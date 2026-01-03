@@ -25,7 +25,7 @@ export function AutomaticAirdropsModal(
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
-  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
+  const initialTokenId = numbers.length > 0 ? numbers[0]?.toString() : "";
   const defaultTokenId = isValidPositiveInteger(initialTokenId)
     ? initialTokenId
     : "";

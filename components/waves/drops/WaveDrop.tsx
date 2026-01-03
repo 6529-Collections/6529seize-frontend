@@ -233,7 +233,7 @@ const WaveDrop = ({
       dispatch(setEditingDropId(null));
     }
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+    onReply({ drop, partId: drop.parts[activePartIndex]?.part_id });
   }, [onReply, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnQuote = useCallback(() => {
@@ -242,7 +242,7 @@ const WaveDrop = ({
       dispatch(setEditingDropId(null));
     }
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id });
   }, [onQuote, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnAddReaction = useCallback(() => {

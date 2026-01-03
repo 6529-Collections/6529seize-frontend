@@ -284,7 +284,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
                 Meme${historical.length > 1 ? "s" : ""} ${items}
               </div>
               <div style="margin-bottom:12px">${formatFullDate(
-                historical[0].instantUtc,
+                historical[0]?.instantUtc,
                 displayTz
               )}</div>
             </div>`;

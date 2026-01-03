@@ -94,7 +94,7 @@ export default function HeaderQRScanner({
         router.push(resolvedPath);
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
         const resolvedUrl = content.replace(`${appScheme}://`, "");
-        const [scope, ...pathParts] = resolvedUrl.split("?")[0].split("/");
+        const [scope, ...pathParts] = resolvedUrl.split("?")[0]?.split("/");
 
         // Extract query params
         const queryString = resolvedUrl.includes("?")

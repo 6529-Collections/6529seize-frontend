@@ -10,7 +10,7 @@ describe('TabToggle', () => {
 
   const setup = () => {
     const Wrapper: React.FC = () => {
-      const [activeKey, setActiveKey] = React.useState(options[0].key);
+      const [activeKey, setActiveKey] = React.useState(options[0]?.key);
 
       return (
         <TabToggle

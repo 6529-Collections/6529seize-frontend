@@ -66,7 +66,7 @@ describe("NftPicker.utils", () => {
       } catch (error) {
         expect(Array.isArray(error)).toBe(true);
         const errors = error as { message: string }[];
-        expect(errors[0].message).toBe("Invalid token format");
+        expect(errors[0]?.message).toBe("Invalid token format");
       }
     });
 

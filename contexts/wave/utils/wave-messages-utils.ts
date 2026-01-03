@@ -478,7 +478,7 @@ async function findLightDropBySerialNoWithPagination(
       break; // Target was found, and now we got an empty batch, so we are done.
     }
 
-    let smallestSerialInCurrentBatch = currentBatch[0].serial_no;
+    let smallestSerialInCurrentBatch = currentBatch[0]?.serial_no;
     for (const drop of currentBatch) {
       if (!allFetchedDropsMap.has(drop.serial_no)) {
         allFetchedDropsMap.set(drop.serial_no, drop);

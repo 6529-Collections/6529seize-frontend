@@ -45,7 +45,7 @@ export function tokenize(input: string): Segment[] {
             part.value === "-" &&
             segments.length > 0 &&
             index + 1 < parts.length &&
-            parts[index + 1].value !== "-"
+            parts[index + 1]?.value !== "-"
         ) {
             const previous = segments.pop()!;
             const next = parts[index + 1];

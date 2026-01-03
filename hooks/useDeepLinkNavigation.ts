@@ -36,7 +36,7 @@ export const useDeepLinkNavigation = () => {
       const schemeEndIndex = urlString.indexOf("://") + 3;
       const urlWithoutScheme = urlString.slice(schemeEndIndex);
 
-      const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
+      const [scope, ...pathParts] = urlWithoutScheme.split("?")[0]?.split("/");
 
       const queryString = urlWithoutScheme.includes("?")
         ? urlWithoutScheme.split("?")[1]

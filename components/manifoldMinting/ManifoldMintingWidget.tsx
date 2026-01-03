@@ -220,7 +220,7 @@ export default function ManifoldMintingWidget(
       const fullError = mintWrite.error.message;
       const resolvedError = fullError
         .split("Request Arguments")[0]
-        .split(".")[0]
+        ?.split(".")[0]
         .split("Contract Call")[0];
       if (!resolvedError || resolvedError.length < 5) {
         setMintError(fullError);
@@ -236,7 +236,7 @@ export default function ManifoldMintingWidget(
       setMintError(
         waitMintWrite.error.message
           .split("Request Arguments")[0]
-          .split(".")[0]
+          ?.split(".")[0]
           .split("Contract Call")[0]
       );
     }

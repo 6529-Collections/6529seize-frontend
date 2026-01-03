@@ -118,7 +118,7 @@ describe("meme calendar timezone handling", () => {
     expect(summerPhaseTimes.map(formatAthensTime)).toEqual(expectedWallTimes);
     expect(winterPhaseTimes.map(formatAthensTime)).toEqual(expectedWallTimes);
 
-    expect(summerPhaseTimes[0].toISOString()).toBe("2024-07-01T14:40:00.000Z");
-    expect(winterPhaseTimes[0].toISOString()).toBe("2024-01-03T15:40:00.000Z");
+    expect(summerPhaseTimes[0]?.toISOString()).toBe("2024-07-01T14:40:00.000Z");
+    expect(winterPhaseTimes[0]?.toISOString()).toBe("2024-01-03T15:40:00.000Z");
   });
 });

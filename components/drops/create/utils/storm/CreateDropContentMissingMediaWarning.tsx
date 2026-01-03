@@ -18,7 +18,7 @@ export default function CreateDropContentMissingMediaWarning({
     IMAGE: "Please upload an image file",
   };
   
-  const tooltipId = `missing-media-warning-${missingMedia[0].toLowerCase()}`;
+  const tooltipId = `missing-media-warning-${missingMedia[0]?.toLowerCase()}`;
   
   return (
     <>

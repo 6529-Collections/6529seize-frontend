@@ -296,7 +296,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
 
     // Extract content from the first part if available
     const description =
-      drop.parts && drop.parts.length > 0 ? drop.parts[0].content || "" : "";
+      drop.parts && drop.parts.length > 0 ? drop.parts[0]?.content || "" : "";
 
     // Return full traits with fallback values for missing traits
     const finalTraits: TraitsData = {

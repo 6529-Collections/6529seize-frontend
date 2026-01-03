@@ -129,7 +129,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
       const response = proofs[index];
       runningTotal += response.spots;
       if (index > 0) {
-        runningTotal -= proofs[index - 1].spots;
+        runningTotal -= proofs[index - 1]?.spots;
       }
       if (props.mint_counts.allowlist < runningTotal) {
         return { proof: response, index };
@@ -151,18 +151,18 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
           const proofResponses: ProofResponse[] = [];
           if (response.length > 0) {
             proofResponses.push({
-              keccak: response[0].keccak,
-              spots: response[0].spots,
-              info: response[0].info,
-              proof: response[0].proof,
+              keccak: response[0]?.keccak,
+              spots: response[0]?.spots,
+              info: response[0]?.info,
+              proof: response[0]?.proof,
             });
             for (let i = 1; i < response.length; i++) {
-              const spots = response[i].spots - response[i - 1].spots;
+              const spots = response[i]?.spots - response[i - 1]?.spots;
               proofResponses.push({
-                keccak: response[i].keccak,
+                keccak: response[i]?.keccak,
                 spots: spots,
-                info: response[i].info,
-                proof: response[i].proof,
+                info: response[i]?.info,
+                proof: response[i]?.proof,
               });
             }
           }

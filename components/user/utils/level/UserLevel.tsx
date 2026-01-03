@@ -17,7 +17,7 @@ export default function UserLevel({
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
-    LEVEL_CLASSES[0].classes;
+    LEVEL_CLASSES[0]?.classes;
 
   const getSizeClasses = () => {
     if (size === "sm") {

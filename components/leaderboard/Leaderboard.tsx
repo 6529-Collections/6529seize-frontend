@@ -77,8 +77,8 @@ export default function Leaderboard(
       .then((response: ApiBlocksPage) => {
         if (response.data.length > 0) {
           setLastTDH({
-            block: response.data[0].block_number,
-            date: new Date(response.data[0].timestamp),
+            block: response.data[0]?.block_number,
+            date: new Date(response.data[0]?.timestamp),
           });
         }
       })

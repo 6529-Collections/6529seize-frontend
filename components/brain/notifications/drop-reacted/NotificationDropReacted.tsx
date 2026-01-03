@@ -85,7 +85,7 @@ export default function NotificationDropReacted({
     if (custom) {
       emojiNode = (
         <img
-          src={custom.skins[0].src}
+          src={custom.skins[0]?.src}
           alt={rawId}
           className="tw-max-w-5 tw-max-h-5 tw-object-contain"
         />
@@ -95,7 +95,7 @@ export default function NotificationDropReacted({
       if (native) {
         emojiNode = (
           <span className="tw-text-[1.2rem] tw-flex tw-items-center tw-justify-center">
-            {native.skins[0].native}
+            {native.skins[0]?.native}
           </span>
         );
       }

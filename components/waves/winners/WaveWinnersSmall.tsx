@@ -62,7 +62,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     // Set first decision point as active when loaded
     useEffect(() => {
       if (decisionPoints?.length > 0 && !activeDecisionPoint) {
-        setActiveDecisionPoint(decisionPoints[0].id);
+        setActiveDecisionPoint(decisionPoints[0]?.id);
       }
     }, [decisionPoints, activeDecisionPoint]);
 

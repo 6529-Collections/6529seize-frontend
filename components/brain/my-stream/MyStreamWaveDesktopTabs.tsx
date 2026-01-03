@@ -187,7 +187,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       [MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(activeTab) &&
       options.length > 0
     ) {
-      setActiveTab(options[0].key);
+      setActiveTab(options[0]?.key);
     }
   }, [isMemesWave, activeTab, options, setActiveTab]);
 

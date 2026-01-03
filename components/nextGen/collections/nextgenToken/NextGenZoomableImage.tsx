@@ -90,11 +90,11 @@ export default function NextGenZoomableImage(
   ) => {
     const clientX =
       e.type === "touchstart"
-        ? (e as React.TouchEvent).touches[0].clientX
+        ? (e as React.TouchEvent).touches[0]?.clientX
         : (e as React.MouseEvent).clientX;
     const clientY =
       e.type === "touchstart"
-        ? (e as React.TouchEvent).touches[0].clientY
+        ? (e as React.TouchEvent).touches[0]?.clientY
         : (e as React.MouseEvent).clientY;
     setDragStart({ x: clientX, y: clientY });
     e.preventDefault();
@@ -107,11 +107,11 @@ export default function NextGenZoomableImage(
 
     const clientX =
       e.type === "touchmove"
-        ? (e as React.TouchEvent).touches[0].clientX
+        ? (e as React.TouchEvent).touches[0]?.clientX
         : (e as React.MouseEvent).clientX;
     const clientY =
       e.type === "touchmove"
-        ? (e as React.TouchEvent).touches[0].clientY
+        ? (e as React.TouchEvent).touches[0]?.clientY
         : (e as React.MouseEvent).clientY;
 
     const deltaX = clientX - dragStart.x;

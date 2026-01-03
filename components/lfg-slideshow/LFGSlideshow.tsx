@@ -160,20 +160,20 @@ const LFGSlideshow: React.FC<{
         />
       </span>
       <div className={styles["slide"]} id={SLIDESHOW_ID}>
-        {isVideo(media[currentIndex].animation) ? (
+        {isVideo(media[currentIndex]?.animation) ? (
           <video
             id={VIDEO_ID}
             autoPlay
             controls
             muted={isMuted}
-            src={media[currentIndex].animation}
-            poster={media[currentIndex].image}>
+            src={media[currentIndex]?.animation}
+            poster={media[currentIndex]?.image}>
             <track kind="captions" src="" srcLang="en" label="English" />
             Your browser does not support the video tag.
           </video>
         ) : (
           <img
-            src={media[currentIndex].image}
+            src={media[currentIndex]?.image}
             alt={`LFG Slide ${currentIndex + 1}`}
           />
         )}

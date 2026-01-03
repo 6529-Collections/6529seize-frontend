@@ -111,7 +111,7 @@ export const NavigationHistoryProvider: React.FC<{
     }
 
     let i = historyRef.current.length - 1;
-    while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
+    while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
     const lastRoute = i >= 0 ? historyRef.current[i] : null;
     const isDuplicate =
       lastRoute?.type === "route" && lastRoute.path === pathKey;

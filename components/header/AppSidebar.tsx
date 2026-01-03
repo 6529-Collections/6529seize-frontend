@@ -128,12 +128,12 @@ export default function AppSidebar({
     let startX: number | null = null;
 
     const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
+      startX = e.touches[0]?.clientX;
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       if (startX === null) return;
-      const endX = e.changedTouches[0].clientX;
+      const endX = e.changedTouches[0]?.clientX;
       if (startX - endX > 80) {
         handleClose();
       }

@@ -228,7 +228,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       return;
     }
 
-    const newestSerial = waveMessages.drops[0].serial_no;
+    const newestSerial = waveMessages.drops[0]?.serial_no;
     setVisibleLatestSerial(newestSerial);
     scrollToVisualBottom();
   }, [waveMessages?.drops, scrollToVisualBottom]);

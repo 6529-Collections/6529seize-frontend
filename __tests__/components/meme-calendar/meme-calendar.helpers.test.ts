@@ -244,7 +244,7 @@ describe("meme-calendar helpers", () => {
       new Date(Date.UTC(2023, 0, 1))
     );
     expect(rows.length).toBeGreaterThan(0);
-    expect(rows[0].utcDay.toISOString()).toBe("2023-01-02T00:00:00.000Z");
+    expect(rows[0]?.utcDay.toISOString()).toBe("2023-01-02T00:00:00.000Z");
   });
 
   it("calculates cards remaining across the season timeline", () => {

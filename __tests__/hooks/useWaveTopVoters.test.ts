@@ -328,7 +328,7 @@ describe('useWaveTopVoters', () => {
 
     await waitFor(() => {
       expect(result.current.voters.length).toBeGreaterThan(0);
-      expect(result.current.voters).toContainEqual(pages[0].data[0]);
+      expect(result.current.voters).toContainEqual(pages[0]?.data[0]);
     });
 
     // Fetch all pages
@@ -337,9 +337,9 @@ describe('useWaveTopVoters', () => {
 
     await waitFor(() => {
       expect(result.current.voters).toEqual([
-        ...pages[0].data,
-        ...pages[1].data,
-        ...pages[2].data,
+        ...pages[0]?.data,
+        ...pages[1]?.data,
+        ...pages[2]?.data,
       ]);
     });
   });

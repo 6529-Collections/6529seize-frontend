@@ -36,11 +36,11 @@ export async function generateMetadata({
     );
 
     if (response?.data?.length > 0) {
-      if (response.data[0].metadata?.name) {
-        name = response.data[0].metadata.name;
+      if (response.data[0]?.metadata?.name) {
+        name = response.data[0]?.metadata.name;
       }
-      if (response.data[0].image) {
-        image = response.data[0].image;
+      if (response.data[0]?.image) {
+        image = response.data[0]?.image;
       }
     }
   } catch (error) {

@@ -75,7 +75,7 @@ const WaveDropActionsAddReaction: React.FC<{
             reactionsWithoutUser[targetIndex] = {
               ...reactionsWithoutUser[targetIndex],
               profiles: [
-                ...reactionsWithoutUser[targetIndex].profiles,
+                ...reactionsWithoutUser[targetIndex]?.profiles,
                 profileMin,
               ],
             };

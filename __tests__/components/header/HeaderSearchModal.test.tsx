@@ -312,8 +312,8 @@ describe("HeaderSearchModal", () => {
     fireEvent.change(input, { target: { value: "faq" } });
 
     const items = await screen.findAllByTestId("item");
-    expect(items[0].textContent).toContain('"title":"FAQ"');
-    expect(items[1].textContent).toContain('"title":"Delegation FAQs"');
+    expect(items[0]?.textContent).toContain('"title":"FAQ"');
+    expect(items[1]?.textContent).toContain('"title":"Delegation FAQs"');
   });
 
   it("renders result categories in deterministic order in All view", async () => {

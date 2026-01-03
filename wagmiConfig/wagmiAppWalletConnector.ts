@@ -23,7 +23,7 @@ export function createAppWalletConnector(
   requestPasswordModal: () => Promise<string>
 ) {
   let walletClient: WalletClient | undefined;
-  let currentChainId: number = chains[0].id;
+  let currentChainId: number = chains[0]?.id;
 
   let decryptedPrivateKey: string | null = null;
 
@@ -174,7 +174,7 @@ export function createAppWalletConnector(
       chainId: number;
     }> {
       const maybeChainId = opts?.chainId;
-      const chainId = maybeChainId ?? chains[0].id;
+      const chainId = maybeChainId ?? chains[0]?.id;
 
       // Validate chainId
       const validChain = chains.find((c) => c.id === chainId);

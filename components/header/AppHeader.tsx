@@ -72,7 +72,7 @@ export default function AppHeader() {
   const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
     ? pathSegments[pathSegments.length - 1]
-        .replace(/[-_]/g, " ")
+        ?.replace(/[-_]/g, " ")
         .replace(/^./, (c) => c.toUpperCase())
     : "Home";
 

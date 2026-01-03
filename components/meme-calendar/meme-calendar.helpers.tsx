@@ -529,7 +529,7 @@ export function isMintingToday(): boolean {
 export function dateFromMintNumber(n: number): Date {
   // Map #1..#47 to the exact historical instants in SZN1
   if (n >= 1 && n <= HISTORICAL_MINTS.length) {
-    return new Date(HISTORICAL_MINTS[n - 1].instantUtc);
+    return new Date(HISTORICAL_MINTS[n - 1]?.instantUtc);
   }
 
   // #48 is FIRST_MINT_DATE (the first modeled 2023 mint day)

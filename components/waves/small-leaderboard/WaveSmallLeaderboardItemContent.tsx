@@ -34,7 +34,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         ref={contentRef}
         onClick={() => onDropClick(drop)}
         className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden tw-space-y-3">
-        {!!drop.parts[0].media.length && (
+        {!!drop.parts[0]?.media.length && (
           <WaveDropPartContentMedias
             activePart={drop.parts[0]}
             disableMediaInteraction={true}

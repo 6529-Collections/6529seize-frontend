@@ -1012,7 +1012,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         const newParts = [...prevDrop.parts];
         newParts[partIndex] = {
           ...newParts[partIndex],
-          media: newParts[partIndex].media.filter((f) => f !== file),
+          media: newParts[partIndex]?.media.filter((f) => f !== file),
         };
         return { ...prevDrop, parts: newParts };
       });
@@ -1044,22 +1044,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const onChangeKey = (params: { index: number; newKey: string }) => {
-    setMetadata((prev) => {
-      const newMetadata = [...prev];
-      newMetadata[params.index].key = params.newKey;
-      return newMetadata;
-    });
+    setMetadata((prev) =>
+      prev.map((item, i) =>
+        i === params.index ? { ...item, key: params.newKey } : item
+      )
+    );
   };
 
   const onChangeValue = (params: {
     index: number;
     newValue: string | number | null;
   }) => {
-    setMetadata((prev) => {
-      const newMetadata = [...prev];
-      newMetadata[params.index].value = params.newValue;
-      return newMetadata;
-    });
+    setMetadata((prev) =>
+      prev.map((item, i) =>
+        i === params.index ? { ...item, value: params.newValue } : item
+      )
+    );
   };
 
   const onAddMetadata = () => {
