@@ -19,7 +19,7 @@ export function ConfirmTokenIdModal(
 ) {
   const contract = MEMES_CONTRACT;
   const numbers = extractAllNumbers(props.plan.name);
-  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
+  const initialTokenId = numbers.length > 0 ? numbers[0]!.toString() : "";
   const [tokenId, setTokenId] = useState<string>(
     isValidPositiveInteger(initialTokenId) ? initialTokenId : ""
   );

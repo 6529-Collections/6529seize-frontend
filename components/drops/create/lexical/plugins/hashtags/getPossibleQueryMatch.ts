@@ -72,14 +72,15 @@ function checkForAtSignHashtags(
   if (match !== null) {
     // The strategy ignores leading whitespace but we need to know it's
     // length to add it to the leadOffset
-    const maybeLeadingWhitespace = match[1];
+    const maybeLeadingWhitespace = match[1] ?? "";
+    const replaceableString = match[2] ?? "";
 
     const matchingString = match[3];
-    if (matchingString.length >= minMatchLength) {
+    if (matchingString && matchingString.length >= minMatchLength) {
       return {
         leadOffset: match.index + maybeLeadingWhitespace.length,
         matchingString,
-        replaceableString: match[2],
+        replaceableString,
       };
     }
   }

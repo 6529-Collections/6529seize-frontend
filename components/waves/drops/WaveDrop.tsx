@@ -198,7 +198,7 @@ const WaveDrop = ({
       // Don't allow mobile menu when in edit mode
       if (isEditing) return;
       const touch = e.touches[0];
-      touchStartPosition.current = { x: touch.clientX, y: touch.clientY };
+      touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
       longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
     },
     [isMobile, handleLongPress, isEditing]
@@ -217,8 +217,8 @@ const WaveDrop = ({
     const touch = e.touches[0];
     const moveThreshold = 10; // pixels
 
-    const deltaX = Math.abs(touch.clientX - touchStartPosition.current.x);
-    const deltaY = Math.abs(touch.clientY - touchStartPosition.current.y);
+    const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
+    const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
 
     if (deltaX > moveThreshold || deltaY > moveThreshold) {
       if (longPressTimeoutRef.current) {
@@ -233,7 +233,7 @@ const WaveDrop = ({
       dispatch(setEditingDropId(null));
     }
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+    onReply({ drop, partId: drop.parts[activePartIndex]!.part_id });
   }, [onReply, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnQuote = useCallback(() => {
@@ -242,7 +242,7 @@ const WaveDrop = ({
       dispatch(setEditingDropId(null));
     }
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+    onQuote({ drop, partId: drop.parts[activePartIndex]!.part_id });
   }, [onQuote, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnAddReaction = useCallback(() => {

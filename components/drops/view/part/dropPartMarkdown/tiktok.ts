@@ -36,7 +36,7 @@ export const parseTikTokLink = (href: string): TikTokLinkInfo | null => {
     }
 
     const first = segments[0];
-    if (first.startsWith("@")) {
+    if (first?.startsWith("@")) {
       if (!USERNAME_PATTERN.test(first)) {
         return null;
       }

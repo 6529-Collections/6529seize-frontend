@@ -234,12 +234,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           }`}>
           <Lightbulb
             mode="black"
-            className={styles["modeIcon"]}
+            className={styles["modeIcon"]!}
             onClick={() => setShowBlackbox(true)}
           />
           <Lightbulb
             mode="light"
-            className={styles["modeIcon"]}
+            className={styles["modeIcon"]!}
             onClick={() => setShowLightbox(true)}
           />
           <Dropdown drop={"down-centered"} className="d-flex">

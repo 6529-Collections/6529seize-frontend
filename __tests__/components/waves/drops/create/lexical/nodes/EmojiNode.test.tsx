@@ -131,7 +131,7 @@ describe("EmojiComponent", () => {
 
     renderEmojiComponent("heart");
     const img = screen.getByRole("img");
-    expect(img).toHaveAttribute("src", fakeEmoji.skins[0].src);
+    expect(img).toHaveAttribute("src", fakeEmoji.skins[0]?.src);
     expect(img).toHaveAttribute("alt", "heart");
     expect(img).toHaveClass("emoji-node");
   });

@@ -31,7 +31,7 @@ describe('NextGenAdminCreateCollection', () => {
   it('submits when valid', async () => {
     const user = userEvent.setup();
     render(<NextGenAdminCreateCollection close={() => {}} />);
-    const contract = (helpers.useCoreContractWrite as jest.Mock).mock.results[0].value;
+    const contract = (helpers.useCoreContractWrite as jest.Mock).mock.results[0]?.value;
     const names = [
       'Collection Name','Artist','Description','Website','License','Base URI','Library','Dependency Script'
     ];

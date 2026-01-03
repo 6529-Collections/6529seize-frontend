@@ -44,7 +44,7 @@ export default function DropListItemContentNft({
   );
   useEffect(() => {
     if (nfts?.length) {
-      setNft(nfts[0]);
+      setNft(nfts[0]!);
     }
   }, [nfts]);
 

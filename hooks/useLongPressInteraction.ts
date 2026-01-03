@@ -49,8 +49,8 @@ export default function useLongPressInteraction(
         e.preventDefault();
       }
 
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0]?.clientX!;
+      touchStartY.current = e.touches[0]?.clientY!;
 
       longPressTimeout.current = setTimeout(() => {
         startInteraction();
@@ -68,11 +68,11 @@ export default function useLongPressInteraction(
         e.preventDefault();
       }
 
-      const touchX = e.touches[0].clientX;
-      const touchY = e.touches[0].clientY;
+      const touchX = e.touches[0]?.clientX;
+      const touchY = e.touches[0]?.clientY;
 
-      const deltaX = Math.abs(touchX - touchStartX.current);
-      const deltaY = Math.abs(touchY - touchStartY.current);
+      const deltaX = Math.abs(touchX! - touchStartX.current);
+      const deltaY = Math.abs(touchY! - touchStartY.current);
 
       if (deltaX > moveThreshold || deltaY > moveThreshold) {
         if (longPressTimeout.current) {

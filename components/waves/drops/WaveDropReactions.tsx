@@ -121,14 +121,14 @@ function WaveDropReaction({
       return {
         emojiNode: (
           <img
-            src={custom.skins[0].src}
+            src={custom.skins[0]?.src}
             alt={emojiId}
             className="tw-max-w-4 tw-max-h-4 tw-object-contain"
           />
         ),
         emojiNodeTooltip: (
           <img
-            src={custom.skins[0].src}
+            src={custom.skins[0]?.src}
             alt={emojiId}
             className="tw-max-w-8 tw-max-h-8 tw-object-contain tw-rounded-sm"
           />
@@ -141,12 +141,12 @@ function WaveDropReaction({
       return {
         emojiNode: (
           <span className="tw-text-[1rem] tw-flex tw-items-center tw-justify-center">
-            {native.skins[0].native}
+            {native.skins[0]?.native}
           </span>
         ),
         emojiNodeTooltip: (
           <span className="tw-text-2xl tw-flex tw-items-center tw-justify-center">
-            {native.skins[0].native}
+            {native.skins[0]?.native}
           </span>
         ),
       };
@@ -186,7 +186,7 @@ function WaveDropReaction({
               );
 
               if (existingIndex >= 0) {
-                const target = reactionsWithoutUser[existingIndex];
+                const target = reactionsWithoutUser[existingIndex]!;
                 reactionsWithoutUser[existingIndex] = {
                   ...target,
                   profiles: [...target.profiles, userProfileMin],
@@ -316,9 +316,9 @@ function WaveDropReaction({
   let animationStyle = "";
   if (animate) {
     if (selected) {
-      animationStyle = styles["reactionSlideUp"];
+      animationStyle = styles["reactionSlideUp"]!;
     } else {
-      animationStyle = styles["reactionSlideDown"];
+      animationStyle = styles["reactionSlideDown"]!;
     }
   }
 

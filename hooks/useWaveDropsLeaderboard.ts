@@ -264,7 +264,7 @@ export function useWaveDropsLeaderboard({
           const latestExistingDrop = drops.at(-1);
 
           const polledCreatedAt = new Date(
-            latestPolledDrop.created_at
+            latestPolledDrop?.created_at!
           ).getTime();
           const existingCreatedAt = new Date(
             latestExistingDrop?.created_at ?? 0

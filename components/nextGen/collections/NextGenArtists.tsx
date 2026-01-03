@@ -62,7 +62,7 @@ export default function NextGenArtists() {
             <Row key={`nextgen-artist-${ac.address}`}>
               <Col>
                 <NextGenCollectionArtist
-                  collection={ac.collections[0]}
+                  collection={ac.collections[0]!}
                   link_collections={ac.collections}
                 />
               </Col>

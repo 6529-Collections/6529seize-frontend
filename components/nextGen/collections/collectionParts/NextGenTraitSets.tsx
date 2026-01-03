@@ -54,10 +54,10 @@ export default function NextGenTraitSets(
 
   const PAGE_SIZE = props.preview ? 10 : 25;
 
-  const availableTraits: string[] = TRAITS[props.collection.id];
+  const availableTraits: string[] = TRAITS[props.collection.id]!;
 
   const [selectedTrait, setSelectedTrait] = useState<string>(
-    availableTraits[0]
+    availableTraits[0]!
   );
 
   const [selectedTraitValues, setSelectedTraitValues] = useState<string[]>([]);

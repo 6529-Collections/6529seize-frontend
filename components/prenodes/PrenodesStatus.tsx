@@ -166,15 +166,15 @@ export default function PrenodesStatus() {
                   <tbody>
                     <tr>
                       <td>Ping Status</td>
-                      <td>{printStatusIcon(updatedAtIcon, updatedAtStatus)}</td>
+                      <td>{printStatusIcon(updatedAtIcon, updatedAtStatus!)}</td>
                     </tr>
                     <tr>
                       <td>TDH Status</td>
-                      <td>{printStatusIcon(tdhIcon, tdhStatus)}</td>
+                      <td>{printStatusIcon(tdhIcon, tdhStatus!)}</td>
                     </tr>
                     <tr>
                       <td>TDH Block Status</td>
-                      <td>{printStatusIcon(blockIcon, blockStatus)}</td>
+                      <td>{printStatusIcon(blockIcon, blockStatus!)}</td>
                     </tr>
                   </tbody>
                 </Table>

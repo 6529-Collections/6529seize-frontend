@@ -159,12 +159,11 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
     const currentNode = textNodes[i];
     const nextNode = textNodes[i + 1];
 
-    const currentText = currentNode.getTextContent();
-    const nextText = nextNode.getTextContent();
+    const currentText = currentNode?.getTextContent();
+    const nextText = nextNode?.getTextContent();
 
-    const mentionStart = currentText.match(/@\[\w*$/);
-    const mentionEnd = nextText.match(/^\w*\]/);
-
+    const mentionStart = currentText?.match(/@\[\w*$/);
+    const mentionEnd = nextText?.match(/^\w*\]/);
     if (mentionStart && mentionEnd) {
       try {
         if (

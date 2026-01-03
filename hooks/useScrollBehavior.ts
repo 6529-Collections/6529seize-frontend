@@ -92,8 +92,8 @@ export const useScrollBehavior = () => {
 
       observer = new IntersectionObserver(
         ([entry]) => {
-          const isIntersecting = entry.isIntersecting;
-          setIsAtBottom(isIntersecting);
+          const isIntersecting = entry?.isIntersecting;
+          setIsAtBottom(isIntersecting!);
 
           // If anchor comes into view, we're definitely at bottom
           if (isIntersecting) {

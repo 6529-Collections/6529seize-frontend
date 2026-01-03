@@ -58,17 +58,17 @@ export function UserPageXtdhGrantedStatusDropdown({
 
     if (normalizedSelection.length === 1) {
       const [status] = normalizedSelection;
-      return labelByStatus[status] ?? STATUS_LABELS[status];
+      return labelByStatus[status!] ?? STATUS_LABELS[status!];
     }
 
     if (normalizedSelection.length === 2) {
       const [first, second] = normalizedSelection;
-      return `${STATUS_LABELS[first]} + ${STATUS_LABELS[second]}`;
+      return `${STATUS_LABELS[first!]} + ${STATUS_LABELS[second!]}`;
     }
 
     const [primary, ...rest] = normalizedSelection;
     const extraCount = rest.length;
-    return `${STATUS_LABELS[primary]} +${extraCount} more`;
+    return `${STATUS_LABELS[primary!]} +${extraCount} more`;
   }, [labelByStatus, normalizedSelection]);
 
   const buttonRef = useRef<HTMLButtonElement>(null);

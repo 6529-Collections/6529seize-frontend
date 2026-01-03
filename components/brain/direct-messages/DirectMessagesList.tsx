@@ -65,7 +65,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     }
 
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
+      if (entry?.isIntersecting) {
         fetchNextPageIfNeeded();
       }
     }, {

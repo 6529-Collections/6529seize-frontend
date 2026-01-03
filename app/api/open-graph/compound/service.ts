@@ -116,7 +116,7 @@ function formatUnitsWithPrecision(
   const formatted = formatUnits(value, decimals);
   if (formatted.includes(".")) {
     const [intPart, fracPart] = formatted.split(".");
-    const trimmed = `${intPart}.${fracPart.slice(0, precision)}`;
+    const trimmed = `${intPart}.${fracPart?.slice(0, precision)}`;
     return trimTrailingZeros(trimmed);
   }
   return formatted;

@@ -110,7 +110,7 @@ export default function RememeImage(props: Readonly<Props>) {
           maxHeight: "100%",
         }}
         id={`${props.nft.contract}-${props.nft.id}`}
-        src={imageFallbackUrls[0]}
+        src={imageFallbackUrls[0]!}
         onError={({ currentTarget }) => {
           const nextFallback = imageFallbackUrls.shift();
           if (nextFallback) {

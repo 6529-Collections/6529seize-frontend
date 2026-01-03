@@ -120,7 +120,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
             shape: "polygon",
             radius: { 8: 0 },
             scale: 1,
-            stroke: theme.primary,
+            stroke: theme?.primary,
             strokeWidth: 2,
             angle: 210,
             delay: 30,
@@ -140,7 +140,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           angle: 0,
           children: {
             shape: "circle",
-            fill: [theme.primary, theme.secondary],
+            fill: [theme?.primary, theme?.secondary],
             delay: "stagger(0, 50)",
             speed: 0.2,
             radius: { 4: 0 },
@@ -159,7 +159,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           angle: 90,
           children: {
             shape: "circle",
-            fill: [theme.secondary, theme.primary],
+            fill: [theme?.secondary, theme?.primary],
             delay: `stagger(0, ${particlesDelay})`,
             speed: 0.3,
             radius: { 3: 0 },

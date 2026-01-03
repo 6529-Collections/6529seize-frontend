@@ -43,7 +43,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
   return (
     <Dropdown className={styles["collectionsDropdown"]}>
       <Dropdown.Toggle variant="outline-light">
-        {activeCollection.name}
+        {activeCollection?.name}
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {COLLECTIONS.map((collection) => (

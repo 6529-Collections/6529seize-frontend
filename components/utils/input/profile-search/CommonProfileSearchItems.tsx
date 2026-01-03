@@ -68,7 +68,7 @@ export default function CommonProfileSearchItems({
     highlightedIndex !== null &&
     highlightedIndex >= 0 &&
     highlightedIndex < optionMetadata.length
-      ? optionMetadata[highlightedIndex].optionId
+      ? optionMetadata[highlightedIndex]?.optionId
       : undefined;
 
   useEffect(() => {

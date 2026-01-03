@@ -35,7 +35,7 @@ export default function UserPageSetUpProfile({
   const getHighestTdhWalletOrNone = () => {
     const tdhWallets =
       profile.wallets?.toSorted((a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)) ?? [];
-    return tdhWallets.length > 0 ? tdhWallets[0].wallet : "";
+    return tdhWallets.length > 0 ? tdhWallets[0]?.wallet : "";
   };
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(

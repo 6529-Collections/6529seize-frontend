@@ -3,7 +3,7 @@ import { getFormSections, getInitialTraitsValues } from '@/components/waves/meme
 describe('traits schema helpers', () => {
   it('replaces profile placeholder', () => {
     const sections = getFormSections('Bob');
-    const artistField = sections[0].fields.find(f => f.field === 'artist') as any;
+    const artistField = sections[0]?.fields.find(f => f.field === 'artist') as any;
     expect(artistField.placeholder).toBe('Bob');
   });
 
@@ -15,6 +15,6 @@ describe('traits schema helpers', () => {
 
   it('handles null profile in getFormSections', () => {
     const sections = getFormSections(null);
-    expect(sections[0].fields[0].placeholder).toBe("User's Profile Name");
+    expect(sections[0]?.fields[0].placeholder).toBe("User's Profile Name");
   });
 });

@@ -300,7 +300,7 @@ function normalizeGoogleWorkspaceUrl(
   }
 
   const [resource, marker, fileId, ...rest] = segments;
-  if (marker !== "d" || !fileId) {
+  if (marker !== "d" || !fileId || !resource) {
     return null;
   }
 

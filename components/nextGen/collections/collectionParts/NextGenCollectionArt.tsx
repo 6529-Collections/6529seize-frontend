@@ -103,8 +103,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           )
         ) {
           selectedTraits.push({
-            trait: t,
-            value: v,
+            trait: t!,
+            value: v!,
           });
         }
       });

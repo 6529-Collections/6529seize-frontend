@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useMemo } from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -56,7 +56,9 @@ interface WaveInfo {
     filterDecisionsDuringPauses: <T extends { decision_time: number }>(
       decisions: T[]
     ) => T[];
-    getNextValidDecision: (decisions: ApiWaveDecision[]) => ApiWaveDecision | null;
+    getNextValidDecision: (
+      decisions: ApiWaveDecision[]
+    ) => ApiWaveDecision | null;
     calculateMintingDate: (checkpointTime: number | null) => number | null;
   };
   isChatWave: boolean;
@@ -125,11 +127,14 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   // Calculate pause information
   const currentPause = useMemo(() => {
     if (!wave?.pauses || wave.pauses.length === 0) return null;
-    
+
     // Pause times are already in milliseconds
-    return wave.pauses.find((pause: ApiWaveDecisionPause) => 
-      now >= pause.start_time && now <= pause.end_time
-    ) || null;
+    return (
+      wave.pauses.find(
+        (pause: ApiWaveDecisionPause) =>
+          now >= pause.start_time && now <= pause.end_time
+      ) || null
+    );
   }, [wave?.pauses, now]);
 
   const isPaused = useMemo(() => {
@@ -139,24 +144,29 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   // Get the next upcoming pause
   const nextPause = useMemo(() => {
     if (!wave?.pauses || wave.pauses.length === 0) return null;
-    
-    const futurePauses = wave.pauses.filter((pause: ApiWaveDecisionPause) => 
-      pause.start_time > now
+
+    const futurePauses = wave.pauses.filter(
+      (pause: ApiWaveDecisionPause) => pause.start_time > now
     );
-    
+
     if (futurePauses.length === 0) return null;
-    
+
     // Return the earliest future pause
-    return futurePauses.reduce((earliest: ApiWaveDecisionPause, current: ApiWaveDecisionPause) => 
-      current.start_time < earliest.start_time ? current : earliest
-    , futurePauses[0]);
+    return futurePauses.reduce(
+      (earliest: ApiWaveDecisionPause, current: ApiWaveDecisionPause) =>
+        current.start_time < earliest.start_time ? current : earliest,
+      futurePauses[0]!
+    );
   }, [wave?.pauses, now]);
 
   // Helper function to check if a decision time falls within any pause period
-  const isDecisionDuringPause = (decisionTime: number, pauses: ApiWaveDecisionPause[]): boolean => {
-    return pauses.some(pause => 
-      decisionTime >= pause.start_time && 
-      decisionTime <= pause.end_time
+  const isDecisionDuringPause = (
+    decisionTime: number,
+    pauses: ApiWaveDecisionPause[]
+  ): boolean => {
+    return pauses.some(
+      (pause) =>
+        decisionTime >= pause.start_time && decisionTime <= pause.end_time
     );
   };
 
@@ -165,8 +175,9 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     return <T extends { decision_time: number }>(decisions: T[]): T[] => {
       if (!wave?.pauses || wave.pauses.length === 0) return decisions;
 
-      return decisions.filter((decision) =>
-        !isDecisionDuringPause(decision.decision_time, wave.pauses)
+      return decisions.filter(
+        (decision) =>
+          !isDecisionDuringPause(decision.decision_time, wave.pauses)
       );
     };
   }, [wave?.pauses]);
@@ -175,14 +186,22 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   const getNextValidDecision = useMemo(() => {
     return (decisions: ApiWaveDecision[]): ApiWaveDecision | null => {
       const filteredDecisions = filterDecisionsDuringPauses(decisions);
-      const futureDecisions = filteredDecisions.filter(d => d.decision_time > now);
-      
+      const futureDecisions = filteredDecisions.filter(
+        (d) => d.decision_time > now
+      );
+
       if (futureDecisions.length === 0) return null;
-      
+
       // Return the earliest future decision
-      return futureDecisions.reduce((earliest, current) => 
-        current.decision_time < earliest.decision_time ? current : earliest
-      , futureDecisions[0]);
+      return (
+        futureDecisions.reduce(
+          (earliest, current) =>
+            current.decision_time < earliest?.decision_time!
+              ? current
+              : earliest,
+          futureDecisions[0]
+        ) ?? null
+      );
     };
   }, [filterDecisionsDuringPauses, now]);
 
@@ -199,12 +218,12 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     return (nextDecisionTime: number | null): ApiWaveDecisionPause | null => {
       // If currently paused, return current pause
       if (currentPause) return currentPause;
-      
+
       // If there's a next pause and no decisions before it, return next pause
       if (nextPause && !hasDecisionsBeforePause(nextDecisionTime)) {
         return nextPause;
       }
-      
+
       return null;
     };
   }, [currentPause, nextPause, hasDecisionsBeforePause]);
@@ -213,10 +232,10 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   const calculateMintingDate = useMemo(() => {
     return (checkpointTime: number | null): number | null => {
       if (!checkpointTime) return null;
-      
+
       const checkpointDate = new Date(checkpointTime);
       const dayOfWeek = checkpointDate.getUTCDay();
-      
+
       // Calculate days until next minting day
       let daysToAdd: number;
       switch (dayOfWeek) {
@@ -231,21 +250,25 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
           break;
         default:
           // For other days, find next Monday/Wednesday/Friday
-          if (dayOfWeek === 0) { // Sunday → Monday
+          if (dayOfWeek === 0) {
+            // Sunday → Monday
             daysToAdd = 1;
-          } else if (dayOfWeek === 2) { // Tuesday → Wednesday
+          } else if (dayOfWeek === 2) {
+            // Tuesday → Wednesday
             daysToAdd = 1;
-          } else if (dayOfWeek === 4) { // Thursday → Friday
+          } else if (dayOfWeek === 4) {
+            // Thursday → Friday
             daysToAdd = 1;
-          } else { // Saturday → Monday
+          } else {
+            // Saturday → Monday
             daysToAdd = 2;
           }
       }
-      
+
       // Create new date and add days
       const mintingDate = new Date(checkpointTime);
       mintingDate.setUTCDate(mintingDate.getUTCDate() + daysToAdd);
-      
+
       return mintingDate.getTime();
     };
   }, []);

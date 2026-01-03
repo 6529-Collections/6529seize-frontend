@@ -53,7 +53,7 @@ describe('BuildPhase', () => {
   });
 
   it('shows run analysis button when any component has not ran', () => {
-    const modified = { ...phases[0], components: [{ ...phases[0].components[0], spotsNotRan: true }] };
+    const modified = { ...phases[0], components: [{ ...phases[0]?.components[0], spotsNotRan: true }] };
     render(<BuildPhase selectedPhase={modified} phases={phases} onNextStep={jest.fn()} />);
 
     expect(screen.getByTestId('next')).toHaveTextContent('run');

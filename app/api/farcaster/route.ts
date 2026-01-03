@@ -500,7 +500,7 @@ const extractMetaContent = (html: string, name: string): string | undefined => {
   if (!contentMatch) {
     return undefined;
   }
-  return contentMatch[1].trim();
+  return contentMatch[1]?.trim();
 };
 
 const extractTitle = (html: string): string | undefined => {

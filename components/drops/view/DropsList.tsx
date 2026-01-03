@@ -125,6 +125,10 @@ const DropsList = memo(function DropsList({
       const previousDrop = orderedDrops[i - 1] ?? null;
       const nextDrop = orderedDrops[i + 1] ?? null;
 
+      if (!drop) {
+        continue;
+      }
+
       if (
         unreadDividerSerialNo !== null &&
         unreadDividerSerialNo !== undefined &&

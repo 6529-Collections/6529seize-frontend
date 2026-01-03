@@ -41,7 +41,7 @@ export default function CreateSnapshotTableRowDownload({
 
   const downloadCsv = (results: DistributionPlanSnapshotToken[]) => {
     const csv = [
-      Object.keys(results[0]).join(","),
+      Object.keys(results[0]!).join(","),
       ...results.map((item) => Object.values(item).join(",")),
     ].join("\n");
 

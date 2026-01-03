@@ -90,9 +90,9 @@ const tx = {
 beforeEach(() => {
   jest.clearAllMocks();
   const collection = mockGradientCollection(3);
-  collection[0].owner = "0x1";
-  collection[0].owner_display = "TestOwner";
-  collection[0].tdh__raw = 50;
+  collection[0]?.owner = "0x1";
+  collection[0]?.owner_display = "TestOwner";
+  collection[0]?.tdh__raw = 50;
   (fetchUrl as jest.Mock)
     .mockResolvedValueOnce({ data: collection }) // for all NFTs
     .mockResolvedValueOnce({ data: [tx] }); // for transactions
@@ -249,7 +249,7 @@ describe("GradientPage", () => {
   it("handles empty transaction history", async () => {
     jest.clearAllMocks();
     const collection = mockGradientCollection(3);
-    collection[0].owner = "0x1";
+    collection[0]?.owner = "0x1";
     (fetchUrl as jest.Mock)
       .mockResolvedValueOnce({ data: collection })
       .mockResolvedValueOnce({ data: [] }); // empty transactions

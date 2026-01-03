@@ -35,7 +35,7 @@ export default function NextGenAdminArtistSignCollection(
     const ids: string[] = [];
     if (collectionArtists.data) {
       for (let i = 0; i < collectionArtists.data.length; i++) {
-        const artist = collectionArtists.data[i].result;
+        const artist = collectionArtists.data[i]?.result;
         if (areEqualAddresses(artist, account.address)) {
           ids.push((i + 1).toString());
         }

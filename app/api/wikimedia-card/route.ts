@@ -1,7 +1,11 @@
 import { toASCII } from "node:punycode";
 import { NextRequest, NextResponse } from "next/server";
 
-import type { WikimediaCardResponse, WikimediaSource, WikimediaImage } from "@/services/api/wikimedia-card";
+import type {
+  WikimediaCardResponse,
+  WikimediaSource,
+  WikimediaImage,
+} from "@/services/api/wikimedia-card";
 
 import {
   UrlGuardError,
@@ -36,25 +40,33 @@ interface SummaryTarget {
   readonly host: string;
   readonly title: string;
   readonly source: WikimediaSource;
-  readonly fragment?: { readonly raw: string; readonly display: string } | undefined;
+  readonly fragment?:
+    | { readonly raw: string; readonly display: string }
+    | undefined;
   readonly canonicalFallback: string;
 }
 
 interface CommonsFileTarget {
   readonly type: "commons-file";
   readonly fileName: string;
-  readonly fragment?: { readonly raw: string; readonly display: string } | undefined;
+  readonly fragment?:
+    | { readonly raw: string; readonly display: string }
+    | undefined;
 }
 
 interface WikidataTarget {
   readonly type: "wikidata";
   readonly id: string;
-  readonly fragment?: { readonly raw: string; readonly display: string } | undefined;
+  readonly fragment?:
+    | { readonly raw: string; readonly display: string }
+    | undefined;
 }
 
 type NormalizedTarget = SummaryTarget | CommonsFileTarget | WikidataTarget;
 
-const decodeFragment = (fragment: string): { raw: string; display: string } | undefined => {
+const decodeFragment = (
+  fragment: string
+): { raw: string; display: string } | undefined => {
   if (!fragment) {
     return undefined;
   }
@@ -90,7 +102,7 @@ const parseAcceptLanguage = (header: string | null): string[] => {
     .split(",")
     .map((token) => {
       const [langPart, qPart] = token.trim().split(";q=");
-      const lang = langPart.toLowerCase();
+      const lang = langPart?.toLowerCase();
       const q = qPart ? Number.parseFloat(qPart) : 1;
       return { lang, q: Number.isNaN(q) ? 1 : q };
     })
@@ -100,6 +112,9 @@ const parseAcceptLanguage = (header: string | null): string[] => {
 
   const preferred = new Set<string>();
   for (const entry of entries) {
+    if (!entry.lang) {
+      continue;
+    }
     preferred.add(entry.lang);
     const base = entry.lang.split("-")[0];
     if (base) {
@@ -118,7 +133,10 @@ const respondWithGuardError = (
   fallbackStatus = 400
 ) => {
   if (error instanceof UrlGuardError) {
-    return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode }
+    );
   }
 
   const message = error instanceof Error ? error.message : fallbackMessage;
@@ -264,7 +282,11 @@ const resolveShortLink = async (url: URL): Promise<URL> => {
   }
 
   if (!finalResponse.ok) {
-    throw new UrlGuardError("Unable to resolve short link", "fetch-failed", finalResponse.status);
+    throw new UrlGuardError(
+      "Unable to resolve short link",
+      "fetch-failed",
+      finalResponse.status
+    );
   }
 
   const finalUrl = finalResponse.url ? new URL(finalResponse.url) : url;
@@ -326,7 +348,13 @@ const resolveWikipediaTitle = async (
       prop: "info",
     });
     const response = await fetchJson<{
-      readonly query?: { readonly pages?: Record<string, { readonly title?: string | undefined }> | undefined } | undefined;
+      readonly query?:
+        | {
+            readonly pages?:
+              | Record<string, { readonly title?: string | undefined }>
+              | undefined;
+          }
+        | undefined;
     }>(`https://${lang}.wikipedia.org/w/api.php?${query.toString()}`);
     const pages = response.query?.pages;
     if (!pages) {
@@ -348,10 +376,22 @@ const resolveWikipediaTitle = async (
       revids: revisionId,
     });
     const response = await fetchJson<{
-      readonly query?: {
-        readonly revisions?: Record<string, { readonly pageid?: number | undefined; readonly title?: string | undefined }> | undefined;
-        readonly pages?: Record<string, { readonly title?: string | undefined }> | undefined;
-      } | undefined;
+      readonly query?:
+        | {
+            readonly revisions?:
+              | Record<
+                  string,
+                  {
+                    readonly pageid?: number | undefined;
+                    readonly title?: string | undefined;
+                  }
+                >
+              | undefined;
+            readonly pages?:
+              | Record<string, { readonly title?: string | undefined }>
+              | undefined;
+          }
+        | undefined;
     }>(`https://${lang}.wikipedia.org/w/api.php?${query.toString()}`);
     const pages = response.query?.pages;
     if (!pages) {
@@ -381,6 +421,9 @@ const extractCommonsFileName = (url: URL): string | null => {
 
   if (segments[0] === "wikipedia" && segments[1] === "commons") {
     if (segments[2] === "thumb" && segments.length >= 6) {
+      if (!segments[5]) {
+        return null;
+      }
       return decodeURIComponent(segments[5]);
     }
     return decodeURIComponent(segments.at(-1)!);
@@ -403,9 +446,14 @@ const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
     hostname = hostname.slice(4);
   }
 
-  const fragment = decodeFragment(currentUrl.hash ? currentUrl.hash.slice(1) : "");
+  const fragment = decodeFragment(
+    currentUrl.hash ? currentUrl.hash.slice(1) : ""
+  );
 
-  if (hostname.endsWith(".wikipedia.org") || hostname.endsWith(".m.wikipedia.org")) {
+  if (
+    hostname.endsWith(".wikipedia.org") ||
+    hostname.endsWith(".m.wikipedia.org")
+  ) {
     let langHost = hostname;
     if (langHost.endsWith(".m.wikipedia.org")) {
       langHost = langHost.replace(".m.wikipedia.org", ".wikipedia.org");
@@ -436,7 +484,9 @@ const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
     }
 
     const normalizedTitle = normalizeTitle(stripped);
-    const canonicalFallback = `https://${canonicalHost}/wiki/${encodeURIComponent(normalizedTitle)}`;
+    const canonicalFallback = `https://${canonicalHost}/wiki/${encodeURIComponent(
+      normalizedTitle
+    )}`;
 
     return {
       type: "summary",
@@ -459,7 +509,9 @@ const normalizeTarget = async (url: URL): Promise<NormalizedTarget> => {
       : currentUrl.pathname.replace(/^\//, "");
     const title = decodeURIComponent(titleSegment);
     const normalizedTitle = normalizeTitle(title);
-    const canonicalFallback = `https://commons.wikimedia.org/wiki/${encodeURIComponent(normalizedTitle)}`;
+    const canonicalFallback = `https://commons.wikimedia.org/wiki/${encodeURIComponent(
+      normalizedTitle
+    )}`;
     return {
       type: "summary",
       host: "commons.wikimedia.org",
@@ -505,19 +557,40 @@ const buildSummaryCard = async (
       readonly description?: string | undefined;
       readonly extract?: string | undefined;
       readonly lang?: string | undefined;
-      readonly thumbnail?: { readonly source?: string | undefined; readonly width?: number | undefined; readonly height?: number | undefined } | undefined;
-      readonly content_urls?: { readonly desktop?: { readonly page?: string | undefined } | undefined } | undefined;
+      readonly thumbnail?:
+        | {
+            readonly source?: string | undefined;
+            readonly width?: number | undefined;
+            readonly height?: number | undefined;
+          }
+        | undefined;
+      readonly content_urls?:
+        | {
+            readonly desktop?:
+              | { readonly page?: string | undefined }
+              | undefined;
+          }
+        | undefined;
       readonly timestamp?: string | undefined;
       readonly type?: string | undefined;
-      readonly coordinates?: { readonly lat?: number | undefined; readonly lon?: number | undefined } | undefined;
+      readonly coordinates?:
+        | {
+            readonly lat?: number | undefined;
+            readonly lon?: number | undefined;
+          }
+        | undefined;
     }>(
-      `https://${target.host}/api/rest_v1/page/summary/${encodeURIComponent(target.title)}?redirect=true`,
+      `https://${target.host}/api/rest_v1/page/summary/${encodeURIComponent(
+        target.title
+      )}?redirect=true`,
       { language: languages[0] }
     );
 
     const canonicalUrl =
       summary.content_urls?.desktop?.page ?? target.canonicalFallback;
-    const pageUrl = target.fragment ? `${canonicalUrl}#${target.fragment.raw}` : canonicalUrl;
+    const pageUrl = target.fragment
+      ? `${canonicalUrl}#${target.fragment.raw}`
+      : canonicalUrl;
 
     const thumbnail: WikimediaImage | null = summary.thumbnail?.source
       ? {
@@ -528,27 +601,47 @@ const buildSummaryCard = async (
         }
       : null;
 
-    const description = summary.description ? sanitizeHtml(summary.description) : null;
+    const description = summary.description
+      ? sanitizeHtml(summary.description)
+      : null;
     const extract = summary.extract ? sanitizeHtml(summary.extract) : null;
 
     if (summary.type === "disambiguation") {
-      let items: Array<{
-        readonly title: string;
-        readonly description?: string | null | undefined;
-        readonly url: string;
-        readonly thumbnail?: WikimediaImage | null | undefined;
-      }> | undefined;
+      let items:
+        | Array<{
+            readonly title: string;
+            readonly description?: string | null | undefined;
+            readonly url: string;
+            readonly thumbnail?: WikimediaImage | null | undefined;
+          }>
+        | undefined;
       try {
         const related = await fetchJson<{
-          readonly pages?: ReadonlyArray<{
-            readonly title?: string | undefined;
-            readonly description?: string | undefined;
-            readonly extract?: string | undefined;
-            readonly thumbnail?: { readonly source?: string | undefined; readonly width?: number | undefined; readonly height?: number | undefined } | undefined;
-            readonly content_urls?: { readonly desktop?: { readonly page?: string | undefined } | undefined } | undefined;
-          }> | undefined;
+          readonly pages?:
+            | ReadonlyArray<{
+                readonly title?: string | undefined;
+                readonly description?: string | undefined;
+                readonly extract?: string | undefined;
+                readonly thumbnail?:
+                  | {
+                      readonly source?: string | undefined;
+                      readonly width?: number | undefined;
+                      readonly height?: number | undefined;
+                    }
+                  | undefined;
+                readonly content_urls?:
+                  | {
+                      readonly desktop?:
+                        | { readonly page?: string | undefined }
+                        | undefined;
+                    }
+                  | undefined;
+              }>
+            | undefined;
         }>(
-          `https://${target.host}/api/rest_v1/page/related/${encodeURIComponent(target.title)}`,
+          `https://${target.host}/api/rest_v1/page/related/${encodeURIComponent(
+            target.title
+          )}`,
           { language: languages[0] }
         );
 
@@ -598,7 +691,8 @@ const buildSummaryCard = async (
       lang: summary.lang ?? languages[0] ?? "en",
       thumbnail,
       coordinates:
-        summary.coordinates?.lat !== undefined && summary.coordinates?.lon !== undefined
+        summary.coordinates?.lat !== undefined &&
+        summary.coordinates?.lon !== undefined
           ? { lat: summary.coordinates.lat, lon: summary.coordinates.lon }
           : null,
       lastModified: summary.timestamp ?? null,
@@ -606,7 +700,9 @@ const buildSummaryCard = async (
     };
   } catch {
     const canonicalUrl = target.canonicalFallback;
-    const pageUrl = target.fragment ? `${canonicalUrl}#${target.fragment.raw}` : canonicalUrl;
+    const pageUrl = target.fragment
+      ? `${canonicalUrl}#${target.fragment.raw}`
+      : canonicalUrl;
     return {
       kind: "unavailable",
       source: target.source,
@@ -617,10 +713,18 @@ const buildSummaryCard = async (
   }
 };
 
-const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCardResponse> => {
-  const fileTitle = target.fileName.startsWith("File:") ? target.fileName : `File:${target.fileName}`;
-  const canonicalUrl = `https://commons.wikimedia.org/wiki/${encodeURIComponent(fileTitle)}`;
-  const pageUrl = target.fragment ? `${canonicalUrl}#${target.fragment.raw}` : canonicalUrl;
+const buildCommonsCard = async (
+  target: CommonsFileTarget
+): Promise<WikimediaCardResponse> => {
+  const fileTitle = target.fileName.startsWith("File:")
+    ? target.fileName
+    : `File:${target.fileName}`;
+  const canonicalUrl = `https://commons.wikimedia.org/wiki/${encodeURIComponent(
+    fileTitle
+  )}`;
+  const pageUrl = target.fragment
+    ? `${canonicalUrl}#${target.fragment.raw}`
+    : canonicalUrl;
 
   try {
     const params = new URLSearchParams({
@@ -632,27 +736,38 @@ const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCar
       iiurlwidth: "1200",
     });
     const response = await fetchJson<{
-      readonly query?: {
-        readonly pages?: Record<
-          string,
-          {
-            readonly title?: string | undefined;
-            readonly missing?: string | undefined;
-            readonly imageinfo?: ReadonlyArray<{
-              readonly url?: string | undefined;
-              readonly mime?: string | undefined;
-              readonly size?: number | undefined;
-              readonly width?: number | undefined;
-              readonly height?: number | undefined;
-              readonly thumburl?: string | undefined;
-              readonly thumbwidth?: number | undefined;
-              readonly thumbheight?: number | undefined;
-              readonly descriptionurl?: string | undefined;
-              readonly extmetadata?: Record<string, { readonly value?: string | undefined }> | undefined;
-            }> | undefined;
+      readonly query?:
+        | {
+            readonly pages?:
+              | Record<
+                  string,
+                  {
+                    readonly title?: string | undefined;
+                    readonly missing?: string | undefined;
+                    readonly imageinfo?:
+                      | ReadonlyArray<{
+                          readonly url?: string | undefined;
+                          readonly mime?: string | undefined;
+                          readonly size?: number | undefined;
+                          readonly width?: number | undefined;
+                          readonly height?: number | undefined;
+                          readonly thumburl?: string | undefined;
+                          readonly thumbwidth?: number | undefined;
+                          readonly thumbheight?: number | undefined;
+                          readonly descriptionurl?: string | undefined;
+                          readonly extmetadata?:
+                            | Record<
+                                string,
+                                { readonly value?: string | undefined }
+                              >
+                            | undefined;
+                        }>
+                      | undefined;
+                  }
+                >
+              | undefined;
           }
-        > | undefined;
-      } | undefined;
+        | undefined;
     }>(`https://commons.wikimedia.org/w/api.php?${params.toString()}`);
 
     const pages = response.query?.pages;
@@ -679,7 +794,8 @@ const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCar
     const artist = getMeta("Artist");
     const licenseName = getMeta("LicenseShortName") ?? getMeta("UsageTerms");
     const licenseUrl = metadata["LicenseUrl"]?.value ?? null;
-    const requiresAttribution = (metadata["AttributionRequired"]?.value ?? "").toLowerCase() === "true";
+    const requiresAttribution =
+      (metadata["AttributionRequired"]?.value ?? "").toLowerCase() === "true";
 
     const thumbnail: WikimediaImage | null = info.thumburl
       ? {
@@ -697,7 +813,9 @@ const buildCommonsCard = async (target: CommonsFileTarget): Promise<WikimediaCar
         }
       : null;
 
-    const original: (WikimediaImage & { readonly mime?: string | null | undefined }) | null = info.url
+    const original:
+      | (WikimediaImage & { readonly mime?: string | null | undefined })
+      | null = info.url
       ? {
           url: info.url,
           width: info.width,
@@ -773,10 +891,16 @@ const fetchEntityLabels = async (
 
     try {
       const response = await fetchJson<{
-        readonly entities?: Record<
-          string,
-          { readonly labels?: Record<string, { readonly value?: string | undefined }> | undefined }
-        > | undefined;
+        readonly entities?:
+          | Record<
+              string,
+              {
+                readonly labels?:
+                  | Record<string, { readonly value?: string | undefined }>
+                  | undefined;
+              }
+            >
+          | undefined;
       }>(`https://www.wikidata.org/w/api.php?${params.toString()}`);
 
       const entities = response.entities ?? {};
@@ -817,9 +941,9 @@ const formatTimeValue = (value: {
     return `${year}-${month}`;
   }
   if (precision >= 9) {
-    return year;
+    return year || null;
   }
-  return year;
+  return year || null;
 };
 
 const FACT_PROPERTIES = ["P31", "P17", "P27", "P495", "P571", "P170"] as const;
@@ -828,28 +952,59 @@ const buildWikidataCard = async (
   target: WikidataTarget,
   languages: readonly string[]
 ): Promise<WikimediaCardResponse> => {
-  const canonicalUrl = `https://www.wikidata.org/wiki/${encodeURIComponent(target.id)}`;
-  const pageUrl = target.fragment ? `${canonicalUrl}#${target.fragment.raw}` : canonicalUrl;
+  const canonicalUrl = `https://www.wikidata.org/wiki/${encodeURIComponent(
+    target.id
+  )}`;
+  const pageUrl = target.fragment
+    ? `${canonicalUrl}#${target.fragment.raw}`
+    : canonicalUrl;
 
   try {
     const response = await fetchJson<{
-      readonly entities?: Record<
-        string,
-        {
-          readonly labels?: Record<string, { readonly value?: string | undefined }> | undefined;
-          readonly descriptions?: Record<string, { readonly value?: string | undefined }> | undefined;
-          readonly claims?: Record<
+      readonly entities?:
+        | Record<
             string,
-            ReadonlyArray<{
-              readonly mainsnak?: {
-                readonly datavalue?: { readonly type?: string | undefined; readonly value?: unknown | undefined } | undefined;
-              } | undefined;
-            }>
-          > | undefined;
-          readonly sitelinks?: Record<string, { readonly title?: string | undefined; readonly url?: string | undefined }> | undefined;
-        }
-      > | undefined;
-    }>(`https://www.wikidata.org/wiki/Special:EntityData/${encodeURIComponent(target.id)}.json`);
+            {
+              readonly labels?:
+                | Record<string, { readonly value?: string | undefined }>
+                | undefined;
+              readonly descriptions?:
+                | Record<string, { readonly value?: string | undefined }>
+                | undefined;
+              readonly claims?:
+                | Record<
+                    string,
+                    ReadonlyArray<{
+                      readonly mainsnak?:
+                        | {
+                            readonly datavalue?:
+                              | {
+                                  readonly type?: string | undefined;
+                                  readonly value?: unknown | undefined;
+                                }
+                              | undefined;
+                          }
+                        | undefined;
+                    }>
+                  >
+                | undefined;
+              readonly sitelinks?:
+                | Record<
+                    string,
+                    {
+                      readonly title?: string | undefined;
+                      readonly url?: string | undefined;
+                    }
+                  >
+                | undefined;
+            }
+          >
+        | undefined;
+    }>(
+      `https://www.wikidata.org/wiki/Special:EntityData/${encodeURIComponent(
+        target.id
+      )}.json`
+    );
 
     const entity = response.entities?.[target.id];
     if (!entity) {
@@ -862,7 +1017,11 @@ const buildWikidataCard = async (
     const claims = entity.claims ?? {};
     const referencedIds: string[] = [];
     const propertyIds: string[] = [];
-    const facts: Array<{ propertyId: string; propertyLabel: string; value: string }> = [];
+    const facts: Array<{
+      propertyId: string;
+      propertyLabel: string;
+      value: string;
+    }> = [];
 
     for (const propertyId of FACT_PROPERTIES) {
       const claim = claims[propertyId]?.[0]?.mainsnak;
@@ -870,25 +1029,57 @@ const buildWikidataCard = async (
         continue;
       }
       propertyIds.push(propertyId);
-      const { type, value } = claim.datavalue as { type?: string | undefined; value?: unknown | undefined };
+      const { type, value } = claim.datavalue as {
+        type?: string | undefined;
+        value?: unknown | undefined;
+      };
       let formatted: string | null = null;
 
-      if (type === "wikibase-entityid" && value && typeof value === "object" && "id" in value) {
+      if (
+        type === "wikibase-entityid" &&
+        value &&
+        typeof value === "object" &&
+        "id" in value
+      ) {
         const entityId = (value as { readonly id?: string | undefined }).id;
         if (entityId) {
           referencedIds.push(entityId);
           formatted = entityId;
         }
       } else if (type === "time" && value && typeof value === "object") {
-        formatted = formatTimeValue(value as { readonly time?: string | undefined; readonly precision?: number | undefined });
-      } else if (type === "monolingualtext" && value && typeof value === "object" && "text" in value) {
-        formatted = String((value as { readonly text?: string | undefined }).text);
+        formatted = formatTimeValue(
+          value as {
+            readonly time?: string | undefined;
+            readonly precision?: number | undefined;
+          }
+        );
+      } else if (
+        type === "monolingualtext" &&
+        value &&
+        typeof value === "object" &&
+        "text" in value
+      ) {
+        formatted = String(
+          (value as { readonly text?: string | undefined }).text
+        );
       } else if (type === "string" && typeof value === "string") {
         formatted = value;
-      } else if (type === "globecoordinate" && value && typeof value === "object") {
-        const coord = value as { readonly latitude?: number | undefined; readonly longitude?: number | undefined };
-        if (typeof coord.latitude === "number" && typeof coord.longitude === "number") {
-          formatted = `${coord.latitude.toFixed(2)}, ${coord.longitude.toFixed(2)}`;
+      } else if (
+        type === "globecoordinate" &&
+        value &&
+        typeof value === "object"
+      ) {
+        const coord = value as {
+          readonly latitude?: number | undefined;
+          readonly longitude?: number | undefined;
+        };
+        if (
+          typeof coord.latitude === "number" &&
+          typeof coord.longitude === "number"
+        ) {
+          formatted = `${coord.latitude.toFixed(2)}, ${coord.longitude.toFixed(
+            2
+          )}`;
         }
       }
 
@@ -902,7 +1093,10 @@ const buildWikidataCard = async (
       }
     }
 
-    const labelLookup = await fetchEntityLabels([...referencedIds, ...propertyIds], languages);
+    const labelLookup = await fetchEntityLabels(
+      [...referencedIds, ...propertyIds],
+      languages
+    );
 
     const resolvedFacts = facts.map((fact) => {
       const propertyLabel = labelLookup[fact.propertyId] ?? fact.propertyId;
@@ -912,9 +1106,18 @@ const buildWikidataCard = async (
 
     let image: WikimediaImage | null = null;
     const imageClaim = claims["P18"]?.[0]?.mainsnak?.datavalue;
-    if (imageClaim && imageClaim.type === "string" && typeof imageClaim.value === "string") {
-      const fileName = imageClaim.value.startsWith("File:") ? imageClaim.value : `File:${imageClaim.value}`;
-      const commonsData = await buildCommonsCard({ type: "commons-file", fileName });
+    if (
+      imageClaim &&
+      imageClaim.type === "string" &&
+      typeof imageClaim.value === "string"
+    ) {
+      const fileName = imageClaim.value.startsWith("File:")
+        ? imageClaim.value
+        : `File:${imageClaim.value}`;
+      const commonsData = await buildCommonsCard({
+        type: "commons-file",
+        fileName,
+      });
       if (commonsData.kind === "commons-file" && commonsData.thumbnail) {
         image = commonsData.thumbnail;
       }
@@ -922,13 +1125,19 @@ const buildWikidataCard = async (
 
     const sitelinks: Array<{ title: string; url: string; site: string }> = [];
     if (entity.sitelinks) {
-      const preferredSites = languages.map((lang) => `${lang.split("-")[0]}wiki`);
+      const preferredSites = languages.map(
+        (lang) => `${lang.split("-")[0]}wiki`
+      );
       preferredSites.push("enwiki");
       const added = new Set<string>();
       for (const siteKey of preferredSites) {
         const link = entity.sitelinks[siteKey];
         if (link?.url && !added.has(link.url)) {
-          sitelinks.push({ title: link.title ?? siteKey, url: link.url, site: siteKey });
+          sitelinks.push({
+            title: link.title ?? siteKey,
+            url: link.url,
+            site: siteKey,
+          });
           added.add(link.url);
         }
         if (sitelinks.length >= 3) {
@@ -1003,7 +1212,8 @@ export async function GET(request: NextRequest) {
   try {
     target = await normalizeTarget(targetUrl);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unsupported Wikimedia URL.";
+    const message =
+      error instanceof Error ? error.message : "Unsupported Wikimedia URL.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 

@@ -117,7 +117,7 @@ export default function VirtualScrollWrapper({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const inView = entry.isIntersecting;
+        const inView = !!entry?.isIntersecting;
         if (!inView && containerRef.current && type !== DropSize.LIGHT) {
           // If leaving viewport, measure height in case content changed
           measureHeight();

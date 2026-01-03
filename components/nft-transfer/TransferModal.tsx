@@ -891,7 +891,7 @@ export default function TransferModal({
         } else {
           by.set(key, {
             contract,
-            collection: it.key.split(":")[0],
+            collection: it.key.split(":")[0]!,
             originKey,
             is1155,
             items: [it],
