@@ -209,12 +209,11 @@ export function useManifoldClaim(
   useEffect(() => {
     if (readContract.error) {
       setClaim((prevClaim) => {
-        if (prevClaim) {
-          return {
-            ...prevClaim,
-            isError: true,
-          };
-        }
+        if (!prevClaim) return;
+        return {
+          ...prevClaim,
+          isError: true,
+        };
       });
       onError?.();
     }
@@ -228,6 +227,7 @@ export function useManifoldClaim(
           isFetching: readContract.isFetching,
         };
       }
+      return;
     });
   }, [readContract.isFetching]);
 

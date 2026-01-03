@@ -186,7 +186,7 @@ export function useWaveDropsLeaderboard({
 
   const processedDrops = useMemo(() => {
     if (!data?.pages) return [];
-    
+
     const mappedDrops = mapToExtendedDrops(
       data.pages.map((page) => ({
         wave: page.wave,
@@ -194,15 +194,15 @@ export function useWaveDropsLeaderboard({
       })),
       []
     );
-    
+
     const uniqueDrops = generateUniqueKeys(mappedDrops, []);
-    
+
     if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
       return uniqueDrops.filter(
         (drop) => drop.context_profile_context?.rating !== 0
       );
     }
-    
+
     return uniqueDrops;
   }, [data, sort]);
 
@@ -253,6 +253,7 @@ export function useWaveDropsLeaderboard({
 
       return () => clearTimeout(timer);
     }
+    return;
   }, [pollingResult, pausePolling]);
 
   useEffect(() => {

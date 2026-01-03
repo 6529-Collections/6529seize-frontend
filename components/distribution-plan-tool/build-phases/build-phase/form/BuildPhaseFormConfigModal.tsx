@@ -9,7 +9,10 @@ import {
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { assertUnreachable, getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import {
+  assertUnreachable,
+  getRandomObjectId,
+} from "@/helpers/AllowlistToolHelpers";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -707,7 +710,7 @@ export default function BuildPhaseFormConfigModal({
   }, [name]);
 
   return (
-    <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+    <div className="tw-flex tw-flex-col tw-gap-y-6 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
       {(() => {
         switch (configStep) {
           case PhaseConfigStep.SELECT_SNAPSHOT:
@@ -819,6 +822,7 @@ export default function BuildPhaseFormConfigModal({
             );
           default:
             assertUnreachable(configStep);
+            return null;
         }
       })()}
     </div>

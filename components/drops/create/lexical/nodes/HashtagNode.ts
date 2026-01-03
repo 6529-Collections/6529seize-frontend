@@ -44,14 +44,16 @@ function convertHashtagElement(
 export class HashtagNode extends TextNode {
   __hashtag: string;
 
-  static getType(): string {
+  static override getType(): string {
     return "hashtag";
   }
 
-  static clone(node: HashtagNode): HashtagNode {
+  static override clone(node: HashtagNode): HashtagNode {
     return new HashtagNode(node.__hashtag, node.__text, node.__key);
   }
-  static importJSON(serializedNode: SerializedHashtagNode): HashtagNode {
+  static override importJSON(
+    serializedNode: SerializedHashtagNode
+  ): HashtagNode {
     const node = $createHashtagNode(serializedNode.hashtagName);
     node.setTextContent(serializedNode.text);
     node.setFormat(serializedNode.format);
@@ -66,7 +68,7 @@ export class HashtagNode extends TextNode {
     this.__hashtag = hashtagName;
   }
 
-  exportJSON(): SerializedHashtagNode {
+  override exportJSON(): SerializedHashtagNode {
     return {
       ...super.exportJSON(),
       hashtagName: this.__hashtag,
@@ -75,14 +77,14 @@ export class HashtagNode extends TextNode {
     };
   }
 
-  createDOM(config: EditorConfig): HTMLElement {
+  override createDOM(config: EditorConfig): HTMLElement {
     const dom = super.createDOM(config);
     dom.className = "editor-hashtag";
 
     return dom;
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement("span");
     element.setAttribute("data-lexical-hashtag", "true");
 
@@ -91,7 +93,7 @@ export class HashtagNode extends TextNode {
     return { element };
   }
 
-  static importDOM(): DOMConversionMap | null {
+  static override importDOM(): DOMConversionMap | null {
     return {
       span: (domNode: HTMLElement) => {
         if (!domNode.hasAttribute("data-lexical-hashtag")) {
@@ -105,15 +107,15 @@ export class HashtagNode extends TextNode {
     };
   }
 
-  isTextEntity(): true {
+  override isTextEntity(): true {
     return true;
   }
 
-  canInsertTextBefore(): boolean {
+  override canInsertTextBefore(): boolean {
     return false;
   }
 
-  canInsertTextAfter(): boolean {
+  override canInsertTextAfter(): boolean {
     return false;
   }
 }

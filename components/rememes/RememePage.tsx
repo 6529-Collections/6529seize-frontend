@@ -71,10 +71,12 @@ export function printMemeReferences(
                     xs={{ span: 6 }}
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
-                    lg={{ span: 3 }}>
+                    lg={{ span: 3 }}
+                  >
                     <a
                       href={`/${routerPath}/${nft.id}`}
-                      className="decoration-none scale-hover">
+                      className="decoration-none scale-hover"
+                    >
                       <Container fluid className="no-padding">
                         <Row>
                           <Col>
@@ -257,7 +259,8 @@ export default function RememePage(props: Readonly<Props>) {
                       className={styles["userLink"]}
                       href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       <Image
                         unoptimized
                         width="0"
@@ -277,7 +280,8 @@ export default function RememePage(props: Readonly<Props>) {
                     <Col>
                       <a
                         className={styles["userLink"]}
-                        href={rememe.contract_opensea_data.externalUrl}>
+                        href={rememe.contract_opensea_data.externalUrl}
+                      >
                         <FontAwesomeIcon
                           icon={faGlobe}
                           className={styles["globeIcon"]}
@@ -294,7 +298,8 @@ export default function RememePage(props: Readonly<Props>) {
                         className={styles["userLink"]}
                         href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
                         target="_blank"
-                        rel="noopener noreferrer">
+                        rel="noopener noreferrer"
+                      >
                         <Image
                           unoptimized
                           width="0"
@@ -355,6 +360,7 @@ export default function RememePage(props: Readonly<Props>) {
         </>
       );
     }
+    return;
   }
 
   function getAttributes(): any[] {
@@ -381,9 +387,13 @@ export default function RememePage(props: Readonly<Props>) {
           href={parseIpfsUrl(s)}
           target="_blank"
           rel="noopener noreferrer"
-          className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}>
+          className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}
+        >
           {s}
-          <FontAwesomeIcon icon={faExternalLink} className={styles["linkIcon"]} />
+          <FontAwesomeIcon
+            icon={faExternalLink}
+            className={styles["linkIcon"]}
+          />
         </a>
       );
     }
@@ -399,13 +409,16 @@ export default function RememePage(props: Readonly<Props>) {
               <Table className={styles["metadataTable"]}>
                 <tbody>
                   <tr>
-                    <td className={styles["metadataTableNoBreak"]}>Token URI</td>
+                    <td className={styles["metadataTableNoBreak"]}>
+                      Token URI
+                    </td>
                     <td className={styles["metadataTableBreak"]}>
                       <a
                         href={rememe.token_uri}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}>
+                        className={`d-inline-flex align-items-center justify-content-start ${styles["userLink"]}`}
+                      >
                         {rememe.token_uri}
                         <FontAwesomeIcon
                           icon={faExternalLink}
@@ -415,7 +428,9 @@ export default function RememePage(props: Readonly<Props>) {
                     </td>
                   </tr>
                   <tr>
-                    <td className={styles["metadataTableNoBreak"]}>Token Type</td>
+                    <td className={styles["metadataTableNoBreak"]}>
+                      Token Type
+                    </td>
                     <td className={styles["metadataTableBreak"]}>
                       {rememe.token_type}
                     </td>
@@ -432,7 +447,8 @@ export default function RememePage(props: Readonly<Props>) {
               xs={12}
               dangerouslySetInnerHTML={{
                 __html: parseNftDescriptionToHtml(rememe.metadata.description),
-              }}></Col>
+              }}
+            ></Col>
           </Row>
           <Row className="pt-4">
             <Col xs={12}>
@@ -465,9 +481,11 @@ export default function RememePage(props: Readonly<Props>) {
                               </tr>
                             );
                           }
+                          return;
                         });
                       }
                     }
+                    return;
                   })}
                 </tbody>
               </Table>
@@ -484,6 +502,7 @@ export default function RememePage(props: Readonly<Props>) {
         </>
       );
     }
+    return;
   }
 
   return (
@@ -523,7 +542,8 @@ export default function RememePage(props: Readonly<Props>) {
                           activeTab === k ? styles["tabActive"] : ""
                         }`}
                         key={`${k}-tab`}
-                        onClick={() => setActiveTab(k)}>
+                        onClick={() => setActiveTab(k)}
+                      >
                         {k}
                       </span>
                     ))}

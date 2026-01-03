@@ -43,39 +43,34 @@ export const FeedScrollContainer = forwardRef<
 
     // Track height changes to maintain scroll position
     useEffect(() => {
-      if (contentRef.current) {
-        previousHeightRef.current = contentRef.current.scrollHeight;
+      if (!contentRef.current) return;
 
-        // Use a mutation observer to detect when items are added or removed
-        const observer = new MutationObserver(() => {
-          if (
-            !contentRef.current ||
-            !ref ||
-            !("current" in ref) ||
-            !ref.current
-          )
-            return;
+      previousHeightRef.current = contentRef.current.scrollHeight;
 
-          const scrollContainer = ref.current;
-          const currentHeight = contentRef.current.scrollHeight;
-          const heightDifference = currentHeight - previousHeightRef.current;
+      // Use a mutation observer to detect when items are added or removed
+      const observer = new MutationObserver(() => {
+        if (!contentRef.current || !ref || !("current" in ref) || !ref.current)
+          return;
 
-          // Only adjust if there's a height change and we're not at the top
-          if (heightDifference > 0 && scrollContainer.scrollTop > 0) {
-            // Maintain the same view by adjusting scroll position by the height difference
-            scrollContainer.scrollTop += heightDifference;
-          }
+        const scrollContainer = ref.current;
+        const currentHeight = contentRef.current.scrollHeight;
+        const heightDifference = currentHeight - previousHeightRef.current;
 
-          previousHeightRef.current = currentHeight;
-        });
+        // Only adjust if there's a height change and we're not at the top
+        if (heightDifference > 0 && scrollContainer.scrollTop > 0) {
+          // Maintain the same view by adjusting scroll position by the height difference
+          scrollContainer.scrollTop += heightDifference;
+        }
 
-        observer.observe(contentRef.current, {
-          childList: true,
-          subtree: true,
-        });
+        previousHeightRef.current = currentHeight;
+      });
 
-        return () => observer.disconnect();
-      }
+      observer.observe(contentRef.current, {
+        childList: true,
+        subtree: true,
+      });
+
+      return () => observer.disconnect();
     }, [ref]);
 
     useEffect(() => {
@@ -286,7 +281,7 @@ export const FeedScrollContainer = forwardRef<
       <div
         ref={ref}
         style={{ overflowAnchor: "none" }}
-        className={`tw-flex tw-flex-col-reverse tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full ${className}`}
+        className={`tw-flex tw-h-full tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 ${className}`}
         onScroll={handleScroll}
       >
         <div ref={contentRef}>{children}</div>
