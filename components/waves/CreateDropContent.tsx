@@ -1009,10 +1009,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       // Remove file from a specific part
       setDrop((prevDrop) => {
         if (!prevDrop) return null;
+
         const newParts = [...prevDrop.parts];
+        const part = newParts[partIndex];
+        if (!part) return prevDrop;
         newParts[partIndex] = {
-          ...newParts[partIndex],
-          media: newParts[partIndex]?.media.filter((f) => f !== file),
+          ...part,
+          media: part.media.filter((f) => f !== file),
         };
         return { ...prevDrop, parts: newParts };
       });
@@ -1056,9 +1059,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     newValue: string | number | null;
   }) => {
     setMetadata((prev) =>
-      prev.map((item, i) =>
-        i === params.index ? { ...item, value: params.newValue } : item
-      )
+      prev.map((item, i) => {
+        if (i !== params.index) return item;
+        if (item.type === ApiWaveMetadataType.Number) {
+          if (params.newValue === null || params.newValue === "") {
+            return { ...item, value: null };
+          }
+          const parsedValue = Number(params.newValue);
+          return { ...item, value: isNaN(parsedValue) ? null : parsedValue };
+        } else if (item.type === ApiWaveMetadataType.String) {
+          if (typeof params.newValue === "string") {
+            return { ...item, value: params.newValue };
+          } else {
+            return { ...item, value: String(params.newValue) };
+          }
+        }
+
+        return item;
+      })
     );
   };
 
