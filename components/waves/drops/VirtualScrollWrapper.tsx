@@ -18,7 +18,7 @@ interface VirtualScrollWrapperProps {
    * A manual delay in milliseconds to wait after media loads
    * before measuring (to account for any last-minute layout changes).
    */
-  readonly delay?: number;
+  readonly delay?: number | undefined;
 
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 

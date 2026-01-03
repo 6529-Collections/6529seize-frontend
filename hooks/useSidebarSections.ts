@@ -213,8 +213,8 @@ export interface SidebarPageEntry {
   name: string;
   href: string;
   section: string;
-  subsection?: string;
-  icon?: ComponentType<{ className?: string }>;
+  subsection?: string | undefined;
+  icon?: ComponentType<{ className?: string | undefined }> | undefined;
 }
 
 export function mapSidebarSectionsToPages(

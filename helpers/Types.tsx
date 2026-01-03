@@ -343,7 +343,7 @@ export interface WsDropUpdateMessage {
 
 export interface PageSSRMetadata {
   title: string;
-  description?: string;
+  description?: string | undefined;
   ogImage: string;
   twitterCard: "summary" | "summary_large_image";
 }

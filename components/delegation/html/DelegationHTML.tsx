@@ -6,8 +6,8 @@ import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 
 interface Props {
-  path?: string;
-  title?: string;
+  path?: string | undefined;
+  title?: string | undefined;
 }
 
 export default function DelegationHTML(props: Readonly<Props>) {

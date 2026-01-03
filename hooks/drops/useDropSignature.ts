@@ -27,7 +27,7 @@ export const useDropSignature = () => {
   }: {
     drop: ApiCreateDropRequest;
     termsOfService: string | null;
-  }): Promise<{ success: boolean; signature?: string }> => {
+  }): Promise<{ success: boolean; signature?: string | undefined }> => {
     try {
       setIsLoading(true);
 

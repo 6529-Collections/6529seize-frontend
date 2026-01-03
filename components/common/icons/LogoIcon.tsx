@@ -1,6 +1,6 @@
 import React from "react";
 
-const LogoIcon = ({ className }: { readonly className?: string }) => (
+const LogoIcon = ({ className }: { readonly className?: string | undefined }) => (
   <svg
     className={className}
     id="Layer_1"

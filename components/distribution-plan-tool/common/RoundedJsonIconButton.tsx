@@ -8,7 +8,7 @@ export default function RoundedJsonIconButton({
 }: {
   loading: boolean;
   onClick: () => void;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
 }) {
   return (
     <button

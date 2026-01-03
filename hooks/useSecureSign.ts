@@ -46,7 +46,7 @@ class ProviderValidationError extends Error {
 interface SignatureResult {
   signature: string | null;
   userRejected: boolean;
-  error?: MobileSigningError | ConnectionMismatchError | SigningProviderError | ProviderValidationError;
+  error?: MobileSigningError | ConnectionMismatchError | SigningProviderError | ProviderValidationError | undefined;
 }
 
 interface UseSecureSignReturn {

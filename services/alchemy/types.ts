@@ -2,159 +2,159 @@ import type { Suggestion, SupportedChain } from "@/types/nft";
 
 export type SearchContractsParams = {
   query: string;
-  chain?: SupportedChain;
-  pageKey?: string;
-  hideSpam?: boolean;
-  signal?: AbortSignal;
+  chain?: SupportedChain | undefined;
+  pageKey?: string | undefined;
+  hideSpam?: boolean | undefined;
+  signal?: AbortSignal | undefined;
 };
 
 export type SearchContractsResult = {
   items: Suggestion[];
   hiddenCount: number;
-  nextPageKey?: string;
+  nextPageKey?: string | undefined;
 };
 
 export type ContractOverviewParams = {
   address: `0x${string}`;
-  chain?: SupportedChain;
-  signal?: AbortSignal;
+  chain?: SupportedChain | undefined;
+  signal?: AbortSignal | undefined;
 };
 
 export type TokenMetadataParams = {
-  address?: `0x${string}`;
-  tokenIds?: readonly string[];
-  tokens?: readonly { contract: string; tokenId: string }[];
-  chain?: SupportedChain;
-  signal?: AbortSignal;
+  address?: `0x${string}` | undefined;
+  tokenIds?: readonly string[] | undefined;
+  tokens?: readonly { contract: string; tokenId: string }[] | undefined;
+  chain?: SupportedChain | undefined;
+  signal?: AbortSignal | undefined;
 };
 
 export type AlchemyContractMetadata = {
-  address?: string | null;
-  name?: string | null;
-  symbol?: string | null;
-  tokenType?: string | null;
-  totalSupply?: string | null;
-  image?: { cachedUrl?: string | null; thumbnailUrl?: string | null } | null;
-  bannerImageUrl?: string | null;
-  description?: string | null;
-  contractDeployer?: string | null;
-  deployedBlockNumber?: number | null;
-  openSeaMetadata?: AlchemyOpenSeaMetadata;
-  openseaMetadata?: AlchemyOpenSeaMetadata;
-  openSea?: AlchemyOpenSeaMetadata;
-  opensea?: AlchemyOpenSeaMetadata;
-  isSpam?: boolean;
-  spamInfo?: { isSpam?: boolean };
+  address?: string | null | undefined;
+  name?: string | null | undefined;
+  symbol?: string | null | undefined;
+  tokenType?: string | null | undefined;
+  totalSupply?: string | null | undefined;
+  image?: { cachedUrl?: string | null | undefined; thumbnailUrl?: string | null | undefined } | null | undefined;
+  bannerImageUrl?: string | null | undefined;
+  description?: string | null | undefined;
+  contractDeployer?: string | null | undefined;
+  deployedBlockNumber?: number | null | undefined;
+  openSeaMetadata?: AlchemyOpenSeaMetadata | undefined;
+  openseaMetadata?: AlchemyOpenSeaMetadata | undefined;
+  openSea?: AlchemyOpenSeaMetadata | undefined;
+  opensea?: AlchemyOpenSeaMetadata | undefined;
+  isSpam?: boolean | undefined;
+  spamInfo?: { isSpam?: boolean | undefined } | undefined;
 };
 
 export type AlchemyOpenSeaMetadata = {
-  imageUrl?: string | null;
-  bannerImageUrl?: string | null;
-  collectionName?: string | null;
-  safelistRequestStatus?: string | null;
-  floorPrice?: number | { eth?: number | string | null } | null;
-  description?: string | null;
+  imageUrl?: string | null | undefined;
+  bannerImageUrl?: string | null | undefined;
+  collectionName?: string | null | undefined;
+  safelistRequestStatus?: string | null | undefined;
+  floorPrice?: number | { eth?: number | string | null | undefined } | null | undefined;
+  description?: string | null | undefined;
 };
 
 export type AlchemyContractResult = {
-  address?: string;
-  contractAddress?: string;
-  contractDeployer?: string | null;
-  isSpam?: boolean;
-  spamInfo?: { isSpam?: boolean };
-  spamClassifications?: string[] | null;
-  contractMetadata?: AlchemyContractMetadata;
-  openSeaMetadata?: AlchemyOpenSeaMetadata;
-  openseaMetadata?: AlchemyOpenSeaMetadata;
+  address?: string | undefined;
+  contractAddress?: string | undefined;
+  contractDeployer?: string | null | undefined;
+  isSpam?: boolean | undefined;
+  spamInfo?: { isSpam?: boolean | undefined } | undefined;
+  spamClassifications?: string[] | null | undefined;
+  contractMetadata?: AlchemyContractMetadata | undefined;
+  openSeaMetadata?: AlchemyOpenSeaMetadata | undefined;
+  openseaMetadata?: AlchemyOpenSeaMetadata | undefined;
 } & AlchemyContractMetadata;
 
 export type AlchemySearchResponse = {
-  contracts?: AlchemyContractResult[];
-  pageKey?: string;
+  contracts?: AlchemyContractResult[] | undefined;
+  pageKey?: string | undefined;
 };
 
 export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
-  contractMetadata?: AlchemyContractMetadata | null;
-  openSeaMetadata?: AlchemyOpenSeaMetadata | null;
-  openseaMetadata?: AlchemyOpenSeaMetadata | null;
-  address?: string | null;
-  contractAddress?: string | null;
-  isSpam?: boolean;
+  contractMetadata?: AlchemyContractMetadata | null | undefined;
+  openSeaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
+  openseaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
+  address?: string | null | undefined;
+  contractAddress?: string | null | undefined;
+  isSpam?: boolean | undefined;
 };
 
 export type AlchemyNftMedia = {
-  cachedUrl?: string | null;
-  thumbnailUrl?: string | null;
-  originalUrl?: string | null;
-  pngUrl?: string | null;
-  gateway?: string | null;
-  raw?: string | null;
-  contentType?: string | null;
-  size?: number | null;
+  cachedUrl?: string | null | undefined;
+  thumbnailUrl?: string | null | undefined;
+  originalUrl?: string | null | undefined;
+  pngUrl?: string | null | undefined;
+  gateway?: string | null | undefined;
+  raw?: string | null | undefined;
+  contentType?: string | null | undefined;
+  size?: number | null | undefined;
 };
 
 export type AlchemyNftMetadata = {
-  image?: string | null;
-  name?: string | null;
-  description?: string | null;
+  image?: string | null | undefined;
+  name?: string | null | undefined;
+  description?: string | null | undefined;
   [key: string]: unknown;
 };
 
 export type AlchemyNftCollection = {
-  name?: string | null;
-  slug?: string | null;
-  externalUrl?: string | null;
-  bannerImageUrl?: string | null;
+  name?: string | null | undefined;
+  slug?: string | null | undefined;
+  externalUrl?: string | null | undefined;
+  bannerImageUrl?: string | null | undefined;
 };
 
 export type AlchemyNftMint = {
-  mintAddress?: string | null;
-  blockNumber?: string | null;
-  timestamp?: string | null;
-  transactionHash?: string | null;
+  mintAddress?: string | null | undefined;
+  blockNumber?: string | null | undefined;
+  timestamp?: string | null | undefined;
+  transactionHash?: string | null | undefined;
 };
 
 export type AlchemyOwnedNftAcquiredAt = {
-  blockTimestamp?: string | null;
-  blockNumber?: string | null;
+  blockTimestamp?: string | null | undefined;
+  blockNumber?: string | null | undefined;
 };
 
 export type AlchemyTokenMetadataEntry = {
   contract?:
-    | (AlchemyContractMetadata & { spamClassifications?: string[] | null })
-    | null;
-  tokenId?: string;
-  tokenType?: string | null;
-  title?: string | null;
-  name?: string | null;
-  description?: string | null;
-  tokenUri?: string | null;
-  image?: AlchemyNftMedia | null;
-  animation?: AlchemyNftMedia | null;
-  media?: AlchemyNftMedia[] | null;
-  metadata?: AlchemyNftMetadata | null;
+    | (AlchemyContractMetadata & { spamClassifications?: string[] | null | undefined })
+    | null | undefined;
+  tokenId?: string | undefined;
+  tokenType?: string | null | undefined;
+  title?: string | null | undefined;
+  name?: string | null | undefined;
+  description?: string | null | undefined;
+  tokenUri?: string | null | undefined;
+  image?: AlchemyNftMedia | null | undefined;
+  animation?: AlchemyNftMedia | null | undefined;
+  media?: AlchemyNftMedia[] | null | undefined;
+  metadata?: AlchemyNftMetadata | null | undefined;
   raw?: {
-    tokenUri?: string | null;
-    metadata?: AlchemyNftMetadata | null;
-    error?: string | null;
-  } | null;
-  collection?: AlchemyNftCollection | null;
-  mint?: AlchemyNftMint | null;
-  owners?: string[] | null;
-  timeLastUpdated?: string | null;
-  balance?: string | null;
-  acquiredAt?: AlchemyOwnedNftAcquiredAt | null;
-  isSpam?: boolean;
-  spamInfo?: { isSpam?: boolean } | null;
+    tokenUri?: string | null | undefined;
+    metadata?: AlchemyNftMetadata | null | undefined;
+    error?: string | null | undefined;
+  } | null | undefined;
+  collection?: AlchemyNftCollection | null | undefined;
+  mint?: AlchemyNftMint | null | undefined;
+  owners?: string[] | null | undefined;
+  timeLastUpdated?: string | null | undefined;
+  balance?: string | null | undefined;
+  acquiredAt?: AlchemyOwnedNftAcquiredAt | null | undefined;
+  isSpam?: boolean | undefined;
+  spamInfo?: { isSpam?: boolean | undefined } | null | undefined;
 };
 
 export type AlchemyTokenMetadataResponse = {
-  tokens?: AlchemyTokenMetadataEntry[];
-  nfts?: AlchemyTokenMetadataEntry[];
+  tokens?: AlchemyTokenMetadataEntry[] | undefined;
+  nfts?: AlchemyTokenMetadataEntry[] | undefined;
 };
 
 export type AlchemyOwnedNft = AlchemyTokenMetadataEntry & {
-  balance?: string | null;
+  balance?: string | null | undefined;
 };
 
 export type OwnerNft = {
@@ -167,15 +167,15 @@ export type OwnerNft = {
 
 export type AlchemyGetNftsForOwnerResponse = {
   ownedNfts: AlchemyOwnedNft[];
-  pageKey?: string;
-  totalCount?: number;
+  pageKey?: string | undefined;
+  totalCount?: number | undefined;
   validAt?: {
-    blockNumber?: number | null;
-    blockHash?: string | null;
-    blockTimestamp?: string | null;
-  };
+    blockNumber?: number | null | undefined;
+    blockHash?: string | null | undefined;
+    blockTimestamp?: string | null | undefined;
+  } | undefined;
   error?: {
-    code?: number;
-    message?: string;
-  };
+    code?: number | undefined;
+    message?: string | undefined;
+  } | undefined;
 };

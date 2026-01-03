@@ -45,10 +45,10 @@ interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
-  readonly dividerSerialNo?: number | null;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly bottomPaddingClassName?: string;
-  readonly isMuted?: boolean;
+  readonly dividerSerialNo?: number | null | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly bottomPaddingClassName?: string | undefined;
+  readonly isMuted?: boolean | undefined;
 }
 
 const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
@@ -261,7 +261,17 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       if (drop.wave.id !== waveId) {
         const waveDetails =
           (drop.wave as unknown as {
-            chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+            chat?:
+              | {
+                  scope?:
+                    | {
+                        group?:
+                          | { is_direct_message?: boolean | undefined }
+                          | undefined;
+                      }
+                    | undefined;
+                }
+              | undefined;
           }) ?? undefined;
         const isDirectMessage = isWaveDirectMessage(drop.wave.id, waveDetails);
         const href = getWaveRoute({
@@ -281,7 +291,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   return (
     <div
       ref={containerRef}
-      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-hidden tw-bg-iron-950">
+      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-hidden tw-bg-iron-950"
+    >
       <WaveDropsContent
         waveMessages={renderedWaveMessages}
         dropId={dropId}
@@ -323,7 +334,8 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   return (
     <UnreadDividerProvider
       initialSerialNo={dividerSerialNo ?? null}
-      key={`unread-divider-${waveId}`}>
+      key={`unread-divider-${waveId}`}
+    >
       <WaveDropsAllInner
         waveId={waveId}
         dropId={dropId}

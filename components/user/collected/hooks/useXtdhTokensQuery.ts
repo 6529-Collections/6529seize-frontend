@@ -10,7 +10,7 @@ interface UseXtdhTokensQueryProps {
   readonly pageSize: number;
   readonly sort: string;
   readonly order: string;
-  readonly contract?: string | null;
+  readonly contract?: string | null | undefined;
 }
 
 export const useXtdhTokensQuery = ({

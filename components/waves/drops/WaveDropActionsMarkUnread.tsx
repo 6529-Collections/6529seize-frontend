@@ -15,8 +15,8 @@ import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsMarkUnreadProps {
   readonly drop: ApiDrop;
-  readonly isMobile?: boolean;
-  readonly onMarkUnread?: () => void;
+  readonly isMobile?: boolean | undefined;
+  readonly onMarkUnread?: (() => void) | undefined;
 }
 
 export default function WaveDropActionsMarkUnread({
@@ -106,7 +106,8 @@ export default function WaveDropActionsMarkUnread({
         disabled={loading}
         className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
           loading ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
-        } tw-transition-colors tw-duration-200`}>
+        } tw-transition-colors tw-duration-200`}
+      >
         {loading ? (
           <Spinner dimension={20} />
         ) : (
@@ -129,7 +130,8 @@ export default function WaveDropActionsMarkUnread({
         disabled={loading}
         className="tw-text-iron-500 desktop-hover:hover:tw-text-iron-50 tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 tw-cursor-pointer"
         aria-label="Mark as unread"
-        data-tooltip-id={`mark-unread-${drop.id}`}>
+        data-tooltip-id={`mark-unread-${drop.id}`}
+      >
         {loading ? (
           <Spinner dimension={20} />
         ) : (
@@ -143,7 +145,8 @@ export default function WaveDropActionsMarkUnread({
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
-        }}>
+        }}
+      >
         <span className="tw-text-xs">Mark as unread</span>
       </Tooltip>
     </>

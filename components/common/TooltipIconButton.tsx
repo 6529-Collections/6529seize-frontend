@@ -9,9 +9,9 @@ interface TooltipIconButtonProps
   extends Omit<ComponentPropsWithoutRef<"button">, "children"> {
   readonly icon: IconDefinition;
   readonly tooltipText: string;
-  readonly iconClassName?: string;
-  readonly tooltipWidth?: string;
-  readonly tooltipPosition?: "top" | "bottom" | "left" | "right";
+  readonly iconClassName?: string | undefined;
+  readonly tooltipWidth?: string | undefined;
+  readonly tooltipPosition?: "top" | "bottom" | "left" | "right" | undefined;
 }
 
 export default function TooltipIconButton({

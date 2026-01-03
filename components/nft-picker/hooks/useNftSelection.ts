@@ -23,10 +23,10 @@ import {
 const EMPTY_SELECTION: TokenSelection = [];
 
 type UseNftSelectionProps = {
-  value?: NftPickerProps["value"];
-  defaultValue?: NftPickerProps["defaultValue"];
+  value?: NftPickerProps["value"] | undefined;
+  defaultValue?: NftPickerProps["defaultValue"] | undefined;
   onChange: NftPickerProps["onChange"];
-  onContractChange?: NftPickerProps["onContractChange"];
+  onContractChange?: NftPickerProps["onContractChange"] | undefined;
   outputMode: OutputMode;
 };
 
@@ -60,7 +60,7 @@ export function useNftSelection({
     (
       canonicalRanges: TokenRange[],
       isAll: boolean
-    ): { selection: TokenSelection | null; error?: ParseError } => {
+    ): { selection: TokenSelection | null; error?: ParseError | undefined } => {
       if (isAll) {
         return { selection: [] };
       }

@@ -18,8 +18,8 @@ interface AllowlistToolCommonModalWrapperProps {
   readonly showModal: boolean;
   readonly onClose: () => void;
   readonly title: string;
-  readonly modalSize?: AllowlistToolModalSize;
-  readonly showTitle?: boolean;
+  readonly modalSize?: AllowlistToolModalSize | undefined;
+  readonly showTitle?: boolean | undefined;
 }
 
 export default function AllowlistToolCommonModalWrapper({

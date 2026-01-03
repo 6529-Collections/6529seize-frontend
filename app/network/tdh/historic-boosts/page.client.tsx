@@ -70,7 +70,7 @@ function Szn1Sublist() {
 function CategoryBList(
   props: Readonly<{
     maxSeason: number; // 4, 5, 11
-    includeAppliedNote?: boolean; // only for 1.3
+    includeAppliedNote?: boolean | undefined; // only for 1.3
   }>
 ) {
   const seasons = Array.from({ length: props.maxSeason }, (_, i) => i + 1);

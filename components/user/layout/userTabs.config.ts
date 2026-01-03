@@ -7,9 +7,12 @@ type UserPageTabDefinition = {
   readonly id: string;
   readonly title: string;
   readonly route: string;
-  readonly metaLabel?: string;
-  readonly badge?: string;
-  readonly isVisible?: (context: UserPageVisibilityContext) => boolean;
+  readonly metaLabel?: string | undefined;
+  readonly badge?: string | undefined;
+  readonly isVisible?:
+    | ((context: UserPageVisibilityContext) => boolean)
+    | undefined
+    | undefined;
 };
 
 const TAB_DEFINITIONS = [
@@ -75,11 +78,15 @@ const TAB_DEFINITIONS = [
   },
 ] as const satisfies readonly UserPageTabDefinition[];
 
-const USER_PAGE_TAB_DEFINITIONS: readonly UserPageTabDefinition[] = TAB_DEFINITIONS;
+const USER_PAGE_TAB_DEFINITIONS: readonly UserPageTabDefinition[] =
+  TAB_DEFINITIONS;
 
 export type UserPageTabKey = (typeof TAB_DEFINITIONS)[number]["id"];
 
-export type UserPageTabConfig = Omit<UserPageTabDefinition, "id" | "metaLabel"> & {
+export type UserPageTabConfig = Omit<
+  UserPageTabDefinition,
+  "id" | "metaLabel"
+> & {
   readonly id: UserPageTabKey;
   readonly metaLabel: string;
 };
@@ -90,21 +97,15 @@ export const USER_PAGE_TABS = USER_PAGE_TAB_DEFINITIONS.map((tab) => ({
 })) as readonly UserPageTabConfig[];
 
 export const USER_PAGE_TAB_MAP: Record<UserPageTabKey, UserPageTabConfig> =
-  USER_PAGE_TABS.reduce(
-    (acc, tab) => {
-      acc[tab.id] = tab;
-      return acc;
-    },
-    {} as Record<UserPageTabKey, UserPageTabConfig>
-  );
-
-export const USER_PAGE_TAB_IDS = USER_PAGE_TABS.reduce(
-  (acc, tab) => {
-    acc[tab.id.toUpperCase() as Uppercase<UserPageTabKey>] = tab.id;
+  USER_PAGE_TABS.reduce((acc, tab) => {
+    acc[tab.id] = tab;
     return acc;
-  },
-  {} as { [K in Uppercase<UserPageTabKey>]: UserPageTabKey }
-);
+  }, {} as Record<UserPageTabKey, UserPageTabConfig>);
+
+export const USER_PAGE_TAB_IDS = USER_PAGE_TABS.reduce((acc, tab) => {
+  acc[tab.id.toUpperCase() as Uppercase<UserPageTabKey>] = tab.id;
+  return acc;
+}, {} as { [K in Uppercase<UserPageTabKey>]: UserPageTabKey });
 
 export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "collected";
 

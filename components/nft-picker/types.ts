@@ -25,24 +25,27 @@ type BaseSelection = {
 
 export type NftPickerSelection =
   | (BaseSelection & {
-    outputMode: "number";
-    tokenIds: readonly number[];
-  })
+      outputMode: "number";
+      tokenIds: readonly number[];
+    })
   | (BaseSelection & {
-    outputMode: "bigint";
-    tokenIds: readonly string[];
-  });
+      outputMode: "bigint";
+      tokenIds: readonly string[];
+    });
 
 // Emitted when the picker cannot safely emit number output because token IDs exceed Number.MAX_SAFE_INTEGER.
 export type NftPickerSelectionError = {
   type: "error";
   error: string;
   unsafeCount: number;
-  contractAddress?: `0x${string}`;
+  contractAddress?: `0x${string}` | undefined;
   outputMode: "number";
 };
 
-export type NftPickerChange = NftPickerSelection | NftPickerSelectionError | null;
+export type NftPickerChange =
+  | NftPickerSelection
+  | NftPickerSelectionError
+  | null;
 
 export type NftPickerOnChange = {
   // Bivariant to accept handlers that only handle the successful selection shape.
@@ -51,32 +54,38 @@ export type NftPickerOnChange = {
 
 export type NftPickerValue = {
   chain: SupportedChain;
-  contractAddress?: `0x${string}`;
+  contractAddress?: `0x${string}` | undefined;
   selectedIds: Readonly<TokenSelection>;
   allSelected: boolean;
 };
 
 export type NftPickerProps = {
-  readonly value?: NftPickerValue;
-  readonly defaultValue?: Partial<NftPickerValue>;
+  readonly value?: NftPickerValue | undefined;
+  readonly defaultValue?: Partial<NftPickerValue> | undefined;
   readonly onChange: NftPickerOnChange;
-  readonly onContractChange?: (meta: ContractOverview | null) => void;
-  readonly chain?: SupportedChain;
-  readonly outputMode?: OutputMode;
-  readonly hideSpam?: boolean;
-  readonly allowAll?: boolean;
-  readonly allowRanges?: boolean;
-  readonly debounceMs?: number;
-  readonly overscan?: number;
-  readonly placeholder?: string;
-  readonly className?: string;
-  readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
-  readonly variant?: "card" | "flat";
+  readonly onContractChange?:
+    | ((meta: ContractOverview | null) => void)
+    | undefined
+    | undefined;
+  readonly chain?: SupportedChain | undefined;
+  readonly outputMode?: OutputMode | undefined;
+  readonly hideSpam?: boolean | undefined;
+  readonly allowAll?: boolean | undefined;
+  readonly allowRanges?: boolean | undefined;
+  readonly debounceMs?: number | undefined;
+  readonly overscan?: number | undefined;
+  readonly placeholder?: string | undefined;
+  readonly className?: string | undefined;
+  readonly renderTokenExtra?:
+    | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
+    | undefined
+    | undefined;
+  readonly variant?: "card" | "flat" | undefined;
 };
 
 export type ParseErrorArray = ParseError[] & { message: string; name: string };
 export type ParseError = {
-  code?: string;
+  code?: string | undefined;
   input: string;
   index: number;
   length: number;
@@ -90,17 +99,17 @@ export type CanonicalTokenState = {
 
 export type TokenListRow = {
   tokenId: bigint;
-  range?: TokenRange;
+  range?: TokenRange | undefined;
 };
 
 export type SearchQueryParams = {
   query: string;
-  chain?: SupportedChain;
-  hideSpam?: boolean;
+  chain?: SupportedChain | undefined;
+  hideSpam?: boolean | undefined;
 };
 
 export type TokenMetadataRequest = {
   address: `0x${string}`;
   tokenIds: readonly string[];
-  chain?: SupportedChain;
+  chain?: SupportedChain | undefined;
 };

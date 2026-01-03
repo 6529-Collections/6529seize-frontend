@@ -28,7 +28,7 @@ export interface ProcessedRememe {
   valid: boolean;
   contract: NftContract;
   nfts: Nft[];
-  error?: string;
+  error?: string | undefined;
 }
 
 interface Props {

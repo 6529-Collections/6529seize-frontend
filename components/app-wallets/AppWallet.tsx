@@ -537,10 +537,10 @@ export default function AppWalletComponent(
 
 function AppWalletPhraseWord(
   props: Readonly<{
-    index?: number;
+    index?: number | undefined;
     word: string;
     hidden: boolean;
-    full_width?: boolean;
+    full_width?: boolean | undefined;
   }>
 ) {
   return (

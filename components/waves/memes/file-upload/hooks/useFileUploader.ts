@@ -36,7 +36,10 @@ interface UseFileUploaderProps {
   /** Callback to be called when a file is uploaded */
   setUploaded: (uploaded: boolean) => void;
   /** Callback to show toast notifications */
-  showToast?: (toast: { type: any; message: string | React.ReactNode }) => void;
+  showToast?:
+    | ((toast: { type: any; message: string | React.ReactNode }) => void)
+    | undefined
+    | undefined;
 }
 
 /**

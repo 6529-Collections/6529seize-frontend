@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 // Stub out lexical's DecoratorNode to avoid constructor issues
 jest.mock("lexical", () => {
   class DecoratorNode {
-    __key?: unknown;
+    __key?: unknown | undefined;
     constructor(key?: unknown) {
       this.__key = key;
     }

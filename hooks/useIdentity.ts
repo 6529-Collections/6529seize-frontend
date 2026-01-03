@@ -19,7 +19,7 @@ export function useIdentity({
   handleOrWallet,
   initialProfile,
 }: Readonly<UseIdentityProps>) {
-  const { data: profile, isLoading } = useQuery<ApiIdentity>({
+  const { data: profile, isLoading } = useQuery<ApiIdentity | undefined>({
     queryKey: [QueryKey.PROFILE, handleOrWallet?.toLowerCase()],
     queryFn: async () =>
       await commonApiFetch<ApiIdentity>({

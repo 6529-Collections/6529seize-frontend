@@ -19,12 +19,13 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   const { setToast } = useContext(AuthContext);
   const { getEligibility } = useWaveEligibility();
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  
+
   // Check centralized eligibility first, fallback to drop's eligibility
   const waveEligibility = getEligibility(drop.wave.id);
-  const isEligibleToChat = waveEligibility?.authenticated_user_eligible_to_chat ?? 
-                          drop.wave.authenticated_user_eligible_to_chat;
-  
+  const isEligibleToChat =
+    waveEligibility?.authenticated_user_eligible_to_chat ??
+    drop.wave.authenticated_user_eligible_to_chat;
+
   const canReply = !isTemporaryDrop;
 
   const handleReplyClick = () => {
@@ -47,14 +48,18 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
         onClick={canReply ? handleReplyClick : undefined}
         disabled={!canReply}
         aria-label="Reply to drop"
-        data-tooltip-id={!isTemporaryDrop ? `reply-${drop.id}` : undefined}>
+        {...(!isTemporaryDrop ? { "data-tooltip-id": `reply-${drop.id}` } : {})}
+      >
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${canReply ? "" : "tw-opacity-50"}`}
+          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
+            canReply ? "" : "tw-opacity-50"
+          }`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
-          stroke="currentColor">
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -78,7 +83,8 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
             zIndex: 99999,
             pointerEvents: "none",
-          }}>
+          }}
+        >
           <span className="tw-text-xs">Reply</span>
         </Tooltip>
       )}

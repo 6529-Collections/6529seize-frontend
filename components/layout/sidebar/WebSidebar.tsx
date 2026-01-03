@@ -14,7 +14,7 @@ interface WebSidebarProps {
   readonly isCollapsed: boolean;
   readonly onToggle: () => void;
   readonly isMobile: boolean;
-  readonly isNarrow?: boolean;
+  readonly isNarrow?: boolean | undefined;
   readonly isOffcanvasOpen: boolean;
   readonly onCloseOffcanvas: () => void;
   readonly sidebarWidth: string;
@@ -40,7 +40,7 @@ function WebSidebar({
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window;
+      window?: Window | undefined;
     };
     if (
       browserWindow === undefined ||
@@ -92,7 +92,7 @@ function WebSidebar({
     if ((!isMobile && !isOverlayActive) || !isOffcanvasOpen) return;
 
     const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window;
+      window?: Window | undefined;
     };
     if (browserWindow === undefined) {
       return;

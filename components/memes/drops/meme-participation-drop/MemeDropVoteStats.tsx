@@ -12,7 +12,7 @@ interface MemeDropVoteStatsProps {
   readonly votingCreditType: string;
   readonly ratersCount: number | null | undefined;
   readonly topVoters: ApiDropRater[];
-  readonly userContext?: ApiDropContextProfileContext | null;
+  readonly userContext?: ApiDropContextProfileContext | null | undefined;
 }
 
 export default function MemeDropVoteStats({

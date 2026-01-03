@@ -22,7 +22,7 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   onQuoteClick,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const { data: drop } = useQuery<ApiDrop>({
+  const { data: drop } = useQuery<ApiDrop | undefined>({
     queryKey: [
       QueryKey.DROP,
       {

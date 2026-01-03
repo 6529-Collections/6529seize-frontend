@@ -7,8 +7,8 @@ import ChatItemHrefButtons from "./ChatItemHrefButtons";
 interface LinkHandlerFrameProps {
   readonly href: string;
   readonly children: ReactNode;
-  readonly hideLink?: boolean;
-  readonly relativeHref?: string;
+  readonly hideLink?: boolean | undefined;
+  readonly relativeHref?: string | undefined;
 }
 
 export default function LinkHandlerFrame({

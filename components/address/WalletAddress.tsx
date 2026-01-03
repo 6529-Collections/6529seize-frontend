@@ -18,10 +18,10 @@ export function WalletAddress(props: {
   wallet: string;
   display: string | undefined;
   displayEns?: string | undefined;
-  isUserPage?: boolean;
-  disableLink?: boolean;
-  hideCopy?: boolean;
-  setLinkQueryAddress?: boolean;
+  isUserPage?: boolean | undefined;
+  disableLink?: boolean | undefined;
+  hideCopy?: boolean | undefined;
+  setLinkQueryAddress?: boolean | undefined;
 }) {
   const uniqueId = getRandomObjectId();
   const uniqueIdEns = getRandomObjectId();

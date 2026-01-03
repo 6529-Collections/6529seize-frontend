@@ -51,12 +51,12 @@ export default function RememeAddPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{
     success: boolean;
-    errors?: string[];
-    contract?: string;
+    errors?: string[] | undefined;
+    contract?: string | undefined;
     tokens?: {
       id: string;
       name: string;
-    }[];
+    }[] | undefined;
   }>();
 
   useEffect(() => {

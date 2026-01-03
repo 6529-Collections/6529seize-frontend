@@ -38,7 +38,7 @@ interface MultiPartUploadParams {
   /**
    * Optional callback that receives an integer (0..100) representing % of file uploaded.
    */
-  onProgress?: (progressPercent: number) => void;
+  onProgress?: ((progressPercent: number) => void) | undefined;
 }
 
 /**
@@ -63,37 +63,42 @@ export async function multiPartUpload({
     if (file.type) {
       return file.type;
     }
-    
+
     // Fallback MIME type detection for files without type
     const fileName = file.name.toLowerCase();
-    if (fileName.endsWith('.glb')) {
-      return 'model/gltf-binary';
+    if (fileName.endsWith(".glb")) {
+      return "model/gltf-binary";
     }
-    if (fileName.endsWith('.gltf')) {
-      return 'model/gltf+json';
+    if (fileName.endsWith(".gltf")) {
+      return "model/gltf+json";
     }
-    if (fileName.endsWith('.mp4')) {
-      return 'video/mp4';
+    if (fileName.endsWith(".mp4")) {
+      return "video/mp4";
     }
-    if (fileName.endsWith('.mov')) {
-      return 'video/quicktime';
+    if (fileName.endsWith(".mov")) {
+      return "video/quicktime";
     }
-    if (fileName.endsWith('.png')) {
-      return 'image/png';
+    if (fileName.endsWith(".png")) {
+      return "image/png";
     }
-    if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
-      return 'image/jpeg';
+    if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+      return "image/jpeg";
     }
-    if (fileName.endsWith('.gif')) {
-      return 'image/gif';
+    if (fileName.endsWith(".gif")) {
+      return "image/gif";
     }
-    
+
     // Default fallback
-    return 'application/octet-stream';
+    return "application/octet-stream";
   };
 
   const contentType = getContentType(file);
-  console.log('File upload - detected content type:', contentType, 'for file:', file.name);
+  console.log(
+    "File upload - detected content type:",
+    contentType,
+    "for file:",
+    file.name
+  );
 
   const startData = await commonApiPost<
     { file_name: string; content_type: string },
@@ -178,7 +183,7 @@ export async function multiPartUpload({
 
       // 2.3) Extract ETag
       const eTagHeader = s3Resp.headers["etag"];
-      const eTag = eTagHeader ? eTagHeader.replaceAll("\"", "") : "";
+      const eTag = eTagHeader ? eTagHeader.replaceAll('"', "") : "";
       if (!eTag) {
         throw new Error(`No ETag returned for part ${partNumber}`);
       }

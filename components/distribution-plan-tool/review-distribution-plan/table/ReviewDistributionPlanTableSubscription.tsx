@@ -112,8 +112,8 @@ export function SubscriptionConfirm(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    isNormalized?: boolean;
-    confirmedTokenId?: string | null;
+    isNormalized?: boolean | undefined;
+    confirmedTokenId?: string | null | undefined;
     onConfirm(contract: string, tokenId: string): void;
   }>
 ) {

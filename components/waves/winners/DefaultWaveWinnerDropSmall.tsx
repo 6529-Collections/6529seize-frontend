@@ -18,7 +18,7 @@ interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly wave: ApiWave;
-  readonly rank?: number; // For explicitly setting rank from decision winners
+  readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
 
 export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(

@@ -99,15 +99,15 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
 interface NextGenCollectionProvenanceRowProps {
   collection: NextGenCollection;
   log: NextGenLog;
-  disable_link?: boolean;
+  disable_link?: boolean | undefined;
 }
 
 export function NextGenCollectionProvenanceRow(
   props: Readonly<{
     collection: NextGenCollection;
     log: NextGenLog;
-    disable_link?: boolean;
-    odd?: boolean;
+    disable_link?: boolean | undefined;
+    odd?: boolean | undefined;
   }>
 ) {
   const log = props.log;

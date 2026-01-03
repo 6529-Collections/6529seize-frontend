@@ -3,7 +3,7 @@ import React from "react";
 interface TabOption {
   readonly key: string;
   readonly label: string;
-  readonly hasIndicator?: boolean;
+  readonly hasIndicator?: boolean | undefined;
   readonly panelId: string;
 }
 
@@ -11,7 +11,7 @@ interface TabToggleProps {
   readonly options: readonly TabOption[];
   readonly activeKey: string;
   readonly onSelect: (key: string) => void;
-  readonly fullWidth?: boolean; // New prop to control width
+  readonly fullWidth?: boolean | undefined; // New prop to control width
 }
 
 export const TabToggle: React.FC<TabToggleProps> = ({

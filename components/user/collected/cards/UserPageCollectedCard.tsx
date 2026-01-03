@@ -32,14 +32,14 @@ export default function UserPageCollectedCard({
   readonly card: CollectedCard;
   readonly contractType: ContractType;
   readonly showDataRow: boolean;
-  readonly interactiveMode?: "link" | "select";
-  readonly selected?: boolean;
+  readonly interactiveMode?: "link" | "select" | undefined;
+  readonly selected?: boolean | undefined;
   readonly onToggle: () => void;
   readonly onIncQty: () => void;
   readonly onDecQty: () => void;
   readonly copiesMax: number;
-  readonly qtySelected?: number;
-  readonly isTransferLoading?: boolean;
+  readonly qtySelected?: number | undefined;
+  readonly isTransferLoading?: boolean | undefined;
 }) {
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
   const path = `${collectionMeta.cardPath}/${card.token_id}`;

@@ -3,7 +3,7 @@ import { publicEnv } from "@/config/env";
 const mockFetchPublicUrl = jest.fn();
 
 const nextResponseJsonRoute = jest.fn(
-  (body: unknown, init?: { status?: number }) => ({
+  (body: unknown, init?: { status?: number | undefined }) => ({
     status: init?.status ?? 200,
     json: async () => body,
   })
@@ -133,7 +133,7 @@ describe("open-graph API route", () => {
 
   const createResponse = (
     status: number,
-    options: { headers?: Record<string, string>; body?: string; url?: string } = {}
+    options: { headers?: Record<string, string> | undefined; body?: string | undefined; url?: string | undefined } = {}
   ) => {
     const headerEntries = Object.entries(options.headers ?? {}).reduce(
       (map, [key, value]) => map.set(key.toLowerCase(), value),

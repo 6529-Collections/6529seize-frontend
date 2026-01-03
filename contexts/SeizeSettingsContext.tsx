@@ -21,7 +21,7 @@ type SeizeSettingsContextType = {
   // unless callers opt into reset=true before reloading.
   isLoaded: boolean;
   loadError: Error | null;
-  loadSeizeSettings: (options?: { reset?: boolean }) => Promise<void>;
+  loadSeizeSettings: (options?: { reset?: boolean | undefined }) => Promise<void>;
 };
 
 const SeizeSettingsContext = createContext<
@@ -43,7 +43,7 @@ export const SeizeSettingsProvider = ({
   const isMountedRef = useRef(true);
 
   const loadSeizeSettings = useCallback(
-    async ({ reset = false }: { reset?: boolean } = {}) => {
+    async ({ reset = false }: { reset?: boolean | undefined } = {}) => {
       if (reset && isMountedRef.current) {
         setIsLoaded(false);
         setLoadError(null);

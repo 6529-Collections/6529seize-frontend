@@ -11,7 +11,7 @@ interface UseAccessibilityProps {
   /** Callback to handle area click */
   onAreaClick: () => void;
   /** Whether reduced motion is preferred */
-  prefersReducedMotion?: boolean;
+  prefersReducedMotion?: boolean | undefined;
 }
 
 /**

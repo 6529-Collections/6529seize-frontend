@@ -321,7 +321,7 @@ const getOptimisticDrop = (
     voting: {
       authenticated_user_eligible: boolean;
       credit_type: ApiWaveCreditType;
-      period?: { min: number | null; max: number | null };
+      period?: { min: number | null; max: number | null } | undefined;
       forbid_negative_votes: boolean;
     };
     chat: { authenticated_user_eligible: boolean };
@@ -345,10 +345,13 @@ const getOptimisticDrop = (
     return undefined;
   };
 
+  const replyTo = getReplyTo();
+  const replyToObj = replyTo ? { reply_to: replyTo } : {};
+
   return {
     id: getOptimisticDropId(),
     serial_no: Date.now(),
-    reply_to: getReplyTo(),
+    ...replyToObj,
     wave: {
       id: wave.id,
       name: wave.name,
@@ -593,9 +596,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     const markdown = getMarkdown;
     if (!markdown?.length && !files.length) {
       const baseParts = drop?.parts.length ? drop.parts : [];
+      const replyTo = getReplyTo();
+      const replyToObj = replyTo ? { reply_to: replyTo } : {};
       return {
         title: null,
-        reply_to: getReplyTo(),
+        ...replyToObj,
         parts: ensurePartsWithFallback(baseParts, hasMetadata),
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
@@ -609,11 +614,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return null;
   };
 
+  const replyTo = getReplyTo();
+  const replyToObj = replyTo ? { reply_to: replyTo } : {};
+
   const createGifDrop = (gif: string): CreateDropConfig => {
     return {
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
-      reply_to: getReplyTo(),
+      ...replyToObj,
       parts: [
         ...(drop?.parts ?? []),
         {
@@ -664,11 +672,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           ];
 
     const parts = ensurePartsWithFallback(newParts, hasMetadata);
-
+    const replyTo = getReplyTo();
+    const replyToObj = replyTo ? { reply_to: replyTo } : {};
     return {
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
-      reply_to: getReplyTo(),
+      ...replyToObj,
       parts,
       mentioned_users: allMentions,
       referenced_nfts: allNfts,
@@ -766,7 +775,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       // Define callback for when signing completes
       const handleSigningComplete = (result: {
         success: boolean;
-        signature?: string;
+        signature?: string | undefined;
       }) => {
         if (!result.success || !result.signature) {
           resolve(null);
@@ -1108,7 +1117,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       <div className="tw-flex tw-items-end tw-w-full">
         <div
           ref={actionsContainerRef}
-          className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
+          className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+        >
           <CreateDropActions
             isStormMode={isStormMode}
             canAddPart={canAddPart}
@@ -1175,7 +1185,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

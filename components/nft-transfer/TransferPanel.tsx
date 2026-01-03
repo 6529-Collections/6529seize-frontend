@@ -20,7 +20,7 @@ import { useTransfer } from "./TransferState";
 export default function TransferPanel({
   isLoading = false,
 }: {
-  readonly isLoading?: boolean;
+  readonly isLoading?: boolean | undefined;
 }) {
   const t = useTransfer();
   const { isConnected } = useSeizeConnectContext();

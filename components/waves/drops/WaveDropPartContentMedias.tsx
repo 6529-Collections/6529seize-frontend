@@ -6,9 +6,9 @@ import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
-  readonly disableMediaInteraction?: boolean;
-  readonly isCompetitionDrop?: boolean;
-  readonly imageScale?: ImageScale;
+  readonly disableMediaInteraction?: boolean | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly imageScale?: ImageScale | undefined;
 }
 
 const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({

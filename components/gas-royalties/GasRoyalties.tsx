@@ -19,7 +19,7 @@ import styles from "./GasRoyalties.module.scss";
 
 interface HeaderProps {
   title: string;
-  description?: string;
+  description?: string | undefined;
   fetching: boolean;
   results_count: number;
   date_selection: DateIntervalsSelection;
@@ -305,7 +305,7 @@ interface TokenImageProps {
   token_id: number;
   name: string;
   thumbnail: string;
-  note?: string;
+  note?: string | undefined;
 }
 
 export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {

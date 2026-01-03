@@ -1,23 +1,23 @@
 type InputProps = {
   readonly value: string;
-  readonly placeholder?: string;
-  readonly showSearchIcon?: boolean;
-  readonly disabled?: boolean;
-  readonly theme?: "dark" | "light";
-  readonly size?: "sm" | "md";
+  readonly placeholder?: string | undefined;
+  readonly showSearchIcon?: boolean | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly theme?: "dark" | "light" | undefined;
+  readonly size?: "sm" | "md" | undefined;
   readonly onChange: (newV: string | null) => void;
-  readonly onFocusChange?: (focus: boolean) => void;
+  readonly onFocusChange?: ((focus: boolean) => void) | undefined;
 };
 
 type NumberInputProps = InputProps & {
   readonly inputType: "number";
-  readonly minValue?: number;
-  readonly maxValue?: number;
+  readonly minValue?: number | undefined;
+  readonly maxValue?: number | undefined;
 };
 
 type TextInputProps = InputProps & {
-  readonly inputType?: "text";
-  readonly maxLength?: number;
+  readonly inputType?: "text" | undefined;
+  readonly maxLength?: number | undefined;
 };
 
 export default function CommonInput(props: NumberInputProps | TextInputProps) {

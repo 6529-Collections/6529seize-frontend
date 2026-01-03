@@ -7,7 +7,7 @@ import { Tooltip } from "react-tooltip";
 interface MemeDropTraitProps {
   readonly label: string;
   readonly value: string;
-  readonly dropId?: string;
+  readonly dropId?: string | undefined;
 }
 
 const convertValue = (value: string) => {

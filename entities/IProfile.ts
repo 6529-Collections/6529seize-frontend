@@ -12,7 +12,7 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 
 interface IProfileWallet {
   readonly address: string;
-  readonly ens?: string;
+  readonly ens?: string | undefined;
 }
 
 export interface IProfileConsolidation {
@@ -254,8 +254,8 @@ export interface ProfileActivityLogProxyActionChanged
   readonly type: ProfileActivityLogType.PROXY_ACTION_CHANGED;
   readonly contents: {
     readonly action_id: string;
-    readonly end_time?: number | null;
-    readonly credit_amount?: number;
+    readonly end_time?: number | null | undefined;
+    readonly credit_amount?: number | undefined;
     readonly proxy_id: string;
     readonly type: ApiProfileProxyActionType;
   };
@@ -347,9 +347,9 @@ export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
 export interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
   readonly classification: ApiProfileClassification;
-  pfp_url?: string;
-  banner_1?: string;
-  banner_2?: string;
+  pfp_url?: string | undefined;
+  banner_1?: string | undefined;
+  banner_2?: string | undefined;
 }
 
 export interface WalletConsolidationState {

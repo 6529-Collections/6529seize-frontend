@@ -9,7 +9,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;
-  readonly isCompetitionDrop?: boolean;
+  readonly isCompetitionDrop?: boolean | undefined;
 }
 
 export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
@@ -21,7 +21,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
 
   const onDropContentClick = (drop: ExtendedDrop) => {
     const waveMeta = (drop.wave as unknown as {
-      chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+      chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
     })?.chat;
     const href = getWaveRoute({
       waveId: drop.wave.id,

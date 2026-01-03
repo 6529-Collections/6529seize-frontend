@@ -41,7 +41,7 @@ import NextGenTokenList from "../NextGenTokenList";
 
 interface Props {
   collection: NextGenCollection;
-  show_view_all?: boolean;
+  show_view_all?: boolean | undefined;
 }
 
 export default function NextGenCollectionArt(props: Readonly<Props>) {

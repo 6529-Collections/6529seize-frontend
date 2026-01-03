@@ -28,7 +28,7 @@ export enum ManifoldPhase {
 interface PhaseBoundary {
   hour: number;
   minute: number;
-  dayOffset?: number;
+  dayOffset?: number | undefined;
 }
 
 interface PhaseDefinition {
@@ -110,7 +110,7 @@ export interface ManifoldClaim {
   endDate: number;
   status: ManifoldClaimStatus;
   phase: ManifoldPhase;
-  memePhase?: MemePhase;
+  memePhase?: MemePhase | undefined;
   isFetching: boolean;
   isFinalized: boolean;
   isSoldOut: boolean;

@@ -142,10 +142,10 @@ export function useUserPageXtdhGrantedListFilters(): UserPageXtdhGrantedListFilt
 
   const updateQueryParams = useCallback(
     (updates: {
-      readonly tab?: GrantedTab;
-      readonly subFilter?: GrantedActiveFilter;
-      readonly sort?: GrantedSortField;
-      readonly direction?: SortDirection;
+      readonly tab?: GrantedTab | undefined;
+      readonly subFilter?: GrantedActiveFilter | undefined;
+      readonly sort?: GrantedSortField | undefined;
+      readonly direction?: SortDirection | undefined;
     }) => {
       if (!pathname) return;
       const params = new URLSearchParams(searchParams?.toString() ?? "");

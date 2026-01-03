@@ -141,7 +141,7 @@ function handleNetworkError(
 }
 
 Sentry.init({
-  dsn: sentryEnabled ? dsn : undefined,
+  ...(dsn && { dsn }),
   enabled: sentryEnabled,
 
   integrations: [Sentry.replayIntegration()],

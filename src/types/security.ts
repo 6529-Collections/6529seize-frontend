@@ -28,20 +28,20 @@ export interface SecurityEventContext {
   readonly source: string;
   
   /** Whether an address validation passed (for validation events) */
-  readonly valid?: boolean;
+  readonly valid?: boolean | undefined;
   
   /** Length of address string (for format analysis, not identification) */
-  readonly addressLength?: number;
+  readonly addressLength?: number | undefined;
   
   /** Format type of address (for diagnostic purposes) */
-  readonly addressFormat?: 'hex_prefixed' | 'other';
+  readonly addressFormat?: 'hex_prefixed' | 'other' | undefined;
   
   /** Name of the wallet connector (e.g., 'MetaMask', 'WalletConnect') */
-  readonly walletName?: string;
+  readonly walletName?: string | undefined;
   
   /** Error type or code for diagnostic purposes */
-  readonly errorCode?: string;
+  readonly errorCode?: string | undefined;
   
   /** Browser user agent string for compatibility analysis */
-  readonly userAgent?: string;
+  readonly userAgent?: string | undefined;
 }

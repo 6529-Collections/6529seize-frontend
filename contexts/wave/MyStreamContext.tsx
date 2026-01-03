@@ -49,10 +49,10 @@ interface ActiveWaveContextData {
   readonly set: (
     waveId: string | null,
     options?: {
-      isDirectMessage?: boolean;
-      replace?: boolean;
-      serialNo?: number | string | null;
-      divider?: number | null;
+      isDirectMessage?: boolean | undefined;
+      replace?: boolean | undefined;
+      serialNo?: number | string | null | undefined;
+      divider?: number | null | undefined;
     }
   ) => void;
 }

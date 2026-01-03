@@ -5,7 +5,7 @@ import { EMPTY_METADATA_MAP } from "../utils";
 import type { TokenWindowEntry } from "../types";
 
 type TokenMetadataWindowParams = Readonly<{
-  contractAddress?: `0x${string}`;
+  contractAddress?: `0x${string}` | undefined;
   chain: SupportedChain | null;
   windowTokens: TokenWindowEntry[];
 }>;

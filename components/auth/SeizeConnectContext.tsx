@@ -146,12 +146,12 @@ const createWalletError = (
 // Address validation utilities
 interface AddressValidationResult {
   isValid: boolean;
-  normalizedAddress?: string;
+  normalizedAddress?: string | undefined;
   errorContext?: {
     length: number;
     format: "hex_prefixed" | "other";
     debugAddress: string;
-  };
+  } | undefined;
 }
 
 const isCapacitorPlatform = (): boolean => {

@@ -10,10 +10,7 @@ import Drop, {
 } from "@/components/waves/drops/Drop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
-import {
-  DropSize,
-  ExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 export default function FeedItemDropCreated({
   item,
@@ -28,7 +25,7 @@ export default function FeedItemDropCreated({
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();

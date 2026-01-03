@@ -10,7 +10,7 @@ const DESKTOP_MAX_WIDTH = 1324;
 
 interface WebLayoutProps {
   readonly children: ReactNode;
-  readonly isSmall?: boolean;
+  readonly isSmall?: boolean | undefined;
 }
 
 const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {

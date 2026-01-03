@@ -6,7 +6,7 @@ import MediaThumbnail from "./MediaThumbnail";
 interface ContentDisplayProps {
   readonly content: ProcessedContent;
   readonly onReplyClick: (serialNo: number) => void;
-  readonly serialNo?: number;
+  readonly serialNo?: number | undefined;
 }
 
 /**

@@ -35,7 +35,7 @@ export function CreateAppWalletModal(
       address: string;
       mnemonic: string;
       privateKey: string;
-    };
+    } | undefined;
     onHide: (isSuccess?: boolean) => void;
   }>
 ) {

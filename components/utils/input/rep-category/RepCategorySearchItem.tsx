@@ -6,7 +6,7 @@ export default function RepCategorySearchItem({
 }: {
   readonly category: string;
   readonly selected: string | null;
-  readonly disabledCategories?: string[];
+  readonly disabledCategories?: string[] | undefined;
   readonly onSelect: (newV: string) => void;
 }) {
   const isSelected = selected === category;

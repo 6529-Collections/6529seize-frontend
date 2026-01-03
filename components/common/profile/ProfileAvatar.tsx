@@ -10,9 +10,9 @@ export enum ProfileBadgeSize {
 
 interface ProfileAvatarProps {
   readonly pfpUrl: string | null | undefined;
-  readonly size?: ProfileBadgeSize;
-  readonly alt?: string;
-  readonly fallbackContent?: ReactNode;
+  readonly size?: ProfileBadgeSize | undefined;
+  readonly alt?: string | undefined;
+  readonly fallbackContent?: ReactNode | undefined;
 }
 
 const AVATAR_SIZE_CLASSES: Record<ProfileBadgeSize, string> = {

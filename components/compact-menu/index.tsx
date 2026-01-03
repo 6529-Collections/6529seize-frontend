@@ -122,11 +122,11 @@ function CompactMenuContent({
       >
         <MenuItems
           ref={menuItemsRef}
-          anchor={anchor}
+          {...(anchor && { anchor })}
           className={clsx(
             unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
             menuWidthClassName,
-            menuClassName,
+            menuClassName
           )}
         >
           <CompactMenuItemsPanel

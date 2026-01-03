@@ -4,7 +4,7 @@ import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveLeaderboardGalleryItemVotesProps {
   readonly drop: ExtendedDrop;
-  readonly variant?: 'default' | 'subtle';
+  readonly variant?: 'default' | 'subtle' | undefined;
 }
 
 export default function WaveLeaderboardGalleryItemVotes({

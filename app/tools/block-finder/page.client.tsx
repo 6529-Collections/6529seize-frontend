@@ -17,7 +17,7 @@ interface PredictBlockNumberRequestApiModel {
 interface PredictBlockNumbersRequestApiModel {
   minTimestamp: number;
   maxTimestamp: number;
-  blockNumberIncludes?: number[];
+  blockNumberIncludes?: number[] | undefined;
 }
 
 export interface PredictBlockNumbersResponseApiModel {
@@ -68,9 +68,9 @@ export default function BlockFinderClient() {
   const [blockNumberIncludes, setBlockNumberIncludes] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [predictedBlocks, setPredictedBlocks] = useState<{
-    timestamp?: number;
-    blocknumber?: number;
-    blocks?: PredictBlockNumbersResponseApiModel[];
+    timestamp?: number | undefined;
+    blocknumber?: number | undefined;
+    blocks?: PredictBlockNumbersResponseApiModel[] | undefined;
   } | null>(null);
 
   useEffect(() => {

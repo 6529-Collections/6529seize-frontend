@@ -13,10 +13,10 @@ function sanitizeString(value: unknown): string | null {
 }
 
 export interface ProfileIdentifiable {
-  readonly handle?: string | null;
-  readonly query?: string | null;
-  readonly primary_wallet?: string | null;
-  readonly consolidation_key?: string | null;
+  readonly handle?: string | null | undefined;
+  readonly query?: string | null | undefined;
+  readonly primary_wallet?: string | null | undefined;
+  readonly consolidation_key?: string | null | undefined;
 }
 
 export function deriveProfileIdentifier(profile: ProfileIdentifiable | null): string | null {

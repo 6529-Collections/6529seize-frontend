@@ -1,7 +1,7 @@
 export interface GroupsRequestParams {
   readonly group_name: string | null;
   readonly author_identity: string | null;
-  readonly created_at_less_than?: string | null;
+  readonly created_at_less_than?: string | null | undefined;
 }
 
 export enum GroupDescriptionType {

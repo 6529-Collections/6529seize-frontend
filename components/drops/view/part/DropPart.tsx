@@ -32,16 +32,18 @@ interface DropPartProps {
   readonly partMedias: DropPartPropsMedia[];
   readonly createdAt: number;
   readonly wave: DropPartPropsWave | null;
-  readonly size?: DropPartSize;
-  readonly totalPartsCount?: number;
-  readonly currentPartCount?: number;
+  readonly size?: DropPartSize | undefined;
+  readonly totalPartsCount?: number | undefined;
+  readonly currentPartCount?: number | undefined;
   readonly smallMenuIsShown: boolean;
-  readonly components?: {
-    readonly authorFollow?: ReactNode;
-  };
-  readonly onNextPart?: () => void;
-  readonly onPrevPart?: () => void;
-  readonly onContentClick?: () => void;
+  readonly components?:
+    | {
+        readonly authorFollow?: ReactNode | undefined;
+      }
+    | undefined;
+  readonly onNextPart?: (() => void) | undefined;
+  readonly onPrevPart?: (() => void) | undefined;
+  readonly onContentClick?: (() => void) | undefined;
 }
 
 const DropPart = memo(
@@ -71,16 +73,16 @@ const DropPart = memo(
     const containerRef = useRef<HTMLDivElement>(null);
 
     const onQuoteClick = (drop: ApiDrop) => {
-      router.push(
-        `/waves?wave=${drop.wave.id}&serialNo=${drop.serial_no}`,
-        { scroll: false }
-      );
+      router.push(`/waves?wave=${drop.wave.id}&serialNo=${drop.serial_no}`, {
+        scroll: false,
+      });
     };
 
     return (
       <div
         ref={containerRef}
-        className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
+        className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+      >
         <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full tw-relative">
           <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
             <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
@@ -92,7 +94,8 @@ const DropPart = memo(
                   size === DropPartSize.SMALL && !wave?.id
                     ? "tw-h-8"
                     : "tw-h-10"
-                }`}>
+                }`}
+              >
                 <DropAuthor profile={profile} timestamp={createdAt} size={size}>
                   {components?.authorFollow}
                 </DropAuthor>
@@ -101,7 +104,8 @@ const DropPart = memo(
                     <Link
                       onClick={(e) => e.stopPropagation()}
                       href={`/waves?wave=${wave.id}`}
-                      className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out">
+                      className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                    >
                       <span>{wave.name}</span>
                     </Link>
                   )}
@@ -111,7 +115,8 @@ const DropPart = memo(
                         className="tw-h-4 tw-w-4 tw-mr-2 tw-text-[#FEDF89]"
                         viewBox="0 0 24 24"
                         fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
                         <path
                           d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
                           stroke="currentColor"
@@ -145,7 +150,8 @@ const DropPart = memo(
               }}
               className={`${onContentClick && "tw-cursor-pointer"} tw-h-full ${
                 size === DropPartSize.SMALL ? "tw-ml-[40px]" : "tw-ml-[54px]"
-              }`}>
+              }`}
+            >
               {dropTitle && (
                 <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-0">
                   {dropTitle}
@@ -163,7 +169,8 @@ const DropPart = memo(
                     onClick={(e) => {
                       e.stopPropagation();
                       onPrevPart();
-                    }}>
+                    }}
+                  >
                     <svg
                       className="tw-size-5 tw-flex-shrink-0"
                       xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +178,8 @@ const DropPart = memo(
                       aria-hidden="true"
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
-                      stroke="currentColor">
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -199,7 +207,8 @@ const DropPart = memo(
                     onClick={(e) => {
                       e.stopPropagation();
                       onNextPart();
-                    }}>
+                    }}
+                  >
                     <svg
                       className="tw-size-5 tw-flex-shrink-0"
                       xmlns="http://www.w3.org/2000/svg"
@@ -207,7 +216,8 @@ const DropPart = memo(
                       aria-hidden="true"
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
-                      stroke="currentColor">
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"

@@ -4,7 +4,7 @@ interface TimePickerProps {
   readonly hours: number;
   readonly minutes: number;
   readonly onTimeChange: (hours: number, minutes: number) => void;
-  readonly minTime?: { hours: number; minutes: number } | null;
+  readonly minTime?: { hours: number; minutes: number } | null | undefined;
 }
 
 interface TimeOption {

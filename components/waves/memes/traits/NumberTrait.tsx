@@ -8,10 +8,10 @@ import { TraitWrapper } from "./TraitWrapper";
 interface NumberTraitProps {
   readonly label: string;
   readonly field: keyof TraitsData;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
-  readonly readOnly?: boolean;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
+  readonly readOnly?: boolean | undefined;
   readonly min: number;
   readonly max: number;
   readonly traits: TraitsData;
@@ -197,7 +197,8 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         readOnly={readOnly}
         className={className}
         error={error}
-        isFieldFilled={isFieldFilled}>
+        isFieldFilled={isFieldFilled}
+      >
         <input
           ref={inputRef}
           type="number"

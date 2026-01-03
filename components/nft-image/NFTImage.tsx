@@ -9,13 +9,13 @@ import { getMediaType } from "./utils/media-type";
 interface Props {
   nft: BaseNFT | NFTLite;
   animation: boolean;
-  showThumbnail?: boolean;
-  showOriginal?: boolean;
+  showThumbnail?: boolean | undefined;
+  showOriginal?: boolean | undefined;
   height: 300 | 650 | "full";
-  targetProfile?: string;
+  targetProfile?: string | undefined;
   showBalance: boolean;
-  transparentBG?: boolean;
-  id?: string;
+  transparentBG?: boolean | undefined;
+  id?: string | undefined;
 }
 
 export default function NFTImage(props: Readonly<Props>) {

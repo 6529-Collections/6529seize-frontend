@@ -13,7 +13,7 @@ export default function CollectionPageShell({
   children,
 }: {
   readonly collection: NextGenCollection;
-  readonly withNav?: boolean;
+  readonly withNav?: boolean | undefined;
   readonly children: ReactNode;
 }) {
   useShallowRedirect(collection.name);

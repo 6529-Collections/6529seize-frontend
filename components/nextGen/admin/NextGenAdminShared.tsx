@@ -26,7 +26,7 @@ export function NextGenAdminHeadingRow(
 export function NextGenCollectionIdFormGroup(
   props: Readonly<{
     collection_id: string;
-    collection_ids?: string[];
+    collection_ids?: string[] | undefined;
     onChange: (id: string) => void;
   }>
 ) {

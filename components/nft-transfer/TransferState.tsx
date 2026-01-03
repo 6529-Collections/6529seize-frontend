@@ -14,10 +14,10 @@ export type TransferItem = {
   contract: string;
   contractType: ContractType;
   tokenId: number;
-  title?: string;
-  thumbUrl?: string;
-  max?: number;
-  qty?: number;
+  title?: string | undefined;
+  thumbUrl?: string | undefined;
+  max?: number | undefined;
+  qty?: number | undefined;
 };
 
 type TransferContextShape = {
@@ -205,9 +205,9 @@ export function useTransfer() {
 }
 
 export function buildTransferKey(args: {
-  collection?: string | null;
-  tokenId?: string | number | null;
-  fallback?: string;
+  collection?: string | null | undefined;
+  tokenId?: string | number | null | undefined;
+  fallback?: string | undefined;
 }) {
   const col = args.collection ?? "col";
   const id =

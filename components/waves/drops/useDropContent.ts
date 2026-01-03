@@ -31,7 +31,7 @@ export const useDropContent = (
     data: drop,
     isFetching,
     error,
-  } = useQuery<ApiDrop>({
+  } = useQuery<ApiDrop | undefined>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
       await commonApiFetch<ApiDrop>({

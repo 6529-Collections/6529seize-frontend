@@ -11,19 +11,19 @@ export interface ValidationOptions {
    * - 'touched': Only validate fields the user has interacted with
    * - 'dirty': Only validate fields that have been modified from initial values
    */
-  mode?: "all" | "touched" | "dirty";
+  mode?: "all" | "touched" | "dirty" | undefined;
 
   /**
    * Set of fields that have been touched by user interaction
    * Used with mode: 'touched'
    */
-  touchedFields?: Set<keyof TraitsData>;
+  touchedFields?: Set<keyof TraitsData> | undefined;
 
   /**
    * Map of initial values to determine dirty state
    * Used with mode: 'dirty'
    */
-  initialValues?: Partial<TraitsData>;
+  initialValues?: Partial<TraitsData> | undefined;
 }
 
 /**
@@ -59,7 +59,7 @@ export interface ValidationResult {
   /**
    * Reference to the first invalid field for focusing
    */
-  firstInvalidField?: keyof TraitsData;
+  firstInvalidField?: keyof TraitsData | undefined;
 
   /**
    * Count of validation errors

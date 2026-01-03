@@ -43,7 +43,7 @@ export default function DropListItemRateGiveSubmit({
   readonly drop: ApiDrop;
   readonly canVote: boolean;
   readonly onSuccessfulRateChange: () => void;
-  readonly isMobile?: boolean;
+  readonly isMobile?: boolean | undefined;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);

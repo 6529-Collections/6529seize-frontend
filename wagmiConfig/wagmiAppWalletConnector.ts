@@ -161,9 +161,9 @@ export function createAppWalletConnector(
     },
 
     async connect<withCapabilities extends boolean = false>(opts?: {
-      chainId?: number;
-      isReconnecting?: boolean;
-      withCapabilities?: boolean | withCapabilities;
+      chainId?: number | undefined;
+      isReconnecting?: boolean | undefined;
+      withCapabilities?: boolean | withCapabilities | undefined;
     }): Promise<{
       accounts: withCapabilities extends true
         ? readonly {

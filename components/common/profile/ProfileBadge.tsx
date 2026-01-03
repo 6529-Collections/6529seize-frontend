@@ -6,18 +6,18 @@ import ProfileLevel, { ProfileLevelSize } from "./ProfileLevel";
 import { CICType } from "@/entities/IProfile";
 
 interface ProfileBadgeProps {
-  readonly handle?: string | null;
-  readonly href?: string;
-  readonly pfpUrl?: string | null;
+  readonly handle?: string | null | undefined;
+  readonly href?: string | undefined;
+  readonly pfpUrl?: string | null | undefined;
   readonly level: number;
   readonly cicType: CICType;
-  readonly size?: ProfileBadgeSize;
-  readonly className?: string;
-  readonly children?: ReactNode;
-  readonly avatarAlt?: string;
-  readonly avatarFallback?: ReactNode;
-  readonly highlightSearchParam?: string;
-  readonly asLink?: boolean;
+  readonly size?: ProfileBadgeSize | undefined;
+  readonly className?: string | undefined;
+  readonly children?: ReactNode | undefined;
+  readonly avatarAlt?: string | undefined;
+  readonly avatarFallback?: ReactNode | undefined;
+  readonly highlightSearchParam?: string | undefined;
+  readonly asLink?: boolean | undefined;
 }
 
 const LEVEL_SIZE_MAP: Record<ProfileBadgeSize, ProfileLevelSize> = {

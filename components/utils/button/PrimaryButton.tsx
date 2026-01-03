@@ -12,8 +12,8 @@ export default function PrimaryButton({
   readonly disabled: boolean;
   readonly onClicked: () => void;
   readonly children: React.ReactNode;
-  readonly padding?: string;
-  readonly title?: string;
+  readonly padding?: string | undefined;
+  readonly title?: string | undefined;
 }) {
   return (
     <button

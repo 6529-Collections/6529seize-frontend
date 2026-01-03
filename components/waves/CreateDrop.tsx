@@ -31,7 +31,7 @@ interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
-  readonly onAllDropsAdded?: () => void;
+  readonly onAllDropsAdded?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
@@ -174,7 +174,11 @@ export default function CreateDrop({
 
   useProgressiveDebounce(
     () => {
-      if (queueRef.current.length === 0 && !isProcessingRef.current && hasQueueChanged) {
+      if (
+        queueRef.current.length === 0 &&
+        !isProcessingRef.current &&
+        hasQueueChanged
+      ) {
         waitAndInvalidateDrops();
         onAllDropsAdded?.();
       }
@@ -217,13 +221,13 @@ export default function CreateDrop({
       // Add to queue
       queueRef.current.push(dropRequest);
       setHasQueueChanged(true);
-      
+
       // Process immediately - avoids state update timing issues
       processNextDrop();
-      
+
       // Trigger UI updates
       onDropAddedToQueue();
-      
+
       // Explicitly blur any focused input to close keyboard
       (document.activeElement as HTMLElement)?.blur();
     },
@@ -269,7 +273,8 @@ export default function CreateDrop({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: ANIMATION_DURATION }}>
+            transition={{ duration: ANIMATION_DURATION }}
+          >
             <CreateDropStormParts
               parts={drop?.parts ?? []}
               mentionedUsers={drop?.mentioned_users ?? []}

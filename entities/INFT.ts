@@ -2,7 +2,7 @@ export interface BaseNFT {
   id: number;
   contract: string;
   created_at: Date;
-  mint_date?: Date;
+  mint_date?: Date | undefined;
   mint_price: number;
   supply: number;
   name: string;
@@ -16,16 +16,16 @@ export interface BaseNFT {
   thumbnail: string;
   scaled: string;
   image: string;
-  compressed_animation?: string;
+  compressed_animation?: string | undefined;
   animation: string;
-  metadata?: any;
+  metadata?: any | undefined;
   market_cap: number;
   floor_price: number;
   total_volume_last_24_hours: number;
   total_volume_last_7_days: number;
   total_volume_last_1_month: number;
   total_volume: number;
-  has_distribution?: boolean;
+  has_distribution?: boolean | undefined;
   highest_offer: number;
 }
 
@@ -169,8 +169,8 @@ export interface Rememe {
 export interface IAttribute {
   trait_type: string;
   value: string;
-  display_type?: string;
-  max_value?: number;
-  trait_count?: number;
-  order?: number;
+  display_type?: string | undefined;
+  max_value?: number | undefined;
+  trait_count?: number | undefined;
+  order?: number | undefined;
 }

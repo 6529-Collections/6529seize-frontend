@@ -9,9 +9,9 @@ export const getNotificationErrorDetails = (
   error: unknown
 ): NotificationErrorDetails => {
   const status =
-    (error as { status?: number })?.status ??
-    (error as { response?: { status?: number } })?.response?.status ??
-    (error as { cause?: { status?: number } })?.cause?.status;
+    (error as { status?: number | undefined })?.status ??
+    (error as { response?: { status?: number | undefined } | undefined })?.response?.status ??
+    (error as { cause?: { status?: number | undefined } | undefined })?.cause?.status;
 
   if (error instanceof Error) {
     const message = error.message?.trim() || DEFAULT_ERROR_MESSAGE;

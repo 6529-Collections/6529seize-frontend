@@ -23,8 +23,8 @@ export type {
 
 export interface UserPageXtdhGrantedListProps {
   readonly grantor: string;
-  readonly pageSize?: number;
-  readonly isSelf?: boolean;
+  readonly pageSize?: number | undefined;
+  readonly isSelf?: boolean | undefined;
 }
 
 export default function UserPageXtdhGrantedList({

@@ -14,9 +14,9 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 
 type ErrorComponentProps = {
-  readonly stackTrace?: string | null;
-  readonly digest?: string | null;
-  readonly onReset?: () => void;
+  readonly stackTrace?: string | null | undefined;
+  readonly digest?: string | null | undefined;
+  readonly onReset?: (() => void) | undefined;
 };
 
 export default function ErrorComponent({
@@ -86,7 +86,8 @@ export default function ErrorComponent({
           Looks like something went wrong. Try again or reach out to us at{" "}
           <a
             className="tw-text-white tw-underline"
-            href="mailto:support@6529.io">
+            href="mailto:support@6529.io"
+          >
             support@6529.io
           </a>
           .
@@ -96,7 +97,8 @@ export default function ErrorComponent({
           <button
             type="button"
             onClick={onReset}
-            className="tw-px-6 tw-py-2 tw-bg-white tw-text-black tw-rounded-lg tw-font-semibold hover:tw-bg-gray-200 tw-transition-colors">
+            className="tw-px-6 tw-py-2 tw-bg-white tw-text-black tw-rounded-lg tw-font-semibold hover:tw-bg-gray-200 tw-transition-colors"
+          >
             Try Again
           </button>
         )}
@@ -108,13 +110,15 @@ export default function ErrorComponent({
                 isStacktraceExpanded
                   ? "tw-justify-between"
                   : "tw-justify-center"
-              }`}>
+              }`}
+            >
               <button
                 type="button"
                 onClick={() => setIsStacktraceExpanded((prev) => !prev)}
                 className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-bg-transparent tw-border-none tw-text-left tw-font-semibold"
                 aria-expanded={isStacktraceExpanded}
-                aria-controls={stacktraceContentId}>
+                aria-controls={stacktraceContentId}
+              >
                 <span>
                   {isStacktraceExpanded ? "Hide Stacktrace" : "Show Stacktrace"}
                 </span>
@@ -129,7 +133,8 @@ export default function ErrorComponent({
                   type="button"
                   onClick={onCopy}
                   disabled={isCopied}
-                  className="tw-px-4 tw-py-1 tw-bg-white tw-text-black tw-rounded-lg tw-font-medium hover:tw-bg-gray-200 tw-transition-colors">
+                  className="tw-px-4 tw-py-1 tw-bg-white tw-text-black tw-rounded-lg tw-font-medium hover:tw-bg-gray-200 tw-transition-colors"
+                >
                   {isCopied ? "Copied" : "Copy"}{" "}
                   {!isCopied && <FontAwesomeIcon icon={faCopy} />}
                 </button>
@@ -143,7 +148,8 @@ export default function ErrorComponent({
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="tw-w-full tw-overflow-hidden">
+                  className="tw-w-full tw-overflow-hidden"
+                >
                   <div className="tw-bg-black tw-rounded-lg tw-p-4 tw-text-xs tw-leading-5 tw-overflow-auto tw-text-gray-200 tw-font-mono tw-whitespace-pre-wrap tw-max-h-[16rem] tw-break-all tw-w-full tw-max-w-full">
                     {digest && <div className="tw-mb-2">Digest: {digest}</div>}
                     {resolvedStackTrace}

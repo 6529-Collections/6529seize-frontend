@@ -1,7 +1,7 @@
 import React from "react";
 
 interface WaveWinnersSmallEmptyProps {
-  readonly isMultiDecision?: boolean;
+  readonly isMultiDecision?: boolean | undefined;
 }
 
 export const WaveWinnersSmallEmpty: React.FC<WaveWinnersSmallEmptyProps> = ({

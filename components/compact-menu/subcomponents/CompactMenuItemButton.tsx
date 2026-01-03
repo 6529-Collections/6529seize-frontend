@@ -12,11 +12,11 @@ interface CompactMenuItemButtonProps {
   readonly isActive: boolean;
   readonly menuActive: boolean;
   readonly onClick: () => void;
-  readonly itemClassName?: string;
-  readonly activeItemClassName?: string;
-  readonly inactiveItemClassName?: string;
-  readonly focusItemClassName?: string;
-  readonly unstyledItems?: boolean;
+  readonly itemClassName?: string | undefined;
+  readonly activeItemClassName?: string | undefined;
+  readonly inactiveItemClassName?: string | undefined;
+  readonly focusItemClassName?: string | undefined;
+  readonly unstyledItems?: boolean | undefined;
 }
 
 export function CompactMenuItemButton({

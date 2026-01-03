@@ -6,7 +6,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveDecisionsProps {
   readonly wave: ApiWave;
-  readonly enabled?: boolean;
+  readonly enabled?: boolean | undefined;
 }
 
 export function useWaveDecisions({ wave, enabled = true }: UseWaveDecisionsProps) {

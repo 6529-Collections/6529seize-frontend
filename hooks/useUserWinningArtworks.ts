@@ -6,7 +6,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseUserWinningArtworksProps {
   readonly user: ApiProfileMin;
-  readonly enabled?: boolean;
+  readonly enabled?: boolean | undefined;
 }
 
 const fetchDrop = async (dropId: string): Promise<ApiDrop> => {

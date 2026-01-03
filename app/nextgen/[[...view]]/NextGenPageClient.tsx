@@ -19,7 +19,7 @@ export default function NextGenPageClient({
   initialView,
 }: {
   readonly featuredCollection: NextGenCollection;
-  readonly initialView?: NextgenView;
+  readonly initialView?: NextgenView | undefined;
 }) {
   const { setTitle } = useTitle();
 

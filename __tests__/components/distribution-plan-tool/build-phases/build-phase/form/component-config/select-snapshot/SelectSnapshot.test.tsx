@@ -10,7 +10,7 @@ jest.mock('@/components/distribution-plan-tool/common/DistributionPlanSecondaryT
 jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/select-snapshot/SelectSnapshotDropdown', () => ({ __esModule: true, default: ({ setSelectedSnapshot }: any) => <button onClick={() => setSelectedSnapshot({ id: 's1', name: 'Snap', poolType: Pool.TOKEN_POOL, walletsCount: 2 })} data-testid="dropdown">dropdown</button> }));
 jest.mock('@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentConfigNextBtn', () => ({ __esModule: true, default: ({ onNext, children }: any) => <button onClick={onNext} data-testid="next">next{children}</button> }));
 
-const Wrapper: React.FC<{children: React.ReactNode, ctx?: any}> = ({ children, ctx }) => (
+const Wrapper: React.FC<{children: React.ReactNode, ctx?: any | undefined}> = ({ children, ctx }) => (
   <DistributionPlanToolContext.Provider value={{ setToasts: jest.fn(), ...(ctx || {}) } as any}>{children}</DistributionPlanToolContext.Provider>
 );
 

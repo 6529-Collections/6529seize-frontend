@@ -1,6 +1,6 @@
 import React from "react";
 
-const ChatBubbleIcon = ({ className }: { readonly className?: string }) => (
+const ChatBubbleIcon = ({ className }: { readonly className?: string | undefined }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"

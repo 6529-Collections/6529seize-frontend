@@ -33,8 +33,8 @@ export const getSeizeBaseOrigin = (): string | null => {
 
 export interface SeizeQuoteLinkInfo {
   waveId: string;
-  serialNo?: string;
-  dropId?: string;
+  serialNo?: string | undefined;
+  dropId?: string | undefined;
 }
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -185,7 +185,7 @@ export const ensureStableSeizeLink = (
 
     let globalWindow: Window | undefined;
     if (typeof globalThis === "object" && "window" in globalThis) {
-      globalWindow = (globalThis as typeof globalThis & { window?: Window }).window;
+      globalWindow = (globalThis as typeof globalThis & { window?: Window | undefined }).window;
     }
 
     const resolvedCurrentHref = currentHref ?? globalWindow?.location?.href;

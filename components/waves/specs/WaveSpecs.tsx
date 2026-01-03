@@ -6,7 +6,7 @@ import WaveRating from "./WaveRating";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
-  readonly useRing?: boolean;
+  readonly useRing?: boolean | undefined;
 }
 
 export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {

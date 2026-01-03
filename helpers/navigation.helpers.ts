@@ -24,8 +24,8 @@ export const getWaveRoute = ({
   isApp: _isApp,
 }: {
   waveId: string;
-  serialNo?: string | number;
-  extraParams?: Record<string, string | undefined>;
+  serialNo?: string | number | undefined;
+  extraParams?: Record<string, string | undefined> | undefined;
   isDirectMessage: boolean;
   isApp: boolean;
 }): string => {

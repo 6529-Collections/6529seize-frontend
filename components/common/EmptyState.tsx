@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 interface EmptyStateProps {
   readonly title: string;
   readonly message: ReactNode;
-  readonly children?: ReactNode;
+  readonly children?: ReactNode | undefined;
 }
 
 export function EmptyState({ title, message, children }: Readonly<EmptyStateProps>) {

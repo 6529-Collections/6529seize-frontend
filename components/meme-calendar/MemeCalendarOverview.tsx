@@ -35,7 +35,7 @@ import {
  */
 interface MemeCalendarOverviewProps {
   readonly displayTz: DisplayTz;
-  readonly showViewAll?: boolean;
+  readonly showViewAll?: boolean | undefined;
 }
 
 export default function MemeCalendarOverview({
@@ -72,7 +72,7 @@ export default function MemeCalendarOverview({
  */
 interface MemeCalendarOverviewNextMintProps {
   readonly displayTz: DisplayTz;
-  readonly id?: number;
+  readonly id?: number | undefined;
 }
 
 const TopControls = memo(function TopControls(props: {

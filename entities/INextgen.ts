@@ -40,18 +40,18 @@ export interface NextGenToken {
   mint_price: number;
   metadata_url: string;
   image_url: string;
-  icon_url?: string;
+  icon_url?: string | undefined;
   thumbnail_url: string;
   animation_url: string;
   generator?: {
     html: string;
     metadata: string;
     image: string;
-  };
+  } | undefined;
   owner: string;
   pending: boolean;
   burnt: boolean;
-  burnt_date?: string;
+  burnt_date?: string | undefined;
   hodl_rate: number;
   mint_data: string;
   rarity_score: number;
@@ -181,8 +181,8 @@ export interface NextgenAllowlist {
   spots: number;
   info: string;
   keccak: string;
-  wallet_display?: string;
-  phase?: string;
+  wallet_display?: string | undefined;
+  phase?: string | undefined;
 }
 
 export interface NextgenTraitSet {

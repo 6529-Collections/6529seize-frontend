@@ -6,7 +6,7 @@ describe("useIsVersionStale", () => {
     (global as any).fetch = jest.fn();
   });
 
-  function TestComponent({ interval }: { interval?: number }) {
+  function TestComponent({ interval }: { interval?: number | undefined }) {
     const { useIsVersionStale } = require("@/hooks/useIsVersionStale");
     const stale = useIsVersionStale(interval);
     return <span>{stale ? "stale" : "fresh"}</span>;
