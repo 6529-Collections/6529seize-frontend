@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { ProfileActivityLogProxyActionStateChanged } from "@/entities/IProfile";
+import type { ProfileActivityLogProxyActionStateChanged } from "@/entities/IProfile";
 import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
 import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";

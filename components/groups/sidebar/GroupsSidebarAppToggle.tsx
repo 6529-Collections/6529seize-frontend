@@ -1,6 +1,6 @@
 import { selectActiveGroupId } from "@/store/groupSlice";
 import { FunnelIcon } from "@heroicons/react/24/outline";
-import { FC } from "react";
+import type { FC } from "react";
 import { useSelector } from "react-redux";
 interface Props {
   readonly open: boolean;

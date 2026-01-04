@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   getSeizeBaseOrigin,
   parseSeizeQueryLink,

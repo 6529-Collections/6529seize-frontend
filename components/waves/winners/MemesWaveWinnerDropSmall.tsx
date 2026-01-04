@@ -1,8 +1,8 @@
 "use client";
 
 import { memo, useCallback } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -12,7 +12,7 @@ import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import WaveDropTime from "../drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
+import type { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveChatConfig {

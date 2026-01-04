@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserSettingsPrimaryWalletItem from '@/components/user/settings/UserSettingsPrimaryWalletItem';
-import { ApiWallet } from '@/generated/models/ApiWallet';
+import type { ApiWallet } from '@/generated/models/ApiWallet';
 
 const wallet: ApiWallet = {
   wallet: '0xabc',

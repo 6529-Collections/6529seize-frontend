@@ -4,7 +4,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import CreateWave from "./CreateWave";
 
 interface CreateWaveModalProps {

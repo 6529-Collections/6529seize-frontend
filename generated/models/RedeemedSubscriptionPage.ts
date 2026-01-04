@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { RedeemedSubscription } from '../models/RedeemedSubscription';
+import type { RedeemedSubscription } from '../models/RedeemedSubscription';
 import { HttpFile } from '../http/http';
 
 export class RedeemedSubscriptionPage {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiFeedItemType } from '../models/ApiFeedItemType';
+import type { ApiFeedItemType } from '../models/ApiFeedItemType';
 import { HttpFile } from '../http/http';
 
 export class ApiFeedItem {

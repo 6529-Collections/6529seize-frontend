@@ -1,4 +1,4 @@
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 
 export const getSelectableIdentity = (
   profile: CommunityMemberMinimal | null | undefined

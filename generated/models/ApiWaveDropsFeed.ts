@@ -11,9 +11,9 @@
  * Do not edit the class manually.
  */
 
-import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
-import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
-import { ApiWaveMin } from '../models/ApiWaveMin';
+import type { ApiDropTraceItem } from '../models/ApiDropTraceItem';
+import type { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
+import type { ApiWaveMin } from '../models/ApiWaveMin';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveDropsFeed {

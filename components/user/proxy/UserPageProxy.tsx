@@ -3,8 +3,8 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";

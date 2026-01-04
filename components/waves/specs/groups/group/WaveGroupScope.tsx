@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ApiGroup } from "@/generated/models/ApiGroup";
+import type { ApiGroup } from "@/generated/models/ApiGroup";
 import {
   getScaledImageUri,
   ImageScale,

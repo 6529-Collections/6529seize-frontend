@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
+import type { ApiXTdhGrant } from '../models/ApiXTdhGrant';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrantsPage {

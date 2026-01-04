@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import { SingleWaveDropTraits } from "@/components/waves/drop/SingleWaveDropTraits";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 
 // Mock dependencies
 jest.mock("@/hooks/isMobileDevice", () => ({

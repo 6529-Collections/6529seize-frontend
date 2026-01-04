@@ -5,7 +5,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 import * as ReviewDistributionPlanTableSubscriptionModule from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 const { download, isSubscriptionsAdmin, SubscriptionConfirm } =
   ReviewDistributionPlanTableSubscriptionModule;
 

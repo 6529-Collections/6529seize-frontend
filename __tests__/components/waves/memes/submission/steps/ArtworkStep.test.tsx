@@ -1,7 +1,8 @@
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ArtworkStep from '@/components/waves/memes/submission/steps/ArtworkStep';
-import { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
+import type { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
 import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
 
 jest.mock('@/components/waves/memes/MemesArtSubmissionFile', () => () => <div data-testid="file" />);

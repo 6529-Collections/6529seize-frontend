@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiXTdhStats } from "@/generated/models/ApiXTdhStats";
+import type { ApiXTdhStats } from "@/generated/models/ApiXTdhStats";
 import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseIdentityTdhStatsOptions {

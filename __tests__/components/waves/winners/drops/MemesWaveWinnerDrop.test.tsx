@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemesWaveWinnersDrop } from '@/components/waves/winners/drops/MemesWaveWinnerDrop';
-import { ApiWave } from '@/generated/models/ApiWave';
-import { ApiWaveDecisionWinner } from '@/generated/models/ApiWaveDecisionWinner';
+import type { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWaveDecisionWinner } from '@/generated/models/ApiWaveDecisionWinner';
 
 jest.mock('@/helpers/waves/drop.helpers', () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: 'ext' })),

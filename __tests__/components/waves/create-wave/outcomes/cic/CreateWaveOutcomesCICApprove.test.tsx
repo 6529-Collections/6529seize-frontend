@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesCICApprove from '@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCICApprove';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '@/types/waves.types';
+import type { CreateWaveDatesConfig } from '@/types/waves.types';
 
 // Mock child components
 jest.mock('@/components/waves/create-wave/outcomes/CreateWaveOutcomeWarning', () => ({

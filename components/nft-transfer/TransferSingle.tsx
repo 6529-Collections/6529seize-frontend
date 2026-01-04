@@ -1,7 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { CollectedCollectionType } from "@/entities/IProfile";
+import type { CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import styles from "@/styles/Home.module.scss";

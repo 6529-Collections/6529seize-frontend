@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { FC } from "react";
+import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 
 interface LightDropProps {
   readonly drop: ApiLightDrop;

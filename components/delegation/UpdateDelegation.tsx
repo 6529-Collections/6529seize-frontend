@@ -9,9 +9,10 @@ import styles from "./Delegation.module.scss";
 import { DELEGATION_ABI } from "@/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import type {
+  DelegationCollection} from "./delegation-constants";
 import {
   CONSOLIDATION_USE_CASE,
-  DelegationCollection,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";

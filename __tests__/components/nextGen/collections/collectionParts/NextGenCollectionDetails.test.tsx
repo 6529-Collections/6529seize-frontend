@@ -1,5 +1,5 @@
 import NextGenCollectionDetails from "@/components/nextGen/collections/collectionParts/NextGenCollectionDetails";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/enums";
 import { render, screen } from "@testing-library/react";
 

@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useLayout } from "../layout/LayoutContext";
 import { useWave } from "@/hooks/useWave";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";

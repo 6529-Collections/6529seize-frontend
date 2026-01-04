@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, RefObject, useEffect, useState } from "react";
+import type { ReactNode, RefObject} from "react";
+import { useEffect, useState } from "react";
 import { createBreakpoint } from "react-use";
 import SeasonsGridDropdownDesktopWrapper from "./SeasonsGridDropdownDesktopWrapper";
 import SeasonsGridDropdownMobileWrapper from "./SeasonsGridDropdownMobileWrapper";

@@ -4,7 +4,7 @@ import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {

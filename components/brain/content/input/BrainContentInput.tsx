@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { useWaveData } from "@/hooks/useWaveData";
 import useCapacitor from "@/hooks/useCapacitor";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";

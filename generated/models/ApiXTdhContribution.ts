@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
-import { ApiXTdhGrant } from '../models/ApiXTdhGrant';
+import type { ApiProfileMin } from '../models/ApiProfileMin';
+import type { ApiXTdhGrant } from '../models/ApiXTdhGrant';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhContribution {

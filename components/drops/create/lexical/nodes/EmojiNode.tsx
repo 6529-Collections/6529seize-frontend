@@ -1,10 +1,11 @@
-import {
-  DecoratorNode,
+import type {
   SerializedLexicalNode,
   Spread,
   LexicalEditor,
   EditorConfig,
-  NodeKey,
+  NodeKey} from "lexical";
+import {
+  DecoratorNode
 } from "lexical";
 import { createElement, type JSX } from "react";
 import { useEmoji } from "@/contexts/EmojiContext";

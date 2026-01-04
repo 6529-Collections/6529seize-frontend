@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useContext, useEffect, useState } from "react";
-import { ApiProfileRaterCicState } from "@/entities/IProfile";
+import type { FormEvent} from "react";
+import { useContext, useEffect, useState } from "react";
+import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import {
@@ -19,7 +20,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 

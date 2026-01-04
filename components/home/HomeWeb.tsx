@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, type ReactNode } from "react";
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import HomePageTabs from "./HomePageTabs";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import ConnectWallet from "../common/ConnectWallet";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import type { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
 import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";

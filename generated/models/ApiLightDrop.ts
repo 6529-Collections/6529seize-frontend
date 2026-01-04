@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import { ApiDropMedia } from '../models/ApiDropMedia';
-import { ApiDropType } from '../models/ApiDropType';
+import type { ApiDropMedia } from '../models/ApiDropMedia';
+import type { ApiDropType } from '../models/ApiDropType';
 import { HttpFile } from '../http/http';
 
 export class ApiLightDrop {

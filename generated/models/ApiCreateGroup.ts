@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
+import type { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateGroup {

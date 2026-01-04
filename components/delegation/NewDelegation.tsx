@@ -8,9 +8,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
+import type {
+  DelegationCollection} from "./delegation-constants";
 import {
-  DELEGATION_USE_CASES,
-  DelegationCollection,
+  DELEGATION_USE_CASES
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import styles from "./Delegation.module.scss";

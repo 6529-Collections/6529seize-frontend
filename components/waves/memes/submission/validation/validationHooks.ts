@@ -2,9 +2,9 @@
 
 import { publicEnv } from "@/config/env";
 import { useCallback, useMemo, useState } from "react";
-import { TraitsData } from "../types/TraitsData";
+import type { TraitsData } from "../types/TraitsData";
 import { validateTraitsData } from "./traitsValidation";
-import { ValidationOptions, ValidationResult } from "./validationTypes";
+import type { ValidationOptions, ValidationResult } from "./validationTypes";
 
 /**
  * Custom hook for form validation

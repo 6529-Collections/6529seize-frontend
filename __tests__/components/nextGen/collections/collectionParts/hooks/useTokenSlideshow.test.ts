@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTokenSlideshow } from '@/components/nextGen/collections/collectionParts/hooks/useTokenSlideshow';
-import { NextGenToken } from '@/entities/INextgen';
+import type { NextGenToken } from '@/entities/INextgen';
 import { commonApiFetch } from '@/services/api/common-api';
 
 // Mock the API service

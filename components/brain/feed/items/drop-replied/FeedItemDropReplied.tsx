@@ -3,12 +3,14 @@
 import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { IFeedItemDropReplied } from "@/types/feed.types";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { IFeedItemDropReplied } from "@/types/feed.types";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import type {
+  DropInteractionParams} from "@/components/waves/drops/Drop";
 import Drop, {
-  DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
 

@@ -1,21 +1,22 @@
-import { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
-import { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
-import { ApiIntRange } from "@/generated/models/ApiIntRange";
+import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
+import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import type { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
+import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
+  TimeWeightedVotingSettings} from "@/types/waves.types";
+import {
   CreateWaveOutcomeType,
-  CreateWaveStep,
-  TimeWeightedVotingSettings,
+  CreateWaveStep
 } from "@/types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
-import { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
+import type { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
 
 /**
  * Converts time-weighted voting settings to milliseconds, ensuring it's within acceptable range

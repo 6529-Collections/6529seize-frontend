@@ -16,7 +16,7 @@ import { ApiCreateNewProfileProxyAllocateRepAction } from '../models/ApiCreateNe
 import { ApiCreateNewProfileProxyCreateWaveAction } from '../models/ApiCreateNewProfileProxyCreateWaveAction';
 import { ApiCreateNewProfileProxyCreateWaveParticipationDropAction } from '../models/ApiCreateNewProfileProxyCreateWaveParticipationDropAction';
 import { ApiCreateNewProfileProxyReadWaveAction } from '../models/ApiCreateNewProfileProxyReadWaveAction';
-import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import type { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { HttpFile } from '../http/http';
 
 export class AddActionToProxyRequest {

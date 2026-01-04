@@ -9,7 +9,7 @@ import {
   MissingActiveProfileError, 
   InvalidRoleStateError 
 } from '@/errors/authentication';
-import { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
+import type { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
 
 // Mock logger to prevent console output during tests
 jest.mock('@/utils/error-sanitizer', () => ({

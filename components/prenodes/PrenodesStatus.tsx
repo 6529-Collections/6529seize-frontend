@@ -13,7 +13,7 @@ import {
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import type { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { getDateDisplay } from "@/helpers/Helpers";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useAuth } from "../auth/Auth";

@@ -1,9 +1,9 @@
 "use client";
 
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import type { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
 import HomeApp from "./HomeApp";
 import HomeWeb from "./HomeWeb";
 

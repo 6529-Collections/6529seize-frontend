@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import NextGenCollectionArtPage from '@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage';
-import { NextGenCollection } from '@/entities/INextgen';
+import type { NextGenCollection } from '@/entities/INextgen';
 
 let headerProps: any = null;
 let artProps: any = null;

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiGroup } from '../models/ApiGroup';
+import type { ApiGroup } from '../models/ApiGroup';
 import { HttpFile } from '../http/http';
 
 /**

@@ -14,7 +14,8 @@ import {
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { LabExtendedData, LabNFT, VolumeType } from "@/entities/INFT";
+import type { LabExtendedData, LabNFT} from "@/entities/INFT";
+import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/enums";
 import {

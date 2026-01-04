@@ -2,9 +2,10 @@
 
 import { Tooltip } from "react-tooltip";
 import React, { useMemo } from "react";
+import type {
+  DropPrivileges} from "@/hooks/useDropPriviledges";
 import {
   ChatRestriction,
-  DropPrivileges,
   SubmissionRestriction,
 } from "@/hooks/useDropPriviledges";
 

@@ -10,8 +10,8 @@ import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { DBResponse } from "@/entities/IDBResponse";
-import {
+import type { DBResponse } from "@/entities/IDBResponse";
+import type {
   NextGenCollection,
   NextgenTraitSet,
   TraitValues,

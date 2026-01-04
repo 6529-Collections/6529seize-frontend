@@ -1,10 +1,10 @@
 "use client";
 
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { INotificationPriorityAlert } from "@/types/feed.types";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { INotificationPriorityAlert } from "@/types/feed.types";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";

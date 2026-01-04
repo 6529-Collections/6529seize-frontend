@@ -1,4 +1,4 @@
-import {
+import type {
   ActivityLogParams,
   ActivityLogParamsConverted,
 } from "@/components/profile-activity/ProfileActivityLogs";

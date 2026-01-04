@@ -1,11 +1,12 @@
 "use client";
 
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
-import CreateDropContent, {
+import type {
   CreateDropContentHandles,
 } from "../utils/CreateDropContent";
-import { EditorState } from "lexical";
-import {
+import CreateDropContent from "../utils/CreateDropContent";
+import type { EditorState } from "lexical";
+import type {
   CreateDropConfig,
   MentionedUser,
   ReferencedNft,
@@ -16,8 +17,8 @@ import { CreateDropType, CreateDropViewType } from "../types";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;

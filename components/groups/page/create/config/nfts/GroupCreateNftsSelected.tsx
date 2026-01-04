@@ -1,4 +1,4 @@
-import {
+import type {
   ApiGroupOwnsNft,
   ApiGroupOwnsNftNameEnum,
 } from "@/generated/models/ApiGroupOwnsNft";

@@ -1,7 +1,7 @@
 "use client";
 
 import WavePicture from "@/components/waves/WavePicture";
-import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";

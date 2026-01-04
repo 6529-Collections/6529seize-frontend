@@ -1,6 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { WaveWinnersLoading } from "./WaveWinnersLoading";
 import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
 import { WaveWinnersPodiumContent } from "./WaveWinnersPodiumContent";

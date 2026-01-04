@@ -4,7 +4,7 @@ import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default async function GradientPage({
   params,

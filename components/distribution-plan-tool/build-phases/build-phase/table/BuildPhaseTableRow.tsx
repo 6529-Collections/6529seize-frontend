@@ -1,4 +1,4 @@
-import { BuildPhasesPhaseComponent } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import type { BuildPhasesPhaseComponent } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanDeleteOperationButton from "@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 

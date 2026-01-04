@@ -17,9 +17,9 @@ import remarkGfm from "remark-gfm";
 import type { PluggableList } from "unified";
 
 import { useEmoji } from "@/contexts/EmojiContext";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 import {

@@ -2,8 +2,8 @@
 
 import { useContext, useState } from "react";
 import CommonInput from "@/components/utils/input/CommonInput";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
@@ -12,7 +12,7 @@ import { commonApiPut } from "@/services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ApiUpdateProxyActionRequest } from "@/generated/models/ApiUpdateProxyActionRequest";
+import type { ApiUpdateProxyActionRequest } from "@/generated/models/ApiUpdateProxyActionRequest";
 
 export default function ProfileProxyCreditEdit({
   profileProxy,

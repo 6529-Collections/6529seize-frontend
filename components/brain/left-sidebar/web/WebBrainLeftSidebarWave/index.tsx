@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { MinimalWave } from '@/contexts/wave/hooks/useEnhancedWavesList';
+import type { MinimalWave } from '@/contexts/wave/hooks/useEnhancedWavesList';
 import { usePrefetchWaveData } from '@/hooks/usePrefetchWaveData';
 import useDeviceInfo from '@/hooks/useDeviceInfo';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';

@@ -2,12 +2,13 @@
 
 import React from "react";
 import { createPortal } from "react-dom";
+import type {
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
 import {
-  ExtendedDrop,
   convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import Link from "next/link";
 import UserCICAndLevel, {
@@ -29,7 +30,7 @@ import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;

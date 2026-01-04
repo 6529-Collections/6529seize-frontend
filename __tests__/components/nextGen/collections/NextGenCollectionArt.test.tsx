@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import NextGenCollectionArt from "@/components/nextGen/collections/collectionParts/NextGenCollectionArt";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({

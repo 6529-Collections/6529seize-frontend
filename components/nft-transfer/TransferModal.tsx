@@ -7,9 +7,9 @@ import { useTransfer } from "./TransferState";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getUserProfile } from "@/helpers/server.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -24,10 +24,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import {
+import type {
   Address,
+  PublicClient} from "viem";
+import {
   isAddress,
-  PublicClient,
   type WriteContractParameters,
 } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";

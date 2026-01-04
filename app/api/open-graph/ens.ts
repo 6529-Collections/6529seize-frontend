@@ -1,12 +1,13 @@
-import {
+import type {
   EnsAddressPreview,
   EnsContenthash,
   EnsLinks,
   EnsNamePreview,
   EnsOwnership,
   EnsPreview,
-  TEXT_RECORD_KEYS,
-  TextRecordKey,
+  TextRecordKey} from "@/components/waves/ens/types";
+import {
+  TEXT_RECORD_KEYS
 } from "@/components/waves/ens/types";
 import type { EnsTarget } from "@/lib/ens/detect";
 import { stripHtmlTags } from "@/lib/text/html";

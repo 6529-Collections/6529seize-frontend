@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 

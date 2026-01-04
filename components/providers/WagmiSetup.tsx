@@ -2,8 +2,9 @@
 
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { AppKitValidationError } from "@/src/errors/appkit-initialization";
+import type {
+  AppKitInitializationConfig} from "@/utils/appkit-initialization.utils";
 import {
-  AppKitInitializationConfig,
   initializeAppKit,
 } from "@/utils/appkit-initialization.utils";
 import {
@@ -15,10 +16,11 @@ import {
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { Capacitor } from "@capacitor/core";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WagmiProvider } from "wagmi";
-import { AppWallet, useAppWallets } from "../app-wallets/AppWalletsContext";
+import type { AppWallet} from "../app-wallets/AppWalletsContext";
+import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import { useAuth } from "../auth/Auth";
 import { AppKitAdapterManager } from "./AppKitAdapterManager";
 

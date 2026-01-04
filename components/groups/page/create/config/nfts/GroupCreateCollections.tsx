@@ -1,5 +1,6 @@
-import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
-import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { ApiGroupOwnsNft} from "@/generated/models/ApiGroupOwnsNft";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 
 const COLLECTIONS = [
   { name: "Gradients", enum: ApiGroupOwnsNftNameEnum.Gradients },

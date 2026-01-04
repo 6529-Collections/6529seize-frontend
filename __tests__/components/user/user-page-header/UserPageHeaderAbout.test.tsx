@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageHeaderAbout from '@/components/user/user-page-header/about/UserPageHeaderAbout';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/user/user-page-header/about/UserPageHeaderAboutStatement', () => (props: any) => (
   <div data-testid="statement">{JSON.stringify(props)}</div>

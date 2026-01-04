@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import UserPageIdentityStatementsConsolidatedAddresses from '@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses';
 import { AuthContext } from '@/components/auth/Auth';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem', () => (props: any) => <li data-testid="item">{props.address.wallet}</li>);
 jest.mock('@/components/user/utils/icons/EthereumIcon', () => () => <div />);

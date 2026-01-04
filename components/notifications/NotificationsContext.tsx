@@ -1,12 +1,14 @@
 "use client";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
-import { Device, DeviceInfo } from "@capacitor/device";
+import type { DeviceInfo } from "@capacitor/device";
+import { Device } from "@capacitor/device";
+import type {
+  PushNotificationSchema} from "@capacitor/push-notifications";
 import {
-  PushNotifications,
-  PushNotificationSchema,
+  PushNotifications
 } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";

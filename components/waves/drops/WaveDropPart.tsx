@@ -1,9 +1,9 @@
 "use client";
 
 import React, { memo, useState, useEffect, useRef } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartDrop from "./WaveDropPartDrop";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartProps {

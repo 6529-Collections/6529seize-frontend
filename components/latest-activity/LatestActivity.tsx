@@ -1,8 +1,8 @@
 "use client";
 
-import { NFT } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
-import { Transaction } from "@/entities/ITransaction";
+import type { NFT } from "@/entities/INFT";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useActivityData } from "@/hooks/useActivityData";
 import { useActivityFilters } from "@/hooks/useActivityFilters";

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import GroupCreateIdentitiesSelect from '@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect';
-import { CommunityMemberMinimal } from '@/entities/IProfile';
+import type { CommunityMemberMinimal } from '@/entities/IProfile';
 
 let searchProps: any;
 jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch', () => (props: any) => { searchProps = props; return <button data-testid="search" onClick={() => props.onIdentitySelect({ wallet: 'w1', handle: 'h1' })} />; });

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import CommonDropdown from '@/components/utils/select/dropdown/CommonDropdown';
-import { CommonSelectItem } from '@/components/utils/select/CommonSelect';
+import type { CommonSelectItem } from '@/components/utils/select/CommonSelect';
 import { SortDirection } from '@/entities/ISort';
 
 // Mock dependencies

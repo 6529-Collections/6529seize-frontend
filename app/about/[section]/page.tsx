@@ -2,7 +2,7 @@ import styles from "@/styles/Home.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 
 import { notFound, redirect } from "next/navigation";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { AboutSection } from "@/enums";
 import About from "@/components/about/About";
 import { capitalizeEveryWord } from "@/helpers/Helpers";

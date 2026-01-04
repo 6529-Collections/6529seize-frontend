@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo, useEffect, type JSX } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ObjectSerializer";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,

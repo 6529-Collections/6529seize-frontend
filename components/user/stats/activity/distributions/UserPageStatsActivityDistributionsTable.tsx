@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Distribution } from "@/entities/IDistribution";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { Distribution } from "@/entities/IDistribution";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   areEqualAddresses,
   capitalizeEveryWord,

@@ -6,7 +6,7 @@ import {
   MEME_FOCUS,
 } from "@/components/the-memes/MemeShared";
 import DistributionComponent from "@/components/distribution/Distribution";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default function MemeDistributionPage() {
   return (

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
+import type { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveSubscriptionActions {

@@ -1,5 +1,5 @@
 import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
-import { SidebarSection } from "@/components/navigation/navTypes";
+import type { SidebarSection } from "@/components/navigation/navTypes";
 import { AboutSection } from "@/enums";
 import {
   DocumentTextIcon,

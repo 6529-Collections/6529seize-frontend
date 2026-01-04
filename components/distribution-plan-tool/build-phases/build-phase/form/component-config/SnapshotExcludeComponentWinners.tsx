@@ -1,14 +1,16 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import AllowlistToolSelectMenuMultiple, {
+import type {
   AllowlistToolSelectMenuMultipleOption,
 } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import AllowlistToolSelectMenuMultiple from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import type {
+  PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
 import {
-  PhaseConfigStep,
-  PhaseGroupSnapshotConfig,
+  PhaseConfigStep
 } from "../BuildPhaseFormConfigModal";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";

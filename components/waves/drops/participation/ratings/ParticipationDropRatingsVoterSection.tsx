@@ -2,7 +2,7 @@ import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { RatingsSectionProps, RatingsData } from "./types";
+import type { RatingsSectionProps, RatingsData } from "./types";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface ParticipationDropRatingsVoterSectionProps

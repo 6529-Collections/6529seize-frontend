@@ -6,14 +6,15 @@ import { goerli, mainnet, sepolia } from "viem/chains";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import type {
+  NextGenContract} from "./nextgen_contracts";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
-  NEXTGEN_MINTER,
-  NextGenContract,
+  NEXTGEN_MINTER
 } from "./nextgen_contracts";
-import {
+import type {
   AdditionalData,
   Info,
   LibraryScript,
@@ -21,8 +22,9 @@ import {
   PhaseTimes,
   ProofResponse,
   ProofResponseBurn,
-  Status,
-  TokensPerAddress,
+  TokensPerAddress} from "./nextgen_entities";
+import {
+  Status
 } from "./nextgen_entities";
 
 interface Crumb {

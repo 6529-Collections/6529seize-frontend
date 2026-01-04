@@ -3,11 +3,13 @@
 import { AuthContext } from "@/components/auth/Auth";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { publicEnv } from "@/config/env";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { FC} from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";

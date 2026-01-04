@@ -5,9 +5,10 @@ import {
     DistributionPlanToolContext,
     DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
+import type {
+    DistributionPlanStepDescription} from "./DistributionPlanToolSidebar";
 import {
-    DISTRIBUTION_PLAN_STEPS,
-    DistributionPlanStepDescription,
+    DISTRIBUTION_PLAN_STEPS
 } from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepDone({

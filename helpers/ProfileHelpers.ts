@@ -1,6 +1,6 @@
 import { ProfileConnectedStatus } from "@/entities/IProfile";
-import { ProfileMinWithoutSubs } from "./ProfileTypes";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ProfileMinWithoutSubs } from "./ProfileTypes";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 export const getProfileConnectedStatus = ({
   profile,
   isProxy,

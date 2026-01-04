@@ -3,7 +3,8 @@
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FocusTrap } from "focus-trap-react";
-import { FormEvent, useId, useRef, useState } from "react";
+import type { FormEvent} from "react";
+import { useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import IdentitySearch, {

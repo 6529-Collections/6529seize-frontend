@@ -1,6 +1,6 @@
 import UserPageCollectedCardsNoCards from "@/components/user/collected/cards/UserPageCollectedCardsNoCards";
 import { CollectedCollectionType, CollectionSeized } from "@/entities/IProfile";
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { render, screen } from "@testing-library/react";
 
 describe("UserPageCollectedCardsNoCards messages", () => {

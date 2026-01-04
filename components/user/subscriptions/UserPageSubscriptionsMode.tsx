@@ -4,7 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";

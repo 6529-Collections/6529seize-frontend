@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 

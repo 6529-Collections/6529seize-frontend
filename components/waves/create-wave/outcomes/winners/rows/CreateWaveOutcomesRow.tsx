@@ -1,6 +1,7 @@
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type {
+  CreateWaveOutcomeConfig} from "@/types/waves.types";
 import {
-  CreateWaveOutcomeConfig,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
 import CreateWaveOutcomesRowCIC from "./cic/CreateWaveOutcomesRowCIC";

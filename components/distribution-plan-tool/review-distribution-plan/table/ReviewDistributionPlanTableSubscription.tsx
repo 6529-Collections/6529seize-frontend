@@ -1,11 +1,11 @@
 "use client";
 
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT, SUBSCRIPTIONS_ADMIN_WALLETS } from "@/constants";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   areEqualAddresses,
   extractAllNumbers,
@@ -15,8 +15,9 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useContext, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
+import type {
+  ReviewDistributionPlanTableItem} from "./ReviewDistributionPlanTable";
 import {
-  ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTableItemType,
 } from "./ReviewDistributionPlanTable";
 

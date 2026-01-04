@@ -1,13 +1,14 @@
 "use client";
 
-import { ReactNode, memo, useRef } from "react";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ReactNode} from "react";
+import { memo, useRef } from "react";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import DropPfp from "@/components/drops/create/utils/DropPfp";
 import DropAuthor from "@/components/drops/create/utils/author/DropAuthor";
 import Link from "next/link";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useRouter } from "next/navigation";
 import DropPartContent from "./DropPartContent";
 import { DropPartSize } from "./DropPart.types";

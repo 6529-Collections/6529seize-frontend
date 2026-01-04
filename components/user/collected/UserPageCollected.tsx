@@ -5,17 +5,18 @@ import TransferPanel from "@/components/nft-transfer/TransferPanel";
 import { useTransfer } from "@/components/nft-transfer/TransferState";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
+import type {
+  CollectedCard} from "@/entities/IProfile";
 import {
-  CollectedCard,
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { Page } from "@/helpers/Types";
+import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";

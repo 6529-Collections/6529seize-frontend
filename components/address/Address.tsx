@@ -1,6 +1,6 @@
 "use client";
 
-import { IProfileConsolidation } from "@/entities/IProfile";
+import type { IProfileConsolidation } from "@/entities/IProfile";
 import { numberWithCommas, parseEmojis } from "@/helpers/Helpers";
 import { faArrowsTurnRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

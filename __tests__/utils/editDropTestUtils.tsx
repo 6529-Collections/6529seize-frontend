@@ -1,5 +1,5 @@
-import { ApiDrop } from '@/generated/models/ApiDrop';
-import { ApiUpdateDropRequest } from '@/generated/models/ApiUpdateDropRequest';
+import type { ApiDrop } from '@/generated/models/ApiDrop';
+import type { ApiUpdateDropRequest } from '@/generated/models/ApiUpdateDropRequest';
 import { ApiDropType } from '@/generated/models/ApiDropType';
 
 export const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({

@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ReactNode, useCallback } from "react";
+import type { ReactNode} from "react";
+import { useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";

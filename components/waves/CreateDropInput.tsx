@@ -1,7 +1,8 @@
 "use client";
 
+import type {
+  InitialConfigType} from "@lexical/react/LexicalComposer";
 import {
-  InitialConfigType,
   LexicalComposer,
 } from "@lexical/react/LexicalComposer";
 import {
@@ -11,8 +12,9 @@ import {
   useEffect,
   useRef,
 } from "react";
+import type {
+  EditorState} from "lexical";
 import {
-  EditorState,
   RootNode,
   COMMAND_PRIORITY_CRITICAL,
   createCommand,
@@ -34,22 +36,25 @@ import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import { MentionedUser, ReferencedNft } from "@/entities/IDrop";
+import type { MentionedUser, ReferencedNft } from "@/entities/IDrop";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { MentionNode } from "../drops/create/lexical/nodes/MentionNode";
 import { HashtagNode } from "../drops/create/lexical/nodes/HashtagNode";
 import { ImageNode } from "../drops/create/lexical/nodes/ImageNode";
 import ExampleTheme from "../drops/create/lexical/ExampleTheme";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import ClearEditorPlugin, {
+import type {
   ClearEditorPluginHandles,
 } from "../drops/create/lexical/plugins/ClearEditorPlugin";
-import NewMentionsPlugin, {
+import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
+import type {
   NewMentionsPluginHandles,
 } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
-import NewHashtagsPlugin, {
+import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type {
   NewHastagsPluginHandles,
 } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";

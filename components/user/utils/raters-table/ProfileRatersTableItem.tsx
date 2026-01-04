@@ -1,6 +1,6 @@
 "use client";
 
-import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import { ProfileRatersTableType } from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas, getTimeAgo } from "@/helpers/Helpers";

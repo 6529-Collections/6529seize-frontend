@@ -13,9 +13,9 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { escapeRegExp } from "@/lib/text/regex";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { GroupsRequestParams } from "@/entities/IGroup";
-import { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { GroupsRequestParams } from "@/entities/IGroup";
+import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,

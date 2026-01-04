@@ -2,8 +2,8 @@
 
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import { CicStatement } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";

@@ -1,4 +1,4 @@
-import { INotificationIdentitySubscribed } from "@/types/feed.types";
+import type { INotificationIdentitySubscribed } from "@/types/feed.types";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";

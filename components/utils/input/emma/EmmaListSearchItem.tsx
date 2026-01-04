@@ -1,4 +1,4 @@
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 
 export default function EmmaListSearchItem({
   item,

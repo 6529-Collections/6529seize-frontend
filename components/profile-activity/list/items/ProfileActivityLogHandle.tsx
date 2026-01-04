@@ -1,4 +1,4 @@
-import { ProfileActivityLogHandleEdit } from "@/entities/IProfile";
+import type { ProfileActivityLogHandleEdit } from "@/entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 export default function ProfileActivityLogHandle({

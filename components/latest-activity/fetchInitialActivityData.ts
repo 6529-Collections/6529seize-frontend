@@ -1,7 +1,7 @@
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFT } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
-import { Transaction } from "@/entities/ITransaction";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT } from "@/entities/INFT";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
 import { commonApiFetch } from "@/services/api/common-api";
 
 export interface InitialActivityData {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiOwnerBalance } from '../models/ApiOwnerBalance';
+import type { ApiOwnerBalance } from '../models/ApiOwnerBalance';
 import { HttpFile } from '../http/http';
 
 export class ApiOwnerBalancePage {

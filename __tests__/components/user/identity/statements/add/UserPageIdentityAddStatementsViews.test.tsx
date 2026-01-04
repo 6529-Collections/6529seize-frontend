@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import UserPageIdentityAddStatementsViews from '@/components/user/identity/statements/add/UserPageIdentityAddStatementsViews';
 import { STATEMENT_ADD_VIEW } from '@/components/user/identity/statements/add/UserPageIdentityAddStatements';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/user/identity/statements/add/UserPageIdentityAddStatementsSelect', () => () => <div data-testid="select" />);
 jest.mock('@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact', () => () => <div data-testid="contact" />);

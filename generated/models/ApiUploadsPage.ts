@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiUploadItem } from '../models/ApiUploadItem';
+import type { ApiUploadItem } from '../models/ApiUploadItem';
 import { HttpFile } from '../http/http';
 
 export class ApiUploadsPage {

@@ -2,12 +2,13 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
+import type {
+  WaveGroupsConfig} from "@/types/waves.types";
 import {
-  CreateWaveGroupConfigType,
-  WaveGroupsConfig,
+  CreateWaveGroupConfigType
 } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
 jest.mock("@tanstack/react-query", () => {
   const actual = jest.requireActual("@tanstack/react-query");

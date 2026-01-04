@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import { ApiArtistsNft } from '../models/ApiArtistsNft';
-import { ApiArtistsWork } from '../models/ApiArtistsWork';
+import type { ApiArtistsNft } from '../models/ApiArtistsNft';
+import type { ApiArtistsWork } from '../models/ApiArtistsWork';
 import { HttpFile } from '../http/http';
 
 export class ApiArtistItem {

@@ -1,6 +1,6 @@
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import FeaturedNFTDetailsColumn from "@/components/home/FeaturedNFTDetailsColumn";
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";
 import { render, screen } from "@testing-library/react";

@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import { ApiIntRange } from '../models/ApiIntRange';
-import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
-import { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
-import { ApiWaveScope } from '../models/ApiWaveScope';
+import type { ApiIntRange } from '../models/ApiIntRange';
+import type { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
+import type { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
+import type { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveParticipationConfig {

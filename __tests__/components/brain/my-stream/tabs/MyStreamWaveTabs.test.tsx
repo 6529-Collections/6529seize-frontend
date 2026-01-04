@@ -22,7 +22,7 @@ jest.mock('@/components/brain/my-stream/tabs/MyStreamWaveTabsDefault', () => ({
 }));
 
 import { MyStreamWaveTabs } from '@/components/brain/my-stream/tabs/MyStreamWaveTabs';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 const { useWave } = require('@/hooks/useWave');
 
 describe('MyStreamWaveTabs', () => {

@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
-import { WaveDataStoreUpdater } from "./types";
+import type { WaveDataStoreUpdater } from "./types";
 import {
   fetchLightWaveMessages,
   fetchWaveMessages,
   fetchAroundSerialNoWaveMessages,
 } from "../utils/wave-messages-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 
 // Tracks which waves are currently loading next page

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import ReviewDistributionPlanTableRow from "./ReviewDistributionPlanTableRow";
-import {
+import type {
   ReviewDistributionPlanTableItem,
   ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable";

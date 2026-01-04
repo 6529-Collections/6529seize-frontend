@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropVoteState } from "./types";
 import { Time } from "@/helpers/time";

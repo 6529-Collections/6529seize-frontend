@@ -5,7 +5,7 @@ import {
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
 } from "@/helpers/waves/create-wave.helpers";
-import {
+import type {
   CreateWaveConfig,
   CreateWaveStep,
 } from "@/types/waves.types";

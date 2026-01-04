@@ -2,7 +2,7 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import { MentionTypeaheadOption } from "./MentionsPlugin";
+import type { MentionTypeaheadOption } from "./MentionsPlugin";
 
 export default function MentionsTypeaheadMenuItem({
   index,

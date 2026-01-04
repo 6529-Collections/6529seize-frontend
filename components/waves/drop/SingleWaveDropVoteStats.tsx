@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 

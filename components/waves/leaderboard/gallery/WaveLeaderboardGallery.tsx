@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useContext, useMemo } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { WaveLeaderboardGalleryItem } from "./WaveLeaderboardGalleryItem";
+import type {
+  WaveDropsLeaderboardSort} from "@/hooks/useWaveDropsLeaderboard";
 import {
-  WaveDropsLeaderboardSort,
   useWaveDropsLeaderboard,
 } from "@/hooks/useWaveDropsLeaderboard";
 

@@ -14,8 +14,8 @@ import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
 import { useTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFT, Rememe } from "@/entities/INFT";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,

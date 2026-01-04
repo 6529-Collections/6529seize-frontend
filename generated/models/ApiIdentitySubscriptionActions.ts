@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
+import type { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
 import { HttpFile } from '../http/http';
 
 export class ApiIdentitySubscriptionActions {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
 import Picker from "@emoji-mart/react";
@@ -10,9 +10,10 @@ import { useEmoji } from "@/contexts/EmojiContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { commonApiPost } from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
-import { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
+import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
   findReactionIndex,
   cloneReactionEntries,

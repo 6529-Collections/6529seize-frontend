@@ -9,8 +9,8 @@ import { printMemeReferences } from "@/components/rememes/RememePage";
 import { RememeSort } from "@/components/rememes/Rememes";
 import { publicEnv } from "@/config/env";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
-import { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,

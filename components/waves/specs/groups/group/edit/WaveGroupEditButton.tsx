@@ -1,8 +1,9 @@
 "use client";
 
+import type {
+  ReactNode} from "react";
 import {
   forwardRef,
-  ReactNode,
   useCallback,
   useImperativeHandle,
   useState,
@@ -11,7 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import WaveGroupEdit from "./WaveGroupEdit";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../WaveGroup.types";
+import type { WaveGroupType } from "../WaveGroup.types";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 
 export type WaveGroupEditButtonHandle = {

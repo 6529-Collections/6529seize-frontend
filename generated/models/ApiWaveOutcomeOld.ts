@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
-import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
-import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
-import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
+import type { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
+import type { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
+import type { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
+import type { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveOutcomeOld {

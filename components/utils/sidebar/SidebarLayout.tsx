@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import type { ReactNode} from "react";
+import { useEffect, useRef, useState } from "react";
 import GroupsSidebarToggle from "@/components/groups/sidebar/GroupsSidebarToggle";
 import GroupsSidebar from "@/components/groups/sidebar/GroupsSidebar";
 import { createBreakpoint } from "react-use";

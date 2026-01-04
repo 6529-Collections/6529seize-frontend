@@ -1,13 +1,14 @@
-import {
+import type {
   AnchorHTMLAttributes,
   ClassAttributes,
-  ImgHTMLAttributes,
+  ImgHTMLAttributes} from "react";
+import {
   type ReactElement,
 } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { ExtraProps } from "react-markdown";
+import type { ExtraProps } from "react-markdown";
 
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";

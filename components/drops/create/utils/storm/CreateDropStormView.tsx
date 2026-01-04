@@ -1,9 +1,9 @@
 import { memo } from "react";
-import { CreateDropConfig } from "@/entities/IDrop";
+import type { CreateDropConfig } from "@/entities/IDrop";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import CreateDropStormViewPart from "./CreateDropStormViewPart";
 import { Time } from "@/helpers/time";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 interface CreateDropStormViewWaveProps {
   readonly name: string;

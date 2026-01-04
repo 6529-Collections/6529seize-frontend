@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import LatestDropSection from '@/components/home/LatestDropSection';
-import { NFTWithMemesExtendedData } from '@/entities/INFT';
+import type { NFTWithMemesExtendedData } from '@/entities/INFT';
 
 jest.mock('@/components/home/FeaturedNFTImageColumn', () => ({
   __esModule: true,

@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
-import { ApiIntRange } from '../models/ApiIntRange';
-import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
-import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
+import type { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
+import type { ApiIntRange } from '../models/ApiIntRange';
+import type { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
+import type { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveVotingConfig {

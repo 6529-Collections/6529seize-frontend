@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
+import type { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { HttpFile } from '../http/http';
 
 export class ApiCompleteMultipartUploadRequest {

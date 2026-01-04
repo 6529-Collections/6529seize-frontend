@@ -3,7 +3,9 @@ import type { ReactNode } from "react";
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 
-import type { SupportedChain } from "@/types/nft";
+import type { ContractOverview, SupportedChain } from "@/types/nft";
+import { ApiXTdhGrantToken } from "@/generated/models/ApiXTdhGrantToken";
+import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 
 export interface UserPageXtdhGrantListItemProps {
   readonly grant: ApiXTdhGrant;
@@ -33,7 +35,7 @@ export interface GrantTokensDisclosureState {
   readonly showInitialLoading: boolean;
   readonly showInitialError: boolean;
   readonly tokenRanges: TokenRange[];
-  readonly tokens: readonly import("@/generated/models/ApiXTdhGrantToken").ApiXTdhGrantToken[];
+  readonly tokens: ApiXTdhGrantToken[];
   readonly errorMessage: string;
   readonly onRetry: () => void;
   readonly contractAddress: `0x${string}` | null;
@@ -44,10 +46,10 @@ export interface GrantTokensDisclosureState {
 }
 
 export interface GrantItemContentProps {
-  readonly contract: import("@/types/nft").ContractOverview;
+  readonly contract: ContractOverview;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null | undefined;
-  readonly status: import("@/generated/models/ApiXTdhGrantStatus").ApiXTdhGrantStatus;
+  readonly status: ApiXTdhGrantStatus;
   readonly validFrom?: number | string | null | undefined;
   readonly validTo?: number | string | null | undefined;
 
@@ -58,7 +60,7 @@ export interface GrantItemErrorProps {
   readonly contractLabel: string;
   readonly details: GrantDetails;
   readonly errorDetails?: string | null | undefined;
-  readonly status: import("@/generated/models/ApiXTdhGrantStatus").ApiXTdhGrantStatus;
+  readonly status: ApiXTdhGrantStatus;
   readonly validFrom?: number | string | null | undefined;
   readonly validTo?: number | string | null | undefined;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { ProfileActivityLogProxyActionChanged } from "@/entities/IProfile";
+import type { ProfileActivityLogProxyActionChanged } from "@/entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";

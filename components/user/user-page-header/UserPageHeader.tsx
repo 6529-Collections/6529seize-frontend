@@ -2,11 +2,11 @@
 
 import { notFound } from "next/navigation";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import { CountlessPage } from "@/helpers/Types";
-import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import type { CountlessPage } from "@/helpers/Types";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 

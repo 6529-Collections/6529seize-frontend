@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageRepNewRep from '@/components/user/rep/new-rep/UserPageRepNewRep';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/user/rep/new-rep/UserPageRepNewRepSearch', () => ({
   __esModule: true,

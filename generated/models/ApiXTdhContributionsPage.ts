@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiXTdhContribution } from '../models/ApiXTdhContribution';
+import type { ApiXTdhContribution } from '../models/ApiXTdhContribution';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhContributionsPage {

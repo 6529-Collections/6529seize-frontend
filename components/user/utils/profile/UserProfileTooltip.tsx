@@ -5,10 +5,11 @@ import UserFollowBtn, {
 } from "@/components/user/utils/UserFollowBtn";
 import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
 import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
-import {
+import type {
   ApiProfileRepRatesState,
-  CLASSIFICATIONS,
-  CicStatement,
+  CicStatement} from "@/entities/IProfile";
+import {
+  CLASSIFICATIONS
 } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -17,7 +18,7 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
-import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 
 export default function UserProfileTooltip({
   user,

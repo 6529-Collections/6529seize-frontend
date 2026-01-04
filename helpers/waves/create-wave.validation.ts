@@ -1,17 +1,18 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { assertUnreachable } from "../AllowlistToolHelpers";
-import {
+import type {
   CreateWaveApprovalConfig,
   CreateWaveConfig,
   CreateWaveDatesConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
   CreateWaveOutcomeConfig,
-  CreateWaveStep,
   CreateWaveVotingConfig,
   WaveGroupsConfig,
-  WaveOverviewConfig,
+  WaveOverviewConfig} from "@/types/waves.types";
+import {
+  CreateWaveStep
 } from "@/types/waves.types";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {

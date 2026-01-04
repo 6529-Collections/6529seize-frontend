@@ -2,7 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
-import { NFT, NFTHistory } from "@/entities/INFT";
+import type { NFT, NFTHistory } from "@/entities/INFT";
 import { fetchAllPages } from "@/services/6529api";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";

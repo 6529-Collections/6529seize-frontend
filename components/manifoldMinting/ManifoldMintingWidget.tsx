@@ -15,14 +15,15 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
+import type {
+  ManifoldClaim} from "@/hooks/useManifoldClaim";
 import {
-  ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
 } from "@/hooks/useManifoldClaim";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
-import { ManifoldMerkleProof } from "./manifold-types";
+import type { ManifoldMerkleProof } from "./manifold-types";
 import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 

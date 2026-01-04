@@ -1,4 +1,4 @@
-import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 
 export interface ReferencedNft {
   readonly contract: string;

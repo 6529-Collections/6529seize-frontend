@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateDrop, { DropMutationBody } from '@/components/waves/CreateDrop';
+import type { DropMutationBody } from '@/components/waves/CreateDrop';
+import CreateDrop from '@/components/waves/CreateDrop';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 

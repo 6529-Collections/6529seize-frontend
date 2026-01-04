@@ -1,10 +1,10 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { NextGenCollection } from "@/entities/INextgen";
-import { Transaction } from "@/entities/ITransaction";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";

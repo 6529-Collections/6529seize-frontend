@@ -12,9 +12,9 @@ import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet } from "viem/chains";
-import { CreateConnectorFn } from "wagmi";
+import type { CreateConnectorFn } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
-import { AppWallet } from "../app-wallets/AppWalletsContext";
+import type { AppWallet } from "../app-wallets/AppWalletsContext";
 
 type ConnectionState = "connecting" | "connected" | "disconnected";
 

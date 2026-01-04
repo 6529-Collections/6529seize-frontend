@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import type { WaveOutcomeDistributionState } from "@/types/waves.types";

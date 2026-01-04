@@ -1,6 +1,6 @@
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveLeaderboardGalleryItemVotesProps {
   readonly drop: ExtendedDrop;

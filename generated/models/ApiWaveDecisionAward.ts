@@ -11,9 +11,9 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
-import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
-import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
+import type { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
+import type { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
+import type { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveDecisionAward {

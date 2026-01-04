@@ -1,5 +1,5 @@
-import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
-import { ProfileRatersTableType } from "@/enums";
+import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import type { ProfileRatersTableType } from "@/enums";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import ProfileRatersTableItem from "./ProfileRatersTableItem";
 

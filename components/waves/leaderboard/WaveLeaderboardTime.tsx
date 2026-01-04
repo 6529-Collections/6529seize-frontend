@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";

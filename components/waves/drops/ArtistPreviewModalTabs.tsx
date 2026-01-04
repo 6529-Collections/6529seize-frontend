@@ -1,5 +1,5 @@
 import React from "react";
-import { ModalTab } from "./ArtistPreviewModal";
+import type { ModalTab } from "./ArtistPreviewModal";
 
 interface ArtistPreviewModalTabsProps {
   readonly activeTab: ModalTab;

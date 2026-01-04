@@ -1,7 +1,8 @@
 "use client";
 
+import type {
+    AllowlistDescription} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-    AllowlistDescription,
     AllowlistRunStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";

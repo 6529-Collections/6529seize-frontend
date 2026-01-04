@@ -5,9 +5,9 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import Pagination from "@/components/pagination/Pagination";
-import { Transaction } from "@/entities/ITransaction";
+import type { Transaction } from "@/entities/ITransaction";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
-import { NextGenCollection, NextGenLog } from "@/entities/INextgen";
+import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
 import { NextGenCollectionProvenanceRow } from "../collectionParts/NextGenCollectionProvenance";
 
 interface Props {

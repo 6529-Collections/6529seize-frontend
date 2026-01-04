@@ -1,15 +1,16 @@
 'use server';
 
+import type {
+  InteractiveMediaValidationResult} from "../constants/security";
 import {
   INTERACTIVE_MEDIA_ALLOWED_CONTENT_TYPES,
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
-  InteractiveMediaValidationResult,
   canonicalizeInteractiveMediaHostname,
   isInteractiveMediaAllowedHost,
   isInteractiveMediaContentIdentifier,
   isInteractiveMediaContentPathAllowed,
 } from "../constants/security";
-import { InteractiveMediaProvider } from "../constants/media";
+import type { InteractiveMediaProvider } from "../constants/media";
 
 type GatewayRequestMethod = "HEAD" | "GET";
 

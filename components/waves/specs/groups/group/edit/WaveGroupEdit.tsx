@@ -1,8 +1,8 @@
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import SelectGroupModalWrapper from "@/components/utils/select-group/SelectGroupModalWrapper";
-import { WaveGroupType } from "../WaveGroup.types";
-import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { WaveGroupType } from "../WaveGroup.types";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { buildWaveUpdateBody } from "./buttons/utils/waveGroupEdit";
 
 export default function WaveGroupEdit({

@@ -1,8 +1,8 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { CommunityMemberOverview } from "@/entities/IProfile";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { CommunityMemberOverview } from "@/entities/IProfile";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AuthContext } from "@/components/auth/Auth";
 import {
   QueryKey,
@@ -10,8 +10,8 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CreditDirection } from "../GroupCard";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { Page } from "@/helpers/Types";
-import { CommunityMembersQuery } from "@/app/network/page";
+import type { Page } from "@/helpers/Types";
+import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
@@ -20,8 +20,8 @@ import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import GroupCardActionStats from "../utils/GroupCardActionStats";
 import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
 import { CommunityMembersSortOption } from "@/enums";
-import { ApiBulkRateRequest } from "@/generated/models/ApiBulkRateRequest";
-import { ApiBulkRateResponse } from "@/generated/models/ApiBulkRateResponse";
+import type { ApiBulkRateRequest } from "@/generated/models/ApiBulkRateRequest";
+import type { ApiBulkRateResponse } from "@/generated/models/ApiBulkRateResponse";
 
 export default function GroupCardVoteAll({
   matter,

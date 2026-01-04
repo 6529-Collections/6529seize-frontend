@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiXTdhGrantee } from '../models/ApiXTdhGrantee';
+import type { ApiXTdhGrantee } from '../models/ApiXTdhGrantee';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhGranteesPage {

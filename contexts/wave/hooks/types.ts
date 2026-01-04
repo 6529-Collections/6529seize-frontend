@@ -1,5 +1,5 @@
-import { Drop } from "./../../../helpers/waves/drop.helpers";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { Drop } from "./../../../helpers/waves/drop.helpers";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 // Define the shape of the functions passed from the store
 export interface WaveDataStoreUpdater {

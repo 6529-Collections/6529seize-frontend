@@ -1,7 +1,7 @@
-import { FullPageRequest } from "@/helpers/Types";
+import type { FullPageRequest } from "@/helpers/Types";
 import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
 import CommunityMembers from "@/components/community/CommunityMembers";
-import { CommunityMembersSortOption } from "@/enums";
+import type { CommunityMembersSortOption } from "@/enums";
 import { getAppMetadata } from "@/components/providers/metadata";
 
 export interface CommunityMembersQuery

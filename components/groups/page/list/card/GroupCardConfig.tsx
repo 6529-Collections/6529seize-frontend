@@ -1,5 +1,5 @@
 import { GroupDescriptionType } from "@/entities/IGroup";
-import { GroupCardConfigProps } from "./GroupCardConfigs";
+import type { GroupCardConfigProps } from "./GroupCardConfigs";
 
 export default function GroupCardConfig({
   config,

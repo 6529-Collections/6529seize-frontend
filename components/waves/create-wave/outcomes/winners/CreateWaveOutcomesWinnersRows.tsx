@@ -1,4 +1,4 @@
-import {
+import type {
   CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,

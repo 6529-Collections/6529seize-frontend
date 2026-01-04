@@ -1,6 +1,7 @@
 "use client";
 import styles from "./AppWallet.module.scss";
-import { RefObject, useCallback, useRef, useState } from "react";
+import type { RefObject} from "react";
+import { useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";

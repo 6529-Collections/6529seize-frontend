@@ -1,18 +1,20 @@
 "use client";
 
-import { FC, useEffect, useRef, useState } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { FC} from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
-import SingleWaveDropVoteSubmit, {
+import type {
   SingleWaveDropVoteSubmitHandles,
 } from "./SingleWaveDropVoteSubmit";
+import SingleWaveDropVoteSubmit from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
 import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;

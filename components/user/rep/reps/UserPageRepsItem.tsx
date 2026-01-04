@@ -1,8 +1,8 @@
 "use client";
 
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import { RatingStats } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { RatingStats } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";

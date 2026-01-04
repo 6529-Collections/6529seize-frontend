@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveScope } from '../models/ApiWaveScope';
+import type { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveVisibilityConfig {

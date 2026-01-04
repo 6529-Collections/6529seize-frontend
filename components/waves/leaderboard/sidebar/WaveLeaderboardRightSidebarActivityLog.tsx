@@ -1,4 +1,4 @@
-import { ApiWaveLog } from "@/generated/models/ApiWaveLog";
+import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
 import {
   formatNumberWithCommas,
   getTimeAgoShort,
@@ -10,8 +10,8 @@ import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
 
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";

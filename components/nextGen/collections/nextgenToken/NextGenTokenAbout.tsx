@@ -15,8 +15,8 @@ import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
 import { ETHEREUM_ICON_TEXT } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   formatAddress,

@@ -6,7 +6,7 @@ import {
 } from "@/components/delegation/delegation-constants";
 import { publicEnv } from "@/config/env";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants";
-import { Delegation } from "@/entities/IDelegation";
+import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";

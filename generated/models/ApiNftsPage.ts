@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiNft } from '../models/ApiNft';
+import type { ApiNft } from '../models/ApiNft';
 import { HttpFile } from '../http/http';
 
 export class ApiNftsPage {

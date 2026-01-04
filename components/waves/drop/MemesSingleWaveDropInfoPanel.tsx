@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useState, type MouseEvent } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";

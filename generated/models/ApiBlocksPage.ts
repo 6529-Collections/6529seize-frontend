@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiBlockItem } from '../models/ApiBlockItem';
+import type { ApiBlockItem } from '../models/ApiBlockItem';
 import { HttpFile } from '../http/http';
 
 export class ApiBlocksPage {

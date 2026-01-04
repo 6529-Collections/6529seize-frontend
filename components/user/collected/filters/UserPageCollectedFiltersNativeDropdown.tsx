@@ -1,5 +1,5 @@
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 

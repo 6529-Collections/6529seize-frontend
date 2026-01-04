@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ParticipationDropFooter from '@/components/waves/drops/participation/ParticipationDropFooter';
-import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 
 jest.mock('date-fns', () => ({ format: jest.fn(() => 'DATE') }));
 

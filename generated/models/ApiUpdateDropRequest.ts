@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
-import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
-import { ApiDropMetadata } from '../models/ApiDropMetadata';
-import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
+import type { ApiCreateDropPart } from '../models/ApiCreateDropPart';
+import type { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
+import type { ApiDropMetadata } from '../models/ApiDropMetadata';
+import type { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateDropRequest {

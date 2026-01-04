@@ -1,7 +1,8 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { AwsRum, AwsRumConfig } from "aws-rum-web";
+import type { AwsRumConfig } from "aws-rum-web";
+import { AwsRum } from "aws-rum-web";
 import { useEffect } from "react";
 
 interface AwsRumProviderProps {
