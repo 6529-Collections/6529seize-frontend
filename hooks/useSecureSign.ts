@@ -12,24 +12,29 @@ export class MobileSigningError extends Error {
   constructor(
     message: string,
     public readonly code?: string | number,
-    public readonly cause?: unknown
+    public override readonly cause?: unknown
   ) {
     super(message);
-    this.name = 'MobileSigningError';
+    this.name = "MobileSigningError";
   }
 }
 
 export class ConnectionMismatchError extends Error {
   constructor(expectedAddress: string, actualAddress?: string) {
-    super(`Address mismatch: expected ${expectedAddress}, got ${actualAddress || 'none'}`);
-    this.name = 'ConnectionMismatchError';
+    super(
+      `Address mismatch: expected ${expectedAddress}, got ${actualAddress || "none"}`
+    );
+    this.name = "ConnectionMismatchError";
   }
 }
 
 export class SigningProviderError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public override readonly cause?: unknown
+  ) {
     super(message);
-    this.name = 'SigningProviderError';
+    this.name = "SigningProviderError";
   }
 }
 
@@ -37,16 +42,24 @@ export class SigningProviderError extends Error {
  * SECURITY: Provider validation error for runtime type checking
  */
 class ProviderValidationError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public override readonly cause?: unknown
+  ) {
     super(message);
-    this.name = 'ProviderValidationError';
+    this.name = "ProviderValidationError";
   }
 }
 
 interface SignatureResult {
   signature: string | null;
   userRejected: boolean;
-  error?: MobileSigningError | ConnectionMismatchError | SigningProviderError | ProviderValidationError | undefined;
+  error?:
+    | MobileSigningError
+    | ConnectionMismatchError
+    | SigningProviderError
+    | ProviderValidationError
+    | undefined;
 }
 
 interface UseSecureSignReturn {
@@ -59,12 +72,12 @@ interface UseSecureSignReturn {
  * Ensures address follows proper format and prevents injection
  */
 function validateEthereumAddress(address: string): void {
-  if (typeof address !== 'string') {
-    throw new ProviderValidationError('Address must be a string');
+  if (typeof address !== "string") {
+    throw new ProviderValidationError("Address must be a string");
   }
 
   if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
-    throw new ProviderValidationError('Invalid Ethereum address format');
+    throw new ProviderValidationError("Invalid Ethereum address format");
   }
 }
 
@@ -73,16 +86,18 @@ function validateEthereumAddress(address: string): void {
  * Ensures message is safe for signing and prevents injection attacks
  */
 function validateMessage(message: string): void {
-  if (typeof message !== 'string') {
-    throw new ProviderValidationError('Message must be a string');
+  if (typeof message !== "string") {
+    throw new ProviderValidationError("Message must be a string");
   }
 
   if (message.length === 0) {
-    throw new ProviderValidationError('Message cannot be empty');
+    throw new ProviderValidationError("Message cannot be empty");
   }
 
   if (message.length > 10000) {
-    throw new ProviderValidationError('Message too long (max 10000 characters)');
+    throw new ProviderValidationError(
+      "Message too long (max 10000 characters)"
+    );
   }
 
   // Check for suspicious patterns that might indicate injection attempts
@@ -96,7 +111,7 @@ function validateMessage(message: string): void {
 
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(message)) {
-      throw new ProviderValidationError('Message contains suspicious content');
+      throw new ProviderValidationError("Message contains suspicious content");
     }
   }
 }
@@ -106,13 +121,13 @@ function validateMessage(message: string): void {
  * Ensures returned signature follows expected format
  */
 function validateSignature(signature: string): void {
-  if (typeof signature !== 'string') {
-    throw new ProviderValidationError('Signature must be a string');
+  if (typeof signature !== "string") {
+    throw new ProviderValidationError("Signature must be a string");
   }
 
   // Ethereum signatures should be 65 bytes (130 hex chars + 0x prefix)
   if (!/^0x[a-fA-F0-9]{130}$/.test(signature)) {
-    throw new ProviderValidationError('Invalid signature format');
+    throw new ProviderValidationError("Invalid signature format");
   }
 }
 
@@ -130,27 +145,27 @@ export const useSecureSign = (): UseSecureSignReturn => {
     setIsSigningPending(false);
   }, []);
 
-  const signMessage = useCallback(async (
-    message: string
-  ): Promise<SignatureResult> => {
-    setIsSigningPending(true);
+  const signMessage = useCallback(
+    async (message: string): Promise<SignatureResult> => {
+      setIsSigningPending(true);
 
-    try {
-      // SECURITY: Input validation - validate message before any processing
-      validateMessage(message);
+      try {
+        // SECURITY: Input validation - validate message before any processing
+        validateMessage(message);
 
-      // Validate connection state before attempting to sign
-      validateSigningContext(isConnected, connectedAddress);
+        // Validate connection state before attempting to sign
+        validateSigningContext(isConnected, connectedAddress);
 
-      // Execute the signature operation using Wagmi
-      return await executeWagmiSignature(wagmiSignMessage, message);
-
-    } catch (error: unknown) {
-      return classifySigningError(error);
-    } finally {
-      setIsSigningPending(false);
-    }
-  }, [connectedAddress, isConnected, wagmiSignMessage]);
+        // Execute the signature operation using Wagmi
+        return await executeWagmiSignature(wagmiSignMessage, message);
+      } catch (error: unknown) {
+        return classifySigningError(error);
+      } finally {
+        setIsSigningPending(false);
+      }
+    },
+    [connectedAddress, isConnected, wagmiSignMessage]
+  );
 
   return {
     signMessage,
@@ -163,15 +178,15 @@ export const useSecureSign = (): UseSecureSignReturn => {
  * SECURITY: Safely extract error code without unsafe type casting
  */
 const extractErrorCode = (error: unknown): string | number | undefined => {
-  if (error && typeof error === 'object') {
+  if (error && typeof error === "object") {
     const errorObj = error as Record<string, unknown>;
-    if ('code' in errorObj) {
+    if ("code" in errorObj) {
       const code = errorObj["code"];
-      if (typeof code === 'string' || typeof code === 'number') {
+      if (typeof code === "string" || typeof code === "number") {
         return code;
       }
     }
-    if ('name' in errorObj && typeof errorObj["name"] === 'string') {
+    if ("name" in errorObj && typeof errorObj["name"] === "string") {
       return errorObj["name"];
     }
   }
@@ -213,10 +228,10 @@ const executeWagmiSignature = async (
 ): Promise<SignatureResult> => {
   try {
     const signature = await wagmiSignMessage.signMessageAsync({ message });
-    
+
     // Clear sensitive data from memory
-    message = '';
-    
+    message = "";
+
     // SECURITY: Validate signature format before returning
     validateSignature(signature);
 
@@ -228,8 +243,14 @@ const executeWagmiSignature = async (
     // Handle user rejection specifically
     // Use multiple detection methods for robustness across different environments
     try {
-      if ((typeof UserRejectedRequestError !== 'undefined' && error instanceof UserRejectedRequestError) || 
-          (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError')) {
+      if (
+        (typeof UserRejectedRequestError !== "undefined" &&
+          error instanceof UserRejectedRequestError) ||
+        (error &&
+          typeof error === "object" &&
+          "name" in error &&
+          error.name === "UserRejectedRequestError")
+      ) {
         return {
           signature: null,
           userRejected: true,
@@ -237,7 +258,12 @@ const executeWagmiSignature = async (
       }
     } catch {
       // If instanceof check fails, fall back to name-based detection
-      if (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError') {
+      if (
+        error &&
+        typeof error === "object" &&
+        "name" in error &&
+        error.name === "UserRejectedRequestError"
+      ) {
         return {
           signature: null,
           userRejected: true,
@@ -255,8 +281,14 @@ const classifySigningError = (error: unknown): SignatureResult => {
   // Handle user rejection (most common case)
   // Use multiple detection methods for robustness across different environments
   try {
-    if ((typeof UserRejectedRequestError !== 'undefined' && error instanceof UserRejectedRequestError) || 
-        (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError')) {
+    if (
+      (typeof UserRejectedRequestError !== "undefined" &&
+        error instanceof UserRejectedRequestError) ||
+      (error &&
+        typeof error === "object" &&
+        "name" in error &&
+        error.name === "UserRejectedRequestError")
+    ) {
       return {
         signature: null,
         userRejected: true,
@@ -264,7 +296,12 @@ const classifySigningError = (error: unknown): SignatureResult => {
     }
   } catch {
     // If instanceof check fails, fall back to name-based detection
-    if (error && typeof error === 'object' && 'name' in error && error.name === 'UserRejectedRequestError') {
+    if (
+      error &&
+      typeof error === "object" &&
+      "name" in error &&
+      error.name === "UserRejectedRequestError"
+    ) {
       return {
         signature: null,
         userRejected: true,
@@ -273,22 +310,33 @@ const classifySigningError = (error: unknown): SignatureResult => {
   }
 
   // Handle custom errors we've defined (use name check for Jest compatibility)
-  if (error && typeof error === 'object' && 'name' in error) {
+  if (error && typeof error === "object" && "name" in error) {
     const errorName = (error as Error).name;
-    if (errorName === 'MobileSigningError' ||
-        errorName === 'ConnectionMismatchError' ||
-        errorName === 'SigningProviderError' ||
-        errorName === 'ProviderValidationError') {
+    if (
+      errorName === "MobileSigningError" ||
+      errorName === "ConnectionMismatchError" ||
+      errorName === "SigningProviderError" ||
+      errorName === "ProviderValidationError"
+    ) {
       return {
         signature: null,
         userRejected: false,
-        error: error as MobileSigningError | ConnectionMismatchError | SigningProviderError | ProviderValidationError,
+        error: error as
+          | MobileSigningError
+          | ConnectionMismatchError
+          | SigningProviderError
+          | ProviderValidationError,
       };
     }
   }
 
   // Handle mobile-specific wallet errors with proper type checking
-  if (error && typeof error === 'object' && 'code' in error && error.code === 4001) {
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    error.code === 4001
+  ) {
     return {
       signature: null,
       userRejected: true,
@@ -309,7 +357,6 @@ const classifySigningError = (error: unknown): SignatureResult => {
   };
 };
 
-
 /**
  * SECURITY: Get user-friendly error messages with proper type checking
  */
@@ -317,11 +364,16 @@ const getMobileErrorMessage = (error: unknown): string => {
   let message: string;
 
   // SECURITY: Safe message extraction without unsafe casting
-  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+  if (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
     message = error.message;
-  } else if (typeof error === 'string') {
+  } else if (typeof error === "string") {
     message = error;
-  } else if (error && typeof error === 'object') {
+  } else if (error && typeof error === "object") {
     // For plain objects, try to get a meaningful representation
     try {
       // Check if it has Object.prototype.toString (plain object)
@@ -333,32 +385,32 @@ const getMobileErrorMessage = (error: unknown): string => {
         message = error.toString();
       }
     } catch {
-      message = 'Unknown error';
+      message = "Unknown error";
     }
   } else {
-    message = 'Unknown error';
+    message = "Unknown error";
   }
 
   // Sanitize message to prevent any potential injection
   message = message.substring(0, 1000); // Limit length
 
   // Common mobile wallet error patterns
-  if (message.includes('connection') || message.includes('provider')) {
-    return 'Connection issue with your wallet. Please check your connection and try again.';
+  if (message.includes("connection") || message.includes("provider")) {
+    return "Connection issue with your wallet. Please check your connection and try again.";
   }
 
-  if (message.includes('network') || message.includes('chain')) {
-    return 'Network issue detected. Please check your wallet network settings.';
+  if (message.includes("network") || message.includes("chain")) {
+    return "Network issue detected. Please check your wallet network settings.";
   }
 
-  if (message.includes('timeout') || message.includes('time out')) {
-    return 'Request timed out. Please try again with a stable connection.';
+  if (message.includes("timeout") || message.includes("time out")) {
+    return "Request timed out. Please try again with a stable connection.";
   }
 
-  if (message.includes('unsupported') || message.includes('not supported')) {
-    return 'This operation is not supported by your current wallet app.';
+  if (message.includes("unsupported") || message.includes("not supported")) {
+    return "This operation is not supported by your current wallet app.";
   }
 
   // Default fallback for mobile
-  return 'Signing failed. Please try again or switch to a different wallet app if the issue persists.';
+  return "Signing failed. Please try again or switch to a different wallet app if the issue persists.";
 };

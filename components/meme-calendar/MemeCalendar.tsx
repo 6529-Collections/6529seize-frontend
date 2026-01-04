@@ -171,20 +171,21 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
       }, 60);
       return () => clearTimeout(t);
     }
+    return;
   }, [autoOpenYmd, year, month]);
 
   return (
-    <div className="tw-p-2 tw-flex tw-flex-col tw-space-y-1 tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
+    <div className="tw-flex tw-flex-col tw-space-y-1 tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-2">
       {/* Month title */}
-      <div className="tw-text-center tw-font-semibold tw-text-sm">
+      <div className="tw-text-center tw-text-sm tw-font-semibold">
         {monthName} {year}
       </div>
       {/* Weekday header */}
-      <div className="tw-grid tw-grid-cols-7 tw-text-xs tw-text-center tw-font-medium tw-mt-1">
+      <div className="tw-mt-1 tw-grid tw-grid-cols-7 tw-text-center tw-text-xs tw-font-medium">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((wd) => (
           <div
             key={wd}
-            className="tw-p-1 tw-border-b-2"
+            className="tw-border-b-2 tw-p-1"
             style={{
               borderColor: "#888888",
               borderBottomStyle: "solid",
@@ -199,7 +200,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
             return (
               <div
                 key={`empty-${year}-${month}-${idx}`}
-                className="tw-invisible tw-pointer-events-none"
+                className="tw-pointer-events-none tw-invisible"
               ></div>
             );
           }
@@ -249,19 +250,19 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
             return (
               <div
                 key={ymd(cellDateUtcDay)}
-                className="tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-text-gray-400"
+                className="tw-flex tw-min-h-[2.5rem] tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-py-2 tw-text-gray-400"
                 style={{ borderColor: "#222222", borderBottomStyle: "solid" }}
               >
                 <span
-                  className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
+                  className={`tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-text-xs ${
                     isToday
-                      ? "tw-bg-[#20fa59] tw-text-black tw-font-semibold"
+                      ? "tw-bg-[#20fa59] tw-font-semibold tw-text-black"
                       : "tw-text-gray-400"
                   }`}
                 >
                   {day}
                 </span>
-                <span className="tw-text-xs tw-font-medium tw-mt-0.5">
+                <span className="tw-mt-0.5 tw-text-xs tw-font-medium">
                   &nbsp;
                 </span>
               </div>
@@ -318,7 +319,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               type="button"
               id={`meme-cell-${ymd(cellDateUtcDay)}`}
               key={ymd(cellDateUtcDay)}
-              className="tw-bg-transparent tw-py-2 tw-min-h-[2.5rem] tw-flex tw-flex-col tw-items-center tw-justify-start tw-border-none tw-border-b-2 tw-cursor-pointer hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-flex tw-min-h-[2.5rem] tw-cursor-pointer tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-border-none tw-bg-transparent tw-py-2 hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
                 borderColor: "#222222",
                 borderBottomStyle: "solid",
@@ -330,16 +331,16 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               onClick={() => onSelectDay?.(cellDateUtcDay)}
             >
               <span
-                className={`tw-text-xs tw-rounded-full tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center ${
+                className={`tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-text-xs ${
                   isToday
-                    ? "tw-bg-[#20fa59] tw-text-black tw-font-semibold"
+                    ? "tw-bg-[#20fa59] tw-font-semibold tw-text-black"
                     : ""
                 }`}
               >
                 {day}
               </span>
               {mintLabel && (
-                <span className="tw-text-xs tw-font-medium tw-text-blue-600 tw-mt-0.5">
+                <span className="tw-mt-0.5 tw-text-xs tw-font-medium tw-text-blue-600">
                   {mintLabel}
                 </span>
               )}
@@ -379,7 +380,7 @@ function SeasonView({
       });
 
   return (
-    <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-3 tw-gap-4 tw-mt-4">
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
       {months.map((m) => (
         <Month
           key={toISO(m)}
@@ -414,11 +415,11 @@ function YearView({
     const isCurrent = currentIdx === sIdx;
 
     return (
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
         <button
           type="button"
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-text-black"
+          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-text-black"
           style={{
             borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
@@ -435,7 +436,7 @@ function YearView({
             {end.toLocaleString("default", { month: "short" })}{" "}
             {end.getUTCFullYear()}
           </div>
-          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
         </button>
       </div>
     );
@@ -449,14 +450,14 @@ function YearView({
   });
 
   return (
-    <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
       {seasons.map((s) => {
         const isCurrent = currentIdx === s.sIdx;
         return (
           <button
             type="button"
             key={s.sIdx}
-            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+            className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
               borderColor: isCurrent ? "#20fa59" : "#222222",
               borderWidth: isCurrent ? "2px" : "1px",
@@ -475,7 +476,7 @@ function YearView({
               {s.end.toLocaleString("default", { month: "short" })}{" "}
               {s.end.getUTCFullYear()}
             </div>
-            <div className="tw-text-sm tw-mt-1">{s.label}</div>
+            <div className="tw-mt-1 tw-text-sm">{s.label}</div>
           </button>
         );
       })}
@@ -501,11 +502,11 @@ function EpochView({
     // Highlight if currentIdx is within SZN1 range
     const isCurrent = currentIdx === sIdx;
     return (
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
         <button
           type="button"
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
             borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
@@ -518,7 +519,7 @@ function EpochView({
         >
           <div className="tw-font-semibold">Year #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
         </button>
       </div>
     );
@@ -542,7 +543,7 @@ function EpochView({
       };
     });
     return (
-      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
         {years.map((y) => {
           const isCurrent =
             currentIdx >= y.seasonIndex &&
@@ -551,7 +552,7 @@ function EpochView({
             <button
               type="button"
               key={toISO(y.start)}
-              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
                 borderColor: isCurrent ? "#20fa59" : "#222222",
                 borderWidth: isCurrent ? "2px" : "1px",
@@ -570,7 +571,7 @@ function EpochView({
                 {y.end.toLocaleString("default", { month: "short" })}{" "}
                 {y.end.getUTCFullYear()}
               </div>
-              <div className="tw-text-sm tw-mt-1">{y.label}</div>
+              <div className="tw-mt-1 tw-text-sm">{y.label}</div>
             </button>
           );
         })}
@@ -594,11 +595,11 @@ function PeriodView({
     const sIdx = SZN1_SEASON_INDEX; // SZN1
     const isCurrent = currentIdx === sIdx;
     return (
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
         <button
           type="button"
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
             borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
@@ -610,7 +611,7 @@ function PeriodView({
         >
           <div className="tw-font-semibold">Epoch #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
         </button>
       </div>
     );
@@ -634,7 +635,7 @@ function PeriodView({
       };
     });
     return (
-      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
         {epochs.map((ep) => {
           const isCurrent =
             currentIdx >= ep.seasonIndex &&
@@ -643,7 +644,7 @@ function PeriodView({
             <button
               type="button"
               key={toISO(ep.start)}
-              className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
               style={{
                 borderColor: isCurrent ? "#20fa59" : "#222222",
                 borderWidth: isCurrent ? "2px" : "1px",
@@ -662,7 +663,7 @@ function PeriodView({
                 {ep.end.toLocaleString("default", { month: "short" })}{" "}
                 {ep.end.getUTCFullYear()}
               </div>
-              <div className="tw-text-sm tw-mt-1">{ep.label}</div>
+              <div className="tw-mt-1 tw-text-sm">{ep.label}</div>
             </button>
           );
         })}
@@ -687,11 +688,11 @@ function EraView({
     const sIdx = SZN1_SEASON_INDEX; // SZN1 bucket
     const isCurrent = currentIdx === sIdx;
     return (
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
         <button
           type="button"
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
             borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
@@ -703,7 +704,7 @@ function EraView({
         >
           <div className="tw-font-semibold">Period #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
         </button>
       </div>
     );
@@ -727,7 +728,7 @@ function EraView({
   });
 
   return (
-    <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
       {periods.map((p) => {
         const isCurrent =
           currentIdx >= p.seasonIndex &&
@@ -736,7 +737,7 @@ function EraView({
           <button
             type="button"
             key={toISO(p.start)}
-            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+            className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
               borderColor: isCurrent ? "#20fa59" : "#222222",
               borderWidth: isCurrent ? "2px" : "1px",
@@ -755,7 +756,7 @@ function EraView({
               {p.end.toLocaleString("default", { month: "short" })}{" "}
               {p.end.getUTCFullYear()}
             </div>
-            <div className="tw-text-sm tw-mt-1">{p.label}</div>
+            <div className="tw-mt-1 tw-text-sm">{p.label}</div>
           </button>
         );
       })}
@@ -775,11 +776,11 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
     const sIdx = SZN1_SEASON_INDEX;
     const isCurrent = currentIdx === sIdx;
     return (
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
         <button
           type="button"
           key={sIdx}
-          className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
           style={{
             borderColor: isCurrent ? "#20fa59" : "#222222",
             borderWidth: isCurrent ? "2px" : "1px",
@@ -791,7 +792,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
         >
           <div className="tw-font-semibold">Era #0 (2022)</div>
           <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-text-sm tw-mt-1">Memes #1 - #47</div>
+          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
         </button>
       </div>
     );
@@ -815,7 +816,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
   });
 
   return (
-    <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mt-4">
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
       {eras.map((er) => {
         const isCurrent =
           currentIdx >= er.seasonIndex &&
@@ -824,7 +825,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
           <button
             type="button"
             key={toISO(er.start)}
-            className="tw-p-3 tw-cursor-pointer tw-bg-black tw-rounded-md tw-border tw-border-solid tw-border-[#222222] hover:tw-bg-[#eee] hover:tw-text-black"
+            className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
             style={{
               borderColor: isCurrent ? "#20fa59" : "#222222",
               borderWidth: isCurrent ? "2px" : "1px",
@@ -843,7 +844,7 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
               {er.end.toLocaleString("default", { month: "short" })}{" "}
               {er.end.getUTCFullYear()}
             </div>
-            <div className="tw-text-sm tw-mt-1">{er.label}</div>
+            <div className="tw-mt-1 tw-text-sm">{er.label}</div>
           </button>
         );
       })}
@@ -1021,9 +1022,9 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
   };
 
   return (
-    <div className="tw-p-4 tw-bg-[#0c0c0d] tw-rounded-md tw-border tw-border-solid tw-border-[#222222]">
+    <div className="tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-[#0c0c0d] tw-p-4">
       {/* Division (zoom) selector buttons */}
-      <div className="tw-mb-8 tw-grid tw-grid-cols-3 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto] tw-gap-2">
+      <div className="tw-mb-8 tw-grid tw-grid-cols-3 tw-gap-2 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto]">
         {(
           [
             ["szn", `SZN ${seasonNumber.toLocaleString()}`],
@@ -1037,20 +1038,20 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           <button
             key={level}
             className={
-              "tw-w-full tw-px-3 tw-py-2 tw-rounded-md tw-text-sm tw-font-medium tw-border tw-transition-colors " +
+              "tw-w-full tw-rounded-md tw-border tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors " +
               (zoomLevel === level
-                ? "tw-bg-blue-600 tw-text-white tw-border-blue-500 tw-shadow"
-                : "tw-bg-gray-100 tw-text-gray-900 tw-border-gray-300 hover:tw-bg-gray-200 dark:tw-bg-gray-800 dark:tw-text-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700")
+                ? "tw-border-blue-500 tw-bg-blue-600 tw-text-white tw-shadow"
+                : "tw-border-gray-300 tw-bg-gray-100 tw-text-gray-900 hover:tw-bg-gray-200 dark:tw-border-gray-700 dark:tw-bg-gray-800 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700")
             }
             onClick={() => setZoomLevel(level)}
           >
             {label}
           </button>
         ))}
-        <div className="tw-col-span-3 lg:tw-col-span-1 tw-flex tw-items-center tw-justify-end">
+        <div className="tw-col-span-3 tw-flex tw-items-center tw-justify-end lg:tw-col-span-1">
           <FontAwesomeIcon
             icon={showInfo ? faXmarkCircle : faInfoCircle}
-            className="tw-w-8 tw-h-8 tw-cursor-pointer"
+            className="tw-h-8 tw-w-8 tw-cursor-pointer"
             onClick={() => setShowInfo((v) => !v)}
           />
         </div>
@@ -1058,16 +1059,16 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
 
       <div
         className={
-          "tw-rounded-md tw-bg-black tw-border tw-border-solid tw-border-[#222222] " +
-          "tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out tw-origin-top " +
+          "tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black " +
+          "tw-origin-top tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out " +
           (showInfo
-            ? "tw-mb-8 tw-opacity-100 tw-scale-y-100 tw-py-5 tw-px-3"
-            : "tw-opacity-0 tw-max-h-0 tw-scale-y-95 tw-pointer-events-none")
+            ? "tw-mb-8 tw-scale-y-100 tw-px-3 tw-py-5 tw-opacity-100"
+            : "tw-pointer-events-none tw-max-h-0 tw-scale-y-95 tw-opacity-0")
         }
         aria-hidden={!showInfo}
       >
         {/* Stack on small; side-by-side from md+ */}
-        <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-4 md:tw-gap-6">
+        <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-gap-6">
           {/* Left side grows on md+ */}
           <div className="md:tw-flex-1">
             {[
@@ -1114,11 +1115,11 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
       </div>
 
       {/* Unified navigation + controls in one row on large, wrap on small */}
-      <div className="tw-mb-6 tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3 tw-mt-2">
+      <div className="tw-mb-6 tw-mt-2 tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3">
         {/* Left half: Prev | Title+Range | Next */}
-        <div className="tw-w-full tw-flex tw-items-center tw-gap-2 tw-flex-1 tw-min-w-0 lg:tw-basis-2/3 lg:tw-max-w-[40%]">
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 lg:tw-max-w-[40%] lg:tw-basis-2/3">
           <button
-            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-1.5 tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
+            className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-gray-300 tw-px-3 tw-py-1.5 tw-text-gray-900 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700"
             onClick={() => {
               let delta = 0;
               if (zoomLevel === "epoch") {
@@ -1156,8 +1157,8 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           </button>
 
           {/* Label block: title and date range; wraps if needed */}
-          <div className="tw-flex-1 tw-min-w-0 tw-text-center">
-            <div className="tw-font-semibold tw-text-sm">
+          <div className="tw-min-w-0 tw-flex-1 tw-text-center">
+            <div className="tw-text-sm tw-font-semibold">
               {getZoomTitle(zoomLevel, seasonIndex)}
             </div>
             {(() => {
@@ -1172,7 +1173,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                 ? "Memes #1 - #47"
                 : getRangeLabel(start, end);
               return (
-                <div className="tw-text-xs tw-text-gray-400 tw-whitespace-normal tw-break-words">
+                <div className="tw-whitespace-normal tw-break-words tw-text-xs tw-text-gray-400">
                   {range} / {mintRange}
                 </div>
               );
@@ -1180,7 +1181,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           </div>
 
           <button
-            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3 tw-py-1.5 tw-w-9 tw-h-9 tw-rounded-md tw-border tw-border-gray-300 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:hover:tw-bg-gray-700 tw-text-gray-900 dark:tw-text-gray-100"
+            className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-gray-300 tw-px-3 tw-py-1.5 tw-text-gray-900 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700"
             onClick={() => {
               let delta = 0;
               if (zoomLevel === "epoch") {
@@ -1218,21 +1219,21 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           </button>
         </div>
         {/* Right: controls — Jump to Today, Mint #, and Date jump (date hidden on small screens) */}
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-w-full tw-justify-center lg:tw-w-auto lg:tw-justify-end">
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 lg:tw-w-auto lg:tw-justify-end">
           {/* Responsive wrapper for Jump to Today and Mint # input */}
           <div className="tw-flex tw-w-full tw-gap-3 sm:tw-w-auto sm:tw-gap-3">
             <button
               type="button"
-              className="tw-whitespace-nowrap tw-inline-flex tw-items-center tw-justify-center tw-h-9 tw-rounded-md tw-bg-white tw-text-black tw-px-3 tw-text-sm tw-font-semibold hover:tw-bg-[#e9e9e9] tw-border tw-border-[#d1d1d1] tw-shrink-0 tw-flex-1 sm:tw-flex-none sm:tw-w-auto"
+              className="tw-inline-flex tw-h-9 tw-flex-1 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-px-3 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-[#e9e9e9] sm:tw-w-auto sm:tw-flex-none"
               onClick={handleJumpToToday}
             >
               Jump to Today
             </button>
             <form
               onSubmit={handleMintJumpSubmit}
-              className="tw-shrink-0 tw-flex-1 tw-w-full sm:tw-flex-none sm:tw-w-auto"
+              className="tw-w-full tw-flex-1 tw-shrink-0 sm:tw-w-auto sm:tw-flex-none"
             >
-              <div className="tw-bg-[#e5e5e5] tw-h-9 tw-flex tw-items-center tw-rounded-md tw-bg-white tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1] tw-w-full">
+              <div className="tw-flex tw-h-9 tw-w-full tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-[#e5e5e5] tw-bg-white tw-pl-3 tw-font-semibold tw-text-black">
                 <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
                 <input
                   id="meme-calendar-mint-input"
@@ -1244,16 +1245,16 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                     const v = event.target.value.replaceAll(/\D/g, "");
                     setJumpMint(v);
                   }}
-                  className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-w-full sm:tw-w-[8ch] tw-min-w-0 tw-px-2 tw-rounded-r-md"
+                  className="tw-h-9 tw-w-full tw-min-w-0 tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none sm:tw-w-[8ch]"
                 />
               </div>
             </form>
           </div>
           <form
             onSubmit={handleDateJumpSubmit}
-            className="tw-hidden sm:tw-block sm:tw-basis-auto sm:tw-w-auto lg:tw-flex-1 tw-min-w-0 tw-max-w-full"
+            className="tw-hidden tw-min-w-0 tw-max-w-full sm:tw-block sm:tw-w-auto sm:tw-basis-auto lg:tw-flex-1"
           >
-            <div className="tw-bg-[#e5e5e5] tw-h-9 tw-flex tw-items-center tw-rounded-md tw-bg-white tw-text-black tw-font-semibold tw-pl-3 tw-border tw-border-[#d1d1d1] tw-w-full sm:tw-w-auto lg:tw-w-full tw-max-w-full sm:tw-max-w-[28rem]">
+            <div className="tw-flex tw-h-9 tw-w-full tw-max-w-full tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-[#e5e5e5] tw-bg-white tw-pl-3 tw-font-semibold tw-text-black sm:tw-w-auto sm:tw-max-w-[28rem] lg:tw-w-full">
               <div className="tw-shrink-0 tw-select-none tw-pr-2">Date</div>
               <input
                 id="meme-calendar-date-input"
@@ -1264,7 +1265,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                   setJumpValue(value);
                   jumpToMonthValue(value);
                 }}
-                className="tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none tw-border-none tw-h-9 tw-px-2 tw-rounded-r-md tw-w-full tw-min-w-0 sm:tw-w-[16rem] lg:tw-w-full lg:tw-max-w-[28rem]"
+                className="tw-h-9 tw-w-full tw-min-w-0 tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none sm:tw-w-[16rem] lg:tw-w-full lg:tw-max-w-[28rem]"
               />
             </div>
           </form>
@@ -1279,8 +1280,8 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         id="meme-tooltip"
         clickable
         openOnClick
-        className={`!tw-opacity-[0.975] !tw-text-black !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222] !tw-z-[1000] !tw-whitespace-normal ${
-          isMobile ? "tw-max-w-[15rem]" : "tw-max-w-[22rem] "
+        className={`!tw-z-[1000] !tw-whitespace-normal !tw-rounded-md !tw-border !tw-border-solid !tw-border-[#222222] !tw-text-black !tw-opacity-[0.975] ${
+          isMobile ? "tw-max-w-[15rem]" : "tw-max-w-[22rem]"
         }`}
       />
     </div>

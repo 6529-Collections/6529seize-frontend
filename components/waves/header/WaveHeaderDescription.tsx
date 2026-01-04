@@ -22,7 +22,7 @@ const calculatePosition = (
 ): { position: "bottom" | "top"; maxHeight: number } => {
   const bottomSpace = viewportHeight - buttonRect.bottom;
   const topSpace = buttonRect.top;
-  
+
   if (bottomSpace >= contentHeight || bottomSpace >= topSpace) {
     return { position: "bottom", maxHeight: bottomSpace - 16 };
   }
@@ -34,10 +34,11 @@ const getMobilePositionStyles = (
   buttonRect: DOMRect | undefined
 ) => {
   if (!buttonRect) return {};
-  
+
   return {
     top: position === "bottom" ? buttonRect.bottom + 8 : undefined,
-    bottom: position === "top" ? window.innerHeight - buttonRect.top + 8 : undefined,
+    bottom:
+      position === "top" ? window.innerHeight - buttonRect.top + 8 : undefined,
     left: 0,
     right: 0,
   };
@@ -49,16 +50,21 @@ const getDesktopPositionStyles = (
   side: WaveHeaderPinnedSide
 ) => {
   if (!buttonRect) return {};
-  
+
   return {
     top: position === "bottom" ? buttonRect.top : undefined,
-    bottom: position === "top" ? window.innerHeight - buttonRect.top : undefined,
-    left: side === WaveHeaderPinnedSide.RIGHT ? buttonRect.right + 8 : undefined,
+    bottom:
+      position === "top" ? window.innerHeight - buttonRect.top : undefined,
+    left:
+      side === WaveHeaderPinnedSide.RIGHT ? buttonRect.right + 8 : undefined,
     right: side === WaveHeaderPinnedSide.LEFT ? 56 : undefined,
   };
 };
 
-const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, side }) => {
+const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({
+  wave,
+  side,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [maxHeight, setMaxHeight] = useState<number | undefined>(undefined);
@@ -87,7 +93,7 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
           dropdownRect.height,
           window.innerHeight
         );
-        
+
         setPosition(result.position);
         setMaxHeight(result.maxHeight);
       };
@@ -97,6 +103,7 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
       window.addEventListener("resize", updatePosition);
       return () => window.removeEventListener("resize", updatePosition);
     }
+    return;
   }, [isOpen]);
 
   useClickAway(dropdownRef, () => {
@@ -116,14 +123,16 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
         aria-label="Show wave description"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-size-8 tw-border-0 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-700 desktop-hover:hover:tw-ring-inset tw-transition tw-duration-300 tw-ease-out">
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-inset desktop-hover:hover:tw-ring-iron-700"
+      >
         <svg
           className="tw-h-5 tw-w-5 tw-flex-shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}
           stroke="currentColor"
-          aria-hidden="true">
+          aria-hidden="true"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -147,15 +156,22 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({ wave, sid
                 maxHeight: maxHeight,
                 overflowY: "auto",
                 ...(isMobile
-                  ? getMobilePositionStyles(position, buttonRef.current?.getBoundingClientRect())
-                  : getDesktopPositionStyles(position, buttonRef.current?.getBoundingClientRect(), side)
-                ),
+                  ? getMobilePositionStyles(
+                      position,
+                      buttonRef.current?.getBoundingClientRect()
+                    )
+                  : getDesktopPositionStyles(
+                      position,
+                      buttonRef.current?.getBoundingClientRect(),
+                      side
+                    )),
               }}
-              className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${
+              className={`tw-focus:tw-outline-none tw-z-50 tw-space-y-1 tw-overflow-y-auto tw-overflow-x-hidden tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 ${
                 isMobile
                   ? "tw-w-full tw-rounded-lg"
-                  : "lg:tw-max-w-[672px] tw-w-full tw-rounded-lg tw-origin-top-left"
-              }`}>
+                  : "tw-w-full tw-origin-top-left tw-rounded-lg lg:tw-max-w-[672px]"
+              }`}
+            >
               <Drop
                 drop={{
                   type: DropSize.FULL,

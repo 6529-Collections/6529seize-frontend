@@ -240,6 +240,7 @@ export function NextGenCollectionProvenanceRow(
       }
       return logSpan;
     }
+    return
   }
 
   return (

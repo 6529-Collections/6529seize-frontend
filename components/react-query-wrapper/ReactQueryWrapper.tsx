@@ -17,7 +17,11 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
 import { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
-import { InfiniteData, type QueryClient, useQueryClient } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  type QueryClient,
+  useQueryClient,
+} from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { createContext, useMemo } from "react";
 import { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
@@ -187,33 +191,33 @@ type ReactQueryWrapperContextType = {
 
 export const ReactQueryWrapperContext =
   createContext<ReactQueryWrapperContextType>({
-    setProfile: () => { },
-    setWavesOverviewPage: () => { },
-    setProfileProxy: () => { },
-    setWave: () => { },
-    setWaveDrops: () => { },
-    onProfileProxyModify: () => { },
-    onProfileCICModify: () => { },
-    onProfileRepModify: () => { },
-    onProfileEdit: () => { },
-    onProfileStatementAdd: () => { },
-    onProfileStatementRemove: () => { },
-    onIdentityFollowChange: () => { },
-    initProfileRepPage: () => { },
-    initProfileIdentityPage: () => { },
-    initCommunityActivityPage: () => { },
+    setProfile: () => {},
+    setWavesOverviewPage: () => {},
+    setProfileProxy: () => {},
+    setWave: () => {},
+    setWaveDrops: () => {},
+    onProfileProxyModify: () => {},
+    onProfileCICModify: () => {},
+    onProfileRepModify: () => {},
+    onProfileEdit: () => {},
+    onProfileStatementAdd: () => {},
+    onProfileStatementRemove: () => {},
+    onIdentityFollowChange: () => {},
+    initProfileRepPage: () => {},
+    initProfileIdentityPage: () => {},
+    initCommunityActivityPage: () => {},
     waitAndInvalidateDrops: async () => {},
     addOptimisticDrop: async () => {},
-    invalidateDrops: () => { },
-    onGroupRemoved: () => { },
-    onGroupChanged: () => { },
-    onGroupCreate: () => { },
-    onIdentityBulkRate: () => { },
-    onWaveCreated: () => { },
-    onWaveFollowChange: () => { },
-    invalidateAll: () => { },
-    invalidateNotifications: () => { },
-    invalidateIdentityTdhStats: () => { },
+    invalidateDrops: () => {},
+    onGroupRemoved: () => {},
+    onGroupChanged: () => {},
+    onGroupCreate: () => {},
+    onIdentityBulkRate: () => {},
+    onWaveCreated: () => {},
+    onWaveFollowChange: () => {},
+    invalidateAll: () => {},
+    invalidateNotifications: () => {},
+    invalidateIdentityTdhStats: () => {},
   });
 
 const getHandlesFromProfile = (profile: ApiIdentity): string[] => {
@@ -588,7 +592,7 @@ const createReactQueryContextValue = (
     const raterTarget =
       profileProxy?.created_by.handle ?? connectedProfile?.handle ?? null;
     const raterRepresentative = profileProxy
-      ? connectedProfile?.handle ?? null
+      ? (connectedProfile?.handle ?? null)
       : null;
 
     if (raterTarget) {
@@ -686,7 +690,7 @@ const createReactQueryContextValue = (
     const raterTarget =
       profileProxy?.created_by.handle ?? connectedProfile?.handle ?? null;
     const raterRepresentative = profileProxy
-      ? connectedProfile?.handle ?? null
+      ? (connectedProfile?.handle ?? null)
       : null;
 
     if (raterTarget) {

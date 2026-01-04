@@ -24,6 +24,7 @@ export class Time {
     if (inp !== undefined && inp !== null) {
       return Time.millis(inp);
     }
+    return;
   }
 
   static millis(amount: number): Time {
@@ -281,7 +282,7 @@ export class Time {
 
     return `${dateStr} - ${timeStr}`;
   }
-  
+
   public toLocaleDropDateString(): string {
     const date = this.toDate();
     const now = new Date();
@@ -308,7 +309,7 @@ export class Time {
       ...(sameYear ? {} : { year: "numeric" }),
     });
   }
-  
+
   public toShortRelativeTime(): string {
     const currentTime = new Date().getTime();
     const timeDifference = currentTime - this.ms;

@@ -108,7 +108,7 @@ export function MemePageActivity(
 
     if (activityLoading) {
       return (
-        <div className="tw-flex tw-justify-center tw-items-center tw-py-4">
+        <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
           <CircleLoader size={CircleLoaderSize.LARGE} />
         </div>
       );
@@ -116,11 +116,12 @@ export function MemePageActivity(
 
     if (activity.length === 0) {
       return (
-        <div className="tw-flex tw-justify-center tw-items-center tw-h-full tw-py-2">
+        <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-py-2">
           <NothingHereYetSummer />
         </div>
       );
     }
+    return;
   }, [activity, activityLoading, props.nft]);
 
   if (props.show && props.nft) {
@@ -189,11 +190,11 @@ export function MemePageActivity(
         )}
         <Row className="tw-py-3">
           <Col>
-            <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-items-stretch md:tw-items-center tw-gap-3">
-              <h3 className="tw-mb-0 tw-whitespace-nowrap tw-shrink-0">
+            <div className="tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
+              <h3 className="tw-mb-0 tw-shrink-0 tw-whitespace-nowrap">
                 Card Activity
               </h3>
-              <div className="tw-w-full md:tw-w-72 tw-shrink-0">
+              <div className="tw-w-full tw-shrink-0 md:tw-w-72">
                 <CommonDropdown
                   items={ActivityTypeItems}
                   activeItem={activityTypeFilter}
