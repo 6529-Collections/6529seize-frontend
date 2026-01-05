@@ -82,7 +82,7 @@ export default function UserPageCollected({
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
-  const user = params?.user?.toString().toLowerCase() ?? "";
+  const user = params?.["user"]?.toString().toLowerCase() ?? "";
 
   const convertSeized = ({
     seized,
@@ -415,19 +415,19 @@ export default function UserPageCollected({
       };
 
       if (!filters.accountForConsolidations) {
-        params.account_for_consolidations = "false";
+        params["account_for_consolidations"] = "false";
       }
 
       if (filters.collection) {
-        params.collection = filters.collection;
+        params["collection"] = filters.collection;
       }
 
       if (filters.seized) {
-        params.seized = filters.seized;
+        params["seized"] = filters.seized;
       }
 
       if (filters.szn) {
-        params.szn = filters.szn.id.toString();
+        params["szn"] = filters.szn.id.toString();
       }
 
       return await commonApiFetch<Page<CollectedCard>>({

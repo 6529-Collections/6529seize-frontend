@@ -9,8 +9,8 @@ export default function NFTActivityPage() {
   useSetTitle("NFT Activity | Network");
 
   return (
-    <main className={styles.main}>
-      <Container fluid className={styles.leaderboardContainer}>
+    <main className={styles["main"]}>
+      <Container fluid className={styles["leaderboardContainer"]}>
         <Row>
           <Col>
             <LatestActivity page={1} pageSize={50} showMore />

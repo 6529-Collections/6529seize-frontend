@@ -3,7 +3,7 @@ import React, { memo } from "react";
 interface SectionProps {
   readonly title: string;
   readonly children: React.ReactNode;
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 /**

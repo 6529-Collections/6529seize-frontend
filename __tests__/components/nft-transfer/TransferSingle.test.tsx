@@ -19,7 +19,7 @@ jest.mock("@/entities/IProfile", () => ({
   CollectedCollectionType: {} as any,
 }));
 
-let mockSelected = new Map<string, { qty?: number; max?: number }>();
+let mockSelected = new Map<string, { qty?: number | undefined; max?: number | undefined }>();
 const mockFns = {
   select: jest.fn(),
   unselect: jest.fn(),

@@ -12,7 +12,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 export default function NextGenNavigationHeader(
   props: Readonly<{
     view?: NextgenView | undefined;
-    setView?: (view: NextgenView | undefined) => void;
+    setView?: ((view: NextgenView | undefined) => void) | undefined;
   }>
 ) {
   const [isMobile, setIsMobile] = useState(false);
@@ -72,7 +72,7 @@ export default function NextGenNavigationHeader(
   return (
     <>
       <Container
-        className={`${styles.navigationHeader} ${
+        className={`${styles["navigationHeader"]} ${
           isMobile ? `flex-column gap-2` : `justify-content-between`
         }`}
         style={{
@@ -128,7 +128,7 @@ export default function NextGenNavigationHeader(
         </Row>
       </Container>
 
-      <hr className={styles.navigationHeaderHr} />
+      <hr className={styles["navigationHeaderHr"]} />
     </>
   );
 }

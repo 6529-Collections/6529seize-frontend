@@ -126,7 +126,7 @@ export const useWaveDropsSerialScroll = ({
       }
 
       const lastDrop = currentMessages.drops[0];
-      if (lastDrop.id.startsWith("temp-") && shouldPinToBottom) {
+      if (lastDrop?.id.startsWith("temp-") && shouldPinToBottom) {
         setTimeout(() => {
           scrollToVisualBottom();
         }, 100);

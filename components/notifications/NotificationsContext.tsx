@@ -91,13 +91,13 @@ const redirectConfig = {
 };
 
 interface NotificationData {
-  redirect?: keyof typeof redirectConfig;
-  profile_id?: string;
-  path?: string;
-  handle?: string;
-  id?: string;
-  wave_id?: string;
-  drop_id?: string;
+  redirect?: keyof typeof redirectConfig | undefined;
+  profile_id?: string | undefined;
+  path?: string | undefined;
+  handle?: string | undefined;
+  id?: string | undefined;
+  wave_id?: string | undefined;
+  drop_id?: string | undefined;
   [key: string]: unknown;
 }
 

@@ -152,10 +152,10 @@ export default function SubsequentDecisions({
                     Winners Announcement #{index + 2}
                   </div>
                   <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-flex tw-items-center">
-                    {formatDate(decisionDates[index + 1])}
+                    {formatDate(decisionDates[index + 1]!)}
                     <span className="tw-text-xs tw-text-iron-400 tw-ml-1">
                       (
-                      {new Date(decisionDates[index + 1]).toLocaleDateString(
+                      {new Date(decisionDates[index + 1]!).toLocaleDateString(
                         undefined,
                         { weekday: "long" }
                       )}
@@ -240,7 +240,7 @@ export default function SubsequentDecisions({
                   {formatDate(
                     subsequentDecisions.length > 0
                       ? new Date(
-                          decisionDates[decisionDates.length - 1]
+                          decisionDates[decisionDates.length - 1]!
                         ).getTime() + periodToMs(additionalTime, timeframeUnit)
                       : new Date(firstDecisionTime).getTime() +
                           periodToMs(additionalTime, timeframeUnit)

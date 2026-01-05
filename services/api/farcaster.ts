@@ -26,7 +26,7 @@ export const fetchFarcasterPreview = async (
       if (!response.ok) {
         let errorMessage = "Failed to fetch Farcaster metadata.";
         try {
-          const body = (await response.json()) as { error?: unknown };
+          const body = (await response.json()) as { error?: unknown | undefined };
           if (body && typeof body.error === "string" && body.error) {
             errorMessage = body.error;
           }

@@ -1,6 +1,10 @@
-"use client"
+"use client";
 
-import { DropSize, Drop as DropType, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  DropSize,
+  Drop as DropType,
+  ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import WaveDrop from "./WaveDrop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
@@ -34,8 +38,8 @@ interface DropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 export default function Drop({
@@ -104,7 +108,6 @@ export default function Drop({
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
-        parentContainerRef={parentContainerRef}
       />
     ),
   };

@@ -2,7 +2,7 @@ import "@google/model-viewer";
 import { BaseNFT } from "@/entities/INFT";
 
 export default function NFTModel(
-  props: Readonly<{ nft: BaseNFT; id?: string }>
+  props: Readonly<{ nft: BaseNFT; id?: string | undefined }>
 ) {
   return (
     // @ts-ignore

@@ -10,10 +10,10 @@ interface ArtworkDetailsProps {
   readonly description: string;
   readonly onTitleChange: (title: string) => void;
   readonly onDescriptionChange: (description: string) => void;
-  readonly titleError?: string | null;
-  readonly descriptionError?: string | null;
-  readonly onTitleBlur?: () => void;
-  readonly onDescriptionBlur?: () => void;
+  readonly titleError?: string | null | undefined;
+  readonly descriptionError?: string | null | undefined;
+  readonly onTitleBlur?: (() => void) | undefined;
+  readonly onDescriptionBlur?: (() => void) | undefined;
 }
 
 /**
@@ -86,7 +86,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   return (
     <FormSection
       title="Artwork Details"
-      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6">
+      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6"
+    >
       <div className="tw-grid tw-grid-cols-1 tw-gap-6">
         <div className="tw-group tw-relative">
           <div className="tw-relative">
@@ -97,7 +98,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   titleError
                     ? "tw-text-red"
                     : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-                }`}>
+                }`}
+            >
               Artwork Title
             </label>
 
@@ -145,7 +147,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   descriptionError
                     ? "tw-text-red"
                     : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-                }`}>
+                }`}
+            >
               Description
             </label>
 

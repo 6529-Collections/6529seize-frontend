@@ -3,9 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { FetchResultsType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable";
-import {
-  DistributionPlanSnapshotToken,
-} from "@/components/allowlist-tool/allowlist-tool.types";
+import { DistributionPlanSnapshotToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
@@ -16,9 +14,7 @@ export default function CreateSnapshotTableRowDownload({
 }: {
   tokenPoolId: string;
 }) {
-  const { distributionPlan, setToasts } = useContext(
-    DistributionPlanToolContext
-  );
+  const { distributionPlan } = useContext(DistributionPlanToolContext);
 
   const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
   const [isLoadingJson, setIsLoadingJson] = useState(false);
@@ -41,7 +37,7 @@ export default function CreateSnapshotTableRowDownload({
 
   const downloadCsv = (results: DistributionPlanSnapshotToken[]) => {
     const csv = [
-      Object.keys(results[0]).join(","),
+      Object.keys(results[0]!).join(","),
       ...results.map((item) => Object.values(item).join(",")),
     ].join("\n");
 

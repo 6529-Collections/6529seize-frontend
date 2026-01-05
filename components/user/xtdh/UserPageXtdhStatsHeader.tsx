@@ -9,7 +9,7 @@ import { UserPageXtdhStatsHeaderSkeleton } from "./user-page-xtdh-stats-header/U
 
 interface UserPageXtdhStatsHeaderProps {
   readonly profileId: string | null;
-  readonly onOutboundClick?: () => void;
+  readonly onOutboundClick?: (() => void) | undefined;
 }
 
 export default function UserPageXtdhStatsHeader({
@@ -38,10 +38,7 @@ export default function UserPageXtdhStatsHeader({
       statsQuery.refetch().catch(() => undefined);
     };
     return (
-      <UserPageXtdhStatsHeaderError
-        message={message}
-        onRetry={handleRetry}
-      />
+      <UserPageXtdhStatsHeaderError message={message} onRetry={handleRetry} />
     );
   }
 

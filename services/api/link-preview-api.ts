@@ -1,25 +1,25 @@
 interface LinkPreviewMedia {
-  readonly url?: string | null;
-  readonly secureUrl?: string | null;
-  readonly type?: string | null;
-  readonly width?: number | null;
-  readonly height?: number | null;
-  readonly alt?: string | null;
+  readonly url?: string | null | undefined;
+  readonly secureUrl?: string | null | undefined;
+  readonly type?: string | null | undefined;
+  readonly width?: number | null | undefined;
+  readonly height?: number | null | undefined;
+  readonly alt?: string | null | undefined;
   readonly [key: string]: unknown;
 }
 
 interface LinkPreviewBase {
-  readonly requestUrl?: string | null;
-  readonly url?: string | null;
-  readonly title?: string | null;
-  readonly description?: string | null;
-  readonly siteName?: string | null;
-  readonly mediaType?: string | null;
-  readonly contentType?: string | null;
-  readonly favicon?: string | null;
-  readonly favicons?: readonly string[] | null;
-  readonly image?: LinkPreviewMedia | null;
-  readonly images?: readonly LinkPreviewMedia[] | null;
+  readonly requestUrl?: string | null | undefined;
+  readonly url?: string | null | undefined;
+  readonly title?: string | null | undefined;
+  readonly description?: string | null | undefined;
+  readonly siteName?: string | null | undefined;
+  readonly mediaType?: string | null | undefined;
+  readonly contentType?: string | null | undefined;
+  readonly favicon?: string | null | undefined;
+  readonly favicons?: readonly string[] | null | undefined;
+  readonly image?: LinkPreviewMedia | null | undefined;
+  readonly images?: readonly LinkPreviewMedia[] | null | undefined;
   readonly [key: string]: unknown;
 }
 
@@ -33,9 +33,9 @@ interface GoogleWorkspaceLinksBase {
 export interface GoogleDocsLinkPreview extends LinkPreviewBase {
   readonly type: "google.docs";
   readonly fileId: string;
-  readonly thumbnail?: string | null;
+  readonly thumbnail?: string | null | undefined;
   readonly links: GoogleWorkspaceLinksBase & {
-    readonly exportPdf?: string;
+    readonly exportPdf?: string | undefined;
   };
   readonly availability: GoogleWorkspaceAvailability;
 }
@@ -43,10 +43,10 @@ export interface GoogleDocsLinkPreview extends LinkPreviewBase {
 export interface GoogleSheetsLinkPreview extends LinkPreviewBase {
   readonly type: "google.sheets";
   readonly fileId: string;
-  readonly gid?: string | null;
-  readonly thumbnail?: string | null;
+  readonly gid?: string | null | undefined;
+  readonly thumbnail?: string | null | undefined;
   readonly links: GoogleWorkspaceLinksBase & {
-    readonly embedPub?: string;
+    readonly embedPub?: string | undefined;
   };
   readonly availability: GoogleWorkspaceAvailability;
 }
@@ -54,9 +54,9 @@ export interface GoogleSheetsLinkPreview extends LinkPreviewBase {
 export interface GoogleSlidesLinkPreview extends LinkPreviewBase {
   readonly type: "google.slides";
   readonly fileId: string;
-  readonly thumbnail?: string | null;
+  readonly thumbnail?: string | null | undefined;
   readonly links: GoogleWorkspaceLinksBase & {
-    readonly exportPdf?: string;
+    readonly exportPdf?: string | undefined;
   };
   readonly availability: GoogleWorkspaceAvailability;
 }
@@ -67,7 +67,7 @@ export type GoogleWorkspaceLinkPreview =
   | GoogleSlidesLinkPreview;
 
 interface GenericLinkPreviewResponse extends LinkPreviewBase {
-  readonly type?: string | null;
+  readonly type?: string | null | undefined;
 }
 
 export type LinkPreviewResponse =

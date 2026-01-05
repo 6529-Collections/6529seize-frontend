@@ -16,8 +16,8 @@ describe('useWaveLoadingState', () => {
       result.current.setPromise('w1', Promise.resolve(null));
       result.current.setLoadingState('w1', true);
     });
-    expect(result.current.loadingStates.current['w1'].isLoading).toBe(true);
-    expect(result.current.loadingStates.current['w1'].promise).not.toBeNull();
+    expect(result.current.loadingStates.current['w1']?.isLoading).toBe(true);
+    expect(result.current.loadingStates.current['w1']?.promise).not.toBeNull();
 
     act(() => {
       result.current.setLoadingState('w1', false);

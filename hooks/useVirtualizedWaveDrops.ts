@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useCallback } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
@@ -72,13 +72,12 @@ export function useVirtualizedWaveDrops(
       maxWaitTimeMs?: number,
       pollIntervalMs?: number
     ) => {
-      if (virtualizedWaveMessages) {
-        return await virtualizedWaveMessages.waitAndRevealDrop(
-          serialNo,
-          maxWaitTimeMs,
-          pollIntervalMs
-        );
-      }
+      if (!virtualizedWaveMessages) return;
+      return await virtualizedWaveMessages.waitAndRevealDrop(
+        serialNo,
+        maxWaitTimeMs,
+        pollIntervalMs
+      );
     },
     [virtualizedWaveMessages]
   );

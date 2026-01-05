@@ -13,7 +13,7 @@ import MintCountdownBox from "./MintCountdownBox";
 export default function MemePageMintCountdown(
   props: Readonly<{
     nft_id: number;
-    hide_mint_btn?: boolean;
+    hide_mint_btn?: boolean | undefined;
   }>
 ) {
   const [isError, setIsError] = useState(false);

@@ -17,7 +17,7 @@ interface WaveDropVoteSummaryProps {
   readonly isVotingEnded: boolean;
   readonly canShowVote: boolean;
   readonly onVoteClick: () => void;
-  readonly variant?: VoteSummaryVariant;
+  readonly variant?: VoteSummaryVariant | undefined;
 }
 
 const VOTE_SUMMARY_STYLES: Record<

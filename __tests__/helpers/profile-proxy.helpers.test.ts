@@ -25,8 +25,8 @@ describe('profile-proxy.helpers', () => {
         { id: '2', created_by: { id: 'c' }, granted_to: { id: 'a' }, actions: [{ is_active: true }] },
       ];
       const grouped = groupProfileProxies({ onlyActive: false, profileProxies: proxies, profileId: 'a' });
-      expect(grouped.granted[0].id).toBe('1');
-      expect(grouped.received[0].id).toBe('2');
+      expect(grouped.granted[0]?.id).toBe('1');
+      expect(grouped.received[0]?.id).toBe('2');
     });
   });
 

@@ -37,13 +37,13 @@ describe('WaveGroupRemove', () => {
     );
     await user.click(screen.getByTestId('remove'));
     expect(onWaveUpdate).toHaveBeenCalled();
-    expect(onWaveUpdate.mock.calls[0][0].visibility.scope.group_id).toBeNull();
+    expect(onWaveUpdate.mock.calls[0][0]?.visibility.scope.group_id).toBeNull();
 
     onWaveUpdate.mockClear();
     render(
       <WaveGroupRemove wave={baseWave} type={WaveGroupType.ADMIN} isEditOpen={true} setIsEditOpen={jest.fn()} onWaveUpdate={onWaveUpdate} />
     );
     await user.click(screen.getAllByTestId('remove')[1]);
-    expect(onWaveUpdate.mock.calls[0][0].wave.admin_group.group_id).toBeNull();
+    expect(onWaveUpdate.mock.calls[0][0]?.wave.admin_group.group_id).toBeNull();
   });
 });

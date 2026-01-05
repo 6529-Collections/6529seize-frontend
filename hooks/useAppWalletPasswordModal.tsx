@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { UnlockAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 
 export const useAppWalletPasswordModal = () => {

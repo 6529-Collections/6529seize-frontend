@@ -108,7 +108,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   function printToken() {
     return (
       <>
-        <Container fluid className={`${styles.tokenContainer} pt-4 pb-4`}>
+        <Container fluid className={`${styles["tokenContainer"]} pt-4 pb-4`}>
           <Row>
             <Col>
               <Container>
@@ -191,7 +191,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       rel="noopener noreferrer"
                     >
                       <FontAwesomeIcon
-                        className={styles.copyIcon}
+                        className={styles["copyIcon"]}
                         icon={faExternalLinkSquare}
                       ></FontAwesomeIcon>
                     </Link>
@@ -211,7 +211,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       >
                         <Image
                           unoptimized
-                          className={styles.marketplace}
+                          className={styles["marketplace"]}
                           src="/opensea.png"
                           alt="opensea"
                           width={28}

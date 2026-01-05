@@ -8,7 +8,7 @@ interface WaveWinnersDropsProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly winners: ApiWaveDecisionWinner[];
-  readonly isLoading?: boolean;
+  readonly isLoading?: boolean | undefined;
 }
 
 export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({

@@ -9,12 +9,18 @@ import styles from "./DatePickerModal.module.scss";
 interface Props {
   mode: "date" | "block";
   show: boolean;
-  initial_from_date?: Date;
-  initial_to_date?: Date;
-  initial_from_block?: number;
-  initial_to_block?: number;
-  onApplyDate?: (fromDate: Date, toDate: Date) => void;
-  onApplyBlock?: (fromBlock: number, toBlock: number) => void;
+  initial_from_date?: Date | undefined;
+  initial_to_date?: Date | undefined;
+  initial_from_block?: number | undefined;
+  initial_to_block?: number | undefined;
+  onApplyDate?:
+    | ((fromDate: Date, toDate: Date) => void)
+    | undefined
+    | undefined;
+  onApplyBlock?:
+    | ((fromBlock: number, toBlock: number) => void)
+    | undefined
+    | undefined;
   onHide: () => void;
 }
 
@@ -81,16 +87,17 @@ export default function DatePickerModal(props: Readonly<Props>) {
 
   return (
     <Modal show={props.show} onHide={() => props.onHide()}>
-      <div className={styles.header}>
+      <div className={styles["header"]}>
         <Modal.Title>Select {props.mode}s</Modal.Title>
         <FontAwesomeIcon
-          className={styles.modalClose}
+          className={styles["modalClose"]}
           icon={faTimesCircle}
           onClick={() => props.onHide()}
         />
       </div>
       <Modal.Body
-        className={`${styles.body} d-flex align-items-center justify-content-between font-larger`}>
+        className={`${styles["body"]} d-flex align-items-center justify-content-between font-larger`}
+      >
         <Container>
           <Row>
             <Col>
@@ -106,7 +113,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                       max={new Date().toISOString().slice(0, 10)}
                       type="date"
                       placeholder="Start Date"
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value && value.length === 10) {
@@ -122,7 +129,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   ) : (
                     <Form.Control
                       value={fromBlock}
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       type="number"
                       placeholder="Start Block"
                       onChange={(e) => {
@@ -144,7 +151,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                         toDate && new Date(toDate)?.toISOString().slice(0, 10)
                       }
                       max={new Date().toISOString().slice(0, 10)}
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       type="date"
                       placeholder="End Date"
                       onChange={(e) => {
@@ -162,7 +169,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   ) : (
                     <Form.Control
                       value={toBlock}
-                      className={`${styles.formInput}`}
+                      className={`${styles["formInput"]}`}
                       type="number"
                       placeholder="End Block"
                       onChange={(e) => {
@@ -181,7 +188,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
           </Row>
         </Container>
       </Modal.Body>
-      <Modal.Footer className={styles.footer}>
+      <Modal.Footer className={styles["footer"]}>
         <Container>
           <Row>
             <Col className="d-flex justify-content-between gap-2">
@@ -191,7 +198,8 @@ export default function DatePickerModal(props: Readonly<Props>) {
               <span className="d-flex justify-content-end gap-2">
                 <Button
                   className="seize-btn-link"
-                  onClick={() => props.onHide()}>
+                  onClick={() => props.onHide()}
+                >
                   Cancel
                 </Button>
                 <Button
@@ -199,7 +207,8 @@ export default function DatePickerModal(props: Readonly<Props>) {
                   onClick={() => {
                     setError(undefined);
                     apply();
-                  }}>
+                  }}
+                >
                   Apply
                 </Button>
               </span>

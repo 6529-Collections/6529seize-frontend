@@ -35,7 +35,7 @@ function isConnectionError(message: string): boolean {
 
 function isFrameWithPaths(
   frame: unknown
-): frame is { filename?: string; abs_path?: string } {
+): frame is { filename?: string | undefined; abs_path?: string | undefined } {
   return (
     typeof frame === "object" &&
     frame !== null &&
@@ -65,7 +65,7 @@ function hasHttpServerStack(stack: string): boolean {
 function checkFirstErrorPath(
   event: Event,
   message: string,
-  value: { stacktrace?: { frames?: unknown[] } }
+  value: { stacktrace?: { frames?: unknown[] | undefined } | undefined }
 ): boolean {
   if (!isConnectionError(message)) {
     return false;

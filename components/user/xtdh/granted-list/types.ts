@@ -5,7 +5,7 @@ export interface UserPageXtdhGrantedListContentProps {
   readonly enabled: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly grants: ApiXTdhGrantsPage["data"];
   readonly isSelf: boolean;
   readonly onRetry: () => void;

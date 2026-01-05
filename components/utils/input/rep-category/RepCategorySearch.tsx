@@ -22,9 +22,9 @@ export default function RepCategorySearch({
   setCategory,
 }: {
   readonly category: string | null;
-  readonly size?: RepCategorySearchSize;
-  readonly disableInputCategoryAsValue?: boolean;
-  readonly error?: boolean;
+  readonly size?: RepCategorySearchSize | undefined;
+  readonly disableInputCategoryAsValue?: boolean | undefined;
+  readonly error?: boolean | undefined;
   readonly setCategory: (category: string | null) => void;
 }) {
   const randomId = getRandomObjectId();

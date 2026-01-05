@@ -10,7 +10,7 @@ export default function AboutCopyright() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles.lastUpdateText} text-right pt-3 pb-3`}>
+        <Col className={`${styles["lastUpdateText"]} text-right pt-3 pb-3`}>
           Last Updated: April 23, 2024
         </Col>
       </Row>

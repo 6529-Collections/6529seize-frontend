@@ -39,7 +39,7 @@ export default function AboutCookiePolicy() {
         </Col>
       </Row>
       <Row>
-        <Col className={`${styles.lastUpdateText} text-right pt-3 pb-3`}>
+        <Col className={`${styles["lastUpdateText"]} text-right pt-3 pb-3`}>
           Last Updated: June 04, 2024
         </Col>
       </Row>
@@ -87,7 +87,7 @@ export default function AboutCookiePolicy() {
             </Row>
             <Row>
               <Col>
-                <Table className={styles.cookiePolicyTable}>
+                <Table className={styles["cookiePolicyTable"]}>
                   <thead>
                     <tr>
                       <th>Domain</th>
@@ -188,7 +188,7 @@ export default function AboutCookiePolicy() {
             </Row>
             <Row>
               <Col>
-                <Table className={styles.cookiePolicyTable}>
+                <Table className={styles["cookiePolicyTable"]}>
                   <thead>
                     <tr>
                       <th>Domain</th>

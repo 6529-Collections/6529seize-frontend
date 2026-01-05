@@ -5,9 +5,9 @@ import { WavePodiumItem } from "./WavePodiumItem";
 
 interface WaveWinnersPodiumContentProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly firstPlaceWinner?: ApiWaveDecisionWinner;
-  readonly secondPlaceWinner?: ApiWaveDecisionWinner;
-  readonly thirdPlaceWinner?: ApiWaveDecisionWinner;
+  readonly firstPlaceWinner?: ApiWaveDecisionWinner | undefined;
+  readonly secondPlaceWinner?: ApiWaveDecisionWinner | undefined;
+  readonly thirdPlaceWinner?: ApiWaveDecisionWinner | undefined;
 }
 
 export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> = ({

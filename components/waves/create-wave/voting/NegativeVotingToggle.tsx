@@ -1,7 +1,7 @@
 interface NegativeVotingToggleProps {
   readonly allowNegativeVotes: boolean;
   readonly onChange: (allowNegativeVotes: boolean) => void;
-  readonly isDisabled?: boolean;
+  readonly isDisabled?: boolean | undefined;
 }
 
 export default function NegativeVotingToggle({

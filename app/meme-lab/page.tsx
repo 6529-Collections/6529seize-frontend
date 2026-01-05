@@ -6,7 +6,7 @@ import { Metadata } from "next";
 
 export default function MemeLab() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <MemeLabComponent />
     </main>
   );

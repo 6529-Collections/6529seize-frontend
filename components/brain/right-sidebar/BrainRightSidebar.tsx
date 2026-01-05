@@ -17,7 +17,7 @@ interface BrainRightSidebarProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
-  readonly variant?: "overlay" | "inline";
+  readonly variant?: "overlay" | "inline" | undefined;
 }
 
 export enum Mode {

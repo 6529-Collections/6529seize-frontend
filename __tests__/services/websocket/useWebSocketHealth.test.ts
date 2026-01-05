@@ -11,8 +11,8 @@ jest.mock('@/services/auth/auth.utils', () => ({
 }));
 
 type CookieChangeEvent = {
-  changed?: Array<{ name: string }>;
-  deleted?: Array<{ name: string }>;
+  changed?: Array<{ name: string }> | undefined;
+  deleted?: Array<{ name: string }> | undefined;
 };
 
 class MockBroadcastChannel {

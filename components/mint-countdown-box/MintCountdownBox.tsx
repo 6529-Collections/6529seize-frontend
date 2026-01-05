@@ -12,18 +12,18 @@ interface Props {
   mintInfo?: {
     title: string;
     date: number; // Unix seconds
-    showAllowlistInfo?: boolean;
-    isFinalized?: boolean;
-    isEnded?: boolean;
-    isSoldOut?: boolean;
-  };
+    showAllowlistInfo?: boolean | undefined;
+    isFinalized?: boolean | undefined;
+    isEnded?: boolean | undefined;
+    isSoldOut?: boolean | undefined;
+  } | undefined;
   linkInfo?: {
     href: string;
     target: "_blank" | "_self";
-  };
-  hideMintBtn?: boolean;
-  small?: boolean;
-  isError?: boolean;
+  } | undefined;
+  hideMintBtn?: boolean | undefined;
+  small?: boolean | undefined;
+  isError?: boolean | undefined;
 }
 
 export default function MintCountdownBox(props: Readonly<Props>) {
@@ -44,8 +44,8 @@ export default function MintCountdownBox(props: Readonly<Props>) {
   const showAllowlistInfo = mintInfo?.showAllowlistInfo;
 
   const containerClasses = [
-    styles.countdownContainer,
-    small ? styles.countdownContainerShort : "",
+    styles["countdownContainer"],
+    small ? styles["countdownContainerShort"] : "",
   ].join(" ");
 
   if (isError) {
@@ -95,7 +95,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
             icon={faInfoCircle}
             data-tooltip-id="allowlist-info"
             data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
-            className={styles.allowlistInfo}
+            className={styles["allowlistInfo"]}
           />
           <Tooltip
             id="allowlist-info"
@@ -126,7 +126,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
         <div className="pt-2 pb-2 tw-w-full">
           <button
             disabled
-            className={`pt-2 pb-2 btn-block no-wrap ${styles.mintBtn} ${styles.skeletonBtn}`}>
+            className={`pt-2 pb-2 btn-block no-wrap ${styles["mintBtn"]} ${styles["skeletonBtn"]}`}>
             &nbsp;
           </button>
         </div>
@@ -140,7 +140,7 @@ export default function MintCountdownBox(props: Readonly<Props>) {
             rel={
               linkInfo.target === "_blank" ? "noopener noreferrer" : undefined
             }>
-            <button className={`pt-2 pb-2 btn-block no-wrap ${styles.mintBtn}`}>
+            <button className={`pt-2 pb-2 btn-block no-wrap ${styles["mintBtn"]}`}>
               Mint
             </button>
           </Link>

@@ -12,8 +12,8 @@ export default function ShowMoreButton({
 }: Readonly<{
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
-  showMoreLabel?: string;
-  showLessLabel?: string;
+  showMoreLabel?: string | undefined;
+  showLessLabel?: string | undefined;
 }>) {
   return (
     <button

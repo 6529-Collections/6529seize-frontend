@@ -1,15 +1,12 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ApiWallet } from "@/generated/models/ApiWallet";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItemPrimary({
   isPrimary,
   canEdit,
-  address,
   assignPrimary,
   isAssigningPrimary,
 }: {
   readonly isPrimary: boolean;
-  readonly address: ApiWallet;
   readonly canEdit: boolean;
   readonly assignPrimary: () => void;
   readonly isAssigningPrimary: boolean;

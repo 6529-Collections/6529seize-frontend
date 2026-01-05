@@ -32,10 +32,6 @@ export enum LeaderboardInteractionsSort {
   "burns" = "burns",
 }
 
-type LeaderboardSortType =
-  | LeaderboardCardsCollectedSort
-  | LeaderboardInteractionsSort;
-
 export interface LeaderboardMetrics {
   handle: string;
   consolidation_key: string;
@@ -52,7 +48,7 @@ export interface LeaderboardMetrics {
   boosted_tdh: number;
   day_change: number;
   level: number;
-  cic_type?: CICType;
+  cic_type?: CICType | undefined;
 }
 
 type LeaderboardItem = LeaderboardMetrics | LeaderboardInteractions;
@@ -78,7 +74,7 @@ export interface LeaderboardInteractions {
   transfers_out: number;
   airdrops: number;
   burns: number;
-  cic_type?: CICType;
+  cic_type?: CICType | undefined;
 }
 
 export function getLeaderboardDownloadFileName(

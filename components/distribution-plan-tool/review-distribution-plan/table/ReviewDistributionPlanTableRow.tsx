@@ -83,7 +83,7 @@ export default function ReviewDistributionPlanTableRow({
   const downloadCsv = (results: AllowlistResult[]) => {
     const fullResult = getFullResults(results);
     const csv = [
-      Object.keys(fullResult[0]).join(","),
+      Object.keys(fullResult[0]!).join(","),
       ...fullResult.map((item) => Object.values(item).join(",")),
     ].join("\n");
 
@@ -111,7 +111,7 @@ export default function ReviewDistributionPlanTableRow({
       {}
     );
     return Object.keys(merged).map<{ address: string; value: number }>(
-      (address) => ({ address, value: merged[address] })
+      (address) => ({ address, value: merged[address]! })
     );
   };
 
@@ -124,7 +124,7 @@ export default function ReviewDistributionPlanTableRow({
       value: row.amount,
     }));
     const csv = [
-      Object.keys(fullResult[0]).join(","),
+      Object.keys(fullResult[0]!).join(","),
       ...mergeAddressValues(fullResult).map((item) =>
         Object.values(item).join(",")
       ),

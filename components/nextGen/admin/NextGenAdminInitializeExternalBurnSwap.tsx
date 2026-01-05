@@ -215,7 +215,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
             <Form.Group className="mb-3">
               <Form.Label>Mint Collection ID</Form.Label>
               <Form.Select
-                className={`${styles.formInput}`}
+                className={`${styles["formInput"]}`}
                 value={mintCollectionID}
                 onChange={(e) => {
                   setStatus(false);

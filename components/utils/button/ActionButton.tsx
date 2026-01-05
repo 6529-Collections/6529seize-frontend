@@ -3,9 +3,9 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 interface ActionButtonProps {
   readonly onClicked: () => void;
   readonly children: React.ReactNode;
-  readonly size?: "default" | "sm";
-  readonly disabled?: boolean;
-  readonly loading?: boolean;
+  readonly size?: "default" | "sm" | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly loading?: boolean | undefined;
 }
 
 export default function ActionButton({

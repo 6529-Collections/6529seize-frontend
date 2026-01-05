@@ -9,12 +9,15 @@ export enum SingleWaveDropVoteSize {
 
 interface SingleWaveDropVoteProps {
   readonly drop: ApiDrop;
-  readonly size?: SingleWaveDropVoteSize;
-  readonly onVoteSuccess?: () => void;
+  readonly size?: SingleWaveDropVoteSize | undefined;
+  readonly onVoteSuccess?: (() => void) | undefined;
 }
 
 const SingleWaveDropVoteContent = dynamic(
-  () => import("./SingleWaveDropVoteContent").then((mod) => mod.SingleWaveDropVoteContent),
+  () =>
+    import("./SingleWaveDropVoteContent").then(
+      (mod) => mod.SingleWaveDropVoteContent
+    ),
   { ssr: false }
 );
 
@@ -23,5 +26,11 @@ export const SingleWaveDropVote: React.FC<SingleWaveDropVoteProps> = ({
   size = SingleWaveDropVoteSize.NORMAL,
   onVoteSuccess,
 }) => {
-  return <SingleWaveDropVoteContent drop={drop} size={size} onVoteSuccess={onVoteSuccess} />;
-}; 
+  return (
+    <SingleWaveDropVoteContent
+      drop={drop}
+      size={size}
+      onVoteSuccess={onVoteSuccess}
+    />
+  );
+};

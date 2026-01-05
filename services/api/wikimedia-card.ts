@@ -2,9 +2,9 @@ export type WikimediaSource = "wikipedia" | "wikimedia-commons" | "wikidata";
 
 export interface WikimediaImage {
   readonly url: string;
-  readonly width?: number | null;
-  readonly height?: number | null;
-  readonly alt?: string | null;
+  readonly width?: number | null | undefined;
+  readonly height?: number | null | undefined;
+  readonly alt?: string | null | undefined;
 }
 
 interface WikimediaCardBase {
@@ -16,51 +16,51 @@ interface WikimediaCardBase {
 export interface WikimediaArticleCard extends WikimediaCardBase {
   readonly kind: "article";
   readonly title: string;
-  readonly description?: string | null;
-  readonly extract?: string | null;
+  readonly description?: string | null | undefined;
+  readonly extract?: string | null | undefined;
   readonly lang: string;
-  readonly thumbnail?: WikimediaImage | null;
-  readonly coordinates?: { readonly lat: number; readonly lon: number } | null;
-  readonly lastModified?: string | null;
-  readonly section?: string | null;
+  readonly thumbnail?: WikimediaImage | null | undefined;
+  readonly coordinates?: { readonly lat: number; readonly lon: number } | null | undefined;
+  readonly lastModified?: string | null | undefined;
+  readonly section?: string | null | undefined;
 }
 
 export interface WikimediaDisambiguationCard extends WikimediaCardBase {
   readonly kind: "disambiguation";
   readonly title: string;
-  readonly description?: string | null;
-  readonly extract?: string | null;
+  readonly description?: string | null | undefined;
+  readonly extract?: string | null | undefined;
   readonly lang: string;
-  readonly section?: string | null;
+  readonly section?: string | null | undefined;
   readonly items: ReadonlyArray<{
     readonly title: string;
     readonly url: string;
-    readonly description?: string | null;
-    readonly thumbnail?: WikimediaImage | null;
+    readonly description?: string | null | undefined;
+    readonly thumbnail?: WikimediaImage | null | undefined;
   }>;
 }
 
 export interface WikimediaCommonsFileCard extends WikimediaCardBase {
   readonly kind: "commons-file";
   readonly title: string;
-  readonly description?: string | null;
-  readonly credit?: string | null;
-  readonly author?: string | null;
+  readonly description?: string | null | undefined;
+  readonly credit?: string | null | undefined;
+  readonly author?: string | null | undefined;
   readonly license?: {
     readonly name: string;
-    readonly url?: string | null;
-    readonly requiresAttribution?: boolean;
-  } | null;
-  readonly thumbnail?: WikimediaImage | null;
-  readonly original?: (WikimediaImage & { readonly mime?: string | null }) | null;
+    readonly url?: string | null | undefined;
+    readonly requiresAttribution?: boolean | undefined;
+  } | null | undefined;
+  readonly thumbnail?: WikimediaImage | null | undefined;
+  readonly original?: (WikimediaImage & { readonly mime?: string | null | undefined }) | null | undefined;
 }
 
 export interface WikimediaWikidataCard extends WikimediaCardBase {
   readonly kind: "wikidata";
   readonly title: string;
   readonly lang: string;
-  readonly description?: string | null;
-  readonly image?: WikimediaImage | null;
+  readonly description?: string | null | undefined;
+  readonly image?: WikimediaImage | null | undefined;
   readonly facts: ReadonlyArray<{
     readonly propertyId: string;
     readonly propertyLabel: string;
@@ -75,8 +75,8 @@ export interface WikimediaWikidataCard extends WikimediaCardBase {
 
 export interface WikimediaUnavailableCard extends WikimediaCardBase {
   readonly kind: "unavailable";
-  readonly reason?: string;
-  readonly title?: string | null;
+  readonly reason?: string | undefined;
+  readonly title?: string | null | undefined;
 }
 
 export type WikimediaCardResponse =
@@ -109,7 +109,7 @@ export const fetchWikimediaCard = async (
 
   const requestPromise = fetch(`/api/wikimedia-card?${params.toString()}`, {
     headers: { Accept: "application/json" },
-    signal,
+    ...(signal !== undefined ? { signal: signal } : {}),
   })
     .then(async (response) => {
       if (!response.ok) {

@@ -3,7 +3,7 @@ import clsx from "clsx";
 interface XtdhContributorSummaryProps {
   readonly activeCount: string;
   readonly totalCount: string;
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 export function XtdhContributorSummary({

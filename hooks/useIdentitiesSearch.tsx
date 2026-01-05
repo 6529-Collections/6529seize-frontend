@@ -23,11 +23,11 @@ export function useIdentitiesSearch({
       };
       if (waveId) {
         if (wave?.visibility.scope.group?.id) {
-          params.group_id = wave.visibility.scope.group.id;
+          params["group_id"] = wave.visibility.scope.group.id;
         } else {
-          params.wave_id = waveId;
+          params["wave_id"] = waveId;
         }
-        params.ignore_authenticated_user = "true";
+        params["ignore_authenticated_user"] = "true";
       }
       return await commonApiFetch<ApiIdentity[]>({
         endpoint: `identities`,

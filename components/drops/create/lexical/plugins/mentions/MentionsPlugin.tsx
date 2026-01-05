@@ -16,7 +16,6 @@ import {
   useRef,
   useState,
 } from "react";
-import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { $createMentionNode } from "@/components/drops/create/lexical/nodes/MentionNode";
@@ -100,14 +99,15 @@ function checkForAtSignMentions(
   if (match !== null) {
     // The strategy ignores leading whitespace but we need to know it's
     // length to add it to the leadOffset
-    const maybeLeadingWhitespace = match[1];
+    const maybeLeadingWhitespace = match[1] ?? "";
 
     const matchingString = match[3];
-    if (matchingString.length >= minMatchLength) {
+    const replaceableString = match[2] ?? "";
+    if (matchingString && matchingString.length >= minMatchLength) {
       return {
         leadOffset: match.index + maybeLeadingWhitespace.length,
         matchingString,
-        replaceableString: match[2],
+        replaceableString,
       };
     }
   }

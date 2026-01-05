@@ -7,7 +7,7 @@ import { Tooltip } from "react-tooltip";
 interface DropVoteProgressingProps {
   readonly current: number | null | undefined;
   readonly projected: number | null | undefined;
-  readonly subtle?: boolean;
+  readonly subtle?: boolean | undefined;
 }
 
 export default function DropVoteProgressing({

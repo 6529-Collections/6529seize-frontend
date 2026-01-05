@@ -157,7 +157,7 @@ describe("config/env.ts publicEnv loader", () => {
   });
 
   it("parses valid PUBLIC_RUNTIME JSON", () => {
-    process.env.PUBLIC_RUNTIME = JSON.stringify({
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
       ...defaultInput,
     });
     const { publicEnv } = require("@/config/env");
@@ -166,7 +166,7 @@ describe("config/env.ts publicEnv loader", () => {
   });
 
   it("throws for invalid BASE_ENDPOINT via PUBLIC_RUNTIME JSON", () => {
-    process.env.PUBLIC_RUNTIME = JSON.stringify({
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
       ...defaultInput,
       BASE_ENDPOINT: "http://example.com", // not localhost -> should fail HTTPS rule
     });

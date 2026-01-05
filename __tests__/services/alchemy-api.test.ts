@@ -118,8 +118,8 @@ describe("services/alchemy-api", () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(result).toHaveLength(1);
-      expect(result[0].tokenId.toString()).toBe("1");
-      expect(result[0].imageUrl).toBe("https://example.com/1.png");
+      expect(result[0]?.tokenId.toString()).toBe("1");
+      expect(result[0]?.imageUrl).toBe("https://example.com/1.png");
     });
   });
 });

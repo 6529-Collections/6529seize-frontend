@@ -4,7 +4,7 @@ import { TimeUnitDisplay } from "./TimeUnitDisplay";
 
 interface CompactTimeCountdownProps {
   readonly timeLeft: TimeLeft;
-  readonly label?: string;
+  readonly label?: string | undefined;
 }
 
 /**

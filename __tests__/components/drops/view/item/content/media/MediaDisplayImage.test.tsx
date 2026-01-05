@@ -16,8 +16,8 @@ jest.mock("@/hooks/useInView", () => ({
 }));
 
 type MockNextImageProps = ComponentProps<"img"> & {
-  readonly fill?: boolean;
-  readonly unoptimized?: boolean;
+  readonly fill?: boolean | undefined;
+  readonly unoptimized?: boolean | undefined;
 };
 
 jest.mock("next/image", () => ({

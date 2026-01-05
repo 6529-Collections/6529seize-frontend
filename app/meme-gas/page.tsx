@@ -7,7 +7,7 @@ import Gas from "@/components/gas-royalties/Gas";
 
 export default function GasPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Gas />
     </main>
   );

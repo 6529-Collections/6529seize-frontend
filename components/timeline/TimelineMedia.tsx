@@ -20,19 +20,19 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
         controls
         loop
         playsInline
-        className={styles.timelineMediaImage}
+        className={styles["timelineMediaImage"]}
         src={props.url}></video>
     );
   }
   if (props.type === MediaType.HTML) {
     return (
-      <iframe className={styles.timelineMediaImage} src={props.url}></iframe>
+      <iframe className={styles["timelineMediaImage"]} src={props.url}></iframe>
     );
   }
   return (
     <img
       src={props.url}
-      className={styles.timelineMediaImage}
+      className={styles["timelineMediaImage"]}
       alt={props.url}
     />
   );

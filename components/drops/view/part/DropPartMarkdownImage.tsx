@@ -26,7 +26,7 @@ const modalButtonClasses =
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
-  readonly alt?: string;
+  readonly alt?: string | undefined;
 }
 
 const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({

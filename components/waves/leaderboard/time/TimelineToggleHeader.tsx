@@ -11,9 +11,9 @@ interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;
   readonly setIsOpen: (isOpen: boolean) => void;
   readonly nextDecisionTime: number | null;
-  readonly isPaused?: boolean;
-  readonly currentPause?: ApiWaveDecisionPause | null;
-  readonly wave?: ApiWave;
+  readonly isPaused?: boolean | undefined;
+  readonly currentPause?: ApiWaveDecisionPause | null | undefined;
+  readonly wave?: ApiWave | undefined;
 }
 
 /**

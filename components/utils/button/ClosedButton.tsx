@@ -2,11 +2,11 @@ import React, { type JSX } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 interface ClosedButtonProps {
-  readonly loading?: boolean;
+  readonly loading?: boolean | undefined;
   readonly children: React.ReactNode;
-  readonly padding?: string;
-  readonly title?: string;
-  readonly className?: string;
+  readonly padding?: string | undefined;
+  readonly title?: string | undefined;
+  readonly className?: string | undefined;
 }
 
 /**

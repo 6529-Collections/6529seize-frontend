@@ -12,13 +12,13 @@ import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/que
 
 interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;
-  readonly limit?: number;
-  readonly following?: boolean;
+  readonly limit?: number | undefined;
+  readonly following?: boolean | undefined;
   /**
    * If true, fetch only direct message waves. If false, exclude them. Undefined -> no filter.
    */
-  readonly directMessage?: boolean;
-  readonly refetchInterval?: number;
+  readonly directMessage?: boolean | undefined;
+  readonly refetchInterval?: number | undefined;
 }
 
 export const useWavesOverview = ({
@@ -50,7 +50,7 @@ export const useWavesOverview = ({
       };
 
       if (params.direct_message !== undefined) {
-        queryParams.direct_message = `${params.direct_message}`;
+        queryParams["direct_message"] = `${params.direct_message}`;
       }
 
       return await commonApiFetch<ApiWave[]>({

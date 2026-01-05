@@ -51,13 +51,13 @@ export function useWaveActivityLogs({
           limit: WAVE_LOGS_PARAMS.limit.toString(),
         };
         if (dropId) {
-          params.drop_id = dropId;
+          params["drop_id"] = dropId;
         }
         if (logTypes) {
-          params.log_types = logTypes.join(",");
+          params["log_types"] = logTypes.join(",");
         }
         if (pageParam) {
-          params.offset = `${pageParam}`;
+          params["offset"] = `${pageParam}`;
         }
         return await commonApiFetch<ApiWaveLog[]>({
           endpoint: `waves/${waveId}/logs`,
@@ -83,13 +83,13 @@ export function useWaveActivityLogs({
           limit: WAVE_LOGS_PARAMS.limit.toString(),
         };
         if (dropId) {
-          params.drop_id = dropId;
+          params["drop_id"] = dropId;
         }
         if (logTypes) {
-          params.log_types = logTypes.join(",");
+          params["log_types"] = logTypes.join(",");
         }
         if (pageParam !== null) {
-          params.offset = `${pageParam}`;
+          params["offset"] = `${pageParam}`;
         }
 
         const results = await commonApiFetch<ApiWaveLog[]>({

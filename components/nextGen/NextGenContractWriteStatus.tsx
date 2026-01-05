@@ -13,10 +13,10 @@ const TRANSFER_EVENT =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 interface Props {
-  hash?: `0x${string}`;
+  hash?: `0x${string}` | undefined;
   isLoading: boolean;
   error: any;
-  onSuccess?: () => void;
+  onSuccess?: (() => void) | undefined;
 }
 
 export default function NextGenContractWriteStatus(props: Readonly<Props>) {
@@ -97,7 +97,8 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
           <Link
             href={getTransactionLink(NEXTGEN_CHAIN_ID, props.hash)}
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+          >
             view
           </Link>
           {waitContractWrite.isLoading && (
@@ -117,7 +118,8 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
                 <Link
                   href={`/nextgen/token/${t}`}
                   target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                >
                   #{t}
                 </Link>
               </li>

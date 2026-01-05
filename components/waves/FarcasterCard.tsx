@@ -90,7 +90,7 @@ const formatRelativeTime = (timestamp: string | undefined): string | null => {
 };
 
 const getPrimaryHref = (
-  preview: { readonly canonicalUrl?: string },
+  preview: { readonly canonicalUrl?: string | undefined },
   fallback: string
 ): string => {
   if (preview.canonicalUrl && preview.canonicalUrl.trim().length > 0) {

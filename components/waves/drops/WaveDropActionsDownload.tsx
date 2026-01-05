@@ -1,6 +1,9 @@
 "use client";
 
-import { ArrowDownTrayIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import useDownloader from "react-use-downloader";
@@ -9,9 +12,9 @@ interface Props {
   href: string;
   name: string;
   extension: string;
-  showProgress?: boolean;
-  className?: string;
-  tooltipId?: string;
+  showProgress?: boolean | undefined;
+  className?: string | undefined;
+  tooltipId?: string | undefined;
 }
 
 export default function WaveDropActionsDownload(props: Readonly<Props>) {
@@ -67,7 +70,8 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
           className="tw-w-5 tw-h-5 tw-text-iron-500 tw-animate-spin tw-flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
-          viewBox="0 0 24 24">
+          viewBox="0 0 24 24"
+        >
           <circle
             className="tw-opacity-25"
             cx="12"
@@ -84,9 +88,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         </svg>
       );
     }
-    return (
-      <ArrowDownTrayIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5" />
-    );
+    return <ArrowDownTrayIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5" />;
   };
 
   return (
@@ -103,8 +105,9 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         }}
         disabled={isCompleted}
         aria-label="Download file"
-        data-tooltip-id={props.tooltipId ?? undefined}
-        type="button">
+        {...(props.tooltipId && { "data-tooltip-id": props.tooltipId })}
+        type="button"
+      >
         {renderIcon()}
       </button>
       {props.tooltipId && (
@@ -123,7 +126,8 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
             zIndex: 99999,
             pointerEvents: "none",
-          }}>
+          }}
+        >
           <span className="tw-text-xs">{getTooltipText()}</span>
         </Tooltip>
       )}

@@ -154,7 +154,7 @@ export default function DelegationMappingTool() {
   }, [csvData]);
 
   return (
-    <Container className={styles.toolArea} id="mapping-tool-form">
+    <Container className={styles["toolArea"]} id="mapping-tool-form">
       <Row>
         <Col>
           Upload File <span className="font-color-h">(.csv)</span>
@@ -163,8 +163,8 @@ export default function DelegationMappingTool() {
       <Row className="pt-2">
         <Col>
           <Container
-            className={`${styles.uploadArea} ${
-              dragActive ? styles.uploadAreaActive : ""
+            className={`${styles["uploadArea"]} ${
+              dragActive ? styles["uploadAreaActive"] : ""
             }`}
             onClick={handleUpload}
             onDrop={handleDrop}
@@ -174,7 +174,7 @@ export default function DelegationMappingTool() {
             <div>
               <FontAwesomeIcon
                 icon={faFileUpload}
-                className={styles.uploadIcon}
+                className={styles["uploadIcon"]}
               />
             </div>
             {file ? (
@@ -191,7 +191,7 @@ export default function DelegationMappingTool() {
       <Row className="pt-2">
         <Col>
           <Form.Select
-            className={`${styles.formInput}`}
+            className={`${styles["formInput"]}`}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -217,7 +217,7 @@ export default function DelegationMappingTool() {
       <Row className="pt-2">
         <Col>
           <Form.Select
-            className={`${styles.formInput}`}
+            className={`${styles["formInput"]}`}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);
@@ -248,9 +248,9 @@ export default function DelegationMappingTool() {
       <Row className="pt-3">
         <Col>
           <Button
-            className={`${styles.submitBtn} ${
+            className={`${styles["submitBtn"]} ${
               useCase === 0 || processing || !file
-                ? styles.submitBtnDisabled
+                ? styles["submitBtnDisabled"]
                 : ""
             }`}
             onClick={() => submit()}>
@@ -258,7 +258,7 @@ export default function DelegationMappingTool() {
             {processing && (
               <div className="d-inline">
                 <div
-                  className={`spinner-border ${styles.loader}`}
+                  className={`spinner-border ${styles["loader"]}`}
                   role="status">
                   <span className="sr-only"></span>
                 </div>
@@ -269,7 +269,7 @@ export default function DelegationMappingTool() {
       </Row>
       <Form.Control
         ref={inputRef}
-        className={`${styles.formInputHidden}`}
+        className={`${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"
         value={file?.fileName}

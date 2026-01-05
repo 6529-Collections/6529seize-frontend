@@ -13,10 +13,10 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WavePodiumItemProps {
-  readonly winner?: ApiWaveDecisionWinner;
+  readonly winner?: ApiWaveDecisionWinner | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly position: "first" | "second" | "third";
-  readonly customAnimationIndex?: number;
+  readonly customAnimationIndex?: number | undefined;
 }
 
 // Configuration for position-specific styling with CSS ready classes for Tailwind

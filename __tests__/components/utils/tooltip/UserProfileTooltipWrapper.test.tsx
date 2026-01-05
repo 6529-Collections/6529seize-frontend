@@ -14,9 +14,9 @@ jest.mock('@/components/utils/tooltip/CustomTooltip', () => {
   }: {
     children: React.ReactElement;
     content: React.ReactNode;
-    placement?: string;
-    delayShow?: number;
-    delayHide?: number;
+    placement?: string | undefined;
+    delayShow?: number | undefined;
+    delayHide?: number | undefined;
   }) {
     return (
       <div data-testid="custom-tooltip" data-placement={placement} data-delay-show={delayShow} data-delay-hide={delayHide}>

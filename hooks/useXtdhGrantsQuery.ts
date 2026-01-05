@@ -26,16 +26,16 @@ import { SortDirection } from "@/entities/ISort";
 
 export interface UseXtdhGrantsQueryParams {
   readonly grantor: string;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly statuses?: GrantedFilterStatuses;
-  readonly validFromGt?: number;
-  readonly validFromLt?: number;
-  readonly validToGt?: number;
-  readonly validToLt?: number;
+  readonly page?: number | undefined;
+  readonly pageSize?: number | undefined;
+  readonly statuses?: GrantedFilterStatuses | undefined;
+  readonly validFromGt?: number | undefined;
+  readonly validFromLt?: number | undefined;
+  readonly validToGt?: number | undefined;
+  readonly validToLt?: number | undefined;
   readonly sortField: GrantedSortField;
   readonly sortDirection: SortDirection;
-  readonly enabled?: boolean;
+  readonly enabled?: boolean | undefined;
 }
 
 type XtdhGrantsInfiniteData = InfiniteData<ApiXTdhGrantsPage>;
@@ -46,9 +46,9 @@ export type UseXtdhGrantsQueryResult = UseInfiniteQueryResult<
 > & {
   readonly grants: ApiXTdhGrantsPage["data"];
   readonly totalCount: number;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
-  readonly firstPage?: ApiXTdhGrantsPage;
+  readonly firstPage?: ApiXTdhGrantsPage | undefined;
 };
 
 const DEFAULT_PAGE = 1;
@@ -107,7 +107,7 @@ export function useXtdhGrantsQuery({
 
   const query = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
       const currentPage = pageParam ?? normalizedPage;
 
       return await commonApiFetch<ApiXTdhGrantsPage>({

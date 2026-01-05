@@ -1,12 +1,12 @@
 import { buildTokenApiUrl, type ArtBlocksTokenIdentifier } from "../artblocks/url";
 
 export type ArtBlocksMeta = {
-  projectName?: string;
-  artistName?: string;
-  tokenNumber?: string;
-  features?: Record<string, string>;
-  series?: string;
-  aspectRatio?: number;
+  projectName?: string | undefined;
+  artistName?: string | undefined;
+  tokenNumber?: string | undefined;
+  features?: Record<string, string> | undefined;
+  series?: string | undefined;
+  aspectRatio?: number | undefined;
 };
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -15,7 +15,7 @@ const MAX_CACHE_ENTRIES = 50;
 interface CacheEntry {
   value: ArtBlocksMeta | null;
   expiry: number;
-  promise?: Promise<ArtBlocksMeta | null>;
+  promise?: Promise<ArtBlocksMeta | null> | undefined;
 }
 
 const cache = new Map<string, CacheEntry>();
@@ -201,7 +201,7 @@ const requestMetadata = async (
   for (const endpoint of endpoints) {
     try {
       const response = await fetch(endpoint, {
-        signal,
+        ...(signal !== undefined ? { signal: signal } : {}),
         headers: { Accept: "application/json" },
       });
 

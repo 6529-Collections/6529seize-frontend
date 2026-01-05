@@ -1,4 +1,3 @@
-import React from "react";
 import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersDropHeaderAuthorPfpProps {

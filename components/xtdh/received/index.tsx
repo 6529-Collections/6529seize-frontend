@@ -16,8 +16,8 @@ import { XtdhCollectionTokensPanel } from "./collection-tokens";
 
 export interface XtdhReceivedSectionProps {
   readonly profileId: string | null;
-  readonly pageSize?: number;
-  readonly requireIdentity?: boolean;
+  readonly pageSize?: number | undefined;
+  readonly requireIdentity?: boolean | undefined;
 }
 
 const DEFAULT_PAGE_SIZE = 10;

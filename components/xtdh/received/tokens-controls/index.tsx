@@ -9,7 +9,7 @@ interface XtdhTokensControlsProps {
   readonly activeSortDirection: SortDirection;
   readonly onSortChange: (sort: XtdhTokensSortField) => void;
 
-  readonly isDisabled?: boolean;
+  readonly isDisabled?: boolean | undefined;
 }
 
 export function XtdhTokensControls({

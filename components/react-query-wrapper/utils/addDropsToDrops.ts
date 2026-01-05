@@ -4,7 +4,7 @@ import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { QueryKey } from "../ReactQueryWrapper";
 
 type DropsQueryData = {
-  pages?: ApiWaveDropsFeed[];
+  pages?: ApiWaveDropsFeed[] | undefined;
 };
 
 type DropsQueryParams = {

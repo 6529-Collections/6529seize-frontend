@@ -45,7 +45,7 @@ export default function CommunityNerdPageClient({
   }, [focus, setTitle]);
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Container fluid>
         <Row>
           <Col>

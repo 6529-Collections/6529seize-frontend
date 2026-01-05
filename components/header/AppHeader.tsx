@@ -72,7 +72,7 @@ export default function AppHeader() {
   const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
     ? pathSegments[pathSegments.length - 1]
-        .replace(/[-_]/g, " ")
+        ?.replace(/[-_]/g, " ")
         .replace(/^./, (c) => c.toUpperCase())
     : "Home";
 
@@ -86,7 +86,7 @@ export default function AppHeader() {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isProfilePage = typeof params?.user === "string";
+  const isProfilePage = typeof params?.["user"] === "string";
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
@@ -101,13 +101,13 @@ export default function AppHeader() {
       return wave?.name ?? "Wave";
     }
 
-    const collectionTitle = getCollectionTitle(basePath, pageTitle);
+    const collectionTitle = getCollectionTitle(basePath!, pageTitle!);
     if (collectionTitle) return collectionTitle;
 
     const rememesTitle = getRememesTitle(pathSegments);
     if (rememesTitle) return rememesTitle;
 
-    return sliceString(capitalizeEveryWord(pageTitle), 20);
+    return sliceString(capitalizeEveryWord(pageTitle!), 20);
   })();
 
   return (

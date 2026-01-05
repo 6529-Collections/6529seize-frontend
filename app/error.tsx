@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import {publicEnv} from "@/config/env";
 
 type ErrorProps = {
-  readonly error: Error & { digest?: string };
+  readonly error: Error & { digest?: string | undefined };
   readonly reset: () => void;
 };
 
@@ -21,7 +21,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   const errorDetails = extractErrorDetails(error, "ROUTE_ERROR");
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <ErrorComponent
         stackTrace={errorDetails}
         digest={error.digest}

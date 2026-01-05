@@ -8,7 +8,7 @@ export function getIsDirectMessage(
   fallback = false
 ): boolean {
   const w = wave as {
-    chat?: { scope?: { group?: { is_direct_message?: boolean } } };
+    chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
   };
   return w.chat?.scope?.group?.is_direct_message ?? fallback;
 }

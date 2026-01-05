@@ -34,9 +34,9 @@ export function createTestQueryClient(
 }
 
 interface RenderWithQueryClientOptions extends RenderOptions {
-  readonly queryClient?: QueryClient;
-  readonly clientConfig?: QueryClientConfig;
-  readonly wrapper?: React.ComponentType<WrapperProps>;
+  readonly queryClient?: QueryClient | undefined;
+  readonly clientConfig?: QueryClientConfig | undefined;
+  readonly wrapper?: React.ComponentType<WrapperProps> | undefined;
 }
 
 export function renderWithQueryClient(

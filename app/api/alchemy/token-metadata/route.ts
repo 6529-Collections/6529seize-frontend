@@ -10,10 +10,10 @@ const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const MAX_BATCH_SIZE = 100;
 
 type TokenMetadataRequestBody = {
-  readonly address?: string;
-  readonly tokenIds?: string[];
-  readonly tokens?: { contract: string; tokenId: string }[];
-  readonly chain?: SupportedChain;
+  readonly address?: string | undefined;
+  readonly tokenIds?: string[] | undefined;
+  readonly tokens?: { contract: string; tokenId: string }[] | undefined;
+  readonly chain?: SupportedChain | undefined;
 };
 
 type TokenToFetch = { contractAddress: string; tokenId: string };
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < tokensToFetch.length; i += MAX_BATCH_SIZE) {
       const slice = tokensToFetch.slice(i, i + MAX_BATCH_SIZE);
-      const payload = await fetchPublicJson<{ tokens?: unknown[]; nfts?: unknown[] }>(
+      const payload = await fetchPublicJson<{ tokens?: unknown[] | undefined; nfts?: unknown[] | undefined }>(
         url,
         {
           method: "POST",

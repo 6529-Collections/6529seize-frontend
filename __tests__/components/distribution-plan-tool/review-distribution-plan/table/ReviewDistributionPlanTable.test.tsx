@@ -73,12 +73,12 @@ describe('ReviewDistributionPlanTable', () => {
     const { phases } = setup();
     // The component renders twice - first with empty rows, then after useEffect runs with actual data
     const lastCallIndex = headerMock.mock.calls.length - 1;
-    const rows = headerMock.mock.calls[lastCallIndex][0].rows;
+    const rows = headerMock.mock.calls[lastCallIndex][0]?.rows;
     expect(rows).toHaveLength(1);
     expect(rows[0].phase.id).toBe(phases[0].id);
     expect(rows[0].phase.spotsCount).toBe(5);
     expect(rows[0].components).toHaveLength(2);
-    expect(bodyMock.mock.calls[lastCallIndex][0].rows).toEqual(rows);
+    expect(bodyMock.mock.calls[lastCallIndex][0]?.rows).toEqual(rows);
     expect(document.querySelector('[data-testid="wrapper"]')).toBeTruthy();
     expect(footerMock).toHaveBeenCalled();
   });

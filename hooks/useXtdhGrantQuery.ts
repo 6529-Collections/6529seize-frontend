@@ -5,12 +5,12 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 export interface UseXtdhGrantQueryParams {
   readonly grantId: string | null;
-  readonly enabled?: boolean;
+  readonly enabled?: boolean | undefined;
 }
 
 export type UseXtdhGrantQueryResult = UseQueryResult<ApiXTdhGrant, Error> & {
   readonly grant: ApiXTdhGrant | undefined;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
 };
 

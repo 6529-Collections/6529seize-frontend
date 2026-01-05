@@ -56,7 +56,7 @@ export default function Decisions({
         setDates({
           ...dates,
           subsequentDecisions: decisions,
-          endDate: lastDecisionTime,
+          endDate: lastDecisionTime ?? null,
         });
       }
     }
@@ -95,7 +95,7 @@ export default function Decisions({
           : dates.firstDecisionTime;
 
       const newEndDate =
-        dates.endDate && dates.endDate > minEndDate
+        dates.endDate && minEndDate && dates.endDate > minEndDate
           ? dates.endDate
           : twoCompleteRoundsEndDate;
 
@@ -115,7 +115,10 @@ export default function Decisions({
           dates.firstDecisionTime,
           dates.subsequentDecisions
         );
-        newEndDate = decisionTimes[decisionTimes.length - 1];
+        const potentialNewEndDate = decisionTimes[decisionTimes.length - 1];
+        if (potentialNewEndDate) {
+          newEndDate = potentialNewEndDate;
+        }
       }
 
       setDates({

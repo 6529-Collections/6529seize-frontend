@@ -6,9 +6,22 @@ import React from "react";
 
 jest.mock("@/components/not-found/NotFound", () => ({
   __esModule: true,
-  default: ({ label }: { label?: string }) => (
+  default: ({ label }: { label?: string | undefined }) => (
     <div data-testid="not-found" data-label={label} />
   ),
+}));
+
+const mockSetTitle = jest.fn();
+jest.mock("@/contexts/TitleContext", () => ({
+  __esModule: true,
+  useTitle: () => ({
+    title: "Test Title",
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
 }));
 
 // Mock useParams to return different values for different tests
@@ -207,7 +220,7 @@ describe("DistributionPage", () => {
       await waitFor(() => {
         const mintCountdown = screen.getByTestId("mint-countdown");
         expect(mintCountdown).toBeInTheDocument();
-        expect(mintCountdown.dataset.nftId).toBe("456");
+        expect(mintCountdown.dataset["nftId"]).toBe("456");
       });
     });
 
@@ -619,11 +632,11 @@ describe("DistributionPage", () => {
         () => {
           const addressComponent = screen.getByTestId("address-component");
           expect(addressComponent).toBeInTheDocument();
-          expect(addressComponent.dataset.wallet).toBe(
+          expect(addressComponent.dataset["wallet"]).toBe(
             "0x1234567890123456789012345678901234567890"
           );
-          expect(addressComponent.dataset.display).toBe("TestUser1");
-          expect(addressComponent.dataset.hideCopy).toBe("true");
+          expect(addressComponent.dataset["display"]).toBe("TestUser1");
+          expect(addressComponent.dataset["hideCopy"]).toBe("true");
         },
         { timeout: 5000 }
       );
@@ -641,9 +654,9 @@ describe("DistributionPage", () => {
       await waitFor(() => {
         const scrollButton = screen.getByTestId("scroll-to-button");
         expect(scrollButton).toBeInTheDocument();
-        expect(scrollButton.dataset.threshold).toBe("500");
-        expect(scrollButton.dataset.to).toBe("distribution-table");
-        expect(scrollButton.dataset.offset).toBe("0");
+        expect(scrollButton.dataset["threshold"]).toBe("500");
+        expect(scrollButton.dataset["to"]).toBe("distribution-table");
+        expect(scrollButton.dataset["offset"]).toBe("0");
       });
     });
   });
@@ -754,6 +767,44 @@ describe("DistributionPage", () => {
         expect(lastCall).toContain("&search=0x123,0x456");
         expect(lastCall).toContain("&page=2");
       });
+    });
+  });
+
+  describe("Title Management", () => {
+    it("sets title when valid nft id is present", async () => {
+      mockUseParams.mockReturnValue({ id: "123" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(
+        <DistributionPage header="Test Collection" contract="0x123" link="" />
+      );
+
+      await waitFor(() => {
+        expect(mockSetTitle).toHaveBeenCalledWith(
+          "Test Collection #123 | DISTRIBUTION"
+        );
+      });
+    });
+
+    it("does not set title when nft id is invalid", () => {
+      mockUseParams.mockReturnValue({ id: "invalid" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      expect(mockSetTitle).not.toHaveBeenCalled();
+    });
+
+    it("does not set title when nft id is missing", () => {
+      mockUseParams.mockReturnValue({ id: "" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      expect(mockSetTitle).not.toHaveBeenCalled();
     });
   });
 });

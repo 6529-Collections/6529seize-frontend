@@ -23,8 +23,8 @@ const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
 interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
-  readonly defaultPath?: string; // "/waves" or "/messages"
-  readonly showLeftSidebar?: boolean;
+  readonly defaultPath?: string | undefined; // "/waves" or "/messages"
+  readonly showLeftSidebar?: boolean | undefined;
 }
 
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({

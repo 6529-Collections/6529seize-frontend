@@ -76,9 +76,8 @@ export function printRoyalties(value: number, royalties: number, from: string) {
           <span>Royalties</span>
           <span>
             {royalties > 0
-              ? `${displayDecimal(royalties, 5)} (${displayDecimal(
-                  royaltiesPercentage * 100,
-                  2
+              ? `${displayDecimal(royalties)} (${displayDecimal(
+                  royaltiesPercentage * 100
                 )}%)`
               : "-"}
           </span>
@@ -98,7 +97,7 @@ export function printGas(
     <>
       <FontAwesomeIcon
         data-tooltip-id={id}
-        className={styles.gasIcon}
+        className={styles["gasIcon"]}
         icon={faGasPump}
       ></FontAwesomeIcon>
       <Tooltip
@@ -111,9 +110,9 @@ export function printGas(
       >
         <div className="tw-flex tw-flex-col tw-gap-1">
           {[
-            ["Gas", `${displayDecimal(gas, 5)}`],
+            ["Gas", `${displayDecimal(gas)}`],
             ["GWEI", numberWithCommas(gas_gwei)],
-            ["Gas Price", `${displayDecimal(gas_price_gwei, 2)}`],
+            ["Gas Price", `${displayDecimal(gas_price_gwei)}`],
           ].map(([label, value]) => (
             <div
               key={label}
@@ -130,10 +129,10 @@ export function printGas(
 }
 
 interface Props {
-  nft?: NFTLite;
-  nextgen_collection?: NextGenCollection;
+  nft?: NFTLite | undefined;
+  nextgen_collection?: NextGenCollection | undefined;
   tr: Transaction;
-  hideNextgenTokenId?: boolean;
+  hideNextgenTokenId?: boolean | undefined;
 }
 
 export default function LatestActivityRow(props: Readonly<Props>) {
@@ -183,7 +182,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             onError={({ currentTarget }) => {
               currentTarget.src = getNftImageSrc(props.nft, currentTarget.src);
             }}
-            className={styles.nftImage}
+            className={styles["nftImage"]}
           />
         </a>
       );
@@ -295,7 +294,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           }}
           src={getNextGenIconUrl(props.tr.token_id)}
           alt={`#${props.tr.token_id.toString()}`}
-          className={styles.nftImage}
+          className={styles["nftImage"]}
           onError={({ currentTarget }) => {
             if (currentTarget.src === getNextGenIconUrl(props.tr.token_id)) {
               currentTarget.src = getNextGenImageUrl(props.tr.token_id);
@@ -389,7 +388,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           className="tw-flex"
         >
           <FontAwesomeIcon
-            className={styles.gasIcon}
+            className={styles["gasIcon"]}
             icon={faExternalLinkSquare}
           ></FontAwesomeIcon>
         </Link>
@@ -414,15 +413,15 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function getIconClass() {
     if (isBurn()) {
-      return styles.iconRed;
+      return styles["iconRed"];
     }
     if (isMint() || isAirdrop()) {
-      return styles.iconWhite;
+      return styles["iconWhite"];
     }
     if (props.tr.value > 0) {
-      return styles.iconBlue;
+      return styles["iconBlue"];
     }
-    return styles.iconGreen;
+    return styles["iconGreen"];
   }
 
   function getIcon() {
@@ -448,7 +447,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
-      className={styles.latestActivityRow}
+      className={styles["latestActivityRow"]}
     >
       <td className="align-middle text-center">
         {getDateDisplay(new Date(props.tr.transaction_date))}

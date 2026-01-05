@@ -17,7 +17,6 @@ export default function CommonDropdown<T, U = unknown>(
     noneLabel,
     filterLabel,
     setSelected,
-    containerRef,
     dynamicPosition = true,
     disabled = false,
     theme = "dark",
@@ -66,43 +65,6 @@ export default function CommonDropdown<T, U = unknown>(
 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const getButtonPosition = () => {
-    if (buttonRef.current) {
-      try {
-        const { right } = buttonRef.current.getBoundingClientRect();
-        return { right };
-      } catch (error) {
-        return { right: 0 };
-      }
-    }
-    return { right: 0 };
-  };
-
-  const [buttonPosition, setButtonPosition] = useState(getButtonPosition());
-
-  const onButtonPositionChange = () => {
-    if (buttonRef.current) {
-      setButtonPosition(getButtonPosition());
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const container = containerRef?.current;
-    if (container) {
-      container.addEventListener("scroll", onButtonPositionChange);
-      window.addEventListener("resize", onButtonPositionChange);
-      onButtonPositionChange();
-
-      return () => {
-        container.removeEventListener("scroll", onButtonPositionChange);
-        window.removeEventListener("resize", onButtonPositionChange);
-      };
-    } else {
-      onButtonPositionChange();
-    }
-  }, [isOpen]);
-
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   return (
@@ -131,7 +93,8 @@ export default function CommonDropdown<T, U = unknown>(
               ? "tw-py-[11px]"
               : "tw-py-2.5"
           } tw-w-full tw-truncate tw-text-left tw-relative tw-block tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-10 tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 
-          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}>
+          focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-sm hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-justify-between`}
+        >
           {showFilterLabel && (
             <span className="tw-font-semibold">{filterLabel}: </span>
           )}
@@ -148,7 +111,8 @@ export default function CommonDropdown<T, U = unknown>(
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -164,10 +128,10 @@ export default function CommonDropdown<T, U = unknown>(
         isOpen={isOpen}
         setOpen={setIsOpen}
         buttonRef={buttonRef}
-        buttonPosition={buttonPosition}
         filterLabel={filterLabel}
         dynamicPosition={dynamicPosition}
-        onIsMobile={setIsMobile}>
+        onIsMobile={setIsMobile}
+      >
         {items.map((item, i) => (
           <CommonDropdownItem
             key={item.key}
@@ -177,7 +141,8 @@ export default function CommonDropdown<T, U = unknown>(
             activeItem={activeItem}
             sortDirection={sortDirection}
             isMobile={isMobile}
-            setSelected={onSelect}>
+            setSelected={onSelect}
+          >
             {renderItemChildren?.(item)}
           </CommonDropdownItem>
         ))}

@@ -35,7 +35,7 @@ export default function ProfileRatersTableWrapper({
   readonly initialParams: ProfileRatersParams;
 }) {
   const params = useParams();
-  const handleOrWallet = (params?.user as string)?.toLowerCase();
+  const handleOrWallet = (params?.["user"] as string)?.toLowerCase();
   const pageSize = initialParams.pageSize;
   const given = initialParams.given;
   const matter = initialParams.matter;

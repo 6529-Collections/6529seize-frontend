@@ -12,7 +12,7 @@ interface MemesLeaderboardDropVoteSummaryProps {
   readonly creditType: string;
   readonly ratersCount: number;
   readonly topVoters: ApiDropRater[];
-  readonly userContext?: ApiDropContextProfileContext | null;
+  readonly userContext?: ApiDropContextProfileContext | null | undefined;
 }
 
 const MemesLeaderboardDropVoteSummary: React.FC<

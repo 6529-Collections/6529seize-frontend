@@ -153,29 +153,29 @@ const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop => ({
 } as ApiDrop);
 
 type WaveMessagesMock = {
-  isLoading?: boolean;
-  isLoadingNextPage?: boolean;
-  hasNextPage?: boolean;
-  drops?: ApiDrop[];
+  isLoading?: boolean | undefined;
+  isLoadingNextPage?: boolean | undefined;
+  hasNextPage?: boolean | undefined;
+  drops?: ApiDrop[] | undefined;
 };
 
 interface MockSetupOptions {
-  waveMessages?: WaveMessagesMock;
+  waveMessages?: WaveMessagesMock | undefined;
   scrollBehavior?: {
-    isAtBottom?: boolean;
-    shouldPinToBottom?: boolean;
-    scrollIntent?: 'pinned' | 'reading' | 'auto';
-  };
+    isAtBottom?: boolean | undefined;
+    shouldPinToBottom?: boolean | undefined;
+    scrollIntent?: 'pinned' | 'reading' | 'auto' | undefined;
+  } | undefined;
   auth?: {
-    connectedProfile?: { handle: string } | null;
-  };
-  typingMessage?: string | null;
+    connectedProfile?: { handle: string } | null | undefined;
+  } | undefined;
+  typingMessage?: string | null | undefined;
   deviceInfo?: {
-    isAppleMobile?: boolean;
-    isMobileDevice?: boolean;
-    hasTouchScreen?: boolean;
-    isApp?: boolean;
-  };
+    isAppleMobile?: boolean | undefined;
+    isMobileDevice?: boolean | undefined;
+    hasTouchScreen?: boolean | undefined;
+    isApp?: boolean | undefined;
+  } | undefined;
 }
 
 function setupMocks(options: MockSetupOptions = {}) {
@@ -265,13 +265,13 @@ function setupMocks(options: MockSetupOptions = {}) {
 }
 
 interface RenderOptions {
-  waveId?: string;
-  dropId?: string | null;
-  onReply?: jest.Mock;
-  onQuote?: jest.Mock;
-  activeDrop?: ActiveDropState | null;
-  initialDrop?: number | null;
-  onDropContentClick?: jest.Mock;
+  waveId?: string | undefined;
+  dropId?: string | null | undefined;
+  onReply?: jest.Mock | undefined;
+  onQuote?: jest.Mock | undefined;
+  activeDrop?: ActiveDropState | null | undefined;
+  initialDrop?: number | null | undefined;
+  onDropContentClick?: jest.Mock | undefined;
 }
 
 function renderComponent(options: RenderOptions = {}) {

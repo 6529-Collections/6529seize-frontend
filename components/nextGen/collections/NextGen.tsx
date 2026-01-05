@@ -23,9 +23,9 @@ export default function NextGen(props: Readonly<Props>) {
 
   return (
     <>
-      <div className={styles.nextgenBannerWrapper}>
+      <div className={styles["nextgenBannerWrapper"]}>
         <div
-          className={styles.nextgenBanner}
+          className={styles["nextgenBanner"]}
           style={{ background: `url(${props.collection.banner})` }}
         />
         <Container className="tw-z-10">
@@ -78,7 +78,7 @@ export default function NextGen(props: Readonly<Props>) {
                             props.collection.name
                           )}`}>
                           <button
-                            className={`font-larger pt-2 pb-2 no-wrap ${styles.exploreBtn}`}>
+                            className={`font-larger pt-2 pb-2 no-wrap ${styles["exploreBtn"]}`}>
                             <span className="font-larger">
                               Explore Collection
                             </span>
@@ -161,7 +161,7 @@ export default function NextGen(props: Readonly<Props>) {
 export function DistributionLink(
   props: Readonly<{
     collection: NextGenCollection;
-    class?: string;
+    class?: string | undefined;
   }>
 ) {
   const alStatus = getStatusFromDates(

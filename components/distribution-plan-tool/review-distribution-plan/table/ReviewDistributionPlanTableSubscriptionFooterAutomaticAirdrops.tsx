@@ -20,14 +20,14 @@ export function AutomaticAirdropsModal(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    confirmedTokenId?: string | null;
+    confirmedTokenId?: string | null | undefined;
     onUpload(contract: string, tokenId: string, csvContent: string): void;
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
-  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
-  const defaultTokenId = isValidPositiveInteger(initialTokenId)
-    ? initialTokenId
+  const initialTokenId = numbers.length > 0 ? numbers[0]?.toString() : "";
+  const defaultTokenId = isValidPositiveInteger(initialTokenId!)
+    ? initialTokenId!
     : "";
   const [tokenId, setTokenId] = useState<string>(
     props.confirmedTokenId ?? defaultTokenId
@@ -46,9 +46,28 @@ export function AutomaticAirdropsModal(
     return /^0x[a-f0-9]{40}$/i.test(address.trim());
   };
 
-  const parseCsv = (csvContent: string): CsvRow[] => {
-    const lines = csvContent.split(/\r?\n/).filter((line) => line.trim());
+  const isHeaderRow = (line: string): boolean => {
+    const parts = line.split(",").map((part) => part.trim().toLowerCase());
+    if (parts.length < 2) return false;
+    const validFirstCol = parts[0] === "address" || parts[0] === "wallet";
+    const validSecondCol = parts[1] === "count" || parts[1] === "value";
+    return validFirstCol && validSecondCol;
+  };
+
+  const parseCsv = (
+    csvContent: string
+  ): { rows: CsvRow[]; hadHeader: boolean } => {
+    let lines = csvContent.split(/\r?\n/).filter((line) => line.trim());
     const rows: CsvRow[] = [];
+    let hadHeader = false;
+
+    const firstLine = lines[0];
+    if (firstLine && isHeaderRow(firstLine)) {
+      hadHeader = true;
+      lines = lines.slice(1);
+    }
+
+    const lineOffset = hadHeader ? 2 : 1;
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
@@ -58,7 +77,7 @@ export function AutomaticAirdropsModal(
       if (parts.length < 2) {
         throw new Error(
           `Line ${
-            index + 1
+            index + lineOffset
           }: Expected format "address,count" but found "${trimmedLine}"`
         );
       }
@@ -66,28 +85,28 @@ export function AutomaticAirdropsModal(
       const address = parts[0];
       const countStr = parts[1];
 
-      if (!isValidAddress(address)) {
+      if (!isValidAddress(address!)) {
         throw new Error(
-          `Line ${index + 1}: Invalid Ethereum address "${address}"`
+          `Line ${index + lineOffset}: Invalid Ethereum address "${address}"`
         );
       }
 
-      const count = Number.parseInt(countStr, 10);
+      const count = Number.parseInt(countStr!, 10);
       if (Number.isNaN(count) || count < 0) {
         throw new Error(
           `Line ${
-            index + 1
+            index + lineOffset
           }: Invalid count "${countStr}". Must be a non-negative integer.`
         );
       }
 
       rows.push({
-        address: address.toLowerCase(),
+        address: address!.toLowerCase(),
         count,
       });
     });
 
-    return rows;
+    return { rows, hadHeader };
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +132,7 @@ export function AutomaticAirdropsModal(
       .text()
       .then((csvContent) => {
         try {
-          const rows = parseCsv(csvContent);
+          const { rows } = parseCsv(csvContent);
           setSelectedFile(file);
           setParsedRows(rows);
           setFileError(null);
@@ -148,10 +167,11 @@ export function AutomaticAirdropsModal(
       return;
     }
 
-    selectedFile.text().then((csvContent) => {
-      props.onUpload(contract, displayTokenId, csvContent);
-      handleClose();
-    });
+    const csvContent = parsedRows
+      .map((row) => `${row.address},${row.count}`)
+      .join("\n");
+    props.onUpload(contract, displayTokenId, csvContent);
+    handleClose();
   };
 
   const handleClose = () => {
@@ -212,7 +232,7 @@ export function AutomaticAirdropsModal(
                     style={{
                       fontSize: "12px",
                     }}>
-                    address,count
+                    address,value
                   </code>
                 </div>
                 <div className="mb-2">

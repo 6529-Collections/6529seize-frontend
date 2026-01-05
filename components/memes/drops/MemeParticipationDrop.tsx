@@ -76,11 +76,11 @@ export default function MemeParticipationDrop({
   const borderClasses = getBorderClasses(drop, isActiveDrop);
 
   const handleOnReply = useCallback(() => {
-    onReply({ drop, partId: drop.parts[0].part_id });
+    onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
   const handleOnQuote = useCallback(() => {
-    onQuote({ drop, partId: drop.parts[0].part_id });
+    onQuote({ drop, partId: drop.parts[0]?.part_id! });
   }, [onQuote, drop]);
 
   return (

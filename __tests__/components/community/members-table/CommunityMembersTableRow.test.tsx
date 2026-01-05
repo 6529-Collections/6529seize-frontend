@@ -62,6 +62,6 @@ describe('CommunityMembersTableRow', () => {
       </table>
     );
     const rows = screen.getAllByRole('row');
-    expect(rows[0].querySelector('.tw-opacity-50')).not.toBeNull();
+    expect(rows[0]?.querySelector('.tw-opacity-50')).not.toBeNull();
   });
 });

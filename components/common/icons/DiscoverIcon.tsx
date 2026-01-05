@@ -1,6 +1,8 @@
-import React from "react";
-
-const DiscoverIcon = ({ className }: { readonly className?: string }) => (
+const DiscoverIcon = ({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 640 640"

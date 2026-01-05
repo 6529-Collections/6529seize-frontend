@@ -2,8 +2,8 @@ import { ChatRestriction, SubmissionRestriction } from "@/hooks/useDropPriviledg
 
 interface DropPlaceholderProps {
   readonly type: "chat" | "submission" | "both";
-  readonly chatRestriction?: ChatRestriction;
-  readonly submissionRestriction?: SubmissionRestriction;
+  readonly chatRestriction?: ChatRestriction | undefined;
+  readonly submissionRestriction?: SubmissionRestriction | undefined;
 }
 
 export default function DropPlaceholder({ type, chatRestriction, submissionRestriction }: DropPlaceholderProps) {

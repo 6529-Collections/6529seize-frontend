@@ -37,7 +37,7 @@ export default function MentionsTypeaheadMenu({
   useKeyPressEvent(" ", () => {
     if (typeof selectedIndex === "number" && options.length > 0) {
       setHighlightedIndex(selectedIndex);
-      selectOptionAndCleanUp(options[selectedIndex]);
+      selectOptionAndCleanUp(options[selectedIndex]!);
     }
   });
 

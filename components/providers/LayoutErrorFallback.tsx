@@ -12,11 +12,11 @@ export default function LayoutErrorFallback({
   const errorDetails = error ? extractErrorDetails(error) : null;
   const digest =
     error && typeof error === "object" && "digest" in error
-      ? (error as { digest?: string }).digest
+      ? (error as { digest?: string | undefined }).digest
       : undefined;
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <ErrorComponent
         stackTrace={errorDetails}
         digest={digest}

@@ -41,8 +41,8 @@ export default function WaveHeaderFollow({
   size = WaveFollowBtnSize.MEDIUM,
 }: {
   readonly wave: ApiWave;
-  readonly subscribeToAllDrops?: boolean;
-  readonly size?: WaveFollowBtnSize;
+  readonly subscribeToAllDrops?: boolean | undefined;
+  readonly size?: WaveFollowBtnSize | undefined;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);

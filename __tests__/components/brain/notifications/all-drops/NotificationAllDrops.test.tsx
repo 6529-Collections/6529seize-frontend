@@ -93,11 +93,11 @@ describe("NotificationAllDrops", () => {
     );
     const lastCall = DropMock.mock.calls.at(-1);
     const props = lastCall?.[0] as Record<string, unknown> | undefined;
-    if (props?.onReplyClick) {
-      (props.onReplyClick as (n: number) => void)(5);
+    if (props?.["onReplyClick"]) {
+      (props["onReplyClick"] as (n: number) => void)(5);
     }
-    if (props?.onQuoteClick) {
-      (props.onQuoteClick as (q: unknown) => void)({
+    if (props?.["onQuoteClick"]) {
+      (props["onQuoteClick"] as (q: unknown) => void)({
         wave: { id: "w" },
         serial_no: 6,
       });

@@ -81,7 +81,7 @@ jest.mock("@/components/nft-navigation/NftNavigation", () => {
   return MockNftNavigation;
 });
 
-const mockReplace = jest.fn((url: string, _options?: { scroll?: boolean }) => {
+const mockReplace = jest.fn((url: string, _options?: { scroll?: boolean | undefined }) => {
   const parsedUrl = new URL(url, "https://example.com");
   currentFocus = parsedUrl.searchParams.get("focus");
 });

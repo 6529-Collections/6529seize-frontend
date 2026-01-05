@@ -1,3 +1,4 @@
+// @ts-nocheck
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
 export * from '../models/AirdropAddressResponse';
@@ -204,8 +205,12 @@ export * from '../models/ApiXTdhTokensPage';
 export * from '../models/CreateDirectMessageWaveRequest';
 export * from '../models/DistributionNormalized';
 export * from '../models/DistributionNormalizedPage';
+export * from '../models/DistributionOverview';
 export * from '../models/DistributionPhasesPage';
 export * from '../models/DistributionPhoto';
+export * from '../models/DistributionPhotoCompleteRequest';
+export * from '../models/DistributionPhotoCompleteRequestPhoto';
+export * from '../models/DistributionPhotoCompleteResponse';
 export * from '../models/DistributionPhotosPage';
 export * from '../models/GetWaveSubscription200Response';
 export * from '../models/NFTFinalSubscription';
@@ -437,8 +442,12 @@ import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { DistributionNormalized } from '../models/DistributionNormalized';
 import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage';
+import { DistributionOverview } from '../models/DistributionOverview';
 import { DistributionPhasesPage } from '../models/DistributionPhasesPage';
 import { DistributionPhoto } from '../models/DistributionPhoto';
+import { DistributionPhotoCompleteRequest } from '../models/DistributionPhotoCompleteRequest';
+import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPhotoCompleteRequestPhoto';
+import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 import { NFTFinalSubscription } from '../models/NFTFinalSubscription';
@@ -689,8 +698,12 @@ let typeMap: {[index: string]: any} = {
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
     "DistributionNormalized": DistributionNormalized,
     "DistributionNormalizedPage": DistributionNormalizedPage,
+    "DistributionOverview": DistributionOverview,
     "DistributionPhasesPage": DistributionPhasesPage,
     "DistributionPhoto": DistributionPhoto,
+    "DistributionPhotoCompleteRequest": DistributionPhotoCompleteRequest,
+    "DistributionPhotoCompleteRequestPhoto": DistributionPhotoCompleteRequestPhoto,
+    "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
     "NFTFinalSubscription": NFTFinalSubscription,

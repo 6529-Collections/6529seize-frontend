@@ -9,7 +9,7 @@ export default function SeasonsGridDropdownMobileWrapper({
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
-  readonly label?: string;
+  readonly label?: string | undefined;
   readonly children: ReactNode;
 }) {
   return (

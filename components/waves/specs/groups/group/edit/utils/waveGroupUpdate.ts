@@ -30,14 +30,14 @@ const cloneWithValueAtPath = (
   for (let index = 0; index < path.length; index += 1) {
     const segment = path[index];
     if (index === path.length - 1) {
-      currentTarget[segment] = value;
+      currentTarget[segment!] = value;
       break;
     }
 
-    const nextSource = toRecord(currentSource?.[segment]);
+    const nextSource = toRecord(currentSource?.[segment!]);
     const nextTarget = { ...nextSource };
 
-    currentTarget[segment] = nextTarget;
+    currentTarget[segment!] = nextTarget;
     currentSource = nextSource;
     currentTarget = nextTarget;
   }

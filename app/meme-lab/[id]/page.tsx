@@ -12,7 +12,7 @@ export default async function MemeLabPage({
 }) {
   const { id } = await params;
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <MemeLabPageComponent nftId={id} />
     </main>
   );

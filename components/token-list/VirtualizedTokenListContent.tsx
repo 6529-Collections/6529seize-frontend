@@ -50,12 +50,12 @@ export function VirtualizedTokenListContent({
   const { firstVisibleIndex, lastVisibleIndex } = getVisibleWindowBounds(virtualItems);
 
   // Calculate token indices based on row indices
-  const firstTokenIndex = isGrid ? firstVisibleIndex * columns : firstVisibleIndex;
+  const firstTokenIndex = isGrid ? firstVisibleIndex! * columns : firstVisibleIndex;
   const lastTokenIndex = isGrid
     ? Math.min((lastVisibleIndex + 1) * columns - 1, totalCount - 1)
     : lastVisibleIndex;
 
-  const windowTokens = useVisibleTokenWindow(ranges, firstTokenIndex, lastTokenIndex, tokens);
+  const windowTokens = useVisibleTokenWindow(ranges, firstTokenIndex!, lastTokenIndex, tokens);
 
   const { metadataMap, metadataQuery } = useTokenMetadataWindow({
     contractAddress,
@@ -112,7 +112,7 @@ export function VirtualizedTokenListContent({
 
                 // Find the token in our window based on its absolute index
                 // windowTokens starts from firstTokenIndex
-                const windowIndex = tokenIndex - firstTokenIndex;
+                const windowIndex = tokenIndex - firstTokenIndex!;
                 const token = windowTokens[windowIndex];
                 if (token) {
                   rowTokens.push(token);
@@ -139,7 +139,7 @@ export function VirtualizedTokenListContent({
             }
 
             // List layout
-            const windowIndex = rowIndex - firstVisibleIndex;
+            const windowIndex = rowIndex - firstVisibleIndex!;
             const token = windowTokens[windowIndex];
             if (!token) {
               return null;

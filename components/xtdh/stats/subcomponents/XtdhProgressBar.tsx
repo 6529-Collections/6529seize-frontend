@@ -1,7 +1,7 @@
 export interface XtdhProgressBarProps {
   readonly percentage: number;
-  readonly ariaLabel?: string;
-  readonly ariaValueText?: string;
+  readonly ariaLabel?: string | undefined;
+  readonly ariaValueText?: string | undefined;
 }
 
 export function XtdhProgressBar({

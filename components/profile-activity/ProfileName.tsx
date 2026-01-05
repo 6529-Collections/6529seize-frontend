@@ -17,7 +17,7 @@ export default function ProfileName({
   readonly type: ProfileNameType;
 }) {
   const params = useParams();
-  const handleOrWallet = params?.user?.toString().toLowerCase();
+  const handleOrWallet = params?.["user"]?.toString().toLowerCase();
 
   const { profile } = useIdentity({
     handleOrWallet: handleOrWallet,

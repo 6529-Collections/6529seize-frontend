@@ -65,7 +65,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         return;
       }
       try {
-        const response = await fetchUrl(url, { signal });
+        const response = await fetchUrl(url, { ...(signal !== undefined ? { signal: signal } : {}) });
         const combined = [...mynfts, ...response.data];
         if (response.next) {
           await fetchNftsInner(response.next, combined, signal);
@@ -213,7 +213,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                 </Row>
                 <Row>
                   <Col>
-                    <Table bordered={false} className={styles.gradientTable}>
+                    <Table bordered={false} className={styles["gradientTable"]}>
                       <tbody>
                         <tr>
                           <td>Mint Date</td>
@@ -233,7 +233,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                         <h3>TDH</h3>
                       </Col>
                     </Row>
-                    <Table bordered={false} className={styles.gradientTable}>
+                    <Table bordered={false} className={styles["gradientTable"]}>
                       <tbody>
                         <tr>
                           <td>TDH</td>
@@ -284,9 +284,9 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                 <h3>Transaction History</h3>
               </Col>
             </Row>
-            <Row className={`pt-3 ${styles.transactionsScrollContainer}`}>
+            <Row className={`pt-3 ${styles["transactionsScrollContainer"]}`}>
               <Col>
-                <Table bordered={false} className={styles.transactionsTable}>
+                <Table bordered={false} className={styles["transactionsTable"]}>
                   <tbody>
                     {transactions.map((tr) => (
                       <LatestActivityRow
@@ -306,7 +306,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }
 
   return (
-    <Container fluid className={styles.mainContainer}>
+    <Container fluid className={styles["mainContainer"]}>
       <Row>
         <Col>
           <Container className="pt-4 pb-4">

@@ -7,7 +7,10 @@ import Link from "next/link";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { goerli, sepolia } from "viem/chains";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "@/components/nextGen/nextgen_contracts";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";
@@ -49,10 +52,11 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                     <Row className="pb-2">
                       <Col xs={12} className="pt-2">
                         <div
-                          className={styles.artistSignature}
+                          className={styles["artistSignature"]}
                           dangerouslySetInnerHTML={{
                             __html: props.collection.artist_signature,
-                          }}></div>
+                          }}
+                        ></div>
                       </Col>
                     </Row>
                   </>
@@ -84,7 +88,8 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                         href={getEtherscanLink()}
                         target="_blank"
                         rel="noopener noreferrer"
-                        data-tooltip-id={`contract-tooltip-${props.collection.id}`}>
+                        data-tooltip-id={`contract-tooltip-${props.collection.id}`}
+                      >
                         {formatAddress(NEXTGEN_CORE[NEXTGEN_CHAIN_ID])}
                       </Link>
                       <Tooltip
@@ -95,7 +100,8 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
                           backgroundColor: "#1F2937",
                           color: "white",
                           padding: "4px 8px",
-                        }}>
+                        }}
+                      >
                         {NEXTGEN_CORE[NEXTGEN_CHAIN_ID]}
                       </Tooltip>
                     </span>
@@ -114,7 +120,7 @@ function NextGenCollectionDetailsOverview(props: Readonly<CollectionProps>) {
   );
 }
 
-function NextGenCollectionDetailsAbout(props: Readonly<CollectionProps>) {
+function NextGenCollectionDetailsAbout() {
   return (
     <Container className="no-padding pt-4">
       <Row className="pb-3">
@@ -325,6 +331,6 @@ export default function NextGenCollectionDetails(props: Readonly<Props>) {
   } else if (props.view === NextgenCollectionView.TOP_TRAIT_SETS) {
     return <NextGenTraitSets preview collection={props.collection} />;
   } else {
-    return <NextGenCollectionDetailsAbout collection={props.collection} />;
+    return <NextGenCollectionDetailsAbout />;
   }
 }

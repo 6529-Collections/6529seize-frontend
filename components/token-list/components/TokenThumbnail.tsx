@@ -4,7 +4,7 @@ import Spinner from "@/components/utils/Spinner";
 import type { TokenMetadata } from "@/components/nft-picker/NftPicker.types";
 
 type TokenThumbnailProps = Readonly<{
-  metadata?: TokenMetadata;
+  metadata?: TokenMetadata | undefined;
   decimalId: string;
   isLoading: boolean;
   hasError: boolean;

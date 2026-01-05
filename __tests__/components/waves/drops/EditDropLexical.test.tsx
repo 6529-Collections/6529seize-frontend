@@ -282,7 +282,7 @@ describe('EditDropLexical', () => {
     expect(enterCall).toBeDefined();
 
     const escapeHandler = escapeCall?.[1] as () => boolean;
-    const enterHandler = enterCall?.[1] as (event?: { shiftKey?: boolean }) => boolean;
+    const enterHandler = enterCall?.[1] as (event?: { shiftKey?: boolean | undefined }) => boolean;
 
     await act(async () => {
       escapeHandler?.();

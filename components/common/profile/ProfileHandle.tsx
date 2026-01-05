@@ -6,11 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { ProfileBadgeSize } from "./ProfileAvatar";
 
 interface ProfileHandleProps {
-  readonly handle?: string | null;
+  readonly handle?: string | null | undefined;
   readonly size: ProfileBadgeSize;
-  readonly href?: string;
-  readonly asLink?: boolean;
-  readonly highlightSearchParam?: string;
+  readonly href?: string | undefined;
+  readonly asLink?: boolean | undefined;
+  readonly highlightSearchParam?: string | undefined;
 }
 
 const TEXT_SIZE_CLASSES: Record<ProfileBadgeSize, string> = {

@@ -7,9 +7,9 @@ import { TraitWrapper } from "./TraitWrapper";
 interface DropdownTraitProps {
   readonly label: string;
   readonly field: keyof TraitsData;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly options: readonly string[];
   readonly traits: TraitsData;
   readonly updateText: (field: keyof TraitsData, value: string) => void;
@@ -42,15 +42,12 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
     );
 
     // Handle blur events
-    const handleBlur = useCallback(
-      (e: React.FocusEvent<HTMLSelectElement>) => {
-        // Call parent onBlur if provided
-        if (onBlur) {
-          onBlur(field);
-        }
-      },
-      [onBlur, field]
-    );
+    const handleBlur = useCallback(() => {
+      // Call parent onBlur if provided
+      if (onBlur) {
+        onBlur(field);
+      }
+    }, [onBlur, field]);
 
     // Check if field is filled (option selected, not empty default)
     const isFieldFilled = React.useMemo(() => {
@@ -63,7 +60,8 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
         label={label}
         className={className}
         error={error}
-        isFieldFilled={isFieldFilled}>
+        isFieldFilled={isFieldFilled}
+      >
         <select
           ref={selectRef}
           defaultValue={(traits[field] as string) || ""}
@@ -84,7 +82,8 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
             backgroundPosition: "right 0.5rem center",
             backgroundRepeat: "no-repeat",
             backgroundSize: "1.5em 1.5em",
-          }}>
+          }}
+        >
           <option value="" className="tw-bg-iron-950">
             Select {label}
           </option>

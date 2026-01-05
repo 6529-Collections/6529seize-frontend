@@ -51,9 +51,9 @@ describe("DelegationCenterMenu links", () => {
     render(<DelegationCenterMenu {...props} />);
     const etherscan = screen
       .getAllByText("Etherscan")[0]
-      .closest("a") as HTMLAnchorElement;
+      ?.closest("a") as HTMLAnchorElement;
     expect(etherscan?.href).toContain("etherscan.io/address");
-    const github = screen.getAllByText("Github")[0].closest("a");
+    const github = screen.getAllByText("Github")[0]?.closest("a");
     expect(github).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections/nftdelegation"

@@ -31,6 +31,6 @@ describe('useVirtualizedWaves', () => {
     
     // Rerender the same hook to get updated state
     rerender();
-    expect(result.current.virtualItems[0].index).toBe(2); // start index advanced
+    expect(result.current.virtualItems[0]?.index).toBe(2); // start index advanced
   });
 });

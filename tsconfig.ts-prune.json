@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "generated/**",
+    "**/generated/**"
   ],
   "include": [
     "next-env.d.ts",

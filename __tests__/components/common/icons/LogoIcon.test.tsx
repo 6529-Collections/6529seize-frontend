@@ -16,6 +16,6 @@ describe('LogoIcon', () => {
     const paths = container.querySelectorAll('path');
     expect(polygon).toBeInTheDocument();
     expect(paths.length).toBeGreaterThan(1);
-    expect(paths[0].getAttribute('fill')).toBe('currentColor');
+    expect(paths[0]?.getAttribute('fill')).toBe('currentColor');
   });
 });

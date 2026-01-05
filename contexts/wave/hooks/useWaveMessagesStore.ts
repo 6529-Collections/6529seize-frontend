@@ -139,7 +139,7 @@ function useWaveMessagesStore() {
       }
 
       const updatedWaveMessages = {
-        ...newWaveMessages[update.key],
+        ...newWaveMessages[update.key]!,
       };
 
       if (update.isLoading !== undefined) {
@@ -153,7 +153,7 @@ function useWaveMessagesStore() {
       }
       if (update.drops !== undefined) {
         updatedWaveMessages.drops = mergeDrops(
-          updatedWaveMessages.drops,
+          updatedWaveMessages.drops!,
           update.drops
         );
       }
@@ -165,12 +165,12 @@ function useWaveMessagesStore() {
         );
       }
 
-      notifyValue = updatedWaveMessages; // Capture the value to notify
+      notifyValue = updatedWaveMessages as WaveMessages; // Capture the value to notify
       const nextState = {
         ...newWaveMessages,
         [update.key]: updatedWaveMessages,
       };
-      waveMessagesRef.current = nextState;
+      waveMessagesRef.current = nextState as Record<string, WaveMessages>;
       return nextState;
     });
 
@@ -259,25 +259,23 @@ function useWaveMessagesStore() {
           optimisticValue,
         } of changes) {
           const currentHasKey = Object.hasOwn(nextDrop, key);
-            const currentValue = currentHasKey
-              ? nextDropRecord[key]
-              : undefined;
+          const currentValue = currentHasKey ? nextDropRecord[key] : undefined;
 
-            if (optimisticHasKey) {
-              if (!valuesEqual(currentValue, optimisticValue)) {
-                continue;
-              }
-            } else if (currentHasKey) {
+          if (optimisticHasKey) {
+            if (!valuesEqual(currentValue, optimisticValue)) {
               continue;
             }
+          } else if (currentHasKey) {
+            continue;
+          }
 
-            if (originalHasKey) {
-              nextDropRecord[key] = cloneValue(originalValue);
-            } else {
-              delete nextDropRecord[key];
-            }
+          if (originalHasKey) {
+            nextDropRecord[key] = cloneValue(originalValue);
+          } else {
+            delete nextDropRecord[key];
+          }
 
-            shouldRollback = true;
+          shouldRollback = true;
         }
 
         if (!shouldRollback) {

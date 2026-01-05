@@ -30,7 +30,7 @@ export const detectBrowser = (): string => {
  * Checks if the browser supports the necessary APIs for file uploads
  * @returns Object with supported status and reason if not supported
  */
-export const isBrowserSupported = (): { supported: boolean; reason?: string } => {
+export const isBrowserSupported = (): { supported: boolean; reason?: string | undefined } => {
   if (typeof window === 'undefined') {
     return { supported: true }; // Server-side rendering
   }

@@ -1,6 +1,12 @@
-"use client"
+"use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   InitialConfigType,
   LexicalComposer,
@@ -54,7 +60,10 @@ import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPl
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
-import { normalizeDropMarkdown, exportDropMarkdown } from "./normalizeDropMarkdown";
+import {
+  normalizeDropMarkdown,
+  exportDropMarkdown,
+} from "./normalizeDropMarkdown";
 import {
   addBlankLinePlaceholders,
   removeBlankLinePlaceholders,
@@ -159,16 +168,20 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
     const currentNode = textNodes[i];
     const nextNode = textNodes[i + 1];
 
-    const currentText = currentNode.getTextContent();
-    const nextText = nextNode.getTextContent();
+    const currentText = currentNode?.getTextContent();
+    const nextText = nextNode?.getTextContent();
 
-    const mentionStart = currentText.match(/@\[\w*$/);
-    const mentionEnd = nextText.match(/^\w*\]/);
-
+    const mentionStart = currentText?.match(/@\[\w*$/);
+    const mentionEnd = nextText?.match(/^\w*\]/);
     if (mentionStart && mentionEnd) {
       try {
         if (
-          reconstructSplitMention(currentNode, nextNode, mentionStart, mentionEnd)
+          reconstructSplitMention(
+            currentNode,
+            nextNode,
+            mentionStart,
+            mentionEnd
+          )
         ) {
           return true;
         }
@@ -187,10 +200,7 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
   useEffect(() => {
     editor.update(() => {
       const normalizedContent = normalizeDropMarkdown(initialContent);
-      $convertFromMarkdownString(
-        normalizedContent,
-        EDIT_MARKDOWN_TRANSFORMERS
-      );
+      $convertFromMarkdownString(normalizedContent, EDIT_MARKDOWN_TRANSFORMERS);
 
       const root = $getRoot();
       convertCodeNodesToFences(root);
@@ -256,6 +266,7 @@ function FocusPlugin({ isApp }: { isApp: boolean }) {
     } else {
       focusEditor();
     }
+    return;
   }, [editor, isApp]);
 
   return null;
@@ -275,8 +286,7 @@ function KeyboardPlugin({
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
 }) {
   const [editor] = useLexicalComposerContext();
-  const sanitizedInitialContent =
-    removeBlankLinePlaceholders(initialContent);
+  const sanitizedInitialContent = removeBlankLinePlaceholders(initialContent);
 
   useEffect(() => {
     const removeEscapeListener = editor.registerCommand(
@@ -307,8 +317,7 @@ function KeyboardPlugin({
           const sanitizedCurrentMarkdown =
             removeBlankLinePlaceholders(currentMarkdown);
           if (
-            sanitizedCurrentMarkdown.trim() ===
-            sanitizedInitialContent.trim()
+            sanitizedCurrentMarkdown.trim() === sanitizedInitialContent.trim()
           ) {
             onCancel();
           } else {
@@ -415,8 +424,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       EDIT_MARKDOWN_TRANSFORMERS
     );
 
-    const sanitizedMarkdown =
-      removeBlankLinePlaceholders(markdown);
+    const sanitizedMarkdown = removeBlankLinePlaceholders(markdown);
 
     if (sanitizedMarkdown.trim() === normalizedInitialContent.trim()) {
       onCancel();
@@ -424,13 +432,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     }
 
     onSave(sanitizedMarkdown, mentionedUsers);
-  }, [
-    editorState,
-    mentionedUsers,
-    onSave,
-    normalizedInitialContent,
-    onCancel,
-  ]);
+  }, [editorState, mentionedUsers, onSave, normalizedInitialContent, onCancel]);
 
   return (
     <div className="tw-w-full" data-editor-mode="true">
@@ -440,7 +442,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             contentEditable={
               <div className="tw-relative">
                 <ContentEditable
-                  className="tw-w-full tw-py-2.5 tw-pl-3 tw-pr-10 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 tw-text-sm tw-resize-none tw-outline-none focus:tw-border-primary-400 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-min-h-[40px]"
+                  className="tw-min-h-[40px] tw-w-full tw-resize-none tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-py-2.5 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 focus:tw-border-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
                   style={{
                     fontFamily: "inherit",
                     lineHeight: "1.4",
@@ -450,7 +452,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
               </div>
             }
             placeholder={
-              <div className="tw-absolute tw-top-2 tw-left-3 tw-text-iron-500 tw-text-sm tw-pointer-events-none">
+              <div className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-2 tw-text-sm tw-text-iron-500">
                 Edit message...
               </div>
             }
@@ -483,18 +485,18 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       </LexicalComposer>
 
       {!isApp && (
-        <div className="tw-flex tw-items-center tw-mt-1 tw-text-xs tw-text-iron-400">
+        <div className="tw-mt-1 tw-flex tw-items-center tw-text-xs tw-text-iron-400">
           escape to{" "}
           <button
             onClick={onCancel}
-            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
+            className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
           >
             cancel
           </button>{" "}
           • enter to{" "}
           <button
             onClick={handleSave}
-            className="tw-bg-transparent tw-px-[3px] tw-border-0 tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-underline tw-transition tw-font-medium focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-rounded-md"
+            className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
           >
             save
           </button>
@@ -502,19 +504,19 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       )}
 
       {isApp && (
-        <div className="tw-mt-3 tw-mb-2">
+        <div className="tw-mb-2 tw-mt-3">
           <div className="tw-flex tw-gap-x-2">
             <button
               onClick={onCancel}
               disabled={isSaving}
-              className="tw-bg-iron-800 tw-text-iron-300 tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-3 tw-font-medium tw-text-sm active:tw-bg-iron-700 tw-transition-colors tw-duration-150 disabled:tw-opacity-50"
+              className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-150 active:tw-bg-iron-700 disabled:tw-opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="tw-bg-primary-500 tw-text-white tw-border-0 tw-rounded-lg tw-py-1.5 tw-px-3 tw-font-medium tw-text-sm active:tw-bg-primary-600 tw-transition-colors tw-duration-150 disabled:tw-opacity-50"
+              className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-transition-colors tw-duration-150 active:tw-bg-primary-600 disabled:tw-opacity-50"
             >
               {isSaving ? "Saving..." : "Save"}
             </button>

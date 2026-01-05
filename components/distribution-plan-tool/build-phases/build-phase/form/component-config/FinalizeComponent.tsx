@@ -33,8 +33,8 @@ export default function FinalizeComponent({
   snapshots: DistributionPlanSnapshot[];
   loading: boolean;
   title: string;
-  uniqueWalletsCount?: number | null;
-  isLoadingUniqueWalletsCount?: boolean;
+  uniqueWalletsCount?: number | null | undefined;
+  isLoadingUniqueWalletsCount?: boolean | undefined;
   onClose: () => void;
   phases: BuildPhasesPhase[];
 }>) {

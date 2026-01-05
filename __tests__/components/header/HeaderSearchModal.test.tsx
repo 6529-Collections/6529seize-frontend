@@ -103,24 +103,34 @@ interface SetupOptions {
     queryKey: [QueryKey, string];
     profilesRefetch: jest.Mock<Promise<unknown>, []>;
     nftsRefetch: jest.Mock<Promise<unknown>, []>;
-    enabled?: boolean;
-  }) => {
-    isFetching: boolean;
-    data: unknown;
-    error?: Error;
-    refetch: jest.Mock<Promise<unknown>, []>;
-  };
-  selectedCategory?: "ALL" | "PROFILES" | "NFTS" | "WAVES" | "PAGES";
-  wavesReturn?: {
-    waves: unknown[];
-    isFetching: boolean;
-    error: Error | null;
-    refetch: jest.Mock<Promise<unknown>, []>;
-  };
-  profilesRefetch?: jest.Mock<Promise<unknown>, []>;
-  nftsRefetch?: jest.Mock<Promise<unknown>, []>;
-  wavesRefetch?: jest.Mock<Promise<unknown>, []>;
-  sidebarSections?: typeof defaultSidebarSections;
+    enabled?: boolean | undefined;
+  }) =>
+    | {
+        isFetching: boolean;
+        data: unknown;
+        error?: Error | undefined;
+        refetch: jest.Mock<Promise<unknown>, []>;
+      }
+    | undefined;
+  selectedCategory?:
+    | "ALL"
+    | "PROFILES"
+    | "NFTS"
+    | "WAVES"
+    | "PAGES"
+    | undefined;
+  wavesReturn?:
+    | {
+        waves: unknown[];
+        isFetching: boolean;
+        error: Error | null;
+        refetch: jest.Mock<Promise<unknown>, []>;
+      }
+    | undefined;
+  profilesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
+  nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
+  wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
+  sidebarSections?: typeof defaultSidebarSections | undefined;
 }
 
 function setup(options: SetupOptions = {}) {
@@ -302,8 +312,8 @@ describe("HeaderSearchModal", () => {
     fireEvent.change(input, { target: { value: "faq" } });
 
     const items = await screen.findAllByTestId("item");
-    expect(items[0].textContent).toContain('"title":"FAQ"');
-    expect(items[1].textContent).toContain('"title":"Delegation FAQs"');
+    expect(items[0]?.textContent).toContain('"title":"FAQ"');
+    expect(items[1]?.textContent).toContain('"title":"Delegation FAQs"');
   });
 
   it("renders result categories in deterministic order in All view", async () => {

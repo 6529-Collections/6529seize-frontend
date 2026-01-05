@@ -50,7 +50,7 @@ describe("ConfirmTokenIdModal", () => {
     );
     const confirmButton = screen.getByText("Confirm");
     await user.click(confirmButton);
-    expect(mockOnConfirm).toHaveBeenCalledWith(expect.any(String), "123");
+    expect(mockOnConfirm).toHaveBeenCalledWith("123");
   });
 
   it("calls onConfirm when Enter key is pressed with valid token id", async () => {
@@ -65,7 +65,7 @@ describe("ConfirmTokenIdModal", () => {
     const input = screen.getByRole("spinbutton");
     input.focus();
     await user.keyboard("{Enter}");
-    expect(mockOnConfirm).toHaveBeenCalledWith(expect.any(String), "123");
+    expect(mockOnConfirm).toHaveBeenCalledWith("123");
   });
 
   it("does not call onConfirm when Enter key is pressed with invalid token id", async () => {

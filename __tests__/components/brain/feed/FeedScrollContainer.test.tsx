@@ -28,7 +28,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  delete (globalThis as Record<string, unknown>).IntersectionObserver;
+  delete (globalThis as Record<string, unknown>)["IntersectionObserver"];
 });
 
 jest.useFakeTimers();

@@ -12,7 +12,7 @@ export enum CreateDropWaveWrapperContext {
 
 interface CreateDropWaveWrapperProps {
   readonly children: React.ReactNode;
-  readonly context?: CreateDropWaveWrapperContext;
+  readonly context?: CreateDropWaveWrapperContext | undefined;
 }
 
 function useResizeObserver(

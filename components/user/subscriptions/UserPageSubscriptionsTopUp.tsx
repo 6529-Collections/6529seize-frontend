@@ -105,7 +105,7 @@ export default function UserPageSubscriptionsTopUp() {
         era: remainingMintsForEra,
         eon: remainingMintsForEon,
       };
-      count = optionCountMap[selectedOption];
+      count = optionCountMap[selectedOption]!;
       if (!count || count < 1) {
         setError("Invalid option selected");
         return;
@@ -178,20 +178,19 @@ export default function UserPageSubscriptionsTopUp() {
       }
     }
 
-    if (showModal) {
-      globalThis.addEventListener("keydown", handleEscape);
-      return () => {
-        globalThis.removeEventListener("keydown", handleEscape);
-      };
-    }
+    if (!showModal) return;
+    globalThis.addEventListener("keydown", handleEscape);
+    return () => {
+      globalThis.removeEventListener("keydown", handleEscape);
+    };
   }, [showModal, isClosable, closeModal]);
 
   function getModalContent() {
     if (error) {
       return (
         <div className="tw-text-center">
-          <p className="tw-text-red tw-text-lg tw-font-medium tw-mb-4">Error</p>
-          <p className="tw-text-iron-100 tw-mb-0">{error}</p>
+          <p className="tw-mb-4 tw-text-lg tw-font-medium tw-text-red">Error</p>
+          <p className="tw-mb-0 tw-text-iron-100">{error}</p>
         </div>
       );
     }
@@ -199,7 +198,7 @@ export default function UserPageSubscriptionsTopUp() {
     if (sendTransaction.isPending) {
       return (
         <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-          <p className="tw-text-iron-100 tw-text-lg tw-font-medium tw-mb-0">
+          <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
             Confirm in your wallet
           </p>
           <CircleLoader size={CircleLoaderSize.LARGE} />
@@ -210,7 +209,7 @@ export default function UserPageSubscriptionsTopUp() {
     if (waitSendTransaction.isLoading) {
       return (
         <div className="tw-text-center">
-          <p className="tw-text-iron-100 tw-text-lg tw-font-medium tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2">
+          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
             Transaction Submitted
             {sendTransaction.data && (
               <a
@@ -220,12 +219,13 @@ export default function UserPageSubscriptionsTopUp() {
                   sendTransaction.data
                 )}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 View Tx
               </a>
             )}
           </p>
-          <p className="tw-text-iron-100 tw-text-md tw-font-medium tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2">
+          <p className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-md tw-font-medium tw-text-iron-100">
             Waiting for confirmation{" "}
             <CircleLoader size={CircleLoaderSize.MEDIUM} />
           </p>
@@ -236,7 +236,7 @@ export default function UserPageSubscriptionsTopUp() {
     if (waitSendTransaction.isSuccess) {
       return (
         <div className="tw-text-center">
-          <p className="tw-text-green tw-text-lg tw-font-medium tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2">
+          <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
             Top Up Successful!
             {sendTransaction.data && (
               <a
@@ -246,7 +246,8 @@ export default function UserPageSubscriptionsTopUp() {
                   sendTransaction.data
                 )}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 View Tx
               </a>
             )}
@@ -269,7 +270,8 @@ export default function UserPageSubscriptionsTopUp() {
           href={window.location.href}
           className="text-center pt-2 pb-2"
           target="_blank"
-          rel="noopener noreferrer">
+          rel="noopener noreferrer"
+        >
           <button className="btn btn-light" style={{ width: "100%" }}>
             Top-up on 6529.io
           </button>
@@ -369,25 +371,26 @@ export default function UserPageSubscriptionsTopUp() {
         <Col xs={12} sm={6} className="d-flex align-items-center">
           <button
             type="button"
-            className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full tw-text-left ${
-              styles.cardCountOption
+            className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
+              styles["cardCountOption"]
             } ${
               selectedOption === "other"
                 ? "tw-bg-iron-800"
                 : "tw-bg-transparent hover:tw-bg-iron-900"
             }`}
-            onClick={handleSelectOther}>
+            onClick={handleSelectOther}
+          >
             <Row className="d-flex align-items-center">
-              <Col xs={1} className="d-flex tw-justify-center tw-items-center">
+              <Col xs={1} className="d-flex tw-items-center tw-justify-center">
                 <input
                   type="radio"
                   checked={selectedOption === "other"}
                   onChange={handleSelectOther}
                   aria-label="Other card count"
-                  className={styles.radioInput}
+                  className={styles["radioInput"]}
                 />
               </Col>
-              <Col xs={11} className="d-flex tw-items-center gap-2">
+              <Col xs={11} className="d-flex gap-2 tw-items-center">
                 <span>Other</span>
                 <Form.Control
                   ref={otherInputRef}
@@ -395,7 +398,7 @@ export default function UserPageSubscriptionsTopUp() {
                   min={1}
                   placeholder="count"
                   value={memeCount}
-                  className={styles.countInput}
+                  className={styles["countInput"]}
                   style={{ width: "100px", padding: "2px 10px" }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -426,9 +429,10 @@ export default function UserPageSubscriptionsTopUp() {
         <Col
           xs={12}
           sm={6}
-          className="d-flex tw-justify-center tw-items-center pt-2 pt-sm-0">
+          className="d-flex pt-2 pt-sm-0 tw-items-center tw-justify-center"
+        >
           <Button
-            className={`${styles.sendBtn} tw-w-full sm:tw-w-auto`}
+            className={`${styles["sendBtn"]} tw-w-full sm:tw-w-auto`}
             onClick={handleSend}
             disabled={
               sendTransaction.isPending ||
@@ -437,7 +441,8 @@ export default function UserPageSubscriptionsTopUp() {
               (selectedOption === "other" &&
                 (!memeCount || Number.parseInt(memeCount, 10) < 1))
             }
-            aria-label="Send top up">
+            aria-label="Send top up"
+          >
             Send
           </Button>
         </Col>
@@ -464,14 +469,15 @@ export default function UserPageSubscriptionsTopUp() {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   {SUBSCRIPTIONS_ADDRESS}
                 </Tooltip>
               </>
             </span>
           </Col>
         </Row>
-        <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
+        <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
         {isIos ? iOsContent : topUpContent}
       </Container>
       {mounted &&
@@ -482,21 +488,23 @@ export default function UserPageSubscriptionsTopUp() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-flex tw-items-center tw-justify-center tw-z-[9999] tw-px-4"
-                onClick={isClosable ? closeModal : undefined}>
+                className="tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
+                onClick={isClosable ? closeModal : undefined}
+              >
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  className="tw-p-6 tw-bg-iron-950 tw-rounded-xl tw-w-full tw-max-w-md tw-shadow-2xl tw-relative"
-                  onClick={(e) => e.stopPropagation()}>
+                  className="tw-relative tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="tw-flex tw-items-start tw-justify-between tw-border-b tw-border-iron-800">
                     <div>
                       <h2 className="tw-text-xl tw-font-semibold tw-text-white">
                         Top up
                       </h2>
                       {topUpAmount !== null && (
-                        <p className="tw-text-iron-400 tw-text-sm tw-mt-1">
+                        <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
                           {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}{" "}
                           Cards -{" "}
                           {numberWithCommasFromString(topUpAmount.toString())}{" "}
@@ -507,8 +515,9 @@ export default function UserPageSubscriptionsTopUp() {
                     {isClosable && (
                       <button
                         onClick={closeModal}
-                        className="tw-size-9 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-                        aria-label="Close modal">
+                        className="tw-size-9 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
+                        aria-label="Close modal"
+                      >
                         <FontAwesomeIcon
                           icon={faXmark}
                           className="tw-size-5 tw-flex-shrink-0"
@@ -516,7 +525,7 @@ export default function UserPageSubscriptionsTopUp() {
                       </button>
                     )}
                   </div>
-                  <div className="tw-bg-iron-800 tw-rounded-xl tw-min-h-[120px] tw-flex tw-items-center tw-justify-center tw-p-2">
+                  <div className="tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-2">
                     {getModalContent()}
                   </div>
                 </motion.div>
@@ -532,7 +541,7 @@ export default function UserPageSubscriptionsTopUp() {
 function CardCountOption(
   props: Readonly<{
     count: number;
-    display?: string;
+    display?: string | undefined;
     selected: boolean;
     onSelect: () => void;
   }>
@@ -545,22 +554,23 @@ function CardCountOption(
   return (
     <button
       type="button"
-      className={`tw-border tw-rounded-lg tw-p-3 tw-cursor-pointer tw-transition-colors tw-w-full tw-text-left ${
-        styles.cardCountOption
+      className={`tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-p-3 tw-text-left tw-transition-colors ${
+        styles["cardCountOption"]
       } ${
         props.selected
           ? "tw-bg-iron-700"
           : "tw-bg-transparent hover:tw-bg-iron-900"
       }`}
-      onClick={props.onSelect}>
+      onClick={props.onSelect}
+    >
       <Row className="d-flex align-items-center">
-        <Col xs={1} className="d-flex tw-justify-center tw-items-center">
+        <Col xs={1} className="d-flex tw-items-center tw-justify-center">
           <input
             type="radio"
             checked={props.selected}
             onChange={props.onSelect}
             aria-label={labelText}
-            className={styles.radioInput}
+            className={styles["radioInput"]}
           />
         </Col>
         <Col xs={11} className="d-flex tw-items-center">

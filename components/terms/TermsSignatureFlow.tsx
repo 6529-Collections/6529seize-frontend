@@ -7,7 +7,7 @@ import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 
 interface SigningCompleteResult {
   success: boolean;
-  signature?: string;
+  signature?: string | undefined;
 }
 
 /**

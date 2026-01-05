@@ -121,7 +121,7 @@ export function useWaveConfig() {
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
-    setConfig((prev) => ({
+    setConfig(() => ({
       ...getInitialConfig({ type: overview.type }),
       overview,
     }));

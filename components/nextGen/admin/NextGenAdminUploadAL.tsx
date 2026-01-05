@@ -25,8 +25,6 @@ interface Props {
   close: () => void;
 }
 
-const MARKLE_ZERO_PATTERN = /^0x0+$/;
-
 enum Type {
   ALLOWLIST = "allowlist",
   NO_ALLOWLIST = "no_allowlist",
@@ -235,7 +233,8 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   uploading ||
                   uploadSuccess
                 }
-                onClick={() => uploadFile()}>
+                onClick={() => uploadFile()}
+              >
                 Upload
               </Button>
               {uploading && (

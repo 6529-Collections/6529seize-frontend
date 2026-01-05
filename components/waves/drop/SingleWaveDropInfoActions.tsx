@@ -5,7 +5,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 interface SingleWaveDropInfoActionsProps {
   readonly drop: ExtendedDrop;
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 export const SingleWaveDropInfoActions: React.FC<

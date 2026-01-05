@@ -6,7 +6,7 @@ interface UserXtdhStatsProps {
   readonly generationRate: number;
   readonly incomingRate: number;
   readonly unusedRate: number;
-  readonly onOutboundClick?: () => void;
+  readonly onOutboundClick?: (() => void) | undefined;
 }
 
 export function UserXtdhStats({
@@ -44,9 +44,10 @@ export function UserXtdhStats({
 
   const percentage =
     generationRate > 0
-      ? ((Math.floor(outbound * 10) / 10) /
-        (Math.floor(generationRate * 10) / 10)) *
-      100
+      ? (Math.floor(outbound * 10) /
+          10 /
+          (Math.floor(generationRate * 10) / 10)) *
+        100
       : 0;
 
   return (

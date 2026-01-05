@@ -33,7 +33,7 @@ describe('HashtagNode', () => {
     expect(element.getAttribute('data-lexical-hashtag')).toBe('true');
 
     const map = HashtagNode.importDOM()!;
-    const entry = map.span!(element);
+    const entry = map["span"]!(element);
     expect(entry).not.toBeNull();
     const result = entry!.conversion(element);
     expect($isHashtagNode(result!.node)).toBe(true);

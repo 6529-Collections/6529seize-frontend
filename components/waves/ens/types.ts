@@ -20,13 +20,13 @@ export interface EnsOwnership {
   readonly isWrapped: boolean;
   readonly registrant: string | null;
   readonly expiry: number | null;
-  readonly gracePeriodEnds?: number | null;
+  readonly gracePeriodEnds?: number | null | undefined;
 }
 
 export interface EnsLinks {
-  readonly app?: string;
-  readonly etherscan?: string;
-  readonly open?: string;
+  readonly app?: string | undefined;
+  readonly etherscan?: string | undefined;
+  readonly open?: string | undefined;
 }
 
 export interface EnsNamePreview {
@@ -68,7 +68,7 @@ export const isEnsPreview = (value: unknown): value is EnsPreview => {
     return false;
   }
 
-  const record = value as { readonly type?: unknown };
+  const record = value as { readonly type?: unknown | undefined };
   return (
     record.type === "ens.name" ||
     record.type === "ens.address" ||

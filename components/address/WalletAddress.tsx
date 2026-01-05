@@ -18,10 +18,10 @@ export function WalletAddress(props: {
   wallet: string;
   display: string | undefined;
   displayEns?: string | undefined;
-  isUserPage?: boolean;
-  disableLink?: boolean;
-  hideCopy?: boolean;
-  setLinkQueryAddress?: boolean;
+  isUserPage?: boolean | undefined;
+  disableLink?: boolean | undefined;
+  hideCopy?: boolean | undefined;
+  setLinkQueryAddress?: boolean | undefined;
 }) {
   const uniqueId = getRandomObjectId();
   const uniqueIdEns = getRandomObjectId();
@@ -89,9 +89,9 @@ export function WalletAddress(props: {
     <span>
       {(props.hideCopy || !navigator.clipboard) &&
         (props.disableLink ? (
-          <span className={styles.address}>{resolveDisplay()}</span>
+          <span className={styles["address"]}>{resolveDisplay()}</span>
         ) : (
-          <Link href={getLink()} className={styles.address}>
+          <Link href={getLink()} className={styles["address"]}>
             {resolveDisplay()}
           </Link>
         ))}
@@ -99,13 +99,13 @@ export function WalletAddress(props: {
         <>
           {!props.isUserPage && (
             <span
-              className={`${styles.address} ${
-                props.isUserPage ? styles.addressUserPage : ""
+              className={`${styles["address"]} ${
+                props.isUserPage ? styles["addressUserPage"] : ""
               }`}>
               {props.disableLink ? (
-                <span className={styles.address}>{resolveDisplay()}</span>
+                <span className={styles["address"]}>{resolveDisplay()}</span>
               ) : (
-                <Link href={getLink()} className={styles.address}>
+                <Link href={getLink()} className={styles["address"]}>
                   {resolveDisplay()}
                 </Link>
               )}
@@ -114,7 +114,7 @@ export function WalletAddress(props: {
           {walletEns ? (
             <Dropdown
               ref={dropdownRef}
-              className={`${styles.copyDropdown}`}
+              className={`${styles["copyDropdown"]}`}
               autoClose="outside"
               data-tooltip-id={uniqueId}
               onToggle={(nextShow: boolean) => {
@@ -123,8 +123,8 @@ export function WalletAddress(props: {
               <Dropdown.Toggle name={`copy-toggle`} aria-label={`copy-toggle`}>
                 {props.isUserPage && props.display && (
                   <span
-                    className={`${styles.address} ${
-                      props.isUserPage ? styles.addressUserPage : ""
+                    className={`${styles["address"]} ${
+                      props.isUserPage ? styles["addressUserPage"] : ""
                     }`}>
                     {formatAddress(props.display)}
                   </span>
@@ -133,7 +133,7 @@ export function WalletAddress(props: {
                   icon={faCopy}
                   name={`copy-btn`}
                   aria-label={`copy-btn`}
-                  className={`${styles.copy}`}
+                  className={`${styles["copy"]}`}
                 />
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -149,7 +149,7 @@ export function WalletAddress(props: {
 
                 <Dropdown.Item
                   data-tooltip-id={uniqueIdWallet}
-                  className={styles.copyDropdownItem}
+                  className={styles["copyDropdownItem"]}
                   aria-label={`copy-address-btn`}
                   onClick={() => copy(props.wallet)}>
                   {formatAddress(props.wallet as string)}
@@ -159,7 +159,7 @@ export function WalletAddress(props: {
           ) : (
             <Dropdown
               ref={dropdownRef}
-              className={`${styles.copyDropdown}`}
+              className={`${styles["copyDropdown"]}`}
               autoClose="outside"
               data-tooltip-id={uniqueId}
               onToggle={(nextShow: boolean) => {
@@ -171,8 +171,8 @@ export function WalletAddress(props: {
                 onClick={() => copy(props.wallet)}>
                 {props.isUserPage && (
                   <span
-                    className={`${styles.address} ${
-                      props.isUserPage ? styles.addressUserPage : ""
+                    className={`${styles["address"]} ${
+                      props.isUserPage ? styles["addressUserPage"] : ""
                     }`}
                     dangerouslySetInnerHTML={{
                       __html: resolveAddress(),
@@ -182,7 +182,7 @@ export function WalletAddress(props: {
                   icon={faCopy}
                   name={`copy-btn`}
                   aria-label={`copy-btn`}
-                  className={`${styles.copy}`}
+                  className={`${styles["copy"]}`}
                 />
               </Dropdown.Toggle>
             </Dropdown>

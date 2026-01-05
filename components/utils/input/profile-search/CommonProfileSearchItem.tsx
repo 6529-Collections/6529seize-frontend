@@ -14,7 +14,7 @@ export default function CommonProfileSearchItem({
   readonly profile: CommunityMemberMinimal;
   readonly selected: string | null;
   readonly onProfileSelect: (newV: CommunityMemberMinimal | null) => void;
-  readonly isHighlighted?: boolean;
+  readonly isHighlighted?: boolean | undefined;
   readonly id: string;
 }) {
   const selectableValue = getSelectableIdentity(profile);

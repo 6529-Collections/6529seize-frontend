@@ -180,7 +180,7 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
             <Form.Group className="mb-3">
               <Form.Label>Merkle Roots</Form.Label>
               <Form.Select
-                className={`${styles.formInput}`}
+                className={`${styles["formInput"]}`}
                 value={selectedAllowlist?.merkle_root ?? ""}
                 onChange={(e) => {
                   const merkleRoot = e.target.value;

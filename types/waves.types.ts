@@ -125,7 +125,7 @@ export interface WaveOutcomeDistributionState {
   readonly fetchNextPage: () => void;
   readonly isLoading: boolean;
   readonly isError: boolean;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
 }
 
 export interface CreateWaveConfig {
@@ -151,9 +151,9 @@ export interface WavesOverviewParams {
   limit: number;
   offset: number;
   type: ApiWavesOverviewType;
-  only_waves_followed_by_authenticated_user?: boolean;
+  only_waves_followed_by_authenticated_user?: boolean | undefined;
   /**
    * Filter waves by direct message flag. true -> only DMs, false -> exclude DMs.
    */
-  direct_message?: boolean;
+  direct_message?: boolean | undefined;
 }

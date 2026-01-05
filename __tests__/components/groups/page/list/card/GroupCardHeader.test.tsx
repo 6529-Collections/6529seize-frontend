@@ -12,7 +12,7 @@ const baseGroup: any = {
   created_at: '2023-01-01',
 };
 
-function renderComp(opts: { handle?: string | null; activeProxy?: boolean; group?: any } = {}) {
+function renderComp(opts: { handle?: string | null | undefined; activeProxy?: boolean | undefined; group?: any | undefined } = {}) {
   const { handle = null, activeProxy = false, group = baseGroup } = opts;
   return render(
     <AuthContext.Provider value={{ connectedProfile: handle ? { handle } : null, activeProfileProxy: activeProxy } as any}>

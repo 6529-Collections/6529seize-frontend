@@ -8,7 +8,7 @@ export default function AppWalletImportPage() {
   useSetTitle("Import App Wallet | Tools");
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <AppWalletImport />
     </main>
   );

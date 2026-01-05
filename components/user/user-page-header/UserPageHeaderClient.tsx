@@ -50,7 +50,7 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const routeHandleOrWallet = params?.user?.toString().toLowerCase() ?? null;
+  const routeHandleOrWallet = params?.["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 

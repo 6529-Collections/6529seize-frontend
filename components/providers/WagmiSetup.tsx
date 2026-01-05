@@ -42,8 +42,8 @@ function installSafeEthereumProxy(): void {
   if (globalThis.window === undefined) return;
 
   const w = globalThis as unknown as {
-    ethereum?: unknown;
-    __6529_safeEthereumProxyInstalled?: boolean;
+    ethereum?: unknown | undefined;
+    __6529_safeEthereumProxyInstalled?: boolean | undefined;
   };
 
   if (w.__6529_safeEthereumProxyInstalled) return;

@@ -5,7 +5,7 @@ interface ListMessageProps {
 }
 
 interface RetryableMessageProps {
-  readonly message?: string;
+  readonly message?: string | undefined;
   readonly onRetry: () => void;
 }
 

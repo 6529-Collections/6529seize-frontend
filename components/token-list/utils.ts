@@ -33,7 +33,7 @@ export function getVisibleWindowBounds(virtualItems: Array<{ index: number }>) {
     return { firstVisibleIndex: 0, lastVisibleIndex: -1 };
   }
 
-  const firstVisibleIndex = virtualItems[0].index;
+  const firstVisibleIndex = virtualItems[0]?.index;
   const lastItem = virtualItems.at(-1)!;
   const lastVisibleIndex = lastItem.index;
 

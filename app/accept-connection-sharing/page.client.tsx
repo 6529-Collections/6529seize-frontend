@@ -17,7 +17,7 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 interface AcceptConnectionSharingProps {
   token: string;
   address: string;
-  role?: string;
+  role?: string | undefined;
 }
 
 function AcceptConnectionSharing(

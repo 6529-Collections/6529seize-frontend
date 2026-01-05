@@ -10,8 +10,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function NextGenAdminPage() {
   return (
-    <main className={styles.main}>
-      <Container fluid className={styles.main}>
+    <main className={styles["main"]}>
+      <Container fluid className={styles["main"]}>
         <Row>
           <Col>
             <NextGenAdminComponent />

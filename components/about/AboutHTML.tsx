@@ -21,7 +21,7 @@ export default function AboutHTML(props: Readonly<Props>) {
 
   if (props.title?.includes(" ")) {
     const [firstWord, ...rest] = props.title.split(" ");
-    titleLighter = firstWord;
+    titleLighter = firstWord!;
     titleDarker = rest.join(" ");
   }
 
@@ -39,7 +39,7 @@ export default function AboutHTML(props: Readonly<Props>) {
       )}
       <Row>
         <Col
-          className={styles.htmlContainer}
+          className={styles["htmlContainer"]}
           dangerouslySetInnerHTML={{
             __html: html,
           }}></Col>

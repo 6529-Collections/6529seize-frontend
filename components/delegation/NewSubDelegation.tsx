@@ -26,7 +26,7 @@ interface Props {
   subdelegation?: {
     originalDelegator: string;
     collection: DelegationCollection;
-  };
+  } | undefined;
   ens: string | null | undefined;
   onHide(): any;
   onSetToast(toast: any): any;

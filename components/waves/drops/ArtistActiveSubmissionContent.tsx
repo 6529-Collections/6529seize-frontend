@@ -27,7 +27,7 @@ interface ArtistActiveSubmissionContentProps {
   readonly user: ApiProfileMin;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly isApp?: boolean;
+  readonly isApp?: boolean | undefined;
 }
 
 export const ArtistActiveSubmissionContent: React.FC<

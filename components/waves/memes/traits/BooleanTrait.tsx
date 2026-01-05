@@ -7,9 +7,9 @@ import { TraitWrapper } from "./TraitWrapper";
 type BooleanTraitProps = {
   readonly label: string;
   readonly field: keyof TraitsData;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly traits: TraitsData;
   readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
 };
@@ -121,11 +121,13 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         className={className}
         error={error}
         id={`field-${field}`}
-        isFieldFilled={isFieldFilled}>
+        isFieldFilled={isFieldFilled}
+      >
         <div
           ref={uiStateRef}
           className="tw-flex tw-gap-3 tw-w-full"
-          data-field={field}>
+          data-field={field}
+        >
           <button
             onClick={handleYesClick}
             className={`yes-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
@@ -134,7 +136,8 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
                 ? "tw-bg-primary-400/30 tw-ring-primary-400/60 tw-text-primary-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
-            type="button">
+            type="button"
+          >
             Yes
           </button>
           <button
@@ -145,7 +148,8 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
                 ? "tw-bg-primary-400/30 tw-ring-primary-400/60 tw-text-primary-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
-            type="button">
+            type="button"
+          >
             No
           </button>
         </div>

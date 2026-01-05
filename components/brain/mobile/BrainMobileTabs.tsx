@@ -16,11 +16,11 @@ import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
-  readonly wave?: ApiWave;
+  readonly wave?: ApiWave | undefined;
   readonly waveActive: boolean;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
-  readonly isApp?: boolean;
+  readonly isApp?: boolean | undefined;
 }
 
 const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({

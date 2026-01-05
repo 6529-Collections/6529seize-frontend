@@ -32,9 +32,9 @@ export default function CommonTimeSelect({
 }: {
   readonly currentTime: number | null;
   readonly onMillis: (millis: number) => void;
-  readonly disabled?: boolean;
-  readonly inline?: boolean;
-  readonly size?: "sm" | "md";
+  readonly disabled?: boolean | undefined;
+  readonly inline?: boolean | undefined;
+  readonly size?: "sm" | "md" | undefined;
 }) {
   const hours = currentTime
     ? +Time.millis(currentTime).diffFromNow().toHours().toFixed(0)

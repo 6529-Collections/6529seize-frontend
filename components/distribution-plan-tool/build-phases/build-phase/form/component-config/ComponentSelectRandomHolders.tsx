@@ -34,8 +34,8 @@ export default function ComponentSelectRandomHolders({
     seed: string;
   }) => void;
   title: string;
-  uniqueWalletsCount?: number | null;
-  isLoadingUniqueWalletsCount?: boolean;
+  uniqueWalletsCount?: number | null | undefined;
+  isLoadingUniqueWalletsCount?: boolean | undefined;
   onClose: () => void;
 }>) {
   const { setToasts, distributionPlan } = useContext(

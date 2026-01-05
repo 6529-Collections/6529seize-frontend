@@ -1,4 +1,3 @@
-import React from "react";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -11,7 +10,7 @@ export default function WaveDropsScrollingOverlay({
   isVisible,
 }: WaveDropsScrollingOverlayProps) {
   if (!isVisible) return null;
-  
+
   return (
     <>
       <div className="tw-absolute tw-inset-0 tw-bg-iron-900 tw-bg-opacity-50 tw-z-10" />

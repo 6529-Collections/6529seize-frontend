@@ -31,8 +31,8 @@ export enum WaveDropsLeaderboardSort {
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | null;
-  readonly sort?: WaveDropsLeaderboardSort;
-  readonly pausePolling?: boolean;
+  readonly sort?: WaveDropsLeaderboardSort | undefined;
+  readonly pausePolling?: boolean | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> =
@@ -127,11 +127,11 @@ export function useWaveDropsLeaderboard({
         };
 
         if (sortDirection) {
-          params.sort_direction = sortDirection;
+          params["sort_direction"] = sortDirection;
         }
 
         if (pageParam) {
-          params.page = `${pageParam}`;
+          params["page"] = `${pageParam}`;
         }
 
         return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -163,11 +163,11 @@ export function useWaveDropsLeaderboard({
       };
 
       if (sortDirection) {
-        params.sort_direction = sortDirection;
+        params["sort_direction"] = sortDirection;
       }
 
       if (pageParam) {
-        params.page = `${pageParam}`;
+        params["page"] = `${pageParam}`;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -186,7 +186,7 @@ export function useWaveDropsLeaderboard({
 
   const processedDrops = useMemo(() => {
     if (!data?.pages) return [];
-    
+
     const mappedDrops = mapToExtendedDrops(
       data.pages.map((page) => ({
         wave: page.wave,
@@ -194,15 +194,15 @@ export function useWaveDropsLeaderboard({
       })),
       []
     );
-    
+
     const uniqueDrops = generateUniqueKeys(mappedDrops, []);
-    
+
     if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
       return uniqueDrops.filter(
         (drop) => drop.context_profile_context?.rating !== 0
       );
     }
-    
+
     return uniqueDrops;
   }, [data, sort]);
 
@@ -226,7 +226,7 @@ export function useWaveDropsLeaderboard({
       };
 
       if (sortDirection) {
-        params.sort_direction = sortDirection;
+        params["sort_direction"] = sortDirection;
       }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -253,6 +253,7 @@ export function useWaveDropsLeaderboard({
 
       return () => clearTimeout(timer);
     }
+    return;
   }, [pollingResult, pausePolling]);
 
   useEffect(() => {
@@ -264,7 +265,7 @@ export function useWaveDropsLeaderboard({
           const latestExistingDrop = drops.at(-1);
 
           const polledCreatedAt = new Date(
-            latestPolledDrop.created_at
+            latestPolledDrop?.created_at!
           ).getTime();
           const existingCreatedAt = new Date(
             latestExistingDrop?.created_at ?? 0

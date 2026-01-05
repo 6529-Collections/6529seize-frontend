@@ -1,4 +1,3 @@
-import React from "react";
 import { MediaItem } from "./media-utils";
 
 interface MediaThumbnailProps {

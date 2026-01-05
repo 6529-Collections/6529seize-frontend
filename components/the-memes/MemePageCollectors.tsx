@@ -25,7 +25,7 @@ export function MemePageCollectorsRightMenu(props: {
           </Row>
           <Row>
             <Col>
-              <Table bordered={false} className={styles.hodlersTable}>
+              <Table bordered={false} className={styles["hodlersTable"]}>
                 <tbody>
                   <tr>
                     <td>Mint Date</td>
@@ -39,7 +39,7 @@ export function MemePageCollectorsRightMenu(props: {
                   <h3>TDH</h3>
                 </Col>
               </Row>
-              <Table bordered={false} className={styles.hodlersTable}>
+              <Table bordered={false} className={styles["hodlersTable"]}>
                 <tbody>
                   <tr>
                     <td>TDH</td>

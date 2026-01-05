@@ -6,7 +6,10 @@ import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
-import { usePinnedWavesServer, MAX_PINNED_WAVES } from "@/hooks/usePinnedWavesServer";
+import {
+  usePinnedWavesServer,
+  MAX_PINNED_WAVES,
+} from "@/hooks/usePinnedWavesServer";
 
 interface WaveHeaderPinButtonProps {
   readonly waveId: string;
@@ -14,8 +17,8 @@ interface WaveHeaderPinButtonProps {
 
 // Constants to reduce string duplication
 const PIN_ACTIONS = {
-  PIN: 'Pin wave',
-  UNPIN: 'Unpin wave',
+  PIN: "Pin wave",
+  UNPIN: "Unpin wave",
 } as const;
 
 const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
@@ -28,20 +31,23 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   const isCurrentlyProcessing = isOperationInProgress(waveId);
   const isPinned = pinnedIds.includes(waveId);
-  
+
   // Helper function to hide tooltip
   const hideTooltip = useCallback(() => setShowMaxLimitTooltip(false), []);
-  
+
   // Helper function to show error toast
-  const showErrorToast = useCallback((message: string) => {
-    setToast({ type: "error", message });
-  }, [setToast]);
+  const showErrorToast = useCallback(
+    (message: string) => {
+      setToast({ type: "error", message });
+    },
+    [setToast]
+  );
 
   // Check if we can pin this wave using server data
   const canPinWave = useCallback(() => {
     // If this wave is already pinned, we can always unpin it
     if (isPinned) return true;
-    
+
     // Check if we have room for another pinned wave using the hook's data
     return pinnedIds.length < MAX_PINNED_WAVES;
   }, [isPinned, pinnedIds.length]);
@@ -78,17 +84,15 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
-    if (showMaxLimitTooltip) {
-      const timer = setTimeout(hideTooltip, 3000);
-      return () => clearTimeout(timer);
-    }
+    if (!showMaxLimitTooltip) return;
+    const timer = setTimeout(hideTooltip, 3000);
+    return () => clearTimeout(timer);
   }, [showMaxLimitTooltip, hideTooltip]);
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
     return null;
   }
-
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -104,19 +108,20 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
         hideTooltip();
         return;
       }
-      
+
       if (!canPinWave()) {
         setShowMaxLimitTooltip(true);
         showErrorToast(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
         return;
       }
-      
+
       waves.addPinnedWave(waveId);
     } catch (error) {
-      console.error('Error updating wave pin status:', error);
-      
-      const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
-      const action = isPinned ? 'unpin' : 'pin';
+      console.error("Error updating wave pin status:", error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
+      const action = isPinned ? "unpin" : "pin";
       showErrorToast(`Failed to ${action} wave: ${errorMessage}`);
     }
   };
@@ -126,7 +131,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`tw-border-0 tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-lg tw-transition-all tw-duration-200 ${buttonStyles} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
+        className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-transition-all tw-duration-200 ${buttonStyles} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={ariaLabel}
         data-tooltip-id={`wave-header-pin-${waveId}`}
       >

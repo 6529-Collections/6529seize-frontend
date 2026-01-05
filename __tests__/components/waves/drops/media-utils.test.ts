@@ -18,7 +18,7 @@ describe("media-utils", () => {
       type: "text",
       content: "Hello @bob!",
     });
-    expect(result.segments[1].mediaInfo?.type).toBe("video");
+    expect(result.segments[1]?.mediaInfo?.type).toBe("video");
     expect(result.segments[2]).toEqual({ type: "text", content: "end" });
   });
 });

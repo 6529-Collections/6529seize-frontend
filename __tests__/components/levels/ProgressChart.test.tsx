@@ -31,7 +31,7 @@ describe("ProgressChart", () => {
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ type: "level-hover", detail: { level: 1 } })
     );
-    const options = lineMock.mock.calls[0][0].options;
+    const options = lineMock.mock.calls[0][0]?.options;
     expect(options.animation).toBeUndefined();
     spy.mockRestore();
   });
@@ -40,7 +40,7 @@ describe("ProgressChart", () => {
     (window as any).matchMedia = jest.fn().mockReturnValue({ matches: true });
     render(<ProgressChart />);
     await waitFor(() => expect(lineMock).toHaveBeenCalledTimes(2));
-    const options = lineMock.mock.calls[1][0].options;
+    const options = lineMock.mock.calls[1][0]?.options;
     expect(options.animation).toBe(false);
   });
 });

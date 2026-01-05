@@ -1,5 +1,5 @@
 const nextResponseJson = jest.fn(
-  (body: unknown, init?: { status?: number }) => ({
+  (body: unknown, init?: { status?: number | undefined }) => ({
     status: init?.status ?? 200,
     json: async () => body,
   })

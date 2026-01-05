@@ -23,7 +23,7 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
 
   return (
     <Col
-      className={`${styles.nftAnimation} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
+      className={`${styles["nftAnimation"]} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}>
       {props.showBalance && (
         <NFTImageBalance
           contract={props.nft.contract}

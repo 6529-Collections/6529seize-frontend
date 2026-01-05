@@ -16,13 +16,13 @@ export type XtdhTokensSortField = "xtdh" | "xtdh_rate";
 export type XtdhTokensOrder = "ASC" | "DESC";
 
 export interface UseXtdhTokensQueryParams {
-  readonly identity?: string | null;
-  readonly contract?: string | null;
-  readonly pageSize?: number;
-  readonly sortField?: XtdhTokensSortField;
-  readonly order?: XtdhTokensOrder;
-  readonly enabled?: boolean;
-  readonly requireIdentity?: boolean;
+  readonly identity?: string | null | undefined;
+  readonly contract?: string | null | undefined;
+  readonly pageSize?: number | undefined;
+  readonly sortField?: XtdhTokensSortField | undefined;
+  readonly order?: XtdhTokensOrder | undefined;
+  readonly enabled?: boolean | undefined;
+  readonly requireIdentity?: boolean | undefined;
 }
 
 type XtdhTokensInfiniteData = InfiniteData<ApiXTdhTokensPage>;
@@ -32,7 +32,7 @@ export type UseXtdhTokensQueryResult = UseInfiniteQueryResult<
   Error
 > & {
   readonly tokens: ApiXTdhTokensPage["data"];
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
 };
 
@@ -84,7 +84,7 @@ export function useXtdhTokensQuery({
 
   const query = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
       const params: Record<string, string> = {
         page: currentPage.toString(),
@@ -94,7 +94,7 @@ export function useXtdhTokensQuery({
         contract: normalizedContract,
       };
       if (hasIdentity) {
-        params.identity = normalizedIdentity;
+        params["identity"] = normalizedIdentity;
       }
 
       return commonApiFetch<ApiXTdhTokensPage>({

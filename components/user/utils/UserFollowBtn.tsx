@@ -51,9 +51,9 @@ export default function UserFollowBtn({
   directMessageLoading,
 }: {
   readonly handle: string;
-  readonly size?: UserFollowBtnSize;
-  readonly onDirectMessage?: () => void;
-  readonly directMessageLoading?: boolean;
+  readonly size?: UserFollowBtnSize | undefined;
+  readonly onDirectMessage?: (() => void) | undefined;
+  readonly directMessageLoading?: boolean | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);

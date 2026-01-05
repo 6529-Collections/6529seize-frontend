@@ -9,8 +9,8 @@ export default function BuidlPage() {
   useSetTitle("BUIDL");
 
   return (
-    <main className={styles.main}>
-      <Container fluid className={`${styles.pageNotFound} text-center`}>
+    <main className={styles["main"]}>
+      <Container fluid className={`${styles["pageNotFound"]} text-center`}>
         <Row>
           <Col>
             <Image

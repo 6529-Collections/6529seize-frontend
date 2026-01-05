@@ -7,7 +7,7 @@ import { useAnimate } from "framer-motion";
 interface DecisionPoint {
   id: string;
   date: string;
-  winnersCount?: number; // Optional count of winners
+  winnersCount?: number | undefined; // Optional count of winners
 }
 
 interface WaveWinnersSmallDecisionSelectorProps {

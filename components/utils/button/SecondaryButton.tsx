@@ -3,10 +3,10 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 interface SecondaryButtonProps {
   readonly onClicked: () => void;
   readonly children: React.ReactNode;
-  readonly size?: "default" | "sm";
-  readonly disabled?: boolean;
-  readonly className?: string;
-  readonly loading?: boolean;
+  readonly size?: "default" | "sm" | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly className?: string | undefined;
+  readonly loading?: boolean | undefined;
 }
 
 export default function SecondaryButton({

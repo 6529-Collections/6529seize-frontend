@@ -34,7 +34,7 @@ export default async function Page() {
     : [];
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <HomePage
         featuredNft={featuredNft}
         isMemeMintingActive={isMintingActive()}

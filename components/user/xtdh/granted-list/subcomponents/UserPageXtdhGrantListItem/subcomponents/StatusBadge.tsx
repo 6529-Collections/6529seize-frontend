@@ -10,8 +10,8 @@ export function StatusBadge({
   validTo,
 }: Readonly<{
   status: ApiXTdhGrantStatus;
-  validFrom?: number | string | null;
-  validTo?: number | string | null;
+  validFrom?: number | string | null | undefined;
+  validTo?: number | string | null | undefined;
 }>) {
   const { badgeClassName, icon, label } = getStatusVisuals(status, validFrom, validTo);
 

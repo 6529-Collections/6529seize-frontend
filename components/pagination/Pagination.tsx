@@ -81,8 +81,8 @@ export default function Pagination(props: Readonly<Props>) {
           <button
             type="button"
             onClick={pagePrevious}
-            className={`${styles.iconButton} ${
-              props.page > 1 ? styles.iconEnabled : styles.iconDisabled
+            className={`${styles["iconButton"]} ${
+              props.page > 1 ? styles["iconEnabled"] : styles["iconDisabled"]
             }`}
             aria-label="Previous page"
             disabled={props.page <= 1}>
@@ -91,7 +91,7 @@ export default function Pagination(props: Readonly<Props>) {
           <input
             id="page-number"
             type="text"
-            className={styles.pageInput}
+            className={styles["pageInput"]}
             onKeyDown={enterValue}
             onChange={setValue}
             value={inputPage}
@@ -101,7 +101,7 @@ export default function Pagination(props: Readonly<Props>) {
           <button
             type="button"
             onClick={goToLast}
-            className={styles.goToLast}
+            className={styles["goToLast"]}
             aria-label="Go to last page"
             disabled={isLastPage()}>
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
@@ -109,8 +109,8 @@ export default function Pagination(props: Readonly<Props>) {
           <button
             type="button"
             onClick={pageNext}
-            className={`${styles.iconButton} ${
-              isLastPage() ? styles.iconDisabled : styles.iconEnabled
+            className={`${styles["iconButton"]} ${
+              isLastPage() ? styles["iconDisabled"] : styles["iconEnabled"]
             }`}
             aria-label="Next page"
             disabled={isLastPage()}>

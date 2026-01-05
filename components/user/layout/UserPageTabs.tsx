@@ -77,7 +77,7 @@ export default function UserPageTabs() {
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const params = useParams();
-  const handleOrWallet = params?.user?.toString() ?? "";
+  const handleOrWallet = params?.["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
   const searchString = searchParams?.toString() ?? "";
   const capacitor = useCapacitor();

@@ -3,7 +3,7 @@
 import { memo } from "react";
 
 interface UnreadDividerProps {
-  readonly label?: string;
+  readonly label?: string | undefined;
 }
 
 const UnreadDivider = memo(function UnreadDivider({

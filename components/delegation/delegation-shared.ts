@@ -3,7 +3,7 @@ import { DELEGATION_CONTRACT } from "@/constants";
 
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{
-    subdelegation?: { originalDelegator: string };
+    subdelegation?: { originalDelegator: string } | undefined;
   }>
 ) {
   return useEnsName({

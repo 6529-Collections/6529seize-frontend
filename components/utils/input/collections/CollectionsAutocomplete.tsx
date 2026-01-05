@@ -18,16 +18,16 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 export interface CollectionsAutocompleteOption {
   readonly id: string;
   readonly name: string;
-  readonly tokenCount?: number;
+  readonly tokenCount?: number | undefined;
 }
 
 export interface CollectionsAutocompleteProps {
   readonly options: ReadonlyArray<CollectionsAutocompleteOption>;
   readonly value: ReadonlyArray<string>;
   readonly onChange: (next: string[]) => void;
-  readonly disabled?: boolean;
-  readonly placeholder?: string;
-  readonly noResultsText?: string;
+  readonly disabled?: boolean | undefined;
+  readonly placeholder?: string | undefined;
+  readonly noResultsText?: string | undefined;
 }
 
 type KeyboardNavigationKey =

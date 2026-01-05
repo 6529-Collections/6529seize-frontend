@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import {publicEnv} from "@/config/env";
 
 type GlobalErrorProps = {
-  readonly error: Error & { digest?: string };
+  readonly error: Error & { digest?: string | undefined };
   readonly reset: () => void;
 };
 
@@ -22,7 +22,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
     <html lang="en">
       <body>
-        <main className={styles.main}>
+        <main className={styles["main"]}>
           <ErrorComponent
             stackTrace={errorDetails}
             digest={error.digest}

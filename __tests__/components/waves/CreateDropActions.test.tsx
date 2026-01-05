@@ -148,7 +148,7 @@ describe("CreateDropActions", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0].querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = fileInputs[0]?.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
 
     await userEvent.upload(fileInput, file);
@@ -265,7 +265,7 @@ describe("CreateDropActions", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0].querySelector('input[type="file"]');
+    const fileInput = fileInputs[0]?.querySelector('input[type="file"]');
     expect(fileInput).toHaveAttribute("accept", "image/*,video/*,audio/*");
     expect(fileInput).toHaveAttribute("multiple");
   });
@@ -298,7 +298,7 @@ describe("CreateDropActions", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const fileInputs = screen.getAllByLabelText("Upload a file");
-    const fileInput = fileInputs[0].querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = fileInputs[0]?.querySelector('input[type="file"]') as HTMLInputElement;
     const files = [
       new File(["test1"], "test1.jpg", { type: "image/jpeg" }),
       new File(["test2"], "test2.png", { type: "image/png" }),

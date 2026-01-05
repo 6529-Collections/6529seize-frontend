@@ -4,8 +4,8 @@ export type AllowlistToolResponse<T> =
 
 interface AllowlistDescriptionActiveRun {
   readonly createdAt: number;
-  readonly updatedAt?: number;
-  readonly status?: AllowlistRunStatus;
+  readonly updatedAt?: number | undefined;
+  readonly status?: AllowlistRunStatus | undefined;
   readonly errorReason: string | null;
 }
 
@@ -14,7 +14,7 @@ export interface AllowlistDescription {
   readonly name: string;
   readonly description: string;
   readonly createdAt: number;
-  readonly activeRun?: AllowlistDescriptionActiveRun;
+  readonly activeRun?: AllowlistDescriptionActiveRun | undefined;
 }
 
 export interface AllowlistTransferPool {
@@ -30,7 +30,7 @@ export interface AllowlistTransferPool {
 export interface AllowlistTokenPool {
   readonly id: string;
   readonly allowlistId: string;
-  readonly tokenIds?: string;
+  readonly tokenIds?: string | undefined;
   readonly name: string;
   readonly description: string;
   readonly walletsCount: number;
@@ -146,7 +146,7 @@ export enum Pool {
 
 export interface CustomTokenPoolParamsToken {
   readonly owner: string;
-  readonly id?: string;
+  readonly id?: string | undefined;
 }
 
 export type Mutable<T, K extends keyof T> = Omit<T, K> & {
@@ -189,7 +189,7 @@ export enum DistributionPlanTokenPoolDownloadStatus {
 
 export interface DistributionPlanTokenPoolDownload {
   readonly contract: string;
-  readonly tokenIds?: string;
+  readonly tokenIds?: string | undefined;
   readonly tokenPoolId: string;
   readonly allowlistId: string;
   readonly blockNo: number;

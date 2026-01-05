@@ -13,9 +13,9 @@ interface ExpandedWaveProps {
   readonly isActive: boolean;
   readonly isDropWave: boolean;
   readonly isPinned: boolean;
-  readonly latestDropTimestamp?: number | null;
+  readonly latestDropTimestamp?: number | null | undefined;
   readonly nameRef: MutableRefObject<HTMLDivElement | null>;
-  readonly onMouseEnter?: () => void;
+  readonly onMouseEnter?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;
@@ -62,7 +62,7 @@ export const ExpandedWave = ({
     >
       <Link
         href={href}
-        onMouseEnter={onMouseEnter}
+        {...(onMouseEnter ? { onMouseEnter } : {})}
         onClick={onClick}
         className={`tw-flex tw-flex-1 tw-min-w-0 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive

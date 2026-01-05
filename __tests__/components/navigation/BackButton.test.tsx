@@ -51,7 +51,7 @@ const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 
 function setup(
   query: Record<string, string> = {},
-  opts: { wave?: object; isDm?: boolean; activeWaveId?: string | null } = {}
+  opts: { wave?: object | undefined; isDm?: boolean | undefined; activeWaveId?: string | null | undefined } = {}
 ) {
   const replace = jest.fn();
   const back = jest.fn();

@@ -17,7 +17,7 @@ interface PredictBlockNumberRequestApiModel {
 interface PredictBlockNumbersRequestApiModel {
   minTimestamp: number;
   maxTimestamp: number;
-  blockNumberIncludes?: number[];
+  blockNumberIncludes?: number[] | undefined;
 }
 
 export interface PredictBlockNumbersResponseApiModel {
@@ -68,9 +68,9 @@ export default function BlockFinderClient() {
   const [blockNumberIncludes, setBlockNumberIncludes] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [predictedBlocks, setPredictedBlocks] = useState<{
-    timestamp?: number;
-    blocknumber?: number;
-    blocks?: PredictBlockNumbersResponseApiModel[];
+    timestamp?: number | undefined;
+    blocknumber?: number | undefined;
+    blocks?: PredictBlockNumbersResponseApiModel[] | undefined;
   } | null>(null);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function BlockFinderClient() {
       const dateObj = new Date(date);
       const [hours, minutes] = time.split(":");
       const startDate = new Date(dateObj);
-      startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      startDate.setHours(parseInt(hours!), parseInt(minutes!), 0, 0);
 
       const minTimestamp = startDate.getTime();
 

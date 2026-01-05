@@ -144,7 +144,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
 
       return { previousPinnedWaves };
     },
-    onError: (err, waveId, context) => {
+    onError: (err, _, context) => {
       // Revert on error if we had previous data
       if (context?.previousPinnedWaves) {
         queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, context.previousPinnedWaves);
@@ -175,7 +175,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
 
       return { previousPinnedWaves };
     },
-    onError: (err, waveId, context) => {
+    onError: (err, _, context) => {
       // Revert optimistic update
       if (context?.previousPinnedWaves) {
         queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, context.previousPinnedWaves);

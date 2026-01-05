@@ -38,7 +38,7 @@ export default function AboutGDRC1() {
       </Row>
       <Row className="pt-1 pb-3">
         <Col
-          className={styles.htmlContainer}
+          className={styles["htmlContainer"]}
           dangerouslySetInnerHTML={{
             __html: html,
           }}></Col>

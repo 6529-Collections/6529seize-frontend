@@ -18,19 +18,13 @@ export enum ProxyMode {
   CREATE = "CREATE",
 }
 
-enum ProxyAction {
-  ALLOCATE_REP = "ALLOCATE_REP",
-  ALLOCATE_CATEGORY_REP = "ALLOCATE_CATEGORY_REP",
-  ALLOCATE_CIC = "ALLOCATE_CIC",
-}
-
 export default function UserPageProxy({
   profile: initialProfile,
 }: {
   readonly profile: ApiIdentity;
 }) {
   const params = useParams();
-  const user = (params?.user as string)?.toLowerCase();
+  const user = (params?.["user"] as string)?.toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 

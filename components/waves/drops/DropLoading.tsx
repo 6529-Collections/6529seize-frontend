@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Component to show loading state for a drop
  */

@@ -17,12 +17,12 @@ import ActivityTable from "./ActivityTable";
 interface Props {
   page: number;
   pageSize: number;
-  showMore?: boolean;
+  showMore?: boolean | undefined;
   // Optional props for SSR
-  initialActivity?: Transaction[];
-  initialTotalResults?: number;
-  initialNfts?: NFT[];
-  initialNextgenCollections?: NextGenCollection[];
+  initialActivity?: Transaction[] | undefined;
+  initialTotalResults?: number | undefined;
+  initialNfts?: NFT[] | undefined;
+  initialNextgenCollections?: NextGenCollection[] | undefined;
 }
 
 export default function LatestActivity(props: Readonly<Props>) {

@@ -37,7 +37,7 @@ export default function HashtagsTypeaheadMenu({
   useKeyPressEvent(" ", () => {
     if (typeof selectedIndex === "number" && options.length > 0) {
       setHighlightedIndex(selectedIndex);
-      selectOptionAndCleanUp(options[selectedIndex]);
+      selectOptionAndCleanUp(options[selectedIndex]!);
     }
   });
 

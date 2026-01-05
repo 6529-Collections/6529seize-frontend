@@ -81,7 +81,7 @@ const mockInitialTokens = [] as any;
 
 const TestProvider: React.FC<{ 
   children: React.ReactNode;
-  connectedProfile?: any;
+  connectedProfile?: any | undefined;
 }> = ({ children, connectedProfile = null }) => {
   const authContextValue = useMemo(
     () => ({

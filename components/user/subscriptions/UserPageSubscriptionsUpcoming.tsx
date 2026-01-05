@@ -70,9 +70,9 @@ export default function UserPageSubscriptionsUpcoming(
             {subscriptions.map((subscription, index) => (
               <div
                 key={subscription.token_id}
-                className={`${styles.nftSubscriptionsListItem} ${
-                  index % 2 === 0 ? styles.odd : styles.even
-                } ${index === subscriptions.length - 1 ? styles.last : ""}`}>
+                className={`${styles["nftSubscriptionsListItem"]} ${
+                  index % 2 === 0 ? styles["odd"] : styles["even"]
+                } ${index === subscriptions.length - 1 ? styles["last"] : ""}`}>
                 <SubscriptionRow
                   profileKey={props.profileKey}
                   title="The Memes"
@@ -107,7 +107,7 @@ function SubscriptionRow(
     subscription: NFTSubscription;
     eligibilityCount: number;
     readonly: boolean;
-    minting_today?: boolean;
+    minting_today?: boolean | undefined;
     first: boolean;
     date: SeasonMintRow | null;
     refresh: () => void;

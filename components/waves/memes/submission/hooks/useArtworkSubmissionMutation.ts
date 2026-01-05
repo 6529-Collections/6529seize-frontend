@@ -19,11 +19,13 @@ import type { InteractiveMediaMimeType } from "../constants/media";
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
-  imageFile?: File;
-  externalMedia?: {
-    url: string;
-    mimeType: InteractiveMediaMimeType;
-  };
+  imageFile?: File | undefined;
+  externalMedia?:
+    | {
+        url: string;
+        mimeType: InteractiveMediaMimeType;
+      }
+    | undefined;
   traits: TraitsData;
   waveId: string;
   termsOfService: string | null;
@@ -40,7 +42,8 @@ const transformToApiRequest = (data: {
   signerAddress: string;
   isSafeSignature: boolean;
 }): ApiCreateDropRequest => {
-  const { waveId, traits, mediaUrl, mimeType, signerAddress, isSafeSignature } = data;
+  const { waveId, traits, mediaUrl, mimeType, signerAddress, isSafeSignature } =
+    data;
 
   // Create metadata array from trait data
   const metadata: ApiDropMetadata[] = Object.entries(traits)
@@ -84,7 +87,10 @@ const transformToApiRequest = (data: {
  * Phase transition callback type
  */
 interface PhaseChangeCallbacks {
-  onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
+  onPhaseChange?:
+    | ((phase: SubmissionPhase, error?: string) => void)
+    | undefined
+    | undefined;
 }
 
 /**
@@ -123,7 +129,7 @@ export function useArtworkSubmissionMutation() {
     Error, // Error type
     {
       file: File;
-      callbacks?: PhaseChangeCallbacks;
+      callbacks?: PhaseChangeCallbacks | undefined;
     }
   >({
     mutationFn: async ({ file, callbacks }) => {
@@ -137,7 +143,9 @@ export function useArtworkSubmissionMutation() {
     },
     onError: (error, variables) => {
       console.error("Upload error:", error);
-      const errorMsg = `Error uploading file: ${error?.message || error?.toString() || 'Unknown error'}`;
+      const errorMsg = `Error uploading file: ${
+        error?.message || error?.toString() || "Unknown error"
+      }`;
       updatePhase("error", variables.callbacks, errorMsg);
 
       setToast({
@@ -153,7 +161,7 @@ export function useArtworkSubmissionMutation() {
     Error, // Error type
     {
       data: ApiCreateDropRequest;
-      callbacks?: PhaseChangeCallbacks;
+      callbacks?: PhaseChangeCallbacks | undefined;
     }
   >({
     mutationFn: async ({ data, callbacks }) => {
@@ -183,7 +191,9 @@ export function useArtworkSubmissionMutation() {
     },
     onError: (error, variables) => {
       console.error("Submission error:", error);
-      const errorMsg = `Submission failed: ${error?.message || error?.toString() || 'Unknown error'}`;
+      const errorMsg = `Submission failed: ${
+        error?.message || error?.toString() || "Unknown error"
+      }`;
       updatePhase("error", variables.callbacks, errorMsg);
 
       setToast({
@@ -201,11 +211,13 @@ export function useArtworkSubmissionMutation() {
     signerAddress: string,
     isSafeSignature: boolean,
     options?: {
-      onSuccess?: (data: ApiDrop) => void;
-      onError?: (error: Error) => void;
-      onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
-    },
- 
+      onSuccess?: ((data: ApiDrop) => void) | undefined;
+      onError?: ((error: Error) => void) | undefined;
+      onPhaseChange?:
+        | ((phase: SubmissionPhase, error?: string) => void)
+        | undefined
+        | undefined;
+    }
   ) => {
     try {
       // Reset state for a new submission

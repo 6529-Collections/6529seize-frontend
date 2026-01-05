@@ -46,7 +46,7 @@ export function AppWebSocketProvider({
   config = DEFAULT_WEBSOCKET_CONFIG,
 }: {
   readonly children: React.ReactNode;
-  readonly config?: WebSocketConfig;
+  readonly config?: WebSocketConfig | undefined;
 }) {
   return (
     <WebSocketProvider config={config}>

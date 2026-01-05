@@ -46,7 +46,7 @@ const nodeIsEditable = (node: Node | null): boolean => {
     ) {
       return true;
     }
-    if (node.dataset?.waveClipboardAllowDefault === "true") {
+    if (node.dataset?.["waveClipboardAllowDefault"] === "true") {
       return true;
     }
   }
@@ -102,7 +102,7 @@ const findDropElement = (node: Node | null): HTMLElement | null => {
   }
 
   while (current) {
-    if (current.dataset?.waveDropId) {
+    if (current.dataset?.["waveDropId"]) {
       return current;
     }
     current = current.parentElement;
@@ -227,9 +227,9 @@ const toPlainText = (markdown: string): string => {
 };
 
 type EmbedInfo = {
-  readonly title?: string;
-  readonly url?: string;
-  readonly description?: string;
+  readonly title?: string | undefined;
+  readonly url?: string | undefined;
+  readonly description?: string | undefined;
   readonly extras: string[];
 };
 
@@ -330,13 +330,13 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
 };
 
 type QuoteDropSource = {
-  readonly author?: { readonly handle?: string | null };
+  readonly author?: { readonly handle?: string | null | undefined } | undefined;
   readonly parts?: ReadonlyArray<{
     readonly part_id: number;
     readonly content: string | null;
-  }>;
-  readonly created_at?: number | null;
-  readonly wave?: { readonly name?: string | null } | null;
+  }> | undefined;
+  readonly created_at?: number | null | undefined;
+  readonly wave?: { readonly name?: string | null | undefined } | null | undefined;
 };
 
 const mergeQuoteDropSources = (
@@ -382,8 +382,8 @@ type DropReferenceDescriptor = {
   readonly label: string;
   readonly dropId: string;
   readonly dropPartId: number;
-  readonly isDeleted?: boolean;
-  readonly drop?: QuoteDropSource | null;
+  readonly isDeleted?: boolean | undefined;
+  readonly drop?: QuoteDropSource | null | undefined;
 };
 
 const formatDeletedReference = (
@@ -764,7 +764,7 @@ const gatherSelectedMessageIds = (
   const seen = new Set<string>();
 
   for (const element of dropElements) {
-    const dropId = element.dataset.waveDropId;
+    const dropId = element.dataset["waveDropId"];
     if (!dropId || seen.has(dropId)) {
       continue;
     }
@@ -934,8 +934,8 @@ const resolveRangeBoundaries = (
 ): RangeBoundaryContext => {
   const startElement = findDropElement(selectionRange.startContainer);
   const endElement = findDropElement(selectionRange.endContainer);
-  const startDropId = startElement?.dataset?.waveDropId ?? null;
-  const endDropId = endElement?.dataset?.waveDropId ?? null;
+  const startDropId = startElement?.dataset?.["waveDropId"] ?? null;
+  const endDropId = endElement?.dataset?.["waveDropId"] ?? null;
 
   const startElementForRange =
     startDropId == null

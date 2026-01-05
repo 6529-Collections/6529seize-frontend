@@ -4,12 +4,12 @@ type StoreFn = <T>(
 ) => Promise<T>;
 
 type RequestLike<T = unknown> = {
-  result?: T;
-  error?: unknown;
+  result?: T | undefined;
+  error?: unknown | undefined;
   onsuccess: ((this: any, ev: Event) => any) | null;
   onerror: ((this: any, ev: Event) => any) | null;
-  oncomplete?: ((this: any, ev: Event) => any) | null;
-  onabort?: ((this: any, ev: Event) => any) | null;
+  oncomplete?: ((this: any, ev: Event) => any) | null | undefined;
+  onabort?: ((this: any, ev: Event) => any) | null | undefined;
 };
 
 function extractErrorMessage(error: unknown): string {
@@ -343,7 +343,7 @@ export function entries<T = unknown>(
           store.getAllKeys() as unknown as RequestLike<IDBValidKey[]>
         ),
         promisifyRequest<T[]>(store.getAll() as unknown as RequestLike<T[]>),
-      ]).then(([k, v]) => k.map((key, i) => [key, v[i]]));
+      ]).then(([k, v]) => k.map((key, i) => [key, v[i]] as [IDBValidKey, T]));
     }
 
     const items: Array<[IDBValidKey, T]> = [];

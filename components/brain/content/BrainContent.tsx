@@ -16,7 +16,7 @@ interface BrainContentProps {
   readonly children: React.ReactNode;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly showPinnedWaves?: boolean;
+  readonly showPinnedWaves?: boolean | undefined;
 }
 
 const BrainContent: React.FC<BrainContentProps> = ({

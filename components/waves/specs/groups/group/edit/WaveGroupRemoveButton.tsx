@@ -23,9 +23,9 @@ interface WaveGroupRemoveButtonProps {
   readonly type: WaveGroupType;
   readonly onWaveUpdate: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean },
+    opts?: { readonly skipAuth?: boolean | undefined },
   ) => Promise<void>;
-  readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null;
+  readonly renderTrigger?: ((options: { readonly open: () => void }) => ReactNode) | null | undefined;
 }
 
 const WaveGroupRemoveButton = forwardRef<

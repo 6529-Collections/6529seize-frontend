@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 export default function UserNotFoundPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Suspense fallback={null}>
         <NotFound label="USER OR PAGE" />
       </Suspense>

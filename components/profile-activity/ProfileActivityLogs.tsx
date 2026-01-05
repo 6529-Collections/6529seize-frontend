@@ -35,11 +35,11 @@ export interface ActivityLogParamsConverted {
   readonly page: string;
   readonly page_size: string;
   readonly log_type: string;
-  include_incoming?: string;
-  rating_matter?: string;
-  profile?: string;
-  target?: string;
-  group_id?: string;
+  include_incoming?: string | undefined;
+  rating_matter?: string | undefined;
+  profile?: string | undefined;
+  target?: string | undefined;
+  group_id?: string | undefined;
 }
 
 export default function ProfileActivityLogs({
@@ -50,8 +50,8 @@ export default function ProfileActivityLogs({
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
-  readonly disableActiveGroup?: boolean;
-  readonly children?: React.ReactNode;
+  readonly disableActiveGroup?: boolean | undefined;
+  readonly children?: React.ReactNode | undefined;
 }) {
   const activeGroupId = useSelector(selectActiveGroupId);
   const [selectedFilters, setSelectedFilters] = useState<

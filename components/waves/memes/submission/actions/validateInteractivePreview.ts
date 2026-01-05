@@ -73,7 +73,7 @@ const performGatewayRequest = async (
 ): Promise<Response> => {
   const headers: Record<string, string> = {};
   if (method === "GET") {
-    headers.Range = `bytes=0-${MAX_BYTES_TO_PEEK}`;
+    headers["Range"] = `bytes=0-${MAX_BYTES_TO_PEEK}`;
   }
 
   const controller = new AbortController();

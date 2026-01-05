@@ -21,7 +21,7 @@ export default function MapDelegations() {
       operations.find(
         (o) =>
           o.code === AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS
-      )?.params?.delegationContract ?? null
+      )?.params?.["delegationContract"] ?? null
     );
   }, [operations]);
 

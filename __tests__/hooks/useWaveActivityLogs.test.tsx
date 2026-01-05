@@ -21,7 +21,7 @@ test('fetches logs', async () => {
 
 test('reverses logs when reverse true', async () => {
   const { result } = renderHook(() => useWaveActivityLogs({ waveId: 'w', connectedProfileHandle: 'h', reverse: true, dropId: null, logTypes: [] }), { wrapper: createWrapper() });
-  await waitFor(() => expect(result.current.logs[0].id).toBe('2'));
+  await waitFor(() => expect(result.current.logs[0]?.id).toBe('2'));
 });
 
 test('prefetches logs on mount', () => {

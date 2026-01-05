@@ -15,9 +15,9 @@ describe('WavesIcon', () => {
     const paths = container.querySelectorAll('path');
     expect(paths.length).toBe(3);
     expect(paths[0]).toHaveAttribute('fill', 'none');
-    expect(paths[0].getAttribute('d')).toContain('M397.9');
+    expect(paths[0]?.getAttribute('d')).toContain('M397.9');
     expect(paths[1]).toHaveAttribute('fill', 'none');
-    expect(paths[1].getAttribute('d')).toContain('M436.9');
+    expect(paths[1]?.getAttribute('d')).toContain('M436.9');
     expect(paths[2]).toHaveAttribute('fill', 'currentColor');
   });
 });

@@ -7,8 +7,8 @@ export default function AllowlistToolAnimationWrapper({
   initial = false,
 }: {
   children: React.ReactNode;
-  mode?: AnimatePresenceProps["mode"];
-  initial?: AnimatePresenceProps["initial"];
+  mode?: AnimatePresenceProps["mode"] | undefined;
+  initial?: AnimatePresenceProps["initial"] | undefined;
 }) {
   return (
     <AnimatePresence mode={mode} initial={initial} >

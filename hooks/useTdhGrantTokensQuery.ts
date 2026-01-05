@@ -19,8 +19,8 @@ const MAX_PAGE_SIZE = 2000;
 
 export interface UseTdhGrantTokensQueryParams {
   readonly grantId: string;
-  readonly pageSize?: number;
-  readonly enabled?: boolean;
+  readonly pageSize?: number | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 export type UseTdhGrantTokensQueryResult =

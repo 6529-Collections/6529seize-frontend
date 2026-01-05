@@ -88,8 +88,8 @@ function extractUrlFromError(error: TypeError, event: Sentry.Event): string {
   const fetchBreadcrumb = event.breadcrumbs?.find(
     (crumb) => crumb.category === "fetch" || crumb.type === "http"
   );
-  if (fetchBreadcrumb?.data?.url) {
-    return fetchBreadcrumb.data.url;
+  if (fetchBreadcrumb?.data?.["url"]) {
+    return fetchBreadcrumb.data["url"];
   }
   if (event.request?.url) {
     return event.request.url;
@@ -141,7 +141,7 @@ function handleNetworkError(
 }
 
 Sentry.init({
-  dsn: sentryEnabled ? dsn : undefined,
+  ...(dsn && { dsn }),
   enabled: sentryEnabled,
 
   integrations: [Sentry.replayIntegration()],

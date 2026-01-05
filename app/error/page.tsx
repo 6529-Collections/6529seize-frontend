@@ -3,14 +3,14 @@ import styles from "@/styles/Home.module.scss";
 import { Suspense } from "react";
 
 type ErrorPageProps = {
-  readonly searchParams?: Promise<{ readonly stack?: string }>;
+  readonly searchParams?: Promise<{ readonly stack?: string | undefined }> | undefined;
 };
 
 export default async function ErrorPage({ searchParams }: ErrorPageProps) {
   const stackTraceParam = (await searchParams)?.stack ?? null;
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Suspense fallback={null}>
         <ErrorComponent stackTrace={stackTraceParam} />
       </Suspense>

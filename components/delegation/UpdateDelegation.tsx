@@ -149,7 +149,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               />
               <Col sm={8}>
                 <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
                   type="text"
                   value={`${props.collection.display}`}
                   disabled
@@ -165,7 +165,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 />
                 <Col sm={8}>
                   <Form.Control
-                    className={`${styles.formInput} ${styles.formInputDisabled}`}
+                    className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
                     type="text"
                     value={`#${props.delegation.use_case} - ${props.delegation.display}`}
                     disabled
@@ -181,7 +181,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               />
               <Col sm={8}>
                 <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
                   type="text"
                   value={
                     previousDelegationEns.data
@@ -201,7 +201,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
               <Col sm={8}>
                 <Form.Control
                   placeholder="Delegate to - 0x... or ENS"
-                  className={`${styles.formInput}`}
+                  className={`${styles["formInput"]}`}
                   type="text"
                   value={delegationToInput}
                   onChange={(e) => {
@@ -221,7 +221,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 <Col sm={8}>
                   <Form.Check
                     checked={!showExpiryCalendar}
-                    className={styles.newDelegationFormToggle}
+                    className={styles["newDelegationFormToggle"]}
                     type="radio"
                     label="Never"
                     name="expiryRadio"
@@ -230,7 +230,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                   &nbsp;&nbsp;
                   <Form.Check
                     checked={showExpiryCalendar}
-                    className={styles.newDelegationFormToggle}
+                    className={styles["newDelegationFormToggle"]}
                     type="radio"
                     label="Select Date"
                     disabled={
@@ -258,7 +258,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                 <Col sm={8}>
                   <Form.Check
                     checked={!showTokensInput}
-                    className={styles.newDelegationFormToggle}
+                    className={styles["newDelegationFormToggle"]}
                     type="radio"
                     label="All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                     name="tokenIdRadio"
@@ -267,7 +267,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
                   &nbsp;&nbsp;
                   <Form.Check
                     checked={showTokensInput}
-                    className={styles.newDelegationFormToggle}
+                    className={styles["newDelegationFormToggle"]}
                     type="radio"
                     disabled={
                       props.delegation.use_case === 16 ||

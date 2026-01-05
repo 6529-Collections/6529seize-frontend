@@ -116,8 +116,8 @@ export default function SnapshotExcludeOtherSnapshots({
                   operations.find(
                     (o2) =>
                       o2.code === AllowlistOperationCode.CREATE_WALLET_POOL &&
-                      o2.params.id === o.value
-                  )?.params.wallets ?? []
+                      o2.params["id"] === o.value
+                  )?.params["wallets"] ?? []
                 )
               )
             : snapshotType === Pool.CUSTOM_TOKEN_POOL
@@ -127,9 +127,9 @@ export default function SnapshotExcludeOtherSnapshots({
                     (o2) =>
                       o2.code ===
                         AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-                      o2.params.id === o.value
+                      o2.params["id"] === o.value
                   )
-                  ?.params.tokens) as CustomTokenPoolParamsToken[] | undefined
+                  ?.params["tokens"]) as CustomTokenPoolParamsToken[] | undefined
               )
             : assertUnreachable(snapshotType);
         return {
@@ -150,13 +150,12 @@ export default function SnapshotExcludeOtherSnapshots({
       (operationItem) =>
         operationItem.code ===
           AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL &&
-        operationItem.params.id === config.snapshotId
+        operationItem.params["id"] === config.snapshotId
     );
     if (!operation) {
       return [];
     }
-    const tokens = operation.params
-      .tokens as CustomTokenPoolParamsToken[] | undefined;
+    const tokens = operation.params["tokens"] as CustomTokenPoolParamsToken[] | undefined;
     return extractOwnersFromTokens(tokens);
   }, [config.snapshotId, config.snapshotType, operations]);
 

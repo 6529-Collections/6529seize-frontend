@@ -13,7 +13,7 @@ export function NextGenAdminHeadingRow(
           <b>{props.title.toUpperCase()}</b>
         </h3>
         <FontAwesomeIcon
-          className={styles.closeIcon}
+          className={styles["closeIcon"]}
           icon={faTimesCircle}
           onClick={() => {
             props.close();
@@ -26,7 +26,7 @@ export function NextGenAdminHeadingRow(
 export function NextGenCollectionIdFormGroup(
   props: Readonly<{
     collection_id: string;
-    collection_ids?: string[];
+    collection_ids?: string[] | undefined;
     onChange: (id: string) => void;
   }>
 ) {
@@ -34,7 +34,7 @@ export function NextGenCollectionIdFormGroup(
     <Form.Group className="mb-3">
       <Form.Label>Collection ID</Form.Label>
       <Form.Select
-        className={`${styles.formInput}`}
+        className={`${styles["formInput"]}`}
         value={props.collection_id}
         onChange={(e) => {
           props.onChange(e.target.value);

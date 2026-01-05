@@ -48,7 +48,7 @@ function SearchModal(props: Readonly<Props>) {
       <Modal.Body>
         <InputGroup
           className={`${
-            invalidWalletAdded ? styles.shakeWalletInput : ""
+            invalidWalletAdded ? styles["shakeWalletInput"] : ""
           } mb-3`}>
           <Form.Control
             value={searchValue}
@@ -59,11 +59,11 @@ function SearchModal(props: Readonly<Props>) {
               }
             }}
             autoFocus
-            className={`${styles.modalInput}`}
+            className={`${styles["modalInput"]}`}
             placeholder="Search for address, ENS or username"
           />
           <Button
-            className={styles.modalButton}
+            className={styles["modalButton"]}
             onClick={addSearchWallet}
             aria-label="Add search wallet">
             +
@@ -76,7 +76,7 @@ function SearchModal(props: Readonly<Props>) {
                 onClick={() => {
                   props.removeSearchWallet(w);
                 }}
-                className={styles.removeWalletBtn}
+                className={styles["removeWalletBtn"]}
                 icon={faSquareXmark}
                 data-tooltip-id={`remove-wallet-${w}`}
               />
@@ -97,18 +97,18 @@ function SearchModal(props: Readonly<Props>) {
           </div>
         ))}
         {props.searchWallets.length === 0 && (
-          <div className={styles.noSearchWalletsText}>
+          <div className={styles["noSearchWalletsText"]}>
             No search queries added
           </div>
         )}
         <Button
           disabled={props.searchWallets.length === 0}
-          className={`${styles.modalButtonClear} mt-3 mb-2`}
+          className={`${styles["modalButtonClear"]} mt-3 mb-2`}
           onClick={() => props.clearSearchWallets()}>
           Clear All
         </Button>
         <Button
-          className={`${styles.modalButtonDone} mt-3 mb-2`}
+          className={`${styles["modalButtonDone"]} mt-3 mb-2`}
           onClick={() => props.setShow(false)}>
           Done
         </Button>
@@ -129,10 +129,10 @@ export function SearchWalletsDisplay(
     <span className="d-flex flex-wrap align-items-center justify-content-end">
       {searchWallets.length > 0 &&
         searchWallets.map((sw) => (
-          <span className={styles.searchWalletDisplayWrapper} key={sw}>
+          <span className={styles["searchWalletDisplayWrapper"]} key={sw}>
             <>
               <button
-                className={`btn-link ${styles.searchWalletDisplayBtn}`}
+                className={`btn-link ${styles["searchWalletDisplayBtn"]}`}
                 onClick={() =>
                   setSearchWallets(searchWallets.filter((s) => s != sw))
                 }
@@ -151,7 +151,7 @@ export function SearchWalletsDisplay(
                 Clear
               </Tooltip>
             </>
-            <span className={styles.searchWalletDisplay}>
+            <span className={styles["searchWalletDisplay"]}>
               {sw.endsWith(".eth") ? sw : formatAddress(sw)}
             </span>
           </span>
@@ -160,7 +160,7 @@ export function SearchWalletsDisplay(
         <>
           <FontAwesomeIcon
             onClick={() => setSearchWallets([])}
-            className={styles.clearSearchBtnIcon}
+            className={styles["clearSearchBtnIcon"]}
             icon={faTimesCircle}
             data-tooltip-id="clear-all-display"
           />
@@ -179,8 +179,8 @@ export function SearchWalletsDisplay(
       )}
       <button
         onClick={() => setShowSearchModal(true)}
-        className={`btn-link ${styles.searchBtn} ${
-          searchWallets.length > 0 ? styles.searchBtnActive : ""
+        className={`btn-link ${styles["searchBtn"]} ${
+          searchWallets.length > 0 ? styles["searchBtnActive"] : ""
         } d-inline-flex align-items-center justify-content-center`}>
         <FontAwesomeIcon
           style={{

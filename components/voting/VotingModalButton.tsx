@@ -5,7 +5,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 interface VotingModalButtonProps {
   readonly drop: ExtendedDrop;
   readonly onClick: () => void;
-  readonly variant?: "default" | "subtle"; // Add variant prop for styling flexibility
+  readonly variant?: "default" | "subtle" | undefined; // Add variant prop for styling flexibility
 }
 
 const VotingModalButton: React.FC<VotingModalButtonProps> = ({

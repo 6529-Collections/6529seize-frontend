@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import Notifications from "../brain/notifications";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
@@ -29,8 +29,9 @@ export default function NotificationsPage() {
 
   return (
     <div className="tw-h-full tw-bg-black tailwind-scope tw-relative">
-      {isDropOpen && drop && (
-        isApp ? (
+      {isDropOpen &&
+        drop &&
+        (isApp ? (
           <div
             className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40"
             style={{ top: spaces.headerSpace }}
@@ -57,8 +58,7 @@ export default function NotificationsPage() {
               onClose={onDropClose}
             />
           </div>
-        )
-      )}
+        ))}
       <div className="tw-h-full tw-px-2 lg:tw-px-6 xl:tw-px-8">
         <BrainContent
           activeDrop={activeDrop}

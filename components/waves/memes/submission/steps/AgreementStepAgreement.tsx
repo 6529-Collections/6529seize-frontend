@@ -1,4 +1,3 @@
-import React from "react";
 import Markdown from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -12,7 +11,9 @@ interface AgreementStepAgreementProps {
  * A component that renders markdown text in a scrollable container.
  * Used for displaying legal agreements, terms, and other formatted text.
  */
-export default function AgreementStepAgreement({ text }: AgreementStepAgreementProps) {
+export default function AgreementStepAgreement({
+  text,
+}: AgreementStepAgreementProps) {
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-items-center">
       <div className="tw-w-full tw-border tw-border-iron-800 tw-rounded-lg tw-overflow-y-auto tw-overflow-x-hidden tw-p-4 tw-max-h-[50vh] md:tw-max-h-[60vh] lg:tw-min-h-[20vh] tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800">

@@ -100,8 +100,8 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     const download = await screen.findByTestId("download");
-    expect(download.dataset.name).toBe("gas_the-memes_today.csv");
-    expect(download.dataset.url).toBe(
+    expect(download.dataset["name"]).toBe("gas_the-memes_today.csv");
+    expect(download.dataset["url"]).toBe(
       "https://test.6529.io/file&download=true"
     );
     expect(mockGetUrl).toHaveBeenCalledWith();
@@ -266,7 +266,7 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     let download = screen.getByTestId("download");
-    expect(download.dataset.name).toBe("gas_the-memes_primary-sales.csv");
+    expect(download.dataset["name"]).toBe("gas_the-memes_primary-sales.csv");
 
     // Test memelab focus
     rerender(
@@ -290,7 +290,7 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     download = screen.getByTestId("download");
-    expect(download.dataset.name).toBe("gas_meme-lab_last-7-days.csv");
+    expect(download.dataset["name"]).toBe("gas_meme-lab_last-7-days.csv");
   });
 });
 

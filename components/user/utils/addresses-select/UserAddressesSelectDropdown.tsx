@@ -16,7 +16,7 @@ export default function UserAddressesSelectDropdown({
   onActiveAddress,
 }: {
   readonly wallets: ApiWallet[];
-  readonly containerRef?: RefObject<HTMLDivElement | null>;
+  readonly containerRef?: RefObject<HTMLDivElement | null> | undefined;
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();

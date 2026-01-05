@@ -176,7 +176,7 @@ export default function ConsolidationMappingTool() {
   }, [csvData]);
 
   return (
-    <Container className={styles.toolArea} id="mapping-tool-form">
+    <Container className={styles["toolArea"]} id="mapping-tool-form">
       <Row>
         <Col>
           Upload File <span className="font-color-h">(.csv)</span>
@@ -185,8 +185,8 @@ export default function ConsolidationMappingTool() {
       <Row className="pt-2">
         <Col>
           <Container
-            className={`${styles.uploadArea} ${
-              dragActive ? styles.uploadAreaActive : ""
+            className={`${styles["uploadArea"]} ${
+              dragActive ? styles["uploadAreaActive"] : ""
             }`}
             onClick={handleUpload}
             onDrop={handleDrop}
@@ -196,7 +196,7 @@ export default function ConsolidationMappingTool() {
             <div>
               <FontAwesomeIcon
                 icon={faFileUpload}
-                className={styles.uploadIcon}
+                className={styles["uploadIcon"]}
               />
             </div>
             {file ? (
@@ -217,15 +217,15 @@ export default function ConsolidationMappingTool() {
       <Row className="pt-3">
         <Col>
           <Button
-            className={`${styles.submitBtn} ${
-              processing || !file ? styles.submitBtnDisabled : ""
+            className={`${styles["submitBtn"]} ${
+              processing || !file ? styles["submitBtnDisabled"] : ""
             }`}
             onClick={() => submit()}>
             {processing ? "Processing" : "Submit"}
             {processing && (
               <div className="d-inline">
                 <div
-                  className={`spinner-border ${styles.loader}`}
+                  className={`spinner-border ${styles["loader"]}`}
                   role="status">
                   <span className="sr-only"></span>
                 </div>
@@ -236,7 +236,7 @@ export default function ConsolidationMappingTool() {
       </Row>
       <Form.Control
         ref={inputRef}
-        className={`${styles.formInputHidden}`}
+        className={`${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"
         value={file?.fileName}

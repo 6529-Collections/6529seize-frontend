@@ -21,13 +21,13 @@ import { SortDirection } from "@/entities/ISort";
 import { commonApiFetch } from "@/services/api/common-api";
 
 export interface UseXtdhTokenContributorsQueryParams {
-  readonly contract?: string | null;
-  readonly tokenId?: number | null;
-  readonly pageSize?: number;
-  readonly sortField?: XtdhTokensSortField;
-  readonly order?: XtdhTokensOrder;
-  readonly groupBy?: XtdhTokenContributorsGroupBy;
-  readonly enabled?: boolean;
+  readonly contract?: string | null | undefined;
+  readonly tokenId?: number | null | undefined;
+  readonly pageSize?: number | undefined;
+  readonly sortField?: XtdhTokensSortField | undefined;
+  readonly order?: XtdhTokensOrder | undefined;
+  readonly groupBy?: XtdhTokenContributorsGroupBy | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 type XtdhTokenContributorsInfiniteData = InfiniteData<ApiXTdhContributionsPage>;
@@ -37,7 +37,7 @@ export type UseXtdhTokenContributorsQueryResult = UseInfiniteQueryResult<
   Error
 > & {
   readonly contributors: ApiXTdhContributionsPage["data"];
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
 };
 
@@ -93,7 +93,7 @@ export function useXtdhTokenContributorsQuery({
 
   const query = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
       const params: Record<string, string> = {
         page: currentPage.toString(),

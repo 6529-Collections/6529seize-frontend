@@ -11,12 +11,15 @@ export default function GroupCardView({
   userPlaceholder,
   titlePlaceholder,
 }: {
-  readonly group?: ApiGroupFull;
+  readonly group?: ApiGroupFull | undefined;
   readonly haveActiveGroupVoteAll: boolean;
-  readonly setState?: (state: GroupCardState) => void;
-  readonly onEditClick?: (group: ApiGroupFull) => void;
-  readonly userPlaceholder?: string;
-  readonly titlePlaceholder?: string;
+  readonly setState?: ((state: GroupCardState) => void) | undefined;
+  readonly onEditClick?:
+    | ((group: ApiGroupFull) => void)
+    | undefined
+    | undefined;
+  readonly userPlaceholder?: string | undefined;
+  readonly titlePlaceholder?: string | undefined;
 }) {
   return (
     <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-4 tw-px-4 tw-py-4 sm:tw-px-5 sm:tw-py-5">

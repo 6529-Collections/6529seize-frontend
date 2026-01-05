@@ -16,13 +16,13 @@ export type XtdhCollectionsSortField = "xtdh" | "xtdh_rate";
 export type XtdhCollectionsOrder = "ASC" | "DESC";
 
 export interface UseXtdhCollectionsQueryParams {
-  readonly identity?: string | null;
-  readonly pageSize?: number;
-  readonly sortField?: XtdhCollectionsSortField;
-  readonly order?: XtdhCollectionsOrder;
-  readonly enabled?: boolean;
-  readonly requireIdentity?: boolean;
-  readonly collectionName?: string;
+  readonly identity?: string | null | undefined;
+  readonly pageSize?: number | undefined;
+  readonly sortField?: XtdhCollectionsSortField | undefined;
+  readonly order?: XtdhCollectionsOrder | undefined;
+  readonly enabled?: boolean | undefined;
+  readonly requireIdentity?: boolean | undefined;
+  readonly collectionName?: string | undefined;
 }
 
 type XtdhCollectionsInfiniteData = InfiniteData<ApiXTdhCollectionsPage>;
@@ -32,7 +32,7 @@ export type UseXtdhCollectionsQueryResult = UseInfiniteQueryResult<
   Error
 > & {
   readonly collections: ApiXTdhCollectionsPage["data"];
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
 };
 
@@ -75,7 +75,7 @@ export function useXtdhCollectionsQuery({
 
   const query = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
       const params: Record<string, string> = {
         page: currentPage.toString(),
@@ -84,10 +84,10 @@ export function useXtdhCollectionsQuery({
         order: normalizedOrder,
       };
       if (hasIdentity) {
-        params.identity = normalizedIdentity;
+        params["identity"] = normalizedIdentity;
       }
       if (collectionName) {
-        params.collection_name = collectionName;
+        params["collection_name"] = collectionName;
       }
 
       return commonApiFetch<ApiXTdhCollectionsPage>({

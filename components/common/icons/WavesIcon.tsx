@@ -1,6 +1,8 @@
-import React from "react";
-
-const WavesIcon = ({ className }: { readonly className?: string }) => (
+const WavesIcon = ({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) => (
   <svg
     className={className}
     id="Capa_1"

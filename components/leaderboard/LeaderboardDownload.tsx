@@ -8,7 +8,7 @@ function LeaderboardDownload(
     url: string;
     name: string;
     page: number;
-    block?: number;
+    block?: number | undefined;
   }>
 ) {
   return (
@@ -37,7 +37,7 @@ export default function LeaderboardFooter(
     page: number;
     pageSize: number;
     setPage: (page: number) => void;
-    block?: number;
+    block?: number | undefined;
   }>
 ) {
   if (props.totalResults == 0 || !props.url) {

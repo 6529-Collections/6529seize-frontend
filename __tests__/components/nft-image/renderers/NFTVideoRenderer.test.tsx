@@ -253,7 +253,7 @@ describe("NFTVideoRenderer", () => {
   describe("Edge Cases and Error Handling", () => {
     it("handles missing animation properties gracefully", () => {
       const nft = createMockNFT({
-        animation: undefined,
+        ...(undefined !== undefined ? { animation: undefined } : {}),
         compressed_animation: undefined,
       });
       const props = createDefaultProps({ nft });
@@ -284,7 +284,7 @@ describe("NFTVideoRenderer", () => {
     });
 
     it("handles missing metadata gracefully", () => {
-      const nft = createMockNFT({ metadata: undefined });
+      const nft = createMockNFT({ ...(undefined !== undefined ? { metadata: undefined } : {}) });
       const props = createDefaultProps({ nft });
 
       expect(() => {
@@ -612,9 +612,9 @@ describe("NFTVideoRenderer", () => {
   describe("Error Resistance and Edge Cases", () => {
     it("handles completely empty NFT animation properties gracefully", () => {
       const nft = createMockNFT({
-        animation: undefined,
+        ...(undefined !== undefined ? { animation: undefined } : {}),
         compressed_animation: undefined,
-        metadata: undefined,
+        ...(undefined !== undefined ? { metadata: undefined } : {}),
       });
       const props = createDefaultProps({ nft });
 

@@ -78,7 +78,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             >
               <button
                 key={c.contract}
-                className={styles.collectionSelectionButton}
+                className={styles["collectionSelectionButton"]}
                 onClick={() => {
                   const newSection = areEqualAddresses(
                     c.contract,
@@ -100,7 +100,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 <span className="d-flex align-items-center gap-3">
                   <Image
                     unoptimized
-                    className={styles.collectionSelectionImage}
+                    className={styles["collectionSelectionImage"]}
                     loading="eager"
                     priority
                     width={0}
@@ -129,7 +129,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       </Row>
       <Row>
         <Col>
-          <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
+          <Container className={`${styles["delegationCenterSection"]} pt-4 pb-4`}>
             <Row>
               <Col
                 sm={12}
@@ -163,14 +163,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 className="pt-2 pb-2 d-flex flex-column gap-2 align-items-center justify-content-center"
               >
                 <button
-                  className={`${styles.addNewDelegationBtn}`}
+                  className={`${styles["addNewDelegationBtn"]}`}
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_DELEGATION)
                   }
                 >
                   <FontAwesomeIcon
                     icon={faPlus}
-                    className={styles.buttonIcon}
+                    className={styles["buttonIcon"]}
                   />
                   Delegation
                 </button>
@@ -181,7 +181,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       </Row>
       <Row className="pt-2">
         <Col>
-          <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
+          <Container className={`${styles["delegationCenterSection"]} pt-4 pb-4`}>
             <Row>
               <Col
                 sm={12}
@@ -215,14 +215,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 className="pt-2 pb-2 d-flex align-items-center justify-content-center"
               >
                 <button
-                  className={`${styles.addNewDelegationBtn}`}
+                  className={`${styles["addNewDelegationBtn"]}`}
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_CONSOLIDATION)
                   }
                 >
                   <FontAwesomeIcon
                     icon={faPlus}
-                    className={styles.buttonIcon}
+                    className={styles["buttonIcon"]}
                   />
                   Consolidation
                 </button>
@@ -233,7 +233,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       </Row>
       <Row className="pt-2">
         <Col>
-          <Container className={`${styles.delegationCenterSection} pt-4 pb-4`}>
+          <Container className={`${styles["delegationCenterSection"]} pt-4 pb-4`}>
             <Row>
               <Col
                 sm={12}
@@ -268,14 +268,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 className="pt-2 pb-2 d-flex align-items-center justify-content-center"
               >
                 <button
-                  className={`${styles.addNewDelegationBtn}`}
+                  className={`${styles["addNewDelegationBtn"]}`}
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_SUB_DELEGATION)
                   }
                 >
                   <FontAwesomeIcon
                     icon={faPlus}
-                    className={styles.buttonIcon}
+                    className={styles["buttonIcon"]}
                   />
                   Delegation Manager
                 </button>

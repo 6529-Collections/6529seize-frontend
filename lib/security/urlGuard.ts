@@ -19,7 +19,12 @@ export class UrlGuardError extends Error {
   readonly kind: UrlGuardErrorKind;
   readonly statusCode: number;
 
-  constructor(message: string, kind: UrlGuardErrorKind, statusCode = 400, options?: { cause?: unknown }) {
+  constructor(
+    message: string,
+    kind: UrlGuardErrorKind,
+    statusCode = 400,
+    options?: { cause?: unknown | undefined }
+  ) {
     super(message, options);
     this.name = "UrlGuardError";
     this.kind = kind;
@@ -28,41 +33,52 @@ export class UrlGuardError extends Error {
 }
 
 export interface UrlGuardHostPolicy {
-  readonly allowedHosts?: readonly string[];
-  readonly allowedHostSuffixes?: readonly string[];
-  readonly blockedHosts?: readonly string[];
-  readonly blockedHostSuffixes?: readonly string[];
+  readonly allowedHosts?: readonly string[] | undefined;
+  readonly allowedHostSuffixes?: readonly string[] | undefined;
+  readonly blockedHosts?: readonly string[] | undefined;
+  readonly blockedHostSuffixes?: readonly string[] | undefined;
 }
 
 interface UrlGuardHooks {
-  readonly onBlockedUrl?: (details: { readonly url: URL; readonly reason: UrlGuardErrorKind; readonly message: string }) => void;
+  readonly onBlockedUrl?:
+    | ((details: {
+        readonly url: URL;
+        readonly reason: UrlGuardErrorKind;
+        readonly message: string;
+      }) => void)
+    | undefined
+    | undefined;
 }
 
 export interface UrlGuardOptions {
-  readonly policy?: UrlGuardHostPolicy;
-  readonly allowIpAddresses?: boolean;
-  readonly hooks?: UrlGuardHooks;
+  readonly policy?: UrlGuardHostPolicy | undefined;
+  readonly allowIpAddresses?: boolean | undefined;
+  readonly hooks?: UrlGuardHooks | undefined;
 }
 
 interface ParsePublicUrlOptions {
-  readonly allowedProtocols?: readonly string[];
-  readonly missingUrlMessage?: string;
-  readonly invalidUrlMessage?: string;
-  readonly unsupportedProtocolMessage?: string;
+  readonly allowedProtocols?: readonly string[] | undefined;
+  readonly missingUrlMessage?: string | undefined;
+  readonly invalidUrlMessage?: string | undefined;
+  readonly unsupportedProtocolMessage?: string | undefined;
 }
 
 export interface FetchPublicUrlOptions extends UrlGuardOptions {
-  readonly maxRedirects?: number;
-  readonly timeoutMs?: number;
-  readonly redirectStatusCodes?: ReadonlySet<number>;
-  readonly userAgent?: string;
-  readonly fetchImpl?: typeof fetch;
-  readonly revalidateFinalUrl?: boolean;
+  readonly maxRedirects?: number | undefined;
+  readonly timeoutMs?: number | undefined;
+  readonly redirectStatusCodes?: ReadonlySet<number> | undefined;
+  readonly userAgent?: string | undefined;
+  readonly fetchImpl?: typeof fetch | undefined;
+  readonly revalidateFinalUrl?: boolean | undefined;
 }
 
 const DEFAULT_PROTOCOLS = ["http:", "https:"];
 const DEFAULT_REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
-const DISALLOWED_HOST_PATTERNS: ReadonlySet<string> = new Set(["localhost", "127.0.0.1", "::1"]);
+const DISALLOWED_HOST_PATTERNS: ReadonlySet<string> = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+]);
 
 const PRIVATE_IPV4_RANGES: ReadonlyArray<[number, number]> = [
   [ipv4ToInt("0.0.0.0"), ipv4ToInt("0.255.255.255")],
@@ -83,16 +99,20 @@ const PRIVATE_IPV4_RANGES: ReadonlyArray<[number, number]> = [
 
 function ipv4ToInt(ip: string): number {
   const segments = ip.split(".").map((segment) => Number.parseInt(segment, 10));
-  if (segments.length !== 4 || segments.some((segment) => Number.isNaN(segment))) {
+  if (
+    segments.length !== 4 ||
+    segments.some((segment) => Number.isNaN(segment))
+  ) {
     return -1;
   }
 
   return (
-    (segments[0] << 24) +
-    (segments[1] << 16) +
-    (segments[2] << 8) +
-    segments[3]
-  ) >>> 0;
+    ((segments[0]! << 24) +
+      (segments[1]! << 16) +
+      (segments[2]! << 8) +
+      segments[3]!) >>>
+    0
+  );
 }
 
 function isPrivateIpv4(address: string): boolean {
@@ -102,7 +122,9 @@ function isPrivateIpv4(address: string): boolean {
     return true;
   }
 
-  return PRIVATE_IPV4_RANGES.some(([start, end]) => value >= start && value <= end);
+  return PRIVATE_IPV4_RANGES.some(
+    ([start, end]) => value >= start && value <= end
+  );
 }
 
 function isPrivateIpv6(address: string): boolean {
@@ -156,7 +178,9 @@ function isSuspiciousIpFormat(host: string): boolean {
 
   if (/^\d+\.\d+\.\d+\.\d+$/.test(lowerHost)) {
     const segments = lowerHost.split(".");
-    return segments.some((segment) => segment.length > 1 && segment.startsWith("0"));
+    return segments.some(
+      (segment) => segment.length > 1 && segment.startsWith("0")
+    );
   }
 
   return false;
@@ -193,7 +217,12 @@ function normalizeHostname(hostname: string): string {
   }
 }
 
-function emitBlockedHook(url: URL, reason: UrlGuardErrorKind, message: string, hooks?: UrlGuardHooks): void {
+function emitBlockedHook(
+  url: URL,
+  reason: UrlGuardErrorKind,
+  message: string,
+  hooks?: UrlGuardHooks
+): void {
   if (hooks?.onBlockedUrl) {
     try {
       hooks.onBlockedUrl({ url, reason, message });
@@ -203,12 +232,22 @@ function emitBlockedHook(url: URL, reason: UrlGuardErrorKind, message: string, h
   }
 }
 
-function checkHostPolicy(hostname: string, url: URL, policy: UrlGuardHostPolicy | undefined, hooks?: UrlGuardHooks): void {
+function checkHostPolicy(
+  hostname: string,
+  url: URL,
+  policy: UrlGuardHostPolicy | undefined,
+  hooks?: UrlGuardHooks
+): void {
   if (!policy) {
     return;
   }
 
-  const { allowedHosts, allowedHostSuffixes, blockedHosts, blockedHostSuffixes } = policy;
+  const {
+    allowedHosts,
+    allowedHostSuffixes,
+    blockedHosts,
+    blockedHostSuffixes,
+  } = policy;
 
   if (blockedHosts?.some((entry) => hostname === entry.toLowerCase())) {
     const message = "URL host is explicitly blocked.";
@@ -216,15 +255,25 @@ function checkHostPolicy(hostname: string, url: URL, policy: UrlGuardHostPolicy 
     throw new UrlGuardError(message, "host-not-allowed");
   }
 
-  if (blockedHostSuffixes?.some((suffix) => hostname.endsWith(suffix.toLowerCase()))) {
+  if (
+    blockedHostSuffixes?.some((suffix) =>
+      hostname.endsWith(suffix.toLowerCase())
+    )
+  ) {
     const message = "URL host suffix is blocked.";
     emitBlockedHook(url, "host-not-allowed", message, hooks);
     throw new UrlGuardError(message, "host-not-allowed");
   }
 
   if (allowedHosts || allowedHostSuffixes) {
-    const isAllowedByExactMatch = allowedHosts?.some((entry) => hostname === entry.toLowerCase()) ?? false;
-    const isAllowedBySuffix = allowedHostSuffixes?.some((suffix) => hostname === suffix.toLowerCase() || hostname.endsWith(`.${suffix.toLowerCase()}`)) ?? false;
+    const isAllowedByExactMatch =
+      allowedHosts?.some((entry) => hostname === entry.toLowerCase()) ?? false;
+    const isAllowedBySuffix =
+      allowedHostSuffixes?.some(
+        (suffix) =>
+          hostname === suffix.toLowerCase() ||
+          hostname.endsWith(`.${suffix.toLowerCase()}`)
+      ) ?? false;
 
     if (!isAllowedByExactMatch && !isAllowedBySuffix) {
       const message = "URL host is not in the allowed list.";
@@ -234,7 +283,10 @@ function checkHostPolicy(hostname: string, url: URL, policy: UrlGuardHostPolicy 
   }
 }
 
-export function parsePublicUrl(value: string | null | undefined, options: ParsePublicUrlOptions = {}): URL {
+export function parsePublicUrl(
+  value: string | null | undefined,
+  options: ParsePublicUrlOptions = {}
+): URL {
   if (!value) {
     throw new UrlGuardError(
       options.missingUrlMessage ?? "A url query parameter is required.",
@@ -247,7 +299,8 @@ export function parsePublicUrl(value: string | null | undefined, options: ParseP
     parsed = new URL(value);
   } catch {
     throw new UrlGuardError(
-      options.invalidUrlMessage ?? "The provided url parameter is not a valid URL.",
+      options.invalidUrlMessage ??
+        "The provided url parameter is not a valid URL.",
       "invalid-url"
     );
   }
@@ -264,7 +317,10 @@ export function parsePublicUrl(value: string | null | undefined, options: ParseP
   return parsed;
 }
 
-export async function assertPublicUrl(url: URL, options: UrlGuardOptions = {}): Promise<void> {
+export async function assertPublicUrl(
+  url: URL,
+  options: UrlGuardOptions = {}
+): Promise<void> {
   let hostname = url.hostname;
 
   if (!hostname) {
@@ -309,7 +365,9 @@ export async function assertPublicUrl(url: URL, options: UrlGuardOptions = {}): 
   } catch (error) {
     const message = "Failed to resolve URL host.";
     emitBlockedHook(url, "dns-lookup-failed", message, options.hooks);
-    throw new UrlGuardError(message, "dns-lookup-failed", 400, { cause: error });
+    throw new UrlGuardError(message, "dns-lookup-failed", 400, {
+      cause: error,
+    });
   }
 
   if (lookupResults.length === 0) {
@@ -337,7 +395,8 @@ export async function fetchPublicUrl(
 ): Promise<Response> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const maxRedirects = options.maxRedirects ?? 5;
-  const redirectStatusCodes = options.redirectStatusCodes ?? DEFAULT_REDIRECT_STATUS_CODES;
+  const redirectStatusCodes =
+    options.redirectStatusCodes ?? DEFAULT_REDIRECT_STATUS_CODES;
 
   let initialUrl: URL;
   try {
@@ -398,14 +457,18 @@ export async function fetchPublicUrl(
       });
     } catch (error) {
       if (abortedByTimeout) {
-        throw new UrlGuardError("Request timed out.", "timeout", 504, { cause: error });
+        throw new UrlGuardError("Request timed out.", "timeout", 504, {
+          cause: error,
+        });
       }
 
       if (error instanceof UrlGuardError) {
         throw error;
       }
 
-      throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, { cause: error });
+      throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, {
+        cause: error,
+      });
     } finally {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -417,7 +480,11 @@ export async function fetchPublicUrl(
 
     if (redirectStatusCodes.has(response.status)) {
       if (redirectCount >= maxRedirects) {
-        throw new UrlGuardError("Too many redirects.", "too-many-redirects", 502);
+        throw new UrlGuardError(
+          "Too many redirects.",
+          "too-many-redirects",
+          502
+        );
       }
 
       const location = response.headers.get("location");
@@ -454,7 +521,12 @@ export async function fetchPublicUrl(
         if (error instanceof UrlGuardError) {
           throw error;
         }
-        throw new UrlGuardError("Failed to validate final URL.", "fetch-failed", 502, { cause: error });
+        throw new UrlGuardError(
+          "Failed to validate final URL.",
+          "fetch-failed",
+          502,
+          { cause: error }
+        );
       }
     }
 

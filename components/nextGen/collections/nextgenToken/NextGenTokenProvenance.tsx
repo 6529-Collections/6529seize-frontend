@@ -83,9 +83,9 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
             <h3>Token Provenance</h3>
           </Col>
         </Row>
-        <Row className={`pt-2 ${styles.logsScrollContainer}`}>
+        <Row className={`pt-2 ${styles["logsScrollContainer"]}`}>
           <Col>
-            <Table bordered={false} className={styles.logsTable}>
+            <Table bordered={false} className={styles["logsTable"]}>
               <tbody>
                 {transactions.map((tr) => (
                   <LatestActivityRow

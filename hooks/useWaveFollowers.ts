@@ -34,7 +34,7 @@ export function useWaveFollowers(waveId: string) {
         ...query,
       };
       if (pageParam) {
-        params.page = `${pageParam}`;
+        params["page"] = `${pageParam}`;
       }
       return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
         endpoint: `/identity-subscriptions/incoming/WAVE/${waveId}`,

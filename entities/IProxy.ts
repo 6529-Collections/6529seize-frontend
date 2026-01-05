@@ -37,10 +37,6 @@ export type CreateProxyAction =
   | CreateProxyCreateDropToWaveAction
   | CreateProxyRateWaveDropAction;
 
-interface CreateNewProfileProxy {
-  readonly target_id: string;
-}
-
 export const PROFILE_PROXY_ACTION_LABELS: Record<
   ApiProfileProxyActionType,
   string

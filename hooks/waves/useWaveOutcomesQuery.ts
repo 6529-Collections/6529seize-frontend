@@ -16,10 +16,10 @@ import { commonApiFetch } from "@/services/api/common-api";
 export type WaveOutcomesSortDirection = "ASC" | "DESC";
 
 export interface UseWaveOutcomesQueryParams {
-  readonly waveId?: string | null;
-  readonly pageSize?: number;
-  readonly sortDirection?: WaveOutcomesSortDirection;
-  readonly enabled?: boolean;
+  readonly waveId?: string | null | undefined;
+  readonly pageSize?: number | undefined;
+  readonly sortDirection?: WaveOutcomesSortDirection | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 type WaveOutcomesInfiniteData = InfiniteData<ApiWaveOutcomesPage>;
@@ -29,7 +29,7 @@ export type UseWaveOutcomesQueryResult = UseInfiniteQueryResult<
   Error
 > & {
   readonly outcomes: ApiWaveOutcomesPage["data"];
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
 };
 
@@ -66,7 +66,7 @@ export function useWaveOutcomesQuery({
 
   const query = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
       const params: Record<string, string> = {
         page: currentPage.toString(),

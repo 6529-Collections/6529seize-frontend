@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export default function TeamDownloads() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <CommunityDownloadsTeam />
     </main>
   );

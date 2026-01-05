@@ -5,74 +5,74 @@ import LinkHandlerFrame from "../LinkHandlerFrame";
 export type PepeKind = "asset" | "collection" | "artist" | "set";
 
 type Market = {
-  readonly bestAskSats?: number;
-  readonly lastSaleSats?: number;
-  readonly bestAskXcp?: number;
-  readonly lastSaleXcp?: number;
-  readonly approxEthPerBtc?: number;
-  readonly approxEthPerXcp?: number;
-  readonly updatedISO?: string;
+  readonly bestAskSats?: number | undefined;
+  readonly lastSaleSats?: number | undefined;
+  readonly bestAskXcp?: number | undefined;
+  readonly lastSaleXcp?: number | undefined;
+  readonly approxEthPerBtc?: number | undefined;
+  readonly approxEthPerXcp?: number | undefined;
+  readonly updatedISO?: string | undefined;
 };
 
 type PepeAssetPreview = {
   readonly kind: "asset";
   readonly href: string;
   readonly slug: string;
-  readonly asset?: string;
-  readonly name?: string;
-  readonly collection?: string;
-  readonly artist?: string;
-  readonly series?: number | null;
-  readonly card?: number | null;
-  readonly supply?: number | null;
-  readonly holders?: number | null;
-  readonly image?: string | null;
+  readonly asset?: string | undefined;
+  readonly name?: string | undefined;
+  readonly collection?: string | undefined;
+  readonly artist?: string | undefined;
+  readonly series?: number | null | undefined;
+  readonly card?: number | null | undefined;
+  readonly supply?: number | null | undefined;
+  readonly holders?: number | null | undefined;
+  readonly image?: string | null | undefined;
   readonly links?: {
-    readonly horizon?: string;
-    readonly xchain?: string;
-    readonly wiki?: string;
-  } | null;
-  readonly market?: Market | null;
+    readonly horizon?: string | undefined;
+    readonly xchain?: string | undefined;
+    readonly wiki?: string | undefined;
+  } | null | undefined;
+  readonly market?: Market | null | undefined;
 };
 
 type PepeCollectionPreview = {
   readonly kind: "collection";
   readonly href: string;
   readonly slug: string;
-  readonly name?: string;
-  readonly image?: string | null;
+  readonly name?: string | undefined;
+  readonly image?: string | null | undefined;
   readonly stats?: {
-    readonly items?: number | null;
-    readonly floorSats?: number | null;
-  } | null;
+    readonly items?: number | null | undefined;
+    readonly floorSats?: number | null | undefined;
+  } | null | undefined;
 };
 
 type PepeArtistPreview = {
   readonly kind: "artist";
   readonly href: string;
   readonly slug: string;
-  readonly name?: string;
-  readonly image?: string | null;
+  readonly name?: string | undefined;
+  readonly image?: string | null | undefined;
   readonly stats?: {
-    readonly uniqueCards?: number | null;
-    readonly collections?: string[] | null;
-  } | null;
+    readonly uniqueCards?: number | null | undefined;
+    readonly collections?: string[] | null | undefined;
+  } | null | undefined;
 };
 
 type PepeSetPreview = {
   readonly kind: "set";
   readonly href: string;
   readonly slug: string;
-  readonly name?: string;
-  readonly image?: string | null;
+  readonly name?: string | undefined;
+  readonly image?: string | null | undefined;
   readonly stats?: {
-    readonly items?: number | null;
-    readonly fullSetFloorSats?: number | null;
-    readonly lastSaleValuationSats?: number | null;
-  } | null;
+    readonly items?: number | null | undefined;
+    readonly fullSetFloorSats?: number | null | undefined;
+    readonly lastSaleValuationSats?: number | null | undefined;
+  } | null | undefined;
   readonly links?: {
-    readonly wiki?: string;
-  } | null;
+    readonly wiki?: string | undefined;
+  } | null | undefined;
 };
 
 type PepePreview =
@@ -87,7 +87,7 @@ type PepeCardProps = {
   readonly href: string;
 };
 
-const Stat = ({ label, value }: { label: string; value?: string | null }) =>
+const Stat = ({ label, value }: { label: string; value?: string | null | undefined }) =>
   value ? (
     <div className="tw-flex tw-items-baseline tw-gap-1 tw-text-xs tw-text-iron-300">
       <span className="tw-text-iron-400">{label}</span>
@@ -398,7 +398,7 @@ const PepeCard = memo(function PepeCard({ kind, slug, href }: PepeCardProps) {
       })
       .then((data: PepePreview) => setPreview(data))
       .catch((error: unknown) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setHasError(true);

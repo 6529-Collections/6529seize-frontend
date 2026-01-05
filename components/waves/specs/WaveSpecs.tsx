@@ -1,4 +1,3 @@
-import React from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
@@ -6,7 +5,7 @@ import WaveRating from "./WaveRating";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
-  readonly useRing?: boolean;
+  readonly useRing?: boolean | undefined;
 }
 
 export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {

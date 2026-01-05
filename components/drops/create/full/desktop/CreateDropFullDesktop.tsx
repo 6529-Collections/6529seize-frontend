@@ -1,22 +1,24 @@
 "use client";
 
-import { CreateDropType, CreateDropViewType } from "@/components/drops/create/types";
+import {
+  CreateDropType,
+  CreateDropViewType,
+} from "@/components/drops/create/types";
 import CreateDropContent, {
-    CreateDropContentHandles,
+  CreateDropContentHandles,
 } from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropDesktopFooter from "@/components/drops/create/utils/CreateDropDesktopFooter";
 import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
 import {
-    CreateDropConfig,
-    DropMetadata,
-    MentionedUser,
-    ReferencedNft,
+  CreateDropConfig,
+  DropMetadata,
+  MentionedUser,
+  ReferencedNft,
 } from "@/entities/IDrop";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { EditorState } from "lexical";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
@@ -31,7 +33,6 @@ export interface CreateDropFullDesktopHandles {
 }
 
 interface CreateDropFullDesktopProps {
-  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
@@ -42,7 +43,7 @@ interface CreateDropFullDesktopProps {
   readonly loading: boolean;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly waveId: string | null;
@@ -68,7 +69,6 @@ const CreateDropFullDesktop = forwardRef<
 >(
   (
     {
-      profile,
       title,
       editorState,
       metadata,
@@ -127,7 +127,8 @@ const CreateDropFullDesktop = forwardRef<
         <button
           onClick={() => onViewChange(CreateDropViewType.COMPACT)}
           type="button"
-          className="tw-relative tw-ml-auto tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent hover:tw-bg-iron-900 tw-border-0 tw-text-iron-300 hover:tw-text-iron-400 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
+          className="tw-relative tw-ml-auto tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent hover:tw-bg-iron-900 tw-border-0 tw-text-iron-300 hover:tw-text-iron-400 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+        >
           <span className="tw-sr-only tw-text-sm">Cancel</span>
           <svg
             className="tw-h-6 tw-w-6"
@@ -135,7 +136,8 @@ const CreateDropFullDesktop = forwardRef<
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor">
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -150,13 +152,15 @@ const CreateDropFullDesktop = forwardRef<
               onClick={() => setTitleState(TITLE_STATE.INPUT)}
               type="button"
               className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 
-            tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+            tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+            >
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg">
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   d="M12 5V19M5 12H19"
                   stroke="currentColor"
@@ -220,13 +224,15 @@ const CreateDropFullDesktop = forwardRef<
                       onClick={() => onFileRemove(file)}
                       type="button"
                       aria-label="Remove file"
-                      className="-tw-mr-1 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800">
+                      className="-tw-mr-1 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                    >
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
                         <path
                           d="M18 6L6 18M6 6L18 18"
                           stroke="currentColor"

@@ -16,7 +16,7 @@ interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly isApp?: boolean;
+  readonly isApp?: boolean | undefined;
   readonly activeTab: ModalTab;
   readonly onTabChange: (tab: ModalTab) => void;
   readonly hasWinningArtworks: boolean;

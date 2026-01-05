@@ -7,7 +7,7 @@ export default function ClientOnly({
   fallback = null,
 }: {
   readonly children: React.ReactNode;
-  readonly fallback?: React.ReactNode;
+  readonly fallback?: React.ReactNode | undefined;
 }) {
   const [hasMounted, setHasMounted] = useState(false);
 

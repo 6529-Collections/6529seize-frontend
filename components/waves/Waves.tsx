@@ -20,8 +20,8 @@ import useCreateModalState, {
 } from "@/hooks/useCreateModalState";
 
 interface WavesProps {
-  readonly heading?: string;
-  readonly documentTitle?: string;
+  readonly heading?: string | undefined;
+  readonly documentTitle?: string | undefined;
 }
 
 enum WavesViewMode {

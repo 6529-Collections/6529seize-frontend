@@ -1,5 +1,3 @@
-import React from "react";
-
 interface PositiveOnlyToggleProps {
   readonly positiveOnly: boolean;
   readonly setPositiveOnly: (newValue: boolean) => void;
@@ -11,7 +9,10 @@ export default function PositiveOnlyToggle({
 }: PositiveOnlyToggleProps) {
   return (
     <div className="tw-hidden">
-      <label htmlFor="positive-only-toggle" className="tw-flex tw-cursor-pointer">
+      <label
+        htmlFor="positive-only-toggle"
+        className="tw-flex tw-cursor-pointer"
+      >
         <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
           <div
             className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${

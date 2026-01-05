@@ -29,10 +29,10 @@ export default function LeaderboardSort<LeaderboardSortType>(
             sort_direction: SortDirection.ASC,
           })
         }
-        className={`${styles.caret} ${
+        className={`${styles["caret"]} ${
           props.sort.sort_direction !== SortDirection.ASC ||
           props.sort.sort !== props.sort_option
-            ? styles.disabled
+            ? styles["disabled"]
             : ""
         }`}
       />
@@ -44,10 +44,10 @@ export default function LeaderboardSort<LeaderboardSortType>(
             sort_direction: SortDirection.DESC,
           })
         }
-        className={`${styles.caret} ${
+        className={`${styles["caret"]} ${
           props.sort.sort_direction !== SortDirection.DESC ||
           props.sort.sort !== props.sort_option
-            ? styles.disabled
+            ? styles["disabled"]
             : ""
         }`}
       />

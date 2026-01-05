@@ -52,8 +52,8 @@ describe('fetchNftTdhResults multiple entries', () => {
 
     const result = await fetchNftTdhResults('0xdef', 1, '', 1, 'balance', 'DESC');
     expect(cicToType).toHaveBeenCalledTimes(2);
-    expect(result.data[0].cic_type).toBe('T1');
-    expect(result.data[1].cic_type).toBe('T2');
+    expect(result.data[0]?.cic_type).toBe('T1');
+    expect(result.data[1]?.cic_type).toBe('T2');
   });
 });
 

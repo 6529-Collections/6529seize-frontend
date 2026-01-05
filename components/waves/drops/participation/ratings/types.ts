@@ -9,7 +9,7 @@ export interface RatingsSectionProps {
 export interface ThemeColors {
   text: string;
   ring: string;
-  indicator?: string;
+  indicator?: string | undefined;
 }
 
 export interface RatingsData {

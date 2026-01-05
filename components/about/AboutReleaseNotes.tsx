@@ -22,7 +22,7 @@ export default function AboutReleaseNotes() {
       </Row>
       <Row className="pt-2">
         <Col
-          className={styles.htmlContainer}
+          className={styles["htmlContainer"]}
           dangerouslySetInnerHTML={{
             __html: html,
           }}></Col>

@@ -106,7 +106,7 @@ describe("Museum1of1ArtPage", () => {
     const pageHeadings = screen.getAllByText("1 OF 1 ART");
     expect(pageHeadings.length).toBeGreaterThan(0);
     expect(pageHeadings[0]).toBeInTheDocument();
-    expect(pageHeadings[0].tagName).toBe("H1");
+    expect(pageHeadings[0]?.tagName).toBe("H1");
   });
 
   it("includes skip to content link for accessibility", () => {

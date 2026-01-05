@@ -207,7 +207,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={primary1?.address}
+                    {...(primary1?.address && { value: primary1.address })}
                   />
                 </Col>
                 <Col xs={3}>
@@ -215,7 +215,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={primary1?.percentage}
+                    {...(primary1?.percentage && { value: primary1.percentage })}
                   />
                 </Col>
               </Row>
@@ -228,7 +228,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={primary2?.address}
+                    {...(primary2?.address && { value: primary2.address })}
                   />
                 </Col>
                 <Col xs={3}>
@@ -236,7 +236,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={primary2?.percentage}
+                    {...(primary2?.percentage && { value: primary2.percentage })}
                   />
                 </Col>
               </Row>
@@ -249,7 +249,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={primary3?.address}
+                    {...(primary3?.address && { value: primary3.address })}
                   />
                 </Col>
                 <Col xs={3}>
@@ -257,7 +257,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={primary3?.percentage}
+                    {...(primary3?.percentage && { value: primary3.percentage })}
                   />
                 </Col>
               </Row>
@@ -270,7 +270,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={secondary1?.address}
+                    {...(secondary1?.address && { value: secondary1.address })}
                   />
                 </Col>
                 <Col xs={3}>
@@ -278,7 +278,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={secondary1?.percentage}
+                    {...(secondary1?.percentage && { value: secondary1.percentage })}
                   />
                 </Col>
               </Row>
@@ -291,7 +291,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={secondary2?.address}
+                    {...(secondary2?.address && { value: secondary2.address })}
                   />
                 </Col>
                 <Col xs={3}>
@@ -299,7 +299,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={secondary2?.percentage}
+                    {...(secondary2?.percentage && { value: secondary2?.percentage })}
                   />
                 </Col>
               </Row>
@@ -312,7 +312,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={secondary3?.address}
+                    {...(secondary3?.address && { value: secondary3.address })}
                   />
                 </Col>
                 <Col xs={3}>
@@ -320,7 +320,7 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                     type="text"
                     disabled={true}
                     placeholder="Select Collection"
-                    value={secondary3?.percentage}
+                    {...(secondary3?.percentage && { value: secondary3.percentage })}
                   />
                 </Col>
               </Row>
@@ -377,7 +377,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
                   {errors.map((error) => (
                     <li
                       key={`error-${error.replaceAll("", " ")}`}
-                      className="text-danger">
+                      className="text-danger"
+                    >
                       {error}
                     </li>
                   ))}
@@ -387,7 +388,8 @@ export default function NextGenAdminAcceptAddressesAndPercentages(
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => submit()}>
+              onClick={() => submit()}
+            >
               Submit
             </Button>
           </Form>

@@ -28,7 +28,7 @@ import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
 interface Props {
   section: DelegationCenterSection;
-  path?: string[];
+  path?: string[] | undefined;
   setActiveSection(section: DelegationCenterSection): any;
   address_query: string;
   setAddressQuery(address: string): any;
@@ -205,16 +205,16 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <Container className="pt-4">
       <Row>
-        <Col className={styles.menuLeft}>
+        <Col className={styles["menuLeft"]}>
           <Container>
             <Row className="pt-2 pb-2">
               <Col
                 onClick={() =>
                   props.setActiveSection(DelegationCenterSection.CENTER)
                 }
-                className={`${styles.menuLeftItem} ${
+                className={`${styles["menuLeftItem"]} ${
                   props.section === DelegationCenterSection.CENTER
-                    ? styles.menuLeftItemActive
+                    ? styles["menuLeftItemActive"]
                     : ""
                 }`}>
                 Delegation Center
@@ -227,9 +227,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                     DelegationCenterSection.WALLET_ARCHITECTURE
                   )
                 }
-                className={`${styles.menuLeftItem} ${
+                className={`${styles["menuLeftItem"]} ${
                   props.section === DelegationCenterSection.WALLET_ARCHITECTURE
-                    ? styles.menuLeftItemActive
+                    ? styles["menuLeftItemActive"]
                     : ""
                 }`}>
                 Wallet Architecture
@@ -240,11 +240,11 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 onClick={() =>
                   props.setActiveSection(DelegationCenterSection.FAQ)
                 }
-                className={`${styles.menuLeftItem} ${
+                className={`${styles["menuLeftItem"]} ${
                   props.section === DelegationCenterSection.FAQ ||
                   (props.section === DelegationCenterSection.HTML &&
                     pathname?.startsWith("/delegation/delegation-faq/"))
-                    ? styles.menuLeftItemActive
+                    ? styles["menuLeftItemActive"]
                     : ""
                 }`}>
                 Delegation FAQs
@@ -257,10 +257,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                     DelegationCenterSection.CONSOLIDATION_USE_CASES
                   )
                 }
-                className={`${styles.menuLeftItem} ${
+                className={`${styles["menuLeftItem"]} ${
                   props.section ===
                   DelegationCenterSection.CONSOLIDATION_USE_CASES
-                    ? styles.menuLeftItemActive
+                    ? styles["menuLeftItemActive"]
                     : ""
                 }`}>
                 Consolidation Use Cases
@@ -271,9 +271,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                 onClick={() =>
                   props.setActiveSection(DelegationCenterSection.CHECKER)
                 }
-                className={`${styles.menuLeftItem} ${
+                className={`${styles["menuLeftItem"]} ${
                   props.section === DelegationCenterSection.CHECKER
-                    ? styles.menuLeftItemActive
+                    ? styles["menuLeftItemActive"]
                     : ""
                 }`}>
                 Wallet Checker
@@ -291,10 +291,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             </Row>
           </Container>
         </Col>
-        {<Col className={styles.menuRight}>{printContent()}</Col>}
+        {<Col className={styles["menuRight"]}>{printContent()}</Col>}
       </Row>
       <Row className="pt-4">
-        <Col className={styles.menuLeftFull}>
+        <Col className={styles["menuLeftFull"]}>
           <Container>
             <Row>
               <Col>
@@ -304,9 +304,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                       onClick={() =>
                         props.setActiveSection(DelegationCenterSection.CENTER)
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`${styles["menuLeftItem"]} ${
                         props.section === DelegationCenterSection.CENTER
-                          ? styles.menuLeftItemActive
+                          ? styles["menuLeftItemActive"]
                           : ""
                       }`}>
                       Delegation Center
@@ -319,10 +319,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                           DelegationCenterSection.WALLET_ARCHITECTURE
                         )
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`${styles["menuLeftItem"]} ${
                         props.section ==
                         DelegationCenterSection.WALLET_ARCHITECTURE
-                          ? styles.menuLeftItemActive
+                          ? styles["menuLeftItemActive"]
                           : ""
                       }`}>
                       Wallet Architecture
@@ -333,9 +333,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                       onClick={() =>
                         props.setActiveSection(DelegationCenterSection.FAQ)
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`${styles["menuLeftItem"]} ${
                         props.section === DelegationCenterSection.FAQ
-                          ? styles.menuLeftItemActive
+                          ? styles["menuLeftItemActive"]
                           : ""
                       }`}>
                       Delegation FAQs
@@ -348,10 +348,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                           DelegationCenterSection.CONSOLIDATION_USE_CASES
                         )
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`${styles["menuLeftItem"]} ${
                         props.section ===
                         DelegationCenterSection.CONSOLIDATION_USE_CASES
-                          ? styles.menuLeftItemActive
+                          ? styles["menuLeftItemActive"]
                           : ""
                       }`}>
                       Consolidation Use Cases
@@ -362,9 +362,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
                       onClick={() =>
                         props.setActiveSection(DelegationCenterSection.CHECKER)
                       }
-                      className={`${styles.menuLeftItem} ${
+                      className={`${styles["menuLeftItem"]} ${
                         props.section === DelegationCenterSection.CHECKER
-                          ? styles.menuLeftItemActive
+                          ? styles["menuLeftItemActive"]
                           : ""
                       }`}>
                       Wallet Checker
@@ -412,7 +412,7 @@ function EtherscanLink() {
       }
       target="_blank"
       rel="noopener noreferrer"
-      className={styles.delegationLink}>
+      className={styles["delegationLink"]}>
       <Image
         unoptimized
         src="/etherscan_w.png"
@@ -431,7 +431,7 @@ function GithubLink() {
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
       rel="noopener noreferrer"
-      className={styles.delegationLink}>
+      className={styles["delegationLink"]}>
       <Image
         unoptimized
         src="/github_w.png"
@@ -447,14 +447,14 @@ function GithubLink() {
 export function DelegationToast(
   props: Readonly<{
     toastRef: React.RefObject<HTMLDivElement | null>;
-    toast: { title: string; message?: string };
+    toast: { title: string; message?: string | undefined };
     showToast: boolean;
     setShowToast: (show: boolean) => void;
   }>
 ) {
   return (
     <div
-      className={styles.toastWrapper}
+      className={styles["toastWrapper"]}
       onClick={(e) => {
         if (!props.toastRef.current?.contains(e.target as Node)) {
           props.setShowToast(false);
@@ -462,7 +462,7 @@ export function DelegationToast(
       }}>
       <ToastContainer
         position={"top-center"}
-        className={styles.toast}
+        className={styles["toast"]}
         ref={props.toastRef}>
         <Toast onClose={() => props.setShowToast(false)} show={props.showToast}>
           <Toast.Header>

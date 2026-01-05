@@ -7,15 +7,18 @@ import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { publicEnv } from "@/config/env";
 
 type EnsureStableSeizeLinkWithSetter = typeof ensureStableSeizeLink & {
-  __setCurrentHref?: (href?: string) => void;
+  __setCurrentHref?: ((href?: string) => void) | undefined;
 };
 
-jest.mock("@/components/drops/view/part/dropPartMarkdown/youtubePreview", () => ({
-  __esModule: true,
-  default: ({ href }: { href: string }) => (
-    <div data-testid="youtube-preview" data-href={href} />
-  ),
-}));
+jest.mock(
+  "@/components/drops/view/part/dropPartMarkdown/youtubePreview",
+  () => ({
+    __esModule: true,
+    default: ({ href }: { href: string }) => (
+      <div data-testid="youtube-preview" data-href={href} />
+    ),
+  })
+);
 
 jest.mock("@/components/drops/view/part/DropPartMarkdownImage", () => ({
   __esModule: true,
@@ -25,7 +28,9 @@ jest.mock("@/components/drops/view/part/DropPartMarkdownImage", () => ({
 }));
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/renderers", () => ({
-  renderGifEmbed: jest.fn((url: string) => <div data-testid="gif" data-url={url} />),
+  renderGifEmbed: jest.fn((url: string) => (
+    <div data-testid="gif" data-url={url} />
+  )),
   renderSeizeQuote: jest.fn(() => <div data-testid="seize-quote" />),
   renderTweetEmbed: jest.fn((href: string) => (
     <div data-testid="tweet" data-href={href} />
@@ -47,7 +52,9 @@ jest.mock("@/components/waves/pepe/PepeCard", () => ({
 }));
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/tiktok", () => ({
-  parseTikTokLink: jest.requireActual("@/components/drops/view/part/dropPartMarkdown/tiktok").parseTikTokLink,
+  parseTikTokLink: jest.requireActual(
+    "@/components/drops/view/part/dropPartMarkdown/tiktok"
+  ).parseTikTokLink,
 }));
 
 jest.mock("@/components/waves/TikTokCard", () => ({
@@ -59,7 +66,13 @@ jest.mock("@/components/waves/TikTokCard", () => ({
 
 jest.mock("@/components/waves/LinkPreviewCard", () => ({
   __esModule: true,
-  default: ({ href, renderFallback }: { href: string; renderFallback: () => ReactNode }) => (
+  default: ({
+    href,
+    renderFallback,
+  }: {
+    href: string;
+    renderFallback: () => ReactNode;
+  }) => (
     <div data-testid="opengraph" data-href={href}>
       {renderFallback()}
     </div>
@@ -84,12 +97,16 @@ jest.mock("@/components/waves/FarcasterCard", () => ({
 
 jest.mock("@/components/waves/WikimediaCard", () => ({
   __esModule: true,
-  default: ({ href }: { href: string }) => <div data-testid="wikimedia-card" data-href={href} />,
+  default: ({ href }: { href: string }) => (
+    <div data-testid="wikimedia-card" data-href={href} />
+  ),
 }));
 
 jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   __esModule: true,
-  default: ({ href }: { href: string }) => <div data-testid="chat-buttons" data-href={href} />,
+  default: ({ href }: { href: string }) => (
+    <div data-testid="chat-buttons" data-href={href} />
+  ),
 }));
 
 jest.mock("@/components/groups/page/list/card/GroupCardChat", () => ({
@@ -101,7 +118,9 @@ jest.mock("@/components/groups/page/list/card/GroupCardChat", () => ({
 
 jest.mock("@/components/waves/list/WaveItemChat", () => ({
   __esModule: true,
-  default: ({ waveId }: { waveId: string }) => <div data-testid="wave-card" data-wave={waveId} />,
+  default: ({ waveId }: { waveId: string }) => (
+    <div data-testid="wave-card" data-wave={waveId} />
+  ),
 }));
 
 jest.mock("@/components/waves/drops/DropItemChat", () => ({
@@ -120,7 +139,8 @@ jest.mock("@/helpers/SeizeLinkParser", () => {
   const ensureStableSeizeLink = (href: string) =>
     actual.ensureStableSeizeLink(href, currentHrefOverride);
 
-  const ensureWithSetter = ensureStableSeizeLink as EnsureStableSeizeLinkWithSetter;
+  const ensureWithSetter =
+    ensureStableSeizeLink as EnsureStableSeizeLinkWithSetter;
   ensureWithSetter.__setCurrentHref = (href?: string) => {
     currentHrefOverride = href;
   };
@@ -136,32 +156,33 @@ const onQuoteClick = jest.fn();
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
 
 type EnsureStableSeizeLinkWithSetter = typeof ensureStableSeizeLink & {
-  __setCurrentHref?: (href?: string) => void;
+  __setCurrentHref?: ((href?: string) => void) | undefined;
 };
 
 const setEnsureCurrentHref = (href?: string) => {
-  const ensureWithSetter = ensureStableSeizeLink as EnsureStableSeizeLinkWithSetter;
+  const ensureWithSetter =
+    ensureStableSeizeLink as EnsureStableSeizeLinkWithSetter;
   ensureWithSetter.__setCurrentHref?.(href);
 };
 
 describe("createLinkRenderer", () => {
   const FALLBACK_BASE_ENDPOINT = "https://6529.io";
   const originalBaseEndpointEnv = publicEnv.BASE_ENDPOINT;
-  const originalProcessBaseEndpoint = process.env.BASE_ENDPOINT;
+  const originalProcessBaseEndpoint = process.env["BASE_ENDPOINT"];
 
   beforeEach(() => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
-    process.env.BASE_ENDPOINT = FALLBACK_BASE_ENDPOINT;
+    process.env["BASE_ENDPOINT"] = FALLBACK_BASE_ENDPOINT;
     setEnsureCurrentHref();
   });
 
   afterEach(() => {
     publicEnv.BASE_ENDPOINT = originalBaseEndpointEnv;
     if (originalProcessBaseEndpoint === undefined) {
-      delete process.env.BASE_ENDPOINT;
+      delete process.env["BASE_ENDPOINT"];
     } else {
-      process.env.BASE_ENDPOINT = originalProcessBaseEndpoint;
+      process.env["BASE_ENDPOINT"] = originalProcessBaseEndpoint;
     }
     setEnsureCurrentHref();
   });
@@ -171,7 +192,10 @@ describe("createLinkRenderer", () => {
     const element = renderImage({ src: "https://example.com/image.png" });
     expect(element).not.toBeNull();
     const { getByTestId } = render(<>{element}</>);
-    expect(getByTestId("markdown-image")).toHaveAttribute("src", "https://example.com/image.png");
+    expect(getByTestId("markdown-image")).toHaveAttribute(
+      "src",
+      "https://example.com/image.png"
+    );
   });
 
   it("returns null for invalid image sources", () => {
@@ -181,9 +205,14 @@ describe("createLinkRenderer", () => {
 
   it("uses TikTok handler for supported URLs", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://www.tiktok.com/@creator/video/123456" } as any);
+    const element = renderAnchor({
+      href: "https://www.tiktok.com/@creator/video/123456",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("tiktok-card")).toHaveAttribute("data-href", "https://www.tiktok.com/@creator/video/123456");
+    expect(screen.getByTestId("tiktok-card")).toHaveAttribute(
+      "data-href",
+      "https://www.tiktok.com/@creator/video/123456"
+    );
     expect(screen.queryByTestId("opengraph")).not.toBeInTheDocument();
   });
 
@@ -209,14 +238,21 @@ describe("createLinkRenderer", () => {
 
   it("renders seize group previews", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://6529.io/network?group=test-group" } as any);
+    const element = renderAnchor({
+      href: "https://6529.io/network?group=test-group",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("group-card")).toHaveAttribute("data-group", "test-group");
+    expect(screen.getByTestId("group-card")).toHaveAttribute(
+      "data-group",
+      "test-group"
+    );
   });
 
   it("renders seize drop previews", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://6529.io/waves?wave=abc&drop=def" } as any);
+    const element = renderAnchor({
+      href: "https://6529.io/waves?wave=abc&drop=def",
+    } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "def");
   });
@@ -241,10 +277,15 @@ describe("createLinkRenderer", () => {
     setEnsureCurrentHref("https://6529.io/messages?wave=current-wave");
 
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://6529.io/?drop=drop-123" } as any);
+    const element = renderAnchor({
+      href: "https://6529.io/?drop=drop-123",
+    } as any);
     render(<>{element}</>);
 
-    expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "drop-123");
+    expect(screen.getByTestId("drop-card")).toHaveAttribute(
+      "data-drop",
+      "drop-123"
+    );
     expect(screen.getByTestId("chat-buttons")).toHaveAttribute(
       "data-href",
       "https://6529.io/messages?wave=current-wave&drop=drop-123"
@@ -260,7 +301,10 @@ describe("createLinkRenderer", () => {
     } as any);
     render(<>{element}</>);
 
-    expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "drop-456");
+    expect(screen.getByTestId("drop-card")).toHaveAttribute(
+      "data-drop",
+      "drop-456"
+    );
     expect(screen.getByTestId("chat-buttons")).toHaveAttribute(
       "data-href",
       "https://6529.io/messages?wave=current-wave&drop=drop-456"
@@ -283,9 +327,14 @@ describe("createLinkRenderer", () => {
 
   it("renders Wikimedia cards", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://en.wikipedia.org/wiki/Test" } as any);
+    const element = renderAnchor({
+      href: "https://en.wikipedia.org/wiki/Test",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("wikimedia-card")).toHaveAttribute("data-href", "https://en.wikipedia.org/wiki/Test");
+    expect(screen.getByTestId("wikimedia-card")).toHaveAttribute(
+      "data-href",
+      "https://en.wikipedia.org/wiki/Test"
+    );
   });
 
   it("renders gif embeds", () => {
@@ -294,29 +343,50 @@ describe("createLinkRenderer", () => {
       href: "https://media.tenor.com/test.gif",
     } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("gif")).toHaveAttribute("data-url", "https://media.tenor.com/test.gif");
+    expect(screen.getByTestId("gif")).toHaveAttribute(
+      "data-url",
+      "https://media.tenor.com/test.gif"
+    );
   });
 
   it("renders Art Blocks previews", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://www.artblocks.io/token/662000" } as any);
+    const element = renderAnchor({
+      href: "https://www.artblocks.io/token/662000",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("artblocks-card")).toHaveAttribute("data-href", "https://www.artblocks.io/token/662000");
-    expect(screen.getByTestId("chat-buttons")).toHaveAttribute("data-href", "https://www.artblocks.io/token/662000");
+    expect(screen.getByTestId("artblocks-card")).toHaveAttribute(
+      "data-href",
+      "https://www.artblocks.io/token/662000"
+    );
+    expect(screen.getByTestId("chat-buttons")).toHaveAttribute(
+      "data-href",
+      "https://www.artblocks.io/token/662000"
+    );
   });
 
   it("renders Pepe cards", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://pepe.wtf/asset/test" } as any);
+    const element = renderAnchor({
+      href: "https://pepe.wtf/asset/test",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("pepe-card")).toHaveAttribute("data-kind", "asset");
+    expect(screen.getByTestId("pepe-card")).toHaveAttribute(
+      "data-kind",
+      "asset"
+    );
   });
 
   it("renders Farcaster cards", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "https://warpcast.com/alice/0x123" } as any);
+    const element = renderAnchor({
+      href: "https://warpcast.com/alice/0x123",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("farcaster-card")).toHaveAttribute("data-href", "https://warpcast.com/alice/0x123");
+    expect(screen.getByTestId("farcaster-card")).toHaveAttribute(
+      "data-href",
+      "https://warpcast.com/alice/0x123"
+    );
     expect(screen.queryByTestId("opengraph")).toBeNull();
   });
 
@@ -325,30 +395,40 @@ describe("createLinkRenderer", () => {
     const element = renderAnchor({ href: "vitalik.eth" } as any);
     render(<>{element}</>);
     expect(mockEnsLinkPreview).toHaveBeenCalledWith({ href: "vitalik.eth" });
-    expect(screen.getByTestId("ens-link-preview")).toHaveAttribute("data-href", "vitalik.eth");
+    expect(screen.getByTestId("ens-link-preview")).toHaveAttribute(
+      "data-href",
+      "vitalik.eth"
+    );
   });
 
   it("renders Open Graph preview for generic external links", () => {
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({ href: "https://example.org/post" } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("opengraph")).toHaveAttribute("data-href", "https://example.org/post");
+    expect(screen.getByTestId("opengraph")).toHaveAttribute(
+      "data-href",
+      "https://example.org/post"
+    );
   });
 
   it("falls back to standard anchor for unsupported protocols", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({ href: "ftp://example.org/resource", children: "ftp" } as any);
+    const element = renderAnchor({
+      href: "ftp://example.org/resource",
+      children: "ftp",
+    } as any);
     render(<>{element}</>);
-    expect(screen.getByText("ftp" as any)).toHaveAttribute("href", "ftp://example.org/resource");
+    expect(screen.getByText("ftp" as any)).toHaveAttribute(
+      "href",
+      "ftp://example.org/resource"
+    );
   });
 
   it("identifies block-level smart links", () => {
     const { isSmartLink } = baseRenderer();
     expect(isSmartLink("https://youtu.be/video123")).toBe(true);
-    expect(isSmartLink("https://example.org/post"))
-      .toBe(true);
-    expect(isSmartLink("https://example.org"))
-      .toBe(true);
+    expect(isSmartLink("https://example.org/post")).toBe(true);
+    expect(isSmartLink("https://example.org")).toBe(true);
     expect(isSmartLink("ftp://example.org/resource")).toBe(false);
   });
 

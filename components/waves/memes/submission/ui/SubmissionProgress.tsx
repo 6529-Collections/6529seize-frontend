@@ -8,8 +8,8 @@ interface SubmissionProgressProps {
   readonly fileInfo?: {
     name: string;
     size: number;
-  } | null;
-  readonly error?: string;
+  } | null | undefined;
+  readonly error?: string | undefined;
 }
 
 /**

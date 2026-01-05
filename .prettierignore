@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+dist
+out
+build
+
+# Generated files
+generated
+*.generated.*
+coverage
+
+# Package manager
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Misc
+.git
+.husky
+*.min.js
+*.min.css

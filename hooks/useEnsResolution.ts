@@ -6,8 +6,8 @@ import { useEnsAddress, useEnsName } from "wagmi";
 const LABEL_SEPARATOR = " - ";
 
 type UseEnsResolutionOptions = Readonly<{
-  initialValue?: string;
-  chainId?: number;
+  initialValue?: string | undefined;
+  chainId?: number | undefined;
 }>;
 
 export function useEnsResolution(

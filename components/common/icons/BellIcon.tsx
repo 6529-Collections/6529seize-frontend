@@ -1,6 +1,8 @@
-import React from 'react';
-
-const BellIcon = ({ className }: { readonly className?: string }) => (
+const BellIcon = ({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
@@ -17,4 +19,4 @@ const BellIcon = ({ className }: { readonly className?: string }) => (
   </svg>
 );
 
-export default BellIcon; 
+export default BellIcon;

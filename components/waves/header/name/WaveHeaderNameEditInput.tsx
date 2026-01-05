@@ -1,11 +1,7 @@
-import { ApiWave } from "@/generated/models/ApiWave";
-
 export default function WaveHeaderNameEditInput({
-  wave,
   name,
   setName,
 }: {
-  readonly wave: ApiWave;
   readonly name: string;
   readonly setName: (newName: string) => void;
 }) {

@@ -21,7 +21,7 @@ export default function UserPageTab({
 }: UserPageTabProps) {
   const params = useParams();
   const searchParams = useSearchParams();
-  const handleOrWallet = params?.user?.toString();
+  const handleOrWallet = params?.["user"]?.toString();
 
   const path = `/${handleOrWallet}/${tab.route}`;
 

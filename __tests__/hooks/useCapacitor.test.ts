@@ -35,9 +35,9 @@ const { Capacitor } = require("@capacitor/core");
 const { App } = require("@capacitor/app");
 
 beforeEach(() => {
-  listeners.appStateChange = () => {};
-  listeners.keyboardWillShow = () => {};
-  listeners.keyboardWillHide = () => {};
+  listeners["appStateChange"] = () => {};
+  listeners["keyboardWillShow"] = () => {};
+  listeners["keyboardWillHide"] = () => {};
   (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
   (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
   (App.getState as jest.Mock).mockResolvedValue({ isActive: false });
@@ -73,18 +73,18 @@ describe("useCapacitor", () => {
     // Wait for async keyboard listeners to be set up
     await waitFor(() => {
       act(() => {
-        listeners.keyboardWillShow();
+        listeners["keyboardWillShow"]();
       });
       expect(result.current.keyboardVisible).toBe(true);
     });
 
     act(() => {
-      listeners.keyboardWillHide();
+      listeners["keyboardWillHide"]();
     });
     expect(result.current.keyboardVisible).toBe(false);
 
     act(() => {
-      listeners.appStateChange({ isActive: true });
+      listeners["appStateChange"]({ isActive: true });
     });
     expect(result.current.isActive).toBe(true);
   });

@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export default function ReMemesAddPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <RememeAddPage />
     </main>
   );

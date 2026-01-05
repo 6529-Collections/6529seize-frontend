@@ -13,7 +13,7 @@ export default function CollectionPageShell({
   children,
 }: {
   readonly collection: NextGenCollection;
-  readonly withNav?: boolean;
+  readonly withNav?: boolean | undefined;
   readonly children: ReactNode;
 }) {
   useShallowRedirect(collection.name);
@@ -21,7 +21,7 @@ export default function CollectionPageShell({
   return (
     <>
       <NextGenCollectionHead collection={collection} />
-      <main className={styles.main}>
+      <main className={styles["main"]}>
         {withNav && <NextGenNavigationHeader />}
         {children}
       </main>

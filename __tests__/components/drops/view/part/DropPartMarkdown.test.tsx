@@ -140,7 +140,7 @@ jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
     relativeHref,
   }: {
     href: string;
-    relativeHref?: string;
+    relativeHref?: string | undefined;
   }) => (
     <div
       data-testid="chat-item-buttons"

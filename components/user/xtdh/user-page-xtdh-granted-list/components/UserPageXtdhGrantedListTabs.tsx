@@ -5,8 +5,8 @@ import type { GrantedTab } from "../types";
 interface UserPageXtdhGrantedListTabsProps {
   readonly activeTab: GrantedTab;
   readonly onTabChange: (tab: GrantedTab) => void;
-  readonly fill?: boolean;
-  readonly pendingCount?: number;
+  readonly fill?: boolean | undefined;
+  readonly pendingCount?: number | undefined;
 }
 
 export function UserPageXtdhGrantedListTabs({

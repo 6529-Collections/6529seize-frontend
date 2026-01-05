@@ -1,9 +1,9 @@
 import {
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-    Transition,
-    TransitionChild,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Transition,
+  TransitionChild,
 } from "@headlessui/react";
 import { Fragment } from "react";
 
@@ -16,13 +16,13 @@ export default function MobileWrapperDialog({
   children,
   noPadding,
 }: {
-  readonly title?: string;
+  readonly title?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onBeforeLeave?: () => void;
-  readonly onAfterLeave?: () => void;
+  readonly onBeforeLeave?: (() => void) | undefined;
+  readonly onAfterLeave?: (() => void) | undefined;
   readonly children: React.ReactNode;
-  readonly noPadding?: boolean;
+  readonly noPadding?: boolean | undefined;
 }) {
   const bottomPadding = noPadding
     ? "env(safe-area-inset-bottom,0px)"
@@ -33,7 +33,8 @@ export default function MobileWrapperDialog({
       <Dialog
         as="div"
         className="tailwind-scope tw-absolute tw-z-[1010]"
-        onClose={onClose}>
+        onClose={onClose}
+      >
         <TransitionChild
           as={Fragment}
           enter="tw-ease-in-out tw-duration-250"
@@ -42,20 +43,23 @@ export default function MobileWrapperDialog({
           leave="tw-ease-in-out tw-duration-250"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
-          beforeLeave={onBeforeLeave}
-          afterLeave={onAfterLeave}>
+          {...(onBeforeLeave ? { beforeLeave: onBeforeLeave } : {})}
+          {...(onAfterLeave ? { afterLeave: onAfterLeave } : {})}
+        >
           <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60" />
         </TransitionChild>
 
-        <div 
-          className="tw-fixed tw-inset-0" 
+        <div
+          className="tw-fixed tw-inset-0"
           onClick={(e) => {
             e.stopPropagation();
             onClose();
-          }}>
-          <div 
+          }}
+        >
+          <div
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
-            onClick={(e) => e.stopPropagation()}>
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-max-w-full tw-pt-10">
               <TransitionChild
                 as={Fragment}
@@ -64,10 +68,12 @@ export default function MobileWrapperDialog({
                 enterTo="tw-translate-y-0"
                 leave="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
                 leaveFrom="tw-translate-y-0"
-                leaveTo="tw-translate-y-full">
-                <DialogPanel 
+                leaveTo="tw-translate-y-full"
+              >
+                <DialogPanel
                   className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md tw-transform-gpu tw-will-change-transform"
-                  onClick={(e) => e.stopPropagation()}>
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <TransitionChild
                     as={Fragment}
                     enter="tw-ease-in-out tw-duration-250"
@@ -75,20 +81,23 @@ export default function MobileWrapperDialog({
                     enterTo="tw-opacity-100"
                     leave="tw-ease-in-out tw-duration-250"
                     leaveFrom="tw-opacity-100"
-                    leaveTo="tw-opacity-0">
+                    leaveTo="tw-opacity-0"
+                  >
                     <div className="tw-absolute tw-right-0 -tw-top-16 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
                       <button
                         type="button"
                         title="Close panel"
                         aria-label="Close panel"
                         className="tw-p-2.5 tw-relative tw-bg-transparent tw-rounded-md focus:tw-outline-none tw-border-none focus:tw-ring-2 focus:tw-ring-white"
-                        onClick={onClose}>
+                        onClick={onClose}
+                      >
                         <svg
                           className="tw-w-6 tw-h-6 tw-flex-shrink-0 tw-text-white"
                           viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg">
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
                           <path
                             d="M18 6L6 18M6 6L18 18"
                             stroke="currentColor"
@@ -107,7 +116,8 @@ export default function MobileWrapperDialog({
                     style={{
                       maxHeight: "calc(100dvh - 10rem)",
                       paddingBottom: bottomPadding,
-                    }}>
+                    }}
+                  >
                     <div className="tw-px-4 sm:tw-px-6">
                       {title && (
                         <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">

@@ -1,4 +1,3 @@
-import React from "react";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveGroup from "../specs/groups/group/WaveGroup";
@@ -6,7 +5,7 @@ import { WaveGroupType } from "../specs/groups/group/WaveGroup.types";
 
 interface WaveGroupsProps {
   readonly wave: ApiWave;
-  readonly useRing?: boolean;
+  readonly useRing?: boolean | undefined;
 }
 
 export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
@@ -28,7 +27,6 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
               <WaveGroup
                 scope={wave.visibility.scope}
                 type={WaveGroupType.VIEW}
-                isEligible={true}
                 wave={wave}
               />
               {wave.wave.type !== ApiWaveType.Chat && (
@@ -36,13 +34,11 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
                   <WaveGroup
                     scope={wave.participation.scope}
                     type={WaveGroupType.DROP}
-                    isEligible={wave.participation.authenticated_user_eligible}
                     wave={wave}
                   />
                   <WaveGroup
                     scope={wave.voting.scope}
                     type={WaveGroupType.VOTE}
-                    isEligible={wave.voting.authenticated_user_eligible}
                     wave={wave}
                   />
                 </>
@@ -51,14 +47,12 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
               <WaveGroup
                 scope={wave.chat.scope}
                 type={WaveGroupType.CHAT}
-                isEligible={wave.chat.authenticated_user_eligible}
                 wave={wave}
               />
 
               <WaveGroup
                 scope={wave.wave.admin_group}
                 type={WaveGroupType.ADMIN}
-                isEligible={wave.wave.authenticated_user_eligible_for_admin}
                 wave={wave}
               />
             </div>

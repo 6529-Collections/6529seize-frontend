@@ -54,8 +54,8 @@ export default function StepHeader({
   description = "",
 }: {
   step: DistributionPlanToolStep;
-  title?: string;
-  description?: string;
+  title?: string | undefined;
+  description?: string | undefined;
 }) {
   const { distributionPlan, operations, fetchOperations } = useContext(
     DistributionPlanToolContext

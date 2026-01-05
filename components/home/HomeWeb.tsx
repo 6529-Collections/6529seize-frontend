@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import Home from "./Home";

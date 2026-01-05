@@ -24,7 +24,7 @@ export default function DelegationMappingToolPage() {
   }, []);
 
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Container fluid>
         <Row>
           <Col>
@@ -84,7 +84,7 @@ export default function DelegationMappingToolPage() {
       <Container id="how-to-use" className="pt-1 pb-5">
         <Row>
           <Col
-            className={styles.htmlContainer}
+            className={styles["htmlContainer"]}
             xs={{ span: 12 }}
             sm={{ span: 10, offset: 1 }}
             md={{ span: 8, offset: 2 }}

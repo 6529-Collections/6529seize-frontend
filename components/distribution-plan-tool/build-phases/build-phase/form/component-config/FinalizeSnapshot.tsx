@@ -19,8 +19,8 @@ interface FinalizeSnapshotProps {
   readonly groupSnapshots: PhaseGroupSnapshotConfig[];
   readonly snapshots: DistributionPlanSnapshot[];
   readonly title: string;
-  readonly uniqueWalletsCount?: number | null;
-  readonly isLoadingUniqueWalletsCount?: boolean;
+  readonly uniqueWalletsCount?: number | null | undefined;
+  readonly isLoadingUniqueWalletsCount?: boolean | undefined;
   readonly onClose: () => void;
   readonly phases: BuildPhasesPhase[];
 }

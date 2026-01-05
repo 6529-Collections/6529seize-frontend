@@ -78,9 +78,9 @@ export interface BaseFieldDefinition {
  */
 interface TextFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.TEXT;
-  readonly readOnly?: boolean;
-  readonly placeholder?: string;
-  readonly initialValue?: string;
+  readonly readOnly?: boolean | undefined;
+  readonly placeholder?: string | undefined;
+  readonly initialValue?: string | undefined;
 }
 
 /**
@@ -88,10 +88,10 @@ interface TextFieldDefinition extends BaseFieldDefinition {
  */
 export interface NumberFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.NUMBER;
-  readonly readOnly?: boolean;
+  readonly readOnly?: boolean | undefined;
   readonly min: number;
   readonly max: number;
-  readonly initialValue?: number;
+  readonly initialValue?: number | undefined;
 }
 
 /**
@@ -99,7 +99,7 @@ export interface NumberFieldDefinition extends BaseFieldDefinition {
  */
 interface BooleanFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.BOOLEAN;
-  readonly initialValue?: boolean;
+  readonly initialValue?: boolean | undefined;
 }
 
 /**
@@ -108,7 +108,7 @@ interface BooleanFieldDefinition extends BaseFieldDefinition {
 export interface DropdownFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.DROPDOWN;
   readonly options: readonly string[];
-  readonly initialValue?: string;
+  readonly initialValue?: string | undefined;
 }
 
 // Union type of all field definitions

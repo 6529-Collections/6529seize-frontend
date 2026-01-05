@@ -16,7 +16,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
       href={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
       className="decoration-none"
     >
-      <Container className={styles.collectionPreview}>
+      <Container className={styles["collectionPreview"]}>
         <Row>
           <Col className="pb-4">
             <Image
@@ -42,7 +42,7 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
         </Row>
         <Row>
           <Col>
-            <Container className={styles.collectionPreviewTitle}>
+            <Container className={styles["collectionPreviewTitle"]}>
               <Row>
                 <Col>
                   <h3 className="mb-0">{props.collection.name}</h3>

@@ -8,10 +8,10 @@ import { TraitWrapper } from "./TraitWrapper";
 interface NumberTraitProps {
   readonly label: string;
   readonly field: keyof TraitsData;
-  readonly className?: string;
-  readonly error?: string | null;
-  readonly onBlur?: (field: keyof TraitsData) => void;
-  readonly readOnly?: boolean;
+  readonly className?: string | undefined;
+  readonly error?: string | null | undefined;
+  readonly onBlur?: ((field: keyof TraitsData) => void) | undefined;
+  readonly readOnly?: boolean | undefined;
   readonly min: number;
   readonly max: number;
   readonly traits: TraitsData;
@@ -56,50 +56,47 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     }, []);
 
     // Handle blur (when the user finishes typing)
-    const handleBlur = useCallback(
-      (e: React.FocusEvent<HTMLInputElement>) => {
-        if (inputRef.current) {
-          // Get the current value from the input
-          let newValue: number;
+    const handleBlur = useCallback(() => {
+      if (inputRef.current) {
+        // Get the current value from the input
+        let newValue: number;
 
-          // If the field is empty, default to 0
-          if (inputRef.current.value === "") {
-            newValue = 0;
-            inputRef.current.value = "0";
-          } else {
-            newValue = Number(inputRef.current.value);
-          }
-
-          // Parse and validate the number
-          if (isNaN(newValue)) {
-            newValue = 0;
-            inputRef.current.value = "0";
-          }
-
-          // Apply min/max constraints if provided
-          if (min !== undefined && newValue < min) {
-            newValue = min;
-            inputRef.current.value = String(min);
-          }
-
-          if (max !== undefined && newValue > max) {
-            newValue = max;
-            inputRef.current.value = String(max);
-          }
-
-          // Only update if the value has changed
-          if (newValue !== (traits[field] as number)) {
-            updateNumber(field, newValue);
-          }
-
-          // Call parent onBlur if provided
-          if (onBlur) {
-            onBlur(field);
-          }
+        // If the field is empty, default to 0
+        if (inputRef.current.value === "") {
+          newValue = 0;
+          inputRef.current.value = "0";
+        } else {
+          newValue = Number(inputRef.current.value);
         }
-      },
-      [field, traits, updateNumber, min, max, onBlur]
-    );
+
+        // Parse and validate the number
+        if (isNaN(newValue)) {
+          newValue = 0;
+          inputRef.current.value = "0";
+        }
+
+        // Apply min/max constraints if provided
+        if (min !== undefined && newValue < min) {
+          newValue = min;
+          inputRef.current.value = String(min);
+        }
+
+        if (max !== undefined && newValue > max) {
+          newValue = max;
+          inputRef.current.value = String(max);
+        }
+
+        // Only update if the value has changed
+        if (newValue !== (traits[field] as number)) {
+          updateNumber(field, newValue);
+        }
+
+        // Call parent onBlur if provided
+        if (onBlur) {
+          onBlur(field);
+        }
+      }
+    }, [field, traits, updateNumber, min, max, onBlur]);
 
     // Store current input for debounce
     const [debouncedValue, setDebouncedValue] = React.useState<string>("");
@@ -197,7 +194,8 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         readOnly={readOnly}
         className={className}
         error={error}
-        isFieldFilled={isFieldFilled}>
+        isFieldFilled={isFieldFilled}
+      >
         <input
           ref={inputRef}
           type="number"

@@ -13,12 +13,10 @@ import { WaveGroupType } from "./WaveGroup.types";
 export default function WaveGroup({
   scope,
   type,
-  isEligible,
   wave,
 }: {
   readonly scope: ApiWaveScope;
   readonly type: WaveGroupType;
-  readonly isEligible: boolean;
   readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);

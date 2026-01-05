@@ -7,7 +7,7 @@ import { capitalizeEveryWord } from "@/helpers/Helpers";
 
 export default function MemeAccountingPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Royalties />
     </main>
   );

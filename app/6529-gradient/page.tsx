@@ -6,7 +6,7 @@ import { Metadata } from "next";
 
 export default function GradientsPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <GradientsComponent />
     </main>
   );

@@ -1,8 +1,8 @@
 const DEFAULT_SCREEN_READER_MESSAGE = "Loading...";
 
 interface SpinnerLoaderProps {
-  readonly text?: string;
-  readonly ariaLabel?: string;
+  readonly text?: string | undefined;
+  readonly ariaLabel?: string | undefined;
 }
 
 export default function SpinnerLoader({

@@ -83,7 +83,7 @@ export default function ProgressChart() {
     onHover: (_: any, activeElements: any[]) => {
       if (activeElements.length > 0) {
         const idx = activeElements[0].index;
-        const level = (levels as LevelData[])[idx].level;
+        const level = (levels as LevelData[])[idx]?.level;
         window.dispatchEvent(
           new CustomEvent("level-hover", { detail: { level } })
         );

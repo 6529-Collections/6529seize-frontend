@@ -115,7 +115,7 @@ export default function RevokeDelegationWithSubComponent(
               />
               <Col sm={9}>
                 <Form.Control
-                  className={`${styles.formInput} ${styles.formInputDisabled}`}
+                  className={`${styles["formInput"]} ${styles["formInputDisabled"]}`}
                   type="text"
                   value={
                     orignalDelegatorEnsResolution.data
@@ -158,7 +158,7 @@ export default function RevokeDelegationWithSubComponent(
               />
               <Col sm={9}>
                 <Form.Select
-                  className={`${styles.formInput}`}
+                  className={`${styles["formInput"]}`}
                   value={newDelegationUseCase}
                   onChange={(e) => {
                     const i = parseInt(e.target.value);

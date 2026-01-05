@@ -1,7 +1,7 @@
-export type SentryStackFrame = { filename?: string; abs_path?: string };
+export type SentryStackFrame = { filename?: string | undefined; abs_path?: string | undefined };
 export type SentryEventHint = {
-  originalException?: unknown;
-  syntheticException?: unknown;
+  originalException?: unknown | undefined;
+  syntheticException?: unknown | undefined;
 };
 
 const filenameExceptions = ["inpage.js", "extensionServiceWorker.js", "injectLeap.js", "inject.chrome"];

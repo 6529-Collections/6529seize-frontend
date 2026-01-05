@@ -15,7 +15,7 @@ interface AveragingIntervalInputProps {
   /** Handler called when the unit changes */
   readonly onUnitChange: (unit: TimeUnit) => void;
   /** Validation error message, if any */
-  readonly validationError?: string;
+  readonly validationError?: string | undefined;
 }
 
 /**

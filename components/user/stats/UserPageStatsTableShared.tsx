@@ -22,7 +22,7 @@ export function UserPageStatsTableHr(
 ) {
   return (
     <tr>
-      <td colSpan={props.span} className={styles.collectedAccordionTableHr}>
+      <td colSpan={props.span} className={styles["collectedAccordionTableHr"]}>
         <hr className="mb-1 mt-1 tw-border-[#93939f]" />
       </td>
     </tr>

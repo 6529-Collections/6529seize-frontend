@@ -6,8 +6,8 @@ import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 
 interface Props {
-  path?: string;
-  title?: string;
+  path?: string | undefined;
+  title?: string | undefined;
 }
 
 export default function DelegationHTML(props: Readonly<Props>) {
@@ -19,7 +19,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
 
   if (props.title?.includes(" ")) {
     const [firstWord, ...rest] = props.title.split(" ");
-    titleLighter = firstWord;
+    titleLighter = firstWord!;
     titleDarker = rest.join(" ");
   }
 
@@ -43,7 +43,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
 
   if (error) {
     return (
-      <div className={`${styles.mainContainer} ${styles.pageNotFound}`}>
+      <div className={`${styles["mainContainer"]} ${styles["pageNotFound"]}`}>
         <Image
           unoptimized
           width="0"
@@ -70,7 +70,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
         )}
         <Row className="pt-3">
           <Col
-            className={styles.htmlContainer}
+            className={styles["htmlContainer"]}
             dangerouslySetInnerHTML={{
               __html: html,
             }}

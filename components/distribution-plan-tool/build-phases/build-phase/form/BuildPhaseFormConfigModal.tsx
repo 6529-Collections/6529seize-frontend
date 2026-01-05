@@ -9,7 +9,10 @@ import {
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { assertUnreachable, getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import {
+  assertUnreachable,
+  getRandomObjectId,
+} from "@/helpers/AllowlistToolHelpers";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -144,7 +147,7 @@ export default function BuildPhaseFormConfigModal({
         return null;
       }
 
-      const tokens = operation.params.tokens;
+      const tokens = operation.params["tokens"];
       if (!tokens) {
         return null;
       }
@@ -158,10 +161,10 @@ export default function BuildPhaseFormConfigModal({
           operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL
       )
       .map<DistributionPlanSnapshot>((operation) => ({
-        id: operation.params.id,
-        name: operation.params.name,
+        id: operation.params["id"],
+        name: operation.params["name"],
         poolType: Pool.TOKEN_POOL,
-        walletsCount: findTokenPoolWalletsCount(operation.params.id),
+        walletsCount: findTokenPoolWalletsCount(operation.params["id"]),
       }));
 
     const customPools = operations
@@ -170,8 +173,8 @@ export default function BuildPhaseFormConfigModal({
           operation.code === AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL
       )
       .map<DistributionPlanSnapshot>((operation) => ({
-        id: operation.params.id,
-        name: operation.params.name,
+        id: operation.params["id"],
+        name: operation.params["name"],
         poolType: Pool.CUSTOM_TOKEN_POOL,
         walletsCount: getCustomTokenPoolWalletsCount(operation),
       }));
@@ -224,12 +227,12 @@ export default function BuildPhaseFormConfigModal({
     const tokenPool = operations.find(
       (operation) =>
         operation.code === AllowlistOperationCode.CREATE_TOKEN_POOL &&
-        operation.params.id === snapshotId
+        operation.params["id"] === snapshotId
     );
     if (!tokenPool) {
       return null;
     }
-    const contract = tokenPool.params.contract;
+    const contract = tokenPool.params["contract"];
     const endpoint = `/other/contract-metadata/${contract}`;
     setIsLoadingContractSchema(true);
     const { data } =
@@ -271,7 +274,7 @@ export default function BuildPhaseFormConfigModal({
         [
           AllowlistOperationCode.CREATE_TOKEN_POOL,
           AllowlistOperationCode.CREATE_CUSTOM_TOKEN_POOL,
-        ].includes(operation.code) && operation.params.id !== snapshotId
+        ].includes(operation.code) && operation.params["id"] !== snapshotId
     ).length;
 
     if (haveMoreSnapshots) {
@@ -625,7 +628,7 @@ export default function BuildPhaseFormConfigModal({
         const coreParams: {
           componentId: string;
           seed: string;
-          weightType?: ComponentRandomHoldersWeightType;
+          weightType?: ComponentRandomHoldersWeightType | undefined;
         } = {
           componentId,
           seed,
@@ -707,7 +710,7 @@ export default function BuildPhaseFormConfigModal({
   }, [name]);
 
   return (
-    <div className="tw-gap-y-6 tw-flex tw-flex-col tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+    <div className="tw-flex tw-flex-col tw-gap-y-6 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
       {(() => {
         switch (configStep) {
           case PhaseConfigStep.SELECT_SNAPSHOT:
@@ -819,6 +822,7 @@ export default function BuildPhaseFormConfigModal({
             );
           default:
             assertUnreachable(configStep);
+            return null;
         }
       })()}
     </div>

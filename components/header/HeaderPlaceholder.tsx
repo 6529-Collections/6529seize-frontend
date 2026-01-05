@@ -8,8 +8,8 @@ const capacitor = useCapacitor();
     <div
       className={
         capacitor.isCapacitor
-          ? styles.headerPlaceholderCapacitor
-          : styles.headerPlaceholder
+          ? styles["headerPlaceholderCapacitor"]
+          : styles["headerPlaceholder"]
       }></div>
   );
 }

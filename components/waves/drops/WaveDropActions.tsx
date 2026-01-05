@@ -23,10 +23,10 @@ import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
-  readonly showVoting?: boolean;
+  readonly showVoting?: boolean | undefined;
   readonly onReply: () => void;
   readonly onQuote: () => void;
-  readonly onEdit?: () => void;
+  readonly onEdit?: (() => void) | undefined;
 }
 
 export default function WaveDropActions({
@@ -50,7 +50,11 @@ export default function WaveDropActions({
     );
 
   return (
-    <div className={`tw-absolute tw-z-20 tw-right-2 ${compact ? "-tw-top-4" : "tw-top-0"} group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out`}>
+    <div
+      className={`tw-absolute tw-z-20 tw-right-2 ${
+        compact ? "-tw-top-4" : "tw-top-0"
+      } group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out`}
+    >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           {connectedProfile?.handle !== drop.author.handle &&

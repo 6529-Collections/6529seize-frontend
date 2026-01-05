@@ -25,7 +25,7 @@ export default function SelectGroupModal({
     };
   }, []);
 
-  useClickAway(modalRef, (event) => {
+  useClickAway(modalRef, () => {
     if (skipInitialOutsideClick.current) {
       skipInitialOutsideClick.current = false;
       return;

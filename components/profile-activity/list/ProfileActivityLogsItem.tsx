@@ -65,5 +65,6 @@ export default function UserPageIdentityActivityLogItem({
       return <></>;
     default:
       assertUnreachable(logType);
+      return;
   }
 }

@@ -23,7 +23,7 @@ export default function UserPageIdentityAddStatementsContactInput({
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value: raw } = event.target;
-    const nativeEvent = event.nativeEvent as { isComposing?: boolean };
+    const nativeEvent = event.nativeEvent as { isComposing?: boolean | undefined };
     const isComposing = Boolean(nativeEvent?.isComposing);
     onChange(isComposing ? raw : collapseProtocolPrefix(raw));
   };

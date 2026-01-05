@@ -90,15 +90,15 @@ async function fetchJsonWithFailover<T>(
 }
 
 type TokenMetadataParams = {
-  readonly address?: `0x${string}`;
-  readonly tokenIds?: readonly string[];
-  readonly tokens?: readonly { contract: string; tokenId: string }[];
-  readonly chain?: SupportedChain;
-  readonly signal?: AbortSignal;
+  readonly address?: `0x${string}` | undefined;
+  readonly tokenIds?: readonly string[] | undefined;
+  readonly tokens?: readonly { contract: string; tokenId: string }[] | undefined;
+  readonly chain?: SupportedChain | undefined;
+  readonly signal?: AbortSignal | undefined;
 };
 
 async function fetchCollectionsFromApi(
-  params: UseCollectionSearchParams & { readonly signal?: AbortSignal }
+  params: UseCollectionSearchParams & { readonly signal?: AbortSignal | undefined }
 ): Promise<SearchContractsResult> {
   const { query, chain = "ethereum", hideSpam = true, signal } = params;
   const search = new URLSearchParams();
@@ -109,14 +109,14 @@ async function fetchCollectionsFromApi(
   const payload = await fetchJsonWithFailover<AlchemySearchResponse>(
     `/api/alchemy/collections?${queryString}`,
     `/collections?${queryString}`,
-    { signal }
+    { ...(signal !== undefined ? { signal: signal } : {}) }
   );
 
   return processSearchResponse(payload, hideSpam);
 }
 
 async function fetchContractOverviewFromApi(
-  params: UseContractOverviewParams & { readonly signal?: AbortSignal }
+  params: UseContractOverviewParams & { readonly signal?: AbortSignal | undefined }
 ): Promise<ContractOverview | null> {
   const { address, chain = "ethereum", signal } = params;
   if (!address) {
@@ -134,9 +134,9 @@ async function fetchContractOverviewFromApi(
   const queryString = search.toString();
 
   const payload = await fetchJsonWithFailover<
-    (AlchemyContractMetadataResponse & { _checksum?: string }) | null
+    (AlchemyContractMetadataResponse & { _checksum?: string | undefined }) | null
   >(`/api/alchemy/contract?${queryString}`, `/contract?${queryString}`, {
-    signal,
+    ...(signal !== undefined ? { signal: signal } : {}),
   });
 
   if (!payload) {
@@ -160,7 +160,7 @@ async function fetchTokenMetadataFromApi(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body,
-    signal: params.signal,
+    signal: params.signal ?? null,
   };
 
   const payload = await fetchJsonWithFailover<AlchemyTokenMetadataResponse>(
@@ -229,24 +229,24 @@ function getTokenCacheKey(params: TokenMetadataParams): string {
 
 type UseCollectionSearchParams = {
   readonly query: string;
-  readonly chain?: SupportedChain;
-  readonly hideSpam?: boolean;
-  readonly debounceMs?: number;
-  readonly enabled?: boolean;
+  readonly chain?: SupportedChain | undefined;
+  readonly hideSpam?: boolean | undefined;
+  readonly debounceMs?: number | undefined;
+  readonly enabled?: boolean | undefined;
 };
 
 type UseContractOverviewParams = {
-  readonly address?: `0x${string}`;
-  readonly chain?: SupportedChain;
-  readonly enabled?: boolean;
+  readonly address?: `0x${string}` | undefined;
+  readonly chain?: SupportedChain | undefined;
+  readonly enabled?: boolean | undefined;
 };
 
 type UseTokenMetadataParams = {
-  readonly address?: `0x${string}`;
-  readonly tokenIds?: readonly string[];
-  readonly tokens?: readonly { contract: string; tokenId: string }[];
-  readonly chain?: SupportedChain;
-  readonly enabled?: boolean;
+  readonly address?: `0x${string}` | undefined;
+  readonly tokenIds?: readonly string[] | undefined;
+  readonly tokens?: readonly { contract: string; tokenId: string }[] | undefined;
+  readonly chain?: SupportedChain | undefined;
+  readonly enabled?: boolean | undefined;
 };
 
 export function useCollectionSearch({
@@ -446,7 +446,7 @@ export async function fetchOwnerNfts(
   const payload = await fetchJsonWithFailover<AlchemyGetNftsForOwnerResponse>(
     `/api/alchemy/owner-nfts?${queryString}`,
     `/owner-nfts?${queryString}`,
-    { signal }
+    { ...(signal !== undefined ? { signal: signal } : {}) }
   );
 
   return processOwnerNftsResponse(payload.ownedNfts ?? []);

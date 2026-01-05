@@ -35,10 +35,10 @@ function DropListItemContentMediaImage({
   imageScale = ImageScale.AUTOx450,
 }: {
   readonly src: string;
-  readonly maxRetries?: number;
-  readonly onContainerClick?: () => void;
-  readonly isCompetitionDrop?: boolean;
-  readonly imageScale?: ImageScale;
+  readonly maxRetries?: number | undefined;
+  readonly onContainerClick?: (() => void) | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly imageScale?: ImageScale | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -121,13 +121,15 @@ function DropListItemContentMediaImage({
       onClick={handleCloseModal}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}>
+      onTouchMove={(e) => e.stopPropagation()}
+    >
       <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-pointer-events-none"></div>
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
         smooth
-        onZoom={(e) => setIsZoomed(e.state.scale > 1)}>
+        onZoom={(e) => setIsZoomed(e.state.scale > 1)}
+      >
         {({ resetTransform }) => (
           <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
             <div className="tw-relative tw-flex tw-flex-col lg:tw-flex-row tw-max-w-[95vw] tw-max-h-[90vh]">
@@ -141,10 +143,12 @@ function DropListItemContentMediaImage({
                   if (e.key === "Enter" || e.key === " ") {
                     e.stopPropagation();
                   }
-                }}>
+                }}
+              >
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                >
                   <img
                     ref={modalImageRef}
                     src={src}
@@ -165,7 +169,8 @@ function DropListItemContentMediaImage({
                     }}
                     data-tooltip-id="reset-zoom"
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Reset">
+                    aria-label="Reset"
+                  >
                     <FontAwesomeIcon
                       icon={faRotateLeft}
                       className="tw-size-4"
@@ -177,7 +182,8 @@ function DropListItemContentMediaImage({
                     onClick={(e) => e.stopPropagation()}
                     data-tooltip-id={`open-browser-${src}`}
                     className={modalButtonClasses}
-                    aria-label="Open image in new tab">
+                    aria-label="Open image in new tab"
+                  >
                     <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
                 </Link>
@@ -186,7 +192,8 @@ function DropListItemContentMediaImage({
                     onClick={handleFullScreen}
                     data-tooltip-id="full-screen"
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Full screen">
+                    aria-label="Full screen"
+                  >
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
                   </button>
                 )}
@@ -199,7 +206,8 @@ function DropListItemContentMediaImage({
                     }}
                     data-tooltip-id="view-drop-details"
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="View drop details">
+                    aria-label="View drop details"
+                  >
                     <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
                 )}
@@ -208,14 +216,16 @@ function DropListItemContentMediaImage({
                   onClick={handleCloseModal}
                   data-tooltip-id="close-modal"
                   className={modalButtonClasses}
-                  aria-label="Close modal">
+                  aria-label="Close modal"
+                >
                   <svg
                     className="tw-h-5 tw-w-5 tw-flex-shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    aria-hidden="true">
+                    aria-hidden="true"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -265,7 +275,8 @@ function DropListItemContentMediaImage({
         ref={ref}
         className={`tw-w-full tw-h-full tw-flex tw-items-center tw-relative tw-mx-[1px] ${
           isCompetitionDrop ? "tw-justify-center" : ""
-        }`}>
+        }`}
+      >
         {!loaded && errorCount <= maxRetries && (
           <div
             className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
@@ -301,7 +312,8 @@ function DropListItemContentMediaImage({
             </span>
             <button
               onClick={manualRetry}
-              className="tw-bg-iron-700 hover:tw-bg-iron-600 tw-text-white tw-px-3 tw-py-1 tw-rounded-md tw-text-xs">
+              className="tw-bg-iron-700 hover:tw-bg-iron-600 tw-text-white tw-px-3 tw-py-1 tw-rounded-md tw-text-xs"
+            >
               Retry
             </button>
           </div>

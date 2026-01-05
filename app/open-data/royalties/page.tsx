@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export default function RoyaltiesDownloads() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <CommunityDownloadsRoyalties />
     </main>
   );

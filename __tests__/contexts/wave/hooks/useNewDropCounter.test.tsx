@@ -35,13 +35,13 @@ describe('useNewDropCounter', () => {
     act(() => {
       wsCallback({ wave: { id: 'wave2' }, author: { handle: 'other' }, created_at: 30 });
     });
-    expect(result.current.newDropsCounts.wave2.count).toBe(1);
-    expect(result.current.newDropsCounts.wave2.latestDropTimestamp).toBe(30);
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+    expect(result.current.newDropsCounts["wave2"]?.latestDropTimestamp).toBe(30);
     act(() => {
       result.current.resetAllWavesNewDropsCount();
     });
-    expect(result.current.newDropsCounts.wave1.count).toBe(0);
-    expect(result.current.newDropsCounts.wave2.count).toBe(0);
+    expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
   });
 
   it('ignores messages from connected profile and resets on active change', () => {
@@ -49,12 +49,12 @@ describe('useNewDropCounter', () => {
       ({ activeId }) => useNewDropCounter(activeId, waves, jest.fn()),
       { wrapper, initialProps: { activeId: 'wave1' } }
     );
-    expect(result.current.newDropsCounts.wave1.count).toBe(0);
+    expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
     act(() => {
       wsCallback({ wave: { id: 'wave1' }, author: { handle: 'me' }, created_at: 50 });
     });
-    expect(result.current.newDropsCounts.wave1.count).toBe(0);
+    expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
     rerender({ activeId: 'wave2' });
-    expect(result.current.newDropsCounts.wave2.count).toBe(0);
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
   });
 });

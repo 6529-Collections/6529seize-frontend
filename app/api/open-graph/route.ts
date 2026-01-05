@@ -36,14 +36,14 @@ const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
 };
 
 type HeaderOverrides = {
-  readonly set?: Record<string, string | undefined>;
-  readonly remove?: readonly string[];
+  readonly set?: Record<string, string | undefined> | undefined;
+  readonly remove?: readonly string[] | undefined;
 };
 
 type HostOverrides = {
   readonly domain: string;
-  readonly headers?: HeaderOverrides;
-  readonly userAgent?: string;
+  readonly headers?: HeaderOverrides | undefined;
+  readonly userAgent?: string | undefined;
 };
 
 const HOST_OVERRIDES: readonly HostOverrides[] = [
@@ -130,7 +130,7 @@ const cache = new Map<string, CacheEntry>();
 
 const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
-  (typeof error === "object" && error !== null && (error as { name?: string }).name === "UrlGuardError");
+  (typeof error === "object" && error !== null && (error as { name?: string | undefined }).name === "UrlGuardError");
 type FetchInput = Parameters<typeof fetch>[0];
 
 const isRequestLike = (value: unknown): value is { url: string } => {
@@ -138,7 +138,7 @@ const isRequestLike = (value: unknown): value is { url: string } => {
     return false;
   }
 
-  const { url } = value as { url?: unknown };
+  const { url } = value as { url?: unknown | undefined };
   return typeof url === "string" && url.length > 0;
 };
 
@@ -146,7 +146,7 @@ const stringifiesToUrl = (value: unknown): string | null => {
   if (
     typeof value !== "object" ||
     value === null ||
-    typeof (value as { toString?: unknown }).toString !== "function"
+    typeof (value as { toString?: unknown | undefined }).toString !== "function"
   ) {
     return null;
   }

@@ -303,7 +303,7 @@ export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
                     const i = e.target.value;
                     setScriptIndex(i);
                     if (existingScripts.length > i) {
-                      setScripts([existingScripts[i]]);
+                      setScripts([existingScripts[i]!]);
                     } else {
                       setScripts([]);
                     }

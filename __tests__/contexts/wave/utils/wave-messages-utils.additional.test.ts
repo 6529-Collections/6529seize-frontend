@@ -24,7 +24,7 @@ describe('wave-messages-utils additional', () => {
     mockFetch.mockResolvedValue({ drops: [drop], wave: { id: 'w' } });
     const res = await fetchWaveMessages('w', null);
     expect(mockFetch).toHaveBeenCalledWith(expect.objectContaining({ endpoint: 'waves/w/drops' }));
-    expect(res?.[0].wave).toEqual({ id: 'w' });
+    expect(res?.[0]?.wave).toEqual({ id: 'w' });
   });
 
   it('fetchWaveMessages rethrows abort errors', async () => {
@@ -37,7 +37,7 @@ describe('wave-messages-utils additional', () => {
     mockFetchRetry.mockResolvedValue({ drops: [drop], wave: { id: 'w' } });
     const res = await fetchAroundSerialNoWaveMessages('w', 5);
     expect(mockFetchRetry).toHaveBeenCalled();
-    expect(res?.[0].serial_no).toBe(1);
+    expect(res?.[0]?.serial_no).toBe(1);
   });
 
   it('fetchLightWaveMessages gathers light drops across pages and merges full drops', async () => {
@@ -75,8 +75,8 @@ describe('wave-messages-utils additional', () => {
     );
     expect(result).not.toBeNull();
     expect(result!.length).toBe(4000);
-    expect(result![0].serial_no).toBe(4005);
-    expect(result![result!.length - 1].serial_no).toBe(5);
+    expect(result![0]?.serial_no).toBe(4005);
+    expect(result![result!.length - 1]?.serial_no).toBe(5);
     expect(result!.find((d) => d.serial_no === 5)).toMatchObject({ id: 'full-5' });
   });
 

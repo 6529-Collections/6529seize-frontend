@@ -30,9 +30,9 @@ export default function CreatePhases() {
     );
     setPhases(
       createPhasesOperations.map((operation) => ({
-        id: operation.params.id,
-        name: operation.params.name,
-        description: operation.params.description,
+        id: operation.params["id"],
+        name: operation.params["name"],
+        description: operation.params["description"],
         hasRan: operation.hasRan,
         order: operation.order,
         allowlistId: operation.allowlistId,

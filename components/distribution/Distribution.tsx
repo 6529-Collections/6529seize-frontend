@@ -23,6 +23,7 @@ import {
 } from "@/helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import Image from "next/image";
+import { useTitle } from "@/contexts/TitleContext";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
@@ -36,6 +37,7 @@ interface Props {
 
 export default function DistributionPage(props: Readonly<Props>) {
   const params = useParams();
+  const { setTitle } = useTitle();
   const [pageProps, setPageProps] = useState<{
     page: number;
     pageSize: number;
@@ -94,11 +96,17 @@ export default function DistributionPage(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    const isValid = isValidPositiveInteger(params?.id as string);
-    const id = isValid ? (params?.id as string) : "";
+    const isValid = isValidPositiveInteger(params?.["id"] as string);
+    const id = isValid ? (params?.["id"] as string) : "";
     setIsValidNftId(isValid);
     setNftId(id);
   }, [params]);
+
+  useEffect(() => {
+    if (isValidNftId && nftId) {
+      setTitle(`${props.header} #${nftId} | DISTRIBUTION`);
+    }
+  }, [isValidNftId, nftId, props.header, setTitle]);
 
   useEffect(() => {
     if (nftId) {
@@ -147,7 +155,7 @@ export default function DistributionPage(props: Readonly<Props>) {
               wrap={false}
               touch={true}
               fade={true}
-              className={styles.distributionCarousel}>
+              className={styles["distributionCarousel"]}>
               {distributionPhotos.map((dp, index) => (
                 <Carousel.Item key={dp.id}>
                   <Image
@@ -222,9 +230,9 @@ export default function DistributionPage(props: Readonly<Props>) {
           </Row>
         </Container>
         <Container>
-          <Row className={styles.distributionsScrollContainer}>
+          <Row className={styles["distributionsScrollContainer"]}>
             <Col className="no-padding">
-              <Table className={styles.distributionsTable}>
+              <Table className={styles["distributionsTable"]}>
                 <thead>
                   <tr>
                     <th colSpan={2}></th>
@@ -351,12 +359,12 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   return (
     <>
-      <Container fluid className={`${styles.mainContainer} tw-pt-6 tw-pb-10`}>
+      <Container fluid className={`${styles["mainContainer"]} tw-pt-6 tw-pb-10`}>
         <Row>
           <Col>
             <Container>
               <Row>
-                <Col className={`${styles.distributionHeader} pb-1`}>
+                <Col className={`${styles["distributionHeader"]} pb-1`}>
                   <h1 className="text-center mb-0">
                     {props.header} Card #{nftId} Distribution
                   </h1>

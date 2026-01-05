@@ -307,7 +307,7 @@ describe('useTokenSlideshow', () => {
       // But if it's showing less, we need to understand the actual behavior
       const initialDisplayLength = result.current.displayTokens.length;
       expect(initialDisplayLength).toBeGreaterThan(0);
-      expect(result.current.displayTokens[0].id).toBe(1);
+      expect(result.current.displayTokens[0]?.id).toBe(1);
       
       // Simulate sliding close to end to trigger expansion
       // Use a slide position that's close to the current display length

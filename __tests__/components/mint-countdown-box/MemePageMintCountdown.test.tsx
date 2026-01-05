@@ -125,7 +125,7 @@ describe("MemePageMintCountdown", () => {
       const box = getByTestId("mint-countdown-box");
       expect(box).toHaveAttribute("data-is-ended", "true");
       // Title is still computed even if ended — current code uses "... Ends In"
-      expect(box.dataset.mintTitle).toMatch(/Ends In$/);
+      expect(box.dataset["mintTitle"]).toMatch(/Ends In$/);
       expect(box).toHaveAttribute("data-mint-date", "200");
     });
 

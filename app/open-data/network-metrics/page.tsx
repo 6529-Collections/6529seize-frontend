@@ -7,7 +7,7 @@ import { Metadata } from "next";
 
 export default function ConsolidatedCommunityMetricsDownloads() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <CommunityDownloadsTDH view={VIEW.CONSOLIDATION} />
     </main>
   );

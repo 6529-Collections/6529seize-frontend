@@ -72,10 +72,10 @@ describe('useEnhancedWavesList', () => {
     } as any);
 
     const { result } = renderHook(() => useEnhancedWavesList('b'));
-    expect(result.current.waves[0].id).toBe('b');
-    expect(result.current.waves[0].newDropsCount.count).toBe(2);
-    expect(result.current.waves[0].newDropsCount.latestDropTimestamp).toBe(300);
-    expect(result.current.waves[0].isPinned).toBe(true);
+    expect(result.current.waves[0]?.id).toBe('b');
+    expect(result.current.waves[0]?.newDropsCount.count).toBe(2);
+    expect(result.current.waves[0]?.newDropsCount.latestDropTimestamp).toBe(300);
+    expect(result.current.waves[0]?.isPinned).toBe(true);
   });
 
   it('maps unreadDropsCount and firstUnreadDropSerialNo from wave metrics', () => {
@@ -112,9 +112,9 @@ describe('useEnhancedWavesList', () => {
     } as any);
 
     const { result } = renderHook(() => useEnhancedWavesList(null));
-    expect(result.current.waves[0].unreadDropsCount).toBe(15);
-    expect(result.current.waves[0].latestReadTimestamp).toBe(90);
-    expect(result.current.waves[0].firstUnreadDropSerialNo).toBe(123);
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(15);
+    expect(result.current.waves[0]?.latestReadTimestamp).toBe(90);
+    expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(123);
   });
 
   it('maps isMuted from wave metrics', () => {
@@ -151,7 +151,7 @@ describe('useEnhancedWavesList', () => {
     } as any);
 
     const { result } = renderHook(() => useEnhancedWavesList(null));
-    expect(result.current.waves[0].isMuted).toBe(true);
+    expect(result.current.waves[0]?.isMuted).toBe(true);
   });
 
   it('sets firstUnreadDropSerialNo to null when first_unread_drop_serial_no is undefined', () => {
@@ -187,6 +187,6 @@ describe('useEnhancedWavesList', () => {
     } as any);
 
     const { result } = renderHook(() => useEnhancedWavesList(null));
-    expect(result.current.waves[0].firstUnreadDropSerialNo).toBeNull();
+    expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBeNull();
   });
 });

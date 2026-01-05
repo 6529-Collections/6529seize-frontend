@@ -70,7 +70,7 @@ const items: NavItemData[] = [
 ];
 
 interface BottomNavigationProps {
-  readonly hidden?: boolean;
+  readonly hidden?: boolean | undefined;
 }
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) => {

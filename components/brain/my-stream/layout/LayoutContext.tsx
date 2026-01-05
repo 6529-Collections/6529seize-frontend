@@ -39,18 +39,6 @@ interface LayoutSpaces {
   measurementsComplete: boolean;
 }
 
-type View =
-  | "wave"
-  | "leaderboard"
-  | "winners"
-  | "myVotes"
-  | "outcome"
-  | "faq"
-  | "notifications"
-  | "myStreamFeed"
-  | "mobileWaves"
-  | "mobileAbout";
-
 const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
   a.headerSpace === b.headerSpace &&
   a.pinnedSpace === b.pinnedSpace &&
@@ -63,7 +51,6 @@ const spacesAreEqual = (a: LayoutSpaces, b: LayoutSpaces) =>
 
 // Helper function to calculate height style
 const calculateHeightStyle = (
-  view: View,
   spaces: LayoutSpaces,
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
@@ -388,7 +375,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
-    const style = calculateHeightStyle("wave", adjustedSpaces, capSpace);
+    const style = calculateHeightStyle(adjustedSpaces, capSpace);
 
     if (isAndroid) {
       return {
@@ -401,37 +388,37 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("leaderboard", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const winnersViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("winners", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const myVotesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("myVotes", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const outcomeViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("outcome", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const faqViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("faq", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("notifications", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("myStreamFeed", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   // Homepage-specific feed style that excludes header/breadcrumb space
@@ -443,7 +430,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       headerSpace: 0, // No header in new homepage layout
       spacerSpace: 0, // No breadcrumb spacer in new homepage layout
     };
-    return calculateHeightStyle("myStreamFeed", homepageSpaces, 0);
+    return calculateHeightStyle(homepageSpaces, 0);
   }, [spaces]);
 
   // Small screen layout feed style (properly accounts for header)
@@ -465,12 +452,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("mobileWaves", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    return calculateHeightStyle("mobileAbout", spaces, 0);
+    return calculateHeightStyle(spaces, 0);
   }, [spaces]);
 
   // Memoize the context value to prevent unnecessary re-renders

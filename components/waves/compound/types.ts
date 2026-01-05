@@ -1,6 +1,6 @@
 interface CompoundLinkGroup {
-  readonly marketUrl?: string;
-  readonly etherscan?: string;
+  readonly marketUrl?: string | undefined;
+  readonly etherscan?: string | undefined;
 }
 
 interface CompoundMarketV2Metrics {
@@ -8,7 +8,7 @@ interface CompoundMarketV2Metrics {
   readonly borrowApy: string;
   readonly utilization: string;
   readonly tvlUnderlying: string;
-  readonly tvlUsd?: string;
+  readonly tvlUsd?: string | undefined;
   readonly collateralFactor: string;
   readonly reserveFactor: string;
   readonly exchangeRate: string;
@@ -20,7 +20,7 @@ interface CompoundMarketV3Metrics {
   readonly utilization: string;
   readonly totalSupplyBase: string;
   readonly totalBorrowBase: string;
-  readonly tvlUsd?: string;
+  readonly tvlUsd?: string | undefined;
 }
 
 export interface CompoundMarketV2Response {
@@ -72,13 +72,13 @@ interface CompoundAccountV2Position {
   readonly supplyApy: string;
   readonly borrowApy: string;
   readonly collateralFactor: string;
-  readonly usdPrice?: string;
+  readonly usdPrice?: string | undefined;
 }
 
 interface CompoundAccountV3CollateralPosition {
   readonly asset: string;
   readonly amount: string;
-  readonly usdPrice?: string;
+  readonly usdPrice?: string | undefined;
   readonly collateralFactor: string;
 }
 
@@ -101,28 +101,28 @@ export interface CompoundAccountResponse {
     readonly v3: readonly CompoundAccountV3Position[];
   };
   readonly risk?: {
-    readonly liquidityUsd?: string;
-    readonly shortfallUsd?: string;
-    readonly healthLabel?: string;
-  };
+    readonly liquidityUsd?: string | undefined;
+    readonly shortfallUsd?: string | undefined;
+    readonly healthLabel?: string | undefined;
+  } | undefined;
   readonly rewards?: {
-    readonly v2CompAccrued?: string;
-    readonly v3Claimable?: string;
-  };
-  readonly links?: CompoundLinkGroup;
+    readonly v2CompAccrued?: string | undefined;
+    readonly v3Claimable?: string | undefined;
+  } | undefined;
+  readonly links?: CompoundLinkGroup | undefined;
 }
 
 interface CompoundTxSummary {
-  readonly version?: "v2" | "v3";
-  readonly action?: string;
+  readonly version?: "v2" | "v3" | undefined;
+  readonly action?: string | undefined;
   readonly market?: {
     readonly address: string;
     readonly symbol: string;
-  };
-  readonly amount?: string;
-  readonly token?: string;
-  readonly from?: string;
-  readonly to?: string;
+  } | undefined;
+  readonly amount?: string | undefined;
+  readonly token?: string | undefined;
+  readonly from?: string | undefined;
+  readonly to?: string | undefined;
 }
 
 export interface CompoundTxResponse {
@@ -130,9 +130,9 @@ export interface CompoundTxResponse {
   readonly chainId: number;
   readonly hash: string;
   readonly status: "success" | "reverted" | "pending";
-  readonly blockNumber?: number;
-  readonly summary?: CompoundTxSummary;
-  readonly links?: CompoundLinkGroup;
+  readonly blockNumber?: number | undefined;
+  readonly summary?: CompoundTxSummary | undefined;
+  readonly links?: CompoundLinkGroup | undefined;
 }
 
 type CompoundMarketResponse =
@@ -149,10 +149,10 @@ export function isCompoundResponse(value: unknown): value is CompoundResponse {
     return false;
   }
   const record = value as Record<string, unknown>;
-  if (typeof record.type !== "string") {
+  if (typeof record["type"] !== "string") {
     return false;
   }
-  return record.type.startsWith("compound.");
+  return record["type"].startsWith("compound.");
 }
 
 export function isCompoundMarket(

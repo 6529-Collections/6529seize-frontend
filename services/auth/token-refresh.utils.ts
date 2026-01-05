@@ -19,40 +19,46 @@ function validateRefreshTokenInputs(
   retryCount: number
 ): void {
   // Validate wallet address
-  if (!walletAddress || typeof walletAddress !== 'string') {
-    throw new TokenRefreshError('Invalid walletAddress: must be non-empty string');
+  if (!walletAddress || typeof walletAddress !== "string") {
+    throw new TokenRefreshError(
+      "Invalid walletAddress: must be non-empty string"
+    );
   }
-  
+
   // Use viem's comprehensive address validation
   // This includes EIP-55 checksum validation and format checking
   if (!isAddress(walletAddress)) {
-    throw new TokenRefreshError(`Invalid wallet address format: ${walletAddress}`);
+    throw new TokenRefreshError(
+      `Invalid wallet address format: ${walletAddress}`
+    );
   }
-  
+
   // Validate refresh token
-  if (!refreshToken || typeof refreshToken !== 'string') {
-    throw new TokenRefreshError('Invalid refreshToken: must be non-empty string');
+  if (!refreshToken || typeof refreshToken !== "string") {
+    throw new TokenRefreshError(
+      "Invalid refreshToken: must be non-empty string"
+    );
   }
-  
+
   // Validate retry count - First check type and NaN, then range
-  if (typeof retryCount !== 'number') {
-    throw new TokenRefreshError('Invalid retryCount: must be a number');
+  if (typeof retryCount !== "number") {
+    throw new TokenRefreshError("Invalid retryCount: must be a number");
   }
 
   if (Number.isNaN(retryCount)) {
-    throw new TokenRefreshError('Invalid retryCount: NaN is not allowed');
+    throw new TokenRefreshError("Invalid retryCount: NaN is not allowed");
   }
 
   if (!Number.isFinite(retryCount)) {
-    throw new TokenRefreshError('Invalid retryCount: Infinity is not allowed');
+    throw new TokenRefreshError("Invalid retryCount: Infinity is not allowed");
   }
 
   if (retryCount < 1 || retryCount > 10) {
-    throw new TokenRefreshError('Invalid retryCount: must be between 1 and 10');
+    throw new TokenRefreshError("Invalid retryCount: must be between 1 and 10");
   }
 
   if (!Number.isInteger(retryCount)) {
-    throw new TokenRefreshError('Invalid retryCount: must be an integer');
+    throw new TokenRefreshError("Invalid retryCount: must be an integer");
   }
 }
 
@@ -65,23 +71,23 @@ function validateRefreshTokenResponse(
 ): ApiRedeemRefreshTokenResponse {
   if (!response) {
     throw new TokenRefreshServerError(
-      'Server returned null/undefined response',
+      "Server returned null/undefined response",
       undefined,
       response
     );
   }
 
-  if (!response.token || typeof response.token !== 'string') {
+  if (!response.token || typeof response.token !== "string") {
     throw new TokenRefreshServerError(
-      'Server returned invalid token',
+      "Server returned invalid token",
       undefined,
       response
     );
   }
 
-  if (!response.address || typeof response.address !== 'string') {
+  if (!response.address || typeof response.address !== "string") {
     throw new TokenRefreshServerError(
-      'Server returned invalid address',
+      "Server returned invalid address",
       undefined,
       response
     );
@@ -98,7 +104,7 @@ function classifyRefreshTokenError(
   attemptNumber: number
 ): TokenRefreshError {
   // Handle cancellation errors
-  if (error.name === 'AbortError') {
+  if (error.name === "AbortError") {
     return new TokenRefreshCancelledError(
       `Operation cancelled during attempt ${attemptNumber}`
     );
@@ -111,10 +117,10 @@ function classifyRefreshTokenError(
 
   // Classify network errors
   if (
-    error?.code === 'NETWORK_ERROR' ||
-    error?.code === 'ENOTFOUND' ||
-    error?.code === 'ECONNREFUSED' ||
-    error?.code === 'ETIMEDOUT'
+    error?.code === "NETWORK_ERROR" ||
+    error?.code === "ENOTFOUND" ||
+    error?.code === "ECONNREFUSED" ||
+    error?.code === "ETIMEDOUT"
   ) {
     return new TokenRefreshNetworkError(
       `Network error on attempt ${attemptNumber}: ${error.message}`,
@@ -158,7 +164,7 @@ async function attemptTokenRefresh(
     body: {
       address: walletAddress,
       token: refreshToken,
-      role: role ?? undefined,
+      ...(role ? { role } : {}),
     },
     signal: abortSignal,
   });
@@ -182,13 +188,13 @@ function checkCancellation(
 
 /**
  * Redeems a refresh token with retry logic and comprehensive error handling.
- * 
+ *
  * This function implements a fail-fast approach with:
  * - Input validation
  * - Cancellation support via AbortSignal
  * - Retry logic with exponential backoff
  * - Structured error handling for different failure scenarios
- * 
+ *
  * @param walletAddress - The wallet address for authentication
  * @param refreshToken - The refresh token to redeem
  * @param role - Optional role for role-based authentication
@@ -209,9 +215,9 @@ export async function redeemRefreshTokenWithRetries(
 ): Promise<ApiRedeemRefreshTokenResponse> {
   // Validate all inputs upfront
   validateRefreshTokenInputs(walletAddress, refreshToken, retryCount);
-  
+
   // Check for cancellation before starting
-  checkCancellation(abortSignal, 'Operation cancelled before starting');
+  checkCancellation(abortSignal, "Operation cancelled before starting");
 
   let lastError: TokenRefreshError | null = null;
 
@@ -228,24 +234,23 @@ export async function redeemRefreshTokenWithRetries(
         role,
         abortSignal
       );
-      
+
       // Success - return valid response
       return response;
-      
     } catch (error: any) {
       // Classify the error
       lastError = classifyRefreshTokenError(error, attempt);
-      
+
       // If cancelled, throw immediately (no retries for cancellation)
       if (lastError instanceof TokenRefreshCancelledError) {
         throw lastError;
       }
-      
+
       // If this was the last attempt, throw the error
       if (attempt >= retryCount) {
         throw lastError;
       }
-      
+
       // Otherwise, continue to next attempt
       // The loop will handle the next iteration
     }
@@ -253,5 +258,5 @@ export async function redeemRefreshTokenWithRetries(
 
   // This should never be reached due to the throw in the catch block,
   // but TypeScript requires it for exhaustiveness
-  throw lastError || new TokenRefreshError('All retry attempts failed');
+  throw lastError || new TokenRefreshError("All retry attempts failed");
 }

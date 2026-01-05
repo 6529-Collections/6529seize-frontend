@@ -15,13 +15,13 @@ export function UploadDistributionPhotosModal(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    existingPhotosCount?: number;
-    confirmedTokenId?: string | null;
+    existingPhotosCount?: number | undefined;
+    confirmedTokenId?: string | null | undefined;
     onUpload(contract: string, tokenId: string, files: File[]): void;
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
-  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
+  const initialTokenId = numbers.length > 0 ? numbers[0]!.toString() : "";
   const defaultTokenId = isValidPositiveInteger(initialTokenId)
     ? initialTokenId
     : "";
@@ -35,7 +35,7 @@ export function UploadDistributionPhotosModal(
 
   const contract = MEMES_CONTRACT;
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const MAX_FILE_SIZE = 500 * 1024 * 1024;
   const ACCEPTED_TYPES = new Set([
     "image/jpeg",
     "image/jpg",
@@ -59,7 +59,7 @@ export function UploadDistributionPhotosModal(
         );
       }
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name}: File size exceeds 10MB limit.`);
+        errors.push(`${file.name}: File size exceeds 500MB limit.`);
       }
     });
 

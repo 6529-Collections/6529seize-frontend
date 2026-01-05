@@ -7,8 +7,8 @@ export default function BlockPickerResult({
   timestamp,
   predictedBlocks,
 }: {
-  blocknumber?: number;
-  timestamp?: number;
+  blocknumber?: number | undefined;
+  timestamp?: number | undefined;
   predictedBlocks: PredictBlockNumbersResponseApiModel[];
 }) {
   return (

@@ -4,7 +4,7 @@ import ParticipationDropRatingsContainer from "./ratings/ParticipationDropRating
 
 interface ParticipationDropRatingsProps {
   readonly drop: ApiDrop;
-  readonly rank?: number | null;
+  readonly rank?: number | null | undefined;
 }
 
 export const ParticipationDropRatings: React.FC<ParticipationDropRatingsProps> = ({

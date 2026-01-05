@@ -8,7 +8,7 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 
 interface WaveWinnersDropHeaderProps {
   readonly winner: ApiWaveDecisionWinner;
-  readonly showVotingInfo?: boolean;
+  readonly showVotingInfo?: boolean | undefined;
 }
 
 export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({

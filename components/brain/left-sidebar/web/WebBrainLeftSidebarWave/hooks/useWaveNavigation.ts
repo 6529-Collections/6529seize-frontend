@@ -7,9 +7,9 @@ interface UseWaveNavigationOptions {
   readonly setActiveWave: (
     waveId: string | null,
     options?: {
-      isDirectMessage?: boolean;
-      serialNo?: number | null;
-      divider?: number | null;
+      isDirectMessage?: boolean | undefined;
+      serialNo?: number | null | undefined;
+      divider?: number | null | undefined;
     }
   ) => void;
   readonly onHover: (waveId: string) => void;
@@ -17,7 +17,7 @@ interface UseWaveNavigationOptions {
   readonly searchParams: ReadonlyURLSearchParams | null;
   readonly waveId: string;
   readonly hasTouchScreen: boolean;
-  readonly firstUnreadDropSerialNo?: number | null;
+  readonly firstUnreadDropSerialNo?: number | null | undefined;
 }
 
 interface UseWaveNavigationResult {

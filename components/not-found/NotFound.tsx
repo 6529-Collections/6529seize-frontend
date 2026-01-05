@@ -4,7 +4,7 @@ import { useTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
 import { useEffect } from "react";
 
-export default function NotFound({ label }: { readonly label?: string }) {
+export default function NotFound({ label }: { readonly label?: string | undefined }) {
   let titleLabel;
   if (label) {
     titleLabel = label.toUpperCase();

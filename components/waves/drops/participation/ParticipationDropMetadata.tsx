@@ -8,13 +8,13 @@ import { Tooltip } from "react-tooltip";
 
 interface ParticipationDropMetadataProps {
   readonly metadata: ApiDropMetadata[];
-  readonly contextId?: string | number;
+  readonly contextId?: string | number | undefined;
 }
 
 // Component to display individual metadata items in cards
 const MetadataItem: React.FC<{
   readonly meta: ApiDropMetadata;
-  readonly contextId?: string | number;
+  readonly contextId?: string | number | undefined;
 }> = ({ meta, contextId }) => {
   const isMobile = useIsMobileDevice();
 

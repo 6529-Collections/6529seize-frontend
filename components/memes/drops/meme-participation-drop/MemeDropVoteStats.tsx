@@ -1,4 +1,3 @@
-import React from "react";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -12,7 +11,7 @@ interface MemeDropVoteStatsProps {
   readonly votingCreditType: string;
   readonly ratersCount: number | null | undefined;
   readonly topVoters: ApiDropRater[];
-  readonly userContext?: ApiDropContextProfileContext | null;
+  readonly userContext?: ApiDropContextProfileContext | null | undefined;
 }
 
 export default function MemeDropVoteStats({
@@ -77,10 +76,11 @@ export default function MemeDropVoteStats({
                   backgroundColor: "#1F2937",
                   color: "white",
                   padding: "4px 8px",
-                }}>
-                <span className="tw-text-xs">{`${voter.profile.handle} - ${formatNumberWithCommas(
-                  voter.rating
-                )}`}</span>
+                }}
+              >
+                <span className="tw-text-xs">{`${
+                  voter.profile.handle
+                } - ${formatNumberWithCommas(voter.rating)}`}</span>
               </Tooltip>
             </div>
           ))}

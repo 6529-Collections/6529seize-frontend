@@ -16,8 +16,8 @@ export default function CommonTableSortIcon({
 }: {
   readonly direction: SortDirection;
   readonly isActive: boolean;
-  readonly shouldRotate?: boolean;
-  readonly activeClassName?: string;
+  readonly shouldRotate?: boolean | undefined;
+  readonly activeClassName?: string | undefined;
 }) {
   const getClasses = ({
     active,

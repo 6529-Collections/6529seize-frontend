@@ -2,7 +2,7 @@
 
 import { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
@@ -71,8 +71,6 @@ const getDropStyles = (
 
 interface DefautWinnerDropProps {
   readonly drop: ExtendedDrop;
-  readonly previousDrop: Drop | null;
-  readonly nextDrop: Drop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
@@ -82,14 +80,11 @@ interface DefautWinnerDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 const DefaultWinnerDrop = ({
   drop,
-  previousDrop,
-  nextDrop,
   showWaveInfo,
   activeDrop,
   location,
@@ -100,7 +95,6 @@ const DefaultWinnerDrop = ({
   onQuoteClick,
   onDropContentClick,
   showReplyAndQuote,
-  parentContainerRef,
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -124,12 +118,12 @@ const DefaultWinnerDrop = ({
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+    onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onReply, drop, activePartIndex]);
 
   const handleOnQuote = useCallback(() => {
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onQuote, drop, activePartIndex]);
 
   const handleOnAddReaction = useCallback(() => {
@@ -140,7 +134,8 @@ const DefaultWinnerDrop = ({
     <div
       className={`tw-w-full ${
         location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-      }`}>
+      }`}
+    >
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
           ${
@@ -155,7 +150,8 @@ const DefaultWinnerDrop = ({
           borderLeft: "1.5px solid transparent",
           ...getDropStyles(isActiveDrop, colors),
           transition: "box-shadow 0.2s ease, background-color 0.2s ease",
-        }}>
+        }}
+      >
         {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
           <WaveDropReply
             onReplyClick={onReplyClick}
@@ -184,27 +180,41 @@ const DefaultWinnerDrop = ({
                 rank={effectiveRank}
                 decisionTime={decisionTime ?? null}
               />
-              {showWaveInfo && (() => {
-                const waveDetails =
-                  (drop.wave as unknown as {
-                    chat?: { scope?: { group?: { is_direct_message?: boolean } } };
-                  }) ?? undefined;
-                const isDirectMessage =
-                  waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
-                const waveHref = getWaveRoute({
-                  waveId: drop.wave.id,
-                  isDirectMessage,
-                  isApp: false,
-                });
-                return (
-                  <Link
-                    href={waveHref}
-                    onClick={(e) => e.stopPropagation()}
-                    className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
-                    {drop.wave.name}
-                  </Link>
-                );
-              })()}
+              {showWaveInfo &&
+                (() => {
+                  const waveDetails =
+                    (drop.wave as unknown as {
+                      chat?:
+                        | {
+                            scope?:
+                              | {
+                                  group?:
+                                    | {
+                                        is_direct_message?: boolean | undefined;
+                                      }
+                                    | undefined;
+                                }
+                              | undefined;
+                          }
+                        | undefined;
+                    }) ?? undefined;
+                  const isDirectMessage =
+                    waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+                  const waveHref = getWaveRoute({
+                    waveId: drop.wave.id,
+                    isDirectMessage,
+                    isApp: false,
+                  });
+                  return (
+                    <Link
+                      href={waveHref}
+                      onClick={(e) => e.stopPropagation()}
+                      className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                    >
+                      {drop.wave.name}
+                    </Link>
+                  );
+                })()}
             </div>
             <div>
               <WaveDropContent
@@ -213,7 +223,6 @@ const DefaultWinnerDrop = ({
                 setActivePartIndex={setActivePartIndex}
                 onDropContentClick={onDropContentClick}
                 onQuoteClick={onQuoteClick}
-                parentContainerRef={parentContainerRef}
                 onLongPress={handleLongPress}
                 setLongPressTriggered={setLongPressTriggered}
                 isCompetitionDrop={true}

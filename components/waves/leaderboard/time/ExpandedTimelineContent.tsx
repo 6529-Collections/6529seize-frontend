@@ -13,14 +13,14 @@ import { HorizontalTimeline } from "./HorizontalTimeline";
 interface ExpandedTimelineContentProps {
   readonly decisions: DecisionPoint[];
   readonly nextDecisionTime: number | null;
-  readonly onLoadMorePast?: () => void;
-  readonly onLoadMoreFuture?: () => void;
-  readonly hasMorePast?: boolean;
-  readonly hasMoreFuture?: boolean;
-  readonly remainingPastCount?: number | null;
-  readonly remainingFutureCount?: number | null;
-  readonly focus?: "start" | "end" | null;
-  readonly onFocusHandled?: () => void;
+  readonly onLoadMorePast?: (() => void) | undefined;
+  readonly onLoadMoreFuture?: (() => void) | undefined;
+  readonly hasMorePast?: boolean | undefined;
+  readonly hasMoreFuture?: boolean | undefined;
+  readonly remainingPastCount?: number | null | undefined;
+  readonly remainingFutureCount?: number | null | undefined;
+  readonly focus?: "start" | "end" | null | undefined;
+  readonly onFocusHandled?: (() => void) | undefined;
 }
 
 export const ExpandedTimelineContent: React.FC<
@@ -49,7 +49,10 @@ export const ExpandedTimelineContent: React.FC<
       ? remainingPastCount
       : earliestDecisionIndex;
 
-  const formatLabel = (count: number | null, direction: "earlier" | "later") => {
+  const formatLabel = (
+    count: number | null,
+    direction: "earlier" | "later"
+  ) => {
     if (count == null) {
       return direction === "earlier" ? "Show earlier" : "Show later";
     }
@@ -72,7 +75,8 @@ export const ExpandedTimelineContent: React.FC<
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.3 }}
       onAnimationComplete={() => setAnimationComplete(true)}
-      className="tw-bg-iron-950">
+      className="tw-bg-iron-950"
+    >
       <div className="tw-px-3 tw-py-4">
         {(hasMorePast || hasMoreFuture) && (
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-300">

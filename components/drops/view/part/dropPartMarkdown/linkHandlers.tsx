@@ -24,7 +24,7 @@ import {
 
 interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly currentDropId?: string;
+  readonly currentDropId?: string | undefined;
 }
 
 interface LinkRenderer {

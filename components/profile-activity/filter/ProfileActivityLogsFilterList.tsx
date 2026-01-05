@@ -5,12 +5,10 @@ export default function UserPageIdentityActivityLogFilterList({
   selected,
   options,
   setSelected,
-  user,
 }: {
   readonly selected: ProfileActivityLogType[];
   readonly options: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
-  readonly user: string | null;
 }) {
   return (
     <div className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5">
@@ -21,7 +19,6 @@ export default function UserPageIdentityActivityLogFilterList({
             itemType={itemType}
             selectedItems={selected}
             setSelected={setSelected}
-            user={user}
           />
         ))}
       </ul>

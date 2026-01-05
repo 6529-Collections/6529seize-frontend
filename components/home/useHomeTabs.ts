@@ -9,7 +9,7 @@ export const HOME_TAB_EVENT = "homeTabChange";
 
 const getBrowserWindow = () => {
   const { window: browserWindow } = globalThis as typeof globalThis & {
-    window?: Window;
+    window?: Window | undefined;
   };
   return browserWindow;
 };
@@ -84,7 +84,7 @@ export function useHomeTabs() {
     }
 
     const handleTabEvent = (event: Event) => {
-      const detail = (event as CustomEvent<{ tab?: HomeTab }>).detail;
+      const detail = (event as CustomEvent<{ tab?: HomeTab | undefined }>).detail;
       if (!detail?.tab) return;
       if (detail.tab !== "feed" && detail.tab !== "latest") return;
       setActiveTab(detail.tab);

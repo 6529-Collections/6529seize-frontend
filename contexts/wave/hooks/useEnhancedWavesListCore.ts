@@ -108,7 +108,7 @@ function useEnhancedWavesListCore(
   }, [activeWaveId, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
-    (wave: ApiWave & { pinned?: boolean }): MinimalWave => {
+    (wave: ApiWave & { pinned?: boolean | undefined }): MinimalWave => {
       const wsData = newDropsCounts[wave.id];
       const hasNewWsDrops = (wsData?.count ?? 0) > 0;
       const newDrops = {

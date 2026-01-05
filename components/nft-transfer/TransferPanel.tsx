@@ -20,7 +20,7 @@ import { useTransfer } from "./TransferState";
 export default function TransferPanel({
   isLoading = false,
 }: {
-  readonly isLoading?: boolean;
+  readonly isLoading?: boolean | undefined;
 }) {
   const t = useTransfer();
   const { isConnected } = useSeizeConnectContext();
@@ -82,6 +82,7 @@ export default function TransferPanel({
       globalThis.addEventListener("keydown", handleEscape);
       return () => globalThis.removeEventListener("keydown", handleEscape);
     }
+    return;
   }, [isExpanded]);
 
   if (!t.enabled) return null;
@@ -95,7 +96,7 @@ export default function TransferPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="tw-fixed tw-inset-0 tw-bg-black/50 tw-backdrop-blur-sm tw-z-40"
+            className="tw-fixed tw-inset-0 tw-z-40 tw-bg-black/50 tw-backdrop-blur-sm"
             onClick={() => setIsExpanded(false)}
             aria-hidden="true"
           />
@@ -103,13 +104,14 @@ export default function TransferPanel({
       </AnimatePresence>
       <div
         className={[
-          "tw-sticky tw-z-50 tw-mt-5 tw-bottom-0",
+          "tw-sticky tw-bottom-0 tw-z-50 tw-mt-5",
           "-tw-mx-2 lg:-tw-mx-6 xl:-tw-mx-8",
           "tw-w-[calc(100%+theme(space.4))] lg:tw-w-[calc(100%+theme(space.12))] xl:tw-w-[calc(100%+theme(space.16))]",
           "tw-animate-slideUp",
         ]
           .filter(Boolean)
-          .join(" ")}>
+          .join(" ")}
+      >
         <div
           {...(!isExpanded && items.length > 0 && !isLoading
             ? {
@@ -140,24 +142,26 @@ export default function TransferPanel({
                 },
               })}
           className={[
-            "tw-border-solid tw-border-[#37373ee6] tw-border-l-0",
+            "tw-border-l-0 tw-border-solid tw-border-[#37373ee6]",
             "tw-bg-black tw-text-iron-50",
-            "tw-select-none tw-flex tw-flex-col",
+            "tw-flex tw-select-none tw-flex-col",
             !isExpanded &&
               items.length > 0 &&
               !isLoading &&
               "tw-cursor-pointer",
           ]
             .filter(Boolean)
-            .join(" ")}>
-          <div className="tw-px-4 tw-py-4 tw-flex tw-items-center tw-gap-3">
+            .join(" ")}
+        >
+          <div className="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-4">
             {items.length > 0 && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
                 disabled={isLoading}
-                className="tw-inline-flex tw-items-center tw-justify-center tw-h-9 tw-w-9 tw-rounded-full tw-bg-white hover:tw-bg-white/90 tw-text-black tw-transition-colors tw-shrink-0 tw-border-[#444] disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
-                aria-label={isExpanded ? "Collapse panel" : "Expand panel"}>
+                className="tw-inline-flex tw-h-9 tw-w-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-[#444] tw-bg-white tw-text-black tw-transition-colors hover:tw-bg-white/90 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                aria-label={isExpanded ? "Collapse panel" : "Expand panel"}
+              >
                 <FontAwesomeIcon
                   icon={isExpanded ? faChevronDown : faChevronUp}
                   className="tw-size-4"
@@ -173,8 +177,9 @@ export default function TransferPanel({
                     style={{
                       marginLeft: index > 0 ? "-12px" : "0",
                       zIndex: items.length - index,
-                    }}>
-                    <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-lg tw-overflow-hidden tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10">
+                    }}
+                  >
+                    <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10">
                       {it.thumbUrl ? (
                         <Image
                           alt={it.title ?? it.key}
@@ -193,7 +198,7 @@ export default function TransferPanel({
               </div>
             )}
             {centerMessage ? (
-              <div className="tw-flex-1 tw-text-sm tw-font-medium tw-text-center">
+              <div className="tw-flex-1 tw-text-center tw-text-sm tw-font-medium">
                 {centerMessage}
               </div>
             ) : null}
@@ -202,9 +207,10 @@ export default function TransferPanel({
                 centerMessage
                   ? "tw-flex tw-items-center tw-gap-3"
                   : "tw-ml-auto tw-flex tw-items-center tw-gap-3"
-              }>
+              }
+            >
               {items.length > 0 && (
-                <div className="tw-text-sm tw-font-medium tw-text-white tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-rounded-full tw-whitespace-nowrap">
+                <div className="tw-whitespace-nowrap tw-rounded-full tw-bg-primary-500 tw-px-4 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white">
                   {t.totalQty} {t.totalQty === 1 ? "item" : "items"}
                 </div>
               )}
@@ -215,16 +221,18 @@ export default function TransferPanel({
                   t.clear();
                 }}
                 disabled={isLoading}
-                className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-text-white tw-border-2 tw-border-solid tw-border-[#444] tw-transition-colors tw-shrink-0 tw-flex tw-items-center tw-justify-center disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-min-w-[100px]"
-                aria-label="Cancel">
+                className="tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors hover:tw-bg-white/20 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                aria-label="Cancel"
+              >
                 Cancel
               </button>
               {items.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowModal(true)}
-                  className="tw-rounded-lg tw-bg-white tw-text-black hover:tw-bg-white/90 tw-transition-colors tw-shrink-0 tw-flex tw-items-center tw-justify-center tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-min-w-[100px]"
-                  aria-label="Continue">
+                  className="tw-flex tw-min-w-[100px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-black tw-transition-colors hover:tw-bg-white/90"
+                  aria-label="Continue"
+                >
                   Continue
                 </button>
               )}
@@ -237,9 +245,10 @@ export default function TransferPanel({
                 animate={{ height: "auto" }}
                 exit={{ height: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="tw-overflow-hidden">
+                className="tw-overflow-hidden"
+              >
                 <div className="tw-max-h-[40vh] tw-overflow-auto tw-px-4 tw-pb-4">
-                  <ul className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-2 tw-p-0">
+                  <ul className="tw-grid tw-grid-cols-1 tw-gap-2 tw-p-0 md:tw-grid-cols-2">
                     {items.map((it) => {
                       const max = Math.max(1, it.max ?? 1);
                       const qty = Math.min(Math.max(1, it.qty ?? 1), max);
@@ -249,9 +258,10 @@ export default function TransferPanel({
                       return (
                         <li
                           key={it.key}
-                          className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2">
+                          className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2"
+                        >
                           {it.thumbUrl ? (
-                            <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-md tw-overflow-hidden tw-bg-white/10 tw-shrink-0">
+                            <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-white/10">
                               <Image
                                 alt={it.title ?? it.key}
                                 src={it.thumbUrl}
@@ -262,7 +272,7 @@ export default function TransferPanel({
                               />
                             </div>
                           ) : (
-                            <div className="tw-h-10 tw-w-10 tw-rounded-md tw-bg-white/10 tw-shrink-0" />
+                            <div className="tw-h-10 tw-w-10 tw-shrink-0 tw-rounded-md tw-bg-white/10" />
                           )}
                           <div className="tw-min-w-0 tw-flex-1">
                             <div className="tw-truncate tw-text-xs">
@@ -273,20 +283,21 @@ export default function TransferPanel({
                             </div>
                           </div>
                           {max > 1 && (
-                            <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-bg-primary-500 tw-rounded-full tw-p-1 tw-font-medium">
+                            <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-full tw-bg-primary-500 tw-p-1 tw-font-medium">
                               <button
                                 type="button"
                                 onClick={() => t.decQty(it.key)}
                                 disabled={qty <= 1}
                                 aria-label="Decrease quantity"
-                                className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                                className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+                              >
                                 <FontAwesomeIcon
                                   icon={faMinusCircle}
                                   className="tw-size-6 tw-cursor-pointer"
                                   color={qty <= 1 ? "#aaa" : "#fff"}
                                 />
                               </button>
-                              <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-select-none">
+                              <div className="tw-min-w-[2ch] tw-select-none tw-text-center tw-text-sm tw-tabular-nums">
                                 {qty}/{max}
                               </div>
                               <button
@@ -294,7 +305,8 @@ export default function TransferPanel({
                                 onClick={() => t.incQty(it.key)}
                                 disabled={qty >= max}
                                 aria-label="Increase quantity"
-                                className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center">
+                                className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+                              >
                                 <FontAwesomeIcon
                                   icon={faPlusCircle}
                                   className="tw-size-6 tw-cursor-pointer"
@@ -305,9 +317,10 @@ export default function TransferPanel({
                           )}
                           <button
                             type="button"
-                            className="tw-inline-flex tw-items-center tw-justify-center tw-h-6 tw-w-6 tw-rounded-full tw-bg-[#ef4444] tw-font-medium tw-text-white hover:tw-bg-[#d92b2b] tw-text-lg tw-p-0 tw-border-0 tw-shrink-0"
+                            className="tw-inline-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-[#ef4444] tw-p-0 tw-text-lg tw-font-medium tw-text-white hover:tw-bg-[#d92b2b]"
                             onClick={() => t.unselect(it.key)}
-                            aria-label="Remove">
+                            aria-label="Remove"
+                          >
                             &times;
                           </button>
                         </li>

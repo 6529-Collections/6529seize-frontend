@@ -110,14 +110,14 @@ export function toCanonicalRanges(ids: readonly bigint[]): TokenRange[] {
         return [];
     }
     const ranges: TokenRange[] = [];
-    let current: TokenRange = { start: sorted[0], end: sorted[0] };
+    let current: TokenRange = { start: sorted[0]!, end: sorted[0]! };
     for (let index = 1; index < sorted.length; index += 1) {
         const value = sorted[index];
         if (value === current.end + BIGINT_ONE) {
             current = { start: current.start, end: value };
         } else {
             ranges.push(current);
-            current = { start: value, end: value };
+            current = { start: value!, end: value! };
         }
     }
     ranges.push(current);

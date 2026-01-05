@@ -30,7 +30,7 @@ export interface UseClientNavigationResult<T, TOptions = undefined> {
   readonly state: T;
   readonly navigate: (
     newState: T,
-    options?: TOptions & { replace?: boolean }
+    options?: TOptions & { replace?: boolean | undefined }
   ) => void;
 }
 
@@ -71,7 +71,7 @@ export function useClientNavigation<T, TOptions = undefined>({
   }, [parseUrl]);
 
   const navigate = useCallback(
-    (newState: T, options?: TOptions & { replace?: boolean }) => {
+    (newState: T, options?: TOptions & { replace?: boolean | undefined }) => {
       if (globalThis.window === undefined) return;
 
       const { window: browserWindow } = globalThis;

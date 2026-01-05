@@ -36,9 +36,9 @@ export default function useDeviceInfo(): DeviceInfo {
 
     const win = window as any;
     const nav = navigator as Navigator & {
-      msMaxTouchPoints?: number;
-      userAgentData?: { mobile?: boolean };
-      standalone?: boolean;
+      msMaxTouchPoints?: number | undefined;
+      userAgentData?: { mobile?: boolean | undefined } | undefined;
+      standalone?: boolean | undefined;
     };
 
     const hasTouchScreen =

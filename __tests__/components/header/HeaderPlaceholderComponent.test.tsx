@@ -11,12 +11,12 @@ describe('HeaderPlaceholder', () => {
   it('uses regular placeholder class when not running in Capacitor', () => {
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
     const { container } = render(<HeaderPlaceholder />);
-    expect(container.firstChild).toHaveClass(styles.headerPlaceholder);
+    expect(container.firstChild).toHaveClass(styles["headerPlaceholder"]);
   });
 
   it('uses capacitor placeholder class when running in Capacitor', () => {
     mockUseCapacitor.mockReturnValue({ isCapacitor: true } as any);
     const { container } = render(<HeaderPlaceholder />);
-    expect(container.firstChild).toHaveClass(styles.headerPlaceholderCapacitor);
+    expect(container.firstChild).toHaveClass(styles["headerPlaceholderCapacitor"]);
   });
 });

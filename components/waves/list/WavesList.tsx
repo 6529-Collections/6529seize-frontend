@@ -14,8 +14,8 @@ export default function WavesList({
   onCreateNewWave,
   onCreateNewDirectMessage,
 }: {
-  readonly heading?: string;
-  readonly showCreateNewButton?: boolean;
+  readonly heading?: string | undefined;
+  readonly showCreateNewButton?: boolean | undefined;
   readonly onCreateNewWave: () => void;
   readonly onCreateNewDirectMessage: () => void;
 }) {

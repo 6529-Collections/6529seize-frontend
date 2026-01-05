@@ -18,7 +18,13 @@ const isGoogleWorkspaceLink = (href: string): boolean => {
     }
 
     const [resource, marker] = segments;
-    return GOOGLE_RESOURCES.has(resource.toLowerCase()) && marker.toLowerCase() === "d";
+    if (!resource || !marker) {
+      return false;
+    }
+    return (
+      GOOGLE_RESOURCES.has(resource.toLowerCase()) &&
+      marker.toLowerCase() === "d"
+    );
   } catch {
     return false;
   }

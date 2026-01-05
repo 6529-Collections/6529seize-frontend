@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export default function MemeSubscriptions() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <CommunityDownloadsSubscriptions />
     </main>
   );

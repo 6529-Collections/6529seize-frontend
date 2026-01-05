@@ -12,7 +12,7 @@ interface NftSuggestItemProps {
   readonly style: React.CSSProperties;
   readonly onHover: (index: number) => void;
   readonly onSelect: (item: Suggestion) => void;
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
 }
 
 export function NftSuggestItem({

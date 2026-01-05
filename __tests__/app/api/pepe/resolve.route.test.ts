@@ -2,8 +2,8 @@ const nextResponseJson = jest.fn(
   (
     body: unknown,
     init?: {
-      status?: number;
-      headers?: Headers;
+      status?: number | undefined;
+      headers?: Headers | undefined;
     }
   ) => ({
     status: init?.status ?? 200,

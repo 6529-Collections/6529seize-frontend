@@ -1,22 +1,24 @@
 "use client";
 
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { CreateDropType, CreateDropViewType } from "@/components/drops/create/types";
+import {
+  CreateDropType,
+  CreateDropViewType,
+} from "@/components/drops/create/types";
 import CreateDropContent, {
-    CreateDropContentHandles,
+  CreateDropContentHandles,
 } from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
 import {
-    CreateDropConfig,
-    DropMetadata,
-    MentionedUser,
-    ReferencedNft,
+  CreateDropConfig,
+  DropMetadata,
+  MentionedUser,
+  ReferencedNft,
 } from "@/entities/IDrop";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { EditorState } from "lexical";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
@@ -32,7 +34,6 @@ export interface CreateDropFullMobileHandles {
 }
 
 interface CreateDropFullMobileProps {
-  readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
@@ -68,7 +69,6 @@ const CreateDropFullMobile = forwardRef<
 >(
   (
     {
-      profile,
       title,
       editorState,
       metadata,
@@ -129,7 +129,8 @@ const CreateDropFullMobile = forwardRef<
         isOpen={isOpen}
         type={type}
         onClose={onClose}
-        onViewClick={onViewClick}>
+        onViewClick={onViewClick}
+      >
         <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
           {children}
           <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
@@ -139,13 +140,15 @@ const CreateDropFullMobile = forwardRef<
                   onClick={() => setTitleState(TITLE_STATE.INPUT)}
                   type="button"
                   className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 
-              tw-px-2.5 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+              tw-px-2.5 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+                >
                   <svg
                     className="tw-w-4 tw-h-4 tw-mr-1 -tw-ml-1"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg">
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       d="M12 5V19M5 12H19"
                       stroke="currentColor"
@@ -201,13 +204,15 @@ const CreateDropFullMobile = forwardRef<
                       onClick={() => onFileRemove(file)}
                       type="button"
                       aria-label="Remove file"
-                      className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800">
+                      className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                    >
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
                         <path
                           d="M18 6L6 18M6 6L18 18"
                           stroke="currentColor"
@@ -239,7 +244,8 @@ const CreateDropFullMobile = forwardRef<
                     !canSubmit
                       ? "tw-opacity-50 tw-text-iron-200"
                       : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
-                  } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}>
+                  } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
+                >
                   <div className={loading ? "tw-opacity-0" : ""}>
                     {getSubmitText()}
                   </div>

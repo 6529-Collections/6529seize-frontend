@@ -3,7 +3,7 @@ import clsx from "clsx";
 export interface XtdhRatePillProps {
   readonly rateLabel: string;
   readonly totalLabel: string;
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 export function XtdhRatePill({

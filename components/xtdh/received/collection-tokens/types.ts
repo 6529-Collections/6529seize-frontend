@@ -10,14 +10,14 @@ export interface XtdhCollectionTokensPanelProps {
   readonly identity: string | null;
   readonly contract: string | null;
   readonly normalizedContract: string | null;
-  readonly collection?: ApiXtdhCollection;
+  readonly collection?: ApiXtdhCollection | undefined;
   readonly onBack: () => void;
-  readonly requireIdentity?: boolean;
+  readonly requireIdentity?: boolean | undefined;
 }
 
 export interface XtdhSelectedTokenDescriptor {
   readonly token: ApiXtdhToken;
-  readonly metadata?: TokenMetadata;
+  readonly metadata?: TokenMetadata | undefined;
   readonly isMetadataLoading: boolean;
   readonly hasMetadataError: boolean;
 }
@@ -28,9 +28,12 @@ export interface XtdhTokensListProps {
   readonly isEnabled: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
-  readonly errorMessage?: string;
+  readonly errorMessage?: string | undefined;
   readonly onRetry: () => void;
-  readonly onTokenSelect?: (descriptor: XtdhSelectedTokenDescriptor) => void;
+  readonly onTokenSelect?:
+    | ((descriptor: XtdhSelectedTokenDescriptor) => void)
+    | undefined
+    | undefined;
 }
 
 export interface UseXtdhTokensListStateParams

@@ -12,7 +12,7 @@ const BASE_SAFE_TRANSFORMERS = TRANSFORMERS.filter((transformer) => {
     return true;
   }
 
-  const maybeTag = (transformer as { tag?: unknown }).tag;
+  const maybeTag = (transformer as { tag?: unknown | undefined }).tag;
   if (typeof maybeTag !== "string") {
     return true;
   }
@@ -21,7 +21,7 @@ const BASE_SAFE_TRANSFORMERS = TRANSFORMERS.filter((transformer) => {
 });
 
 const isCodeTransformer = (transformer: Transformer): boolean => {
-  const dependencies = (transformer as { dependencies?: unknown }).dependencies;
+  const dependencies = (transformer as { dependencies?: unknown | undefined }).dependencies;
   if (!Array.isArray(dependencies)) {
     return false;
   }
@@ -30,7 +30,7 @@ const isCodeTransformer = (transformer: Transformer): boolean => {
     if (
       !dependency ||
       typeof dependency !== "object" ||
-      typeof (dependency as { getType?: unknown }).getType !== "function"
+      typeof (dependency as { getType?: unknown | undefined }).getType !== "function"
     ) {
       return false;
     }

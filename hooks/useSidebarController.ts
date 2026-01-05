@@ -10,7 +10,7 @@ import { safeSessionStorage } from "../helpers/safeSessionStorage";
 
 const getBrowserWindow = () => {
   const { window: browserWindow } = globalThis as typeof globalThis & {
-    window?: Window;
+    window?: Window | undefined;
   };
   return browserWindow;
 };

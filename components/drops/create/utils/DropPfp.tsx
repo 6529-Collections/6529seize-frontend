@@ -12,7 +12,7 @@ export default function DropPfp({
   size,
 }: {
   readonly pfpUrl: string | null | undefined;
-  readonly size?: DropPartSize;
+  readonly size?: DropPartSize | undefined;
 }) {
   const effectiveSize = size ?? DropPartSize.MEDIUM;
   return (

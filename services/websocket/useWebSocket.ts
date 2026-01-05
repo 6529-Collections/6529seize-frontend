@@ -21,12 +21,3 @@ export function useWebSocket(): WebSocketContextValue {
 
   return context;
 }
-
-/**
- * Simplified useWebSocket that doesn't throw for SSR compatibility
- *
- * @returns WebSocket context or undefined if not available
- */
-function useOptionalWebSocket(): WebSocketContextValue | undefined {
-  return useContext(WebSocketContext);
-}

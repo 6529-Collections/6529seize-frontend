@@ -53,10 +53,10 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       areEqualAddresses(al.address, address)
     );
     const index = addressEntries.findIndex((al) => al.keccak === keccak);
-    let returnSpots = addressEntries[index].spots;
+    let returnSpots = addressEntries[index]?.spots;
     if (index > 0) {
       returnSpots =
-        addressEntries[index].spots - addressEntries[index - 1].spots;
+        addressEntries[index]?.spots! - addressEntries[index - 1]?.spots!;
     }
     return returnSpots;
   }
@@ -125,7 +125,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
         md={4}
         key={getRandomObjectId()}
         className="pt-2 pb-2 d-flex flex-column">
-        <Container className={styles.phaseBox}>
+        <Container className={styles["phaseBox"]}>
           <Row>
             <Col>
               <span className="d-flex align-items-center justify-content-center pb-4">
@@ -200,7 +200,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       )}
       <Row className="pt-4" ref={allowlistScrollTarget}>
         <Col className="d-flex align-items-center justify-content-between">
-          <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
+          <Dropdown className={styles["filterDropdown"]} drop={"down-centered"}>
             <Dropdown.Toggle>
               {selectedPhase?.phase ?? "All Phases"}
             </Dropdown.Toggle>
@@ -226,7 +226,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       </Row>
       <Row className="table-scroll-container">
         <Col>
-          <Table className={styles.logsTable}>
+          <Table className={styles["logsTable"]}>
             <thead>
               <tr>
                 <th>Address x{totalResults.toLocaleString()}</th>

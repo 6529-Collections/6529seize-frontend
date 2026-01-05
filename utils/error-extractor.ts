@@ -1,7 +1,7 @@
 import { publicEnv } from "@/config/env";
 
 export function extractErrorDetails(
-  err: Error & { digest?: string },
+  err: Error & { digest?: string | undefined },
   context?: string
 ): string {
   if (context && publicEnv.NODE_ENV !== "production") {

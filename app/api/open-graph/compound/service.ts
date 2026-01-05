@@ -116,7 +116,7 @@ function formatUnitsWithPrecision(
   const formatted = formatUnits(value, decimals);
   if (formatted.includes(".")) {
     const [intPart, fracPart] = formatted.split(".");
-    const trimmed = `${intPart}.${fracPart.slice(0, precision)}`;
+    const trimmed = `${intPart}.${fracPart?.slice(0, precision)}`;
     return trimTrailingZeros(trimmed);
   }
   return formatted;
@@ -173,7 +173,7 @@ type V2MarketState = {
     readonly borrowApy: string;
     readonly utilization: string;
     readonly tvlUnderlying: string;
-    readonly tvlUsd?: string;
+    readonly tvlUsd?: string | undefined;
     readonly collateralFactor: string;
     readonly reserveFactor: string;
     readonly exchangeRate: string;
@@ -187,7 +187,7 @@ type V3CollateralInfo = {
   readonly scale: bigint;
   readonly collateralFactor: string;
   readonly priceFeed: Address | null;
-  readonly usdPrice?: string;
+  readonly usdPrice?: string | undefined;
 };
 
 type V3MarketState = {
@@ -207,7 +207,7 @@ type V3MarketState = {
     readonly utilization: string;
     readonly totalSupplyBase: string;
     readonly totalBorrowBase: string;
-    readonly tvlUsd?: string;
+    readonly tvlUsd?: string | undefined;
   };
 };
 
@@ -710,7 +710,7 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
 
 async function fetchV3Account(address: Address): Promise<{
   readonly v3Positions: any[];
-  readonly v3Rewards?: string;
+  readonly v3Rewards?: string | undefined;
 }> {
   const markets = Array.from(v3MarketsByAddress.values());
   const states = await Promise.all(markets.map((market) => fetchV3MarketState(market)));
@@ -887,8 +887,8 @@ type CompoundTransactionSummary = {
   };
   readonly amount: string;
   readonly token: string;
-  readonly from?: Address;
-  readonly to?: Address;
+  readonly from?: Address | undefined;
+  readonly to?: Address | undefined;
 };
 
 type CompoundSummaryAction =
@@ -900,8 +900,8 @@ type CompoundSummaryAction =
   | "withdraw";
 
 type TxParticipants = {
-  readonly from?: Address;
-  readonly to?: Address;
+  readonly from?: Address | undefined;
+  readonly to?: Address | undefined;
 };
 
 async function getTransactionReceiptDetails(hash: Hash): Promise<ReceiptDetails> {
@@ -922,8 +922,8 @@ async function getTransactionReceiptDetails(hash: Hash): Promise<ReceiptDetails>
 }
 
 function extractTransactionParticipants(transaction: {
-  readonly from?: string | null;
-  readonly to?: string | null;
+  readonly from?: string | null | undefined;
+  readonly to?: string | null | undefined;
 }): TxParticipants {
   return {
     from: transaction.from ? getAddress(transaction.from) : undefined,
@@ -1204,7 +1204,7 @@ export function createCompoundPlan(url: URL): PreviewPlan | null {
       cacheKey: `compound:tx:${target.hash.toLowerCase()}`,
       execute: async () => {
         const data = await decodeCompoundTx(target.hash);
-        const ttl = data.status === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
+        const ttl = data["status"] === "pending" ? TX_TTL_PENDING_MS : TX_TTL_SUCCESS_MS;
         return { data, ttl };
       },
     };

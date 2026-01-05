@@ -1,14 +1,14 @@
 "use client";
 import {
-    Dialog,
-    DialogPanel,
-    Transition,
-    TransitionChild,
+  Dialog,
+  DialogPanel,
+  Transition,
+  TransitionChild,
 } from "@headlessui/react";
 import {
-    DocumentTextIcon,
-    UserIcon,
-    WrenchIcon,
+  DocumentTextIcon,
+  UserIcon,
+  WrenchIcon,
 } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
@@ -128,13 +128,13 @@ export default function AppSidebar({
     let startX: number | null = null;
 
     const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
+      startX = e.touches[0]?.clientX || null;
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       if (startX === null) return;
-      const endX = e.changedTouches[0].clientX;
-      if (startX - endX > 80) {
+      const endX = e.changedTouches[0]?.clientX;
+      if (endX !== undefined && startX - endX > 80) {
         handleClose();
       }
       startX = null;
@@ -153,7 +153,8 @@ export default function AppSidebar({
       <Dialog
         as="div"
         className="tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden tailwind-scope"
-        onClose={handleClose}>
+        onClose={handleClose}
+      >
         <TransitionChild
           as={Fragment}
           enter="tw-ease-out tw-duration-300"
@@ -161,7 +162,8 @@ export default function AppSidebar({
           enterTo="tw-opacity-100"
           leave="tw-ease-in tw-duration-200"
           leaveFrom="tw-opacity-100"
-          leaveTo="tw-opacity-0">
+          leaveTo="tw-opacity-0"
+        >
           <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50" />
         </TransitionChild>
 
@@ -173,7 +175,8 @@ export default function AppSidebar({
             enterTo="tw-translate-x-0"
             leave="tw-transform tw-ease-in tw-duration-200"
             leaveFrom="tw-translate-x-0"
-            leaveTo="-tw-translate-x-full">
+            leaveTo="-tw-translate-x-full"
+          >
             <DialogPanel className="tw-pointer-events-auto tw-max-w-[22.75rem] tw-w-full tw-h-full tw-bg-iron-950 tw-shadow-xl tw-flex tw-flex-col tw-pt-[env(safe-area-inset-top,0px)] tw-pb-[env(safe-area-inset-bottom,0px)]">
               <AppSidebarHeader onClose={handleClose} />
               <nav className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-6">

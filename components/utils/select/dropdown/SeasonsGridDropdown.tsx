@@ -9,8 +9,8 @@ import SeasonsGridDropdownItemsWrapper from "./SeasonsGridDropdownItemsWrapper";
 interface SeasonsGridDropdownProps {
   readonly selected: MemeSeason | null;
   readonly setSelected: (season: MemeSeason | null) => void;
-  readonly initialSeasonId?: number | null;
-  readonly disabled?: boolean;
+  readonly initialSeasonId?: number | null | undefined;
+  readonly disabled?: boolean | undefined;
 }
 
 export default function SeasonsGridDropdown({

@@ -17,7 +17,7 @@ export const getProfileLogTypes = ({
   addDisabledLogTypes = [],
 }: {
   readonly logTypes: ProfileActivityLogType[];
-  readonly addDisabledLogTypes?: ProfileActivityLogType[];
+  readonly addDisabledLogTypes?: ProfileActivityLogType[] | undefined;
 }): ProfileActivityLogType[] => {
   const disabledTypes = DISABLED_LOG_TYPES.filter(
     (logType) => !addDisabledLogTypes.includes(logType)

@@ -126,10 +126,10 @@ export default function GasComponent() {
         {...getSharedProps()}
       />
       <Container className={`no-padding pt-4`}>
-        <Row className={`pt-3 ${styles.scrollContainer}`}>
+        <Row className={`pt-3 ${styles["scrollContainer"]}`}>
           <Col>
             {gas.length > 0 && (
-              <Table bordered={false} className={styles.gasTable}>
+              <Table bordered={false} className={styles["gasTable"]}>
                 <thead>
                   <tr>
                     <th>Meme Card (x{gas.length})</th>
@@ -155,7 +155,7 @@ export default function GasComponent() {
                       </td>
                       <td>{g.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(g.gas, 2)}
+                        {displayDecimal(g.gas)}
                       </td>
                     </tr>
                   ))}
@@ -163,7 +163,7 @@ export default function GasComponent() {
                     <td colSpan={2} className="text-right">
                       <b>TOTAL</b>
                     </td>
-                    <td className="text-center">{displayDecimal(sumGas, 2)}</td>
+                    <td className="text-center">{displayDecimal(sumGas)}</td>
                   </tr>
                 </tbody>
               </Table>

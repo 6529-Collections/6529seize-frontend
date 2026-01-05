@@ -8,7 +8,7 @@ import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/d
 
 interface WaveDropDeleteButtonProps {
   readonly drop: ApiDrop;
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({

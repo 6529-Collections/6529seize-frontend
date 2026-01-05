@@ -19,7 +19,7 @@ export default function WaveGroupRemove({
   readonly setIsEditOpen: (isOpen: boolean) => void;
   readonly onWaveUpdate: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean },
+    opts?: { readonly skipAuth?: boolean | undefined },
   ) => Promise<void>;
 }) {
   const getBody = (): ApiUpdateWaveRequest =>

@@ -653,7 +653,7 @@ export default function HeaderSearchModal({
     if (isNftResult(item)) {
       const collectionMap = getNftCollectionMap();
       const key = item.contract.toLowerCase();
-      router.push(`${collectionMap[key].path}/${item.id}`);
+      router.push(`${collectionMap[key]?.path}/${item.id}`);
       onClose();
       return;
     }

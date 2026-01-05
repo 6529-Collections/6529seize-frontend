@@ -44,8 +44,8 @@ describe("NftNavigation", () => {
       />
     );
     const links = screen.getAllByRole("link");
-    expect(links[0].className).toMatch(/tw-pointer-events-none/);
-    expect(links[1].className).not.toMatch(/tw-pointer-events-none/);
+    expect(links[0]?.className).toMatch(/tw-pointer-events-none/);
+    expect(links[1]?.className).not.toMatch(/tw-pointer-events-none/);
   });
 
   it("shows fullscreen icon and triggers fullscreen", async () => {

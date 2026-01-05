@@ -45,9 +45,9 @@ describe('DropPart', () => {
         smallMenuIsShown={false}
       />
     );
-    const fn = DropPartContentMock.mock.calls[0][0].onQuoteClick;
+    const fn = DropPartContentMock.mock.calls[0][0]?.onQuoteClick;
     fn(drop as any);
-    const router = (useRouter as jest.Mock).mock.results[0].value;
+    const router = (useRouter as jest.Mock).mock.results[0]?.value;
     expect(router.push).toHaveBeenCalledWith('/waves?wave=w&serialNo=1', { scroll: false });
   });
 });

@@ -10,7 +10,7 @@ import { fetchTokenData, getContentView } from "./page-utils";
 export async function generateMetadata({
   params,
 }: {
-  readonly params: Promise<{ token: string; view?: string[] }>;
+  readonly params: Promise<{ token: string; view?: string[] | undefined }>;
 }): Promise<Metadata> {
   const { token, view } = await params;
   const headers = await getAppCommonHeaders();
@@ -38,7 +38,7 @@ export async function generateMetadata({
 export default async function NextGenTokenPage({
   params,
 }: {
-  readonly params: Promise<{ token: string; view?: string[] }>;
+  readonly params: Promise<{ token: string; view?: string[] | undefined }>;
 }) {
   const { token, view } = await params;
   const headers = await getAppCommonHeaders();

@@ -21,7 +21,7 @@ import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdent
 
 interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;
-  readonly size?: UserFollowBtnSize;
+  readonly size?: UserFollowBtnSize | undefined;
 }
 
 const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({

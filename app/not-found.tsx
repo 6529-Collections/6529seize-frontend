@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 export default function NotFoundPage() {
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <Suspense fallback={null}>
         <NotFound />
       </Suspense>

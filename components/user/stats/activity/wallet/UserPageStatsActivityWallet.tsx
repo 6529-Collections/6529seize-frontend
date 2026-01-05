@@ -161,7 +161,7 @@ export default function UserPageStatsActivityWallet({
       };
 
       if (activeFilter) {
-        params.filter = FILTER_TO_PARAM[activeFilter];
+        params["filter"] = FILTER_TO_PARAM[activeFilter];
       }
 
       return await commonApiFetch<Page<Transaction>>({

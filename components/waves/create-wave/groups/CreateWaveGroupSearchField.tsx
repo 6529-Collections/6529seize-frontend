@@ -207,7 +207,7 @@ export default function CreateWaveGroupSearchField({
     } else if (event.key === "Enter") {
       if (activeIndex >= 0 && activeIndex < suggestions.length) {
         event.preventDefault();
-        onOptionSelect(suggestions[activeIndex]);
+        onOptionSelect(suggestions[activeIndex]!);
       }
     } else if (event.key === "Escape") {
       event.preventDefault();

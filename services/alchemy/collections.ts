@@ -41,7 +41,7 @@ export async function searchNftCollections(
     headers: {
       Accept: "application/json",
     },
-    signal,
+    ...(signal !== undefined ? { signal: signal } : {}),
   });
   if (!response.ok) {
     throw new Error("Failed to search NFT collections");
@@ -68,7 +68,7 @@ export async function getContractOverview(
     headers: {
       Accept: "application/json",
     },
-    signal,
+    ...(signal !== undefined ? { signal: signal } : {}),
   });
   if (response.status === 404) {
     return null;

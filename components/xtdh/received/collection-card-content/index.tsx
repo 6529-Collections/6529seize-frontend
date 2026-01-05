@@ -26,9 +26,12 @@ type InteractionMode = "button" | "static";
 
 interface XtdhReceivedCollectionCardProps {
   readonly collection: ApiXtdhCollection;
-  readonly isSelected?: boolean;
-  readonly onSelect?: (contract: string | null) => void;
-  readonly interactionMode?: InteractionMode;
+  readonly isSelected?: boolean | undefined;
+  readonly onSelect?:
+    | ((contract: string | null) => void)
+    | undefined
+    | undefined;
+  readonly interactionMode?: InteractionMode | undefined;
 }
 
 export function XtdhReceivedCollectionCard({
@@ -39,11 +42,13 @@ export function XtdhReceivedCollectionCard({
 }: Readonly<XtdhReceivedCollectionCardProps>) {
   const contractAddress = useMemo(() => {
     const trimmed = collection.contract?.trim() ?? "";
-    return isValidEthAddress(trimmed)
-      ? (trimmed as `0x${string}`)
-      : null;
+    return isValidEthAddress(trimmed) ? (trimmed as `0x${string}`) : null;
   }, [collection.contract]);
-  const { data: contract, isLoading, isError } = useContractOverviewQuery({
+  const {
+    data: contract,
+    isLoading,
+    isError,
+  } = useContractOverviewQuery({
     address: contractAddress ?? undefined,
     enabled: Boolean(contractAddress),
   });
@@ -91,12 +96,17 @@ export function XtdhReceivedCollectionCard({
   const floorPriceLabel = formatFloorPrice(contract?.floorPriceEth);
   const totalTokensGrantedLabel = formatCount(collection.total_token_count);
   const activeTokensGrantedLabel = formatCount(collection.active_token_count);
-  const totalContributorsLabel = formatCount(collection.total_contributor_count);
-  const activeContributorsLabel = formatCount(collection.active_contributor_count);
+  const totalContributorsLabel = formatCount(
+    collection.total_contributor_count
+  );
+  const activeContributorsLabel = formatCount(
+    collection.active_contributor_count
+  );
   const xtdhValueLabel = formatXtdhValue(collection.xtdh);
   const xtdhRateLabel = formatXtdhRate(collection.xtdh_rate);
 
-  const isSelectable = interactionMode === "button" && Boolean(onSelect && collection.contract);
+  const isSelectable =
+    interactionMode === "button" && Boolean(onSelect && collection.contract);
 
   const content = (
     <div
@@ -106,7 +116,9 @@ export function XtdhReceivedCollectionCard({
           ? "tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-p-4"
           : "tw-py-6 tw-px-6 desktop-hover:hover:tw-bg-iron-900 tw-rounded-b-xl",
         isSelected && "tw-bg-iron-900/50",
-        !isSelectable && interactionMode === "button" && "tw-cursor-not-allowed tw-opacity-70"
+        !isSelectable &&
+          interactionMode === "button" &&
+          "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
       <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6">
@@ -147,10 +159,19 @@ export function XtdhReceivedCollectionCard({
       </header>
       <dl className="tw-mt-6 md:tw-mt-4 md:tw-ml-20 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-mb-0">
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
-        <CollectionMetric label="Active tokens" value={activeTokensGrantedLabel} />
-        <CollectionMetric label="Tokens granted" value={totalTokensGrantedLabel} />
+        <CollectionMetric
+          label="Active tokens"
+          value={activeTokensGrantedLabel}
+        />
+        <CollectionMetric
+          label="Tokens granted"
+          value={totalTokensGrantedLabel}
+        />
         <CollectionMetric label="Floor price" value={floorPriceLabel} />
-        <CollectionMetric label="Active contributors" value={activeContributorsLabel} />
+        <CollectionMetric
+          label="Active contributors"
+          value={activeContributorsLabel}
+        />
         <CollectionMetric label="Contributors" value={totalContributorsLabel} />
       </dl>
     </div>
@@ -186,11 +207,9 @@ export function CollectionMetric({
   label,
   value,
   className,
-}: Readonly<{ label: string; value: string; className?: string }>) {
+}: Readonly<{ label: string; value: string; className?: string | undefined }>) {
   return (
-    <div
-      className={clsx("tw-flex tw-flex-col tw-text-left", className)}
-    >
+    <div className={clsx("tw-flex tw-flex-col tw-text-left", className)}>
       <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1.5">
         {label}
       </dt>

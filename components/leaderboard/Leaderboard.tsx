@@ -77,8 +77,8 @@ export default function Leaderboard(
       .then((response: ApiBlocksPage) => {
         if (response.data.length > 0) {
           setLastTDH({
-            block: response.data[0].block_number,
-            date: new Date(response.data[0].timestamp),
+            block: response.data[0]?.block_number!,
+            date: new Date(response.data[0]?.timestamp!),
           });
         }
       })
@@ -112,13 +112,14 @@ export default function Leaderboard(
 
   function printCollectorsDropdown() {
     return (
-      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+      <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
         <Dropdown.Toggle>Collectors: {collector}</Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(Collector).map((collector) => (
             <Dropdown.Item
               key={collector}
-              onClick={() => setCollector(collector)}>
+              onClick={() => setCollector(collector)}
+            >
               {[Collector.MEMES_SETS, Collector.GENESIS].includes(collector) ? (
                 <>&nbsp;&nbsp;{collector}</>
               ) : (
@@ -133,7 +134,7 @@ export default function Leaderboard(
 
   function printCollectionsDropdown() {
     return (
-      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+      <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
         <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(Content).map((content) => (
@@ -148,13 +149,14 @@ export default function Leaderboard(
 
   function printSeasonsDropdown() {
     return (
-      <Dropdown className={styles.contentDropdown} drop={"down-centered"}>
+      <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
         <Dropdown.Toggle
           disabled={
             content != Content.MEMES &&
             collector != Collector.MEMES &&
             collector != Collector.MEMES_SETS
-          }>
+          }
+        >
           SZN: {selectedSeason > 0 ? selectedSeason : "All"}
         </Dropdown.Toggle>
         <Dropdown.Menu>
@@ -164,7 +166,8 @@ export default function Leaderboard(
           {seasons.map((season) => (
             <Dropdown.Item
               key={season.display}
-              onClick={() => setSelectedSeason(season.id)}>
+              onClick={() => setSelectedSeason(season.id)}
+            >
               {season.display}
             </Dropdown.Item>
           ))}
@@ -179,12 +182,13 @@ export default function Leaderboard(
         <Col
           className={`d-flex align-items-center`}
           xs={{ span: showViewAll ? 12 : 6 }}
-          sm={{ span: 6 }}>
+          sm={{ span: 6 }}
+        >
           <h1>
             Network{" "}
             {showViewAll && (
               <Link href="/network/nerd">
-                <span className={styles.viewAllLink}>View All</span>
+                <span className={styles["viewAllLink"]}>View All</span>
               </Link>
             )}
           </h1>
@@ -194,14 +198,16 @@ export default function Leaderboard(
             className={
               "no-padding d-flex flex-column align-items-end justify-content-center"
             }
-            xs={{ span: 6 }}>
-            <div className={styles.statsContainer}>
+            xs={{ span: 6 }}
+          >
+            <div className={styles["statsContainer"]}>
               <span>
                 TDH Block&nbsp;
                 <a
                   href={`https://etherscan.io/block/${lastTDH.block}`}
                   rel="noopener noreferrer"
-                  target="_blank">
+                  target="_blank"
+                >
                   {lastTDH.block}
                 </a>
               </span>
@@ -242,25 +248,29 @@ export default function Leaderboard(
             <Col
               className="d-flex justify-content-start gap-5 align-items-center"
               sm={{ span: 12 }}
-              md={{ span: 9 }}>
+              md={{ span: 9 }}
+            >
               {printCollectorsDropdown()}
               {printCollectionsDropdown()}
               {printSeasonsDropdown()}
             </Col>
             <Col
-              className={`${styles.pageHeader}`}
+              className={`${styles["pageHeader"]}`}
               sm={{ span: 12 }}
-              md={{ span: 3 }}>
+              md={{ span: 3 }}
+            >
               <div
-                className={`${styles.headerMenuFocus} d-flex justify-content-center align-items-center`}>
+                className={`${styles["headerMenuFocus"]} d-flex justify-content-center align-items-center`}
+              >
                 <span>
                   <span
                     onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-                    className={`${styles.focus} ${
+                    className={`${styles["focus"]} ${
                       props.focus === LeaderboardFocus.TDH
                         ? ""
-                        : styles.disabled
-                    }`}>
+                        : styles["disabled"]
+                    }`}
+                  >
                     {LeaderboardFocus.TDH}
                   </span>
                 </span>
@@ -270,11 +280,12 @@ export default function Leaderboard(
                     onClick={() =>
                       props.setFocus(LeaderboardFocus.INTERACTIONS)
                     }
-                    className={`${styles.focus} ${
+                    className={`${styles["focus"]} ${
                       props.focus === LeaderboardFocus.INTERACTIONS
                         ? ""
-                        : styles.disabled
-                    }`}>
+                        : styles["disabled"]
+                    }`}
+                  >
                     {LeaderboardFocus.INTERACTIONS}
                   </span>
                 </span>
@@ -285,7 +296,8 @@ export default function Leaderboard(
             <Col xs={1}>{isLoading && <Spinner dimension={30} />}</Col>
             <Col
               xs={11}
-              className={`d-flex justify-content-end align-items-center`}>
+              className={`d-flex justify-content-end align-items-center`}
+            >
               <SearchWalletsDisplay
                 searchWallets={searchWallets}
                 setSearchWallets={setSearchWallets}
@@ -295,7 +307,7 @@ export default function Leaderboard(
           </Row>
         </>
       )}
-      <Row className={`${styles.scrollContainer} pt-2`}>
+      <Row className={`${styles["scrollContainer"]} pt-2`}>
         <Col>
           {props.focus === LeaderboardFocus.TDH && (
             <LeaderboardCardsCollectedComponent

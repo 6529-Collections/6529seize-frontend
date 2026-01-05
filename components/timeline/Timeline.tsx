@@ -178,15 +178,15 @@ export default function Timeline(props: Readonly<Props>) {
   }
 
   return (
-    <div className={styles.timeline}>
+    <div className={styles["timeline"]}>
       {props.steps.map((step, index) => {
         return (
           <div
             key={`timeline-${step.block}`}
-            className={`${styles.timelineContainer} ${
-              index % 2 === 0 ? styles.right : styles.left
+            className={`${styles["timelineContainer"]} ${
+              index % 2 === 0 ? styles["right"] : styles["left"]
             }`}>
-            <div className={styles.content}>
+            <div className={styles["content"]}>
               <h5 className="m-0 mb-3">
                 {`${getDateDisplay(step.transaction_date)} UTC`}
               </h5>
@@ -203,7 +203,7 @@ export default function Timeline(props: Readonly<Props>) {
                         URI
                         <FontAwesomeIcon
                           icon={faExternalLinkSquare}
-                          className={styles.linkIcon}
+                          className={styles["linkIcon"]}
                         />
                       </a>
                       <a
@@ -214,14 +214,14 @@ export default function Timeline(props: Readonly<Props>) {
                         TXN
                         <FontAwesomeIcon
                           icon={faExternalLinkSquare}
-                          className={styles.linkIcon}
+                          className={styles["linkIcon"]}
                         />
                       </a>
                     </span>
                   </Col>
                 </Row>
                 {step.description.changes.length > 0 && (
-                  <ul className={styles.changesUl}>
+                  <ul className={styles["changesUl"]}>
                     {step.description.changes.map((change) => (
                       <li key={`timeline-table-${change.key}`}>
                         <Row className="pt-3 pb-1">

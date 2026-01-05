@@ -6,8 +6,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseIdentityTdhStatsOptions {
   readonly identity: string | null | undefined;
-  readonly enabled?: boolean;
-  readonly staleTime?: number;
+  readonly enabled?: boolean | undefined;
+  readonly staleTime?: number | undefined;
 }
 
 export interface IdentityTdhStats {

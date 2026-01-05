@@ -11,7 +11,7 @@ import { fetchCollection, getCollectionView } from "../page-utils";
 export async function generateMetadata({
   params,
 }: {
-  readonly params: Promise<{ collection: string; view?: string[] }>;
+  readonly params: Promise<{ collection: string; view?: string[] | undefined }>;
 }): Promise<Metadata> {
   const { collection, view } = await params;
   const headers = await getAppCommonHeaders();
@@ -38,7 +38,7 @@ export async function generateMetadata({
 export default async function NextGenCollectionPage({
   params,
 }: {
-  readonly params: Promise<{ collection: string; view?: string[] }>;
+  readonly params: Promise<{ collection: string; view?: string[] | undefined }>;
 }) {
   const { collection, view } = await params;
   const headers = await getAppCommonHeaders();
@@ -48,7 +48,7 @@ export default async function NextGenCollectionPage({
   }
   const resolvedView = getCollectionView(view?.[0] ?? "");
   return (
-    <main className={styles.main}>
+    <main className={styles["main"]}>
       <NextGenCollectionComponent
         collection={resolvedCollection}
         initialView={resolvedView}

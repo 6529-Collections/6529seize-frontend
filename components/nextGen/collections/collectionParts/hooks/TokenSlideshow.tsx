@@ -16,7 +16,7 @@ const MemoizedTokenImage = memo(NextGenTokenImage);
 
 interface TokenSlideshowProps {
   readonly collectionId: number;
-  readonly initialTokens?: NextGenToken[];
+  readonly initialTokens?: NextGenToken[] | undefined;
 }
 
 export default function TokenSlideshow({

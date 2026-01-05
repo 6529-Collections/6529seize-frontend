@@ -29,7 +29,7 @@ interface Props {
   subdelegation?: {
     originalDelegator: string;
     collection: DelegationCollection;
-  };
+  } | undefined;
   ens: string | null | undefined;
   onHide(): any;
   onSetToast(toast: any): any;
@@ -171,7 +171,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                   target="_blank"
                   rel="noopener noreferrer">
                   <FontAwesomeIcon
-                    className={styles.infoIconLink}
+                    className={styles["infoIconLink"]}
                     icon={faInfoCircle}></FontAwesomeIcon>
                 </Link>
               </Form.Label>

@@ -22,7 +22,7 @@ export default function FooterWrapper() {
     getStoredHomeTab()
   );
   useEffect(() => {
-    const win = (globalThis as typeof globalThis & { window?: Window }).window;
+    const win = (globalThis as typeof globalThis & { window?: Window | undefined }).window;
     if (win === undefined) {
       return;
     }
@@ -36,7 +36,7 @@ export default function FooterWrapper() {
       current === nextTab ? current : nextTab
     );
 
-    const handleTabChange = (event: CustomEvent<{ tab?: HomeTab }>) => {
+    const handleTabChange = (event: CustomEvent<{ tab?: HomeTab | undefined }>) => {
       const detail = event.detail;
       if (!detail?.tab || !isHomeTab(detail.tab)) {
         return;

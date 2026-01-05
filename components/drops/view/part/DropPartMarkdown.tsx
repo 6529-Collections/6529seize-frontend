@@ -38,10 +38,13 @@ const headingClassName = "tw-text-iron-200 tw-break-words word-break";
 
 type MarkdownRendererProps<T extends ElementType> =
   ComponentPropsWithoutRef<T> &
-    ExtraProps & { children?: ReactNode; className?: string };
+    ExtraProps & {
+      children?: ReactNode | undefined;
+      className?: string | undefined;
+    };
 
 type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
-  inline?: boolean;
+  inline?: boolean | undefined;
 };
 
 type MarkdownComponentsOptions = {
@@ -63,7 +66,8 @@ const InlineCodeRenderer = ({
     className={mergeClassNames(
       "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
       className
-    )}>
+    )}
+  >
     {children}
   </code>
 );
@@ -124,7 +128,8 @@ const CodeBlockRenderer = ({
       className={mergeClassNames(
         "tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words",
         className
-      )}>
+      )}
+    >
       {children}
     </code>
   );
@@ -175,7 +180,8 @@ const createMarkdownComponents = ({
       className={mergeClassNames(
         "tw-text-md tw-text-iron-200 tw-break-words word-break",
         className
-      )}>
+      )}
+    >
       {customRenderer(children)}
     </li>
   );
@@ -190,7 +196,8 @@ const createMarkdownComponents = ({
       className={mergeClassNames(
         "tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0",
         className
-      )}>
+      )}
+    >
       {customRenderer(children)}
     </blockquote>
   );
@@ -201,11 +208,11 @@ const createMarkdownComponents = ({
     h3: createHeadingRenderer("h3"),
     h4: createHeadingRenderer("h4"),
     h5: createHeadingRenderer("h5"),
-    p: renderParagraph,
+    ...(renderParagraph ? { p: renderParagraph } : {}),
     li: ListItemRenderer,
     code: CodeRenderer,
-    a: renderAnchor,
-    img: renderImage,
+    ...(renderAnchor ? { a: renderAnchor } : {}),
+    ...(renderImage ? { img: renderImage } : {}),
     br: BreakComponent,
     blockquote: BlockQuoteRenderer,
   } satisfies Components;
@@ -216,8 +223,8 @@ export interface DropPartMarkdownProps {
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly textSize?: "sm" | "md";
-  readonly currentDropId?: string;
+  readonly textSize?: "sm" | "md" | undefined;
+  readonly currentDropId?: string | undefined;
 }
 
 function DropPartMarkdown({
@@ -337,7 +344,8 @@ function DropPartMarkdown({
       rehypePlugins={rehypePlugins}
       remarkPlugins={remarkPlugins}
       className="tw-w-full"
-      components={markdownComponents}>
+      components={markdownComponents}
+    >
       {processedContent}
     </Markdown>
   );

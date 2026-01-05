@@ -33,10 +33,10 @@ describe('EndedParticipationDrop', () => {
       />
     );
     // Initially menu should be closed
-    expect(WaveDropMobileMenuMock.mock.calls[0][0].isOpen).toBe(false);
+    expect(WaveDropMobileMenuMock.mock.calls[0][0]?.isOpen).toBe(false);
     
     // Trigger onLongPress prop from WaveDropContent
-    const onLongPress = WaveDropContentMock.mock.calls[0][0].onLongPress;
+    const onLongPress = WaveDropContentMock.mock.calls[0][0]?.onLongPress;
     onLongPress();
     
     // Force a re-render to check updated state
@@ -54,6 +54,6 @@ describe('EndedParticipationDrop', () => {
     );
     
     // After long press, menu should be open
-    expect(WaveDropMobileMenuMock.mock.calls[1][0].isOpen).toBe(true);
+    expect(WaveDropMobileMenuMock.mock.calls[1][0]?.isOpen).toBe(true);
   });
 });
