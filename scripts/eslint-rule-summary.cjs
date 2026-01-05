@@ -1,18 +1,44 @@
-const { spawn } = require("node:child_process");
+const { spawn, execSync } = require("node:child_process");
 const fs = require("node:fs");
 
 const args = process.argv.slice(2);
 const outputPath = parseOutputPath(args);
 const configPath = parseConfigPath(args);
+const changedOnly = args.includes("--changed");
 
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const npmArgs = ["--silent", "run", "lint", "--"];
-if (configPath) {
-  npmArgs.push("--config", configPath);
+function getChangedFiles() {
+  const cmd = `{ git diff --name-only -z main...HEAD -- "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"; git ls-files --others --exclude-standard -z -- "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"; }`;
+  try {
+    const output = execSync(cmd, { shell: "/bin/bash", encoding: "utf8" });
+    return output.split("\0").filter((file) => file && fs.existsSync(file));
+  } catch {
+    return [];
+  }
 }
-npmArgs.push("--format", "json");
 
-const proc = spawn(npmCommand, npmArgs, { stdio: ["ignore", "pipe", "pipe"] });
+let proc;
+
+if (changedOnly) {
+  const files = getChangedFiles();
+  if (files.length === 0) {
+    console.log("No changed files to lint.");
+    process.exit(0);
+  }
+  const eslintArgs = ["eslint", "--no-warn-ignored", "--format", "json"];
+  if (configPath) {
+    eslintArgs.push("--config", configPath);
+  }
+  eslintArgs.push(...files);
+  proc = spawn("npx", eslintArgs, { stdio: ["ignore", "pipe", "pipe"] });
+} else {
+  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+  const npmArgs = ["--silent", "run", "lint", "--"];
+  if (configPath) {
+    npmArgs.push("--config", configPath);
+  }
+  npmArgs.push("--format", "json");
+  proc = spawn(npmCommand, npmArgs, { stdio: ["ignore", "pipe", "pipe"] });
+}
 
 let stdout = "";
 let stderr = "";
