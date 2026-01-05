@@ -183,7 +183,7 @@ export const MemesSingleWaveDropInfoPanel = ({
             <WaveDropAdditionalInfo drop={drop} />
 
             {artworkMedia && fileInfo && (
-              <div className="tw-flex tw-items-center tw-gap-x-3">
+              <div className="tw-flex tw-items-center tw-gap-x-3 tw-border-t tw-border-iron-800 tw-pt-8 tw-border-x-0 tw-border-solid tw-border-b-0 tw-mt-8">
                 <span className="tw-text-xs tw-font-medium tw-text-iron-600">
                   Media Type:{" "}
                   <span className="tw-text-iron-400">

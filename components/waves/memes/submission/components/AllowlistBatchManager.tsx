@@ -71,7 +71,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   placeholder="0x..."
                   value={batch.contract ?? ""}
                   onChange={(e) => handleBatchChange(index, "contract", e.target.value)}
-                  className={`tw-form-input tw-w-full tw-rounded-lg tw-pl-4 tw-pr-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                  className={`tw-form-input tw-w-full tw-rounded-lg tw-pl-4 tw-pr-11 tw-truncate tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.contract ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}
                 />
@@ -90,7 +90,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   placeholder="Optional"
                   value={batch.token_ids_raw ?? ""}
                   onChange={(e) => handleBatchChange(index, "token_ids_raw", e.target.value)}
-                  className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                  className={`tw-form-input tw-w-full tw-rounded-lg tw-pl-4 tw-pr-11 tw-truncat tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.token_ids ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}
                 />

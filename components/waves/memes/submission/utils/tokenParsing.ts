@@ -19,8 +19,12 @@ export function validateTokenIdFormat(input: string): string | null {
       if (parts.length !== 2) {
         return "Invalid range format. Use: 1-5";
       }
-      const start = parseInt(parts[0].trim(), 10);
-      const end = parseInt(parts[1].trim(), 10);
+      const [startRaw, endRaw] = parts;
+      if (!startRaw || !endRaw) {
+        return "Invalid range format. Use: 1-5";
+      }
+      const start = parseInt(startRaw.trim(), 10);
+      const end = parseInt(endRaw.trim(), 10);
       if (isNaN(start) || isNaN(end)) {
         return "Invalid range. Use numbers only: 1-5";
       }

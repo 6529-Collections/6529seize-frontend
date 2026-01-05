@@ -236,7 +236,7 @@ export const SingleWaveDropTechnicalDetails = ({
                         key={`${entry.address}-${index}`}
                         className="tw-py-3 tw-px-3 tw-flex tw-items-center tw-justify-between tw-gap-3"
                       >
-                        <div className="tw-flex-1 tw-min-w-0 tw-font-mono tw-text-iron-200 tw-font-medium tw-text-xs tw-break-all">
+                        <div className="tw-flex-1 tw-min-w-0 tw-font-mono tw-line-clamp-1 tw-text-iron-200 tw-font-medium tw-text-xs tw-break-all">
                           {entry.address}
                         </div>
                         <div className="tw-flex tw-items-center tw-gap-2 tw-shrink-0">
@@ -274,10 +274,10 @@ export const SingleWaveDropTechnicalDetails = ({
                       >
                         <div>
                           <div className="tw-text-[10px] tw-text-iron-500">
-                            Contract
+                            Contract Address
                           </div>
                           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-                            <div className="tw-font-mono tw-text-iron-200 tw-font-medium tw-text-xs tw-break-all">
+                            <div className="tw-font-mono tw-line-clamp-1 tw-text-iron-200 tw-font-medium tw-text-xs tw-break-all">
                               {batch.contract}
                             </div>
                             <button
@@ -296,7 +296,7 @@ export const SingleWaveDropTechnicalDetails = ({
                         {batch.tokenIds && (
                           <div className="tw-pt-2 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
                             <div className="tw-text-[10px] tw-text-iron-500 tw-mb-2">
-                              Eligible Token IDs
+                              Token IDs
                             </div>
                             <div className="tw-font-mono tw-text-iron-200 tw-font-medium tw-text-xs">
                               {batch.tokenIds}

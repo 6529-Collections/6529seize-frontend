@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type { FC } from "react";
 import { motion } from "framer-motion";
 import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, { AllowlistBatchRaw } from "../components/AllowlistBatchManager";
@@ -15,11 +15,9 @@ interface AdditionalInfoStepProps {
   readonly airdropEntries: AirdropEntry[];
   readonly onAirdropEntriesChange: (entries: AirdropEntry[]) => void;
   readonly allowlistBatches: AllowlistBatchRaw[];
-  readonly artistProfileMedia: string[];
   readonly artworkCommentaryMedia: string[];
   readonly artworkCommentary: string;
   readonly onBatchesChange: (batches: AllowlistBatchRaw[]) => void;
-  readonly onArtistProfileMediaChange: (media: string[]) => void;
   readonly onArtworkCommentaryMediaChange: (media: string[]) => void;
   readonly onArtworkCommentaryChange: (commentary: string) => void;
   readonly onBack: () => void;
@@ -27,15 +25,13 @@ interface AdditionalInfoStepProps {
   readonly isSubmitting: boolean;
 }
 
-const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
+const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   airdropEntries,
   onAirdropEntriesChange,
   allowlistBatches,
-  artistProfileMedia,
   artworkCommentaryMedia,
   artworkCommentary,
   onBatchesChange,
-  onArtistProfileMediaChange,
   onArtworkCommentaryMediaChange,
   onArtworkCommentaryChange,
   onBack,
@@ -117,17 +113,19 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
         <AllowlistBatchManager
           batches={allowlistBatches}
           onBatchesChange={onBatchesChange}
-          errors={allowlistBatches.map((b) => ({
-            contract: getContractError(b.contract),
-            token_ids: getTokenIdsError(b.token_ids_raw),
-          }))}
+          errors={allowlistBatches.map((batch) => {
+            const contractError = getContractError(batch.contract);
+            const tokenIdsError = getTokenIdsError(batch.token_ids_raw);
+            return {
+              ...(contractError ? { contract: contractError } : {}),
+              ...(tokenIdsError ? { token_ids: tokenIdsError } : {}),
+            };
+          })}
         />
 
         <AdditionalMediaUpload
-          artistProfileMedia={artistProfileMedia}
           artworkCommentaryMedia={artworkCommentaryMedia}
           artworkCommentary={artworkCommentary}
-          onArtistProfileMediaChange={onArtistProfileMediaChange}
           onArtworkCommentaryMediaChange={onArtworkCommentaryMediaChange}
           onArtworkCommentaryChange={onArtworkCommentaryChange}
         />

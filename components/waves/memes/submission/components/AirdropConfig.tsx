@@ -22,6 +22,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
   );
 
   const remaining = AIRDROP_TOTAL - totalAllocated;
+  const firstEntry = entries[0];
 
   const getAddressError = (address: string): string | null => {
     if (!address) return null;
@@ -47,7 +48,11 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
   const handleAddressChange = useCallback(
     (index: number, value: string) => {
       const newEntries = [...entries];
-      newEntries[index] = { ...newEntries[index], address: value };
+      const currentEntry = newEntries[index];
+      if (!currentEntry) {
+        return;
+      }
+      newEntries[index] = { ...currentEntry, address: value };
       onEntriesChange(newEntries);
     },
     [entries, onEntriesChange]
@@ -56,8 +61,15 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
   const handleCountChange = useCallback(
     (index: number, value: string) => {
       const newEntries = [...entries];
+      const currentEntry = newEntries[index];
+      if (!currentEntry) {
+        return;
+      }
       const numVal = parseInt(value, 10);
-      newEntries[index] = { ...newEntries[index], count: isNaN(numVal) ? 0 : Math.max(0, numVal) };
+      newEntries[index] = {
+        ...currentEntry,
+        count: isNaN(numVal) ? 0 : Math.max(0, numVal),
+      };
       onEntriesChange(newEntries);
     },
     [entries, onEntriesChange]
@@ -116,7 +128,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 placeholder="0x..."
                 value={entry.address}
                 onChange={(e) => handleAddressChange(index, e.target.value)}
-                className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                className={`tw-form-input tw-w-full tw-rounded-lg tw-pl-4 tw-pr-11 tw-truncate tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
                   getAddressError(entry.address) ? "tw-ring-red" : "tw-ring-iron-700"
                 } focus:tw-ring-primary-400`}
               />
@@ -135,7 +147,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 max={AIRDROP_TOTAL}
                 value={entry.count || ""}
                 onChange={(e) => handleCountChange(index, e.target.value)}
-                className="tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
+                className="tw-form-input tw-w-full tw-rounded-lg tw-pl-4 tw-pr-11 tw-truncate tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400"
               />
             </TraitWrapper>
 
@@ -165,7 +177,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
       </button>
 
       {/* Validation hint */}
-      {entries.length === 1 && !entries[0].address && (
+      {entries.length === 1 && !firstEntry?.address && (
         <p className="tw-text-xs tw-text-iron-500 tw-mt-3">
           Enter at least one wallet address to receive airdrops.
         </p>

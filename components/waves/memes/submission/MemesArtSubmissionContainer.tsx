@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import type { FC } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -30,9 +31,10 @@ interface MemesArtSubmissionContainerProps {
  * 5. Using a separate mutation hook for API submission
  * 6. Using a dedicated progress component for visual feedback
  */
-const MemesArtSubmissionContainer: React.FC<
-  MemesArtSubmissionContainerProps
-> = ({ onClose, wave }) => {
+const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
+  onClose,
+  wave,
+}) => {
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm();
   const { isSafeWallet, address } = useSeizeConnectContext();
@@ -60,14 +62,6 @@ const MemesArtSubmissionContainer: React.FC<
   const handleFileSelect = (file: File) => {
     form.handleFileSelect(file);
   };
-
-  // Memoized callbacks for additional media to prevent infinite loops
-  const handleArtistProfileMediaChange = useCallback(
-    (media: string[]) => {
-      form.setAdditionalMedia({ artist_profile_media: media });
-    },
-    [form.setAdditionalMedia]
-  );
 
   const handleArtworkCommentaryMediaChange = useCallback(
     (media: string[]) => {
@@ -186,11 +180,9 @@ const MemesArtSubmissionContainer: React.FC<
         airdropEntries={form.operationalData.airdrop_config}
         onAirdropEntriesChange={form.setAirdropConfig}
         allowlistBatches={form.operationalData.allowlist_batches}
-        artistProfileMedia={form.operationalData.additional_media.artist_profile_media}
         artworkCommentaryMedia={form.operationalData.additional_media.artwork_commentary_media}
         artworkCommentary={form.operationalData.commentary}
         onBatchesChange={form.setAllowlistBatches}
-        onArtistProfileMediaChange={handleArtistProfileMediaChange}
         onArtworkCommentaryMediaChange={handleArtworkCommentaryMediaChange}
         onArtworkCommentaryChange={form.setCommentary}
         onBack={form.handleBackToArtwork}

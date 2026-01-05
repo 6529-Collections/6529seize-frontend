@@ -87,7 +87,9 @@ export const WaveDropAdditionalInfo = ({
     return { commentary: commentaryValue, mediaItems: mediaItemsValue };
   }, [drop.metadata]);
 
-  if (!commentary && mediaItems.length === 0) {
+  const displayedMedia = mediaItems.slice(0, MAX_MEDIA);
+
+  if (!commentary && displayedMedia.length === 0) {
     return null;
   }
 
@@ -95,7 +97,7 @@ export const WaveDropAdditionalInfo = ({
     <section className="tw-space-y-6">
       <div className="tw-space-y-2">
         <h2 className="tw-text-lg tw-font-semibold tw-text-iron-100">
-          Process
+          Media & Notes
         </h2>
         {commentary && (
           <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-leading-relaxed">
@@ -104,12 +106,16 @@ export const WaveDropAdditionalInfo = ({
         )}
       </div>
 
-      {mediaItems.length > 0 && (
-        <div className="tw-grid tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
-          {mediaItems.slice(0, MAX_MEDIA).map((item, index) => (
+      {displayedMedia.length > 0 && (
+        <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
+          {displayedMedia.map((item, index) => (
             <div
               key={`${item.url}-${index}`}
-              className="tw-relative tw-aspect-[4/3] tw-overflow-hidden tw-bg-white/[0.02]"
+              className={`tw-relative tw-overflow-hidden tw-bg-white/[0.02] ${
+                item.isVideo
+                  ? "tw-aspect-video sm:tw-col-span-2"
+                  : "tw-aspect-[4/3]"
+              }`}
             >
               {item.isVideo ? (
                 <video
