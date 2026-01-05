@@ -1,13 +1,8 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AllowlistBatchManager from "@/components/waves/memes/submission/components/AllowlistBatchManager";
 
 describe("AllowlistBatchManager", () => {
-  const defaultProps = {
-    batches: [],
-    onBatchesChange: jest.fn(),
-  };
-
   it("renders with no batches and allows adding one", async () => {
     const user = userEvent.setup();
     const onBatchesChange = jest.fn();

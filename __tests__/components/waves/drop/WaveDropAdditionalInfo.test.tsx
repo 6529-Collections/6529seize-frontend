@@ -4,7 +4,7 @@ import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submi
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => <img {...props} alt={props.alt ?? ""} />,
 }));
 
 const buildDrop = (metadata: { data_key: string; data_value: string }[]) =>

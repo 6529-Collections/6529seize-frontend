@@ -73,9 +73,12 @@ export const WaveDropAdditionalInfo = ({
       additionalMediaEntry?.data_value
     );
     const mediaItemsValue = additionalMedia.artwork_commentary_media
-      .filter((url): url is string => typeof url === "string")
+      .filter(
+        (url): url is string =>
+          typeof url === "string" && url.trim().length > 0
+      )
       .map((url) => parseIpfsUrl(url))
-      .filter((url): url is string => Boolean(url))
+      .filter((url): url is string => url.length > 0)
       .map((url) => {
         const isVideo = isVideoUrl(url);
         const displayUrl = isVideo
@@ -123,7 +126,14 @@ export const WaveDropAdditionalInfo = ({
                   className="tw-h-full tw-w-full tw-object-cover"
                   controls
                   preload="metadata"
-                />
+                >
+                  <track
+                    kind="captions"
+                    src="data:text/vtt,WEBVTT"
+                    srcLang="en"
+                    label="Captions"
+                  />
+                </video>
               ) : (
                 <Image
                   src={item.displayUrl}

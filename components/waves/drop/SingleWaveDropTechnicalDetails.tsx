@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { Tooltip } from "react-tooltip";
@@ -17,6 +17,10 @@ interface AirdropEntry {
 interface AllowlistBatch {
   readonly contract: string;
   readonly tokenIds: string;
+}
+
+function isPresent<T>(value: T | null): value is T {
+  return value !== null;
 }
 
 const parseJson = <T,>(raw: string | undefined, fallback: T): T => {
@@ -53,7 +57,7 @@ const parseAirdropConfig = (raw: string | undefined): AirdropEntry[] => {
 
       return { address, count: countValue };
     })
-    .filter((entry): entry is AirdropEntry => Boolean(entry));
+    .filter(isPresent);
 };
 
 const parsePaymentAddress = (raw: string | undefined): string => {
@@ -81,14 +85,14 @@ const parseAllowlistBatches = (raw: string | undefined): AllowlistBatch[] => {
       };
       const contract =
         typeof record?.contract === "string" ? record.contract.trim() : "";
-      const tokenIds =
-        typeof record?.token_ids === "string"
-          ? record.token_ids.trim()
-          : Array.isArray(record?.token_ids)
-          ? record.token_ids.join(", ")
-          : typeof record?.token_ids_raw === "string"
-          ? record.token_ids_raw.trim()
-          : "";
+      let tokenIds = "";
+      if (typeof record?.token_ids === "string") {
+        tokenIds = record.token_ids.trim();
+      } else if (Array.isArray(record?.token_ids)) {
+        tokenIds = record.token_ids.join(", ");
+      } else if (typeof record?.token_ids_raw === "string") {
+        tokenIds = record.token_ids_raw.trim();
+      }
 
       if (!contract) {
         return null;
@@ -96,7 +100,7 @@ const parseAllowlistBatches = (raw: string | undefined): AllowlistBatch[] => {
 
       return { contract, tokenIds };
     })
-    .filter((batch): batch is AllowlistBatch => Boolean(batch));
+    .filter(isPresent);
 };
 
 interface SingleWaveDropTechnicalDetailsProps {
@@ -114,15 +118,16 @@ export const SingleWaveDropTechnicalDetails = ({
       if (!value) {
         return;
       }
-      const copyPromise = navigator?.clipboard?.writeText?.(value);
-      if (!copyPromise) {
+      const writeText = navigator?.clipboard?.writeText;
+      if (!writeText) {
         setToast({
           message: "Unable to copy to clipboard.",
           type: "error",
         });
         return;
       }
-      copyPromise
+      writeText
+        .call(navigator.clipboard, value)
         .then(() => {
           setToast({
             message: "Copied to clipboard.",
@@ -162,6 +167,9 @@ export const SingleWaveDropTechnicalDetails = ({
     airdropEntries.length > 0 ||
     allowlistBatches.length > 0;
 
+  const panelId = useId();
+  const buttonId = `${panelId}-toggle`;
+
   if (!hasDetails) {
     return null;
   }
@@ -170,6 +178,9 @@ export const SingleWaveDropTechnicalDetails = ({
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        id={buttonId}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
         className={`tw-w-full tw-px-4 tw-py-4 tw-flex tw-items-center tw-justify-between tw-text-left desktop-hover:hover:tw-bg-iron-900 tw-transition-colors tw-duration-300 tw-ease-out tw-border-0 ${
           isOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
         }`}
@@ -196,6 +207,9 @@ export const SingleWaveDropTechnicalDetails = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id={panelId}
+            role="region"
+            aria-labelledby={buttonId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
