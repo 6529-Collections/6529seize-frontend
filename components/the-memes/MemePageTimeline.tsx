@@ -16,9 +16,8 @@ export function MemePageTimeline(props: {
 
   useEffect(() => {
     async function fetchHistory(url: string) {
-      return fetchAllPages<NFTHistory>(url).then((response) => {
-        setNftHistory(response);
-      });
+      const response = await fetchAllPages<NFTHistory>(url);
+      setNftHistory(response);
     }
     if (props.nft) {
       const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`;

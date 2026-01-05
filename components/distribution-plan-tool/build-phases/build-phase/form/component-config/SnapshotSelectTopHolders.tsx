@@ -125,9 +125,9 @@ export default function SnapshotSelectTopHolders({
     const missingTopHolderTypeError = !topHolderType;
 
     const localUniqueWalletsHigherThanTotalError =
-      !!localUniqueWalletsCount &&
-      !!config.uniqueWalletsCount &&
-      !!(localUniqueWalletsCount > config.uniqueWalletsCount);
+      typeof localUniqueWalletsCount === "number" &&
+      typeof config.uniqueWalletsCount === "number" &&
+      localUniqueWalletsCount > config.uniqueWalletsCount;
 
     const fromAndToMissingError =
       typeof from !== "number" && typeof to !== "number";

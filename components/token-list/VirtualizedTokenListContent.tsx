@@ -1,7 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-import { ROW_HEIGHT, GRID_ROW_HEIGHT, DEFAULT_OVERSCAN, getVisibleWindowBounds } from "./utils";
+import {
+  ROW_HEIGHT,
+  GRID_ROW_HEIGHT,
+  DEFAULT_OVERSCAN,
+  getVisibleWindowBounds,
+} from "./utils";
 import type { VirtualizedTokenListContentProps } from "./types";
 import { usePersistentScrollOffset } from "./hooks/usePersistentScrollOffset";
 import { useVisibleTokenWindow } from "./hooks/useVisibleTokenWindow";
@@ -32,12 +37,16 @@ export function VirtualizedTokenListContent({
   tokens,
 }: VirtualizedTokenListContentProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const initialOffset = usePersistentScrollOffset(scrollKey, scrollContainerRef);
+  const initialOffset = usePersistentScrollOffset(
+    scrollKey,
+    scrollContainerRef
+  );
 
   const isGrid = layout === "grid";
   const rowCount = isGrid ? Math.ceil(totalCount / columns) : totalCount;
   const rowHeight = isGrid ? GRID_ROW_HEIGHT : ROW_HEIGHT;
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => scrollContainerRef.current,
@@ -47,15 +56,23 @@ export function VirtualizedTokenListContent({
   });
 
   const virtualItems = virtualizer.getVirtualItems();
-  const { firstVisibleIndex, lastVisibleIndex } = getVisibleWindowBounds(virtualItems);
+  const { firstVisibleIndex, lastVisibleIndex } =
+    getVisibleWindowBounds(virtualItems);
 
   // Calculate token indices based on row indices
-  const firstTokenIndex = isGrid ? firstVisibleIndex! * columns : firstVisibleIndex;
+  const firstTokenIndex = isGrid
+    ? firstVisibleIndex! * columns
+    : firstVisibleIndex;
   const lastTokenIndex = isGrid
     ? Math.min((lastVisibleIndex + 1) * columns - 1, totalCount - 1)
     : lastVisibleIndex;
 
-  const windowTokens = useVisibleTokenWindow(ranges, firstTokenIndex!, lastTokenIndex, tokens);
+  const windowTokens = useVisibleTokenWindow(
+    ranges,
+    firstTokenIndex!,
+    lastTokenIndex,
+    tokens
+  );
 
   const { metadataMap, metadataQuery } = useTokenMetadataWindow({
     contractAddress,
@@ -80,12 +97,24 @@ export function VirtualizedTokenListContent({
         onEndReached({ lastVisibleIndex: lastTokenIndex, totalCount });
       }
     }
-  }, [onEndReached, totalCount, lastVisibleIndex, overscan, endReachedOffset, rowCount, lastTokenIndex]);
+  }, [
+    onEndReached,
+    totalCount,
+    lastVisibleIndex,
+    overscan,
+    endReachedOffset,
+    rowCount,
+    lastTokenIndex,
+  ]);
 
   if (totalCount === 0) {
     return (
       <>
-        <div ref={scrollContainerRef} aria-hidden="true" className="tw-hidden" />
+        <div
+          ref={scrollContainerRef}
+          aria-hidden="true"
+          className="tw-hidden"
+        />
         {emptyState}
       </>
     );
@@ -133,7 +162,6 @@ export function VirtualizedTokenListContent({
                     width: "100%",
                   }}
                   columns={columns}
-
                 />
               );
             }
