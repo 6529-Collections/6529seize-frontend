@@ -202,9 +202,7 @@ const getVotingValidationErrors = ({
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_CATEGORY);
     }
 
-    if (!voting.profileId) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
-    } else if (voting.profileId.trim() === "") {
+    if (!voting.profileId || voting.profileId.trim() === "") {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
     }
   } else {

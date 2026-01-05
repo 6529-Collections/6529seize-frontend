@@ -45,7 +45,7 @@ const plugins = {
 // RULES
 // =============================================================================
 const rules = {
-   "@typescript-eslint/no-shadow": "error",
+   "sonarjs/no-duplicated-branches": "error",
 };
 
 // =============================================================================
