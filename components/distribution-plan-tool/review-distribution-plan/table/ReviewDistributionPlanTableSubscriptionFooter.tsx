@@ -19,6 +19,16 @@ interface DistributionOverview {
   automatic_airdrops: number;
 }
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Something went wrong.";
+}
+
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
@@ -96,15 +106,9 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
       await refreshOverview(contract, tokenId);
     } catch (error: unknown) {
-      const errorMessage =
-        typeof error === "string"
-          ? error
-          : error instanceof Error
-          ? error.message
-          : "Something went wrong.";
       setToast({
         type: "error",
-        message: `Reset failed: ${errorMessage}`,
+        message: `Reset failed: ${getErrorMessage(error)}`,
       });
     } finally {
       setIsResetting(false);
@@ -139,15 +143,9 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         });
       }
     } catch (error: unknown) {
-      const errorMessage =
-        typeof error === "string"
-          ? error
-          : error instanceof Error
-          ? error.message
-          : "Something went wrong.";
       setToast({
         type: "error",
-        message: errorMessage,
+        message: getErrorMessage(error),
       });
     } finally {
       setIsFinalizing(false);
@@ -322,15 +320,9 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                 });
                 await refreshOverview(contract, tokenId);
               } catch (error: unknown) {
-                const errorMessage =
-                  typeof error === "string"
-                    ? error
-                    : error instanceof Error
-                    ? error.message
-                    : "Something went wrong.";
                 setToast({
                   type: "error",
-                  message: errorMessage,
+                  message: getErrorMessage(error),
                 });
               } finally {
                 setIsUploading(false);
@@ -376,14 +368,10 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                     message: response.error || "Upload failed",
                   });
                 }
-              } catch (error: any) {
-                const errorMessage =
-                  typeof error === "string"
-                    ? error
-                    : error?.message || "Something went wrong.";
+              } catch (error: unknown) {
                 setToast({
                   type: "error",
-                  message: errorMessage,
+                  message: getErrorMessage(error),
                 });
               } finally {
                 setIsUploadingAirdrops(false);
