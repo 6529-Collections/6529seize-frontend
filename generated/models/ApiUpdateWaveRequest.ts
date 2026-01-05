@@ -11,11 +11,11 @@
  * Do not edit the class manually.
  */
 
-import type { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
-import type { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
-import type { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
-import type { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
-import type { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
+import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
+import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
+import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
+import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateWaveRequest {

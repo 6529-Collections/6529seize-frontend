@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import type { ApiIntRange } from '../models/ApiIntRange';
-import type { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
-import type { ApiWaveScope } from '../models/ApiWaveScope';
-import type { ApiWaveType } from '../models/ApiWaveType';
+import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
+import { ApiWaveScope } from '../models/ApiWaveScope';
+import { ApiWaveType } from '../models/ApiWaveType';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveConfig {

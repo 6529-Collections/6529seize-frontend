@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiWaveDecision } from '../models/ApiWaveDecision';
+import { ApiWaveDecision } from '../models/ApiWaveDecision';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveDecisionsPage {

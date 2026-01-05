@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiProfileClassification } from '../models/ApiProfileClassification';
+import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateOrUpdateProfileRequest {

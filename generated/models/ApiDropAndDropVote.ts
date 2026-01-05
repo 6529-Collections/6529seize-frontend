@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDrop } from '../models/ApiDrop';
-import type { ApiDropVote } from '../models/ApiDropVote';
+import { ApiDrop } from '../models/ApiDrop';
+import { ApiDropVote } from '../models/ApiDropVote';
 import { HttpFile } from '../http/http';
 
 export class ApiDropAndDropVote {

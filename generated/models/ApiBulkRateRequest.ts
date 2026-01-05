@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiRateMatter } from '../models/ApiRateMatter';
+import { ApiRateMatter } from '../models/ApiRateMatter';
 import { HttpFile } from '../http/http';
 
 export class ApiBulkRateRequest {

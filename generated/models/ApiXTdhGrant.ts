@@ -11,9 +11,9 @@
  * Do not edit the class manually.
  */
 
-import type { ApiProfileMin } from '../models/ApiProfileMin';
-import type { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
-import type { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
+import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrant {

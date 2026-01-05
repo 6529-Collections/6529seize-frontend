@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiArtistItem } from '../models/ApiArtistItem';
+import { ApiArtistItem } from '../models/ApiArtistItem';
 import { HttpFile } from '../http/http';
 
 export class ApiArtistsPage {

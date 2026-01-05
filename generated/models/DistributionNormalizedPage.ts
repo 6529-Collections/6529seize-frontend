@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { DistributionNormalized } from '../models/DistributionNormalized';
+import { DistributionNormalized } from '../models/DistributionNormalized';
 import { HttpFile } from '../http/http';
 
 export class DistributionNormalizedPage {

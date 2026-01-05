@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
-import type { ApiWaveMin } from '../models/ApiWaveMin';
+import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
+import { ApiWaveMin } from '../models/ApiWaveMin';
 import { HttpFile } from '../http/http';
 
 export class ApiDropsLeaderboardPage {

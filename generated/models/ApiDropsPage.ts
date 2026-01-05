@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDrop } from '../models/ApiDrop';
+import { ApiDrop } from '../models/ApiDrop';
 import { HttpFile } from '../http/http';
 
 export class ApiDropsPage {

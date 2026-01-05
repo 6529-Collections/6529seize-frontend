@@ -11,11 +11,11 @@
  * Do not edit the class manually.
  */
 
-import type { ApiGroupCicFilter } from '../models/ApiGroupCicFilter';
-import type { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
-import type { ApiGroupOwnsNft } from '../models/ApiGroupOwnsNft';
-import type { ApiGroupRepFilter } from '../models/ApiGroupRepFilter';
-import type { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
+import { ApiGroupCicFilter } from '../models/ApiGroupCicFilter';
+import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
+import { ApiGroupOwnsNft } from '../models/ApiGroupOwnsNft';
+import { ApiGroupRepFilter } from '../models/ApiGroupRepFilter';
+import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
 import { HttpFile } from '../http/http';
 
 export class ApiGroupDescription {

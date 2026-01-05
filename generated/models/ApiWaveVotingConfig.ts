@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import type { ApiIntRange } from '../models/ApiIntRange';
-import type { ApiProfileMin } from '../models/ApiProfileMin';
-import type { ApiWaveCreditType } from '../models/ApiWaveCreditType';
-import type { ApiWaveScope } from '../models/ApiWaveScope';
+import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
+import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveVotingConfig {

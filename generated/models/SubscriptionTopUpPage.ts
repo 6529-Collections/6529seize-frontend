@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { SubscriptionTopUp } from '../models/SubscriptionTopUp';
+import { SubscriptionTopUp } from '../models/SubscriptionTopUp';
 import { HttpFile } from '../http/http';
 
 export class SubscriptionTopUpPage {

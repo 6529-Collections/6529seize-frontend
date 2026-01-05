@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiBulkRateSkippedIdentity } from '../models/ApiBulkRateSkippedIdentity';
+import { ApiBulkRateSkippedIdentity } from '../models/ApiBulkRateSkippedIdentity';
 import { HttpFile } from '../http/http';
 
 export class ApiBulkRateResponse {

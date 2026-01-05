@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiTdhEdition } from '../models/ApiTdhEdition';
+import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { HttpFile } from '../http/http';
 
 export class ApiTdhEditionsPage {

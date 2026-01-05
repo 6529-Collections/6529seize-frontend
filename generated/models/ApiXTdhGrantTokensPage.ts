@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiXTdhGrantToken } from '../models/ApiXTdhGrantToken';
+import { ApiXTdhGrantToken } from '../models/ApiXTdhGrantToken';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrantTokensPage {

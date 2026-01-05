@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
+import { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
 import { HttpFile } from '../http/http';
 
 export class DistributionNormalized {

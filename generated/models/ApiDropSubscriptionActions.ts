@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
+import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { HttpFile } from '../http/http';
 
 export class ApiDropSubscriptionActions {

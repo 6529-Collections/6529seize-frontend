@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
+import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { HttpFile } from '../http/http';
 
 export class ApiOutgoingIdentitySubscriptionsPage {

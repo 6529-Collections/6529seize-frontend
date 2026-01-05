@@ -11,18 +11,18 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
-import type { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
-import type { ApiDropMetadata } from '../models/ApiDropMetadata';
-import type { ApiDropPart } from '../models/ApiDropPart';
-import type { ApiDropRater } from '../models/ApiDropRater';
-import type { ApiDropReaction } from '../models/ApiDropReaction';
-import type { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
-import type { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
-import type { ApiDropType } from '../models/ApiDropType';
-import type { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import type { ApiProfileMin } from '../models/ApiProfileMin';
-import type { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
+import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
+import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
+import { ApiDropMetadata } from '../models/ApiDropMetadata';
+import { ApiDropPart } from '../models/ApiDropPart';
+import { ApiDropRater } from '../models/ApiDropRater';
+import { ApiDropReaction } from '../models/ApiDropReaction';
+import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
+import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
+import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { HttpFile } from '../http/http';
 
 export class ApiDropWithoutWave {

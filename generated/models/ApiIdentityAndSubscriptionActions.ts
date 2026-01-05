@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import type { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
-import type { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
 export class ApiIdentityAndSubscriptionActions {

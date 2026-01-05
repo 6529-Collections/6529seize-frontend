@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiNftOwner } from '../models/ApiNftOwner';
+import { ApiNftOwner } from '../models/ApiNftOwner';
 import { HttpFile } from '../http/http';
 
 export class ApiNftOwnerPage {

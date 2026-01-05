@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
+import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { HttpFile } from '../http/http';
 
 export class ApiAggregatedActivityPage {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
+import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
 import { HttpFile } from '../http/http';
 
 export class ApiBulkRepRequest {

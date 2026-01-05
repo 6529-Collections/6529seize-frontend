@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDropMedia } from '../models/ApiDropMedia';
-import type { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
+import { ApiDropMedia } from '../models/ApiDropMedia';
+import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
 import { HttpFile } from '../http/http';
 
 export class ApiDropPart {

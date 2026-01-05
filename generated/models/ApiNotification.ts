@@ -11,9 +11,9 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDrop } from '../models/ApiDrop';
-import type { ApiNotificationCause } from '../models/ApiNotificationCause';
-import type { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiDrop } from '../models/ApiDrop';
+import { ApiNotificationCause } from '../models/ApiNotificationCause';
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
 export class ApiNotification {

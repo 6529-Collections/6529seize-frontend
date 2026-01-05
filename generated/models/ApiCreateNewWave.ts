@@ -11,13 +11,13 @@
  * Do not edit the class manually.
  */
 
-import type { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
-import type { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
-import type { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
-import type { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
-import type { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
-import type { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
-import type { ApiCreateWaveOutcome } from '../models/ApiCreateWaveOutcome';
+import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
+import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
+import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
+import { ApiCreateNewWaveVotingConfig } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateWaveConfig } from '../models/ApiCreateWaveConfig';
+import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
+import { ApiCreateWaveOutcome } from '../models/ApiCreateWaveOutcome';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWave {

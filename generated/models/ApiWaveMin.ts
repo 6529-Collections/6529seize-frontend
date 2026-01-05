@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiWaveCreditType } from '../models/ApiWaveCreditType';
+import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveMin {

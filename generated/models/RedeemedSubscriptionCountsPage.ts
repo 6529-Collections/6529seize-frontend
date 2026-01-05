@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { RedeemedSubscriptionCounts } from '../models/RedeemedSubscriptionCounts';
+import { RedeemedSubscriptionCounts } from '../models/RedeemedSubscriptionCounts';
 import { HttpFile } from '../http/http';
 
 export class RedeemedSubscriptionCountsPage {

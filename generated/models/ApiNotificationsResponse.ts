@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiNotification } from '../models/ApiNotification';
+import { ApiNotification } from '../models/ApiNotification';
 import { HttpFile } from '../http/http';
 
 export class ApiNotificationsResponse {

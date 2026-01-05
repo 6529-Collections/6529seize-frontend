@@ -11,8 +11,8 @@
  * Do not edit the class manually.
  */
 
-import type { ApiProfileMin } from '../models/ApiProfileMin';
-import type { ApiProfileProxyAction } from '../models/ApiProfileProxyAction';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiProfileProxyAction } from '../models/ApiProfileProxyAction';
 import { HttpFile } from '../http/http';
 
 export class ApiProfileProxy {

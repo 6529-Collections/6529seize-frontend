@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { SubscriptionLog } from '../models/SubscriptionLog';
+import { SubscriptionLog } from '../models/SubscriptionLog';
 import { HttpFile } from '../http/http';
 
 export class SubscriptionLogPage {

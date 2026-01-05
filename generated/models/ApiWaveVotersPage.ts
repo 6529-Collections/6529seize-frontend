@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiWaveVoter } from '../models/ApiWaveVoter';
+import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveVotersPage {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
+import { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
 import { HttpFile } from '../http/http';
 
 export class NFTFinalSubscriptionUploadPage {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
+import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
 import { HttpFile } from '../http/http';
 
 export class ApiDropWinningContext {

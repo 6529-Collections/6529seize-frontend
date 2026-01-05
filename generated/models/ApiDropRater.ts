@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
 export class ApiDropRater {

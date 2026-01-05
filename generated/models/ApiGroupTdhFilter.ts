@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
+import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
 import { HttpFile } from '../http/http';
 
 export class ApiGroupTdhFilter {

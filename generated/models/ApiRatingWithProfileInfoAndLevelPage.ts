@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
+import { ApiRatingWithProfileInfoAndLevel } from '../models/ApiRatingWithProfileInfoAndLevel';
 import { HttpFile } from '../http/http';
 
 export class ApiRatingWithProfileInfoAndLevelPage {

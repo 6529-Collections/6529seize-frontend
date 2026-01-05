@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave } from '../models/ApiDropWithoutWave';
 import { HttpFile } from '../http/http';
 
 export class ApiQuotedDropResponse {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { DistributionPhoto } from '../models/DistributionPhoto';
+import { DistributionPhoto } from '../models/DistributionPhoto';
 import { HttpFile } from '../http/http';
 
 export class DistributionPhotosPage {

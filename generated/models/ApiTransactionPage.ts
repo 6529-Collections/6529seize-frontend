@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiTransaction } from '../models/ApiTransaction';
+import { ApiTransaction } from '../models/ApiTransaction';
 import { HttpFile } from '../http/http';
 
 export class ApiTransactionPage {

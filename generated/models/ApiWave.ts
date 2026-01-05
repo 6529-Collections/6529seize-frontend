@@ -11,18 +11,18 @@
  * Do not edit the class manually.
  */
 
-import type { ApiDrop } from '../models/ApiDrop';
-import type { ApiProfileMin } from '../models/ApiProfileMin';
-import type { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
-import type { ApiWaveConfig } from '../models/ApiWaveConfig';
-import type { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
-import type { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
-import type { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import type { ApiWaveOutcomeOld } from '../models/ApiWaveOutcomeOld';
-import type { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
-import type { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
-import type { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
-import type { ApiWaveVotingConfig } from '../models/ApiWaveVotingConfig';
+import { ApiDrop } from '../models/ApiDrop';
+import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
+import { ApiWaveConfig } from '../models/ApiWaveConfig';
+import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
+import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
+import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
+import { ApiWaveOutcomeOld } from '../models/ApiWaveOutcomeOld';
+import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
+import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
+import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
+import { ApiWaveVotingConfig } from '../models/ApiWaveVotingConfig';
 import { HttpFile } from '../http/http';
 
 export class ApiWave {

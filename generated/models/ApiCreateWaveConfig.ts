@@ -11,10 +11,10 @@
  * Do not edit the class manually.
  */
 
-import type { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
-import type { ApiIntRange } from '../models/ApiIntRange';
-import type { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
-import type { ApiWaveType } from '../models/ApiWaveType';
+import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
+import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
+import { ApiWaveType } from '../models/ApiWaveType';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateWaveConfig {

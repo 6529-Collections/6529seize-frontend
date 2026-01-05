@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiWaveOutcome } from '../models/ApiWaveOutcome';
+import { ApiWaveOutcome } from '../models/ApiWaveOutcome';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveOutcomesPage {

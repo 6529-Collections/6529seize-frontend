@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiIdentity } from '../models/ApiIdentity';
+import { ApiIdentity } from '../models/ApiIdentity';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhStats {

@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import type { ApiWaveScope } from '../models/ApiWaveScope';
+import { ApiWaveScope } from '../models/ApiWaveScope';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveChatConfig {
