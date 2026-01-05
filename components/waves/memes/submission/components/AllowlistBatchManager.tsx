@@ -35,7 +35,11 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
   const handleBatchChange = useCallback(
     (index: number, field: keyof AllowlistBatchRaw, value: string) => {
       const newBatches = [...batches];
-      newBatches[index] = { ...newBatches[index], [field]: value };
+      const currentBatch = newBatches[index];
+      if (!currentBatch) {
+        return;
+      }
+      newBatches[index] = { ...currentBatch, [field]: value };
       onBatchesChange(newBatches);
     },
     [batches, onBatchesChange]
@@ -67,7 +71,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                   placeholder="0x..."
                   value={batch.contract ?? ""}
                   onChange={(e) => handleBatchChange(index, "contract", e.target.value)}
-                  className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
+                  className={`tw-form-input tw-w-full tw-rounded-lg tw-pl-4 tw-pr-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-bg-iron-900 tw-border-0 tw-outline-none tw-ring-1 ${
                     errors?.[index]?.contract ? "tw-ring-red" : "tw-ring-iron-700"
                   } focus:tw-ring-primary-400`}
                 />
