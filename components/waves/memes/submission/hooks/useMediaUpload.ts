@@ -38,7 +38,7 @@ export function useMediaUpload(maxFiles: number = 4): UseMediaUploadReturn {
 
       // Create initial items with uploading status
       const newItems: MediaUploadItem[] = filesToAdd.map((file) => ({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
         file,
         previewUrl: URL.createObjectURL(file),
         serverUrl: null,
