@@ -410,12 +410,12 @@ const rules = {
 
   // JSX
   "perfectionist/sort-jsx-props": [
-    "error",
+    "off",
     {
       type: "alphabetical",
       order: "asc",
     },
-  ],
+  ], // TODO: enable later
 
   // Code structure
   "perfectionist/sort-switch-case": [
