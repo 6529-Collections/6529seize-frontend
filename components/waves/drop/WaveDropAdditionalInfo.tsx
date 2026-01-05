@@ -97,7 +97,7 @@ export const WaveDropAdditionalInfo = ({
     <section className="tw-space-y-6">
       <div className="tw-space-y-2">
         <h2 className="tw-text-lg tw-font-semibold tw-text-iron-100">
-          Media & Notes
+          Additional Media & Notes
         </h2>
         {commentary && (
           <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-leading-relaxed">

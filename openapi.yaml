@@ -5813,7 +5813,7 @@ components:
           maxLength: 500
         data_value:
           type: string
-          maxLength: 500
+          maxLength: 5000
     ApiDropPart:
       type: object
       required:
