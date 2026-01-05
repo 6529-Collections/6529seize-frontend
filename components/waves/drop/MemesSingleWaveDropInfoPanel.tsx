@@ -45,8 +45,6 @@ export const MemesSingleWaveDropInfoPanel = ({
     enabled: true,
   });
 
-  console.log({ nicTotal, repTotal, manualOutcomes });
-
   const title = useMemo(
     () =>
       drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
