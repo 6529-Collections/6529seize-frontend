@@ -18,43 +18,16 @@ import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton
 import { ImageScale } from "@/helpers/image.helpers";
 import Download from "@/components/download/Download";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { VotingModal, MobileVotingModal } from "@/components/voting";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
+import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
 }
-
-const calculateOutcomes = (drop: ExtendedDrop, wave: ApiWave | null) => {
-  if (!wave || !drop.rank)
-    return { nicTotal: 0, repTotal: 0, manualOutcomes: [] as string[] };
-
-  const rank = drop.rank;
-  const outcomes = wave.outcomes;
-
-  const nicTotal = outcomes
-    .filter((o) => o.credit === ApiWaveOutcomeCredit.Cic)
-    .reduce((acc, o) => acc + (o.distribution?.[rank - 1]?.amount ?? 0), 0);
-
-  const repTotal = outcomes
-    .filter((o) => o.credit === ApiWaveOutcomeCredit.Rep)
-    .reduce((acc, o) => acc + (o.distribution?.[rank - 1]?.amount ?? 0), 0);
-
-  const manualOutcomes = outcomes
-    .filter(
-      (o) =>
-        o.type === ApiWaveOutcomeType.Manual &&
-        o.distribution?.[rank - 1]?.amount
-    )
-    .map((o) => o.distribution?.[rank - 1]?.description ?? "");
-
-  return { nicTotal, repTotal, manualOutcomes };
-};
 
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
@@ -63,12 +36,14 @@ export const MemesSingleWaveDropInfoPanel = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVotingOpen, setIsVotingOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
-  const { isWinner, canDelete, canShowVote, isVotingEnded } = useDropInteractionRules(drop);
+  const { isWinner, canDelete, canShowVote, isVotingEnded } =
+    useDropInteractionRules(drop);
 
-  const { nicTotal, repTotal, manualOutcomes } = useMemo(
-    () => calculateOutcomes(drop, wave),
-    [drop, wave]
-  );
+  const { nicTotal, repTotal, manualOutcomes } = useWaveRankReward({
+    waveId: drop.wave.id,
+    rank: drop.rank,
+    enabled: true,
+  });
 
   const title = useMemo(
     () =>
@@ -115,11 +90,11 @@ export const MemesSingleWaveDropInfoPanel = ({
   return (
     <>
       <div className="tw-w-full">
-        <div className="tw-w-full tw-min-h-screen tw-flex tw-flex-col">
-          <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-py-6 lg:tw-py-8">
+        <div className="tw-flex tw-min-h-screen tw-w-full tw-flex-col">
+          <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-py-8 xl:tw-px-20">
             {artworkMedia && (
-              <div className="tw-w-full md:tw-max-w-4xl tw-mx-auto tw-flex tw-items-center tw-justify-center">
-                <div className="tw-relative tw-w-full tw-h-[60vh] md:tw-h-[80vh] lg:tw-h-[95vh]">
+              <div className="tw-mx-auto tw-flex tw-w-full tw-items-center tw-justify-center md:tw-max-w-4xl">
+                <div className="tw-relative tw-h-[60vh] tw-w-full md:tw-h-[80vh] lg:tw-h-[95vh]">
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
@@ -131,9 +106,9 @@ export const MemesSingleWaveDropInfoPanel = ({
             )}
           </div>
 
-          <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-mt-4 md:tw-mt-6">
-            <div className="tw-max-w-3xl tw-mx-auto tw-w-full">
-              <div className="tw-flex tw-justify-center tw-mb-8">
+          <div className="tw-mt-4 tw-px-4 sm:tw-px-6 md:tw-mt-6 xl:tw-px-20">
+            <div className="tw-mx-auto tw-w-full tw-max-w-3xl">
+              <div className="tw-mb-8 tw-flex tw-justify-center">
                 <WaveDropVoteSummary
                   drop={drop}
                   isWinner={isWinner}
@@ -145,11 +120,11 @@ export const MemesSingleWaveDropInfoPanel = ({
               </div>
 
               <div className="tw-mb-6">
-                <h1 className="tw-text-lg sm:tw-text-2xl tw-font-bold tw-text-white tw-mb-4 tw-tracking-tight">
+                <h1 className="tw-mb-4 tw-text-lg tw-font-bold tw-tracking-tight tw-text-white sm:tw-text-2xl">
                   {title}
                 </h1>
                 {description && (
-                  <p className="tw-text-sm lg:tw-text-md tw-text-white/60 tw-mb-0">
+                  <p className="tw-mb-0 tw-text-sm tw-text-white/60 lg:tw-text-md">
                     {description}
                   </p>
                 )}
@@ -174,7 +149,7 @@ export const MemesSingleWaveDropInfoPanel = ({
                     <span className="tw-text-white/40">·</span>
                     <FontAwesomeIcon
                       icon={faAddressCard}
-                      className="tw-w-4 tw-h-4 tw-text-white/40"
+                      className="tw-h-4 tw-w-4 tw-text-white/40"
                     />
                     <span className="tw-text-sm tw-text-white/60">
                       {nicTotal} NIC
@@ -186,7 +161,7 @@ export const MemesSingleWaveDropInfoPanel = ({
                     <span className="tw-text-white/40">·</span>
                     <FontAwesomeIcon
                       icon={faStar}
-                      className="tw-w-4 tw-h-4 tw-text-white/40"
+                      className="tw-h-4 tw-w-4 tw-text-white/40"
                     />
                     <span className="tw-text-sm tw-text-white/60">
                       {repTotal} Rep
@@ -198,16 +173,16 @@ export const MemesSingleWaveDropInfoPanel = ({
           </div>
         </div>
 
-        <div className="tw-w-full tw-h-px tw-bg-white/10 tw-my-8 md:tw-my-10"></div>
+        <div className="tw-my-8 tw-h-px tw-w-full tw-bg-white/10 md:tw-my-10"></div>
 
-        <div className="tw-px-4 sm:tw-px-6 xl:tw-px-20 tw-pb-8 md:tw-pb-10">
-          <div className="tw-max-w-3xl tw-mx-auto tw-space-y-8">
+        <div className="tw-px-4 tw-pb-8 sm:tw-px-6 md:tw-pb-10 xl:tw-px-20">
+          <div className="tw-mx-auto tw-max-w-3xl tw-space-y-8">
             <SingleWaveDropTraits drop={drop} />
 
             <SingleWaveDropInfoDetails drop={drop} />
 
             {artworkMedia && fileInfo && (
-              <div className="tw-flex tw-gap-x-3 tw-items-center">
+              <div className="tw-flex tw-items-center tw-gap-x-3">
                 <span className="tw-text-xs tw-font-medium tw-text-iron-600">
                   Media Type:{" "}
                   <span className="tw-text-iron-400">
@@ -238,9 +213,9 @@ export const MemesSingleWaveDropInfoPanel = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-950/90 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-4"
+            className="tw-fixed tw-inset-0 tw-z-50 tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950/90 tw-p-4"
           >
-            <div className="tw-w-full tw-max-w-5xl tw-flex tw-justify-between tw-items-center tw-mb-4">
+            <div className="tw-mb-4 tw-flex tw-w-full tw-max-w-5xl tw-items-center tw-justify-between">
               <div className="tw-flex tw-flex-col">
                 <div className="tw-flex tw-items-center tw-gap-x-3">
                   <SingleWaveDropPosition rank={drop.rank ?? 1} drop={drop} />
@@ -249,7 +224,7 @@ export const MemesSingleWaveDropInfoPanel = ({
                   </h3>
                 </div>
                 {description && (
-                  <p className="tw-text-iron-400 tw-text-md tw-mt-1 tw-ml-10">
+                  <p className="tw-ml-10 tw-mt-1 tw-text-md tw-text-iron-400">
                     {description}
                   </p>
                 )}
@@ -261,20 +236,18 @@ export const MemesSingleWaveDropInfoPanel = ({
 
               <button
                 onClick={toggleFullscreen}
-                className="tw-bg-iron-900/80 tw-text-iron-100 tw-p-3 tw-rounded-lg 
-                        tw-transition-colors tw-duration-200 hover:tw-bg-iron-800 
-                        focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
+                className="tw-rounded-lg tw-bg-iron-900/80 tw-p-3 tw-text-iron-100 tw-transition-colors tw-duration-200 hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
                 aria-label="Exit fullscreen view"
               >
-                <FontAwesomeIcon icon={faCompress} className="tw-w-5 tw-h-5" />
+                <FontAwesomeIcon icon={faCompress} className="tw-h-5 tw-w-5" />
               </button>
             </div>
 
-            <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+            <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
               <img
                 src={artworkMedia.url}
                 alt={title}
-                className="tw-max-w-full tw-max-h-full tw-object-contain"
+                className="tw-max-h-full tw-max-w-full tw-object-contain"
               />
             </div>
           </motion.div>
