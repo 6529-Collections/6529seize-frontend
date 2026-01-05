@@ -326,6 +326,196 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DistributionPhotosPage"
+  /distribution_photos/{contract}/{nft_id}/prep:
+    post:
+      tags:
+        - Distributions
+      summary: Get presigned S3 URL for distribution photo upload
+      description: Requires the user to be authenticated as a Subscription Admin
+      operationId: createDistributionPhotoUploadUrl
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateMediaUploadUrlRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCreateMediaUrlResponse"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /distribution_photos/{contract}/{nft_id}/multipart-upload:
+    post:
+      tags:
+        - Distributions
+      summary: Start multipart upload for distribution photo
+      description: Requires the user to be authenticated as a Subscription Admin
+      operationId: createDistributionPhotoMultipartUpload
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateMediaUploadUrlRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiStartMultipartMediaUploadResponse"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /distribution_photos/{contract}/{nft_id}/multipart-upload/part:
+    post:
+      tags:
+        - Distributions
+      summary: Get presigned URL for multipart upload part
+      description: Requires the user to be authenticated as a Subscription Admin
+      operationId: uploadPartOfDistributionPhotoMultipartUpload
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadResponse"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /distribution_photos/{contract}/{nft_id}/multipart-upload/completion:
+    post:
+      tags:
+        - Distributions
+      summary: Complete multipart upload for distribution photo
+      description: Requires the user to be authenticated as a Subscription Admin
+      operationId: completeDistributionPhotoMultipartUpload
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompleteMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /distribution_photos/{contract}/{nft_id}/complete:
+    post:
+      tags:
+        - Distributions
+      summary: Save uploaded distribution photos to database
+      description: Requires the user to be authenticated as a Subscription Admin. Replaces all existing photos for the card.
+      operationId: completeDistributionPhotosUpload
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: nft_id
+          in: path
+          description: NFT ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DistributionPhotoCompleteRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributionPhotoCompleteResponse"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
   /distributions:
     get:
       tags:
@@ -384,6 +574,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DistributionNormalizedPage"
+  /distributions/{contract}/{id}/overview:
+    get:
+      tags:
+        - Distributions
+      summary: Get distribution overview for a specific contract and card
+      description: Requires the user to be authenticated as a Subscription Admin
+      operationId: getDistributionOverview
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributionOverview"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
   /light-drops:
     get:
       tags:
@@ -5813,7 +6035,7 @@ components:
           maxLength: 500
         data_value:
           type: string
-          maxLength: 500
+          maxLength: 5000
     ApiDropPart:
       type: object
       required:
@@ -8892,6 +9114,29 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DistributionNormalized"
+    DistributionOverview:
+      type: object
+      required:
+        - photos_count
+        - is_normalized
+        - automatic_airdrops_addresses
+        - automatic_airdrops_count
+      properties:
+        photos_count:
+          type: integer
+          format: int64
+          description: Number of photos for this distribution
+        is_normalized:
+          type: boolean
+          description: Whether the distribution has been normalized
+        automatic_airdrops_addresses:
+          type: integer
+          format: int64
+          description: Count of unique addresses with automatic airdrops
+        automatic_airdrops_count:
+          type: integer
+          format: int64
+          description: Total count of automatic airdrops
     DistributionPhasesPage:
       type: object
       required:
@@ -8938,6 +9183,37 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DistributionPhoto"
+    DistributionPhotoCompleteRequestPhoto:
+      type: object
+      required:
+        - media_url
+      properties:
+        media_url:
+          type: string
+          description: The CloudFront URL of the uploaded photo
+    DistributionPhotoCompleteRequest:
+      type: object
+      required:
+        - photos
+      properties:
+        photos:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/DistributionPhotoCompleteRequestPhoto"
+    DistributionPhotoCompleteResponse:
+      type: object
+      required:
+        - success
+        - photos
+      properties:
+        success:
+          type: boolean
+        photos:
+          type: array
+          items:
+            type: string
+            description: CloudFront URLs of the saved photos
     NFTFinalSubscription:
       type: object
       required:
