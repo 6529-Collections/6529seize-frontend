@@ -136,7 +136,6 @@ const rules = {
   ], // TODO: enable later
   "@typescript-eslint/no-unnecessary-condition": "off", // TODO: enable later
   "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO: enable later
-  "@typescript-eslint/no-non-null-assertion": "off", // TODO: enable later
 
   // Best practices
   "@typescript-eslint/prefer-nullish-coalescing": "off", // TODO: enable later
@@ -317,7 +316,6 @@ const rules = {
   "security/detect-non-literal-require": "error",
 
   // Injection vulnerabilities
-  "security/detect-object-injection": "off", // TODO: enable later
   "security/detect-non-literal-regexp": "off", // TODO: enable later
   "security/detect-unsafe-regex": "off", // TODO: enable later
 
@@ -349,22 +347,12 @@ const rules = {
   // Best practices
   "promise/param-names": "error",
   "promise/valid-params": "error",
-  "promise/prefer-await-to-then": "off", // TODO: enable later
   "promise/prefer-await-to-callbacks": "off", // TODO: enable later
 
   // -------------------------------------------------------------------------
   // Perfectionist - Production Grade
   // -------------------------------------------------------------------------
   "perfectionist/sort-imports": "off", // Using import/order instead
-
-  // TypeScript types
-  "perfectionist/sort-named-exports": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
 
   // -------------------------------------------------------------------------
   // Tailwind CSS - Production Grade
@@ -414,17 +402,13 @@ const rules = {
   "no-unneeded-ternary": "off", // TODO: enable later
 
   // Modern JS
-  "object-shorthand": "off", // TODO: enable later
-  "prefer-template": "off", // TODO: enable later
   "prefer-arrow-callback": "off", // TODO: enable later
-  "prefer-destructuring": ["off", { array: false, object: true }], // TODO: enable later
   "prefer-rest-params": "error",
   "prefer-spread": "error",
-  "arrow-body-style": ["off", "as-needed"], // TODO: enable later
 
   // Complexity limits
   "max-depth": ["off", 4], // TODO: enable later
-  "max-lines": ["off", { max: 300, skipBlankLines: true, skipComments: true }], // TODO: enable later
+  "max-lines": ["off", { max: 750, skipBlankLines: true, skipComments: true }], // TODO: enable later
   "max-lines-per-function": [
     "off",
     { max: 150, skipBlankLines: true, skipComments: true },

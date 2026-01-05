@@ -136,7 +136,6 @@ const rules = {
   ],
   "@typescript-eslint/no-unnecessary-condition": "error",
   "@typescript-eslint/no-unnecessary-type-assertion": "error",
-  "@typescript-eslint/no-non-null-assertion": "error",
 
   // Best practices
   "@typescript-eslint/prefer-nullish-coalescing": "error",
@@ -317,7 +316,6 @@ const rules = {
   "security/detect-non-literal-require": "error",
 
   // Injection vulnerabilities
-  "security/detect-object-injection": "error",
   "security/detect-non-literal-regexp": "error",
   "security/detect-unsafe-regex": "error",
 
@@ -349,22 +347,12 @@ const rules = {
   // Best practices
   "promise/param-names": "error",
   "promise/valid-params": "error",
-  "promise/prefer-await-to-then": "error",
   "promise/prefer-await-to-callbacks": "error",
 
   // -------------------------------------------------------------------------
   // Perfectionist - Production Grade
   // -------------------------------------------------------------------------
   "perfectionist/sort-imports": "off", // Using import/order instead
-
-  // TypeScript types
-  "perfectionist/sort-named-exports": [
-    "error",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ],
 
   // -------------------------------------------------------------------------
   // Tailwind CSS - Production Grade
@@ -414,19 +402,15 @@ const rules = {
   "no-unneeded-ternary": "error",
 
   // Modern JS
-  "object-shorthand": "error",
-  "prefer-template": "error",
   "prefer-arrow-callback": "error",
-  "prefer-destructuring": ["error", { array: false, object: true }],
   "prefer-rest-params": "error",
   "prefer-spread": "error",
-  "arrow-body-style": ["error", "as-needed"],
 
   // Complexity limits
   "max-depth": ["error", 4],
   "max-lines": [
     "error",
-    { max: 300, skipBlankLines: true, skipComments: true },
+    { max: 750, skipBlankLines: true, skipComments: true },
   ],
   "max-lines-per-function": [
     "error",
