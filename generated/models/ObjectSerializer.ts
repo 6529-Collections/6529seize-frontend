@@ -205,6 +205,7 @@ export * from '../models/ApiXTdhTokensPage';
 export * from '../models/CreateDirectMessageWaveRequest';
 export * from '../models/DistributionNormalized';
 export * from '../models/DistributionNormalizedPage';
+export * from '../models/DistributionOverview';
 export * from '../models/DistributionPhasesPage';
 export * from '../models/DistributionPhoto';
 export * from '../models/DistributionPhotoCompleteRequest';
@@ -441,6 +442,7 @@ import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { DistributionNormalized } from '../models/DistributionNormalized';
 import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage';
+import { DistributionOverview } from '../models/DistributionOverview';
 import { DistributionPhasesPage } from '../models/DistributionPhasesPage';
 import { DistributionPhoto } from '../models/DistributionPhoto';
 import { DistributionPhotoCompleteRequest } from '../models/DistributionPhotoCompleteRequest';
@@ -696,6 +698,7 @@ let typeMap: {[index: string]: any} = {
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
     "DistributionNormalized": DistributionNormalized,
     "DistributionNormalizedPage": DistributionNormalizedPage,
+    "DistributionOverview": DistributionOverview,
     "DistributionPhasesPage": DistributionPhasesPage,
     "DistributionPhoto": DistributionPhoto,
     "DistributionPhotoCompleteRequest": DistributionPhotoCompleteRequest,

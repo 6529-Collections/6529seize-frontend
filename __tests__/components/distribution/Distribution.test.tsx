@@ -769,4 +769,42 @@ describe("DistributionPage", () => {
       });
     });
   });
+
+  describe("Title Management", () => {
+    it("sets title when valid nft id is present", async () => {
+      mockUseParams.mockReturnValue({ id: "123" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(
+        <DistributionPage header="Test Collection" contract="0x123" link="" />
+      );
+
+      await waitFor(() => {
+        expect(mockSetTitle).toHaveBeenCalledWith(
+          "Test Collection #123 | DISTRIBUTION"
+        );
+      });
+    });
+
+    it("does not set title when nft id is invalid", () => {
+      mockUseParams.mockReturnValue({ id: "invalid" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      expect(mockSetTitle).not.toHaveBeenCalled();
+    });
+
+    it("does not set title when nft id is missing", () => {
+      mockUseParams.mockReturnValue({ id: "" });
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({ count: 0, data: [] });
+
+      render(<DistributionPage header="Test" contract="0x123" link="" />);
+
+      expect(mockSetTitle).not.toHaveBeenCalled();
+    });
+  });
 });

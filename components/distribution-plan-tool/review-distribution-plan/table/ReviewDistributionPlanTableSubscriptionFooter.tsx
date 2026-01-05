@@ -4,6 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants";
+import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
@@ -12,12 +13,6 @@ import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription"
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
-
-interface DistributionOverview {
-  photos_count: number;
-  is_normalized: boolean;
-  automatic_airdrops: number;
-}
 
 function getErrorMessage(error: unknown): string {
   if (typeof error === "string") {
@@ -228,7 +223,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                 </span>
               ) : (
                 <span className="tw-ml-2">
-                  ({overview?.automatic_airdrops ?? 0})
+                  (Addresses: {overview?.automatic_airdrops_addresses ?? 0} |
+                  Count: {overview?.automatic_airdrops_count ?? 0})
                 </span>
               )}
             </>
