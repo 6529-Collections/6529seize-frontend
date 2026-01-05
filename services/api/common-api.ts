@@ -221,7 +221,7 @@ export const commonApiFetchWithRetry = async <
           // Race the delay with the abort signal.
           await Promise.race([
             delayPromise,
-            new Promise((_, reject) => {
+            new Promise((_resolve, reject) => {
               // Check if already aborted before adding listener
               if (fetchParams.signal?.aborted) {
                 reject(

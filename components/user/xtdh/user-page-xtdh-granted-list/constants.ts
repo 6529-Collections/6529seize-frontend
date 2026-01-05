@@ -213,17 +213,46 @@ export function getUserPageXtdhGrantedListStatusItems(
   }));
 }
 
-export function getApiParamsFromFilters(
-  tab: GrantedTab,
-  subFilter: GrantedActiveFilter
-): {
+type GrantedApiParams = {
   readonly statuses: GrantedFilterStatuses;
   readonly validFromGt?: number | undefined;
   readonly validFromLt?: number | undefined;
   readonly validToGt?: number | undefined;
   readonly validToLt?: number | undefined;
-} {
+};
+
+const getActiveTabApiParams = (
+  subFilter: GrantedActiveFilter,
+  now: number
+): GrantedApiParams => {
+  switch (subFilter) {
+    case "ENDED":
+      return { statuses: ["GRANTED"], validToLt: now };
+    case "ACTIVE":
+      // Active: Started (validFrom < now) AND (Not ended (validTo > now) OR validTo is null)
+      // API supports validToGt including nulls.
+      return {
+        statuses: ["GRANTED"],
+        validFromLt: now,
+        validToGt: now,
+      };
+    case "NOT_STARTED":
+      return { statuses: ["GRANTED"], validFromGt: now };
+    case "ALL":
+    default:
+      return { statuses: ["GRANTED"] };
+  }
+};
+
+export function getApiParamsFromFilters(
+  tab: GrantedTab,
+  subFilter: GrantedActiveFilter
+): GrantedApiParams {
   const now = Date.now();
+
+  if (tab === "ACTIVE") {
+    return getActiveTabApiParams(subFilter, now);
+  }
 
   switch (tab) {
     case "PENDING":
@@ -232,24 +261,6 @@ export function getApiParamsFromFilters(
       return { statuses: ["DISABLED"] };
     case "FAILED":
       return { statuses: ["FAILED"] };
-    case "ACTIVE":
-      switch (subFilter) {
-        case "ENDED":
-          return { statuses: ["GRANTED"], validToLt: now };
-        case "ACTIVE":
-          // Active: Started (validFrom < now) AND (Not ended (validTo > now) OR validTo is null)
-          // API supports validToGt including nulls.
-          return {
-            statuses: ["GRANTED"],
-            validFromLt: now,
-            validToGt: now,
-          };
-        case "NOT_STARTED":
-          return { statuses: ["GRANTED"], validFromGt: now };
-        case "ALL":
-        default:
-          return { statuses: ["GRANTED"] };
-      }
     default:
       return { statuses: ["GRANTED"] };
   }

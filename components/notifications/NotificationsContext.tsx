@@ -316,7 +316,7 @@ const registerPushNotification = async (
   profile?: ApiIdentity
 ) => {
   try {
-    const response = await commonApiPost({
+    await commonApiPost({
       endpoint: `push-notifications/register`,
       body: {
         device_id: deviceId,

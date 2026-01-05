@@ -1,4 +1,3 @@
-import { FIELD_TO_LABEL_MAP } from "@/components/waves/memes/traits/schema";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import React from "react";

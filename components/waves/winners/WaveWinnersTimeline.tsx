@@ -20,16 +20,6 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   wave,
   isLoading,
 }) => {
-  const groupedByDate: Record<string, ApiWaveDecision[]> = {};
-
-  [...decisionPoints].forEach((point) => {
-    const dateKey = format(new Date(point.decision_time), "yyyy-MM-dd");
-    if (!groupedByDate[dateKey]) {
-      groupedByDate[dateKey] = [];
-    }
-    groupedByDate[dateKey].push(point);
-  });
-
   if (isLoading) {
     return <WaveWinnersTimelineLoading />;
   }
