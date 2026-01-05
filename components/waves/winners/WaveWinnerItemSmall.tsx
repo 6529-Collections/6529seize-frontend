@@ -21,7 +21,6 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
         <MemesWaveWinnerDropSmall
           drop={drop}
           onDropClick={onDropClick}
-          wave={wave}
           rank={rank}
         />
       );
@@ -30,7 +29,6 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
         <DefaultWaveWinnerDropSmall
           drop={drop}
           onDropClick={onDropClick}
-          wave={wave}
           rank={rank}
         />
       );
