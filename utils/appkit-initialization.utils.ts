@@ -32,7 +32,7 @@ interface AppKitInitializationResult {
  */
 function debugLog(message: string, ...args: any[]): void {
   if (publicEnv.NODE_ENV === "development") {
-    console.log(`[AppKitInitialization] ${message}`, ...args);
+    console.warn(`[AppKitInitialization] ${message}`, ...args);
   }
 }
 

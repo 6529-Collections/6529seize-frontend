@@ -78,7 +78,6 @@ function TransferSingleImpl(props: TransferSingleProps) {
     return () => {
       t.unselect(key);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     key,
     collectionType,
@@ -127,21 +126,22 @@ function TransferSingleImpl(props: TransferSingleProps) {
           <FontAwesomeIcon icon={faRightLeft} />
         </div>
         {max > 1 && (
-          <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-bg-primary-500 tw-rounded-full tw-p-1 tw-font-medium">
+          <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-full tw-bg-primary-500 tw-p-1 tw-font-medium">
             <button
               type="button"
               onClick={() => t.decQty(key)}
               disabled={selectedQty <= 1}
               aria-label="Decrease quantity"
-              className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
-              data-testid="transfer-single-minus">
+              className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+              data-testid="transfer-single-minus"
+            >
               <FontAwesomeIcon
                 icon={faMinusCircle}
                 className="tw-size-6 tw-cursor-pointer"
                 color={selectedQty <= 1 ? "#aaa" : "#fff"}
               />
             </button>
-            <div className="tw-min-w-[2ch] tw-text-center tw-text-sm tw-tabular-nums tw-select-none">
+            <div className="tw-min-w-[2ch] tw-select-none tw-text-center tw-text-sm tw-tabular-nums">
               {selectedQty}/{max}
             </div>
             <button
@@ -149,8 +149,9 @@ function TransferSingleImpl(props: TransferSingleProps) {
               onClick={() => t.incQty(key)}
               disabled={selectedQty >= max}
               aria-label="Increase quantity"
-              className="tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
-              data-testid="transfer-single-plus">
+              className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+              data-testid="transfer-single-plus"
+            >
               <FontAwesomeIcon
                 icon={faPlusCircle}
                 className="tw-size-6 tw-cursor-pointer"
@@ -172,8 +173,9 @@ function TransferSingleImpl(props: TransferSingleProps) {
             }
             setShowModal(true);
           }}
-          className="tw-w-full tw-py-2 tw-rounded-lg tw-bg-white tw-text-black disabled:tw-opacity-75 disabled:tw-cursor-not-allowed tw-border-2 tw-border-solid tw-border-[#444] tw-text-lg tw-font-semibold"
-          data-testid="transfer-single-submit">
+          className="tw-w-full tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white tw-py-2 tw-text-lg tw-font-semibold tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-75"
+          data-testid="transfer-single-submit"
+        >
           {transferButtonText}
         </button>
       </div>

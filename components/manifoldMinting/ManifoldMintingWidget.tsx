@@ -15,12 +15,8 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import type {
-  ManifoldClaim} from "@/hooks/useManifoldClaim";
-import {
-  ManifoldClaimStatus,
-  ManifoldPhase,
-} from "@/hooks/useManifoldClaim";
+import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import type { ManifoldMerkleProof } from "./manifold-types";
@@ -204,7 +200,6 @@ export default function ManifoldMintingWidget(
     setMintStatus(<></>);
     const value = getValue();
     const args = getMintArgs();
-    console.log("i am mint args", args);
     mintWrite.writeContract({
       address: props.proxy as `0x${string}`,
       abi: props.abi,

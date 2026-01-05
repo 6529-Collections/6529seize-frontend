@@ -6,8 +6,8 @@ import { areEqualURLS } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
-    CapacitorBarcodeScanner,
-    CapacitorBarcodeScannerTypeHint,
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerTypeHint,
 } from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ export default function HeaderQRScanner({
     if (typeof CapacitorBarcodeScanner?.scanBarcode === "function") {
       setScannerAvailable(true);
     } else {
-      console.log("CapacitorBarcodeScanner is not available");
+      console.warn("CapacitorBarcodeScanner is not available");
     }
   }, []);
 
@@ -81,8 +81,6 @@ export default function HeaderQRScanner({
   };
 
   const handleQRCode = (content: string) => {
-    console.log("Scanned:", content);
-
     try {
       const url = new URL(content);
       let path = "";
@@ -122,7 +120,7 @@ export default function HeaderQRScanner({
             path = "/accept-connection-sharing";
             break;
           default:
-            console.log("Unknown Deep Link Scope", scope);
+            console.warn("Unknown Deep Link Scope", scope);
             setToast({
               message: "Invalid QR code",
               type: "error",
@@ -155,9 +153,10 @@ export default function HeaderQRScanner({
     return (
       <button
         onClick={startScan}
-        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 active:tw-bg-iron-700 active:tw-text-iron-200 tw-rounded-lg tw-transition-colors tw-duration-200"
-        aria-label="Scan QR Code">
-        <HeaderQRScannerIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
+        className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
+        aria-label="Scan QR Code"
+      >
+        <HeaderQRScannerIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
         <span>Scan QR Code</span>
       </button>
     );
@@ -171,14 +170,19 @@ export default function HeaderQRScanner({
         aria-label="QR Code Scanner"
         title="QR Code Scanner"
         onClick={startScan}
-        className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
+        className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      >
         <HeaderQRScannerIcon />
       </button>
     </div>
   );
 }
 
-function HeaderQRScannerIcon({ className }: { readonly className?: string | undefined }) {
+function HeaderQRScannerIcon({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) {
   return (
     <Image
       unoptimized

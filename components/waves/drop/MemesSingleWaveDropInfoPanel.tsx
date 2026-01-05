@@ -65,6 +65,7 @@ export const MemesSingleWaveDropInfoPanel = ({
   const isMobileScreen = useIsMobileScreen();
   const { isWinner, canDelete, canShowVote, isVotingEnded } = useDropInteractionRules(drop);
 
+  
   const { nicTotal, repTotal, manualOutcomes } = useMemo(
     () => calculateOutcomes(drop, wave),
     [drop, wave]

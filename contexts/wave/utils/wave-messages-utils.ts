@@ -379,7 +379,7 @@ export async function fetchNewestWaveMessages(
     return { drops: fetchedDrops, highestSerialNo };
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      console.log(`[Utils] Fetch newest for ${waveId} aborted.`);
+      console.warn(`[Utils] Fetch newest for ${waveId} aborted.`);
       throw error; // Re-throw abort errors
     }
     console.error(

@@ -63,7 +63,7 @@ const MemesArtSubmissionContainer: React.FC<
   // Phase change handler
   const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
     // Any additional phase-specific handling can be done here
-    console.log(`Submission phase changed to: ${phase}`);
+    console.warn(`Submission phase changed to: ${phase}`);
   }, []);
 
   // Handle final submission

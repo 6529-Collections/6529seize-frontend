@@ -227,7 +227,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         await rateChangeMutation.mutateAsync({
           rate: newRating,
         });
-      } catch (error) {
+      } catch {
         setLoading(false);
         setIsTextExiting(false);
         setIsProcessing(false);

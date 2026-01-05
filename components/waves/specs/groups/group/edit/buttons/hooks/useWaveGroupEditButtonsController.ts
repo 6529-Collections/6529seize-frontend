@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode } from "react";
 import type { TypeOptions } from "react-toastify";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -50,14 +46,14 @@ const dedupeAddresses = (addresses: readonly string[]): string[] =>
       addresses
         .filter((addr): addr is string => typeof addr === "string")
         .map((addr) => addr.trim().toLowerCase())
-        .filter((addr) => addr.length > 0),
-    ),
+        .filter((addr) => addr.length > 0)
+    )
   );
 
 const fetchIdentityGroupWallets = async (
   groupId: string,
   identityGroupId: string | null,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<string[]> => {
   if (!identityGroupId) {
     return [];
@@ -71,7 +67,7 @@ const fetchIdentityGroupWallets = async (
   } catch (error) {
     console.warn(
       `[WaveGroupEditButtons] Failed to load identity group ${identityGroupId} for group ${groupId}:`,
-      error,
+      error
     );
     return [];
   }
@@ -79,7 +75,7 @@ const fetchIdentityGroupWallets = async (
 
 const waitWithAbort = async (
   ms: number,
-  signal: AbortSignal,
+  signal: AbortSignal
 ): Promise<void> => {
   if (signal.aborted) {
     throw new DOMException("Request aborted", "AbortError");
@@ -119,7 +115,11 @@ const cloneGroupPayload = (group: ApiGroupFull): ApiCreateGroup => ({
 const createEmptyGroupPayload = (name: string): ApiCreateGroup => ({
   name,
   group: {
-    tdh: { min: null, max: null, inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh },
+    tdh: {
+      min: null,
+      max: null,
+      inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
+    },
     rep: {
       min: null,
       max: null,
@@ -144,7 +144,7 @@ const createEmptyGroupPayload = (name: string): ApiCreateGroup => ({
 const buildDefaultGroupName = (
   wave: ApiWave,
   type: WaveGroupType,
-  mode: WaveGroupIdentitiesModal,
+  mode: WaveGroupIdentitiesModal
 ): string => {
   const typeLabel = WAVE_GROUP_LABELS[type] ?? "Group";
   const actionLabel =
@@ -159,14 +159,13 @@ const buildDefaultGroupName = (
 const applyIdentityChangeToPayload = (
   payload: ApiCreateGroup,
   normalizedIdentity: string,
-  mode: WaveGroupIdentitiesModal,
+  mode: WaveGroupIdentitiesModal
 ): ApiCreateGroup => {
-
   const includeSet = new Set(
-    dedupeAddresses(payload.group.identity_addresses ?? []),
+    dedupeAddresses(payload.group.identity_addresses ?? [])
   );
   const excludeSet = new Set(
-    dedupeAddresses(payload.group.excluded_identity_addresses ?? []),
+    dedupeAddresses(payload.group.excluded_identity_addresses ?? [])
   );
 
   if (mode === WaveGroupIdentitiesModal.INCLUDE) {
@@ -192,7 +191,7 @@ const applyIdentityChangeToPayload = (
 
 const mapValidationToMessage = (
   issues: ValidationIssue[],
-  mode: WaveGroupIdentitiesModal,
+  mode: WaveGroupIdentitiesModal
 ): string => {
   if (issues.includes("INCLUDE_LIMIT")) {
     return "This group already contains the maximum number of included identities.";
@@ -216,22 +215,21 @@ type IdentityModalPermissions = Readonly<
 const isIdentityActionAllowed = (
   mode: WaveGroupIdentitiesModal,
   permissions: IdentityModalPermissions,
-  setToast: SetToast,
+  setToast: SetToast
 ): boolean => {
   if (permissions[mode]) {
     return true;
   }
   setToast({
     type: "error",
-    message:
-      "You do not have permission to modify identities for this group.",
+    message: "You do not have permission to modify identities for this group.",
   });
   return false;
 };
 
 const ensureAuthenticated = async (
   requestAuth: RequestAuth,
-  setToast: SetToast,
+  setToast: SetToast
 ): Promise<boolean> => {
   const { success } = await requestAuth();
   if (success) {
@@ -252,7 +250,7 @@ interface BuildIdentityPayloadParams {
   readonly fetchScopedGroupFull: () => Promise<ApiGroupFull | null>;
   readonly loadIdentityGroupWallets: (
     groupId: string,
-    identityGroupId: string | null,
+    identityGroupId: string | null
   ) => Promise<string[]>;
 }
 
@@ -281,13 +279,10 @@ const buildIdentityPayload = async ({
   }
 
   const [includeWallets, excludeWallets] = await Promise.all([
+    loadIdentityGroupWallets(groupFull.id, groupFull.group.identity_group_id),
     loadIdentityGroupWallets(
       groupFull.id,
-      groupFull.group.identity_group_id,
-    ),
-    loadIdentityGroupWallets(
-      groupFull.id,
-      groupFull.group.excluded_identity_group_id,
+      groupFull.group.excluded_identity_group_id
     ),
   ]);
 
@@ -310,7 +305,7 @@ const buildIdentityPayload = async ({
 const validatePayloadOrNotify = (
   payload: ApiCreateGroup,
   mode: WaveGroupIdentitiesModal,
-  setToast: SetToast,
+  setToast: SetToast
 ): boolean => {
   const validation = validateGroupPayload(payload);
   if (validation.valid) {
@@ -351,10 +346,7 @@ const pollGroupVisibility = async ({
           signal: pollController.signal,
         });
         if (refreshed.visible) {
-          queryClient.setQueryData(
-            [QueryKey.GROUP, createdGroupId],
-            refreshed,
-          );
+          queryClient.setQueryData([QueryKey.GROUP, createdGroupId], refreshed);
           return;
         }
       } catch (pollError) {
@@ -386,7 +378,6 @@ interface CreateAndPublishGroupParams {
   readonly abortControllersRef: MutableRefObject<Set<AbortController>>;
   readonly queryClient: QueryClient;
   readonly waveId: string;
-  readonly waveGroupType: WaveGroupType;
 }
 
 const createAndPublishGroupWithVisibility = async ({
@@ -395,7 +386,6 @@ const createAndPublishGroupWithVisibility = async ({
   abortControllersRef,
   queryClient,
   waveId,
-  waveGroupType,
 }: CreateAndPublishGroupParams): Promise<string> => {
   const trimmedName = payload.name.trim();
   const createdGroup = await createGroup({
@@ -424,13 +414,6 @@ const createAndPublishGroupWithVisibility = async ({
     waveId,
     abortControllersRef,
     queryClient,
-  });
-
-  console.info("[WaveGroupEditButtons] Published updated group", {
-    waveId,
-    waveGroupType,
-    previousGroupId,
-    newGroupId: createdGroup.id,
   });
 
   return createdGroup.id;
@@ -468,12 +451,14 @@ interface WaveGroupEditButtonsController {
   readonly closeIdentitiesModal: () => void;
   readonly updateWave: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean | undefined },
+    opts?: { readonly skipAuth?: boolean | undefined }
   ) => Promise<void>;
-  readonly onIdentityConfirm: (event: Readonly<{
-    identity: string;
-    mode: WaveGroupIdentitiesModal;
-  }>) => Promise<void>;
+  readonly onIdentityConfirm: (
+    event: Readonly<{
+      identity: string;
+      mode: WaveGroupIdentitiesModal;
+    }>
+  ) => Promise<void>;
 }
 
 export const useWaveGroupEditButtonsController = ({
@@ -488,10 +473,7 @@ export const useWaveGroupEditButtonsController = ({
   const [mutating, setMutating] = useState(false);
   const [activeIdentitiesModal, setActiveIdentitiesModal] =
     useState<WaveGroupIdentitiesModal | null>(null);
-  const scopedGroup = useMemo(
-    () => getScopedGroup(wave, type),
-    [wave, type],
-  );
+  const scopedGroup = useMemo(() => getScopedGroup(wave, type), [wave, type]);
   const queryClient = useQueryClient();
   const abortControllersRef = useRef(new Set<AbortController>());
 
@@ -516,24 +498,25 @@ export const useWaveGroupEditButtonsController = ({
     },
   });
 
-  const fetchScopedGroupFull = useCallback(async (): Promise<ApiGroupFull | null> => {
-    if (!scopedGroup?.id) {
-      return null;
-    }
-    return await queryClient.ensureQueryData({
-      queryKey: [QueryKey.GROUP, scopedGroup.id],
-      queryFn: async ({ signal }) =>
-        await commonApiFetch<ApiGroupFull>({
-          endpoint: `groups/${scopedGroup.id}`,
-          signal,
-        }),
-    });
-  }, [queryClient, scopedGroup]);
+  const fetchScopedGroupFull =
+    useCallback(async (): Promise<ApiGroupFull | null> => {
+      if (!scopedGroup?.id) {
+        return null;
+      }
+      return await queryClient.ensureQueryData({
+        queryKey: [QueryKey.GROUP, scopedGroup.id],
+        queryFn: async ({ signal }) =>
+          await commonApiFetch<ApiGroupFull>({
+            endpoint: `groups/${scopedGroup.id}`,
+            signal,
+          }),
+      });
+    }, [queryClient, scopedGroup]);
 
   const loadIdentityGroupWallets = useCallback(
     async (
       groupId: string,
-      identityGroupId: string | null,
+      identityGroupId: string | null
     ): Promise<string[]> => {
       if (!identityGroupId) {
         return [];
@@ -550,28 +533,26 @@ export const useWaveGroupEditButtonsController = ({
           await fetchIdentityGroupWallets(groupId, identityGroupId, signal),
       });
     },
-    [queryClient],
+    [queryClient]
   );
 
-  const isWaveAdmin =
-    wave.wave.authenticated_user_eligible_for_admin ?? false;
+  const isWaveAdmin = wave.wave.authenticated_user_eligible_for_admin ?? false;
 
   const isAuthor = useMemo(
     () => isGroupAuthor(scopedGroup, connectedProfile),
-    [scopedGroup, connectedProfile],
+    [scopedGroup, connectedProfile]
   );
 
   const canIncludeIdentity = isWaveAdmin || isAuthor;
   const canExcludeIdentity = isWaveAdmin || isAuthor;
-  const canRemoveGroup =
-    haveGroup && type !== WaveGroupType.ADMIN;
+  const canRemoveGroup = haveGroup && type !== WaveGroupType.ADMIN;
 
   const identityModalPermissions = useMemo<IdentityModalPermissions>(
     () => ({
       [WaveGroupIdentitiesModal.INCLUDE]: canIncludeIdentity,
       [WaveGroupIdentitiesModal.EXCLUDE]: canExcludeIdentity,
     }),
-    [canIncludeIdentity, canExcludeIdentity],
+    [canIncludeIdentity, canExcludeIdentity]
   );
 
   const editWaveMutation = useMutation({
@@ -585,15 +566,12 @@ export const useWaveGroupEditButtonsController = ({
     },
     onError: (error, body) => {
       const groupId = body ? getGroupIdFromUpdateBody(body, type) : null;
-      console.error(
-        "[WaveGroupEditButtons] Wave update failed",
-        {
-          waveId: wave.id,
-          waveGroupType: type,
-          groupId,
-          error,
-        },
-      );
+      console.error("[WaveGroupEditButtons] Wave update failed", {
+        waveId: wave.id,
+        waveGroupType: type,
+        groupId,
+        error,
+      });
       setToast({
         message: toErrorMessage(error),
         type: "error",
@@ -607,14 +585,11 @@ export const useWaveGroupEditButtonsController = ({
   const updateWave = useCallback(
     async (
       body: ApiUpdateWaveRequest,
-      opts?: { readonly skipAuth?: boolean | undefined },
+      opts?: { readonly skipAuth?: boolean | undefined }
     ) => {
       setMutating(true);
       if (!opts?.skipAuth) {
-        const authenticated = await ensureAuthenticated(
-          requestAuth,
-          setToast,
-        );
+        const authenticated = await ensureAuthenticated(requestAuth, setToast);
         if (!authenticated) {
           setMutating(false);
           return;
@@ -622,7 +597,7 @@ export const useWaveGroupEditButtonsController = ({
       }
       await editWaveMutation.mutateAsync(body);
     },
-    [editWaveMutation, requestAuth, setToast],
+    [editWaveMutation, requestAuth, setToast]
   );
 
   useEffect(() => {
@@ -634,12 +609,9 @@ export const useWaveGroupEditButtonsController = ({
     }
   }, [activeIdentitiesModal, identityModalPermissions]);
 
-  const openIdentitiesModal = useCallback(
-    (modal: WaveGroupIdentitiesModal) => {
-      setActiveIdentitiesModal(modal);
-    },
-    [],
-  );
+  const openIdentitiesModal = useCallback((modal: WaveGroupIdentitiesModal) => {
+    setActiveIdentitiesModal(modal);
+  }, []);
 
   const closeIdentitiesModal = useCallback(() => {
     setActiveIdentitiesModal(null);
@@ -656,11 +628,7 @@ export const useWaveGroupEditButtonsController = ({
       const normalizedIdentity = normalizeIdentity(identity);
       if (
         !normalizedIdentity ||
-        !isIdentityActionAllowed(
-          mode,
-          identityModalPermissions,
-          setToast,
-        )
+        !isIdentityActionAllowed(mode, identityModalPermissions, setToast)
       ) {
         return;
       }
@@ -669,10 +637,7 @@ export const useWaveGroupEditButtonsController = ({
       const needsWaveUpdate = !scopedGroup?.id;
       let waveMutationTriggered = false;
       try {
-        const authenticated = await ensureAuthenticated(
-          requestAuth,
-          setToast,
-        );
+        const authenticated = await ensureAuthenticated(requestAuth, setToast);
         if (!authenticated) {
           return;
         }
@@ -689,7 +654,7 @@ export const useWaveGroupEditButtonsController = ({
         const updatedPayload = applyIdentityChangeToPayload(
           payload,
           normalizedIdentity,
-          mode,
+          mode
         );
 
         if (!validatePayloadOrNotify(updatedPayload, mode, setToast)) {
@@ -702,15 +667,10 @@ export const useWaveGroupEditButtonsController = ({
           abortControllersRef,
           queryClient,
           waveId: wave.id,
-          waveGroupType: type,
         });
 
         if (needsWaveUpdate) {
-          const updateBody = buildWaveUpdateBody(
-            wave,
-            type,
-            newGroupId,
-          );
+          const updateBody = buildWaveUpdateBody(wave, type, newGroupId);
           waveMutationTriggered = true;
           await updateWave(updateBody, { skipAuth: true });
         } else {
@@ -729,11 +689,8 @@ export const useWaveGroupEditButtonsController = ({
         });
       } catch (error) {
         if (!waveMutationTriggered) {
-          if (
-            error instanceof DOMException &&
-            error.name === "AbortError"
-          ) {
-            console.info("[WaveGroupEditButtons] Identity update aborted");
+          if (error instanceof DOMException && error.name === "AbortError") {
+            console.warn("[WaveGroupEditButtons] Identity update aborted");
           } else {
             setToast({
               message: toErrorMessage(error),
@@ -760,7 +717,7 @@ export const useWaveGroupEditButtonsController = ({
       loadIdentityGroupWallets,
       abortControllersRef,
       queryClient,
-    ],
+    ]
   );
 
   return {

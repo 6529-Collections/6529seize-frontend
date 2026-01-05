@@ -93,12 +93,6 @@ export async function multiPartUpload({
   };
 
   const contentType = getContentType(file);
-  console.log(
-    "File upload - detected content type:",
-    contentType,
-    "for file:",
-    file.name
-  );
 
   const startData = await commonApiPost<
     { file_name: string; content_type: string },

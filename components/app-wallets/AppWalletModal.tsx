@@ -281,7 +281,7 @@ export function UnlockAppWalletModal(
           showUnlockError();
         }
       } catch (e) {
-        console.log("unlock error", e);
+        console.error("unlock error", e);
         showUnlockError();
       }
     };

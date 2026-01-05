@@ -16,7 +16,7 @@ export default function AwsRumProvider({
 
     // Skip initialization in development mode to avoid noise
     if (publicEnv.NODE_ENV === "development") {
-      console.log("AWS RUM: Skipped initialization in development mode");
+      console.warn("AWS RUM: Skipped initialization in development mode");
       return;
     }
 
@@ -30,7 +30,7 @@ export default function AwsRumProvider({
       );
 
       if (!APPLICATION_ID) {
-        console.log(
+        console.warn(
           "AWS RUM: Skipped initialization - missing required environment variables"
         );
         return;
@@ -62,7 +62,6 @@ export default function AwsRumProvider({
       // Optional: Store the instance globally for manual tracking if needed
       (window as any).awsRum = awsRum;
 
-      console.log("AWS RUM: Successfully initialized");
     } catch (error) {
       // Silently handle errors to prevent breaking the application
       console.warn("AWS RUM: Failed to initialize", error);

@@ -245,15 +245,6 @@ export function useArtworkSubmissionMutation() {
         return null;
       }
 
-      // Debug logging for file info
-      if (hasFile && data.imageFile) {
-        console.log("Uploading file:", {
-          name: data.imageFile.name,
-          type: data.imageFile.type,
-          size: data.imageFile.size,
-        });
-      }
-
       if (!data.traits.title) {
         setToast({
           message: "Please provide a title for your artwork",

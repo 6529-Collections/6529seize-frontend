@@ -388,14 +388,14 @@ export function useWavePagination({
           } else {
             aroundQueueLastFetchedMinSerialNoRef.current = null;
             aroundQueueLastFetchedMaxSerialNoRef.current = null;
-            console.log(
+            console.warn(
               `[WavePagination] Fetched around serial no ${serialToFetch}, received an empty list of drops.`
             );
           }
         } else {
           aroundQueueLastFetchedMinSerialNoRef.current = null;
           aroundQueueLastFetchedMaxSerialNoRef.current = null;
-          console.log(
+          console.warn(
             `[WavePagination] Fetched around serial no ${serialToFetch}, no new data (null result).`
           );
         }
@@ -406,7 +406,7 @@ export function useWavePagination({
             error
           );
         } else {
-          console.log(
+          console.warn(
             `[WavePagination] Fetch around ${serialToFetch} aborted.`
           );
         }

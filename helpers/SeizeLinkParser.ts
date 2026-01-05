@@ -37,7 +37,8 @@ export interface SeizeQuoteLinkInfo {
   dropId?: string | undefined;
 }
 
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+const UUID_REGEX =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const DIGITS_REGEX = /^\d+$/;
 
 const sanitizeQueryValue = (value: string | null): string | null => {
@@ -84,10 +85,7 @@ export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
 
   const waveId = sanitizeQueryValue(url.searchParams.get("wave"));
 
-  if (
-    !waveId ||
-    !UUID_REGEX.test(waveId)
-  ) {
+  if (!waveId || !UUID_REGEX.test(waveId)) {
     return null;
   }
 
@@ -102,7 +100,7 @@ export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
 
     result.serialNo = serialNo;
   } else {
-    return null
+    return null;
   }
 
   return result;
@@ -152,7 +150,7 @@ export function parseSeizeQueryLink(
     }
 
     return result;
-  } catch (err) {
+  } catch {
     return null;
   }
 }
@@ -185,7 +183,9 @@ export const ensureStableSeizeLink = (
 
     let globalWindow: Window | undefined;
     if (typeof globalThis === "object" && "window" in globalThis) {
-      globalWindow = (globalThis as typeof globalThis & { window?: Window | undefined }).window;
+      globalWindow = (
+        globalThis as typeof globalThis & { window?: Window | undefined }
+      ).window;
     }
 
     const resolvedCurrentHref = currentHref ?? globalWindow?.location?.href;

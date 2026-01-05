@@ -22,16 +22,13 @@ export interface IdentityTdhStats {
   readonly unusedRate: number;
 }
 
-async function fetchIdentityTdhStats(identity: string): Promise<IdentityTdhStats> {
+async function fetchIdentityTdhStats(
+  identity: string
+): Promise<IdentityTdhStats> {
   const encodedIdentity = encodeURIComponent(identity);
   const response = await commonApiFetch<ApiXTdhStats>({
     endpoint: `xtdh/stats/${encodedIdentity}`,
   });
-
-  console.log(response)
-
-
-
 
   return {
     generationRate: response.generation_rate,
@@ -69,6 +66,3 @@ export function useIdentityTdhStats({
     refetchOnMount: true,
   });
 }
-
-
-
