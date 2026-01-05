@@ -11,6 +11,19 @@ jest.mock("@/components/not-found/NotFound", () => ({
   ),
 }));
 
+const mockSetTitle = jest.fn();
+jest.mock("@/contexts/TitleContext", () => ({
+  __esModule: true,
+  useTitle: () => ({
+    title: "Test Title",
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+}));
+
 // Mock useParams to return different values for different tests
 const mockUseParams = jest.fn(() => ({ id: "123" }));
 jest.mock("next/navigation", () => ({
