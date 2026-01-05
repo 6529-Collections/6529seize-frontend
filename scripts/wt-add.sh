@@ -37,7 +37,8 @@ cat > "$WORKTREE_PATH/settings.json" <<EOF
   "workbench.colorCustomizations": {
     "titleBar.activeBackground": "$RAND_COLOR",
     "titleBar.inactiveBackground": "$RAND_COLOR"
-  }
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
 EOF
 echo "VS Code color set to $RAND_COLOR."
