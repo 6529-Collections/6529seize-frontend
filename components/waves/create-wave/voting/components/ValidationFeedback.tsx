@@ -3,7 +3,7 @@ import { MIN_MINUTES, MAX_HOURS } from '../types';
 
 interface ValidationFeedbackProps {
   /** Error message to display, if any */
-  readonly error?: string;
+  readonly error?: string | undefined;
 }
 
 /**

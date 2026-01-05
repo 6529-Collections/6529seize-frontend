@@ -28,7 +28,7 @@ export enum ManifoldPhase {
 interface PhaseBoundary {
   hour: number;
   minute: number;
-  dayOffset?: number;
+  dayOffset?: number | undefined;
 }
 
 interface PhaseDefinition {
@@ -110,7 +110,7 @@ export interface ManifoldClaim {
   endDate: number;
   status: ManifoldClaimStatus;
   phase: ManifoldPhase;
-  memePhase?: MemePhase;
+  memePhase?: MemePhase | undefined;
   isFetching: boolean;
   isFinalized: boolean;
   isSoldOut: boolean;
@@ -209,12 +209,11 @@ export function useManifoldClaim(
   useEffect(() => {
     if (readContract.error) {
       setClaim((prevClaim) => {
-        if (prevClaim) {
-          return {
-            ...prevClaim,
-            isError: true,
-          };
-        }
+        if (!prevClaim) return;
+        return {
+          ...prevClaim,
+          isError: true,
+        };
       });
       onError?.();
     }
@@ -228,6 +227,7 @@ export function useManifoldClaim(
           isFetching: readContract.isFetching,
         };
       }
+      return;
     });
   }, [readContract.isFetching]);
 

@@ -1,4 +1,3 @@
-import React from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
 
 interface WavePictureProps {
@@ -99,7 +98,7 @@ export default function WavePicture({
   return (
     <div className="tw-relative tw-w-full tw-h-full">
       {pfps.slice(0, sliceCount).map((pfp, i) => {
-        const clip = polygons[i];
+        const clip = polygons?.[i];
         return (
           <div
             key={pfp + i}

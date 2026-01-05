@@ -1,7 +1,7 @@
 "use client";
 
 /* istanbul ignore file */
-import React, { useContext, useRef, useState, type JSX } from "react";
+import { useContext, useRef, useState, type JSX } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
@@ -37,7 +37,7 @@ export default function CreateWave({
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
-  readonly onSuccess?: () => void;
+  readonly onSuccess?: (() => void) | undefined;
 }) {
   const router = useRouter();
   const { isIos, keyboardVisible } = useCapacitor();
@@ -153,7 +153,7 @@ export default function CreateWave({
     );
 
     const dropRequest: ApiCreateWaveDropRequest = {
-      title: drop.title,
+      title: drop.title ?? null,
       parts: dropParts.map((part) => ({
         content: part.content,
         quoted_drop: part.quoted_drop,
@@ -249,7 +249,6 @@ export default function CreateWave({
     [CreateWaveStep.APPROVAL]: (
       <CreateWaveApproval
         threshold={config.approval.threshold}
-        thresholdTimeMs={config.approval.thresholdTimeMs}
         errors={errors}
         setThreshold={onThresholdChange}
         setThresholdTimeMs={onThresholdTimeChange}

@@ -14,7 +14,7 @@ import * as Sentry from "@sentry/nextjs";
 const dsn = publicEnv.SENTRY_DSN;
 
 Sentry.init({
-  dsn,
+  ...(dsn && { dsn }),
   enabled: Boolean(dsn),
 
   // Define how likely traces are sampled.

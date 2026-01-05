@@ -48,13 +48,12 @@ const MemesArtSubmissionContainer: React.FC<
 
   // Auto-close on successful submission after a short delay
   useEffect(() => {
-    if (submissionPhase === "success") {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 1200); // Brief delay to show success state
+    if (submissionPhase !== "success") return;
+    const timer = setTimeout(() => {
+      onClose();
+    }, 1200); // Brief delay to show success state
 
-      return () => clearTimeout(timer);
-    }
+    return () => clearTimeout(timer);
   }, [submissionPhase, onClose]);
 
   // Handle file selection
@@ -202,28 +201,30 @@ const MemesArtSubmissionContainer: React.FC<
   };
 
   return (
-    <div className="tw-h-full tw-flex tw-flex-col">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-border tw-border-iron-800 tw-backdrop-blur tw-flex tw-flex-col tw-overflow-hidden">
-        <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-overflow-hidden">
-          <div className="tw-absolute tw-w-1/2 tw-h-1/2 tw-bg-primary-500/[0.03] tw-blur-3xl -tw-top-1/4 -tw-right-1/4" />
-          <div className="tw-absolute tw-w-2/3 tw-h-1/2 tw-bg-purple-500/[0.02] tw-blur-3xl tw-top-1/4 -tw-left-1/4" />
-          <div className="tw-absolute tw-w-1/2 tw-h-1/2 tw-bg-iron-500/[0.03] tw-blur-3xl -tw-bottom-1/4 -tw-left-1/4" />
+    <div className="tw-flex tw-h-full tw-flex-col">
+      <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-950 tw-backdrop-blur">
+        <div className="tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-xl">
+          <div className="tw-absolute -tw-right-1/4 -tw-top-1/4 tw-h-1/2 tw-w-1/2 tw-bg-primary-500/[0.03] tw-blur-3xl" />
+          <div className="tw-absolute -tw-left-1/4 tw-top-1/4 tw-h-1/2 tw-w-2/3 tw-bg-purple-500/[0.02] tw-blur-3xl" />
+          <div className="tw-absolute -tw-bottom-1/4 -tw-left-1/4 tw-h-1/2 tw-w-1/2 tw-bg-iron-500/[0.03] tw-blur-3xl" />
         </div>
-        <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-h-full">
+        <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col">
           <div className="tw-px-4 md:tw-px-8">
             <div
-              className={`tw-flex tw-justify-between tw-w-full lg:tw-mb-0 tw-pt-6 lg:tw-pt-8 tw-pb-4 lg:tw-pb-6 tw-flex-shrink-0 tw-border tw-border-solid tw-border-x-0 tw-border-t-0 lg:tw-border-b-0 tw-border-iron-800 ${
+              className={`tw-flex tw-w-full tw-flex-shrink-0 tw-justify-between tw-border tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4 tw-pt-6 lg:tw-mb-0 lg:tw-border-b-0 lg:tw-pb-6 lg:tw-pt-8 ${
                 form.currentStep === SubmissionStep.AGREEMENT
-                  ? "tw-max-w-6xl tw-mx-auto"
+                  ? "tw-mx-auto tw-max-w-6xl"
                   : ""
-              }`}>
-              <motion.h3 className="tw-text-2xl lg:tw-text-3xl tw-font-semibold tw-text-iron-100">
+              }`}
+            >
+              <motion.h3 className="tw-text-2xl tw-font-semibold tw-text-iron-100 lg:tw-text-3xl">
                 Submit Work to The Memes
               </motion.h3>
               <motion.button
                 onClick={onClose}
-                className="tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-size-9 lg:tw-size-10 tw-rounded-full tw-border-0 tw-ring-1 tw-ring-iron-700 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-                aria-label="Close modal">
+                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400 lg:tw-size-10"
+                aria-label="Close modal"
+              >
                 <FontAwesomeIcon
                   icon={faXmark}
                   className="tw-size-5 tw-flex-shrink-0"
@@ -231,7 +232,7 @@ const MemesArtSubmissionContainer: React.FC<
               </motion.button>
             </div>
           </div>
-          <div className="tw-flex-1 tw-min-h-0">
+          <div className="tw-min-h-0 tw-flex-1">
             {stepComponents[form.currentStep]}
           </div>
         </div>

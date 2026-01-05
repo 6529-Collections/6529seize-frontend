@@ -40,8 +40,8 @@ type LevelTextColor = keyof typeof TEXT_COLOR_CLASSES;
 interface ProfileLevelProps {
   readonly level: number;
   readonly cicType: CICType;
-  readonly color?: LevelTextColor;
-  readonly size?: ProfileLevelSize;
+  readonly color?: LevelTextColor | undefined;
+  readonly size?: ProfileLevelSize | undefined;
 }
 
 export default function ProfileLevel({

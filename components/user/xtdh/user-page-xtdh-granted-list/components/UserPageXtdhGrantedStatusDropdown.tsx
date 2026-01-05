@@ -21,7 +21,7 @@ interface UserPageXtdhGrantedStatusDropdownProps {
   readonly selectedStatuses: GrantedFilterStatuses;
   readonly onChange: (statuses: GrantedFilterStatuses) => void;
   readonly filterLabel: string;
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
 }
 
 export function UserPageXtdhGrantedStatusDropdown({
@@ -58,52 +58,20 @@ export function UserPageXtdhGrantedStatusDropdown({
 
     if (normalizedSelection.length === 1) {
       const [status] = normalizedSelection;
-      return labelByStatus[status] ?? STATUS_LABELS[status];
+      return labelByStatus[status!] ?? STATUS_LABELS[status!];
     }
 
     if (normalizedSelection.length === 2) {
       const [first, second] = normalizedSelection;
-      return `${STATUS_LABELS[first]} + ${STATUS_LABELS[second]}`;
+      return `${STATUS_LABELS[first!]} + ${STATUS_LABELS[second!]}`;
     }
 
     const [primary, ...rest] = normalizedSelection;
     const extraCount = rest.length;
-    return `${STATUS_LABELS[primary]} +${extraCount} more`;
+    return `${STATUS_LABELS[primary!]} +${extraCount} more`;
   }, [labelByStatus, normalizedSelection]);
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-  const getButtonPosition = () => {
-    const currentButton = buttonRef.current;
-    if (!currentButton) {
-      return { right: 0 };
-    }
-
-    try {
-      const { right } = currentButton.getBoundingClientRect();
-      return { right };
-    } catch (error) {
-      console.error("Failed to read dropdown trigger position", error);
-      return { right: 0 };
-    }
-  };
-
-  const [buttonPosition, setButtonPosition] = useState(getButtonPosition());
-
-  const onButtonPositionChange = () => {
-    if (buttonRef.current) {
-      setButtonPosition(getButtonPosition());
-    }
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    window.addEventListener("resize", onButtonPositionChange);
-    onButtonPositionChange();
-    return () => {
-      window.removeEventListener("resize", onButtonPositionChange);
-    };
-  }, [isOpen]);
 
   const handleToggle = (status: GrantedFilterStatus) => {
     if (disabled) return;
@@ -177,7 +145,6 @@ export function UserPageXtdhGrantedStatusDropdown({
         isOpen={isOpen}
         setOpen={setIsOpen}
         buttonRef={buttonRef}
-        buttonPosition={buttonPosition}
         filterLabel={filterLabel}
         dynamicPosition={true}
         onIsMobile={() => {}} // Mobile state unused: dropdown layout identical across breakpoints

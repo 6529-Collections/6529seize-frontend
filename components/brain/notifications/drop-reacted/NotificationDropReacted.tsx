@@ -32,7 +32,7 @@ interface Props {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export default function NotificationDropReacted({
@@ -67,7 +67,8 @@ export default function NotificationDropReacted({
         <span
           className={`${getNotificationVoteColor(
             voteValue
-          )} tw-font-medium tw-text-sm`}>
+          )} tw-font-medium tw-text-sm`}
+        >
           {voteValue > 0 && "+"}
           {numberWithCommas(voteValue)}
         </span>
@@ -84,7 +85,7 @@ export default function NotificationDropReacted({
     if (custom) {
       emojiNode = (
         <img
-          src={custom.skins[0].src}
+          src={custom.skins[0]?.src}
           alt={rawId}
           className="tw-max-w-5 tw-max-h-5 tw-object-contain"
         />
@@ -94,7 +95,7 @@ export default function NotificationDropReacted({
       if (native) {
         emojiNode = (
           <span className="tw-text-[1.2rem] tw-flex tw-items-center tw-justify-center">
-            {native.skins[0].native}
+            {native.skins[0]?.native}
           </span>
         );
       }
@@ -118,6 +119,9 @@ export default function NotificationDropReacted({
   }
 
   const drop = notification.related_drops[0];
+  if (!drop) {
+    return null;
+  }
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
@@ -129,7 +133,8 @@ export default function NotificationDropReacted({
             profile={notification.related_identity}
             size={UserFollowBtnSize.SMALL}
           />
-        }>
+        }
+      >
         {actionElement}
       </NotificationHeader>
 

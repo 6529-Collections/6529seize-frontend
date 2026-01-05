@@ -6,9 +6,9 @@ const mockScrollTo = jest.fn();
 
 // Create a mock HTMLDivElement with scroll properties
 const createMockScrollContainer = (options: {
-  scrollTop?: number;
-  scrollHeight?: number;
-  clientHeight?: number;
+  scrollTop?: number | undefined;
+  scrollHeight?: number | undefined;
+  clientHeight?: number | undefined;
 } = {}) => {
   const element = document.createElement('div');
   

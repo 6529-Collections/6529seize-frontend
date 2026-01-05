@@ -14,7 +14,7 @@ describe('CreateWaveDropsMetadataRowType', () => {
   it('applies active classes based on activeType', () => {
     render(<CreateWaveDropsMetadataRowType activeType={ApiWaveMetadataType.Number} onTypeChange={jest.fn()} />);
     const buttons = screen.getAllByRole('button');
-    expect(buttons[1].className).toContain('tw-ring-primary-400');
-    expect(buttons[0].className).not.toContain('tw-ring-primary-400');
+    expect(buttons[1]?.className).toContain('tw-ring-primary-400');
+    expect(buttons[0]?.className).not.toContain('tw-ring-primary-400');
   });
 });

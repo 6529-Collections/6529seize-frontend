@@ -4,9 +4,9 @@ import { useId } from "react";
 interface XtdhStatCardProps {
   readonly label: string;
   readonly value: string;
-  readonly subtext?: string;
-  readonly tooltip?: string;
-  readonly onClick?: () => void;
+  readonly subtext?: string | undefined;
+  readonly tooltip?: string | undefined;
+  readonly onClick?: (() => void) | undefined;
 }
 
 export function XtdhStatCard({

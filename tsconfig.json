@@ -1,29 +1,66 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    // ==========================================================================
+    // Language & Environment
+    // ==========================================================================
+    "target": "ES2022",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "jsx": "react-jsx",
+    // ==========================================================================
+    // Modules
+    // ==========================================================================
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowJs": true,
+    // ==========================================================================
+    // Strict Type-Checking (Production Grade)
+    // ==========================================================================
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": true,
+    // ==========================================================================
+    // Code Quality
+    // ==========================================================================
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    // ==========================================================================
+    // Emit
+    // ==========================================================================
+    "noEmit": true,
     "incremental": true,
-    "types": ["@testing-library/jest-dom"],
+    // ==========================================================================
+    // Path Aliases
+    // ==========================================================================
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    // ==========================================================================
+    // Next.js & Testing
+    // ==========================================================================
+    "types": [
+      "@testing-library/jest-dom"
+    ],
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./*"]
-    }
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -32,5 +69,12 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "tests", "e2e", "**/__mocks__/**"]
+  "exclude": [
+    "node_modules",
+    "tests",
+    "__tests__",
+    "e2e",
+    "**/__mocks__/**",
+    "generated/**"
+  ]
 }

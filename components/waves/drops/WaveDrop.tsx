@@ -128,8 +128,7 @@ interface WaveDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 const WaveDrop = ({
@@ -146,7 +145,6 @@ const WaveDrop = ({
   onQuoteClick,
   onDropContentClick,
   showReplyAndQuote,
-  parentContainerRef,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -198,13 +196,13 @@ const WaveDrop = ({
       // Don't allow mobile menu when in edit mode
       if (isEditing) return;
       const touch = e.touches[0];
-      touchStartPosition.current = { x: touch.clientX, y: touch.clientY };
+      touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
       longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
     },
     [isMobile, handleLongPress, isEditing]
   );
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleTouchEnd = useCallback(() => {
     if (longPressTimeoutRef.current) {
       clearTimeout(longPressTimeoutRef.current);
     }
@@ -217,8 +215,8 @@ const WaveDrop = ({
     const touch = e.touches[0];
     const moveThreshold = 10; // pixels
 
-    const deltaX = Math.abs(touch.clientX - touchStartPosition.current.x);
-    const deltaY = Math.abs(touch.clientY - touchStartPosition.current.y);
+    const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
+    const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
 
     if (deltaX > moveThreshold || deltaY > moveThreshold) {
       if (longPressTimeoutRef.current) {
@@ -233,7 +231,7 @@ const WaveDrop = ({
       dispatch(setEditingDropId(null));
     }
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+    onReply({ drop, partId: drop.parts[activePartIndex]!.part_id });
   }, [onReply, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnQuote = useCallback(() => {
@@ -242,7 +240,7 @@ const WaveDrop = ({
       dispatch(setEditingDropId(null));
     }
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+    onQuote({ drop, partId: drop.parts[activePartIndex]!.part_id });
   }, [onQuote, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnAddReaction = useCallback(() => {
@@ -254,41 +252,46 @@ const WaveDrop = ({
   }, [editingDropId, dispatch]);
 
   const handleOnEdit = useCallback(() => {
-    setIsSlideUp(false);  // Close mobile menu when entering edit mode
+    setIsSlideUp(false); // Close mobile menu when entering edit mode
     dispatch(setEditingDropId(drop.id));
   }, [dispatch, drop.id]);
 
-  const handleEditSave = useCallback(async (newContent: string, mentions?: ApiDropMentionedUser[]) => {
-    // Clean mentioned users to only include allowed fields for API
-    const cleanedMentions = (mentions || drop.mentioned_users).map(user => ({
-      mentioned_profile_id: user.mentioned_profile_id,
-      handle_in_content: user.handle_in_content,
-      // Exclude current_handle as it's not allowed in update requests
-    }));
+  const handleEditSave = useCallback(
+    async (newContent: string, mentions?: ApiDropMentionedUser[]) => {
+      // Clean mentioned users to only include allowed fields for API
+      const cleanedMentions = (mentions || drop.mentioned_users).map(
+        (user) => ({
+          mentioned_profile_id: user.mentioned_profile_id,
+          handle_in_content: user.handle_in_content,
+          // Exclude current_handle as it's not allowed in update requests
+        })
+      );
 
-    const updateRequest: ApiUpdateDropRequest = {
-      parts: drop.parts.map((part, index) => ({
-        content: index === activePartIndex ? newContent : part.content,
-        quoted_drop: part.quoted_drop || null,
-        media: part.media || []
-      })),
-      title: drop.title,
-      metadata: drop.metadata,
-      referenced_nfts: drop.referenced_nfts,
-      mentioned_users: cleanedMentions,
-      signature: null,
-    };
+      const updateRequest: ApiUpdateDropRequest = {
+        parts: drop.parts.map((part, index) => ({
+          content: index === activePartIndex ? newContent : part.content,
+          quoted_drop: part.quoted_drop || null,
+          media: part.media || [],
+        })),
+        title: drop.title,
+        metadata: drop.metadata,
+        referenced_nfts: drop.referenced_nfts,
+        mentioned_users: cleanedMentions,
+        signature: null,
+      };
 
-    // Optimistically close the editor
-    dispatch(setEditingDropId(null));
+      // Optimistically close the editor
+      dispatch(setEditingDropId(null));
 
-    // Execute the mutation
-    dropUpdateMutation.mutate({
-      dropId: drop.id,
-      request: updateRequest,
-      currentDrop: drop,
-    });
-  }, [drop, activePartIndex, dropUpdateMutation, dispatch]);
+      // Execute the mutation
+      dropUpdateMutation.mutate({
+        dropId: drop.id,
+        request: updateRequest,
+        currentDrop: drop,
+      });
+    },
+    [drop, activePartIndex, dropUpdateMutation, dispatch]
+  );
 
   const handleEditCancel = useCallback(() => {
     dispatch(setEditingDropId(null));
@@ -321,14 +324,16 @@ const WaveDrop = ({
     <div
       className={`${
         isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
-      } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}>
+      } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}
+    >
       <div
         className={dropClasses}
         data-wave-drop-id={drop.stableHash ?? drop.id}
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}>
+        onTouchMove={handleTouchMove}
+      >
         {drop.reply_to &&
           (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
             drop.author.handle !== previousDrop?.author.handle) &&
@@ -350,7 +355,8 @@ const WaveDrop = ({
             className="tw-flex tw-flex-col tw-w-full tw-gap-y-1"
             style={{
               maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
-            }}>
+            }}
+          >
             {showAuthorInfo && (
               <WaveDropHeader
                 drop={drop}
@@ -365,7 +371,8 @@ const WaveDrop = ({
                 shouldGroupWithPreviousDrop && !isProfileView
                   ? "tw-ml-[3.25rem]"
                   : ""
-              }>
+              }
+            >
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -374,7 +381,6 @@ const WaveDrop = ({
                 onDropContentClick={onDropContentClick}
                 onQuoteClick={onQuoteClick}
                 setLongPressTriggered={setLongPressTriggered}
-                parentContainerRef={parentContainerRef}
                 isEditing={isEditing}
                 isSaving={dropUpdateMutation.isPending}
                 onSave={handleEditSave}
@@ -394,8 +400,11 @@ const WaveDrop = ({
         )}
         <div
           className={`tw-mx-2 tw-flex tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap ${
-            compact ? "tw-ml-[2.75rem] tw-w-[calc(100%-2.5rem)]" : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
-          }`}>
+            compact
+              ? "tw-ml-[2.75rem] tw-w-[calc(100%-2.5rem)]"
+              : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
+          }`}
+        >
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}

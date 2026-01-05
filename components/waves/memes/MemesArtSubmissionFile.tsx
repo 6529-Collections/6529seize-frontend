@@ -31,7 +31,7 @@ import {
 } from "./submission/constants/media";
 
 const renderPreviewMessage = (primary: string, secondary: string) => (
-  <div className="tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center tw-text-sm tw-text-iron-400 tw-px-4">
+  <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center tw-text-sm tw-text-iron-400">
     <span>{primary}</span>
     <span className="tw-text-iron-500">{secondary}</span>
   </div>
@@ -71,7 +71,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   // Check for browser support
   const [browserSupport, setBrowserSupport] = useState<{
     supported: boolean;
-    reason?: string;
+    reason?: string | undefined;
   }>({ supported: true });
 
   // Reduced-motion preference
@@ -161,7 +161,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         setMediaSource("url");
       }
     },
-    [setMediaSource, onExternalMimeTypeChange],
+    [setMediaSource, onExternalMimeTypeChange]
   );
 
   const providerOptions = useMemo(
@@ -171,7 +171,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         label: provider.label,
         panelId: `memes-art-submission-provider-${provider.key}`,
       })),
-    [],
+    []
   );
 
   const handleProviderSelect = useCallback(
@@ -184,7 +184,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         onExternalProviderChange(key);
       }
     },
-    [externalProvider, onExternalProviderChange],
+    [externalProvider, onExternalProviderChange]
   );
 
   // Check browser compatibility on mount
@@ -228,6 +228,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     // - existing objectUrl (if your useFileUploader logic set it)
     // - or the original "artworkUrl" prop from the server
     setPreviewUrl(objectUrl ?? artworkUrl);
+    return;
   }, [currentFile, objectUrl, artworkUrl]);
 
   const showUploadUi = mediaSource === "upload";
@@ -236,33 +237,33 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     if (externalValidationStatus === "pending") {
       return renderPreviewMessage(
         "Validating preview...",
-        "We're verifying the gateway serves an HTML document.",
+        "We're verifying the gateway serves an HTML document."
       );
     }
 
     if (externalValidationStatus === "invalid" && externalError) {
       return renderPreviewMessage(
         externalError,
-        "Only ipfs.io or arweave.net HTML documents can be embedded.",
+        "Only ipfs.io or arweave.net HTML documents can be embedded."
       );
     }
 
     return renderPreviewMessage(
       "Provide a valid hash or CID to enable the preview.",
-      "The final artwork is rendered securely inside a sandboxed iframe.",
+      "The final artwork is rendered securely inside a sandboxed iframe."
     );
   }, [externalValidationStatus, externalError]);
 
   const mediaTypeLabel = useMemo(() => {
     const match = ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.find(
-      (type) => type.value === externalMimeType,
+      (type) => type.value === externalMimeType
     );
     return match?.label ?? externalMimeType;
   }, [externalMimeType]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 tw-h-full">
-      <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-rounded-lg tw-p-1 tw-w-full tw-max-w-md">
+    <div className="tw-flex tw-h-full tw-flex-col tw-gap-4">
+      <div className="tw-w-full tw-max-w-md tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-1">
         <TabToggle
           options={tabOptions}
           activeKey={mediaSource}
@@ -275,29 +276,18 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         <motion.div
           id="memes-art-submission-upload-panel"
           ref={dropAreaRef}
-          whileHover={
-            !artworkUploaded && !prefersReducedMotion
-              ? { scale: 1.002 }
-              : undefined
-          }
-          className={`
-            tw-relative tw-w-full tw-h-full
-            tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
-            tw-rounded-xl tw-overflow-hidden tw-group
-            ${
-              visualState === "dragging"
-                ? "tw-border-2 tw-border-primary-500/60"
-                : ""
-            }
-            ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""}
-            ${
-              visualState === "idle" && !artworkUploaded
-                ? "hover:tw-border hover:tw-border-iron-700/80"
-                : ""
-            }
-            tw-transition-all tw-duration-300
-            ${artworkUploaded ? "" : "tw-cursor-pointer"}
-          `}
+          {...(!artworkUploaded && !prefersReducedMotion
+            ? { whileHover: { scale: 1.002 } }
+            : {})}
+          className={`tw-group tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 ${
+            visualState === "dragging"
+              ? "tw-border-2 tw-border-primary-500/60"
+              : ""
+          } ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""} ${
+            visualState === "idle" && !artworkUploaded
+              ? "hover:tw-border hover:tw-border-iron-700/80"
+              : ""
+          } tw-transition-all tw-duration-300 ${artworkUploaded ? "" : "tw-cursor-pointer"} `}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -308,7 +298,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           aria-label="Upload artwork"
           onKeyDown={handleKeyDown}
           aria-describedby={error ? "file-upload-error" : undefined}
-          data-testid="artwork-upload-area">
+          data-testid="artwork-upload-area"
+        >
           <input
             ref={fileInputRef}
             type="file"
@@ -342,16 +333,13 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       ) : (
         <div
           id="memes-art-submission-interactive-panel"
-          className={`
-            tw-flex tw-flex-col tw-gap-4 tw-flex-1
-            tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
-            tw-rounded-xl tw-border tw-border-iron-800 tw-p-4
-          `}>
+          className={`tw-flex tw-flex-1 tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 tw-p-4`}
+        >
           <div className="tw-flex tw-flex-col tw-gap-2">
             <span className="tw-text-sm tw-font-medium tw-text-iron-200">
               Hosting Network
             </span>
-            <div className="tw-inline-flex tw-bg-iron-900 tw-border tw-border-iron-800 tw-rounded-lg tw-p-1">
+            <div className="tw-inline-flex tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-1">
               <TabToggle
                 options={providerOptions}
                 activeKey={externalProvider}
@@ -363,7 +351,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           <div className="tw-flex tw-flex-col tw-gap-2">
             <label
               htmlFor="memes-interactive-media-hash"
-              className="tw-text-sm tw-font-medium tw-text-iron-200">
+              className="tw-text-sm tw-font-medium tw-text-iron-200"
+            >
               Content Hash or Path
             </label>
             <input
@@ -377,12 +366,14 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               aria-invalid={Boolean(externalError)}
             />
             {externalError && (
-              <p className="tw-text-xs tw-text-red-400">{externalError}</p>
+              <p className="tw-text-red-400 tw-text-xs">{externalError}</p>
             )}
             {externalConstructedUrl && !externalError && (
               <p className="tw-text-xs tw-text-iron-400">
                 Resulting URL{" "}
-                <span className="tw-text-iron-100">{externalConstructedUrl}</span>
+                <span className="tw-text-iron-100">
+                  {externalConstructedUrl}
+                </span>
               </p>
             )}
           </div>
@@ -391,7 +382,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             <span className="tw-text-sm tw-font-medium tw-text-iron-200">
               Media Type
             </span>
-            <div className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200 tw-flex tw-items-center tw-justify-between">
+            <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200">
               <span>{mediaTypeLabel}</span>
               <span className="tw-text-xs tw-text-iron-500">
                 Fixed to interactive HTML (text/html)
@@ -403,13 +394,14 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             <button
               type="button"
               onClick={onClearExternalMedia}
-              className="tw-text-xs tw-font-medium tw-text-iron-200 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 hover:tw-bg-iron-800 tw-transition disabled:tw-opacity-40 disabled:tw-cursor-not-allowed"
-              disabled={!externalHash}>
+              className="tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+              disabled={!externalHash}
+            >
               Clear Hash
             </button>
           </div>
 
-          <div className="tw-flex-1 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-overflow-hidden tw-flex tw-flex-col tw-min-h-[360px]">
+          <div className="tw-flex tw-min-h-[360px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950">
             {isExternalMediaValid ? (
               <SandboxedExternalIframe
                 key={externalPreviewUrl}
@@ -419,11 +411,13 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                 containerClassName="tw-flex-1 tw-flex tw-flex-col"
                 fallback={renderPreviewMessage(
                   "Preview unavailable for unapproved domains or file types.",
-                  "Only ipfs.io or arweave.net HTML documents can be embedded.",
+                  "Only ipfs.io or arweave.net HTML documents can be embedded."
                 )}
               />
             ) : (
-              <div className="tw-flex-1 tw-flex tw-flex-col">{previewFallback}</div>
+              <div className="tw-flex tw-flex-1 tw-flex-col">
+                {previewFallback}
+              </div>
             )}
           </div>
         </div>

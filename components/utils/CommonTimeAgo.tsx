@@ -8,8 +8,8 @@ export default function CommonTimeAgo({
   className = "tw-text-sm sm:tw-text-base",
 }: {
   readonly timestamp: number;
-  readonly short?: boolean;
-  readonly className?: string;
+  readonly short?: boolean | undefined;
+  readonly className?: string | undefined;
 }) {
   const [, forceUpdate] = useState(0);
 

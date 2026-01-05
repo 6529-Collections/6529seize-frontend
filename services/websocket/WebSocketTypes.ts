@@ -31,6 +31,6 @@ export type SubscriberMap = Map<string, Set<MessageCallback>>;
  */
 export interface WebSocketConfig {
   url: string;
-  reconnectDelay?: number;
-  maxReconnectAttempts?: number;
+  reconnectDelay?: number | undefined;
+  maxReconnectAttempts?: number | undefined;
 }

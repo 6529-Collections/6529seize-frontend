@@ -10,7 +10,7 @@ import { commonApiPost } from "@/services/api/common-api";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
-  readonly isResetting?: boolean;
+  readonly isResetting?: boolean | undefined;
 }
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({

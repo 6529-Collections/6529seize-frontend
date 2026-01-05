@@ -5,7 +5,10 @@ import Drop, {
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import { convertApiDropToExtendedDrop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  convertApiDropToExtendedDrop,
+  ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
 import { ActiveDropState } from "@/types/dropInteractionTypes";
 
 interface NotificationDropProps {
@@ -15,7 +18,7 @@ interface NotificationDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (quote: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export default function NotificationDrop({

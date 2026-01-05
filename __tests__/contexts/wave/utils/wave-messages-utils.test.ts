@@ -80,8 +80,8 @@ describe("mergeDrops", () => {
     ] as any[];
 
     const merged = mergeDrops(current, incoming);
-    expect(merged[0].id).toBe("drop-2");
-    expect(merged[0].serial_no).toBe(6);
+    expect(merged[0]?.id).toBe("drop-2");
+    expect(merged[0]?.serial_no).toBe(6);
   });
 });
 

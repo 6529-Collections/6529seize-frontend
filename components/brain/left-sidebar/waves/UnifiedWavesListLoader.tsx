@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import React from "react";
 
 interface UnifiedWavesListLoaderProps {
-  readonly isFetching?: boolean;
+  readonly isFetching?: boolean | undefined;
   readonly isFetchingNextPage: boolean;
 }
 

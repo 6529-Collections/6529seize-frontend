@@ -228,7 +228,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     contracts: getConsolidationReadParams(
       accountResolution.address as `0x${string}`,
       props.collection.contract,
-      outgoingDelegations[CONSOLIDATION_USE_CASE.index]
+      outgoingDelegations[CONSOLIDATION_USE_CASE.index]!
     ),
     query: {
       enabled: accountResolution.isConnected && outgoingDelegations.length > 0,
@@ -287,7 +287,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     contracts: getConsolidationReadParams(
       accountResolution.address as `0x${string}`,
       props.collection.contract,
-      incomingDelegations[CONSOLIDATION_USE_CASE.index]
+      incomingDelegations[CONSOLIDATION_USE_CASE.index]!
     ),
     query: {
       enabled: accountResolution.isConnected && incomingDelegations.length > 0,
@@ -653,11 +653,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (!showToast && outgoingDelegationsLoaded && incomingDelegationsLoaded) {
       setToast(undefined);
     }
-  }, [
-    incomingDelegationsLoaded,
-    outgoingDelegationsLoaded,
-    showToast,
-  ]);
+  }, [incomingDelegationsLoaded, outgoingDelegationsLoaded, showToast]);
 
   useEffect(() => {
     if (toast) {
@@ -793,10 +789,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Accordion
           alwaysOpen
           className={styles["collectionDelegationsAccordion"]}
-          activeKey={delegationKeys}>
+          activeKey={delegationKeys}
+        >
           <Accordion.Item
             className={`${styles["collectionDelegationsAccordionItem"]}`}
-            eventKey={"0"}>
+            eventKey={"0"}
+          >
             <Accordion.Header
               onClick={() => {
                 if (delegationKeys.includes("0")) {
@@ -805,7 +803,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setDelegationKeys([...delegationKeys, "0"]);
                 }
                 setDelegationKeysChanged(true);
-              }}>
+              }}
+            >
               Outgoing
             </Accordion.Header>
             <Accordion.Body>
@@ -814,7 +813,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           </Accordion.Item>
           <Accordion.Item
             className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
-            eventKey={"1"}>
+            eventKey={"1"}
+          >
             <Accordion.Header
               onClick={() => {
                 if (delegationKeys.includes("1")) {
@@ -823,7 +823,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setDelegationKeys([...delegationKeys, "1"]);
                 }
                 setDelegationKeysChanged(true);
-              }}>
+              }}
+            >
               Incoming
             </Accordion.Header>
             <Accordion.Body>
@@ -844,10 +845,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Accordion
           alwaysOpen
           className={`${styles["collectionDelegationsAccordion"]} `}
-          activeKey={subDelegationKeys}>
+          activeKey={subDelegationKeys}
+        >
           <Accordion.Item
             className={`${styles["collectionDelegationsAccordionItem"]}`}
-            eventKey={"0"}>
+            eventKey={"0"}
+          >
             <Accordion.Header
               onClick={() => {
                 if (subDelegationKeys.includes("0")) {
@@ -858,7 +861,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setSubDelegationKeys([...subDelegationKeys, "0"]);
                 }
                 setSubDelegationKeysChanged(true);
-              }}>
+              }}
+            >
               Outgoing
             </Accordion.Header>
             <Accordion.Body>
@@ -872,7 +876,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           </Accordion.Item>
           <Accordion.Item
             className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
-            eventKey={"1"}>
+            eventKey={"1"}
+          >
             <Accordion.Header
               onClick={() => {
                 if (subDelegationKeys.includes("1")) {
@@ -883,7 +888,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setSubDelegationKeys([...subDelegationKeys, "1"]);
                 }
                 setSubDelegationKeysChanged(true);
-              }}>
+              }}
+            >
               Incoming
             </Accordion.Header>
             <Accordion.Body>
@@ -908,10 +914,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         <Accordion
           alwaysOpen
           className={`${styles["collectionDelegationsAccordion"]}`}
-          activeKey={consolidationKeys}>
+          activeKey={consolidationKeys}
+        >
           <Accordion.Item
             className={`${styles["collectionDelegationsAccordionItem"]}`}
-            eventKey={"0"}>
+            eventKey={"0"}
+          >
             <Accordion.Header
               onClick={() => {
                 if (consolidationKeys.includes("0")) {
@@ -922,7 +930,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setConsolidationKeys([...consolidationKeys, "0"]);
                 }
                 setConsolidationKeysChanged(true);
-              }}>
+              }}
+            >
               Outgoing
             </Accordion.Header>
             <Accordion.Body>
@@ -936,7 +945,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           </Accordion.Item>
           <Accordion.Item
             className={`${styles["collectionDelegationsAccordionItem"]} mt-3`}
-            eventKey={"1"}>
+            eventKey={"1"}
+          >
             <Accordion.Header
               onClick={() => {
                 if (consolidationKeys.includes("1")) {
@@ -947,7 +957,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setConsolidationKeys([...consolidationKeys, "1"]);
                 }
                 setConsolidationKeysChanged(true);
-              }}>
+              }}
+            >
               Incoming
             </Accordion.Header>
             <Accordion.Body>
@@ -983,7 +994,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               w.expiry === "expired"
                 ? styles["delegationExpiredLabel"]
                 : styles["delegationActiveLabel"]
-            }>
+            }
+          >
             {w.expiry}
           </span>
           {isConsolidation && (
@@ -992,21 +1004,24 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 !pending
                   ? styles["consolidationActiveLabel"]
                   : styles["consolidationNotAcceptedLabel"]
-              }>
+              }
+            >
               {consolidationStatus}
               {pending && (
                 <>
                   <FontAwesomeIcon
                     className={styles["infoIcon"]}
                     icon={faInfoCircle}
-                    data-tooltip-id={`consolidation-missing-${label}`}></FontAwesomeIcon>
+                    data-tooltip-id={`consolidation-missing-${label}`}
+                  ></FontAwesomeIcon>
                   <Tooltip
                     id={`consolidation-missing-${label}`}
                     style={{
                       backgroundColor: "#1F2937",
                       color: "white",
                       padding: "4px 8px",
-                    }}>
+                    }}
+                  >
                     {label} consolidation missing
                   </Tooltip>
                 </>
@@ -1051,7 +1066,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       <tr key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
           <div
-            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}>
+            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}
+          >
             <span className="d-flex align-items-center justify-content-between">
               <span className="d-flex gap-3 align-items-center">
                 {delegations >= 2 && (
@@ -1101,14 +1117,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       });
                       setShowUpdateDelegation(true);
                       window.scrollTo(0, 0);
-                    }}></FontAwesomeIcon>
+                    }}
+                  ></FontAwesomeIcon>
                   <Tooltip
                     id={`edit-${del.useCase.use_case}-${w.wallet}`}
                     style={{
                       backgroundColor: "#1F2937",
                       color: "white",
                       padding: "4px 8px",
-                    }}>
+                    }}
+                  >
                     Edit
                   </Tooltip>
                 </>
@@ -1144,14 +1162,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                         message = getSwitchToHtml();
                       }
                       setToast({ title, message });
-                    }}></FontAwesomeIcon>
+                    }}
+                  ></FontAwesomeIcon>
                   <Tooltip
                     id={`revoke-${del.useCase.use_case}-${w.wallet}`}
                     style={{
                       backgroundColor: "#1F2937",
                       color: "white",
                       padding: "4px 8px",
-                    }}>
+                    }}
+                  >
                     Revoke
                   </Tooltip>
                 </>
@@ -1182,41 +1202,40 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               <tbody>
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
-                    if (del.wallets.length > 0) {
-                      const isConsolidation =
-                        del.useCase.use_case ===
-                        CONSOLIDATION_USE_CASE.use_case;
-                      return (
-                        <Fragment
-                          key={`outgoing-${del.useCase.use_case}-${index}`}>
-                          <tr>
-                            <td
-                              colSpan={4}
-                              className={styles["delegationsTableUseCaseHeader"]}>
-                              #{del.useCase.use_case} - {del.useCase.display}
-                            </td>
-                          </tr>
-                          {del.wallets.map((w) => {
-                            const consolidationStatus =
-                              outgoingActiveConsolidations.find((i) =>
-                                areEqualAddresses(w.wallet, i.wallet)
-                              )?.status;
-                            const pending =
-                              consolidationStatus ===
-                              "consolidation incomplete";
-                            return printOutgoingDelegationRow(
-                              index,
-                              delegations,
-                              del,
-                              w,
-                              consolidationStatus,
-                              pending,
-                              isConsolidation
-                            );
-                          })}
-                        </Fragment>
-                      );
-                    }
+                    if (!del.wallets.length) return null;
+                    const isConsolidation =
+                      del.useCase.use_case === CONSOLIDATION_USE_CASE.use_case;
+                    return (
+                      <Fragment
+                        key={`outgoing-${del.useCase.use_case}-${index}`}
+                      >
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className={styles["delegationsTableUseCaseHeader"]}
+                          >
+                            #{del.useCase.use_case} - {del.useCase.display}
+                          </td>
+                        </tr>
+                        {del.wallets.map((w) => {
+                          const consolidationStatus =
+                            outgoingActiveConsolidations.find((i) =>
+                              areEqualAddresses(w.wallet, i.wallet)
+                            )?.status;
+                          const pending =
+                            consolidationStatus === "consolidation incomplete";
+                          return printOutgoingDelegationRow(
+                            index,
+                            delegations,
+                            del,
+                            w,
+                            consolidationStatus,
+                            pending,
+                            isConsolidation
+                          );
+                        })}
+                      </Fragment>
+                    );
                   })
                 ) : !outgoingDelegationsLoaded ? (
                   <tr>
@@ -1266,14 +1285,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             message = getSwitchToHtml();
                           }
                           setToast({ title, message });
-                        }}>
+                        }}
+                      >
                         Batch Revoke
                         {(contractWriteBatchRevoke.isPending ||
                           waitContractWriteBatchRevoke.isLoading) && (
                           <div className="d-inline">
                             <div
                               className={`spinner-border ${styles["loader"]}`}
-                              role="status">
+                              role="status"
+                            >
                               <span className="sr-only"></span>
                             </div>
                           </div>
@@ -1302,7 +1323,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       <tr key={`incoming-${del.useCase.use_case}-${index}-${w.wallet}`}>
         <td>
           <div
-            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}>
+            className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}
+          >
             <span className="d-flex align-items-center gap-3">
               {del.useCase.use_case == SUB_DELEGATION_USE_CASE.use_case ? (
                 <FormCheck
@@ -1355,40 +1377,40 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               <tbody>
                 {delegations > 0 ? (
                   myDelegations.map((del, index: number) => {
-                    if (del.wallets.length > 0) {
-                      const isConsolidation =
-                        del.useCase.use_case ===
-                        CONSOLIDATION_USE_CASE.use_case;
-                      return (
-                        <Fragment
-                          key={`incoming-${del.useCase.use_case}-${index}`}>
-                          <tr>
-                            <td
-                              colSpan={4}
-                              className={styles["delegationsTableUseCaseHeader"]}>
-                              #{del.useCase.use_case} - {del.useCase.display}
-                            </td>
-                          </tr>
-                          {del.wallets.map((w) => {
-                            const consolidationStatus =
-                              incomingActiveConsolidations.find((i) =>
-                                areEqualAddresses(w.wallet, i.wallet)
-                              )?.status;
-                            const pending =
-                              consolidationStatus ===
-                              "consolidation incomplete";
-                            return printIncomingDelegationRow(
-                              index,
-                              del,
-                              w,
-                              consolidationStatus,
-                              pending,
-                              isConsolidation
-                            );
-                          })}
-                        </Fragment>
-                      );
-                    }
+                    if (!del.wallets.length) return null;
+
+                    const isConsolidation =
+                      del.useCase.use_case === CONSOLIDATION_USE_CASE.use_case;
+                    return (
+                      <Fragment
+                        key={`incoming-${del.useCase.use_case}-${index}`}
+                      >
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className={styles["delegationsTableUseCaseHeader"]}
+                          >
+                            #{del.useCase.use_case} - {del.useCase.display}
+                          </td>
+                        </tr>
+                        {del.wallets.map((w) => {
+                          const consolidationStatus =
+                            incomingActiveConsolidations.find((i) =>
+                              areEqualAddresses(w.wallet, i.wallet)
+                            )?.status;
+                          const pending =
+                            consolidationStatus === "consolidation incomplete";
+                          return printIncomingDelegationRow(
+                            index,
+                            del,
+                            w,
+                            consolidationStatus,
+                            pending,
+                            isConsolidation
+                          );
+                        })}
+                      </Fragment>
+                    );
                   })
                 ) : !incomingDelegationsLoaded ? (
                   <tr>
@@ -1414,7 +1436,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             onClick={() => {
                               setShowCreateNewDelegationWithSub(true);
                               window.scrollTo(0, 0);
-                            }}>
+                            }}
+                          >
                             <FontAwesomeIcon
                               icon={faPlus}
                               className={styles["buttonIcon"]}
@@ -1430,7 +1453,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             onClick={() => {
                               setShowCreateNewSubDelegationWithSub(true);
                               window.scrollTo(0, 0);
-                            }}>
+                            }}
+                          >
                             <FontAwesomeIcon
                               icon={faPlus}
                               className={styles["buttonIcon"]}
@@ -1446,7 +1470,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             onClick={() => {
                               setShowCreateNewConsolidationWithSub(true);
                               window.scrollTo(0, 0);
-                            }}>
+                            }}
+                          >
                             <FontAwesomeIcon
                               icon={faPlus}
                               className={styles["buttonIcon"]}
@@ -1466,7 +1491,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               onClick={() => {
                                 setShowAssignPrimaryAddressWithSub(true);
                                 window.scrollTo(0, 0);
-                              }}>
+                              }}
+                            >
                               <FontAwesomeIcon
                                 icon={faPlus}
                                 className={styles["buttonIcon"]}
@@ -1483,7 +1509,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             onClick={() => {
                               setShowRevokeDelegationWithSub(true);
                               window.scrollTo(0, 0);
-                            }}>
+                            }}
+                          >
                             <FontAwesomeIcon
                               icon={faMinus}
                               className={styles["buttonIcon"]}
@@ -1513,14 +1540,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 <FontAwesomeIcon
                   className={styles["infoIcon"]}
                   icon={faInfoCircle}
-                  data-tooltip-id="locks-info"></FontAwesomeIcon>
+                  data-tooltip-id="locks-info"
+                ></FontAwesomeIcon>
                 <Tooltip
                   id="locks-info"
                   style={{
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   Lock Wallet or Use Case to stop accepting incoming delegations
                 </Tooltip>
               </>
@@ -1552,7 +1581,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   message = getSwitchToHtml();
                 }
                 setToast({ title, message });
-              }}>
+              }}
+            >
               <FontAwesomeIcon
                 icon={collectionLockRead.data ? faLock : faLockOpen}
                 className={styles["buttonIcon"]}
@@ -1593,7 +1623,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   setLockUseCaseIndex(value - 1);
                 }
                 useCaseLockWrite.reset();
-              }}>
+              }}
+            >
               <option value={0}>
                 Lock/Unlock Use Case
                 {collectionLockRead.data || collectionLockReadGlobal?.data
@@ -1601,27 +1632,25 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   : ``}
               </option>
               {ALL_USE_CASES.map((uc, index) => {
-                if (uc.use_case != 1) {
-                  const asteriskDisplay = useCaseLockStatusesGlobal.data?.[
-                    index
-                  ]
-                    ? ` *`
-                    : ``;
-                  const lockDisplay =
-                    useCaseLockStatuses.data?.[index] ||
-                    useCaseLockStatusesGlobal.data?.[index] ||
-                    collectionLockRead.data
-                      ? ` - LOCKED${asteriskDisplay}`
-                      : ` - UNLOCKED`;
-                  return (
-                    <option
-                      key={`collection-delegation-select-use-case-${uc.use_case}`}
-                      value={uc.use_case}>
-                      #{uc.use_case} - {uc.display}
-                      {lockDisplay}
-                    </option>
-                  );
-                }
+                if (uc.use_case === 1) return null;
+                const asteriskDisplay = useCaseLockStatusesGlobal.data?.[index]
+                  ? ` *`
+                  : ``;
+                const lockDisplay =
+                  useCaseLockStatuses.data?.[index] ||
+                  useCaseLockStatusesGlobal.data?.[index] ||
+                  collectionLockRead.data
+                    ? ` - LOCKED${asteriskDisplay}`
+                    : ` - UNLOCKED`;
+                return (
+                  <option
+                    key={`collection-delegation-select-use-case-${uc.use_case}`}
+                    value={uc.use_case}
+                  >
+                    #{uc.use_case} - {uc.display}
+                    {lockDisplay}
+                  </option>
+                );
               })}
             </Form.Select>
           </Col>
@@ -1631,7 +1660,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               sm={12}
               md={8}
               lg={8}
-              className="pt-2 pb-2 d-flex align-items-center">
+              className="pt-2 pb-2 d-flex align-items-center"
+            >
               {!useCaseLockStatusesGlobal.data ||
               (useCaseLockStatusesGlobal?.data &&
                 (useCaseLockStatusesGlobal?.data[
@@ -1645,8 +1675,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       useCaseLockStatuses?.data?.[lockUseCaseIndex]
                         ? "Unlocking"
                         : "Locking"
-                    } Wallet on Use Case #${useCase.use_case} - ${
-                      useCase.display
+                    } Wallet on Use Case #${useCase?.use_case} - ${
+                      useCase?.display
                     }`;
                     let message = "Confirm in your wallet...";
 
@@ -1666,7 +1696,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       message = getSwitchToHtml();
                     }
                     setToast({ title, message });
-                  }}>
+                  }}
+                >
                   <FontAwesomeIcon
                     icon={
                       useCaseLockStatuses.data?.[lockUseCaseIndex]
@@ -1684,7 +1715,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 </button>
               ) : (
                 <div>
-                  <span className={styles["hint"]}>* Note:</span> Unlock use case in{" "}
+                  <span className={styles["hint"]}>* Note:</span> Unlock use
+                  case in{" "}
                   <Link href={`/delegation/${ANY_COLLECTION_PATH}`}>
                     All Collections
                   </Link>
@@ -1733,7 +1765,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     className={styles["backBtn"]}
                     onClick={() =>
                       props.setSection(DelegationCenterSection.CENTER)
-                    }>
+                    }
+                  >
                     <FontAwesomeIcon icon={faCircleArrowLeft} />
                     <span className="font-smaller">
                       Back to Delegation Center
@@ -1759,7 +1792,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             className={styles["backBtn"]}
                             onClick={() =>
                               props.setSection(DelegationCenterSection.CENTER)
-                            }>
+                            }
+                          >
                             <FontAwesomeIcon icon={faCircleArrowLeft} />
                             Back to Delegation Center
                           </button>

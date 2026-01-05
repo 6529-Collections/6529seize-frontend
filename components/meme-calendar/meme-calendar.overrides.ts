@@ -4,14 +4,14 @@ import { CUSTOM_SKIPPED_MINT_DAYS } from "./meme-calendar.overrides.skipped";
 
 export interface MintDayOverride {
   readonly isoDate: string;
-  readonly note?: string;
+  readonly note?: string | undefined;
 }
 
 export interface MintRescheduleOverride {
   readonly mintNumber: number;
   readonly from: string;
   readonly to: string;
-  readonly note?: string;
+  readonly note?: string | undefined;
 }
 
 const BASE_SKIPPED_MINT_DAYS: readonly MintDayOverride[] = [

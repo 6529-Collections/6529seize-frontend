@@ -31,11 +31,11 @@ interface Props {
   subdelegation?: {
     originalDelegator: string;
     collection: DelegationCollection;
-  };
+  } | undefined;
   ens: string | null | undefined;
-  collection_query?: string;
+  collection_query?: string | undefined;
   setCollectionQuery?(collection: string): any;
-  use_case_query?: number;
+  use_case_query?: number | undefined;
   setUseCaseQuery?(useCase: number): any;
   onHide(): any;
   onSetToast(toast: any): any;

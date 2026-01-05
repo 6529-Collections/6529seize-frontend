@@ -23,8 +23,8 @@ export type {
 
 export interface UserPageXtdhGrantedListProps {
   readonly grantor: string;
-  readonly pageSize?: number;
-  readonly isSelf?: boolean;
+  readonly pageSize?: number | undefined;
+  readonly isSelf?: boolean | undefined;
 }
 
 export default function UserPageXtdhGrantedList({
@@ -37,7 +37,6 @@ export default function UserPageXtdhGrantedList({
     activeTab,
     activeSubFilter,
     activeSortField,
-    activeSortDirection,
     apiSortDirection,
     handleTabChange,
     handleSubFilterChange,
@@ -52,7 +51,6 @@ export default function UserPageXtdhGrantedList({
     grants,
     isLoading,
     isError,
-    isFetching,
     errorMessage,
     refetch,
     hasNextPage,
@@ -90,7 +88,6 @@ export default function UserPageXtdhGrantedList({
     }
   }, [pendingCount, queryClient, grantor, invalidateIdentityTdhStats]);
 
-
   const handleRetry = useCallback(() => {
     refetch().catch(() => {
       // Errors propagate through the query state that's already rendered.
@@ -105,27 +102,26 @@ export default function UserPageXtdhGrantedList({
         <h2 className="tw-text-base tw-font-semibold tw-text-iron-100 tw-m-0">
           Granted xTDH
         </h2>
-     
 
-      <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800">
-        <div className="tw-flex-1 tw-min-w-0">
-          <UserPageXtdhGrantedListTabs
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            fill={false}
-            pendingCount={pendingCount}
-          />
-        </div>
-        {activeTab === "ACTIVE" && (
-          <div className="tw-w-full sm:tw-w-auto">
-            <UserPageXtdhGrantedListSubFilters
-              activeSubFilter={activeSubFilter}
-              onSubFilterChange={handleSubFilterChange}
+        <div className="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800">
+          <div className="tw-flex-1 tw-min-w-0">
+            <UserPageXtdhGrantedListTabs
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              fill={false}
+              pendingCount={pendingCount}
             />
           </div>
-        )}
+          {activeTab === "ACTIVE" && (
+            <div className="tw-w-full sm:tw-w-auto">
+              <UserPageXtdhGrantedListSubFilters
+                activeSubFilter={activeSubFilter}
+                onSubFilterChange={handleSubFilterChange}
+              />
+            </div>
+          )}
+        </div>
       </div>
- </div>
       <UserPageXtdhGrantedListContent
         enabled={enabled}
         isLoading={isLoading}
@@ -142,7 +138,8 @@ export default function UserPageXtdhGrantedList({
             type="button"
             onClick={() => fetchNextPage()}
             disabled={isFetchingNextPage}
-            className="tw-px-4 tw-py-2 tw-rounded-lg tw-text-sm tw-transition tw-bg-iron-900 tw-text-iron-400 tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300">
+            className="tw-px-4 tw-py-2 tw-rounded-lg tw-text-sm tw-transition tw-bg-iron-900 tw-text-iron-400 tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+          >
             {isFetchingNextPage ? "Loading..." : "Load More"}
           </button>
         </div>

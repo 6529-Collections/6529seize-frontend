@@ -16,9 +16,9 @@ import { Tooltip } from "react-tooltip";
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly isChecked?: boolean;
-  readonly onToggleCheck?: (dropId: string) => void;
-  readonly isResetting?: boolean;
+  readonly isChecked?: boolean | undefined;
+  readonly onToggleCheck?: ((dropId: string) => void) | undefined;
+  readonly isResetting?: boolean | undefined;
 }
 
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
@@ -122,7 +122,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               level={drop.author.level || 0}
               size={UserCICAndLevelSize.SMALL}
             />
-            <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+            <UserProfileTooltipWrapper
+              user={drop.author.handle ?? drop.author.id}
+            >
               <Link
                 href={`/${drop.author.handle}`}
                 onClick={(e) => {
@@ -177,7 +179,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                           pointerEvents: "none",
                         }}
                       >
-                        {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
+                        {voter.profile.handle} -{" "}
+                        {formatNumberWithCommas(voter.rating)}
                       </Tooltip>
                     </React.Fragment>
                   ))}
@@ -191,10 +194,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               </div>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
-              <MyStreamWaveMyVoteInput
-                drop={drop}
-                isResetting={isResetting}
-              />
+              <MyStreamWaveMyVoteInput drop={drop} isResetting={isResetting} />
             </div>
           </div>
         </div>

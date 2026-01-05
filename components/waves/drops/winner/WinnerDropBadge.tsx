@@ -5,15 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface WinnerDropBadgeProps {
   rank: number | null;
-  round?: number;
-  position?: number;
+  position?: number | undefined;
   decisionTime: number | null;
-  variant?: "default" | "simple";
+  variant?: "default" | "simple" | undefined;
 }
 
 const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   rank,
-  round = 1,
   position = 1,
   decisionTime,
   variant = "default",
@@ -58,7 +56,8 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   switch (rankNumber) {
     case 1:
-      colorClasses = "tw-bg-yellow-500/10 tw-text-yellow-400 tw-border-yellow-500/20";
+      colorClasses =
+        "tw-bg-yellow-500/10 tw-text-yellow-400 tw-border-yellow-500/20";
       textColorClass = "tw-text-amber-400";
       rankText = "1st";
       break;
@@ -68,7 +67,8 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       rankText = "2nd";
       break;
     case 3:
-      colorClasses = "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
+      colorClasses =
+        "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
       textColorClass = "tw-text-amber-600";
       rankText = "3rd";
       break;
@@ -80,7 +80,9 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   if (variant === "simple") {
     return (
-      <div className={`tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold ${textColorClass}`}>
+      <div
+        className={`tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold ${textColorClass}`}
+      >
         <FontAwesomeIcon icon={faTrophy} className="tw-w-3.5 tw-h-3.5" />
         <span>
           {rankText}
@@ -89,7 +91,9 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
         {dateString && (
           <span>
             · {dateString}
-            {timeString && <span className="tw-hidden sm:tw-inline">, {timeString}</span>}
+            {timeString && (
+              <span className="tw-hidden sm:tw-inline">, {timeString}</span>
+            )}
           </span>
         )}
       </div>
@@ -98,7 +102,8 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-xs tw-font-semibold tw-border tw-border-solid tw-whitespace-nowrap ${colorClasses}`}>
+      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-xs tw-font-semibold tw-border tw-border-solid tw-whitespace-nowrap ${colorClasses}`}
+    >
       <FontAwesomeIcon icon={faTrophy} className="tw-size-2.5" />
       {rankText}
       {position > 1 && <span>#{position}</span>}

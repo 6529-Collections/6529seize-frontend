@@ -7,8 +7,8 @@ export default function GroupCreateNumericValue({
   setValue,
 }: {
   readonly value: number | null;
-  readonly minValue?: number;
-  readonly maxValue?: number;
+  readonly minValue?: number | undefined;
+  readonly maxValue?: number | undefined;
   readonly label: string;
   readonly labelId: string;
   readonly setValue: (value: number | null) => void;

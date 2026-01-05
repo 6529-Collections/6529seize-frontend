@@ -18,7 +18,7 @@ export interface AirdropAddressResult {
 export default function UserPageSubscriptionsAirdropAddress(
   props: Readonly<{
     show_edit: boolean;
-    airdrop?: AirdropAddressResult;
+    airdrop?: AirdropAddressResult | undefined;
   }>
 ) {
   return (

@@ -5,11 +5,7 @@ import {
   ApiDropSearchStrategy,
   ApiLightDrop,
 } from "@/generated/models/ObjectSerializer";
-import {
-  Drop,
-  DropSize,
-  getStableDropKey,
-} from "@/helpers/waves/drop.helpers";
+import { Drop, DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
@@ -47,9 +43,12 @@ export async function fetchWaveMessages(
     // Update centralized eligibility if callback provided
     if (updateEligibility && data.wave) {
       updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_eligible_to_chat:
+          data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote:
+          data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate:
+          data.wave.authenticated_user_eligible_to_participate,
         authenticated_user_admin: data.wave.authenticated_user_admin,
       });
     }
@@ -184,9 +183,9 @@ export function formatWaveMessages(
   waveId: string,
   drops: ApiDrop[],
   options: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
+    isLoading?: boolean | undefined;
+    isLoadingNextPage?: boolean | undefined;
+    hasNextPage?: boolean | undefined;
   } = {}
 ): WaveMessagesUpdate {
   const {
@@ -197,9 +196,7 @@ export function formatWaveMessages(
 
   // Calculate the highest serial number from the fetched drops
   const latestFetchedSerialNo =
-    drops.length > 0
-      ? Math.max(...drops.map((drop) => drop.serial_no))
-      : undefined;
+    drops.length > 0 ? Math.max(...drops.map((drop) => drop.serial_no)) : null;
 
   const update: WaveMessagesUpdate = {
     key: waveId,
@@ -228,9 +225,9 @@ export function formatWaveMessages(
 export function createEmptyWaveMessages(
   waveId: string,
   options: {
-    isLoading?: boolean;
-    isLoadingNextPage?: boolean;
-    hasNextPage?: boolean;
+    isLoading?: boolean | undefined;
+    isLoadingNextPage?: boolean | undefined;
+    hasNextPage?: boolean | undefined;
   } = {}
 ): WaveMessagesUpdate {
   const {
@@ -278,9 +275,7 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   // Then add all new drops, overwriting any duplicates
   // This ensures we keep the newest version of each drop
   for (const drop of newDropsWithStableKey) {
-    const existingDrop = dropsMapStableKey.get(drop.stableKey);
-    const resolvedDrop = resolveReplacement(existingDrop, drop);
-    dropsMapStableKey.set(resolvedDrop.stableKey, resolvedDrop);
+    dropsMapStableKey.set(drop.stableKey, drop);
   }
 
   // Convert the map back to an array
@@ -312,13 +307,6 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   });
 
   return finalDrops;
-}
-
-function resolveReplacement(
-  existingDrop: Drop | undefined,
-  incomingDrop: Drop
-): Drop {
-  return incomingDrop;
 }
 
 // Helper function to get the highest serial number from an array of drops
@@ -369,9 +357,12 @@ export async function fetchNewestWaveMessages(
     // Update centralized eligibility if callback provided
     if (updateEligibility && data.wave) {
       updateEligibility(waveId, {
-        authenticated_user_eligible_to_chat: data.wave.authenticated_user_eligible_to_chat,
-        authenticated_user_eligible_to_vote: data.wave.authenticated_user_eligible_to_vote,
-        authenticated_user_eligible_to_participate: data.wave.authenticated_user_eligible_to_participate,
+        authenticated_user_eligible_to_chat:
+          data.wave.authenticated_user_eligible_to_chat,
+        authenticated_user_eligible_to_vote:
+          data.wave.authenticated_user_eligible_to_vote,
+        authenticated_user_eligible_to_participate:
+          data.wave.authenticated_user_eligible_to_participate,
         authenticated_user_admin: data.wave.authenticated_user_admin,
       });
     }
@@ -416,7 +407,7 @@ interface LightDropsApiParams {
   /** The ID of the wave to fetch messages for. Required by the API. */
   wave_id: string;
   /** The maximum number of items to return. API requires 1-2000. Defaults to 2000 if not specified by caller. */
-  limit?: number;
+  limit?: number | undefined;
   /** Fetch items with serial_no less than or equal to this value. For pagination. Required. */
   max_serial_no: number;
   // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist
@@ -478,7 +469,7 @@ async function findLightDropBySerialNoWithPagination(
       break; // Target was found, and now we got an empty batch, so we are done.
     }
 
-    let smallestSerialInCurrentBatch = currentBatch[0].serial_no;
+    let smallestSerialInCurrentBatch = currentBatch[0]?.serial_no;
     for (const drop of currentBatch) {
       if (!allFetchedDropsMap.has(drop.serial_no)) {
         allFetchedDropsMap.set(drop.serial_no, drop);
@@ -486,7 +477,7 @@ async function findLightDropBySerialNoWithPagination(
       if (drop.serial_no === targetSerialNo) {
         targetFound = true;
       }
-      if (drop.serial_no < smallestSerialInCurrentBatch) {
+      if (drop.serial_no < smallestSerialInCurrentBatch!) {
         smallestSerialInCurrentBatch = drop.serial_no;
       }
     }
@@ -499,13 +490,13 @@ async function findLightDropBySerialNoWithPagination(
     // Prepare for next iteration or check if we should stop
     if (
       currentBatch.length < itemsPerRequest &&
-      smallestSerialInCurrentBatch > targetSerialNo
+      smallestSerialInCurrentBatch! > targetSerialNo
     ) {
       // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
       // This means target is not in the dataset in the range we are looking.
       break; // Target not found, and no more data in the desired direction.
     }
-    currentMaxSerialForNextCall = smallestSerialInCurrentBatch;
+    currentMaxSerialForNextCall = smallestSerialInCurrentBatch!;
 
     // Safety break: if max_serial_no for next call is not less than targetSerialNo after fetching a full page
     // and target not found, it implies we might be stuck or target is much lower.

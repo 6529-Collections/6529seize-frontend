@@ -11,9 +11,9 @@ const { lookup } = require("node:dns/promises") as {
 const originalFetch = global.fetch;
 
 type MockResponseOptions = {
-  readonly headers?: Record<string, string>;
-  readonly body?: string;
-  readonly url?: string;
+  readonly headers?: Record<string, string> | undefined;
+  readonly body?: string | undefined;
+  readonly url?: string | undefined;
 };
 
 const createResponse = (

@@ -14,13 +14,13 @@ const TOKENSCAN_BASE = "https://tokenscan.io/api";
 type PepeKind = "asset" | "collection" | "artist" | "set";
 
 type Market = {
-  bestAskSats?: number;
-  lastSaleSats?: number;
-  bestAskXcp?: number;
-  lastSaleXcp?: number;
-  approxEthPerBtc?: number;
-  approxEthPerXcp?: number;
-  updatedISO?: string;
+  bestAskSats?: number | undefined;
+  lastSaleSats?: number | undefined;
+  bestAskXcp?: number | undefined;
+  lastSaleXcp?: number | undefined;
+  approxEthPerBtc?: number | undefined;
+  approxEthPerXcp?: number | undefined;
+  updatedISO?: string | undefined;
 };
 
 type BasePreview = {
@@ -31,55 +31,55 @@ type BasePreview = {
 
 type AssetPreview = BasePreview & {
   readonly kind: "asset";
-  readonly asset?: string;
-  readonly name?: string;
-  readonly collection?: string;
-  readonly artist?: string;
-  readonly series?: number | null;
-  readonly card?: number | null;
-  readonly supply?: number | null;
-  readonly holders?: number | null;
-  readonly image?: string | null;
+  readonly asset?: string | undefined;
+  readonly name?: string | undefined;
+  readonly collection?: string | undefined;
+  readonly artist?: string | undefined;
+  readonly series?: number | null | undefined;
+  readonly card?: number | null | undefined;
+  readonly supply?: number | null | undefined;
+  readonly holders?: number | null | undefined;
+  readonly image?: string | null | undefined;
   readonly links?: {
-    readonly horizon?: string;
-    readonly xchain?: string;
-    readonly wiki?: string;
-  } | null;
-  readonly market?: Market | null;
+    readonly horizon?: string | undefined;
+    readonly xchain?: string | undefined;
+    readonly wiki?: string | undefined;
+  } | null | undefined;
+  readonly market?: Market | null | undefined;
 };
 
 type CollectionPreview = BasePreview & {
   readonly kind: "collection";
-  readonly name?: string;
-  readonly image?: string | null;
+  readonly name?: string | undefined;
+  readonly image?: string | null | undefined;
   readonly stats?: {
-    readonly items?: number | null;
-    readonly floorSats?: number | null;
-  } | null;
+    readonly items?: number | null | undefined;
+    readonly floorSats?: number | null | undefined;
+  } | null | undefined;
 };
 
 type ArtistPreview = BasePreview & {
   readonly kind: "artist";
-  readonly name?: string;
-  readonly image?: string | null;
+  readonly name?: string | undefined;
+  readonly image?: string | null | undefined;
   readonly stats?: {
-    readonly uniqueCards?: number | null;
-    readonly collections?: string[] | null;
-  } | null;
+    readonly uniqueCards?: number | null | undefined;
+    readonly collections?: string[] | null | undefined;
+  } | null | undefined;
 };
 
 type SetPreview = BasePreview & {
   readonly kind: "set";
-  readonly name?: string;
-  readonly image?: string | null;
+  readonly name?: string | undefined;
+  readonly image?: string | null | undefined;
   readonly stats?: {
-    readonly items?: number | null;
-    readonly fullSetFloorSats?: number | null;
-    readonly lastSaleValuationSats?: number | null;
-  } | null;
+    readonly items?: number | null | undefined;
+    readonly fullSetFloorSats?: number | null | undefined;
+    readonly lastSaleValuationSats?: number | null | undefined;
+  } | null | undefined;
   readonly links?: {
-    readonly wiki?: string;
-  } | null;
+    readonly wiki?: string | undefined;
+  } | null | undefined;
 };
 
 type Preview = AssetPreview | CollectionPreview | ArtistPreview | SetPreview;
@@ -184,7 +184,7 @@ function ipfsToHttp(url: string): string {
   }
 
   const [, , path] = match;
-  return `${IPFS_GATEWAY}/${path.replace(/^\/+/, "")}`;
+  return `${IPFS_GATEWAY}/${path?.replace(/^\/+/, "")}`;
 }
 
 function absolutizeRelativeUrl(candidate: string, base: string): string {
@@ -322,13 +322,13 @@ function extractFirstString(values: unknown[]): string | undefined {
 }
 
 type ScrapedAsset = {
-  asset?: string;
-  name?: string;
-  artist?: string;
-  collection?: string;
-  image?: string | null;
-  series?: number | null;
-  card?: number | null;
+  asset?: string | undefined;
+  name?: string | undefined;
+  artist?: string | undefined;
+  collection?: string | undefined;
+  image?: string | null | undefined;
+  series?: number | null | undefined;
+  card?: number | null | undefined;
 };
 
 async function tryExtractImageFromDescription(

@@ -22,7 +22,7 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
-  readonly isCollapsed?: boolean;
+  readonly isCollapsed?: boolean | undefined;
 }
 
 const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
@@ -35,8 +35,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
     useCreateModalState();
 
   const globalScope = globalThis as typeof globalThis & {
-    window?: Window;
-    navigator?: Navigator;
+    window?: Window | undefined;
+    navigator?: Navigator | undefined;
   };
   const browserWindow = globalScope.window;
   const browserNavigator = globalScope.navigator;

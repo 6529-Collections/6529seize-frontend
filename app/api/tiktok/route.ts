@@ -62,14 +62,14 @@ const TRACKING_PARAM_PREFIXES = ["utm_", "is_from_", "share_"];
 const TRACKING_PARAM_NAMES = new Set(["web_id"]);
 
 interface TikTokOEmbedResponse {
-  readonly author_name?: string;
-  readonly author_url?: string;
-  readonly title?: string;
-  readonly thumbnail_url?: string;
-  readonly thumbnail_width?: number;
-  readonly thumbnail_height?: number;
-  readonly provider_name?: string;
-  readonly provider_url?: string;
+  readonly author_name?: string | undefined;
+  readonly author_url?: string | undefined;
+  readonly title?: string | undefined;
+  readonly thumbnail_url?: string | undefined;
+  readonly thumbnail_width?: number | undefined;
+  readonly thumbnail_height?: number | undefined;
+  readonly provider_name?: string | undefined;
+  readonly provider_url?: string | undefined;
 }
 
 interface NormalizedTikTokUrl {
@@ -239,7 +239,7 @@ function parseTikTokPath(segments: readonly string[]): NormalizedTikTokUrl {
   }
 
   const first = segments[0];
-  if (first.startsWith("@")) {
+  if (first?.startsWith("@")) {
     if (!/^@[A-Za-z0-9._-]+$/.test(first)) {
       throw new Error("Invalid TikTok username.");
     }

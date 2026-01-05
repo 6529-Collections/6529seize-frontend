@@ -30,8 +30,8 @@ export default function TimeWeightedVoting({
 }: TimeWeightedVotingProps) {
   // State for validation errors
   const [validationErrors, setValidationErrors] = useState<{
-    interval?: string;
-    general?: string;
+    interval?: string | undefined;
+    general?: string | undefined;
   }>({});
 
   // State for tracking input value during editing
@@ -52,7 +52,7 @@ export default function TimeWeightedVoting({
       return;
     }
 
-    const errors: { interval?: string; general?: string } = {};
+    const errors: { interval?: string | undefined; general?: string | undefined } = {};
 
     // Use the utility function for conversion
     const valueInMinutes = convertToMinutes(

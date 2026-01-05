@@ -56,14 +56,14 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   useEffect(() => {
     const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window;
+      window?: Window | undefined;
     };
     if (browserWindow === undefined) {
       return;
     }
 
     const handleTabEvent = (event: Event) => {
-      const detail = (event as CustomEvent<{ tab?: HomeTab }>).detail;
+      const detail = (event as CustomEvent<{ tab?: HomeTab | undefined }>).detail;
       const tab = detail?.tab;
       if (tab !== "feed" && tab !== "latest") return;
       setHomeActiveTab(tab);

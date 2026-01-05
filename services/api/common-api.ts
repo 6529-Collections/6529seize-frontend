@@ -67,8 +67,8 @@ const executeApiRequest = async <T>(
     const res = await fetch(url, {
       method,
       headers,
-      body,
-      signal,
+      ...(body !== undefined ? { body: body } : {}),
+      ...(signal !== undefined ? { signal: signal } : {}),
     });
 
     if (!res.ok) {
@@ -114,9 +114,9 @@ const executeApiRequest = async <T>(
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
-  headers?: Record<string, string>;
-  params?: U;
-  signal?: AbortSignal;
+  headers?: Record<string, string> | undefined;
+  params?: U | undefined;
+  signal?: AbortSignal | undefined;
 }): Promise<T> => {
   const url = buildUrl(
     param.endpoint,
@@ -141,16 +141,16 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
 
 interface RetryOptions {
   /** Maximum number of retry attempts. Default: 0 (no retries). */
-  readonly maxRetries?: number;
+  readonly maxRetries?: number | undefined;
   /** Initial delay in milliseconds before the first retry. Default: 1000ms. */
-  readonly initialDelayMs?: number;
+  readonly initialDelayMs?: number | undefined;
   /** Factor by which the delay increases for each subsequent retry. Default: 2. */
-  readonly backoffFactor?: number;
+  readonly backoffFactor?: number | undefined;
   /**
    * Adds randomness to the delay (jitter) to prevent thundering herd problem.
    * Value is a percentage of the current delay (e.g., 0.1 for 10%). Default: 0.1.
    */
-  readonly jitter?: number;
+  readonly jitter?: number | undefined;
 }
 
 /**
@@ -173,10 +173,10 @@ export const commonApiFetchWithRetry = async <
   U = Record<string, string>
 >(param: {
   readonly endpoint: string;
-  readonly headers?: Record<string, string>;
-  readonly params?: U;
-  readonly signal?: AbortSignal;
-  readonly retryOptions?: RetryOptions;
+  readonly headers?: Record<string, string> | undefined;
+  readonly params?: U | undefined;
+  readonly signal?: AbortSignal | undefined;
+  readonly retryOptions?: RetryOptions | undefined;
 }): Promise<T> => {
   const { retryOptions, ...fetchParams } = param;
   const maxRetries = retryOptions?.maxRetries ?? 0;
@@ -261,9 +261,9 @@ export const commonApiFetchWithRetry = async <
 export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   endpoint: string;
   body: T;
-  headers?: Record<string, string>;
-  params?: Z;
-  signal?: AbortSignal;
+  headers?: Record<string, string> | undefined;
+  params?: Z | undefined;
+  signal?: AbortSignal | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -281,7 +281,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
 
 export const commonApiPostWithoutBodyAndResponse = async (param: {
   endpoint: string;
-  headers?: Record<string, string>;
+  headers?: Record<string, string> | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -297,7 +297,7 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 
 export const commonApiDelete = async (param: {
   endpoint: string;
-  headers?: Record<string, string>;
+  headers?: Record<string, string> | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -318,8 +318,8 @@ export const commonApiDeleteWithBody = async <
 >(param: {
   endpoint: string;
   body: T;
-  headers?: Record<string, string>;
-  params?: Z;
+  headers?: Record<string, string> | undefined;
+  params?: Z | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -337,8 +337,8 @@ export const commonApiDeleteWithBody = async <
 export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   endpoint: string;
   body: T;
-  headers?: Record<string, string>;
-  params?: Z;
+  headers?: Record<string, string> | undefined;
+  params?: Z | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -356,7 +356,7 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
 export const commonApiPostForm = async <U>(param: {
   endpoint: string;
   body: FormData;
-  headers?: Record<string, string>;
+  headers?: Record<string, string> | undefined;
 }): Promise<U> => {
   const url = buildUrl(param.endpoint);
 

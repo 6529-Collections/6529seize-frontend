@@ -4,8 +4,8 @@ import { LabNFT, NFT } from "@/entities/INFT";
 
 export function NftPageStats(props: {
   readonly nft: NFT | LabNFT;
-  readonly hide_mint_price?: boolean;
-  readonly hide_hodl_rate?: boolean;
+  readonly hide_mint_price?: boolean | undefined;
+  readonly hide_hodl_rate?: boolean | undefined;
 }) {
   const hasHodlRate = !props.hide_hodl_rate && "hodl_rate" in props.nft;
   return (
@@ -48,8 +48,8 @@ export function NftPageStats(props: {
 function NftStatTableRow(props: {
   readonly label: string;
   readonly value: number;
-  readonly decimals?: number;
-  readonly unit?: string;
+  readonly decimals?: number | undefined;
+  readonly unit?: string | undefined;
 }) {
   const decimals = props.decimals ?? 1000;
   const value = Math.round(props.value * decimals) / decimals;

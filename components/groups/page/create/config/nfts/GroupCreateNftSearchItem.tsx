@@ -38,7 +38,7 @@ export default function GroupCreateNftSearchItem({
   };
 
   const nameEnum = NAME_ENUMS[item.contract.toLowerCase()];
-  const contractName = labels[nameEnum];
+  const contractName = labels[nameEnum!];
 
   const getIsSelected = (): boolean => {
     if (!nameEnum) {

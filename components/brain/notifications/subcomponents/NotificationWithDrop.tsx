@@ -21,7 +21,7 @@ interface NotificationWithDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export default function NotificationWithDrop({
@@ -66,4 +66,3 @@ export default function NotificationWithDrop({
     </div>
   );
 }
-

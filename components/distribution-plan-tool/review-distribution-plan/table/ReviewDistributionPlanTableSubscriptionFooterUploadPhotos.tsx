@@ -15,13 +15,13 @@ export function UploadDistributionPhotosModal(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    existingPhotosCount?: number;
-    confirmedTokenId?: string | null;
+    existingPhotosCount?: number | undefined;
+    confirmedTokenId?: string | null | undefined;
     onUpload(contract: string, tokenId: string, files: File[]): void;
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
-  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
+  const initialTokenId = numbers.length > 0 ? numbers[0]!.toString() : "";
   const defaultTokenId = isValidPositiveInteger(initialTokenId)
     ? initialTokenId
     : "";

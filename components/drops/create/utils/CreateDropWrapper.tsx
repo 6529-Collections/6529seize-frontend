@@ -31,15 +31,12 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/src/errors/wallet";
-import {
-  exportDropMarkdown,
-} from "@/components/waves/drops/normalizeDropMarkdown";
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -57,7 +54,6 @@ interface CreateDropWrapperWaveProps {
 }
 
 interface CreateDropWrapperProps {
-  readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: {
     dropId: string;
     partId: number;
@@ -71,17 +67,13 @@ interface CreateDropWrapperProps {
   readonly drop: CreateDropConfig | null;
   readonly viewType: CreateDropViewType;
   readonly showSubmit: boolean;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
   readonly children: React.ReactNode;
-  readonly showProfile?: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
   readonly setDrop: (newV: CreateDropConfig) => void;
-  readonly setMentionedUsers: (
-    newV: Omit<MentionedUser, "current_handle">[]
-  ) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -89,7 +81,10 @@ interface CreateDropWrapperProps {
   readonly setTitle: (newV: string | null) => void;
   readonly setMetadata: (newV: DropMetadata[]) => void;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-  readonly onCanSubmitChange?: (canSubmit: boolean) => void;
+  readonly onCanSubmitChange?:
+    | ((canSubmit: boolean) => void)
+    | undefined
+    | undefined;
 }
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
@@ -100,7 +95,6 @@ const CreateDropWrapper = forwardRef<
 >(
   (
     {
-      profile,
       quotedDrop,
       type,
       loading,
@@ -112,14 +106,12 @@ const CreateDropWrapper = forwardRef<
       viewType,
       showSubmit,
       showDropError = false,
-      showProfile = true,
       wave: waveProps,
       waveId,
       children,
       setIsStormMode,
       setViewType,
       setDrop,
-      setMentionedUsers,
       setReferencedNfts,
       onMentionedUser,
       setTitle,
@@ -131,18 +123,18 @@ const CreateDropWrapper = forwardRef<
   ) => {
     const { isSafeWallet, address, isAuthenticated } = useSeizeConnectContext();
     const breakpoint = useBreakpoint();
-    
+
     // SECURITY: Fail-fast if wallet is not properly authenticated
     useEffect(() => {
       if (!isAuthenticated) {
         throw new WalletValidationError(
-          'Authentication required for drop creation. Please connect and authenticate your wallet.'
+          "Authentication required for drop creation. Please connect and authenticate your wallet."
         );
       }
-      
+
       if (!address) {
         throw new WalletValidationError(
-          'Authenticated wallet address is missing. Please reconnect your wallet.'
+          "Authenticated wallet address is missing. Please reconnect your wallet."
         );
       }
     }, [isAuthenticated, address]);
@@ -360,7 +352,7 @@ const CreateDropWrapper = forwardRef<
           metadata,
           signature: null,
           is_safe_signature: isSafeWallet,
-          signer_address: address, // Already validated via useEffect above
+          ...{ ...(address && { signer_address: address }) },
         };
         setDrop(currentDrop);
         clearInputState();
@@ -402,7 +394,7 @@ const CreateDropWrapper = forwardRef<
         metadata,
         signature: null,
         is_safe_signature: isSafeWallet,
-        signer_address: address, // Already validated via useEffect above
+        ...{ ...(address && { signer_address: address }) },
       };
       currentDrop.parts.push({
         content: markdown?.length ? markdown : null,
@@ -439,13 +431,9 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          profile={profile}
-          showProfile={showProfile}
           screenType={screenType}
           editorState={editorState}
           files={files}
-          title={title}
-          metadata={metadata}
           canSubmit={canSubmit}
           waveId={waveId}
           canAddPart={canAddPart}
@@ -457,14 +445,14 @@ const CreateDropWrapper = forwardRef<
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onViewChange={setViewType}
-          onMetadataRemove={onMetadataRemove}
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
           onReferencedNft={onReferencedNft}
           setFiles={setFiles}
           onFileRemove={onFileRemove}
           onDrop={onDrop}
-          onDropPart={onStormDropPart}>
+          onDropPart={onStormDropPart}
+        >
           {children}
         </CreateDropCompact>
       ),
@@ -472,7 +460,6 @@ const CreateDropWrapper = forwardRef<
         <CreateDropFull
           ref={createDropContentFullRef}
           screenType={screenType}
-          profile={profile}
           title={title}
           files={files}
           metadata={metadata}
@@ -497,7 +484,8 @@ const CreateDropWrapper = forwardRef<
           setFiles={setFiles}
           onFileRemove={onFileRemove}
           onDrop={onDrop}
-          onDropPart={onStormDropPart}>
+          onDropPart={onStormDropPart}
+        >
           {children}
         </CreateDropFull>
       ),

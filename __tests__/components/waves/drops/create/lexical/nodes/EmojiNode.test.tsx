@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 // Stub out lexical's DecoratorNode to avoid constructor issues
 jest.mock("lexical", () => {
   class DecoratorNode {
-    __key?: unknown;
+    __key?: unknown | undefined;
     constructor(key?: unknown) {
       this.__key = key;
     }
@@ -131,7 +131,7 @@ describe("EmojiComponent", () => {
 
     renderEmojiComponent("heart");
     const img = screen.getByRole("img");
-    expect(img).toHaveAttribute("src", fakeEmoji.skins[0].src);
+    expect(img).toHaveAttribute("src", fakeEmoji.skins[0]?.src);
     expect(img).toHaveAttribute("alt", "heart");
     expect(img).toHaveClass("emoji-node");
   });

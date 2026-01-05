@@ -21,8 +21,8 @@ import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
-  readonly showPin?: boolean;
-  readonly isDirectMessage?: boolean;
+  readonly showPin?: boolean | undefined;
+  readonly isDirectMessage?: boolean | undefined;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
@@ -141,7 +141,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       }`}>
       <Link
         href={href}
-        onMouseEnter={hasTouchScreen ? undefined : onWaveHover}
+         {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
         onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive

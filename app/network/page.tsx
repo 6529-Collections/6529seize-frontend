@@ -6,7 +6,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 
 export interface CommunityMembersQuery
   extends FullPageRequest<CommunityMembersSortOption> {
-  group_id?: string;
+  group_id?: string | undefined;
 }
 
 export default function CommunityPage() {

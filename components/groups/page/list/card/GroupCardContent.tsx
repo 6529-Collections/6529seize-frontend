@@ -16,10 +16,10 @@ export default function GroupCardContent({
   setState,
   titlePlaceholder,
 }: {
-  readonly group?: ApiGroupFull;
+  readonly group?: ApiGroupFull | undefined;
   readonly haveActiveGroupVoteAll: boolean;
-  readonly setState?: (state: GroupCardState) => void;
-  readonly titlePlaceholder?: string;
+  readonly setState?: ((state: GroupCardState) => void) | undefined;
+  readonly titlePlaceholder?: string | undefined;
 }) {
   const { connectedProfile } = useContext(AuthContext);
   const baseButtonClasses =

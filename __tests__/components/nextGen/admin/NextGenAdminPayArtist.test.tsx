@@ -37,7 +37,7 @@ describe('NextGenAdminPayArtist', () => {
   it('calls writeContract when valid', async () => {
     const user = userEvent.setup();
     render(<NextGenAdminPayArtist close={()=>{}} />);
-    const contract = (helpers.useMinterContractWrite as jest.Mock).mock.results[0].value;
+    const contract = (helpers.useMinterContractWrite as jest.Mock).mock.results[0]?.value;
     await user.type(screen.getByTestId('col'), '1');
     const inputs = screen.getAllByTestId('Artist Address');
     await user.type(inputs[0], 'a1');

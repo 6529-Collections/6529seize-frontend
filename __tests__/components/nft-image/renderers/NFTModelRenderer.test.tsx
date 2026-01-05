@@ -309,7 +309,7 @@ describe("NFTModelRenderer", () => {
       // Note: BaseNFT always has metadata key, even if undefined
       // The component only checks for presence of metadata key, not its value
       const baseNFTWithUndefinedMetadata = createMockNFT({
-        metadata: undefined,
+        ...(undefined !== undefined ? { metadata: undefined } : {}),
       });
       const props = createDefaultProps({ nft: baseNFTWithUndefinedMetadata });
 

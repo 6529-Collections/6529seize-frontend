@@ -112,14 +112,14 @@ export function SubscriptionConfirm(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    isNormalized?: boolean;
-    confirmedTokenId?: string | null;
+    isNormalized?: boolean | undefined;
+    confirmedTokenId?: string | null | undefined;
     onConfirm(contract: string, tokenId: string): void;
   }>
 ) {
   const contract = MEMES_CONTRACT;
   const numbers = extractAllNumbers(props.plan.name);
-  const defaultTokenId = numbers.length > 0 ? numbers[0].toString() : "";
+  const defaultTokenId = numbers.length > 0 ? numbers[0]!.toString() : "";
   const [tokenId, setTokenId] = useState<string>(
     props.confirmedTokenId ?? defaultTokenId
   );

@@ -20,14 +20,14 @@ export function AutomaticAirdropsModal(
     plan: AllowlistDescription;
     show: boolean;
     handleClose(): void;
-    confirmedTokenId?: string | null;
+    confirmedTokenId?: string | null | undefined;
     onUpload(contract: string, tokenId: string, csvContent: string): void;
   }>
 ) {
   const numbers = extractAllNumbers(props.plan.name);
-  const initialTokenId = numbers.length > 0 ? numbers[0].toString() : "";
-  const defaultTokenId = isValidPositiveInteger(initialTokenId)
-    ? initialTokenId
+  const initialTokenId = numbers.length > 0 ? numbers[0]?.toString() : "";
+  const defaultTokenId = isValidPositiveInteger(initialTokenId!)
+    ? initialTokenId!
     : "";
   const [tokenId, setTokenId] = useState<string>(
     props.confirmedTokenId ?? defaultTokenId
@@ -66,13 +66,13 @@ export function AutomaticAirdropsModal(
       const address = parts[0];
       const countStr = parts[1];
 
-      if (!isValidAddress(address)) {
+      if (!isValidAddress(address!)) {
         throw new Error(
           `Line ${index + 1}: Invalid Ethereum address "${address}"`
         );
       }
 
-      const count = Number.parseInt(countStr, 10);
+      const count = Number.parseInt(countStr!, 10);
       if (Number.isNaN(count) || count < 0) {
         throw new Error(
           `Line ${
@@ -82,7 +82,7 @@ export function AutomaticAirdropsModal(
       }
 
       rows.push({
-        address: address.toLowerCase(),
+        address: address!.toLowerCase(),
         count,
       });
     });

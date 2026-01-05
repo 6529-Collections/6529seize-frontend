@@ -96,18 +96,12 @@ export default function NextGenCollectionProvenance(props: Readonly<Props>) {
   );
 }
 
-interface NextGenCollectionProvenanceRowProps {
-  collection: NextGenCollection;
-  log: NextGenLog;
-  disable_link?: boolean;
-}
-
 export function NextGenCollectionProvenanceRow(
   props: Readonly<{
     collection: NextGenCollection;
     log: NextGenLog;
-    disable_link?: boolean;
-    odd?: boolean;
+    disable_link?: boolean | undefined;
+    odd?: boolean | undefined;
   }>
 ) {
   const log = props.log;
@@ -246,6 +240,7 @@ export function NextGenCollectionProvenanceRow(
       }
       return logSpan;
     }
+    return
   }
 
   return (

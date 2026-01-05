@@ -37,17 +37,19 @@ interface DropEditorProps {
     readonly dropId: string;
     readonly partId: number;
   } | null;
-  readonly isClient?: boolean;
+  readonly isClient?: boolean | undefined;
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly dropEditorRefreshKey: number;
-  readonly showSubmit?: boolean;
-  readonly showDropError?: boolean;
-  readonly showProfile?: boolean;
+  readonly showSubmit?: boolean | undefined;
+  readonly showDropError?: boolean | undefined;
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
-  readonly onCanSubmitChange?: (canSubmit: boolean) => void;
+  readonly onCanSubmitChange?:
+    | ((canSubmit: boolean) => void)
+    | undefined
+    | undefined;
 }
 
 const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
@@ -61,7 +63,6 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       dropEditorRefreshKey,
       showSubmit = true,
       showDropError = false,
-      showProfile = true,
       wave,
       waveId,
       onSubmitDrop,
@@ -131,9 +132,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       <div>
         <CreateDropWrapper
           ref={createDropWrapperRef}
-          profile={profile}
           quotedDrop={quotedDrop}
-          showProfile={showProfile}
           type={type}
           waveId={waveId}
           loading={loading}
@@ -149,14 +148,14 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setIsStormMode={setIsStormMode}
           setViewType={setViewType}
           setDrop={setDrop}
-          setMentionedUsers={setMentionedUsers}
           onMentionedUser={onMentionedUser}
           setReferencedNfts={setReferencedNfts}
           setTitle={setTitle}
           setMetadata={setMetadata}
           onSubmitDrop={onSubmitDrop}
           onCanSubmitChange={onCanSubmitChange}
-          key={dropEditorRefreshKey}>
+          key={dropEditorRefreshKey}
+        >
           {!!drop?.parts.length && isStormMode && !loading ? (
             <CreateDropStormView
               drop={drop}

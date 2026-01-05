@@ -3,7 +3,7 @@ export default function CommonInfoBox({
   widthFull = false,
 }: {
   readonly message: string;
-  readonly widthFull?: boolean;
+  readonly widthFull?: boolean | undefined;
 }) {
   return (
     <div

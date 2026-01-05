@@ -4,21 +4,21 @@ import React from "react";
 import Link from "next/link";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
-type IconComp = React.ComponentType<{ className?: string }>; 
+type IconComp = React.ComponentType<{ className?: string | undefined }>;
 
 interface SidebarPrimaryItemProps {
-  readonly href?: string;
-  readonly onClick?: (e?: React.MouseEvent) => void;
-  readonly icon?: IconComp;
-  readonly iconSizeClass?: string;
+  readonly href?: string | undefined;
+  readonly onClick?: ((e?: React.MouseEvent) => void) | undefined;
+  readonly icon?: IconComp | undefined;
+  readonly iconSizeClass?: string | undefined;
   readonly label: string;
-  readonly active?: boolean;
-  readonly collapsed?: boolean;
-  readonly ariaExpanded?: boolean;
-  readonly ariaControls?: string;
-  readonly rightSlot?: React.ReactNode;
-  readonly hasIndicator?: boolean;
-  readonly "data-section"?: string;
+  readonly active?: boolean | undefined;
+  readonly collapsed?: boolean | undefined;
+  readonly ariaExpanded?: boolean | undefined;
+  readonly ariaControls?: string | undefined;
+  readonly rightSlot?: React.ReactNode | undefined;
+  readonly hasIndicator?: boolean | undefined;
+  readonly "data-section"?: string | undefined;
 }
 
 function WebSidebarNavItem({
@@ -48,7 +48,9 @@ function WebSidebarNavItem({
           <div className="tw-relative">
             <Icon
               aria-hidden="true"
-              className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${iconSizeClass ?? ""}`}
+              className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${
+                iconSizeClass ?? ""
+              }`}
             />
             {hasIndicator && (
               <>

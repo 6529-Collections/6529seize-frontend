@@ -31,8 +31,8 @@ interface UserStatsRowProps {
   readonly rep: number;
   readonly cic: number;
   readonly followersCount: number | null;
-  readonly className?: string;
-  readonly size?: UserStatsRowSize;
+  readonly className?: string | undefined;
+  readonly size?: UserStatsRowSize | undefined;
 }
 
 export default function UserStatsRow({

@@ -3,11 +3,13 @@ import { FC } from "react";
 interface WaveDropsScrollBottomButtonProps {
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
-  readonly newMessagesCount?: number;
-  readonly onRevealNewMessages?: () => void;
+  readonly newMessagesCount?: number | undefined;
+  readonly onRevealNewMessages?: (() => void) | undefined;
 }
 
-export const WaveDropsScrollBottomButton: FC<WaveDropsScrollBottomButtonProps> = ({
+export const WaveDropsScrollBottomButton: FC<
+  WaveDropsScrollBottomButtonProps
+> = ({
   isAtBottom,
   scrollToBottom,
   newMessagesCount = 0,

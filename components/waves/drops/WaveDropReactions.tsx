@@ -14,10 +14,7 @@ import { useEmoji } from "@/contexts/EmojiContext";
 import { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { Tooltip } from "react-tooltip";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
-import {
-  commonApiDelete,
-  commonApiPost,
-} from "@/services/api/common-api";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
 import clsx from "clsx";
 import { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -99,6 +96,7 @@ function WaveDropReaction({
       return () => clearTimeout(timeout);
     }
     previousTotalRef.current = total;
+    return;
   }, [total]);
 
   // derive emoji ID
@@ -121,16 +119,16 @@ function WaveDropReaction({
       return {
         emojiNode: (
           <img
-            src={custom.skins[0].src}
+            src={custom.skins[0]?.src}
             alt={emojiId}
-            className="tw-max-w-4 tw-max-h-4 tw-object-contain"
+            className="tw-max-h-4 tw-max-w-4 tw-object-contain"
           />
         ),
         emojiNodeTooltip: (
           <img
-            src={custom.skins[0].src}
+            src={custom.skins[0]?.src}
             alt={emojiId}
-            className="tw-max-w-8 tw-max-h-8 tw-object-contain tw-rounded-sm"
+            className="tw-max-h-8 tw-max-w-8 tw-rounded-sm tw-object-contain"
           />
         ),
       };
@@ -140,13 +138,13 @@ function WaveDropReaction({
     if (native) {
       return {
         emojiNode: (
-          <span className="tw-text-[1rem] tw-flex tw-items-center tw-justify-center">
-            {native.skins[0].native}
+          <span className="tw-flex tw-items-center tw-justify-center tw-text-[1rem]">
+            {native.skins[0]?.native}
           </span>
         ),
         emojiNodeTooltip: (
-          <span className="tw-text-2xl tw-flex tw-items-center tw-justify-center">
-            {native.skins[0].native}
+          <span className="tw-flex tw-items-center tw-justify-center tw-text-2xl">
+            {native.skins[0]?.native}
           </span>
         ),
       };
@@ -186,7 +184,7 @@ function WaveDropReaction({
               );
 
               if (existingIndex >= 0) {
-                const target = reactionsWithoutUser[existingIndex];
+                const target = reactionsWithoutUser[existingIndex]!;
                 reactionsWithoutUser[existingIndex] = {
                   ...target,
                   profiles: [...target.profiles, userProfileMin],
@@ -200,8 +198,7 @@ function WaveDropReaction({
             }
 
             draft.reactions = reactionsWithoutUser;
-            const existingContext =
-              draft.context_profile_context ??
+            const existingContext = draft.context_profile_context ??
               drop.context_profile_context ?? {
                 rating: 0,
                 min_rating: 0,
@@ -316,9 +313,9 @@ function WaveDropReaction({
   let animationStyle = "";
   if (animate) {
     if (selected) {
-      animationStyle = styles["reactionSlideUp"];
+      animationStyle = styles["reactionSlideUp"]!;
     } else {
-      animationStyle = styles["reactionSlideDown"];
+      animationStyle = styles["reactionSlideDown"]!;
     }
   }
 
@@ -330,20 +327,22 @@ function WaveDropReaction({
         data-tooltip-id={tooltipId}
         data-text-selection-exclude="true"
         className={clsx(
-          "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
+          "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
           borderStyle,
           bgStyle,
           hoverStyle
-        )}>
-        <div className="tw-flex tw-items-center tw-gap-x-1 tw-h-full">
-          <div className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
+        )}
+      >
+        <div className="tw-flex tw-h-full tw-items-center tw-gap-x-1">
+          <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
             {emojiNode}
           </div>
           <span
             className={clsx(
-              "tw-text-xs tw-font-normal tw-min-w-[2ch]",
+              "tw-min-w-[2ch] tw-text-xs tw-font-normal",
               animationStyle
-            )}>
+            )}
+          >
             {formatLargeNumber(total)}
           </span>
         </div>
@@ -353,7 +352,8 @@ function WaveDropReaction({
         delayShow={250}
         place="bottom"
         opacity={1}
-        style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}>
+        style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}
+      >
         <div className="tw-flex tw-items-center tw-gap-2">
           {emojiNodeTooltip}
           <span className="tw-whitespace-nowrap">by {tooltipText}</span>

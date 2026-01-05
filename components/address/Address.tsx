@@ -13,10 +13,10 @@ import { WalletAddress } from "./WalletAddress";
 
 interface Props {
   wallets: `0x${string}`[];
-  consolidatedWallets?: IProfileConsolidation[];
+  consolidatedWallets?: IProfileConsolidation[] | undefined;
   display: string | undefined;
   displayEns?: string | undefined;
-  hideCopy?: boolean;
+  hideCopy?: boolean | undefined;
   tags?: {
     memesCardsSets: number;
     memesCardsSetS1: number;
@@ -28,15 +28,15 @@ interface Props {
     memesBalance: number;
     genesis: number;
     gradientsBalance: number;
-    tdh_rank?: number;
-    balance_rank?: number;
-    unique_rank?: number;
-  };
-  isUserPage?: boolean;
-  disableLink?: boolean;
-  viewingWallet?: `0x${string}`;
-  expandedTags?: boolean;
-  setLinkQueryAddress?: boolean;
+    tdh_rank?: number | undefined;
+    balance_rank?: number | undefined;
+    unique_rank?: number | undefined;
+  } | undefined;
+  isUserPage?: boolean | undefined;
+  disableLink?: boolean | undefined;
+  viewingWallet?: `0x${string}` | undefined;
+  expandedTags?: boolean | undefined;
+  setLinkQueryAddress?: boolean | undefined;
 }
 
 const MEMES_SETS_ICON = "";
@@ -98,7 +98,7 @@ export default function Address(props: Readonly<Props>) {
     <>
       {props.wallets.length === 1 ? (
         <WalletAddress
-          wallet={props.wallets[0]}
+          wallet={props.wallets[0]!}
           display={props.display}
           displayEns={props.displayEns}
           hideCopy={props.hideCopy}

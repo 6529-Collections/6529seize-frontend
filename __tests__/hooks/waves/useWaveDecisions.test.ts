@@ -27,8 +27,8 @@ describe('useWaveDecisions', () => {
       queryKey: [QueryKey.WAVE_DECISIONS, { waveId: 'w1' }],
       enabled: true,
     }));
-    expect(result.current.decisionPoints[0].decision_time).toBe(1);
-    expect(result.current.decisionPoints[0].winners[0].place).toBe(1);
-    expect(result.current.decisionPoints[1].winners[0].place).toBe(1);
+    expect(result.current.decisionPoints[0]?.decision_time).toBe(1);
+    expect(result.current.decisionPoints[0]?.winners[0].place).toBe(1);
+    expect(result.current.decisionPoints[1]?.winners[0].place).toBe(1);
   });
 });

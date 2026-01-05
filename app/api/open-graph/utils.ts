@@ -88,11 +88,11 @@ interface GoogleWorkspaceNormalization {
   readonly kind: GoogleWorkspaceKind;
   readonly fileId: string;
   readonly canonicalBase: string;
-  readonly gid?: string;
-  readonly range?: string;
-  readonly widget?: string;
-  readonly headers?: string;
-  readonly chrome?: string;
+  readonly gid?: string | undefined;
+  readonly range?: string | undefined;
+  readonly widget?: string | undefined;
+  readonly headers?: string | undefined;
+  readonly chrome?: string | undefined;
   readonly isPublished: boolean;
 }
 
@@ -112,7 +112,7 @@ interface GooglePreviewRule {
   readonly kind: GoogleWorkspaceKind;
   readonly pattern: RegExp;
   readonly allowedParams: ReadonlySet<string>;
-  readonly requiredParams?: ReadonlySet<string>;
+  readonly requiredParams?: ReadonlySet<string> | undefined;
 }
 
 const GOOGLE_PREVIEW_RULES: readonly GooglePreviewRule[] = [
@@ -300,7 +300,7 @@ function normalizeGoogleWorkspaceUrl(
   }
 
   const [resource, marker, fileId, ...rest] = segments;
-  if (marker !== "d" || !fileId) {
+  if (marker !== "d" || !fileId || !resource) {
     return null;
   }
 

@@ -176,14 +176,16 @@ export default function RoyaltiesComponent() {
                             <FontAwesomeIcon
                               className={styles["infoIcon"]}
                               icon={faInfoCircle}
-                              data-tooltip-id="primary-proceeds-tooltip"></FontAwesomeIcon>
+                              data-tooltip-id="primary-proceeds-tooltip"
+                            ></FontAwesomeIcon>
                             <Tooltip
                               id="primary-proceeds-tooltip"
                               style={{
                                 backgroundColor: "#1F2937",
                                 color: "white",
                                 padding: "4px 8px",
-                              }}>
+                              }}
+                            >
                               Total Minter payments less the Manifold fee
                             </Tooltip>
                           </>
@@ -200,14 +202,16 @@ export default function RoyaltiesComponent() {
                           <FontAwesomeIcon
                             className={styles["infoIcon"]}
                             icon={faInfoCircle}
-                            data-tooltip-id="artist-split-tooltip"></FontAwesomeIcon>
+                            data-tooltip-id="artist-split-tooltip"
+                          ></FontAwesomeIcon>
                           <Tooltip
                             id="artist-split-tooltip"
                             style={{
                               backgroundColor: "#1F2937",
                               color: "white",
                               padding: "4px 8px",
-                            }}>
+                            }}
+                          >
                             {getTippyArtistsContent()}
                           </Tooltip>
                         </>
@@ -241,10 +245,10 @@ export default function RoyaltiesComponent() {
                       </td>
                       <td>{r.artist}</td>
                       <td className="text-center">
-                        {displayDecimal(r.volume, 2)}
+                        {displayDecimal(r.volume)}
                       </td>
                       <td className="text-center">
-                        {displayDecimal(r.proceeds, 2)}
+                        {displayDecimal(r.proceeds)}
                       </td>
                       {!isPrimary && (
                         <td className="text-center">
@@ -256,12 +260,12 @@ export default function RoyaltiesComponent() {
                       <td>
                         <div className="d-flex justify-content-center">
                           <span className="d-flex align-items-center gap-1">
-                            {displayDecimal(r.artist_take, 2)}
+                            {displayDecimal(r.artist_take)}
                             {collectionFocus ===
                               GasRoyaltiesCollectionFocus.MEMELAB &&
                               r.artist_split > 0 && (
                                 <span className="font-smaller font-color-h">
-                                  ({displayDecimal(r.artist_split * 100, 2)}
+                                  ({displayDecimal(r.artist_split * 100)}
                                   %)
                                 </span>
                               )}
@@ -274,11 +278,9 @@ export default function RoyaltiesComponent() {
                     <td colSpan={2} className="text-right">
                       <b>TOTAL</b>
                     </td>
+                    <td className="text-center">{displayDecimal(sumVolume)}</td>
                     <td className="text-center">
-                      {displayDecimal(sumVolume, 2)}
-                    </td>
-                    <td className="text-center">
-                      {displayDecimal(sumProceeds, 2)}
+                      {displayDecimal(sumProceeds)}
                     </td>
                     {!isPrimary && (
                       <td className="text-center">
@@ -288,13 +290,12 @@ export default function RoyaltiesComponent() {
                       </td>
                     )}
                     <td className="text-center">
-                      {displayDecimal(sumArtistTake, 2)}
+                      {displayDecimal(sumArtistTake)}
                       {collectionFocus ===
                         GasRoyaltiesCollectionFocus.MEMELAB &&
                         sumArtistTake > 0 &&
                         ` (${displayDecimal(
-                          (sumArtistTake * 100) / sumProceeds,
-                          2
+                          (sumArtistTake * 100) / sumProceeds
                         )}%)`}
                     </td>
                   </tr>

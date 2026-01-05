@@ -1,6 +1,6 @@
 export const mainSegment = (url: string): string => {
   const pathname = url.split(/[?#]/)[0];
-  const [, first] = pathname.split("/");
+  const [, first] = pathname!.split("/");
   return first ? `/${first.toLowerCase()}` : "/";
 };
 
@@ -24,8 +24,8 @@ export const getWaveRoute = ({
   isApp: _isApp,
 }: {
   waveId: string;
-  serialNo?: string | number;
-  extraParams?: Record<string, string | undefined>;
+  serialNo?: string | number | undefined;
+  extraParams?: Record<string, string | undefined> | undefined;
   isDirectMessage: boolean;
   isApp: boolean;
 }): string => {

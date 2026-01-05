@@ -7,7 +7,7 @@ export function ShareMobileApp({
   target = "_blank",
 }: {
   readonly platform: "ios" | "android";
-  readonly target?: "_blank" | "_self";
+  readonly target?: "_blank" | "_self" | undefined;
 }) {
   const appUrl = platform === "ios" ? MOBILE_APP_IOS : MOBILE_APP_ANDROID;
   const imageSrc = platform === "ios" ? "/app-store.png" : "/play-store.png";

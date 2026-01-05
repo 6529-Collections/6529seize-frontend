@@ -66,7 +66,7 @@ describe("NftPicker.utils", () => {
       } catch (error) {
         expect(Array.isArray(error)).toBe(true);
         const errors = error as { message: string }[];
-        expect(errors[0].message).toBe("Invalid token format");
+        expect(errors[0]?.message).toBe("Invalid token format");
       }
     });
 
@@ -77,7 +77,7 @@ describe("NftPicker.utils", () => {
         parseTokenExpressionToRanges("0-10000");
       } catch (error) {
         expect(Array.isArray(error)).toBe(true);
-        const errors = error as { code?: string; message: string }[];
+        const errors = error as { code?: string | undefined; message: string }[];
         expect(errors[0]?.code).toBe("range-too-large");
         expect(errors[0]?.message).toContain("exceeding the limit");
       }
@@ -90,7 +90,7 @@ describe("NftPicker.utils", () => {
         parseTokenExpressionToBigints(input);
       } catch (error) {
         expect(Array.isArray(error)).toBe(true);
-        const errors = error as { code?: string; message: string }[];
+        const errors = error as { code?: string | undefined; message: string }[];
         expect(errors[0]?.code).toBe("range-too-large");
         expect(errors[0]?.message).toContain(MAX_ENUMERATION.toString());
       }

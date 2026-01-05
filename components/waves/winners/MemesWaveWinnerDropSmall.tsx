@@ -1,12 +1,10 @@
-"use client"
+"use client";
 
-import React, { memo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
-import {
-  formatNumberWithCommas,
-} from "@/helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
@@ -20,7 +18,7 @@ interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly wave: ApiWave;
-  readonly rank?: number; // For explicitly setting rank from decision winners
+  readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
 
 export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
@@ -110,8 +108,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                     <span
                       className={`tw-text-sm tw-font-medium ${userVoteStyle}`}
                     >
-                      {formatNumberWithCommas(userVote)}{" "}
-                      {votingLabel}
+                      {formatNumberWithCommas(userVote)} {votingLabel}
                     </span>
                   </div>
                 )}
@@ -140,7 +137,9 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
             </Link>
 
             <div className="tw-flex tw-items-center tw-gap-1.5">
-              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
                 <Link
                   href={`/${drop.author.handle}`}
                   onClick={(e) => e.stopPropagation()}

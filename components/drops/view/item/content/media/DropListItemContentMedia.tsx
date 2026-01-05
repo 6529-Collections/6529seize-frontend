@@ -32,9 +32,9 @@ export default function DropListItemContentMedia({
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
-  readonly onContainerClick?: () => void;
-  readonly isCompetitionDrop?: boolean;
-  readonly imageScale?: ImageScale;
+  readonly onContainerClick?: (() => void) | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly imageScale?: ImageScale | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -46,10 +46,12 @@ export default function DropListItemContentMedia({
     if (media_mime_type.includes("audio")) {
       return MediaType.AUDIO;
     }
-    if (media_mime_type === "model/gltf-binary" || 
-        media_mime_type === "model/gltf+json" ||
-        media_url.endsWith(".glb") || 
-        media_url.endsWith(".gltf")) {
+    if (
+      media_mime_type === "model/gltf-binary" ||
+      media_mime_type === "model/gltf+json" ||
+      media_url.endsWith(".glb") ||
+      media_url.endsWith(".gltf")
+    ) {
       return MediaType.GLB;
     }
     if (media_mime_type === "text/html") {
@@ -57,7 +59,6 @@ export default function DropListItemContentMedia({
     }
     return MediaType.UNKNOWN;
   };
-  
 
   const mediaType = getMediaType();
 
@@ -78,10 +79,17 @@ export default function DropListItemContentMedia({
     case MediaType.GLB:
       return <DropListItemContentMediaGLB src={media_url} />;
     case MediaType.HTML:
-      return <SandboxedExternalIframe title="" src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}  className="tw-w-full tw-h-full"/>;
+      return (
+        <SandboxedExternalIframe
+          title=""
+          src={media_url.replace("ipfs://", "https://ipfs.io/ipfs/")}
+          className="tw-h-full tw-w-full"
+        />
+      );
     case MediaType.UNKNOWN:
       return <></>;
     default:
       assertUnreachable(mediaType);
+      return;
   }
 }

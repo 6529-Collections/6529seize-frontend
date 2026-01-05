@@ -61,5 +61,6 @@ export default function ProfileActivityLogsIcon({
       return <></>;
     default:
       assertUnreachable(logType);
+      return;
   }
 }

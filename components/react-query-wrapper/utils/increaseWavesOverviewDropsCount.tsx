@@ -5,7 +5,7 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "../ReactQueryWrapper";
 
 type WavesOverviewQueryData = {
-  pages?: ApiWave[][];
+  pages?: ApiWave[][] | undefined;
 };
 
 export const increaseWavesOverviewDropsCount = async (
@@ -40,10 +40,12 @@ export const increaseWavesOverviewDropsCount = async (
         let matchingWavePage: number = -1;
 
         for (let i = 0; i < pages.length; i++) {
-          matchingWaveIndex = pages[i].findIndex((wave) => wave.id === waveId);
+          const page = pages[i];
+          if (!page) continue;
+          matchingWaveIndex = page.findIndex((wave) => wave.id === waveId);
           if (matchingWaveIndex !== -1) {
             matchingWavePage = i;
-            matchingWave = pages[i][matchingWaveIndex];
+            matchingWave = page[matchingWaveIndex];
             break;
           }
         }

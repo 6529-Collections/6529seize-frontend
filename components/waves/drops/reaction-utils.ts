@@ -65,7 +65,7 @@ export const findReactionIndex = (
   reactionCode: string
 ): number => {
   for (let index = 0; index < entries.length; index += 1) {
-    if (entries[index].reaction === reactionCode) {
+    if (entries[index]?.reaction === reactionCode) {
       return index;
     }
   }

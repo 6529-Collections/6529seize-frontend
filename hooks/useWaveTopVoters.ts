@@ -17,9 +17,9 @@ interface UseWaveTopVotersProps {
   readonly connectedProfileHandle: string | undefined;
   readonly reverse: boolean;
   readonly dropId: string | null;
-  readonly sortDirection?: "ASC" | "DESC";
-  readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE";
-  readonly refetchInterval?: number;
+  readonly sortDirection?: "ASC" | "DESC" | undefined;
+  readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE" | undefined;
+  readonly refetchInterval?: number | undefined;
 }
 
 export function useWaveTopVoters({
@@ -70,7 +70,9 @@ export function useWaveTopVoters({
           return null;
         }
         const currentPage =
-          typeof lastPage.page === "number" ? lastPage.page : allPages.length - 1;
+          typeof lastPage.page === "number"
+            ? lastPage.page
+            : allPages.length - 1;
         return currentPage + 1;
       },
       pages: 3,
@@ -123,7 +125,7 @@ export function useWaveTopVoters({
   });
 
   useEffect(() => {
-    setVoters((prev) => {
+    setVoters(() => {
       const newVoters = (data?.pages ? data.pages : []).flatMap(
         (page) => page.data
       );

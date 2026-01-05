@@ -7,9 +7,9 @@ import CircleLoader, {
 
 interface ImageComponentProps {
   readonly src: string;
-  readonly altText?: string;
-  readonly width?: number;
-  readonly height?: number;
+  readonly altText?: string | undefined;
+  readonly width?: number | undefined;
+  readonly height?: number | undefined;
 }
 
 export default function ImageComponent({

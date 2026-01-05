@@ -19,15 +19,15 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
     this.__emojiId = emojiId;
   }
 
-  static getType(): string {
+  static override getType(): string {
     return "emoji";
   }
 
-  static clone(node: EmojiNode): EmojiNode {
+  static override clone(node: EmojiNode): EmojiNode {
     return new EmojiNode(node.__emojiId, node.__key);
   }
 
-  isInline(): boolean {
+  override isInline(): boolean {
     return true;
   }
 
@@ -39,12 +39,12 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
     return true;
   }
 
-  createDOM(_config: EditorConfig): HTMLElement {
+  override createDOM(_config: EditorConfig): HTMLElement {
     const span = document.createElement("span");
     return span;
   }
 
-  updateDOM(
+  override updateDOM(
     _prevNode: EmojiNode,
     _dom: HTMLElement,
     _config: EditorConfig
@@ -52,15 +52,18 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
     return false;
   }
 
-  decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
+  override decorate(
+    _editor: LexicalEditor,
+    _config: EditorConfig
+  ): JSX.Element {
     return createElement(EmojiComponent, { emojiId: this.__emojiId });
   }
 
-  static importJSON(serializedNode: SerializedEmojiNode): EmojiNode {
+  static override importJSON(serializedNode: SerializedEmojiNode): EmojiNode {
     return new EmojiNode(serializedNode.emojiId);
   }
 
-  exportJSON(): SerializedEmojiNode {
+  override exportJSON(): SerializedEmojiNode {
     return {
       type: "emoji",
       version: 1,
@@ -77,10 +80,10 @@ const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
   if (!emoji) {
     const nativeEmoji = findNativeEmoji(emojiId);
     if (nativeEmoji) {
-      return <span>{nativeEmoji.skins[0].native}</span>;
+      return <span>{nativeEmoji.skins[0]?.native}</span>;
     }
     return <span>{`:${emojiId}:`}</span>;
   }
 
-  return <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />;
+  return <img src={emoji.skins[0]?.src} alt={emojiId} className="emoji-node" />;
 };

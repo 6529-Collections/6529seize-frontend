@@ -22,7 +22,7 @@ export function useWaveRankReward({
 }: {
   waveId: string;
   rank: number | null;
-  enabled?: boolean;
+  enabled?: boolean | undefined;
 }): WaveRankRewards {
   const { outcomes, isEnabled: isOutcomesEnabled } = useWaveOutcomesQuery({
     waveId,
@@ -71,7 +71,7 @@ export function useWaveRankReward({
 
   outcomes.forEach((outcome, i) => {
     const query = distributionQueries[i];
-    if (query.data?.data) {
+    if (query?.data?.data) {
       const item = query.data.data.find((d) => d.index === targetIndex);
       if (item?.amount) {
         if (outcome.credit === ApiWaveOutcomeCredit.Cic) {

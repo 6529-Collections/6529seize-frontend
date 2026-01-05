@@ -6,7 +6,7 @@ interface ModalLayoutProps {
   readonly title: string;
   readonly onCancel: () => void;
   readonly children: React.ReactNode;
-  readonly titleId?: string;
+  readonly titleId?: string | undefined;
 }
 
 /**

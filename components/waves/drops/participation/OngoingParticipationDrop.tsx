@@ -24,8 +24,7 @@ interface OngoingParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export default function OngoingParticipationDrop({
@@ -38,7 +37,6 @@ export default function OngoingParticipationDrop({
   onQuote,
   onQuoteClick,
   onDropContentClick,
-  parentContainerRef,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
@@ -55,12 +53,12 @@ export default function OngoingParticipationDrop({
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
+    onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onReply, drop, activePartIndex]);
 
   const handleOnQuote = useCallback(() => {
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
+    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onQuote, drop, activePartIndex]);
 
   const handleOnAddReaction = useCallback(() => {
@@ -71,7 +69,8 @@ export default function OngoingParticipationDrop({
     <ParticipationDropContainer
       drop={drop}
       isActiveDrop={isActiveDrop}
-      location={location}>
+      location={location}
+    >
       {!isMobile && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
@@ -93,7 +92,6 @@ export default function OngoingParticipationDrop({
             onDropContentClick={onDropContentClick}
             onQuoteClick={onQuoteClick}
             setLongPressTriggered={setLongPressTriggered}
-            parentContainerRef={parentContainerRef}
             isCompetitionDrop={true}
           />
         </div>

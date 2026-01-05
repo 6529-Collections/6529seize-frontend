@@ -1,11 +1,11 @@
 type CommonBorderedRadioButtonProps<T extends string> = {
   readonly type: T;
   readonly selected: T;
-  readonly disabled?: boolean;
+  readonly disabled?: boolean | undefined;
   readonly onChange: (type: T) => void;
 } & (
-  | { readonly label: string; readonly children?: never }
-  | { readonly label?: never; readonly children: React.ReactNode }
+  | { readonly label: string; readonly children?: never | undefined }
+  | { readonly label?: never | undefined; readonly children: React.ReactNode }
 );
 
 export default function CommonBorderedRadioButton<T extends string>({

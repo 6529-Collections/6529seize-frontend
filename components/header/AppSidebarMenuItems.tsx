@@ -12,11 +12,11 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 type MenuItem = {
   readonly label: string;
-  readonly path?: string;
-  readonly icon?: React.ElementType;
-  readonly children?: MenuItem[];
-  readonly section?: boolean;
-  readonly dividerBefore?: boolean;
+  readonly path?: string | undefined;
+  readonly icon?: React.ElementType | undefined;
+  readonly children?: MenuItem[] | undefined;
+  readonly section?: boolean | undefined;
+  readonly dividerBefore?: boolean | undefined;
 };
 
 export default function AppSidebarMenuItems({

@@ -14,7 +14,7 @@ interface WebSidebarProps {
   readonly isCollapsed: boolean;
   readonly onToggle: () => void;
   readonly isMobile: boolean;
-  readonly isNarrow?: boolean;
+  readonly isNarrow?: boolean | undefined;
   readonly isOffcanvasOpen: boolean;
   readonly onCloseOffcanvas: () => void;
   readonly sidebarWidth: string;
@@ -40,7 +40,7 @@ function WebSidebar({
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window;
+      window?: Window | undefined;
     };
     if (
       browserWindow === undefined ||
@@ -72,6 +72,7 @@ function WebSidebar({
         }
       };
     }
+    return;
   }, []);
 
   // Close sidebar on route change when on mobile
@@ -92,7 +93,7 @@ function WebSidebar({
     if ((!isMobile && !isOverlayActive) || !isOffcanvasOpen) return;
 
     const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window;
+      window?: Window | undefined;
     };
     if (browserWindow === undefined) {
       return;
@@ -130,8 +131,8 @@ function WebSidebar({
           type="button"
           className={
             isMobile
-              ? "tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-[70] tw-border-0 focus:tw-outline-none"
-              : "tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-z-30 tw-border-0 focus:tw-outline-none"
+              ? "tw-fixed tw-inset-0 tw-z-[70] tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
+              : "tw-fixed tw-inset-0 tw-z-30 tw-border-0 tw-bg-gray-600 tw-bg-opacity-50 focus:tw-outline-none"
           }
           onClick={onCloseOffcanvas}
           aria-label="Close menu overlay"
@@ -141,24 +142,24 @@ function WebSidebar({
         className={
           isMobile
             ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none"
-            : "tw-fixed tw-inset-y-0 tw-left-0 focus:tw-outline-none tw-z-40"
+            : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40 focus:tw-outline-none"
         }
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >
         <div
-          className="tw-group tw-relative tw-z-50 tw-h-full tw-bg-black tw-border-r tw-border-solid tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-border-0 tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+          className="tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}
         >
-          <div className="tw-flex tw-flex-col tw-h-full tw-pt-2">
+          <div className="tw-flex tw-h-full tw-flex-col tw-pt-2">
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
               onToggle={handleToggle}
             />
 
             <div
-              className="tw-flex tw-flex-col tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+              className="no-scrollbar tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
               data-sidebar-scroll="true"
             >
               <div className="tw-flex-1">

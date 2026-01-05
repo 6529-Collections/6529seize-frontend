@@ -19,7 +19,7 @@ export default function ProxyCreateAction({
 }: {
   readonly profileProxy: ApiProfileProxy;
   readonly onActionCreated: () => void;
-  readonly onCancel?: () => void;
+  readonly onCancel?: (() => void) | undefined;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);

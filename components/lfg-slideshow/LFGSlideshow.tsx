@@ -99,7 +99,9 @@ const LFGSlideshow: React.FC<{
     }).then((media) => {
       setMedia(media);
       setCurrentIndex(0);
-      preloadMedia(media[0]);
+      if (media[0]) {
+        preloadMedia(media[0]);
+      }
     });
   }, []);
 
@@ -109,7 +111,7 @@ const LFGSlideshow: React.FC<{
     const currentMedia = media[currentIndex];
     preloadNext(currentIndex);
 
-    if (isVideo(currentMedia.animation)) {
+    if (currentMedia?.animation && isVideo(currentMedia.animation)) {
       const videoElement = document.getElementById(
         VIDEO_ID
       ) as HTMLVideoElement;
@@ -160,20 +162,22 @@ const LFGSlideshow: React.FC<{
         />
       </span>
       <div className={styles["slide"]} id={SLIDESHOW_ID}>
-        {isVideo(media[currentIndex].animation) ? (
+        {media[currentIndex]?.animation &&
+        isVideo(media[currentIndex].animation) ? (
           <video
             id={VIDEO_ID}
             autoPlay
             controls
             muted={isMuted}
-            src={media[currentIndex].animation}
-            poster={media[currentIndex].image}>
+            src={media[currentIndex]?.animation}
+            poster={media[currentIndex]?.image}
+          >
             <track kind="captions" src="" srcLang="en" label="English" />
             Your browser does not support the video tag.
           </video>
         ) : (
           <img
-            src={media[currentIndex].image}
+            src={media[currentIndex]?.image}
             alt={`LFG Slide ${currentIndex + 1}`}
           />
         )}
@@ -192,7 +196,8 @@ export const LFGButton: React.FC<{
       <LFGSlideshow contract={contract} isOpen={isOpen} setIsOpen={setIsOpen} />
       <Button
         onClick={() => setIsOpen(true)}
-        className={`${styles["lfgButton"]} no-wrap`}>
+        className={`${styles["lfgButton"]} no-wrap`}
+      >
         LFG: Start the Show!
       </Button>
     </>

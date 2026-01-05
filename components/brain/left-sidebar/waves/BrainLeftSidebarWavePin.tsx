@@ -52,10 +52,9 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
   // Auto-hide tooltip after 3 seconds with proper cleanup
   useEffect(() => {
-    if (showMaxLimitTooltip) {
-      const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
-      return () => clearTimeout(timer);
-    }
+    if (!showMaxLimitTooltip) return;
+    const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
+    return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
 
   // Detect touch device on component mount
@@ -64,9 +63,9 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       // Check if device supports touch events
       setIsTouchDevice(
         "ontouchstart" in window ||
-        navigator.maxTouchPoints > 0 ||
-        // @ts-ignore: matchMedia may not be available in all environments
-        (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
+          navigator.maxTouchPoints > 0 ||
+          // @ts-ignore: matchMedia may not be available in all environments
+          (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
       );
     };
 
@@ -103,13 +102,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
         }
       }
     } catch (error) {
-      console.error('Error updating wave pin status:', error);
+      console.error("Error updating wave pin status:", error);
 
       // Show user-friendly error message
-      const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
       setToast({
         type: "error",
-        message: `Failed to ${isPinned ? 'unpin' : 'pin'} wave: ${errorMessage}`,
+        message: `Failed to ${isPinned ? "unpin" : "pin"} wave: ${errorMessage}`,
       });
     }
   };
@@ -146,7 +146,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${isCurrentlyProcessing ? 'tw-opacity-50 tw-cursor-not-allowed' : ''}`}
+        className={`-tw-mr-2 tw-mt-0.5 tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 sm:tw-size-6 ${opacityClass} ${getButtonStyles()} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
       >

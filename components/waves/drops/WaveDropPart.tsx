@@ -10,16 +10,16 @@ interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly isEditing?: boolean;
-  readonly isSaving?: boolean;
-  readonly onSave?: (newContent: string) => void;
-  readonly onCancel?: () => void;
-  readonly isCompetitionDrop?: boolean;
-  readonly mediaImageScale?: ImageScale;
+  readonly isEditing?: boolean | undefined;
+  readonly isSaving?: boolean | undefined;
+  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onCancel?: (() => void) | undefined;
+  readonly isCompetitionDrop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -60,8 +60,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
       if (isTemporaryDrop) return;
 
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0]!.clientX;
+      touchStartY.current = e.touches[0]!.clientY;
 
       longPressTimeout.current = setTimeout(() => {
         setLongPressTriggered(true);
@@ -70,8 +70,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-      const touchX = e.touches[0].clientX;
-      const touchY = e.touches[0].clientY;
+      const touchX = e.touches[0]!.clientX;
+      const touchY = e.touches[0]!.clientY;
 
       const deltaX = Math.abs(touchX - touchStartX.current);
       const deltaY = Math.abs(touchY - touchStartY.current);
@@ -100,6 +100,10 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       onDropContentClick(drop);
     };
 
+    if (!activePart) {
+      return null;
+    }
+
     return (
       <div
         onClick={handleClick}
@@ -116,7 +120,8 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         tabIndex={isTemporaryDrop || !onDropContentClick ? undefined : 0}
         onKeyDown={(e) =>
           !isTemporaryDrop && e.key === "Enter" && handleClick()
-        }>
+        }
+      >
         <div className="tw-relative tw-overflow-hidden  tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDropPartDrop
             drop={drop}

@@ -41,7 +41,7 @@ import NextGenTokenList from "../NextGenTokenList";
 
 interface Props {
   collection: NextGenCollection;
-  show_view_all?: boolean;
+  show_view_all?: boolean | undefined;
 }
 
 export default function NextGenCollectionArt(props: Readonly<Props>) {
@@ -103,8 +103,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           )
         ) {
           selectedTraits.push({
-            trait: t,
-            value: v,
+            trait: t!,
+            value: v!,
           });
         }
       });

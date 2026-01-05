@@ -9,7 +9,7 @@ export enum CircleLoaderSize {
 export default function CircleLoader({
   size = CircleLoaderSize.MEDIUM,
 }: {
-  readonly size?: CircleLoaderSize;
+  readonly size?: CircleLoaderSize | undefined;
 }) {
   const classes: Record<CircleLoaderSize, string> = {
     [CircleLoaderSize.SMALL]: "tw-w-4 tw-h-4",

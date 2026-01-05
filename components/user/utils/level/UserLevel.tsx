@@ -12,12 +12,12 @@ export default function UserLevel({
   asSpan = false,
 }: {
   readonly level: number;
-  readonly size?: "xxs" | "xs" | "sm" | "base";
-  readonly asSpan?: boolean;
+  readonly size?: "xxs" | "xs" | "sm" | "base" | undefined;
+  readonly asSpan?: boolean | undefined;
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
-    LEVEL_CLASSES[0].classes;
+    LEVEL_CLASSES[0]?.classes;
 
   const getSizeClasses = () => {
     if (size === "sm") {

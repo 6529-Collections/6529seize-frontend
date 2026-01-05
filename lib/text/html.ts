@@ -1,6 +1,6 @@
 interface StripHtmlTagsOptions {
-  readonly maxLength?: number;
-  readonly preserveTagSpacing?: boolean;
+  readonly maxLength?: number | undefined;
+  readonly preserveTagSpacing?: boolean | undefined;
 }
 
 const NAMED_ENTITIES: Record<string, string> = {
@@ -171,7 +171,7 @@ function getTagIdentifier(rawTag: string): string | null {
   let start = 0;
   const length = rawTag.length;
 
-  while (start < length && isWhitespace(rawTag[start])) {
+  while (start < length && isWhitespace(rawTag[start]!)) {
     start += 1;
   }
 
@@ -185,7 +185,7 @@ function getTagIdentifier(rawTag: string): string | null {
     start += 1;
   }
 
-  while (start < length && isWhitespace(rawTag[start])) {
+  while (start < length && isWhitespace(rawTag[start]!)) {
     start += 1;
   }
 
@@ -196,10 +196,10 @@ function getTagIdentifier(rawTag: string): string | null {
   let name = "";
   while (start < length) {
     const char = rawTag[start];
-    if (!isTagNameChar(char)) {
+    if (!isTagNameChar(char!)) {
       break;
     }
-    name += char.toLowerCase();
+    name += char?.toLowerCase();
     start += 1;
   }
 

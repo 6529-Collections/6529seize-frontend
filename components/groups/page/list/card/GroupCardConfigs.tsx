@@ -11,13 +11,13 @@ import GroupCardConfig from "./GroupCardConfig";
 export interface GroupCardConfigProps {
   readonly key: GroupDescriptionType;
   readonly value: string;
-  readonly label?: string;
+  readonly label?: string | undefined;
 }
 
 export default function GroupCardConfigs({
   group,
 }: {
-  readonly group?: ApiGroupFull;
+  readonly group?: ApiGroupFull | undefined;
 }) {
   const directionLabels: Record<ApiGroupFilterDirection, string> = {
     [ApiGroupFilterDirection.Received]: "from",

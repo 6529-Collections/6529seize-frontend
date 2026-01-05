@@ -2,10 +2,10 @@ interface WaveDetailsLike {
   readonly chat?: {
     readonly scope?: {
       readonly group?: {
-        readonly is_direct_message?: boolean;
-      };
-    };
-  };
+        readonly is_direct_message?: boolean | undefined;
+      } | undefined;
+    } | undefined;
+  } | undefined;
 }
 
 interface MinimalWaveLike {

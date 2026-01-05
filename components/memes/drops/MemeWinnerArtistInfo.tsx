@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -11,7 +10,7 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;
-  readonly showWaveInfo?: boolean;
+  readonly showWaveInfo?: boolean | undefined;
 }
 
 export default function MemeWinnerArtistInfo({
@@ -34,7 +33,9 @@ export default function MemeWinnerArtistInfo({
           )}
           <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
             {drop.author?.handle ? (
-              <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   href={`/${drop.author?.handle}`}

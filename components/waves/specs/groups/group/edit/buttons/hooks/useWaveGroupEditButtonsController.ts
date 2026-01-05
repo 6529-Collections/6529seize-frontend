@@ -468,7 +468,7 @@ interface WaveGroupEditButtonsController {
   readonly closeIdentitiesModal: () => void;
   readonly updateWave: (
     body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean },
+    opts?: { readonly skipAuth?: boolean | undefined },
   ) => Promise<void>;
   readonly onIdentityConfirm: (event: Readonly<{
     identity: string;
@@ -607,7 +607,7 @@ export const useWaveGroupEditButtonsController = ({
   const updateWave = useCallback(
     async (
       body: ApiUpdateWaveRequest,
-      opts?: { readonly skipAuth?: boolean },
+      opts?: { readonly skipAuth?: boolean | undefined },
     ) => {
       setMutating(true);
       if (!opts?.skipAuth) {

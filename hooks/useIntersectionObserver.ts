@@ -8,21 +8,21 @@ export function useIntersectionObserver(
   const intersectionElementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (intersectionElementRef.current) {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            onIntersection(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
+    if (!intersectionElementRef.current) return;
 
-      observer.observe(intersectionElementRef.current);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          onIntersection(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-      return () => observer.disconnect();
-    }
+    observer.observe(intersectionElementRef.current);
+
+    return () => observer.disconnect();
   }, [onIntersection]);
 
   return intersectionElementRef;

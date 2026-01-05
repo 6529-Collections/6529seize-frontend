@@ -6,11 +6,11 @@ import React, { useMemo } from "react";
 type FallbackImageProps = Omit<ImageProps, "src" | "alt"> & {
   readonly primarySrc: string;
   readonly fallbackSrc: string;
-  readonly alt?: string;
+  readonly alt?: string | undefined;
   readonly onPrimaryError?: (
     event: React.SyntheticEvent<HTMLImageElement, Event>
-  ) => void;
-  readonly optimize?: boolean;
+  ) => void | undefined;
+  readonly optimize?: boolean | undefined;
 };
 
 export const FallbackImage = React.forwardRef<

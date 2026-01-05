@@ -12,7 +12,7 @@ interface SingleWaveDropVoteInputProps {
   readonly label: string;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly onSubmit: () => void;
-  readonly size?: SingleWaveDropVoteSize;
+  readonly size?: SingleWaveDropVoteSize | undefined;
 }
 
 const MEMETIC_VALUES: number[] = [
@@ -117,7 +117,7 @@ export const SingleWaveDropVoteInput: React.FC<
         increment
       );
       crossedMemetic = hasCrossed;
-      return nextValue;
+      return nextValue!;
     });
 
     if (crossedMemetic) {

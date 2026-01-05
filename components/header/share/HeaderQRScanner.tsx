@@ -18,7 +18,7 @@ export default function HeaderQRScanner({
   appSidebar = false,
 }: {
   readonly onScanSuccess: () => void;
-  readonly appSidebar?: boolean;
+  readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
   const baseEndpoint = publicEnv.BASE_ENDPOINT ?? "https://6529.io";
@@ -94,7 +94,7 @@ export default function HeaderQRScanner({
         router.push(resolvedPath);
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
         const resolvedUrl = content.replace(`${appScheme}://`, "");
-        const [scope, ...pathParts] = resolvedUrl.split("?")[0].split("/");
+        const [scope, ...pathParts] = resolvedUrl.split("?")[0]?.split("/")!;
 
         // Extract query params
         const queryString = resolvedUrl.includes("?")
@@ -178,7 +178,7 @@ export default function HeaderQRScanner({
   );
 }
 
-function HeaderQRScannerIcon({ className }: { readonly className?: string }) {
+function HeaderQRScannerIcon({ className }: { readonly className?: string | undefined }) {
   return (
     <Image
       unoptimized

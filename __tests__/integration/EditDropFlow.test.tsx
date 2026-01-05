@@ -79,7 +79,8 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => {
             onClick={() => {
               // Simulate the actual edit button click which would trigger onEdit
               onEdit();
-            }}>
+            }}
+          >
             Edit
           </button>
         )}
@@ -90,8 +91,8 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => {
 
 // Create a context to pass handlers
 const TestEditContext = React.createContext<{
-  onSave?: (content: string, mentions: any[]) => void;
-  onCancel?: () => void;
+  onSave?: ((content: string, mentions: any[]) => void) | undefined;
+  onCancel?: (() => void) | undefined;
 }>({});
 
 // Mock WaveDropPartContentMarkdown to check for edit state
@@ -120,7 +121,8 @@ jest.mock("@/components/waves/drops/WaveDropPartContentMarkdown", () => {
               if ((window as any).testHandleSave) {
                 (window as any).testHandleSave(content, []);
               }
-            }}>
+            }}
+          >
             Save
           </button>
           <button
@@ -130,7 +132,8 @@ jest.mock("@/components/waves/drops/WaveDropPartContentMarkdown", () => {
               if ((window as any).testHandleCancel) {
                 (window as any).testHandleCancel();
               }
-            }}>
+            }}
+          >
             Cancel
           </button>
         </div>
@@ -270,11 +273,11 @@ const setupEditTest = (user: any) => {
       await user.type(editTextarea, additionalContent);
     },
     async save() {
-      const saveButton = screen.getByRole('button', { name: /save/i });
+      const saveButton = screen.getByRole("button", { name: /save/i });
       await user.click(saveButton);
     },
     async cancel() {
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      const cancelButton = screen.getByRole("button", { name: /cancel/i });
       await user.click(cancelButton);
     },
   };

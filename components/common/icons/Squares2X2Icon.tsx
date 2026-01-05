@@ -1,6 +1,8 @@
-import React from "react";
-
-const Squares2X2Icon = ({ className }: { readonly className?: string }) => (
+const Squares2X2Icon = ({
+  className,
+}: {
+  readonly className?: string | undefined;
+}) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"

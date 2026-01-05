@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import {publicEnv} from "@/config/env";
 
 type GlobalErrorProps = {
-  readonly error: Error & { digest?: string };
+  readonly error: Error & { digest?: string | undefined };
   readonly reset: () => void;
 };
 

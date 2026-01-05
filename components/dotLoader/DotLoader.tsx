@@ -14,7 +14,7 @@ export default function DotLoader() {
 
 export function Spinner(
   props: Readonly<{
-    dimension?: number;
+    dimension?: number | undefined;
   }>
 ) {
   return (

@@ -49,7 +49,7 @@ const squareStyle = {
 export default function HeaderShare({
   isCollapsed = false,
 }: {
-  readonly isCollapsed?: boolean;
+  readonly isCollapsed?: boolean | undefined;
 }) {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
@@ -66,7 +66,7 @@ export default function HeaderShare({
         aria-label="QR Code"
         title="QR Code"
         onClick={() => setShowQRModal(true)}
-        className={`tw-w-full tw-block tw-text-left tw-no-underline tw-rounded-xl tw-border-none tw-transition-colors tw-duration-200 tw-h-[2.875rem] tw-cursor-pointer focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 tw-font-medium tw-text-base tw-px-2 tw-text-iron-400 tw-bg-transparent ${
+        className={`tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           isCollapsed
             ? "desktop-hover:hover:tw-text-white"
             : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
@@ -76,16 +76,16 @@ export default function HeaderShare({
         data-tooltip-hidden={!isCollapsed}
       >
         <div
-          className={`tw-flex tw-items-center tw-w-full tw-h-full ${
+          className={`tw-flex tw-h-full tw-w-full tw-items-center ${
             isCollapsed ? "" : "tw-gap-x-2"
           }`}
         >
-          <div className="tw-w-10 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0">
+          <div className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
             <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
           </div>
           <span
             className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 ${
-              isCollapsed ? "tw-opacity-0 tw-w-0" : "tw-opacity-100 tw-flex-1"
+              isCollapsed ? "tw-w-0 tw-opacity-0" : "tw-flex-1 tw-opacity-100"
             }`}
           >
             Share
@@ -203,15 +203,13 @@ function HeaderQRModal({
   useEffect(() => {
     setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
     setActiveSubTab(SubMode.APP);
-
-    if (!show) {
-      const timer = setTimeout(() => {
-        setNavigateBrowserSrc("");
-        setNavigateAppSrc("");
-        setShareConnectionSrc("");
-      }, 150);
-      return () => clearTimeout(timer);
-    }
+    if (show) return;
+    const timer = setTimeout(() => {
+      setNavigateBrowserSrc("");
+      setNavigateAppSrc("");
+      setShareConnectionSrc("");
+    }, 150);
+    return () => clearTimeout(timer);
   }, [show]);
 
   function printImage() {
@@ -255,7 +253,7 @@ function HeaderQRModal({
             />
             <Button
               variant="primary"
-              className="tw-flex tw-items-center tw-gap-2 tw-w-full"
+              className="tw-flex tw-w-full tw-items-center tw-gap-2"
             >
               <FontAwesomeIcon icon={faExternalLink} />
               <div className="no-wrap">Open in 6529 Desktop</div>
@@ -313,7 +311,7 @@ function HeaderQRModal({
         case SubMode.APP:
           content = (
             <div
-              className="tw-p-10 tw-flex tw-flex-col tw-gap-12 tw-items-center tw-justify-center"
+              className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-12 tw-p-10"
               style={squareStyle}
             >
               <ShareMobileApp platform="ios" />
@@ -391,7 +389,7 @@ function ModalMenu({
   activeSubTab,
   onTabChange,
 }: {
-  readonly isShareConnection?: boolean;
+  readonly isShareConnection?: boolean | undefined;
   readonly activeTab: Mode;
   readonly activeSubTab: SubMode;
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
@@ -403,7 +401,9 @@ function ModalMenu({
       <div className="d-flex gap-2">
         {isShareConnection && (
           <Button
-            className={activeTab === Mode.SHARE ? styles["disabledMenuBtn"] : ""}
+            className={
+              activeTab === Mode.SHARE ? styles["disabledMenuBtn"] : ""
+            }
             variant={activeTab === Mode.SHARE ? "light" : "outline-light"}
             onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
           >
@@ -411,7 +411,9 @@ function ModalMenu({
           </Button>
         )}
         <Button
-          className={activeTab === Mode.NAVIGATE ? styles["disabledMenuBtn"] : ""}
+          className={
+            activeTab === Mode.NAVIGATE ? styles["disabledMenuBtn"] : ""
+          }
           variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
           onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
         >
@@ -464,7 +466,7 @@ function CoreAppsDownload() {
     downloadPath: string;
     image: string;
     enabled: boolean;
-    version?: string;
+    version?: string | undefined;
   }
 
   interface FileData {
@@ -580,9 +582,9 @@ function CoreAppDownload({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
+      className="decoration-none tw-flex tw-w-full tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-black tw-px-5 tw-py-3 tw-transition-all tw-duration-300 tw-ease-out hover:tw-scale-[1.03]"
     >
-      <div className="tw-bg-white tw-rounded-full tw-p-4">
+      <div className="tw-rounded-full tw-bg-white tw-p-4">
         <Image
           unoptimized
           priority
@@ -594,7 +596,7 @@ function CoreAppDownload({
           className="unselectable"
         />
       </div>
-      <div className="tw-flex tw-items-center tw-gap-2 tw-w-full">
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
         <div className="no-wrap tw-text-lg tw-font-semibold">
           {platform} v{version}
         </div>

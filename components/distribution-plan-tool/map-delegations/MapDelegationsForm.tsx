@@ -1,8 +1,8 @@
 "use client";
 
 import {
-    AllowlistOperation,
-    AllowlistOperationCode,
+  AllowlistOperation,
+  AllowlistOperationCode,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import { useContext, useState } from "react";
@@ -10,7 +10,7 @@ import DistributionPlanAddOperationBtn from "../common/DistributionPlanAddOperat
 import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 
 export default function MapDelegationsForm() {
-  const { setToasts, distributionPlan, fetchOperations } = useContext(
+  const { distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 

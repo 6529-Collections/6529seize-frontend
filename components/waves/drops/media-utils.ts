@@ -50,7 +50,7 @@ export type MediaItem = {
 export type ContentSegment = {
   type: 'text' | 'media';
   content: string;
-  mediaInfo?: MediaItem;
+  mediaInfo?: MediaItem | undefined;
 };
 
 /**
@@ -84,11 +84,11 @@ const extractMediaFromMarkdown = (text: string): ProcessedContent => {
     
     // Add media segment
     const url = match[2];
-    const type = isVideoUrl(url) ? 'video' : 'image';
+    const type = isVideoUrl(url!) ? 'video' : 'image';
     segments.push({ 
       type: 'media', 
       content: match[0],
-      mediaInfo: { alt: match[1], url, type }
+      mediaInfo: { alt: match[1]!, url: url!, type }
     });
     
     lastIndex = match.index + match[0].length;

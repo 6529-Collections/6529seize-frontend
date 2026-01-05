@@ -50,7 +50,7 @@ describe('NextGenAdminProposeAddressesAndPercentages', () => {
   it('calls writeContract with filled values', async () => {
     const user = userEvent.setup();
     render(<NextGenAdminProposeAddressesAndPercentages type={ProposalType.PRIMARY} close={()=>{}} />);
-    const contract = (helpers.useMinterContractWrite as jest.Mock).mock.results[0].value;
+    const contract = (helpers.useMinterContractWrite as jest.Mock).mock.results[0]?.value;
 
     await user.type(screen.getByTestId('collection'), '1');
     await user.type(screen.getByTestId('Primary Address 1'), 'a1');

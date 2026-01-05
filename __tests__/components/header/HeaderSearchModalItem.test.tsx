@@ -160,7 +160,7 @@ describe("HeaderSearchModalItem", () => {
   it("renders page item and shows breadcrumbs", () => {
     useHoverDirty.mockReturnValue(false);
     mockUsePathname.mockReturnValue("/delegation/delegation-faq");
-    const PageIcon = ({ className }: { className?: string }) => (
+    const PageIcon = ({ className }: { className?: string | undefined }) => (
       <div data-testid="page-icon" className={className} />
     );
     const page: any = {

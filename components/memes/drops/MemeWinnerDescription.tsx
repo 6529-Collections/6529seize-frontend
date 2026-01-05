@@ -1,5 +1,3 @@
-import React from "react";
-
 interface MemeWinnerDescriptionProps {
   readonly description: string;
 }

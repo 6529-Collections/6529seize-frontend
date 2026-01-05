@@ -265,7 +265,7 @@ function MenuItem({
   readonly title: string;
   readonly section: AboutSection;
   readonly setSection: (section: AboutSection) => void;
-  readonly currentSection?: AboutSection;
+  readonly currentSection?: AboutSection | undefined;
 }) {
   return (
     <div className="tw-py-1">

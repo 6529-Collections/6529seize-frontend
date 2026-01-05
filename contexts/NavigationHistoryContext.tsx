@@ -57,12 +57,12 @@ export const NavigationHistoryProvider: React.FC<{
   const canGoBack = useMemo(() => {
     if (index === 0) return false;
     const current = historyRef.current[index];
-    const currentPath = current.type === "route" ? current.path : null;
+    const currentPath = current?.type === "route" ? current.path : null;
 
     for (let i = index - 1; i >= 0; i--) {
       const entry = historyRef.current[i];
-      if (entry.type === "view") return true;
-      if (entry.type === "route") {
+      if (entry?.type === "view") return true;
+      if (entry?.type === "route") {
         if (!currentPath) return true;
         if (!sameMainPath(entry.path, currentPath)) return true;
       }
@@ -98,20 +98,20 @@ export const NavigationHistoryProvider: React.FC<{
     const isWaveRoute =
       hasWaveParam &&
       (pathOnly === "/" ||
-        pathOnly.startsWith("/waves") ||
-        pathOnly.startsWith("/messages"));
+        pathOnly?.startsWith("/waves") ||
+        pathOnly?.startsWith("/messages"));
 
     let pathKey: string;
     if (isProfile) {
       pathKey = mainSegment(url);
     } else if (isWaveRoute) {
-      pathKey = url.split("&")[0];
+      pathKey = url.split("&")[0]!;
     } else {
-      pathKey = url.split(/[?#]/)[0];
+      pathKey = url.split(/[?#]/)[0]!;
     }
 
     let i = historyRef.current.length - 1;
-    while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
+    while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
     const lastRoute = i >= 0 ? historyRef.current[i] : null;
     const isDuplicate =
       lastRoute?.type === "route" && lastRoute.path === pathKey;
@@ -136,8 +136,8 @@ export const NavigationHistoryProvider: React.FC<{
       while (targetIndex >= 0) {
         const entry = historyRef.current[targetIndex];
         if (
-          entry.type === "route" &&
-          current.type === "route" &&
+          entry?.type === "route" &&
+          current?.type === "route" &&
           sameMainPath(entry.path, current.path)
         ) {
           targetIndex -= 1;
@@ -152,11 +152,11 @@ export const NavigationHistoryProvider: React.FC<{
       }
 
       const target = historyRef.current[targetIndex];
-      if (target.type === "route") {
+      if (target?.type === "route") {
         skipNext.current = true;
         router.push(target.path);
       } else {
-        hardBack(target.view);
+        hardBack(target!.view);
       }
       return targetIndex;
     });

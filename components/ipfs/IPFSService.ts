@@ -3,13 +3,13 @@ import FormData from "form-data";
 
 interface IpfsServiceConfig {
   apiEndpoint: string;
-  mfsPath?: string;
+  mfsPath?: string | undefined;
 }
 
 class IpfsService {
   private readonly apiEndpoint: string;
   private readonly mfsEnabled: boolean;
-  private readonly mfsPath?: string;
+  private readonly mfsPath?: string | undefined;
 
   constructor(config: IpfsServiceConfig) {
     this.apiEndpoint = config.apiEndpoint;

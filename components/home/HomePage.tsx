@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";

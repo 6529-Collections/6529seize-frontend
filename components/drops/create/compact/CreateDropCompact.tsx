@@ -7,7 +7,6 @@ import CreateDropContent, {
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
-  DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
@@ -19,32 +18,26 @@ import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFileP
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;
 }
 interface CreateDropCompactProps {
   readonly waveId: string | null;
-  readonly profile: ProfileMinWithoutSubs;
-  readonly showProfile?: boolean;
   readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
-  readonly title: string | null;
   readonly files: File[];
-  readonly metadata: DropMetadata[];
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
   readonly loading: boolean;
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
-  readonly showDropError?: boolean;
+  readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
-  readonly onMetadataRemove: (key: string) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
@@ -52,7 +45,7 @@ interface CreateDropCompactProps {
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileRemove: (file: File) => void;
   readonly setFiles: (files: File[]) => void;
-  readonly onDrop?: () => void;
+  readonly onDrop?: (() => void) | undefined;
   readonly onDropPart: () => void;
 }
 
@@ -63,13 +56,9 @@ const CreateDropCompact = forwardRef<
   (
     {
       waveId,
-      profile,
-      showProfile = true,
       editorState,
       screenType,
       files,
-      title,
-      metadata,
       canSubmit,
       canAddPart,
       loading,
@@ -81,7 +70,6 @@ const CreateDropCompact = forwardRef<
       missingMetadata,
       children,
       onViewChange,
-      onMetadataRemove,
       onEditorState,
       onMentionedUser,
       onReferencedNft,
@@ -147,7 +135,8 @@ const CreateDropCompact = forwardRef<
                 onDrop={onDrop}
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}
                 setFiles={setFiles}
-                onDropPart={onDropPart}>
+                onDropPart={onDropPart}
+              >
                 {showSubmit && (
                   <div>
                     {onDrop && (
@@ -159,7 +148,8 @@ const CreateDropCompact = forwardRef<
                           screenType === CreateDropScreenType.MOBILE
                             ? "tw-px-3 tw-py-2"
                             : "tw-px-4 tw-py-2.5"
-                        }>
+                        }
+                      >
                         {getSubmitText()}
                       </PrimaryButton>
                     )}
@@ -184,13 +174,15 @@ const CreateDropCompact = forwardRef<
                   onClick={() => onFileRemove(file)}
                   type="button"
                   aria-label="Remove file"
-                  className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800">
+                  className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                >
                   <svg
                     className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg">
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path
                       d="M18 6L6 18M6 6L18 18"
                       stroke="currentColor"

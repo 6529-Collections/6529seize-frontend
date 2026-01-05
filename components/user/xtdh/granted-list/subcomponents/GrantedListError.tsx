@@ -1,5 +1,5 @@
 interface GrantedListErrorProps {
-  readonly message?: string;
+  readonly message?: string | undefined;
   readonly onRetry: () => void;
 }
 

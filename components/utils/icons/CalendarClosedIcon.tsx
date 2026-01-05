@@ -1,7 +1,7 @@
-import React, { type JSX } from "react";
+import { type JSX } from "react";
 
 interface CalendarClosedIconProps {
-  readonly className?: string;
+  readonly className?: string | undefined;
 }
 
 /**

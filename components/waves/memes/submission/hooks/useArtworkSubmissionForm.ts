@@ -53,7 +53,7 @@ type FormAction =
       payload: {
         status: ExternalMediaState["status"];
         error: string | null;
-        finalUrl?: string;
+        finalUrl?: string | undefined;
       };
     }
   | {

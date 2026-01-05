@@ -3,7 +3,7 @@ import styles from "@/styles/Home.module.scss";
 import { Suspense } from "react";
 
 type ErrorPageProps = {
-  readonly searchParams?: Promise<{ readonly stack?: string }>;
+  readonly searchParams?: Promise<{ readonly stack?: string | undefined }> | undefined;
 };
 
 export default async function ErrorPage({ searchParams }: ErrorPageProps) {

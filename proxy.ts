@@ -143,9 +143,9 @@ function buildWaveHref({
   serialNo,
   isDirectMessage,
 }: {
-  wave?: string;
-  drop?: string;
-  serialNo?: string;
+  wave?: string | undefined;
+  drop?: string | undefined;
+  serialNo?: string | undefined;
   isDirectMessage: boolean;
 }): string {
   if (!wave) {
@@ -170,10 +170,10 @@ function resolveMyStreamHomeRedirect({
   drop,
   serialNo,
 }: {
-  view?: string;
-  wave?: string;
-  drop?: string;
-  serialNo?: string;
+  view?: string | undefined;
+  wave?: string | undefined;
+  drop?: string | undefined;
+  serialNo?: string | undefined;
 }): string {
   if (view === "messages") {
     return buildWaveHref({
@@ -243,7 +243,7 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
   for (const mapping of redirectMappings) {
     if (pathname.toLowerCase() === mapping.url.toLowerCase()) {
       const url = req.nextUrl.clone();
-      url.pathname = mapping.target.split("?")[0];
+      url.pathname = mapping.target.split("?")[0]!;
       const queryString = mapping.target.split("?")[1];
       if (queryString) {
         url.search = `?${queryString}`;

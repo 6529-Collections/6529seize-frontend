@@ -163,7 +163,7 @@ const fetchWarpcastJson = async <T>(
 
     return (await response.json()) as T;
   } catch (error) {
-    if ((error as { name?: string }).name === "AbortError") {
+    if ((error as { name?: string | undefined }).name === "AbortError") {
       throw new Error("Warpcast request aborted");
     }
 
@@ -176,70 +176,70 @@ const fetchWarpcastJson = async <T>(
 type WarpcastUserResponse = {
   readonly result?: {
     readonly user?: {
-      readonly fid?: number;
-      readonly username?: string;
-      readonly displayName?: string;
-      readonly pfp?: { readonly url?: string };
+      readonly fid?: number | undefined;
+      readonly username?: string | undefined;
+      readonly displayName?: string | undefined;
+      readonly pfp?: { readonly url?: string | undefined } | undefined;
       readonly profile?: {
-        readonly bio?: { readonly text?: string };
-      };
-    };
-  };
+        readonly bio?: { readonly text?: string | undefined } | undefined;
+      } | undefined;
+    } | undefined;
+  } | undefined;
 };
 
 type WarpcastCastEmbed = {
-  readonly url?: string;
-  readonly castId?: { readonly fid?: number; readonly hash?: string };
-  readonly metadata?: { readonly image?: string };
-  readonly type?: string;
+  readonly url?: string | undefined;
+  readonly castId?: { readonly fid?: number | undefined; readonly hash?: string | undefined } | undefined;
+  readonly metadata?: { readonly image?: string | undefined } | undefined;
+  readonly type?: string | undefined;
 };
 
 type WarpcastCastAuthor = {
-  readonly fid?: number;
-  readonly username?: string;
-  readonly displayName?: string;
-  readonly pfp?: { readonly url?: string };
+  readonly fid?: number | undefined;
+  readonly username?: string | undefined;
+  readonly displayName?: string | undefined;
+  readonly pfp?: { readonly url?: string | undefined } | undefined;
 };
 
 type WarpcastCastResponse = {
   readonly result?: {
     readonly cast?: {
-      readonly hash?: string;
-      readonly text?: string;
-      readonly timestamp?: string;
-      readonly embeds?: readonly WarpcastCastEmbed[];
-      readonly author?: WarpcastCastAuthor;
+      readonly hash?: string | undefined;
+      readonly text?: string | undefined;
+      readonly timestamp?: string | undefined;
+      readonly embeds?: readonly WarpcastCastEmbed[] | undefined;
+      readonly author?: WarpcastCastAuthor | undefined;
       readonly channel?: {
-        readonly id?: string;
-        readonly name?: string;
-        readonly imageUrl?: string;
-      };
+        readonly id?: string | undefined;
+        readonly name?: string | undefined;
+        readonly imageUrl?: string | undefined;
+      } | undefined;
       readonly reactions?: {
-        readonly likes?: number;
-        readonly recasts?: number;
-      };
+        readonly likes?: number | undefined;
+        readonly recasts?: number | undefined;
+      } | undefined;
       readonly replies?: {
-        readonly count?: number;
-      };
-    };
-  };
+        readonly count?: number | undefined;
+      } | undefined;
+    } | undefined;
+  } | undefined;
 };
 
 type WarpcastChannelResponse = {
   readonly result?: {
     readonly channel?: {
-      readonly id?: string;
-      readonly name?: string;
-      readonly description?: string;
-      readonly imageUrl?: string;
-    };
+      readonly id?: string | undefined;
+      readonly name?: string | undefined;
+      readonly description?: string | undefined;
+      readonly imageUrl?: string | undefined;
+    } | undefined;
     readonly recentCast?: {
-      readonly text?: string;
+      readonly text?: string | undefined;
       readonly author?: {
-        readonly username?: string;
-      };
-    };
-  };
+        readonly username?: string | undefined;
+      } | undefined;
+    } | undefined;
+  } | undefined;
 };
 
 const mapWarpcastUser = (
@@ -500,7 +500,7 @@ const extractMetaContent = (html: string, name: string): string | undefined => {
   if (!contentMatch) {
     return undefined;
   }
-  return contentMatch[1].trim();
+  return contentMatch[1]?.trim();
 };
 
 const extractTitle = (html: string): string | undefined => {
@@ -686,7 +686,7 @@ const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
   (typeof error === "object" &&
     error !== null &&
-    (error as { name?: string }).name === "UrlGuardError");
+    (error as { name?: string | undefined }).name === "UrlGuardError");
 
 const handleGuardError = (error: unknown, fallbackStatus = 400) => {
   if (isUrlGuardError(error)) {

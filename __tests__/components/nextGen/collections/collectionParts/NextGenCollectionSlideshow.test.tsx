@@ -11,7 +11,7 @@ jest.mock("@/components/nextGen/collections/collectionParts/hooks/SlideshowHeade
 });
 
 jest.mock("@/components/nextGen/collections/collectionParts/hooks/TokenSlideshow", () => {
-  return function MockTokenSlideshow({ collectionId, initialTokens }: { collectionId: number; initialTokens?: any[] }) {
+  return function MockTokenSlideshow({ collectionId, initialTokens }: { collectionId: number; initialTokens?: any[] | undefined }) {
     return (
       <div data-testid="token-slideshow">
         Collection ID: {collectionId}

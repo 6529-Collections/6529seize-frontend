@@ -7,11 +7,13 @@ type GridRowProps = Readonly<{
   tokens: TokenWindowEntry[];
   metadataMap: Map<string, TokenMetadata>;
   metadataQuery: any;
-  renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
-  action?: TokenListAction;
+  renderTokenExtra?:
+    | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
+    | undefined
+    | undefined;
+  action?: TokenListAction | undefined;
   positionStyle: CSSProperties;
   columns: number;
-
 }>;
 
 export function GridRow({
@@ -22,7 +24,6 @@ export function GridRow({
   action,
   positionStyle,
   columns,
-
 }: GridRowProps) {
   return (
     <li
@@ -52,7 +53,9 @@ export function GridRow({
             </div>
             <div className="tw-flex tw-flex-col tw-p-3 tw-gap-3">
               <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-iron-400">
-                <span className="tw-truncate">{metadata?.collectionName ?? "Collection"}</span>
+                <span className="tw-truncate">
+                  {metadata?.collectionName ?? "Collection"}
+                </span>
                 <span className="tw-font-mono">#{token.decimalId}</span>
               </div>
 
@@ -76,7 +79,9 @@ export function GridRow({
                   type="button"
                   className="tw-w-full tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
                   onClick={() => action.onClick(token.tokenId, metadata)}
-                  aria-label={action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label}
+                  aria-label={
+                    action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label
+                  }
                 >
                   {action.label}
                 </button>

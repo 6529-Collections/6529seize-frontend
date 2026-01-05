@@ -88,7 +88,7 @@ describe('media-type utils', () => {
 
     describe('when animation is true but NFT has no metadata', () => {
       it('returns image type for BaseNFT without metadata', () => {
-        const nft = createMockNFT({ metadata: undefined });
+        const nft = createMockNFT({ ...(undefined !== undefined ? { metadata: undefined } : {}) });
         
         const result = getMediaType(nft, true);
         expect(result).toBe('image');

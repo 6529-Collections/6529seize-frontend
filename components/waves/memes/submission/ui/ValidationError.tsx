@@ -1,9 +1,9 @@
 import React from "react";
 
 interface ValidationErrorProps {
-  error?: string | null;
-  id?: string;
-  className?: string;
+  error?: string | null | undefined;
+  id?: string | undefined;
+  className?: string | undefined;
 }
 
 /**

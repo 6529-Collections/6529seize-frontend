@@ -89,7 +89,7 @@ interface NftTDH {
   cic_score: number;
   primary_wallet: string;
   level: number;
-  cic_type?: CICType;
+  cic_type?: CICType | undefined;
 }
 
 export interface NftTDHRanked extends NftTDH {

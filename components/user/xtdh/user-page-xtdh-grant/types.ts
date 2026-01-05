@@ -38,7 +38,7 @@ export type UserPageXtdhGrantForm = UserPageXtdhGrantFormState &
   UserPageXtdhGrantFormControls;
 
 export type GrantValidationParams = UserPageXtdhGrantFormState & {
-  maxGrantRate?: number | null;
+  maxGrantRate?: number | null | undefined;
 };
 
 export type GrantValidationResult =

@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
  *   scrollbars without managing explicit heights; relies on parent layout flex.
  */
 interface WebLeftSidebarProps {
-  readonly isCollapsed?: boolean;
+  readonly isCollapsed?: boolean | undefined;
 }
 
 const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({

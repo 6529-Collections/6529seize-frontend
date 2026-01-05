@@ -12,8 +12,8 @@ test('mapToExtendedDrops maps and reverses order', () => {
   const pages = [{ wave, drops: [{ id: '1' }, { id: '2' }] }] as any;
   const res = mapToExtendedDrops(pages, [], true);
   expect((getStableDropKey as jest.Mock).mock.calls.length).toBe(2);
-  expect(res[0].stableKey).toBe('k2');
-  expect(res[1].wave).toBe(wave);
+  expect(res[0]?.stableKey).toBe('k2');
+  expect(res[1]?.wave).toBe(wave);
 });
 
 test('generateUniqueKeys assigns unique keys', () => {

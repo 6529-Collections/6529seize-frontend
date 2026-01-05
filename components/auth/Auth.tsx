@@ -1,10 +1,23 @@
 "use client";
 
 import styles from "./Auth.module.scss";
-import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from "@/hooks/useSecureSign";
+import {
+  useSecureSign,
+  MobileSigningError,
+  ConnectionMismatchError,
+  SigningProviderError,
+} from "@/hooks/useSecureSign";
 import { useIdentity } from "@/hooks/useIdentity";
 import {
   getAuthJwt,
@@ -30,33 +43,42 @@ import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { sanitizeErrorForUser, logErrorSecurely } from "@/utils/error-sanitizer";
+import {
+  sanitizeErrorForUser,
+  logErrorSecurely,
+} from "@/utils/error-sanitizer";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
   MissingActiveProfileError,
-  InvalidRoleStateError
+  InvalidRoleStateError,
 } from "@/errors/authentication";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public override readonly cause?: unknown
+  ) {
     super(message);
-    this.name = 'AuthenticationNonceError';
+    this.name = "AuthenticationNonceError";
   }
 }
 
 class InvalidSignerAddressError extends Error {
   constructor(signerAddress: string) {
     super(`Invalid signer address: ${signerAddress}`);
-    this.name = 'InvalidSignerAddressError';
+    this.name = "InvalidSignerAddressError";
   }
 }
 
 class NonceResponseValidationError extends Error {
-  constructor(message: string, public readonly response?: unknown) {
+  constructor(
+    message: string,
+    public readonly response?: unknown
+  ) {
     super(message);
-    this.name = 'NonceResponseValidationError';
+    this.name = "NonceResponseValidationError";
   }
 }
 
@@ -88,8 +110,8 @@ export const AuthContext = createContext<AuthContextType>({
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),
-  setToast: () => { },
-  setActiveProfileProxy: async () => { },
+  setToast: () => {},
+  setActiveProfileProxy: async () => {},
 });
 
 export const useAuth = () => {
@@ -103,20 +125,33 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, isConnected, seizeDisconnectAndLogout, isSafeWallet, connectionState } =
-    useSeizeConnectContext();
+  const {
+    address,
+    isConnected,
+    seizeDisconnectAndLogout,
+    isSafeWallet,
+    connectionState,
+  } = useSeizeConnectContext();
 
-  const { signMessage, isSigningPending, reset: resetSigning } = useSecureSign();
+  const {
+    signMessage,
+    isSigningPending,
+    reset: resetSigning,
+  } = useSecureSign();
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity({
-    handleOrWallet: address,
-    initialProfile: null,
-  });
+  const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(
+    {
+      handleOrWallet: address,
+      initialProfile: null,
+    }
+  );
 
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [authLoadingState, setAuthLoadingState] = useState<'idle' | 'validating' | 'signing'>('idle');
+  const [authLoadingState, setAuthLoadingState] = useState<
+    "idle" | "validating" | "signing"
+  >("idle");
 
   // Centralized abort mechanism for cancelling in-flight operations
   const abortCurrentAuthOperation = useCallback(() => {
@@ -124,9 +159,8 @@ export default function Auth({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    setAuthLoadingState('idle');
+    setAuthLoadingState("idle");
   }, []);
-
 
   const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
     queryKey: [
@@ -169,7 +203,6 @@ export default function Auth({
     seizeDisconnectAndLogout();
   }, [invalidateAll, seizeDisconnectAndLogout]);
 
-
   // Comprehensive cleanup effect for unmount and address changes
   useEffect(() => {
     return () => {
@@ -193,11 +226,11 @@ export default function Auth({
     abortCurrentAuthOperation();
 
     // Don't start validation during transitional states
-    if (connectionState === 'connecting') {
+    if (connectionState === "connecting") {
       return;
     }
 
-    if (!address || connectionState !== 'connected') {
+    if (!address || connectionState !== "connected") {
       setShowSignModal(false);
       return;
     }
@@ -218,7 +251,7 @@ export default function Auth({
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
-      setAuthLoadingState('validating');
+      setAuthLoadingState("validating");
 
       try {
         const result = await validateAuthImmediate({
@@ -229,15 +262,15 @@ export default function Auth({
             activeProfileProxy,
             isConnected,
             operationId,
-            abortSignal: abortController.signal
+            abortSignal: abortController.signal,
           },
           callbacks: {
             onShowSignModal: setShowSignModal,
             onInvalidateCache: invalidateAll,
             onReset: reset,
             onRemoveJwt: removeAuthJwt,
-            onLogError: logErrorSecurely
-          }
+            onLogError: logErrorSecurely,
+          },
         });
 
         // If operation was cancelled or address changed, no further action needed
@@ -248,7 +281,7 @@ export default function Auth({
         // Clean up only if this is still the current operation
         if (!abortController.signal.aborted && currentAddress === address) {
           abortControllerRef.current = null;
-          setAuthLoadingState('idle');
+          setAuthLoadingState("idle");
         }
       }
     };
@@ -256,7 +289,15 @@ export default function Auth({
     validateImmediately();
 
     // No cleanup needed - immediate execution prevents stale timeouts
-  }, [address, activeProfileProxy, connectionState, isConnected, abortCurrentAuthOperation, invalidateAll, reset]);
+  }, [
+    address,
+    activeProfileProxy,
+    connectionState,
+    isConnected,
+    abortCurrentAuthOperation,
+    invalidateAll,
+    reset,
+  ]);
 
   const getNonce = async ({
     signerAddress,
@@ -264,7 +305,7 @@ export default function Auth({
     signerAddress: string;
   }): Promise<ApiNonceResponse> => {
     // Input validation - fail fast on invalid input
-    if (!signerAddress || typeof signerAddress !== 'string') {
+    if (!signerAddress || typeof signerAddress !== "string") {
       throw new InvalidSignerAddressError(signerAddress);
     }
 
@@ -284,28 +325,47 @@ export default function Auth({
 
       // Response validation - fail fast on invalid response
       if (!response) {
-        throw new NonceResponseValidationError('Nonce API returned null or undefined response');
+        throw new NonceResponseValidationError(
+          "Nonce API returned null or undefined response"
+        );
       }
 
-      if (!response.nonce || typeof response.nonce !== 'string' || response.nonce.trim().length === 0) {
-        throw new NonceResponseValidationError('Invalid nonce in API response', response);
+      if (
+        !response.nonce ||
+        typeof response.nonce !== "string" ||
+        response.nonce.trim().length === 0
+      ) {
+        throw new NonceResponseValidationError(
+          "Invalid nonce in API response",
+          response
+        );
       }
 
-      if (!response.server_signature || typeof response.server_signature !== 'string' || response.server_signature.trim().length === 0) {
-        throw new NonceResponseValidationError('Invalid server_signature in API response', response);
+      if (
+        !response.server_signature ||
+        typeof response.server_signature !== "string" ||
+        response.server_signature.trim().length === 0
+      ) {
+        throw new NonceResponseValidationError(
+          "Invalid server_signature in API response",
+          response
+        );
       }
 
       // Return valid response - FAIL-FAST: Only returns valid data or throws
       return response;
     } catch (error) {
       // Re-throw our custom errors without modification
-      if (error instanceof NonceResponseValidationError || error instanceof InvalidSignerAddressError) {
+      if (
+        error instanceof NonceResponseValidationError ||
+        error instanceof InvalidSignerAddressError
+      ) {
         throw error;
       }
 
       // Wrap API/network errors in our custom error type
       throw new AuthenticationNonceError(
-        'Failed to obtain authentication nonce from server',
+        "Failed to obtain authentication nonce from server",
         error
       );
     }
@@ -345,12 +405,14 @@ export default function Auth({
       if (result.error) {
         if (result.error instanceof ConnectionMismatchError) {
           setToast({
-            message: "Wallet address mismatch. Please disconnect and reconnect your wallet.",
+            message:
+              "Wallet address mismatch. Please disconnect and reconnect your wallet.",
             type: "error",
           });
         } else if (result.error instanceof SigningProviderError) {
           setToast({
-            message: "Wallet provider error. Please reconnect your wallet and try again.",
+            message:
+              "Wallet provider error. Please reconnect your wallet and try again.",
             type: "error",
           });
         } else if (result.error instanceof MobileSigningError) {
@@ -368,7 +430,7 @@ export default function Auth({
       };
     } catch (error) {
       // Fallback error handling with secure logging
-      logErrorSecurely('getSignature', error);
+      logErrorSecurely("getSignature", error);
       setToast({
         message: sanitizeErrorForUser(error),
         type: "error",
@@ -416,9 +478,9 @@ export default function Auth({
         body: {
           server_signature,
           client_signature: clientSignature.signature,
-          role: role ?? undefined,
           is_safe_wallet: isSafeWallet,
           client_address: signerAddress,
+          ...(role != null && { role }),
         },
       });
       setAuthJwt(
@@ -447,7 +509,7 @@ export default function Auth({
         });
       } else {
         // Handle other errors (login API errors, etc.)
-        logErrorSecurely('requestSignIn', error);
+        logErrorSecurely("requestSignIn", error);
         setToast({
           message: sanitizeErrorForUser(error),
           type: "error",
@@ -456,7 +518,6 @@ export default function Auth({
       return { success: false };
     }
   };
-
 
   // These functions have been moved above to fix initialization order
 
@@ -471,7 +532,7 @@ export default function Auth({
     }
 
     // Set loading state for signing
-    setAuthLoadingState('signing');
+    setAuthLoadingState("signing");
 
     try {
       // Create a new abort controller for this auth request
@@ -481,17 +542,21 @@ export default function Auth({
       const { isValid } = await validateJwt({
         jwt: getAuthJwt(),
         wallet: address,
-        role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
+        role: activeProfileProxy
+          ? validateRoleForAuthentication(activeProfileProxy)
+          : null,
         operationId,
         abortSignal: abortController.signal,
-        activeProfileProxy
+        activeProfileProxy,
       });
 
       if (!isValid) {
         removeAuthJwt();
         await requestSignIn({
           signerAddress: address,
-          role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
+          role: activeProfileProxy
+            ? validateRoleForAuthentication(activeProfileProxy)
+            : null,
         });
         invalidateAll();
       }
@@ -502,7 +567,7 @@ export default function Auth({
       }
       return { success: isSuccess };
     } finally {
-      setAuthLoadingState('idle');
+      setAuthLoadingState("idle");
     }
   };
 
@@ -526,7 +591,7 @@ export default function Auth({
     } catch (error) {
       // Handle InvalidRoleStateError specifically
       if (error instanceof InvalidRoleStateError) {
-        logErrorSecurely('onActiveProfileProxy_invalid_role_state', error);
+        logErrorSecurely("onActiveProfileProxy_invalid_role_state", error);
         setToast({
           message: "Invalid profile role state. Please select a valid profile.",
           type: "error",
@@ -538,7 +603,7 @@ export default function Auth({
 
       // Handle MissingActiveProfileError
       if (error instanceof MissingActiveProfileError) {
-        logErrorSecurely('onActiveProfileProxy_missing_profile', error);
+        logErrorSecurely("onActiveProfileProxy_missing_profile", error);
         setToast({
           message: "Profile authentication failed. Please select a profile.",
           type: "error",
@@ -558,9 +623,11 @@ export default function Auth({
 
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
-    return showSignModal &&
-      authLoadingState !== 'validating' &&
-      connectionState === 'connected';
+    return (
+      showSignModal &&
+      authLoadingState !== "validating" &&
+      connectionState === "connected"
+    );
   }, [showSignModal, authLoadingState, connectionState]);
 
   return (
@@ -586,7 +653,7 @@ export default function Auth({
         show={shouldShowSignModal}
         onHide={() => {
           // Only allow modal dismissal when not actively validating
-          if (authLoadingState !== 'validating') {
+          if (authLoadingState !== "validating") {
             setShowSignModal(false);
           }
         }}
@@ -602,7 +669,6 @@ export default function Auth({
             To connect your wallet, you will need to sign a message to confirm
             your identity.
           </p>
-
 
           <ul className="font-lighter">
             <li className="mt-1 mb-1">

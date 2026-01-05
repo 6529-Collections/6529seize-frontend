@@ -39,7 +39,7 @@ export interface PageSearchResult {
   title: string;
   href: string;
   breadcrumbs: string[];
-  icon?: ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string | undefined }> | undefined;
 }
 
 export type HeaderSearchModalItemType =
@@ -102,7 +102,7 @@ export default function HeaderSearchModalItem({
   const getNft = () => content as NFTSearchResult;
   const getPage = () => content as PageSearchResult;
 
-  const getMediaIcon = (Icon: ComponentType<{ className?: string }>) => {
+  const getMediaIcon = (Icon: ComponentType<{ className?: string | undefined }>) => {
     return (
       <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900">
         <Icon className="tw-h-5 tw-w-5" />
@@ -158,7 +158,7 @@ export default function HeaderSearchModalItem({
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
       const key = nft.contract.toLowerCase();
-      return `${collectionMap[key].path}/${nft.id}`;
+      return `${collectionMap[key]?.path}/${nft.id}`;
     } else if (isPage()) {
       return getPage().href;
     } else {
@@ -202,7 +202,7 @@ export default function HeaderSearchModalItem({
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
       const key = nft.contract.toLowerCase();
-      return `${collectionMap[key].title} #${nft.id}`;
+      return `${collectionMap[key]?.title} #${nft.id}`;
     } else if (isPage()) {
       const page = getPage();
       if (page.breadcrumbs.length > 0) {

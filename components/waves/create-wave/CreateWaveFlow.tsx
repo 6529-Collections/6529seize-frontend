@@ -9,7 +9,7 @@ export default function CreateWaveFlow({
   readonly title: string;
   readonly onBack: () => void;
   readonly children: ReactNode;
-  readonly isActive?: boolean;
+  readonly isActive?: boolean | undefined;
 }) {
   const onBackRef = useRef(onBack);
 

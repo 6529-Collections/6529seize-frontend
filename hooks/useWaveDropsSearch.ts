@@ -44,7 +44,7 @@ export function useWaveDropsSearch({
   readonly wave: ApiWave;
   readonly term: string;
   readonly enabled: boolean;
-  readonly size?: number;
+  readonly size?: number | undefined;
 }) {
   const trimmedTerm = term.trim();
   const waveMin = useMemo(() => toWaveMin(wave), [wave]);

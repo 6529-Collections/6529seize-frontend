@@ -20,10 +20,10 @@ export default function WavesListHeader({
   setIdentity,
   setWaveName,
 }: {
-  readonly title?: string;
+  readonly title?: string | undefined;
   readonly identity: string | null;
   readonly waveName: string | null;
-  readonly showCreateNewButton?: boolean;
+  readonly showCreateNewButton?: boolean | undefined;
   readonly onCreateNewWave: () => void;
   readonly onCreateNewDirectMessage: () => void;
   readonly setIdentity: (identity: string | null) => void;

@@ -16,7 +16,7 @@ export default function ComponentConfigNextBtn({
   onNext: () => void;
   onSkip: () => void;
   isDisabled: boolean;
-  isLoading?: boolean;
+  isLoading?: boolean | undefined;
   children: React.ReactNode;
 }) {
   const [disabled, setDisabled] = useState<boolean>(false);

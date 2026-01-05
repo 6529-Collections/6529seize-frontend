@@ -10,7 +10,7 @@ import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 
 interface WaveSmallLeaderboardItemOutcomesProps {
   readonly drop: ApiDrop;
-  readonly isMobile?: boolean;
+  readonly isMobile?: boolean | undefined;
 }
 
 export const WaveSmallLeaderboardItemOutcomes: React.FC<

@@ -18,8 +18,8 @@ import { isAddress } from "viem";
 type Props = {
   readonly profile: ApiIdentity;
   readonly initialSeasons: MemeSeason[];
-  readonly initialTdh?: ConsolidatedTDH | TDH;
-  readonly initialOwnerBalance?: OwnerBalance;
+  readonly initialTdh?: ConsolidatedTDH | TDH | undefined;
+  readonly initialOwnerBalance?: OwnerBalance | undefined;
   readonly initialBalanceMemes: OwnerBalanceMemes[];
 };
 
@@ -33,15 +33,12 @@ export default function UserPageStatsClient({
   const [activeAddress, setActiveAddress] = useState<string | null>(null);
 
   const [seasons, setSeasons] = useState<MemeSeason[]>(initialSeasons);
-  const [tdh, setTdh] = useState<ConsolidatedTDH | TDH | undefined>(
-    initialTdh
-  );
+  const [tdh, setTdh] = useState<ConsolidatedTDH | TDH | undefined>(initialTdh);
   const [ownerBalance, setOwnerBalance] = useState<OwnerBalance | undefined>(
     initialOwnerBalance
   );
-  const [balanceMemes, setBalanceMemes] = useState<OwnerBalanceMemes[]>(
-    initialBalanceMemes
-  );
+  const [balanceMemes, setBalanceMemes] =
+    useState<OwnerBalanceMemes[]>(initialBalanceMemes);
   const activeAddressForStats = useMemo(() => {
     if (!activeAddress) {
       return null;
@@ -81,7 +78,7 @@ export default function UserPageStatsClient({
     })
       .then(setSeasons)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setSeasons([]);
@@ -109,7 +106,7 @@ export default function UserPageStatsClient({
     })
       .then(setTdh)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setTdh(undefined);
@@ -138,7 +135,7 @@ export default function UserPageStatsClient({
     })
       .then(setOwnerBalance)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setOwnerBalance(undefined);
@@ -150,10 +147,7 @@ export default function UserPageStatsClient({
   useEffect(() => {
     const controller = new AbortController();
 
-    if (
-      activeAddressForStats === null &&
-      initialBalanceMemes != null
-    ) {
+    if (activeAddressForStats === null && initialBalanceMemes != null) {
       setBalanceMemes(initialBalanceMemes);
       return () => controller.abort();
     }
@@ -170,7 +164,7 @@ export default function UserPageStatsClient({
     })
       .then(setBalanceMemes)
       .catch((error) => {
-        if ((error as { name?: string })?.name === "AbortError") {
+        if ((error as { name?: string | undefined })?.name === "AbortError") {
           return;
         }
         setBalanceMemes([]);
@@ -185,7 +179,6 @@ export default function UserPageStatsClient({
         <UserPageStatsTags
           ownerBalance={ownerBalance}
           balanceMemes={balanceMemes}
-          seasons={seasons}
         />
         <div>
           <UserAddressesSelectDropdown

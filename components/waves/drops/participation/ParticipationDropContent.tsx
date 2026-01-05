@@ -1,6 +1,5 @@
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiDrop } from "@/generated/models/ApiDrop";
-import React from "react";
 import WaveDropContent from "../WaveDropContent";
 
 interface ParticipationDropContentProps {
@@ -8,11 +7,10 @@ interface ParticipationDropContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onLongPress: () => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
-  readonly isCompetitionDrop?: boolean;
+  readonly isCompetitionDrop?: boolean | undefined;
 }
 
 export default function ParticipationDropContent({
@@ -23,7 +21,6 @@ export default function ParticipationDropContent({
   onDropContentClick,
   onQuoteClick,
   setLongPressTriggered,
-  parentContainerRef,
   isCompetitionDrop = false,
 }: ParticipationDropContentProps) {
   return (
@@ -36,7 +33,6 @@ export default function ParticipationDropContent({
         onDropContentClick={onDropContentClick}
         onQuoteClick={onQuoteClick}
         setLongPressTriggered={setLongPressTriggered}
-        parentContainerRef={parentContainerRef}
         isCompetitionDrop={isCompetitionDrop}
       />
     </div>

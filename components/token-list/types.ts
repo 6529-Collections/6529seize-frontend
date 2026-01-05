@@ -8,37 +8,46 @@ import type {
 export type TokenListAction = {
   label: string;
   onClick: (tokenId: bigint, metadata?: TokenMetadata) => void;
-  getAriaLabel?: (tokenLabel: string) => string;
+  getAriaLabel?: ((tokenLabel: string) => string) | undefined;
 };
 
 export type TokenWindowEntry = {
   tokenId: bigint;
   decimalId: string;
-  xtdh?: number;
+  xtdh?: number | undefined;
 };
 
 export interface VirtualizedTokenListProps {
-  readonly contractAddress?: `0x${string}`;
+  readonly contractAddress?: `0x${string}` | undefined;
   readonly chain: SupportedChain | null;
   readonly ranges: TokenRange[];
   readonly scrollKey: string;
-  readonly overscan?: number;
-  readonly renderTokenExtra?: (tokenId: bigint, metadata?: TokenMetadata) => ReactNode;
-  readonly action?: TokenListAction;
-  readonly className?: string;
-  readonly scrollContainerClassName?: string;
-  readonly rowClassName?: string;
-  readonly footerContent?: ReactNode;
-  readonly footerClassName?: string;
-  readonly emptyState?: ReactNode;
-  readonly onEndReached?: (info: { lastVisibleIndex: number; totalCount: number }) => void;
-  readonly endReachedOffset?: number;
-  readonly layout?: "list" | "grid";
-  readonly columns?: number;
+  readonly overscan?: number | undefined;
+  readonly renderTokenExtra?:
+    | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
+    | undefined
+    | undefined;
+  readonly action?: TokenListAction | undefined;
+  readonly className?: string | undefined;
+  readonly scrollContainerClassName?: string | undefined;
+  readonly rowClassName?: string | undefined;
+  readonly footerContent?: ReactNode | undefined;
+  readonly footerClassName?: string | undefined;
+  readonly emptyState?: ReactNode | undefined;
+  readonly onEndReached?:
+    | ((info: { lastVisibleIndex: number; totalCount: number }) => void)
+    | undefined
+    | undefined;
+  readonly endReachedOffset?: number | undefined;
+  readonly layout?: "list" | "grid" | undefined;
+  readonly columns?: number | undefined;
 
-  readonly tokens?: readonly { tokenId: bigint; xtdh: number }[];
+  readonly tokens?: readonly { tokenId: bigint; xtdh: number }[] | undefined;
 }
 
 export type VirtualizedTokenListContentProps = Readonly<
-  Omit<VirtualizedTokenListProps, "emptyState"> & { totalCount: number; emptyState: ReactNode }
+  Omit<VirtualizedTokenListProps, "emptyState"> & {
+    totalCount: number;
+    emptyState: ReactNode;
+  }
 >;

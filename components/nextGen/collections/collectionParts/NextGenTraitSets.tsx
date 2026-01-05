@@ -47,17 +47,17 @@ const ULTIMATE = "Ultimate";
 export default function NextGenTraitSets(
   props: Readonly<{
     collection: NextGenCollection;
-    preview?: boolean;
+    preview?: boolean | undefined;
   }>
 ) {
   const [page, setPage] = useState(1);
 
   const PAGE_SIZE = props.preview ? 10 : 25;
 
-  const availableTraits: string[] = TRAITS[props.collection.id];
+  const availableTraits: string[] = TRAITS[props.collection.id]!;
 
   const [selectedTrait, setSelectedTrait] = useState<string>(
-    availableTraits[0]
+    availableTraits[0]!
   );
 
   const [selectedTraitValues, setSelectedTraitValues] = useState<string[]>([]);

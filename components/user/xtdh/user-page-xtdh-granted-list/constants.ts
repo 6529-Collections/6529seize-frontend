@@ -217,10 +217,10 @@ export function getApiParamsFromFilters(
   subFilter: import("./types").GrantedActiveFilter
 ): {
   readonly statuses: GrantedFilterStatuses;
-  readonly validFromGt?: number;
-  readonly validFromLt?: number;
-  readonly validToGt?: number;
-  readonly validToLt?: number;
+  readonly validFromGt?: number | undefined;
+  readonly validFromLt?: number | undefined;
+  readonly validToGt?: number | undefined;
+  readonly validToLt?: number | undefined;
 } {
   const now = Date.now();
 

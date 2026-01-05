@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
@@ -9,7 +9,7 @@ interface WaveWinnerItemSmallProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly wave: ApiWave;
-  readonly rank?: number; // For explicitly setting rank from decision winners
+  readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
 
 export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(

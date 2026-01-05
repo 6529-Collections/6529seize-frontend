@@ -15,10 +15,10 @@ export default function HeaderSearchModalPfp({
   level,
   size = 40,
 }: {
-  readonly src?: string | null;
-  readonly alt?: string;
+  readonly src?: string | null | undefined;
+  readonly alt?: string | undefined;
   readonly level: number;
-  readonly size?: number;
+  readonly size?: number | undefined;
 }) {
   const { data: resolved } = useResolvedIpfsUrl(src);
 
