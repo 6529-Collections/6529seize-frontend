@@ -23,11 +23,13 @@ export interface UseTdhGrantTokensQueryParams {
   readonly enabled?: boolean | undefined;
 }
 
-export type UseTdhGrantTokensQueryResult =
-  UseInfiniteQueryResult<InfiniteData<ApiXTdhGrantTokensPage>, Error> & {
-    readonly tokens: readonly ApiXTdhGrantToken[];
-    readonly totalCount: number;
-  };
+export type UseTdhGrantTokensQueryResult = UseInfiniteQueryResult<
+  InfiniteData<ApiXTdhGrantTokensPage>,
+  Error
+> & {
+  readonly tokens: ApiXTdhGrantToken[];
+  readonly totalCount: number;
+};
 
 export function useTdhGrantTokensQuery({
   grantId,
@@ -58,8 +60,7 @@ export function useTdhGrantTokensQuery({
   });
 
   const tokens = useMemo(
-    () =>
-      query.data?.pages.flatMap((page) => page.data) ?? [],
+    () => query.data?.pages.flatMap((page) => page.data) ?? [],
     [query.data]
   );
   const totalCount = query.data?.pages?.[0]?.count ?? 0;
