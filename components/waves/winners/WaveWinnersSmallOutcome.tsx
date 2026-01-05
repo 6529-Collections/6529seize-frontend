@@ -94,7 +94,7 @@ export const WaveWinnersSmallOutcome: React.FC<
           </div>
 
           {manualOutcomes.map((outcome) => (
-            <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-iron-800/40 tw-p-2">
+            <div key={`manual-${outcome}`} className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-iron-800/40 tw-p-2">
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
                   className="tw-size-4 tw-flex-shrink-0 tw-text-[#D4C5AA]"
@@ -135,7 +135,7 @@ export const WaveWinnersSmallOutcome: React.FC<
           Outcome:
         </span>
         <div className="tw-flex tw-items-center tw-gap-2">
-          {!!nicOutcomes.length && (
+          {!!nicTotal && (
             <svg
               className="tw-size-4 tw-flex-shrink-0 tw-text-[#A4C2DB]"
               viewBox="0 0 24 24"
@@ -151,7 +151,7 @@ export const WaveWinnersSmallOutcome: React.FC<
               />
             </svg>
           )}
-          {!!repOutcomes.length && (
+          {!!repTotal && (
             <svg
               className="tw-size-4 tw-flex-shrink-0 tw-text-[#C3B5D9]"
               viewBox="0 0 24 24"
