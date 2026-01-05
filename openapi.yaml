@@ -574,6 +574,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DistributionNormalizedPage"
+  /distributions/{contract}/{id}/overview:
+    get:
+      tags:
+        - Distributions
+      summary: Get distribution overview for a specific contract and card
+      description: Requires the user to be authenticated as a Subscription Admin
+      operationId: getDistributionOverview
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributionOverview"
+        "400":
+          description: Invalid request
+        "403":
+          description: Forbidden - not a Subscription Admin
   /light-drops:
     get:
       tags:
@@ -6003,7 +6035,7 @@ components:
           maxLength: 500
         data_value:
           type: string
-          maxLength: 500
+          maxLength: 5000
     ApiDropPart:
       type: object
       required:
@@ -9082,6 +9114,29 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DistributionNormalized"
+    DistributionOverview:
+      type: object
+      required:
+        - photos_count
+        - is_normalized
+        - automatic_airdrops_addresses
+        - automatic_airdrops_count
+      properties:
+        photos_count:
+          type: integer
+          format: int64
+          description: Number of photos for this distribution
+        is_normalized:
+          type: boolean
+          description: Whether the distribution has been normalized
+        automatic_airdrops_addresses:
+          type: integer
+          format: int64
+          description: Count of unique addresses with automatic airdrops
+        automatic_airdrops_count:
+          type: integer
+          format: int64
+          description: Total count of automatic airdrops
     DistributionPhasesPage:
       type: object
       required:
