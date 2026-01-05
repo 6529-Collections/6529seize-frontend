@@ -8,7 +8,6 @@ import importPlugin from "eslint-plugin-import";
 import sonarjs from "eslint-plugin-sonarjs";
 import security from "eslint-plugin-security";
 import promise from "eslint-plugin-promise";
-import perfectionist from "eslint-plugin-perfectionist";
 import tailwindcss from "eslint-plugin-tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,7 +43,6 @@ const plugins = {
   sonarjs: sonarjs,
   security: security,
   promise: promise,
-  perfectionist: perfectionist,
   tailwindcss: tailwindcss,
 };
 
@@ -60,9 +58,9 @@ const rules = {
   // Next.js Rules - Production Grade
   // -------------------------------------------------------------------------
   // Performance & Core Web Vitals
-  "@next/next/no-img-element": "off", // TODO: enable later
-  "@next/next/no-html-link-for-pages": "off", // TODO: enable later
-  "@next/next/no-css-tags": "off", // TODO: enable later
+  "@next/next/no-img-element": "error",
+  "@next/next/no-html-link-for-pages": "error",
+  "@next/next/no-css-tags": "error",
   "@next/next/no-sync-scripts": "error",
 
   // Google Fonts
@@ -72,7 +70,7 @@ const rules = {
 
   // Scripts & Head
   "@next/next/no-head-element": "error",
-  "@next/next/next-script-for-ga": "warn",
+  "@next/next/next-script-for-ga": "error",
   "@next/next/inline-script-id": "error",
   "@next/next/no-before-interactive-script-outside-document": "error",
   "@next/next/no-script-component-in-head": "error",
@@ -96,34 +94,34 @@ const rules = {
   // Custom overrides not possible due to ESLint flat config plugin scoping
   // -------------------------------------------------------------------------
 
-  "react/no-unescaped-entities": "off", // TODO: enable later
+  "react/no-unescaped-entities": "error",
 
   // -------------------------------------------------------------------------
   // TypeScript - Production Grade
   // -------------------------------------------------------------------------
   // Safety - Prevent unsafe operations
-  "@typescript-eslint/no-explicit-any": "off", // TODO: enable later
-  "@typescript-eslint/no-unsafe-assignment": "off", // TODO: enable later
-  "@typescript-eslint/no-unsafe-call": "off", // TODO: enable later
-  "@typescript-eslint/no-unsafe-member-access": "off", // TODO: enable later
-  "@typescript-eslint/no-unsafe-return": "off", // TODO: enable later
-  "@typescript-eslint/no-unsafe-argument": "off", // TODO: enable later
+  "@typescript-eslint/no-explicit-any": "error",
+  "@typescript-eslint/no-unsafe-assignment": "error",
+  "@typescript-eslint/no-unsafe-call": "error",
+  "@typescript-eslint/no-unsafe-member-access": "error",
+  "@typescript-eslint/no-unsafe-return": "error",
+  "@typescript-eslint/no-unsafe-argument": "error",
 
   // Async - Catch promise mistakes
-  "@typescript-eslint/no-floating-promises": "off", // TODO: enable later
+  "@typescript-eslint/no-floating-promises": "error",
   "@typescript-eslint/no-misused-promises": [
-    "off",
+    "error",
     {
       checksVoidReturn: { attributes: false }, // Allow async onClick handlers
     },
-  ], // TODO: enable later
-  "@typescript-eslint/await-thenable": "off", // TODO: enable later
-  "@typescript-eslint/require-await": "off", // TODO: enable later
-  "@typescript-eslint/no-redundant-type-constituents": "off", // TODO: enable later
+  ],
+  "@typescript-eslint/await-thenable": "error",
+  "@typescript-eslint/require-await": "error",
+  "@typescript-eslint/no-redundant-type-constituents": "error",
 
   // Type safety
   "@typescript-eslint/strict-boolean-expressions": [
-    "off",
+    "error",
     {
       allowString: true,
       allowNumber: true,
@@ -133,49 +131,57 @@ const rules = {
       allowNullableNumber: false,
       allowAny: false,
     },
-  ], // TODO: enable later
-  "@typescript-eslint/no-unnecessary-condition": "off", // TODO: enable later
-  "@typescript-eslint/no-unnecessary-type-assertion": "off", // TODO: enable later
+  ],
+  "@typescript-eslint/no-unnecessary-condition": "error",
+  "@typescript-eslint/no-unnecessary-type-assertion": "error",
 
   // Best practices
-  "@typescript-eslint/prefer-nullish-coalescing": "off", // TODO: enable later
-  "@typescript-eslint/prefer-optional-chain": "off", // TODO: enable later
+  "@typescript-eslint/prefer-nullish-coalescing": "error",
+  "@typescript-eslint/prefer-optional-chain": "error",
   "@typescript-eslint/no-unused-vars": "off", // Handled by unused-imports
   "@typescript-eslint/prefer-as-const": "error",
-  "@typescript-eslint/no-unnecessary-type-parameters": "off", // TODO: enable later
+  "@typescript-eslint/no-unnecessary-type-parameters": "error",
 
   // Consistency
   "@typescript-eslint/consistent-type-imports": [
-    "off",
+    "error",
     {
       prefer: "type-imports",
       fixStyle: "separate-type-imports",
     },
-  ], // TODO: enable later
+  ],
   "@typescript-eslint/consistent-type-exports": [
-    "off",
+    "error",
     {
       fixMixedExportsWithInlineTypeSpecifier: true,
     },
-  ], // TODO: enable later
-  "@typescript-eslint/no-import-type-side-effects": "off", // TODO: enable later
+  ],
+  "@typescript-eslint/no-import-type-side-effects": "error",
 
   // Prevent common mistakes
   "@typescript-eslint/no-array-delete": "error",
   "@typescript-eslint/no-duplicate-enum-values": "error",
-  "@typescript-eslint/no-duplicate-type-constituents": "off", // TODO: enable later
+  "@typescript-eslint/no-duplicate-type-constituents": "error",
   "@typescript-eslint/no-for-in-array": "error",
   "@typescript-eslint/no-mixed-enums": "error",
   "@typescript-eslint/restrict-plus-operands": "error",
   "@typescript-eslint/restrict-template-expressions": [
-    "off",
+    "error",
     {
       allowNumber: true,
       allowBoolean: true,
       allowNullish: false,
     },
-  ], // TODO: enable later
-  "@typescript-eslint/use-unknown-in-catch-callback-variable": "off", // TODO: enable later
+  ],
+  "@typescript-eslint/use-unknown-in-catch-callback-variable": "error",
+  "@typescript-eslint/no-shadow": "error",
+  "@typescript-eslint/only-throw-error": "error",
+  "@typescript-eslint/switch-exhaustiveness-check": "error",
+  "@typescript-eslint/unbound-method": "error",
+  "@typescript-eslint/no-base-to-string": "error",
+  "@typescript-eslint/no-confusing-void-expression": "error",
+  "@typescript-eslint/no-unsafe-enum-comparison": "error",
+  "@typescript-eslint/no-deprecated": "error",
 
   // Disable base rules that TypeScript handles
   "require-await": "off", // Using @typescript-eslint/require-await instead
@@ -183,15 +189,20 @@ const rules = {
   // -------------------------------------------------------------------------
   // React Hooks Rules - Production Grade
   // -------------------------------------------------------------------------
-  "react-hooks/rules-of-hooks": "off", // TODO: enable later
-  "react-hooks/exhaustive-deps": "off", // TODO: enable later
-  "react-hooks/preserve-manual-memoization": "off", // TODO: enable later
-  "react-hooks/error-boundaries": "off", // TODO: enable later
-  "react-hooks/set-state-in-effect": "off", // TODO: enable later
+  "react-hooks/rules-of-hooks": "error",
+  "react-hooks/exhaustive-deps": "error",
+  "react-hooks/preserve-manual-memoization": "error",
+  "react-hooks/error-boundaries": "error",
+  "react-hooks/set-state-in-effect": "error",
   "react-hooks/use-memo": "off", // Too noisy, React Compiler handles this
-  "react-hooks/refs": "off", // TODO: enable later
-  "react-hooks/immutability": "off", // TODO: enable later
-  "react-hooks/purity": "off", // TODO: enable later
+  "react-hooks/refs": "error",
+  "react-hooks/immutability": "error",
+  "react-hooks/purity": "error",
+  "react-hooks/set-state-in-render": "error",
+  "react-hooks/globals": "error",
+  "react-hooks/static-components": "error",
+  "react-hooks/incompatible-library": "error",
+  "react-hooks/gating": "error",
 
   // -------------------------------------------------------------------------
   // Unused Imports - Production Grade
@@ -213,8 +224,8 @@ const rules = {
   // Import Plugin - Production Grade
   // -------------------------------------------------------------------------
   // Safety
-  "import/no-cycle": ["off", { maxDepth: 3 }], // TODO: enable later
-  "import/no-duplicates": "off", // TODO: enable later
+  "import/no-cycle": ["error", { maxDepth: 3 }],
+  "import/no-duplicates": "error",
   "import/no-self-import": "error",
   "import/no-relative-packages": "error", // No imports from packages via relative path
   "import/no-mutable-exports": "error",
@@ -234,8 +245,8 @@ const rules = {
   ],
 
   // Organization
-  "import/first": "off", // TODO: enable later
-  "import/no-useless-path-segments": ["off", { noUselessIndex: true }], // TODO: enable later
+  "import/first": "error",
+  "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
 
   // -------------------------------------------------------------------------
   // Accessibility (jsx-a11y) - handled by eslint-config-next
@@ -246,18 +257,18 @@ const rules = {
   // SonarJS - Production Grade
   // -------------------------------------------------------------------------
   // Complexity
-  "sonarjs/cognitive-complexity": ["off", 15], // TODO: enable later
+  "sonarjs/cognitive-complexity": ["error", 15],
   "sonarjs/no-nested-switch": "error",
-  "sonarjs/no-nested-template-literals": "warn",
-  "sonarjs/no-nested-conditional": "off", // TODO: enable later
+  "sonarjs/no-nested-template-literals": "error",
+  "sonarjs/no-nested-conditional": "error",
 
   // Code Smells
-  "sonarjs/no-duplicate-string": ["off", { threshold: 4 }], // TODO: enable later
-  "sonarjs/no-identical-functions": "warn",
+  "sonarjs/no-duplicate-string": ["error", { threshold: 4 }],
+  "sonarjs/no-identical-functions": "error",
   "sonarjs/no-identical-expressions": "error",
-  "sonarjs/no-collapsible-if": "off", // TODO: enable later
+  "sonarjs/no-collapsible-if": "error",
   "sonarjs/no-redundant-boolean": "error",
-  "sonarjs/no-redundant-jump": "off", // TODO: enable later
+  "sonarjs/no-redundant-jump": "error",
   "sonarjs/no-inverted-boolean-check": "error",
   "sonarjs/no-gratuitous-expressions": "error",
 
@@ -269,34 +280,34 @@ const rules = {
   "sonarjs/no-empty-collection": "error",
   "sonarjs/no-extra-arguments": "error",
   "sonarjs/no-all-duplicated-branches": "error",
-  "sonarjs/no-duplicated-branches": "off", // TODO: enable later
+  "sonarjs/no-duplicated-branches": "error",
   "sonarjs/no-same-line-conditional": "error",
-  "sonarjs/no-ignored-return": "off", // TODO: enable later
+  "sonarjs/no-ignored-return": "error",
   "sonarjs/no-identical-conditions": "error",
 
   // Maintainability
-  "sonarjs/prefer-immediate-return": "off", // TODO: enable later
-  "sonarjs/prefer-single-boolean-return": "off", // TODO: enable later
-  "sonarjs/prefer-object-literal": "warn",
-  "sonarjs/prefer-while": "warn",
+  "sonarjs/prefer-immediate-return": "error",
+  "sonarjs/prefer-single-boolean-return": "error",
+  "sonarjs/prefer-object-literal": "error",
+  "sonarjs/prefer-while": "error",
 
   // -------------------------------------------------------------------------
   // Security - Production Grade
   // -------------------------------------------------------------------------
   // Critical - These can lead to RCE or major vulnerabilities
   "security/detect-eval-with-expression": "error",
-  "security/detect-child-process": "warn",
-  "security/detect-non-literal-fs-filename": "warn",
+  "security/detect-child-process": "error",
+  "security/detect-non-literal-fs-filename": "error",
   "security/detect-non-literal-require": "error",
 
   // Injection vulnerabilities
-  "security/detect-non-literal-regexp": "off", // TODO: enable later
-  "security/detect-unsafe-regex": "off", // TODO: enable later
+  "security/detect-non-literal-regexp": "error",
+  "security/detect-unsafe-regex": "error",
 
   // Buffer & crypto
   "security/detect-buffer-noassert": "error",
-  "security/detect-pseudoRandomBytes": "warn",
-  "security/detect-possible-timing-attacks": "warn",
+  "security/detect-pseudoRandomBytes": "error",
+  "security/detect-possible-timing-attacks": "error",
 
   // Web security
   "security/detect-no-csrf-before-method-override": "error",
@@ -306,33 +317,33 @@ const rules = {
   // Promise - Production Grade
   // -------------------------------------------------------------------------
   // Error handling
-  "promise/catch-or-return": ["off", { allowFinally: true }], // TODO: enable later
+  "promise/catch-or-return": ["error", { allowFinally: true }],
   "promise/always-return": ["error", { ignoreLastCallback: true }],
   "promise/no-return-in-finally": "error",
 
   // Anti-patterns
   "promise/no-return-wrap": "error",
-  "promise/no-nesting": "off", // TODO: enable later
-  "promise/no-promise-in-callback": "warn",
-  "promise/no-callback-in-promise": "warn",
+  "promise/no-nesting": "error",
+  "promise/no-promise-in-callback": "error",
+  "promise/no-callback-in-promise": "error",
   "promise/no-new-statics": "error",
   "promise/no-multiple-resolved": "error",
 
   // Best practices
   "promise/param-names": "error",
   "promise/valid-params": "error",
-  "promise/prefer-await-to-callbacks": "off", // TODO: enable later
+  "promise/prefer-await-to-callbacks": "error",
 
   // -------------------------------------------------------------------------
   // Tailwind CSS - Production Grade
   // -------------------------------------------------------------------------
   "tailwindcss/classnames-order": "off", // Handled by prettier-plugin-tailwindcss
   "tailwindcss/enforces-negative-arbitrary-values": "error", // Use -top-[5px] not top-[-5px]
-  "tailwindcss/enforces-shorthand": "off", // TODO: enable later
+  "tailwindcss/enforces-shorthand": "error",
   "tailwindcss/no-arbitrary-value": "off", // Allow arbitrary values like w-[123px]
-  "tailwindcss/no-custom-classname": "off", // Only Tailwind classes allowed, no legacy CSS, TODO: enable later
-  "tailwindcss/no-contradicting-classname": "off", // TODO: enable later
-  "tailwindcss/no-unnecessary-arbitrary-value": "off", // TODO: enable later
+  "tailwindcss/no-custom-classname": "off", // TODO: enable later
+  "tailwindcss/no-contradicting-classname": "error",
+  "tailwindcss/no-unnecessary-arbitrary-value": "error",
 
   // -------------------------------------------------------------------------
   // General Code Quality - Production Grade
@@ -340,25 +351,20 @@ const rules = {
   // Console & debugging
   "no-console": ["error", { allow: ["warn", "error"] }],
   "no-debugger": "error",
-  "no-alert": "off", // TODO: enable later
+  "no-alert": "error",
 
   // Best practices
-  eqeqeq: ["off", "always"], // TODO: enable later
-  curly: ["error", "all"],
-  "default-case": "off", // TODO: enable later
-  "default-case-last": "error",
-  "no-else-return": ["off", { allowElseIf: false }], // TODO: enable later
-  "no-lonely-if": "off", // TODO: enable later
-  "no-param-reassign": ["off", { props: false }], // TODO: enable later
+  eqeqeq: ["error", "always"],
+  "no-else-return": ["error", { allowElseIf: false }],
+  "no-lonely-if": "error",
+  "no-param-reassign": ["error", { props: false }],
   "no-return-assign": "error",
   "no-sequences": "error",
-  "no-throw-literal": "error",
-  "no-useless-return": "off", // TODO: enable later
+  "no-useless-return": "error",
   // "require-await" is off - using @typescript-eslint/require-await instead
-  yoda: "off", // TODO: enable later
 
   // Variables
-  "prefer-const": "off", // TODO: enable later
+  "prefer-const": "error",
   "no-var": "error",
   "no-unused-expressions": [
     "error",
@@ -367,31 +373,34 @@ const rules = {
   "no-shadow": "off", // Handled by @typescript-eslint
 
   // Ternary & conditionals
-  "no-nested-ternary": "off", // TODO: enable later
-  "no-unneeded-ternary": "off", // TODO: enable later
+  "no-nested-ternary": "error",
+  "no-unneeded-ternary": "error",
 
   // Modern JS
-  "prefer-arrow-callback": "off", // TODO: enable later
+  "prefer-arrow-callback": "error",
   "prefer-rest-params": "error",
   "prefer-spread": "error",
 
   // Complexity limits
-  "max-depth": ["off", 4], // TODO: enable later
-  "max-lines": ["off", { max: 750, skipBlankLines: true, skipComments: true }], // TODO: enable later
+  "max-depth": ["error", 4],
+  "max-lines": [
+    "error",
+    { max: 750, skipBlankLines: true, skipComments: true },
+  ],
   "max-lines-per-function": [
-    "off",
+    "error",
     { max: 150, skipBlankLines: true, skipComments: true },
-  ], // TODO: enable later
-  "max-params": ["off", 5], // TODO: enable later
+  ],
+  "max-params": ["error", 5],
 
   // Arrays
-  "array-callback-return": ["off", { allowImplicit: true }], // TODO: enable later
+  "array-callback-return": ["error", { allowImplicit: true }],
   "no-array-constructor": "error",
 };
 
 // Add React Compiler rule if available
 if (reactCompilerPlugin) {
-  rules["react-compiler/react-compiler"] = "off"; // TODO: enable later
+  rules["react-compiler/react-compiler"] = "error";
 }
 
 // =============================================================================

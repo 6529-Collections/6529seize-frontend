@@ -8,7 +8,6 @@ import importPlugin from "eslint-plugin-import";
 import sonarjs from "eslint-plugin-sonarjs";
 import security from "eslint-plugin-security";
 import promise from "eslint-plugin-promise";
-import perfectionist from "eslint-plugin-perfectionist";
 import tailwindcss from "eslint-plugin-tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,7 +36,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // =============================================================================
 // Note: jsx-a11y is already included via eslint-config-next, so we don't register it again
 const plugins = {
-  perfectionist: perfectionist,
   "@typescript-eslint": tseslint.plugin,
   sonarjs: sonarjs,
   "react-hooks": reactHooks,
@@ -47,7 +45,7 @@ const plugins = {
 // RULES
 // =============================================================================
 const rules = {
-  "react-hooks/error-boundaries": "error",
+   "@typescript-eslint/no-shadow": "error",
 };
 
 // =============================================================================

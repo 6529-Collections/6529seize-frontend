@@ -8,7 +8,6 @@ import importPlugin from "eslint-plugin-import";
 import sonarjs from "eslint-plugin-sonarjs";
 import security from "eslint-plugin-security";
 import promise from "eslint-plugin-promise";
-import perfectionist from "eslint-plugin-perfectionist";
 import tailwindcss from "eslint-plugin-tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,7 +43,6 @@ const plugins = {
   sonarjs: sonarjs,
   security: security,
   promise: promise,
-  perfectionist: perfectionist,
   tailwindcss: tailwindcss,
 };
 
@@ -72,7 +70,7 @@ const rules = {
 
   // Scripts & Head
   "@next/next/no-head-element": "error",
-  "@next/next/next-script-for-ga": "warn",
+  "@next/next/next-script-for-ga": "error",
   "@next/next/inline-script-id": "error",
   "@next/next/no-before-interactive-script-outside-document": "error",
   "@next/next/no-script-component-in-head": "error",
@@ -176,6 +174,14 @@ const rules = {
     },
   ],
   "@typescript-eslint/use-unknown-in-catch-callback-variable": "error",
+  "@typescript-eslint/no-shadow": "error",
+  "@typescript-eslint/only-throw-error": "error",
+  "@typescript-eslint/switch-exhaustiveness-check": "error",
+  "@typescript-eslint/unbound-method": "error",
+  "@typescript-eslint/no-base-to-string": "error",
+  "@typescript-eslint/no-confusing-void-expression": "error",
+  "@typescript-eslint/no-unsafe-enum-comparison": "error",
+  "@typescript-eslint/no-deprecated": "error",
 
   // Disable base rules that TypeScript handles
   "require-await": "off", // Using @typescript-eslint/require-await instead
@@ -192,6 +198,11 @@ const rules = {
   "react-hooks/refs": "error",
   "react-hooks/immutability": "error",
   "react-hooks/purity": "error",
+  "react-hooks/set-state-in-render": "error",
+  "react-hooks/globals": "error",
+  "react-hooks/static-components": "error",
+  "react-hooks/incompatible-library": "error",
+  "react-hooks/gating": "error",
 
   // -------------------------------------------------------------------------
   // Unused Imports - Production Grade
@@ -248,12 +259,12 @@ const rules = {
   // Complexity
   "sonarjs/cognitive-complexity": ["error", 15],
   "sonarjs/no-nested-switch": "error",
-  "sonarjs/no-nested-template-literals": "warn",
+  "sonarjs/no-nested-template-literals": "error",
   "sonarjs/no-nested-conditional": "error",
 
   // Code Smells
   "sonarjs/no-duplicate-string": ["error", { threshold: 4 }],
-  "sonarjs/no-identical-functions": "warn",
+  "sonarjs/no-identical-functions": "error",
   "sonarjs/no-identical-expressions": "error",
   "sonarjs/no-collapsible-if": "error",
   "sonarjs/no-redundant-boolean": "error",
@@ -277,16 +288,16 @@ const rules = {
   // Maintainability
   "sonarjs/prefer-immediate-return": "error",
   "sonarjs/prefer-single-boolean-return": "error",
-  "sonarjs/prefer-object-literal": "warn",
-  "sonarjs/prefer-while": "warn",
+  "sonarjs/prefer-object-literal": "error",
+  "sonarjs/prefer-while": "error",
 
   // -------------------------------------------------------------------------
   // Security - Production Grade
   // -------------------------------------------------------------------------
   // Critical - These can lead to RCE or major vulnerabilities
   "security/detect-eval-with-expression": "error",
-  "security/detect-child-process": "warn",
-  "security/detect-non-literal-fs-filename": "warn",
+  "security/detect-child-process": "error",
+  "security/detect-non-literal-fs-filename": "error",
   "security/detect-non-literal-require": "error",
 
   // Injection vulnerabilities
@@ -295,8 +306,8 @@ const rules = {
 
   // Buffer & crypto
   "security/detect-buffer-noassert": "error",
-  "security/detect-pseudoRandomBytes": "warn",
-  "security/detect-possible-timing-attacks": "warn",
+  "security/detect-pseudoRandomBytes": "error",
+  "security/detect-possible-timing-attacks": "error",
 
   // Web security
   "security/detect-no-csrf-before-method-override": "error",
@@ -313,8 +324,8 @@ const rules = {
   // Anti-patterns
   "promise/no-return-wrap": "error",
   "promise/no-nesting": "error",
-  "promise/no-promise-in-callback": "warn",
-  "promise/no-callback-in-promise": "warn",
+  "promise/no-promise-in-callback": "error",
+  "promise/no-callback-in-promise": "error",
   "promise/no-new-statics": "error",
   "promise/no-multiple-resolved": "error",
 
@@ -344,18 +355,13 @@ const rules = {
 
   // Best practices
   eqeqeq: ["error", "always"],
-  curly: ["error", "all"],
-  "default-case": "error",
-  "default-case-last": "error",
   "no-else-return": ["error", { allowElseIf: false }],
   "no-lonely-if": "error",
   "no-param-reassign": ["error", { props: false }],
   "no-return-assign": "error",
   "no-sequences": "error",
-  "no-throw-literal": "error",
   "no-useless-return": "error",
   // "require-await" is off - using @typescript-eslint/require-await instead
-  yoda: "error",
 
   // Variables
   "prefer-const": "error",
