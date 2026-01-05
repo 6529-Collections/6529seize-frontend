@@ -1,10 +1,16 @@
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
 
-const outputPath = parseOutputPath(process.argv.slice(2));
+const args = process.argv.slice(2);
+const outputPath = parseOutputPath(args);
+const configPath = parseConfigPath(args);
 
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const npmArgs = ["--silent", "run", "lint", "--", "--format", "json"];
+const npmArgs = ["--silent", "run", "lint", "--"];
+if (configPath) {
+  npmArgs.push("--config", configPath);
+}
+npmArgs.push("--format", "json");
 
 const proc = spawn(npmCommand, npmArgs, { stdio: ["ignore", "pipe", "pipe"] });
 
@@ -81,6 +87,34 @@ function parseOutputPath(args) {
   }
 
   return output;
+}
+
+function parseConfigPath(args) {
+  let config = null;
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--config" || arg === "-c") {
+      const value = args[index + 1];
+      if (!value) {
+        console.error("Missing config path after --config.");
+        process.exit(1);
+      }
+      config = value;
+      index += 1;
+    } else if (arg.startsWith("--config=")) {
+      config = arg.slice("--config=".length);
+    } else if (arg.startsWith("-c=")) {
+      config = arg.slice("-c=".length);
+    }
+  }
+
+  if (config === "") {
+    console.error("Missing config path after --config.");
+    process.exit(1);
+  }
+
+  return config;
 }
 
 function extractJsonArray(output) {
