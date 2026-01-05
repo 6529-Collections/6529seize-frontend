@@ -6,25 +6,8 @@ jest.mock("@/services/api/common-api", () => ({
 
 import * as ReviewDistributionPlanTableSubscriptionModule from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
-const { download, isSubscriptionsAdmin, SubscriptionConfirm } =
+const { download, isSubscriptionsAdmin } =
   ReviewDistributionPlanTableSubscriptionModule;
-
-jest.mock("react-bootstrap", () => ({
-  __esModule: true,
-  Modal: Object.assign(
-    ({ show, children }: any) => (show ? <div>{children}</div> : null),
-    {
-      Header: ({ children }: any) => <div>{children}</div>,
-      Title: ({ children }: any) => <div>{children}</div>,
-      Body: ({ children }: any) => <div>{children}</div>,
-      Footer: ({ children }: any) => <div>{children}</div>,
-    }
-  ),
-  Button: (p: any) => <button {...p}>{p.children}</button>,
-  Col: (p: any) => <div>{p.children}</div>,
-  Container: (p: any) => <div>{p.children}</div>,
-  Row: (p: any) => <div>{p.children}</div>,
-}));
 
 describe("ReviewDistributionPlanTableSubscription utilities", () => {
   it("checks subscriptions admin wallets", () => {
@@ -70,50 +53,6 @@ jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
   default: () => <div data-testid="circle-loader">Loading...</div>,
 }));
 
-test("SubscriptionConfirm extracts token id from plan name", () => {
-  render(
-    <SubscriptionConfirm
-      title="t"
-      plan={{ id: "1", name: "Meme 123 drop" } as any}
-      show={true}
-      handleClose={jest.fn()}
-      onConfirm={jest.fn()}
-    />
-  );
-  const input = screen.getByRole("spinbutton") as HTMLInputElement;
-  expect(input.value).toBe("123");
-});
-
-test("SubscriptionConfirm displays token id as text when confirmedTokenId is provided", () => {
-  render(
-    <SubscriptionConfirm
-      title="t"
-      plan={{ id: "1", name: "Meme 123 drop" } as any}
-      show={true}
-      handleClose={jest.fn()}
-      confirmedTokenId="456"
-      onConfirm={jest.fn()}
-    />
-  );
-  expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
-  expect(screen.getByText("456")).toBeInTheDocument();
-});
-
-test("SubscriptionConfirm shows input when confirmedTokenId is not provided", () => {
-  render(
-    <SubscriptionConfirm
-      title="t"
-      plan={{ id: "1", name: "Meme 123 drop" } as any}
-      show={true}
-      handleClose={jest.fn()}
-      onConfirm={jest.fn()}
-    />
-  );
-  const input = screen.getByRole("spinbutton") as HTMLInputElement;
-  expect(input).toBeInTheDocument();
-  expect(input.value).toBe("123");
-});
-
 describe("SubscriptionLinks", () => {
   const mockSetToast = jest.fn();
   const mockAuthCtx = {
@@ -124,7 +63,11 @@ describe("SubscriptionLinks", () => {
   };
 
   const mockPlan = { id: "plan1", name: "Meme 123 drop" } as any;
-  const mockDistCtx = {
+  const mockDistCtxWithTokenId = {
+    confirmedTokenId: "123",
+  } as any;
+
+  const mockDistCtxNoTokenId = {
     confirmedTokenId: null,
   } as any;
 
@@ -146,7 +89,7 @@ describe("SubscriptionLinks", () => {
     jest.restoreAllMocks();
   });
 
-  it("renders Public Subscriptions button for public phase", () => {
+  it("renders Public Subscriptions button for public phase when token is confirmed", () => {
     const publicPhase = {
       id: "phase1",
       name: "public",
@@ -155,7 +98,7 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     render(
-      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+      <DistributionPlanToolContext.Provider value={mockDistCtxWithTokenId}>
         <AuthContext.Provider value={mockAuthCtx as any}>
           <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
         </AuthContext.Provider>
@@ -165,8 +108,7 @@ describe("SubscriptionLinks", () => {
     expect(screen.getByText("Public Subscriptions")).toBeInTheDocument();
   });
 
-  it("shows confirm modal when Public Subscriptions button is clicked", async () => {
-    const user = userEvent.setup();
+  it("does not render when token is not confirmed", () => {
     const publicPhase = {
       id: "phase1",
       name: "public",
@@ -174,24 +116,18 @@ describe("SubscriptionLinks", () => {
       phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
     } as any;
 
-    render(
-      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+    const { container } = render(
+      <DistributionPlanToolContext.Provider value={mockDistCtxNoTokenId}>
         <AuthContext.Provider value={mockAuthCtx as any}>
           <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
         </AuthContext.Provider>
       </DistributionPlanToolContext.Provider>
     );
 
-    await user.click(screen.getByText("Public Subscriptions"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Confirm Download Public Subscriptions Info")
-      ).toBeInTheDocument();
-    });
+    expect(container.innerHTML).toBe("");
   });
 
-  it("calls download and shows toast when Public Subscriptions is confirmed", async () => {
+  it("calls download directly when button is clicked", async () => {
     const user = userEvent.setup();
 
     jest
@@ -215,7 +151,7 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     render(
-      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+      <DistributionPlanToolContext.Provider value={mockDistCtxWithTokenId}>
         <AuthContext.Provider value={mockAuthCtx as any}>
           <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
         </AuthContext.Provider>
@@ -223,14 +159,6 @@ describe("SubscriptionLinks", () => {
     );
 
     await user.click(screen.getByText("Public Subscriptions"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Confirm Download Public Subscriptions Info")
-      ).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByText("Looks good"));
 
     await waitFor(() => {
       expect(mockSetToast).toHaveBeenCalledWith({
@@ -256,7 +184,7 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     const { container } = render(
-      <DistributionPlanToolContext.Provider value={mockDistCtx}>
+      <DistributionPlanToolContext.Provider value={mockDistCtxWithTokenId}>
         <AuthContext.Provider value={nonAdminCtx as any}>
           <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
         </AuthContext.Provider>
@@ -266,11 +194,27 @@ describe("SubscriptionLinks", () => {
     expect(container.innerHTML).toBe("");
   });
 
-  it("displays token id as text when confirmedTokenId is provided in context", async () => {
+  it("shows loading state during download", async () => {
     const user = userEvent.setup();
-    const distCtxWithTokenId = {
-      confirmedTokenId: "789",
-    } as any;
+
+    jest
+      .spyOn(
+        ReviewDistributionPlanTableSubscriptionModule,
+        "isSubscriptionsAdmin"
+      )
+      .mockReturnValue(true);
+
+    let resolveDownload: (value: { success: boolean; message: string }) => void;
+    const downloadPromise = new Promise<{ success: boolean; message: string }>(
+      (resolve) => {
+        resolveDownload = resolve;
+      }
+    );
+
+    jest
+      .spyOn(ReviewDistributionPlanTableSubscriptionModule, "download")
+      .mockReturnValue(downloadPromise);
+
     const publicPhase = {
       id: "phase1",
       name: "public",
@@ -279,7 +223,7 @@ describe("SubscriptionLinks", () => {
     } as any;
 
     render(
-      <DistributionPlanToolContext.Provider value={distCtxWithTokenId}>
+      <DistributionPlanToolContext.Provider value={mockDistCtxWithTokenId}>
         <AuthContext.Provider value={mockAuthCtx as any}>
           <SubscriptionLinks plan={mockPlan} phase={publicPhase} />
         </AuthContext.Provider>
@@ -289,12 +233,13 @@ describe("SubscriptionLinks", () => {
     await user.click(screen.getByText("Public Subscriptions"));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Confirm Download Public Subscriptions Info")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Downloading")).toBeInTheDocument();
     });
 
-    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
-    expect(screen.getByText("789")).toBeInTheDocument();
+    resolveDownload!({ success: true, message: "Done" });
+
+    await waitFor(() => {
+      expect(screen.getByText("Public Subscriptions")).toBeInTheDocument();
+    });
   });
 });

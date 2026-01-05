@@ -5,16 +5,10 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants";
 import { formatAddress } from "@/helpers/Helpers";
-import {
-  commonApiFetch,
-  commonApiPost,
-  commonApiPostForm,
-} from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import { useCallback, useContext, useEffect, useState } from "react";
-import {
-  SubscriptionConfirm,
-  isSubscriptionsAdmin,
-} from "./ReviewDistributionPlanTableSubscription";
+import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
@@ -30,11 +24,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
 
-  const [showSubscriptionsReset, setShowSubscriptionsReset] = useState(false);
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
   const [showAutomaticAirdrops, setShowAutomaticAirdrops] = useState(false);
-  const [showFinalizeDistribution, setShowFinalizeDistribution] =
-    useState(false);
   const [showConfirmTokenId, setShowConfirmTokenId] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -92,7 +83,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     tokenId: string,
     planId: string
   ) => {
-    setShowSubscriptionsReset(false);
     setIsResetting(true);
     try {
       await commonApiPost({
@@ -105,13 +95,62 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       });
 
       await refreshOverview(contract, tokenId);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+          ? error.message
+          : "Something went wrong.";
       setToast({
         type: "error",
-        message: `Reset failed: ${error}`,
+        message: `Reset failed: ${errorMessage}`,
       });
     } finally {
       setIsResetting(false);
+    }
+  };
+
+  const finalizeDistribution = async (contract: string, tokenId: string) => {
+    setIsFinalizing(true);
+    try {
+      const response = await commonApiPost<
+        Record<string, never>,
+        {
+          success: boolean;
+          message?: string;
+          error?: string;
+        }
+      >({
+        endpoint: `distributions/${contract}/${tokenId}/normalize`,
+        body: {},
+      });
+
+      if (response.success) {
+        setToast({
+          type: "success",
+          message: response.message || "Distribution normalized successfully",
+        });
+        await refreshOverview(contract, tokenId);
+      } else {
+        setToast({
+          type: "error",
+          message: response.error || "Normalization failed",
+        });
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+          ? error.message
+          : "Something went wrong.";
+      setToast({
+        type: "error",
+        message: errorMessage,
+      });
+    } finally {
+      setIsFinalizing(false);
     }
   };
 
@@ -151,7 +190,10 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             Change Token ID
           </button>
           <button
-            onClick={() => setShowSubscriptionsReset(true)}
+            onClick={() =>
+              distributionPlan &&
+              resetSubscriptions(contract, confirmedTokenId, distributionPlan.id)
+            }
             disabled={isResetting}
             type="button"
             className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#f87171] tw-ring-[#f87171]/20 hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
@@ -221,7 +263,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       </div>
       <div className="mt-2 d-flex align-items-center justify-content-end gap-2">
         <button
-          onClick={() => setShowFinalizeDistribution(true)}
+          onClick={() => finalizeDistribution(contract, confirmedTokenId)}
           disabled={isFinalizing}
           type="button"
           className="tw-px-3 tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-sm tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-900 tw-bg-[#86efac] tw-ring-[#86efac]/20 hover:tw-bg-[#14532d] hover:tw-text-iron-100 tw-ease-out tw-transition tw-duration-300"
@@ -268,37 +310,24 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
               setShowUploadPhotos(false);
               setIsUploading(true);
               try {
-                const formData = new FormData();
-                files.forEach((file) => {
-                  formData.append("photos", file);
+                const uploadedUrls = await uploadDistributionPhotos({
+                  contract,
+                  tokenId,
+                  files,
                 });
 
-                const response = await commonApiPostForm<{
-                  success: boolean;
-                  photos?: string[] | undefined;
-                  error?: string | undefined;
-                }>({
-                  endpoint: `distribution_photos/${contract}/${tokenId}`,
-                  body: formData,
+                setToast({
+                  type: "success",
+                  message: `Successfully uploaded ${uploadedUrls.length} photo(s)`,
                 });
-
-                if (response.success && response.photos) {
-                  setToast({
-                    type: "success",
-                    message: `Successfully uploaded ${response.photos.length} photo(s)`,
-                  });
-                  await refreshOverview(contract, tokenId);
-                } else {
-                  setToast({
-                    type: "error",
-                    message: response.error || "Upload failed",
-                  });
-                }
-              } catch (error: any) {
+                await refreshOverview(contract, tokenId);
+              } catch (error: unknown) {
                 const errorMessage =
                   typeof error === "string"
                     ? error
-                    : error?.message || "Something went wrong.";
+                    : error instanceof Error
+                    ? error.message
+                    : "Something went wrong.";
                 setToast({
                   type: "error",
                   message: errorMessage,
@@ -358,67 +387,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
                 });
               } finally {
                 setIsUploadingAirdrops(false);
-              }
-            }}
-          />
-          <SubscriptionConfirm
-            title="Reset Subscriptions"
-            plan={distributionPlan}
-            show={showSubscriptionsReset}
-            handleClose={() => setShowSubscriptionsReset(false)}
-            confirmedTokenId={confirmedTokenId}
-            onConfirm={(contract: string, tokenId: string) =>
-              resetSubscriptions(contract, tokenId, distributionPlan.id)
-            }
-          />
-          <SubscriptionConfirm
-            title="Finalize Distribution"
-            plan={distributionPlan}
-            show={showFinalizeDistribution}
-            handleClose={() => setShowFinalizeDistribution(false)}
-            isNormalized={overview?.is_normalized ?? false}
-            confirmedTokenId={confirmedTokenId}
-            onConfirm={async (contract: string, tokenId: string) => {
-              setShowFinalizeDistribution(false);
-              setIsFinalizing(true);
-              try {
-                const response = await commonApiPost<
-                  Record<string, never>,
-                  {
-                    success: boolean;
-                    message?: string | undefined;
-                    error?: string | undefined;
-                  }
-                >({
-                  endpoint: `distributions/${contract}/${tokenId}/normalize`,
-                  body: {},
-                });
-
-                if (response.success) {
-                  setToast({
-                    type: "success",
-                    message:
-                      response.message ||
-                      "Distribution normalized successfully",
-                  });
-                  await refreshOverview(contract, tokenId);
-                } else {
-                  setToast({
-                    type: "error",
-                    message: response.error || "Normalization failed",
-                  });
-                }
-              } catch (error: any) {
-                const errorMessage =
-                  typeof error === "string"
-                    ? error
-                    : error?.message || "Something went wrong.";
-                setToast({
-                  type: "error",
-                  message: errorMessage,
-                });
-              } finally {
-                setIsFinalizing(false);
               }
             }}
           />

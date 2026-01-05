@@ -207,6 +207,9 @@ export * from '../models/DistributionNormalized';
 export * from '../models/DistributionNormalizedPage';
 export * from '../models/DistributionPhasesPage';
 export * from '../models/DistributionPhoto';
+export * from '../models/DistributionPhotoCompleteRequest';
+export * from '../models/DistributionPhotoCompleteRequestPhoto';
+export * from '../models/DistributionPhotoCompleteResponse';
 export * from '../models/DistributionPhotosPage';
 export * from '../models/GetWaveSubscription200Response';
 export * from '../models/NFTFinalSubscription';
@@ -440,6 +443,9 @@ import { DistributionNormalized } from '../models/DistributionNormalized';
 import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage';
 import { DistributionPhasesPage } from '../models/DistributionPhasesPage';
 import { DistributionPhoto } from '../models/DistributionPhoto';
+import { DistributionPhotoCompleteRequest } from '../models/DistributionPhotoCompleteRequest';
+import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPhotoCompleteRequestPhoto';
+import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 import { NFTFinalSubscription } from '../models/NFTFinalSubscription';
@@ -692,6 +698,9 @@ let typeMap: {[index: string]: any} = {
     "DistributionNormalizedPage": DistributionNormalizedPage,
     "DistributionPhasesPage": DistributionPhasesPage,
     "DistributionPhoto": DistributionPhoto,
+    "DistributionPhotoCompleteRequest": DistributionPhotoCompleteRequest,
+    "DistributionPhotoCompleteRequestPhoto": DistributionPhotoCompleteRequestPhoto,
+    "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
     "NFTFinalSubscription": NFTFinalSubscription,
