@@ -358,67 +358,7 @@ const rules = {
   "perfectionist/sort-imports": "off", // Using import/order instead
 
   // TypeScript types
-  "perfectionist/sort-named-imports": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
   "perfectionist/sort-named-exports": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-  "perfectionist/sort-object-types": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-  "perfectionist/sort-interfaces": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-  "perfectionist/sort-enums": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-  "perfectionist/sort-union-types": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-  "perfectionist/sort-intersection-types": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-
-  // JSX
-  "perfectionist/sort-jsx-props": [
-    "off",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ], // TODO: enable later
-
-  // Code structure
-  "perfectionist/sort-switch-case": [
     "off",
     {
       type: "alphabetical",
