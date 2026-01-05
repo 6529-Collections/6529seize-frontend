@@ -9,8 +9,7 @@ import styles from "./Delegation.module.scss";
 import { DELEGATION_ABI } from "@/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import type {
-  DelegationCollection} from "./delegation-constants";
+import type { DelegationCollection } from "./delegation-constants";
 import {
   CONSOLIDATION_USE_CASE,
   SUB_DELEGATION_USE_CASE,
@@ -77,7 +76,7 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
         ? delegationDate.getTime() / 1000
         : NEVER_DATE,
       props.delegation.use_case,
-      isDelegation && showTokensInput ? false : true,
+      !(isDelegation && showTokensInput),
       isDelegation && showTokensInput ? delegationToken : 0,
     ],
     functionName:
@@ -116,8 +115,8 @@ export default function UpdateDelegationComponent(props: Readonly<Props>) {
             {props.delegation.use_case === CONSOLIDATION_USE_CASE.use_case
               ? "Consolidation"
               : props.delegation.use_case === SUB_DELEGATION_USE_CASE.use_case
-              ? "Delegation Manager"
-              : "Delegation"}
+                ? "Delegation Manager"
+                : "Delegation"}
           </h4>
         </Col>
         {props.showCancel && (

@@ -90,16 +90,14 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       if (isPinned) {
         await waves.removePinnedWave(waveId);
         setShowMaxLimitTooltip(false);
+      } else if (!canPinWave()) {
+        setShowMaxLimitTooltip(true);
+        setToast({
+          type: "error",
+          message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+        });
       } else {
-        if (!canPinWave()) {
-          setShowMaxLimitTooltip(true);
-          setToast({
-            type: "error",
-            message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
-          });
-        } else {
-          await waves.addPinnedWave(waveId);
-        }
+        await waves.addPinnedWave(waveId);
       }
     } catch (error) {
       console.error("Error updating wave pin status:", error);

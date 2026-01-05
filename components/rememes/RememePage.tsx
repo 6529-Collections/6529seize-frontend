@@ -468,22 +468,20 @@ export default function RememePage(props: Readonly<Props>) {
                           </tr>
                         );
                       }
-                    } else {
-                      if (k !== "attributes") {
-                        return Object.keys(value).map((j: any) => {
-                          if (typeof value[j] === "string") {
-                            return (
-                              <tr key={j}>
-                                <td>
-                                  {k}::{j}
-                                </td>
-                                <td>{value[j]}</td>
-                              </tr>
-                            );
-                          }
-                          return;
-                        });
-                      }
+                    } else if (k !== "attributes") {
+                      return Object.keys(value).map((j: any) => {
+                        if (typeof value[j] === "string") {
+                          return (
+                            <tr key={j}>
+                              <td>
+                                {k}::{j}
+                              </td>
+                              <td>{value[j]}</td>
+                            </tr>
+                          );
+                        }
+                        return;
+                      });
                     }
                     return;
                   })}

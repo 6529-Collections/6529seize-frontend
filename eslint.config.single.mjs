@@ -38,19 +38,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Note: jsx-a11y is already included via eslint-config-next, so we don't register it again
 const plugins = {
   perfectionist: perfectionist,
+  "@typescript-eslint": tseslint.plugin,
+  sonarjs: sonarjs,
+  "react-hooks": reactHooks,
 };
 
 // =============================================================================
 // RULES
 // =============================================================================
 const rules = {
-  "perfectionist/sort-jsx-props": [
-    "error",
-    {
-      type: "alphabetical",
-      order: "asc",
-    },
-  ],
+  "react-hooks/error-boundaries": "error",
 };
 
 // =============================================================================

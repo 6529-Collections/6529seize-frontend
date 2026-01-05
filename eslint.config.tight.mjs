@@ -330,7 +330,7 @@ const rules = {
   "tailwindcss/enforces-negative-arbitrary-values": "error", // Use -top-[5px] not top-[-5px]
   "tailwindcss/enforces-shorthand": "error",
   "tailwindcss/no-arbitrary-value": "off", // Allow arbitrary values like w-[123px]
-  "tailwindcss/no-custom-classname": "off", // Only Tailwind classes allowed, no legacy CSS, TODO: enable later
+  "tailwindcss/no-custom-classname": "error",
   "tailwindcss/no-contradicting-classname": "error",
   "tailwindcss/no-unnecessary-arbitrary-value": "error",
 

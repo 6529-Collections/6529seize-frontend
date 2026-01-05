@@ -8,11 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import type {
-  DelegationCollection} from "./delegation-constants";
-import {
-  DELEGATION_USE_CASES
-} from "./delegation-constants";
+import type { DelegationCollection } from "./delegation-constants";
+import { DELEGATION_USE_CASES } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
 import {
@@ -29,10 +26,12 @@ import {
 
 interface Props {
   address: string;
-  subdelegation?: {
-    originalDelegator: string;
-    collection: DelegationCollection;
-  } | undefined;
+  subdelegation?:
+    | {
+        originalDelegator: string;
+        collection: DelegationCollection;
+      }
+    | undefined;
   ens: string | null | undefined;
   collection_query?: string | undefined;
   setCollectionQuery?(collection: string): any;
@@ -75,7 +74,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             ? newDelegationDate.getTime() / 1000
             : NEVER_DATE,
           newDelegationUseCase,
-          showTokensInput ? false : true,
+          !showTokensInput,
           showTokensInput ? newDelegationToken : 0,
         ],
         functionName:
@@ -102,7 +101,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             ? newDelegationDate.getTime() / 1000
             : NEVER_DATE,
           newDelegationUseCase,
-          showTokensInput ? false : true,
+          !showTokensInput,
           showTokensInput ? newDelegationToken : 0,
         ],
         functionName:
@@ -160,7 +159,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
         </Col>
         <Col
           xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
+        >
           <DelegationCloseButton onHide={props.onHide} title="Delegation" />
         </Col>
       </Row>
@@ -217,7 +217,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                       props.setUseCaseQuery(newCase);
                     }
                     clearErrors();
-                  }}>
+                  }}
+                >
                   <option value={0} disabled>
                     Select Use Case
                   </option>
@@ -225,7 +226,8 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                     return (
                       <option
                         key={`add-delegation-select-use-case-${uc.use_case}`}
-                        value={uc.use_case}>
+                        value={uc.use_case}
+                      >
                         #{uc.use_case} - {uc.display}
                       </option>
                     );
@@ -300,10 +302,12 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
                 <Link
                   href={`/delegation/delegation-faq/use-cases-overview`}
                   target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                >
                   <FontAwesomeIcon
                     className={styles["infoIconLink"]}
-                    icon={faInfoCircle}></FontAwesomeIcon>
+                    icon={faInfoCircle}
+                  ></FontAwesomeIcon>
                 </Link>
               </Form.Label>
             </Form.Group>

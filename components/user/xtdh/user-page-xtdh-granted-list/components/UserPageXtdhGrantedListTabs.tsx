@@ -1,7 +1,7 @@
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { GRANTED_TABS } from "../constants";
 import type { GrantedTab } from "../types";
-import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 
 interface UserPageXtdhGrantedListTabsProps {
   readonly activeTab: GrantedTab;
