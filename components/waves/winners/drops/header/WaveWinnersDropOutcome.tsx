@@ -2,7 +2,6 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
-import { OutcomeType } from "@/hooks/drops/useDropOutcomes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import { faAward } from "@fortawesome/free-solid-svg-icons";
@@ -23,7 +22,7 @@ export default function WaveWinnersDropOutcome({
         award.amount > 0
     )
     .map((award) => ({
-      type: OutcomeType.NIC as const,
+      type: ApiWaveOutcomeCredit.Cic as const,
       value: award.amount ?? 0,
     }));
 
@@ -35,7 +34,7 @@ export default function WaveWinnersDropOutcome({
         award.amount > 0
     )
     .map((award) => ({
-      type: OutcomeType.REP as const,
+      type: ApiWaveOutcomeCredit.Rep as const,
       value: award.amount ?? 0,
       category: award.rep_category ?? "",
     }));
@@ -45,7 +44,7 @@ export default function WaveWinnersDropOutcome({
       (award) => award.type === ApiWaveOutcomeType.Manual && award.description
     )
     .map((award) => ({
-      type: OutcomeType.MANUAL as const,
+      type: ApiWaveOutcomeType.Manual as const,
       description: award.description ?? "",
     }));
 

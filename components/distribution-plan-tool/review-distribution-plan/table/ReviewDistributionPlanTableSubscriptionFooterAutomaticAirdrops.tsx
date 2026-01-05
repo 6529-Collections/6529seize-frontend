@@ -46,9 +46,28 @@ export function AutomaticAirdropsModal(
     return /^0x[a-f0-9]{40}$/i.test(address.trim());
   };
 
-  const parseCsv = (csvContent: string): CsvRow[] => {
-    const lines = csvContent.split(/\r?\n/).filter((line) => line.trim());
+  const isHeaderRow = (line: string): boolean => {
+    const parts = line.split(",").map((part) => part.trim().toLowerCase());
+    if (parts.length < 2) return false;
+    const validFirstCol = parts[0] === "address" || parts[0] === "wallet";
+    const validSecondCol = parts[1] === "count" || parts[1] === "value";
+    return validFirstCol && validSecondCol;
+  };
+
+  const parseCsv = (
+    csvContent: string
+  ): { rows: CsvRow[]; hadHeader: boolean } => {
+    let lines = csvContent.split(/\r?\n/).filter((line) => line.trim());
     const rows: CsvRow[] = [];
+    let hadHeader = false;
+
+    const firstLine = lines[0];
+    if (firstLine && isHeaderRow(firstLine)) {
+      hadHeader = true;
+      lines = lines.slice(1);
+    }
+
+    const lineOffset = hadHeader ? 2 : 1;
 
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
@@ -58,7 +77,7 @@ export function AutomaticAirdropsModal(
       if (parts.length < 2) {
         throw new Error(
           `Line ${
-            index + 1
+            index + lineOffset
           }: Expected format "address,count" but found "${trimmedLine}"`
         );
       }
@@ -68,7 +87,7 @@ export function AutomaticAirdropsModal(
 
       if (!isValidAddress(address!)) {
         throw new Error(
-          `Line ${index + 1}: Invalid Ethereum address "${address}"`
+          `Line ${index + lineOffset}: Invalid Ethereum address "${address}"`
         );
       }
 
@@ -76,7 +95,7 @@ export function AutomaticAirdropsModal(
       if (Number.isNaN(count) || count < 0) {
         throw new Error(
           `Line ${
-            index + 1
+            index + lineOffset
           }: Invalid count "${countStr}". Must be a non-negative integer.`
         );
       }
@@ -87,7 +106,7 @@ export function AutomaticAirdropsModal(
       });
     });
 
-    return rows;
+    return { rows, hadHeader };
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +132,7 @@ export function AutomaticAirdropsModal(
       .text()
       .then((csvContent) => {
         try {
-          const rows = parseCsv(csvContent);
+          const { rows } = parseCsv(csvContent);
           setSelectedFile(file);
           setParsedRows(rows);
           setFileError(null);
@@ -148,10 +167,11 @@ export function AutomaticAirdropsModal(
       return;
     }
 
-    selectedFile.text().then((csvContent) => {
-      props.onUpload(contract, displayTokenId, csvContent);
-      handleClose();
-    });
+    const csvContent = parsedRows
+      .map((row) => `${row.address},${row.count}`)
+      .join("\n");
+    props.onUpload(contract, displayTokenId, csvContent);
+    handleClose();
   };
 
   const handleClose = () => {
@@ -212,7 +232,7 @@ export function AutomaticAirdropsModal(
                     style={{
                       fontSize: "12px",
                     }}>
-                    address,count
+                    address,value
                   </code>
                 </div>
                 <div className="mb-2">

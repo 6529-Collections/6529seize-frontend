@@ -35,7 +35,7 @@ export function UploadDistributionPhotosModal(
 
   const contract = MEMES_CONTRACT;
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const MAX_FILE_SIZE = 500 * 1024 * 1024;
   const ACCEPTED_TYPES = new Set([
     "image/jpeg",
     "image/jpg",
@@ -59,7 +59,7 @@ export function UploadDistributionPhotosModal(
         );
       }
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name}: File size exceeds 10MB limit.`);
+        errors.push(`${file.name}: File size exceeds 500MB limit.`);
       }
     });
 

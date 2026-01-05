@@ -23,6 +23,7 @@ import {
 } from "@/helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import Image from "next/image";
+import { useTitle } from "@/contexts/TitleContext";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
@@ -36,6 +37,7 @@ interface Props {
 
 export default function DistributionPage(props: Readonly<Props>) {
   const params = useParams();
+  const { setTitle } = useTitle();
   const [pageProps, setPageProps] = useState<{
     page: number;
     pageSize: number;
@@ -99,6 +101,12 @@ export default function DistributionPage(props: Readonly<Props>) {
     setIsValidNftId(isValid);
     setNftId(id);
   }, [params]);
+
+  useEffect(() => {
+    if (isValidNftId && nftId) {
+      setTitle(`${props.header} #${nftId} | DISTRIBUTION`);
+    }
+  }, [isValidNftId, nftId, props.header, setTitle]);
 
   useEffect(() => {
     if (nftId) {
