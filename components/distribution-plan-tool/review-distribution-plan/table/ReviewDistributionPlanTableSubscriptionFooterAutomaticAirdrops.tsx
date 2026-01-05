@@ -61,7 +61,8 @@ export function AutomaticAirdropsModal(
     const rows: CsvRow[] = [];
     let hadHeader = false;
 
-    if (lines.length > 0 && isHeaderRow(lines[0])) {
+    const firstLine = lines[0];
+    if (firstLine && isHeaderRow(firstLine)) {
       hadHeader = true;
       lines = lines.slice(1);
     }
