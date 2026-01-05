@@ -141,7 +141,6 @@ const rules = {
   "@typescript-eslint/prefer-nullish-coalescing": "off", // TODO: enable later
   "@typescript-eslint/prefer-optional-chain": "off", // TODO: enable later
   "@typescript-eslint/no-unused-vars": "off", // Handled by unused-imports
-  "@typescript-eslint/no-inferrable-types": "off", // TODO: enable later
   "@typescript-eslint/prefer-as-const": "error",
   "@typescript-eslint/no-unnecessary-type-parameters": "off", // TODO: enable later
 
@@ -236,32 +235,7 @@ const rules = {
 
   // Organization
   "import/first": "off", // TODO: enable later
-  "import/newline-after-import": ["off", { count: 1 }], // TODO: enable later
   "import/no-useless-path-segments": ["off", { noUselessIndex: true }], // TODO: enable later
-  "import/order": [
-    "off",
-    {
-      groups: [
-        "builtin",
-        "external",
-        "internal",
-        ["parent", "sibling"],
-        "index",
-        "type",
-      ], // TODO: enable later
-      pathGroups: [
-        { pattern: "react", group: "builtin", position: "before" },
-        { pattern: "next/**", group: "builtin", position: "before" },
-        { pattern: "@/**", group: "internal", position: "before" },
-      ],
-      pathGroupsExcludedImportTypes: ["react", "next"],
-      "newlines-between": "always",
-      alphabetize: {
-        order: "asc",
-        caseInsensitive: true,
-      },
-    },
-  ],
 
   // -------------------------------------------------------------------------
   // Accessibility (jsx-a11y) - handled by eslint-config-next
@@ -348,11 +322,6 @@ const rules = {
   "promise/param-names": "error",
   "promise/valid-params": "error",
   "promise/prefer-await-to-callbacks": "off", // TODO: enable later
-
-  // -------------------------------------------------------------------------
-  // Perfectionist - Production Grade
-  // -------------------------------------------------------------------------
-  "perfectionist/sort-imports": "off", // Using import/order instead
 
   // -------------------------------------------------------------------------
   // Tailwind CSS - Production Grade

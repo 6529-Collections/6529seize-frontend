@@ -141,7 +141,6 @@ const rules = {
   "@typescript-eslint/prefer-nullish-coalescing": "error",
   "@typescript-eslint/prefer-optional-chain": "error",
   "@typescript-eslint/no-unused-vars": "off", // Handled by unused-imports
-  "@typescript-eslint/no-inferrable-types": "error",
   "@typescript-eslint/prefer-as-const": "error",
   "@typescript-eslint/no-unnecessary-type-parameters": "error",
 
@@ -236,32 +235,7 @@ const rules = {
 
   // Organization
   "import/first": "error",
-  "import/newline-after-import": ["error", { count: 1 }],
   "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
-  "import/order": [
-    "error",
-    {
-      groups: [
-        "builtin",
-        "external",
-        "internal",
-        ["parent", "sibling"],
-        "index",
-        "type",
-      ],
-      pathGroups: [
-        { pattern: "react", group: "builtin", position: "before" },
-        { pattern: "next/**", group: "builtin", position: "before" },
-        { pattern: "@/**", group: "internal", position: "before" },
-      ],
-      pathGroupsExcludedImportTypes: ["react", "next"],
-      "newlines-between": "always",
-      alphabetize: {
-        order: "asc",
-        caseInsensitive: true,
-      },
-    },
-  ],
 
   // -------------------------------------------------------------------------
   // Accessibility (jsx-a11y) - handled by eslint-config-next
@@ -348,11 +322,6 @@ const rules = {
   "promise/param-names": "error",
   "promise/valid-params": "error",
   "promise/prefer-await-to-callbacks": "error",
-
-  // -------------------------------------------------------------------------
-  // Perfectionist - Production Grade
-  // -------------------------------------------------------------------------
-  "perfectionist/sort-imports": "off", // Using import/order instead
 
   // -------------------------------------------------------------------------
   // Tailwind CSS - Production Grade
