@@ -18,20 +18,22 @@ export default function CreateDropActionsRow({
   const { setToast } = useContext(AuthContext);
   return (
     <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
-      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
         <label>
           <div
             role="button"
             aria-label="Select audio file"
-            className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300">
+            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-x-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
+          >
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor">
+              stroke="currentColor"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -51,10 +53,12 @@ export default function CreateDropActionsRow({
                       message: "You can only upload up to 4 files at a time",
                       type: "error",
                     });
+                    e.target.value = "";
                     return;
                   }
                   setFiles(files);
                 }
+                e.target.value = "";
               }}
             />
             <span className="tw-text-sm tw-font-medium">Upload Media</span>
@@ -66,13 +70,15 @@ export default function CreateDropActionsRow({
           onClick={breakIntoStorm}
           disabled={!canAddPart}
           type="button"
-          className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300">
+          className="tw-flex tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
+        >
           <svg
-            className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
+            className="-tw-mr-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"
@@ -86,7 +92,8 @@ export default function CreateDropActionsRow({
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
               stroke="currentColor"
