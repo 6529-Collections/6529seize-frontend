@@ -1,5 +1,5 @@
 import ProfileActivityLogPfp from "@/components/profile-activity/list/items/ProfileActivityLogPfp";
-import { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
+import type { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
 import { ProfileActivityLogType } from "@/enums";
 import { render, screen } from "@testing-library/react";
 

@@ -1,4 +1,4 @@
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";

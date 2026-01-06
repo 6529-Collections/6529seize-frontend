@@ -1,6 +1,6 @@
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getThemeColors } from "./ParticipationDropRatingsTheme";
-import { RatingsData } from "./types";
+import type { RatingsData } from "./types";
 import ParticipationDropRatingsTotalSection from "./ParticipationDropRatingsTotalSection";
 import ParticipationDropRatingsVoterSection from "./ParticipationDropRatingsVoterSection";
 import ParticipationDropRatingsUserSection from "./ParticipationDropRatingsUserSection";

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { WaveWinnersSmallOutcome } from '@/components/waves/winners/WaveWinnersSmallOutcome';
-import { ApiWave } from '@/generated/models/ApiWave';
-import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import type { ApiWave } from '@/generated/models/ApiWave';
+import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 
 // Mock external dependencies
 jest.mock('react-tooltip', () => ({

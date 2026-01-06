@@ -1,4 +1,4 @@
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProfileRatersTableHeaderSortableCell from "./ProfileRatersTableHeaderSortableCell";

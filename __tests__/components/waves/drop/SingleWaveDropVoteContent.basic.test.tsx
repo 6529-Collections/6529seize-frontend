@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SingleWaveDropVoteContent } from '@/components/waves/drop/SingleWaveDropVoteContent';
-import { ApiDrop } from '@/generated/models/ApiDrop';
+import type { ApiDrop } from '@/generated/models/ApiDrop';
 import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <span /> }));

@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import type { FC} from "react";
+import { useState, useEffect } from "react";
 import { FocusTrap } from "focus-trap-react";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 

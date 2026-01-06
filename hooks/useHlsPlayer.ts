@@ -259,7 +259,6 @@ export function useHlsPlayer({
       videoEl.removeAttribute("src");
       videoEl.load();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     src,
     isHls,

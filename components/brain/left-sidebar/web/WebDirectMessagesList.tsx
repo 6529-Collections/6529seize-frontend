@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useRef, useContext, type ReactNode } from "react";
-import WebUnifiedWavesListWaves, {
+import type {
   WebUnifiedWavesListWavesHandle,
 } from "./WebUnifiedWavesListWaves";
+import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import PrimaryButton from "../../../utils/button/PrimaryButton";

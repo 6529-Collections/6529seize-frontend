@@ -14,7 +14,7 @@ import {
 } from "../nextgen_helpers";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { AdditionalData } from "../nextgen_entities";
+import type { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,

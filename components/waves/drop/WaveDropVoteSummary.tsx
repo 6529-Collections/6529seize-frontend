@@ -7,7 +7,7 @@ import {
   WAVE_VOTE_STATS_LABELS,
 } from "@/helpers/waves/waves.constants";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 type VoteSummaryVariant = "default" | "memes";
 

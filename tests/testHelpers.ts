@@ -1,4 +1,5 @@
-import { test as baseTest, expect, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { test as baseTest, expect } from "@playwright/test";
 
 // Extend the base test to include a global beforeEach hook
 export const test = baseTest.extend({

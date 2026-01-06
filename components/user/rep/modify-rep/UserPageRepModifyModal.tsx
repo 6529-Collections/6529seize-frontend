@@ -7,11 +7,11 @@ import {
     ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
-import {
+import type {
     ApiProfileRepRatesState,
     RatingStats,
 } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import {

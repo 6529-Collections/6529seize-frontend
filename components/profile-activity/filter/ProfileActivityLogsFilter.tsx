@@ -1,7 +1,7 @@
 "use client";
 
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
-import { ProfileActivityLogType } from "@/enums";
+import type { ProfileActivityLogType } from "@/enums";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";

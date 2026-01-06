@@ -1,4 +1,4 @@
-import { UserPageStatsTag } from "./UserPageStatsTags";
+import type { UserPageStatsTag } from "./UserPageStatsTags";
 
 export default function UserPageStatsTagsSet({
   tags,

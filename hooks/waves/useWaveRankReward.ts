@@ -3,7 +3,7 @@ import { useWaveOutcomesQuery } from "./useWaveOutcomesQuery";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWaveOutcomeDistributionItemsPage } from "@/generated/models/ApiWaveOutcomeDistributionItemsPage";
+import type { ApiWaveOutcomeDistributionItemsPage } from "@/generated/models/ApiWaveOutcomeDistributionItemsPage";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 const DISTRIBUTION_PAGE_SIZE = 100;

@@ -43,12 +43,13 @@ import {
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { Spinner } from "../dotLoader/DotLoader";
+import type {
+  DelegationCollection} from "./delegation-constants";
 import {
   ALL_USE_CASES,
   ANY_COLLECTION_PATH,
   CONSOLIDATION_USE_CASE,
   DELEGATION_USE_CASES,
-  DelegationCollection,
   MAX_BULK_ACTIONS,
   MEMES_COLLECTION,
   PRIMARY_ADDRESS_USE_CASE,

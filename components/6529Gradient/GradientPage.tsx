@@ -17,10 +17,10 @@ import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFT } from "@/entities/INFT";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import { Transaction } from "@/entities/ITransaction";
+import type { Transaction } from "@/entities/ITransaction";
 import { ContractType } from "@/enums";
 import {
   areEqualAddresses,

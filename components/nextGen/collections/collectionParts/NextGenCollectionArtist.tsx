@@ -1,7 +1,7 @@
 "use client";
 
-import { NextGenCollection } from "@/entities/INextgen";
-import { CicStatement } from "@/entities/IProfile";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_TYPE } from "@/helpers/Types";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";

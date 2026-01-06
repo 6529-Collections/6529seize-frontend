@@ -1,4 +1,4 @@
-import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import CreateSnapshotFormSearchCollectionDropdownTable from "./CreateSnapshotFormSearchCollectionDropdownTable";
 
 export default function CreateSnapshotFormSearchCollectionDropdown({

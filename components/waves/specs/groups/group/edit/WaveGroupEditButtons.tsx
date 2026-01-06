@@ -5,7 +5,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../WaveGroup.types";
+import type { WaveGroupType } from "../WaveGroup.types";
 import {
   useWaveGroupEditButtonsController,
   WaveGroupIdentitiesModal,

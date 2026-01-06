@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";

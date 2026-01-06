@@ -1,7 +1,7 @@
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 

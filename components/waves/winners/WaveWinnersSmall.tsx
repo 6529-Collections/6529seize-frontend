@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, memo, useEffect } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type {
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
 import {
-  ExtendedDrop,
   convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
-import { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
+import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 
 // Import extracted components
 import { WaveWinnerItemSmall } from "./WaveWinnerItemSmall";

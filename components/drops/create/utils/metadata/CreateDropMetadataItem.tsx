@@ -1,4 +1,4 @@
-import { DropMetadata } from "@/entities/IDrop";
+import type { DropMetadata } from "@/entities/IDrop";
 
 export default function CreateDropMetadataItem({
   item: { data_key, data_value },

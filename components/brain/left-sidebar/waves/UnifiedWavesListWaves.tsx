@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
-import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
 import JoinedToggle from "./JoinedToggle";
+import type {
+  VirtualItem} from "@/hooks/useVirtualizedWaves";
 import {
-  useVirtualizedWaves,
-  VirtualItem,
+  useVirtualizedWaves
 } from "@/hooks/useVirtualizedWaves";
 
 // VirtualItem interface is now imported from useVirtualizedWaves

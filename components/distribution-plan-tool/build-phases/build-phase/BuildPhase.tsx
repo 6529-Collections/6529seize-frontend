@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BuildPhasesPhase } from "../BuildPhases";
+import type { BuildPhasesPhase } from "../BuildPhases";
 import {
   DistributionPlanToolStep,
 } from "@/components/distribution-plan-tool/DistributionPlanToolContext";

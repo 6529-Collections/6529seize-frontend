@@ -7,7 +7,7 @@ import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { DecisionPoint } from "@/helpers/waves/time.types";
+import type { DecisionPoint } from "@/helpers/waves/time.types";
 import { HorizontalTimeline } from "./HorizontalTimeline";
 
 interface ExpandedTimelineContentProps {

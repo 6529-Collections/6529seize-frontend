@@ -1,4 +1,4 @@
-import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
+import type { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WalletValidationError, WalletSecurityError } from '@/src/errors/wallet-validation'
 
 const ETHEREUM_ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/

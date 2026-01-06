@@ -1,8 +1,9 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { WsDropUpdateMessage, WsMessageType } from "@/helpers/Types";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { WsDropUpdateMessage} from "@/helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useCallback, useContext, useEffect, useState } from "react";
 

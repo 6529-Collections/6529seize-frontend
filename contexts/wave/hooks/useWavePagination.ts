@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
-import { WaveDataStoreUpdater } from "./types";
+import type { WaveDataStoreUpdater } from "./types";
 import {
   fetchLightWaveMessages,
   fetchWaveMessages,
   fetchAroundSerialNoWaveMessages,
 } from "../utils/wave-messages-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 
 // Tracks which waves are currently loading next page
@@ -388,14 +388,14 @@ export function useWavePagination({
           } else {
             aroundQueueLastFetchedMinSerialNoRef.current = null;
             aroundQueueLastFetchedMaxSerialNoRef.current = null;
-            console.log(
+            console.warn(
               `[WavePagination] Fetched around serial no ${serialToFetch}, received an empty list of drops.`
             );
           }
         } else {
           aroundQueueLastFetchedMinSerialNoRef.current = null;
           aroundQueueLastFetchedMaxSerialNoRef.current = null;
-          console.log(
+          console.warn(
             `[WavePagination] Fetched around serial no ${serialToFetch}, no new data (null result).`
           );
         }
@@ -406,7 +406,7 @@ export function useWavePagination({
             error
           );
         } else {
-          console.log(
+          console.warn(
             `[WavePagination] Fetch around ${serialToFetch} aborted.`
           );
         }

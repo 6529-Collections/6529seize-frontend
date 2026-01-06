@@ -1,9 +1,9 @@
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
-import { NFT, NftRank, NftTDH } from "@/entities/INFT";
+import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import { ConsolidatedTDH } from "@/entities/ITDH";
-import { Transaction } from "@/entities/ITransaction";
+import type { ConsolidatedTDH } from "@/entities/ITDH";
+import type { Transaction } from "@/entities/ITransaction";
 import { ContractType } from "@/enums";
 import {
   areEqualAddresses,

@@ -1,11 +1,11 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import WaveItem from "./WaveItem";
 import { AuthContext } from "@/components/auth/Auth";
-import { WavesOverviewParams } from "@/types/waves.types";
+import type { WavesOverviewParams } from "@/types/waves.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import CircleLoader, {

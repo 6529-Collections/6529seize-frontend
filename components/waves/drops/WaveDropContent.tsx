@@ -1,7 +1,7 @@
 import React from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPart from "./WaveDropPart";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropContentProps {

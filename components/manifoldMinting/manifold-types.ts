@@ -1,4 +1,4 @@
-import { IAttribute } from "@/entities/INFT";
+import type { IAttribute } from "@/entities/INFT";
 
 interface ManifoldImageDetails {
   bytes: number;

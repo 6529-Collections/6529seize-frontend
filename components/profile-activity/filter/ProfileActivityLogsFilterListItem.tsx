@@ -1,7 +1,7 @@
 "use client";
 
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
-import { ProfileActivityLogType } from "@/enums";
+import type { ProfileActivityLogType } from "@/enums";
 import { useEffect, useState } from "react";
 import ProfileActivityLogsIcon from "../icons/ProfileActivityLogsIcon";
 

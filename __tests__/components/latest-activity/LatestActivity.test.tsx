@@ -1,7 +1,7 @@
 import LatestActivity from "@/components/latest-activity/LatestActivity";
-import { NFT } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
-import { Transaction } from "@/entities/ITransaction";
+import type { NFT } from "@/entities/INFT";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen, waitFor } from "@testing-library/react";

@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { useIdentity } from '@/hooks/useIdentity';
 import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { commonApiFetch } from '@/services/api/common-api';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));

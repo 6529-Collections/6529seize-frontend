@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountHeader";
+import type {
+  NFT_ACCOUNTS_STATEMENT_TYPE} from "@/helpers/Types";
 import {
-  NFT_ACCOUNTS_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
 } from "@/helpers/Types";

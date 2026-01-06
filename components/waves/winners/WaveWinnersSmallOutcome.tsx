@@ -94,7 +94,10 @@ export const WaveWinnersSmallOutcome: React.FC<
           </div>
 
           {manualOutcomes.map((outcome) => (
-            <div key={`manual-${outcome}`} className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-iron-800/40 tw-p-2">
+            <div
+              key={`manual-${outcome}`}
+              className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-iron-800/40 tw-p-2"
+            >
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
                   className="tw-size-4 tw-flex-shrink-0 tw-text-[#D4C5AA]"

@@ -1,17 +1,12 @@
-import {
-  Children,
-  ClassAttributes,
-  Fragment,
-  HTMLAttributes,
-  ReactNode,
-  isValidElement,
-} from "react";
-import { ExtraProps } from "react-markdown";
+import type { ClassAttributes, HTMLAttributes, ReactNode } from "react";
+import { Children, Fragment, isValidElement } from "react";
+import type { ExtraProps } from "react-markdown";
 
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -26,9 +21,7 @@ interface NativeEmojiSkin {
   native: string;
 }
 
-type FindNativeEmoji = (
-  emojiId: string
-) => { skins: NativeEmojiSkin[] } | null;
+type FindNativeEmoji = (emojiId: string) => { skins: NativeEmojiSkin[] } | null;
 
 interface MarkdownContentConfig {
   readonly textSizeClass: string;
@@ -48,13 +41,6 @@ interface MarkdownContentRenderers {
   ) => ReactNode;
   readonly processContent: (content: string | null) => string | null;
 }
-
-type DropListItemContentPartComponent = typeof import("../../item/content/DropListItemContentPart").default;
-
-const getDropListItemContentPart = (): DropListItemContentPartComponent => {
-  const dropListItemContentPartModule = require("@/components/drops/view/item/content/DropListItemContentPart");
-  return dropListItemContentPartModule.default as DropListItemContentPartComponent;
-};
 
 const emojiRegex = /(:\w+:)/g;
 
@@ -76,7 +62,9 @@ export const createMarkdownContentRenderers = ({
       const nativeEmoji = findNativeEmoji(emojiId);
       if (nativeEmoji) {
         return (
-          <span className={`${bigEmoji ? "emoji-text-node" : "tw-align-middle"}`}>
+          <span
+            className={`${bigEmoji ? "emoji-text-node" : "tw-align-middle"}`}
+          >
             {nativeEmoji.skins[0]?.native}
           </span>
         );
@@ -124,7 +112,8 @@ export const createMarkdownContentRenderers = ({
     };
 
     const isEmoji = (str: string): boolean => {
-      const emojiTextRegex = /^(?:\ud83c[\udffb-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udfff]|\ud83e[\udd00-\uddff]|\u00a9|\u00ae|\u200d|\u203c|\u2049|\u2122|\u2139|\u2194-\u21aa|\u231a-\u23fa|\u24c2|\u25aa-\u25fe|\u2600-\u27bf|\u2934-\u2b55|\u3030|\u303d|\u3297|\u3299|\ufe0f)$/;
+      const emojiTextRegex =
+        /^(?:\ud83c[\udffb-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udfff]|\ud83e[\udd00-\uddff]|\u00a9|\u00ae|\u200d|\u203c|\u2049|\u2122|\u2139|\u2194-\u21aa|\u231a-\u23fa|\u24c2|\u25aa-\u25fe|\u2600-\u27bf|\u2934-\u2b55|\u3030|\u303d|\u3297|\u3299|\ufe0f)$/;
       return emojiTextRegex.test(str.trim());
     };
 
@@ -149,7 +138,6 @@ export const createMarkdownContentRenderers = ({
         const partProps = values[part];
         if (partProps) {
           const randomId = getRandomObjectId();
-          const DropListItemContentPart = getDropListItemContentPart();
           return <DropListItemContentPart key={randomId} part={partProps} />;
         }
 
@@ -204,7 +192,7 @@ export const createMarkdownContentRenderers = ({
     ) => (
       <p
         key={getRandomObjectId()}
-        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        className={`word-break tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
       >
         {customRenderer(paragraphParams.children)}
       </p>

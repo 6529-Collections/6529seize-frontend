@@ -1,6 +1,6 @@
 import React from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { WaveWinnersTimeline } from "./WaveWinnersTimeline";

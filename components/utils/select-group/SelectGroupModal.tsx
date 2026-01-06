@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import SelectGroupSearchPanel from "./SelectGroupSearchPanel";
 export default function SelectGroupModal({
   onClose,

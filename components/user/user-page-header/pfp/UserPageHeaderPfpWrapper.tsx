@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import { createPortal } from "react-dom";
 import UserPageHeaderEditPfp from "./UserPageHeaderEditPfp";

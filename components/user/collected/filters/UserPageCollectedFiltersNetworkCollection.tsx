@@ -1,5 +1,5 @@
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 import { useMemo } from "react";
 

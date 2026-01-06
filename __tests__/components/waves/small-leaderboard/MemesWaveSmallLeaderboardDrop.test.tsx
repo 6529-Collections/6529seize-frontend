@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemesWaveSmallLeaderboardDrop } from '@/components/waves/small-leaderboard/MemesWaveSmallLeaderboardDrop';
-import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import type { ApiWave } from '@/generated/models/ApiWave';
 
 // Mock the child components
 jest.mock('@/components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop', () => ({

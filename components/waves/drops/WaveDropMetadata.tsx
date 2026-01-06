@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
-import { DropMetadata } from "@/entities/IDrop";
+import type { DropMetadata } from "@/entities/IDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ApiDrop } from "@/generated/models/ObjectSerializer";
+import type { ApiDrop } from "@/generated/models/ObjectSerializer";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,

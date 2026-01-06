@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AllowlistToolSelectMenuMultipleOption } from "./AllowlistToolSelectMenuMultiple";
+import type { AllowlistToolSelectMenuMultipleOption } from "./AllowlistToolSelectMenuMultiple";
 
 export default function AllowlistToolSelectMenuListItem({
   option,

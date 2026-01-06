@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react';
 import React, { createRef } from 'react';
-import ClearEditorPlugin, { ClearEditorPluginHandles } from '@/components/drops/create/lexical/plugins/ClearEditorPlugin';
+import type { ClearEditorPluginHandles } from '@/components/drops/create/lexical/plugins/ClearEditorPlugin';
+import ClearEditorPlugin from '@/components/drops/create/lexical/plugins/ClearEditorPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 jest.mock('@lexical/react/LexicalComposerContext');

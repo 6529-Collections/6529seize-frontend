@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveMute from '@/components/waves/header/options/mute/WaveMute';
 import { AuthContext } from '@/components/auth/Auth';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 
 jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),

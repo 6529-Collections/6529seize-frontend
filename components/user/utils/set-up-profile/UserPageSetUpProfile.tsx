@@ -9,8 +9,8 @@ import UserSettingsClassification from "@/components/user/settings/UserSettingsC
 import UserSettingsPrimaryWallet from "@/components/user/settings/UserSettingsPrimaryWallet";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
-import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";

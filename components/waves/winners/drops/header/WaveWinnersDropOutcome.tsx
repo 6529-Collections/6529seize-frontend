@@ -1,5 +1,5 @@
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

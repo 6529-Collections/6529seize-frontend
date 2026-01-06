@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEnsName, useReadContract } from "wagmi";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import styles from "./NextGen.module.scss";

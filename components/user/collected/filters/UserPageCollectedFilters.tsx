@@ -2,23 +2,26 @@
 
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
-import CommonSelect, {
+import type {
   CommonSelectItem,
 } from "@/components/utils/select/CommonSelect";
-import {
-  CollectedCollectionType,
+import CommonSelect from "@/components/utils/select/CommonSelect";
+import type {
   CollectionSeized,
-  CollectionSort,
+  CollectionSort} from "@/entities/IProfile";
+import {
+  CollectedCollectionType
 } from "@/entities/IProfile";
-import { MemeSeason } from "@/entities/ISeason";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { MemeSeason } from "@/entities/ISeason";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { RefObject, useEffect, useRef, useState } from "react";
-import { ProfileCollectedFilters } from "../UserPageCollected";
+import type { RefObject} from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ProfileCollectedFilters } from "../UserPageCollected";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 import UserPageCollectedFiltersNativeDropdown from "./UserPageCollectedFiltersNativeDropdown";
 import UserPageCollectedFiltersNetworkCollection from "./UserPageCollectedFiltersNetworkCollection";

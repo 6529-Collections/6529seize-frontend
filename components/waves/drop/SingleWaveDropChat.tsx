@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
+import type { ApiDrop, ApiWave } from "@/generated/models/ObjectSerializer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import WaveDropsAll from "../drops/wave-drops-all";
 import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,
 } from "../CreateDropWaveWrapper";
+import type {
+  ActiveDropState} from "@/types/dropInteractionTypes";
 import {
-  ActiveDropAction,
-  ActiveDropState,
+  ActiveDropAction
 } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";

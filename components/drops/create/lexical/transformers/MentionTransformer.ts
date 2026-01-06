@@ -1,4 +1,4 @@
-import { TextMatchTransformer } from "@lexical/markdown";
+import type { TextMatchTransformer } from "@lexical/markdown";
 import { $createMentionNode, $isMentionNode, MentionNode } from "../nodes/MentionNode";
 
 export const MENTION_TRANSFORMER: TextMatchTransformer = {

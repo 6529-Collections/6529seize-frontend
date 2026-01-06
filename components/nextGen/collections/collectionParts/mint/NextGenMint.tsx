@@ -9,7 +9,7 @@ import {
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { publicEnv } from "@/config/env";
 import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { fromGWEI } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import Image from "next/image";
@@ -21,9 +21,10 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
+import type {
+  CollectionWithMerkle} from "@/components/nextGen/nextgen_entities";
 import {
   AllowlistType,
-  CollectionWithMerkle,
   Status,
 } from "@/components/nextGen/nextgen_entities";
 import {

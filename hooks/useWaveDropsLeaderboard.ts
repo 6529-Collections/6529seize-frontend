@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   useInfiniteQuery,
   useQuery,
@@ -17,7 +17,7 @@ import {
   getDefaultQueryRetry,
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
-import { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 

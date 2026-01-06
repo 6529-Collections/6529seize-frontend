@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
 import LruTtlCache from "@/lib/cache/lruTtl";

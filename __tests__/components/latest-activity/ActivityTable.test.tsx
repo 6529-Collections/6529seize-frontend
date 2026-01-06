@@ -1,9 +1,9 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import ActivityTable from "@/components/latest-activity/ActivityTable";
-import { Transaction } from "@/entities/ITransaction";
-import { NFT } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
+import type { NFT } from "@/entities/INFT";
+import type { NextGenCollection } from "@/entities/INextgen";
 
 // Mock the child component to isolate ActivityTable testing
 jest.mock("@/components/latest-activity/LatestActivityRow", () => {

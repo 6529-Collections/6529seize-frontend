@@ -20,7 +20,7 @@ import {
   Row,
 } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import {
+import type {
   NextGenCollection,
   TraitValuePair,
   TraitValues,

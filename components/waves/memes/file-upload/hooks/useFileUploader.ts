@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useCallback, useReducer } from "react";
+import type React from "react";
+import { useCallback, useReducer } from "react";
 import {
   fileUploaderReducer,
   initialFileUploaderState,
 } from "../reducers/fileUploadReducer";
 import { validateFile, testVideoCompatibility } from "../utils/fileValidation";
 import { PROCESSING_TIMEOUT_MS } from "../utils/constants";
-import type { FileUploaderState } from "../reducers/types";
+import type { FileUploaderAction, FileUploaderState } from "../reducers/types";
 
 /**
  * Interface for the return value of the useFileUploader hook
@@ -24,7 +25,7 @@ interface FileUploaderHook {
   /** Handle file removal */
   handleRemoveFile: (e: React.MouseEvent<HTMLButtonElement>) => void;
   /** Direct access to the dispatch function for custom actions */
-  dispatch: React.Dispatch<import("../reducers/types").FileUploaderAction>;
+  dispatch: React.Dispatch<FileUploaderAction>;
 }
 
 /**

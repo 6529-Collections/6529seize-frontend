@@ -1,7 +1,8 @@
 "use client";
 
+import type {
+  AllowlistOperation} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-  AllowlistOperation,
   AllowlistOperationCode,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";

@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./NFTAttributes.module.scss";
-import { IAttribute } from "@/entities/INFT";
+import type { IAttribute } from "@/entities/INFT";
 
 export default function NFTAttributes(
   props: Readonly<{

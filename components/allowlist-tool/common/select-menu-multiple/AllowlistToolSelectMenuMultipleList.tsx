@@ -1,5 +1,5 @@
 
-import { AllowlistToolSelectMenuMultipleOption } from "./AllowlistToolSelectMenuMultiple";
+import type { AllowlistToolSelectMenuMultipleOption } from "./AllowlistToolSelectMenuMultiple";
 import AllowlistToolSelectMenuMultipleListItem from "./AllowlistToolSelectMenuMultipleListItem";
 
 export default function AllowlistToolSelectMenuList({

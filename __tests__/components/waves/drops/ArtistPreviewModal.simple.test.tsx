@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArtistPreviewModal } from '@/components/waves/drops/ArtistPreviewModal';
-import { ApiProfileMin } from '@/generated/models/ApiProfileMin';
+import type { ApiProfileMin } from '@/generated/models/ApiProfileMin';
 
 // Mock all dependencies to prevent DOM testing issues
 jest.mock('@/hooks/useDeviceInfo', () => ({

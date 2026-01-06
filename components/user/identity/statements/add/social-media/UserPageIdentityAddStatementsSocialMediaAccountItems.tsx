@@ -1,5 +1,6 @@
+import type {
+  SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
-  SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES,
 } from "@/helpers/Types";
 import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";

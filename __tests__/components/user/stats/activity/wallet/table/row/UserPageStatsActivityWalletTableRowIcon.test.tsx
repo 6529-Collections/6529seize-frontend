@@ -24,7 +24,7 @@ describe('UserPageStatsActivityWalletTableRowIcon', () => {
   });
 
   it('throws for unknown type', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     expect(() => render(<UserPageStatsActivityWalletTableRowIcon type={'X' as any} />)).toThrow();
   });
 });

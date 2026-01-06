@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import EmmaListSearch from "@/components/utils/input/emma/EmmaListSearch";
-import {
+import type {
   AllowlistDescription,
   AllowlistResult,
 } from "@/components/allowlist-tool/allowlist-tool.types";

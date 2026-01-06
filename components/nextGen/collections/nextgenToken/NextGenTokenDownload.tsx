@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import useDownloader from "react-use-downloader";
-import { NextGenToken } from "@/entities/INextgen";
+import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
 

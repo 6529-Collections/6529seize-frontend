@@ -1,23 +1,25 @@
 "use client";
 
-import { EditorState } from "lexical";
+import type { EditorState } from "lexical";
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
-import CreateDropFullDesktop, {
+import type {
   CreateDropFullDesktopHandles,
 } from "./desktop/CreateDropFullDesktop";
-import CreateDropFullMobile, {
+import CreateDropFullDesktop from "./desktop/CreateDropFullDesktop";
+import type {
   CreateDropFullMobileHandles,
 } from "./mobile/CreateDropFullMobile";
-import {
+import CreateDropFullMobile from "./mobile/CreateDropFullMobile";
+import type {
   CreateDropConfig,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
-import { CreateDropType, CreateDropViewType } from "../types";
+import type { CreateDropType, CreateDropViewType } from "../types";
 import { forwardRef, useImperativeHandle, useRef, type JSX } from "react";
-import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 
 export interface CreateDropFullHandles {
   clearEditorState: () => void;

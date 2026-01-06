@@ -6,9 +6,10 @@ import {
   formatNumberWithCommasOrDash,
   getTimeAgo,
 } from "@/helpers/Helpers";
+import type {
+  DistributionTableItem} from "./UserPageStatsActivityDistributionsTable";
 import {
-  DistributionCollection,
-  DistributionTableItem,
+  DistributionCollection
 } from "./UserPageStatsActivityDistributionsTable";
 import { useEffect, useState } from "react";
 

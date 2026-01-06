@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { WaveLeaderboardDrops } from '@/components/waves/leaderboard/drops/WaveLeaderboardDrops';
 import { AuthContext } from '@/components/auth/Auth';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 import { WaveDropsLeaderboardSort } from '@/hooks/useWaveDropsLeaderboard';
 
 const hook = jest.fn();

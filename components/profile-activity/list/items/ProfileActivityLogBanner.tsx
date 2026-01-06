@@ -1,4 +1,4 @@
-import {
+import type {
   ProfileActivityLogBanner1Edit,
   ProfileActivityLogBanner2Edit,
 } from "@/entities/IProfile";

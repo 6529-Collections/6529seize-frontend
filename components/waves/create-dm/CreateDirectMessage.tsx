@@ -7,8 +7,8 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import GroupCreateIdentitiesSelect from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";

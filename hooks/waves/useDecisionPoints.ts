@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { DecisionPoint } from "@/helpers/waves/time.types";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { DecisionPoint } from "@/helpers/waves/time.types";
 import {
   calculateLastDecisionTime,
   FALLBACK_END_TIME,

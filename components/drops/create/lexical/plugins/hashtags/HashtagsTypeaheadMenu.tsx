@@ -2,7 +2,7 @@
 
 import { useKeyPressEvent } from "react-use";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { HashtagsTypeaheadOption } from "./HashtagsPlugin";
+import type { HashtagsTypeaheadOption } from "./HashtagsPlugin";
 import HashtagsTypeaheadMenuItem from "./HashtagsTypeaheadMenuItem";
 
 export default function HashtagsTypeaheadMenu({

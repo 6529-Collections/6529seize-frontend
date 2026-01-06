@@ -1,10 +1,10 @@
 import React from "react";
-import { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
+import type { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
 import Link from "next/link";
 import Image from "next/image";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
 import {

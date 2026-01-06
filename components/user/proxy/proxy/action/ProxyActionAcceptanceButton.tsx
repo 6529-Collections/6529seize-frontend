@@ -1,14 +1,15 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
+import type {
+  AcceptActionRequest} from "@/generated/models/AcceptActionRequest";
 import {
-  AcceptActionRequest,
   AcceptActionRequestActionEnum,
 } from "@/generated/models/AcceptActionRequest";
 import { commonApiPost } from "@/services/api/common-api";

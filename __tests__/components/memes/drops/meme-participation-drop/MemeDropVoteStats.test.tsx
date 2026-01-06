@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import MemeDropVoteStats from '@/components/memes/drops/meme-participation-drop/MemeDropVoteStats';
-import { ApiDropRater } from '@/generated/models/ApiDropRater';
+import type { ApiDropRater } from '@/generated/models/ApiDropRater';
 
 jest.mock('next/link', () => ({__esModule:true, default: ({href,children}:any) => <a href={href}>{children}</a>}));
 

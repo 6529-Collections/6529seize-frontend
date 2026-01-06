@@ -1,9 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import {
+import type {
   ReactNode,
-  RefObject,
+  RefObject} from "react";
+import {
   useCallback,
   useEffect,
   useLayoutEffect,

@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";

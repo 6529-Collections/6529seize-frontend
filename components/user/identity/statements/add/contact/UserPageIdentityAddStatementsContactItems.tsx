@@ -1,5 +1,6 @@
+import type {
+  CONTACT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
-  CONTACT_STATEMENT_TYPE,
   CONTACT_STATEMENT_TYPES,
 } from "@/helpers/Types";
 import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";

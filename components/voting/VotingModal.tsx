@@ -1,6 +1,6 @@
 "use client";
 
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";

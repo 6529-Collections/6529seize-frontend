@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";

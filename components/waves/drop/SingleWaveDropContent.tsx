@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { SingleWaveDropContentMetadata } from "./SingleWaveDropContentMetadata";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
 import { ImageScale } from "@/helpers/image.helpers";
 

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiOwnerBalance } from "@/generated/models/ApiOwnerBalance";
+import type { ApiOwnerBalance } from "@/generated/models/ApiOwnerBalance";
 
 export function useIdentityBalance({
   consolidationKey,

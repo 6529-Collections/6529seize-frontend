@@ -1,4 +1,4 @@
-import { ProfileActivityLog } from "@/entities/IProfile";
+import type { ProfileActivityLog } from "@/entities/IProfile";
 import ProfileActivityLogsItem from "./ProfileActivityLogsItem";
 import ProfileActivityLogItemWrapper from "./items/utils/ProfileActivityLogItemWrapper";
 

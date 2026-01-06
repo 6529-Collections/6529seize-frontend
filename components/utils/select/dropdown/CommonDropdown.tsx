@@ -1,10 +1,10 @@
 "use client";
 
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import { useAnimate } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CommonSelectProps } from "../CommonSelect";
+import type { CommonSelectProps } from "../CommonSelect";
 import CommonDropdownItem from "./CommonDropdownItem";
 import CommonDropdownItemsWrapper from "./CommonDropdownItemsWrapper";
 

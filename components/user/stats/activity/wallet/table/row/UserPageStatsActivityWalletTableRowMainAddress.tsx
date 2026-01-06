@@ -1,5 +1,5 @@
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { Transaction } from "@/entities/ITransaction";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { Transaction } from "@/entities/ITransaction";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatAddress } from "@/helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";

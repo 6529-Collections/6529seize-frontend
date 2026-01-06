@@ -14,7 +14,7 @@ import {
   useCoreContractWrite,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
-import { AdditionalData } from "../nextgen_entities";
+import type { AdditionalData } from "../nextgen_entities";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,

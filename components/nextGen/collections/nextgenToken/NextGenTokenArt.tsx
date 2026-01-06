@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Lightbulb from "./Lightbulb";

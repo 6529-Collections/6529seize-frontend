@@ -6,12 +6,13 @@ import styles from "./Leaderboard.module.scss";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { SortDirection } from "@/entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import { MemeSeason } from "@/entities/ISeason";
-import { Collector, Content } from "./Leaderboard";
+import type { MemeSeason } from "@/entities/ISeason";
+import type { Collector, Content } from "./Leaderboard";
 import LeaderboardSort from "./LeaderboardSort";
+import type {
+  LeaderboardInteractions} from "./leaderboard_helpers";
 import {
   LEADERBOARD_PAGE_SIZE,
-  LeaderboardInteractions,
   LeaderboardInteractionsSort,
   useFetchLeaderboard,
 } from "./leaderboard_helpers";

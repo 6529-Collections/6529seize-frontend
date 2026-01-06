@@ -9,7 +9,7 @@
  * - Acceptance of valid values
  */
 
-import { z } from "zod";
+import type { z } from "zod";
 
 const originalEnv = process.env;
 
@@ -17,7 +17,7 @@ const originalEnv = process.env;
 function freshImportPublicEnvSchema() {
   jest.resetModules();
   // Adjust path if needed
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   const mod = require("@/config/env.schema");
   if (!mod.publicEnvSchema) {
     throw new Error(

@@ -1,11 +1,11 @@
 "use client";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { NFTSubscription } from "@/generated/models/NFTSubscription";
-import { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
-import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import { SubscriptionLog } from "@/generated/models/SubscriptionLog";
-import { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { NFTSubscription } from "@/generated/models/NFTSubscription";
+import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
+import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
+import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
@@ -14,12 +14,13 @@ import {
   getCardsRemainingUntilEndOf,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import { Page } from "@/helpers/Types";
+import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
-import UserPageSubscriptionsAirdropAddress, {
+import type {
   AirdropAddressResult,
 } from "./UserPageSubscriptionsAirdropAddress";
+import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";

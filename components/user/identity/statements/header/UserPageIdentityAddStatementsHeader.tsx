@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 import { createPossessionStr } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";

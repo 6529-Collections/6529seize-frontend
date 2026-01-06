@@ -13,8 +13,8 @@ import type {
   UserPageXtdhGrantForm,
 } from "../types";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
-import { ApiXTdhCreateGrant } from "@/generated/models/ApiXTdhCreateGrant";
-import { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
+import type { ApiXTdhCreateGrant } from "@/generated/models/ApiXTdhCreateGrant";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 
 export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {

@@ -12,7 +12,7 @@ import { distributionPlanApiFetch, distributionPlanApiPost } from '@/services/di
 jest.mock('react-use', () => ({
   useInterval: jest.fn(),
 }));
-import { TypeOptions } from 'react-toastify';
+import type { TypeOptions } from 'react-toastify';
 import { toast } from 'react-toastify';
 
 jest.mock('react-toastify', () => ({

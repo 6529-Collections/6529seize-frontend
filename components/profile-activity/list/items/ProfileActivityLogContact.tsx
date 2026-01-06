@@ -1,6 +1,7 @@
+import type {
+  ProfileActivityLogContactsEdit} from "@/entities/IProfile";
 import {
-  PROFILE_ACTIVITY_LOG_ACTION_STR,
-  ProfileActivityLogContactsEdit,
+  PROFILE_ACTIVITY_LOG_ACTION_STR
 } from "@/entities/IProfile";
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";

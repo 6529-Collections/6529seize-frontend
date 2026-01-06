@@ -2,8 +2,8 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";

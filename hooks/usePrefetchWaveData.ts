@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export const usePrefetchWaveData = () => {
   const queryClient = useQueryClient();

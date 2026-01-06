@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
+import type {
+  TimeLeft} from "@/helpers/waves/time.utils";
 import {
-  TimeLeft,
   calculateTimeLeft,
   calculateLastDecisionTime,
   FALLBACK_START_TIME,

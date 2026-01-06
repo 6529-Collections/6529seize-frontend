@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { useContext, useEffect, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -9,8 +9,8 @@ import GroupItems from "./GroupItems";
 import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "@/store/groupSlice";
 import GroupsSelectActiveGroup from "./GroupsSelectActiveGroup";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { GroupsRequestParams } from "@/entities/IGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { GroupsRequestParams } from "@/entities/IGroup";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";

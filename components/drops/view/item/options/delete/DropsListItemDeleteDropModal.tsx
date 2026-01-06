@@ -3,7 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { commonApiDelete } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";

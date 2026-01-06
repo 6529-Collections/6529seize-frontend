@@ -6,7 +6,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";

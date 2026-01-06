@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
-import { CICType } from "@/entities/IProfile";
+import type { CICType } from "@/entities/IProfile";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import {
   SearchModalDisplay,

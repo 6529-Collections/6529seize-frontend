@@ -4,7 +4,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { SortDirection } from "@/entities/ISort";
-import { ProfileRatersParamsOrderBy } from "@/enums";
+import type { ProfileRatersParamsOrderBy } from "@/enums";
 import { useEffect, useState } from "react";
 import CommonTableSortIcon from "../icons/CommonTableSortIcon";
 

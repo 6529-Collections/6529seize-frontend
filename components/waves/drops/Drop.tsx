@@ -1,13 +1,14 @@
 "use client";
 
-import {
-  DropSize,
+import type {
   Drop as DropType,
-  ExtendedDrop,
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import {
+  DropSize
 } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import WaveDrop from "./WaveDrop";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WinnerDrop from "./winner/WinnerDrop";

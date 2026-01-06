@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ProxyActionRowStatus from '@/components/user/proxy/proxy/list/ProxyActionRowStatus';
 import { ProfileProxyActionStatus, ProfileProxySide } from '@/entities/IProxy';
-import { ApiProfileMin } from '@/generated/models/ApiProfileMin';
+import type { ApiProfileMin } from '@/generated/models/ApiProfileMin';
 
 
 describe('ProxyActionRowStatus', () => {

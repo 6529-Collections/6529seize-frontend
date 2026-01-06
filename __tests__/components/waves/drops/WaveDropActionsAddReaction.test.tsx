@@ -1,7 +1,8 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActionsAddReaction";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));

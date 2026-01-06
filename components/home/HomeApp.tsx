@@ -1,14 +1,14 @@
 "use client";
 
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
-import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useDropModal } from "@/hooks/useDropModal";
 import React, { useEffect } from "react";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import ConnectWallet from "../common/ConnectWallet";
-import { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
+import type { InitialActivityData } from "../latest-activity/fetchInitialActivityData";
 import Home from "./Home";
 import HomeFeed from "./HomeFeed";
 import { useHomeTabs } from "./useHomeTabs";

@@ -3,7 +3,7 @@ import styles from "@/styles/Home.module.scss";
 import { getAppMetadata } from "@/components/providers/metadata";
 import TheMemesComponent from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default function TheMemesPage() {
   return (

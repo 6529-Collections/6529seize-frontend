@@ -5,7 +5,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { useContext } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";

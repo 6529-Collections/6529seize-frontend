@@ -1,9 +1,9 @@
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ApiDropRater } from "@/generated/models/ApiDropRater";
+import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 
 interface MemeDropVoteStatsProps {
   readonly current: number | null | undefined;

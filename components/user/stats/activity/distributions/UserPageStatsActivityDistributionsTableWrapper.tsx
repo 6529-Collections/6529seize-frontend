@@ -1,5 +1,5 @@
-import { Distribution } from "@/entities/IDistribution";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { Distribution } from "@/entities/IDistribution";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";

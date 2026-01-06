@@ -3,7 +3,7 @@
 import { useState, useContext } from "react";
 import { useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";
-import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { DropHasher } from "@/utils/drop-hasher";
 import { AuthContext } from "@/components/auth/Auth";
 

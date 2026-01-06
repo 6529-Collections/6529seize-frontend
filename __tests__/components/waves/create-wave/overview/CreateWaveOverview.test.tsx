@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import CreateWaveOverview from '@/components/waves/create-wave/overview/CreateWaveOverview';
 import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
-import { WaveOverviewConfig } from '@/types/waves.types';
+import type { WaveOverviewConfig } from '@/types/waves.types';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 // Mock the child components

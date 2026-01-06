@@ -14,8 +14,9 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
+import type {
+  DelegationCollection} from "./delegation-constants";
 import {
-  DelegationCollection,
   SUPPORTED_COLLECTIONS,
 } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";

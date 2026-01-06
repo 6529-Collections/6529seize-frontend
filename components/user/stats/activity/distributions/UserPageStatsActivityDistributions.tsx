@@ -1,9 +1,9 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { Distribution } from "@/entities/IDistribution";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { Page } from "@/helpers/Types";
+import type { Distribution } from "@/entities/IDistribution";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";

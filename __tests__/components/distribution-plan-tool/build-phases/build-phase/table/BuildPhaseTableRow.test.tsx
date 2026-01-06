@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import BuildPhaseTableRow from '@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableRow';
-import { BuildPhasesPhaseComponent } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
+import type { BuildPhasesPhaseComponent } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
 jest.mock('@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper', () => ({ children }: any) => (
   <tr data-testid="wrapper">{children}</tr>

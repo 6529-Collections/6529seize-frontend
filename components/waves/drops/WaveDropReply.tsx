@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropContent } from "./useDropContent";
 import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";

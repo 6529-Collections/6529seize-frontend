@@ -1,6 +1,6 @@
-import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
-import { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 

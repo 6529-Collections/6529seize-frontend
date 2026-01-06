@@ -1,5 +1,5 @@
 import NFTImage from "@/components/nft-image/NFTImage";
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 

@@ -11,11 +11,13 @@ import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridD
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFTWithMemesExtendedData, VolumeType } from "@/entities/INFT";
-import { MemeSeason } from "@/entities/ISeason";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFTWithMemesExtendedData} from "@/entities/INFT";
+import { VolumeType } from "@/entities/INFT";
+import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort, MEMES_EXTENDED_SORT, MemesSort } from "@/enums";
+import type { MemeLabSort} from "@/enums";
+import { MEMES_EXTENDED_SORT, MemesSort } from "@/enums";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import {

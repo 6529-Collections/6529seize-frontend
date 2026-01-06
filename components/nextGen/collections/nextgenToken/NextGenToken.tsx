@@ -3,7 +3,7 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import { NEXTGEN_CONTRACT } from "@/constants";
-import {
+import type {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,

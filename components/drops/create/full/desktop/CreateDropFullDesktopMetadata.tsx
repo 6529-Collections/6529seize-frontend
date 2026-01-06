@@ -1,7 +1,7 @@
 "use client";
 
 import CreateDropMetadataItems from "@/components/drops/create/utils/metadata/CreateDropMetadataItems";
-import { DropMetadata } from "@/entities/IDrop";
+import type { DropMetadata } from "@/entities/IDrop";
 import { useRef, useState } from "react";
 
 export default function CreateDropFullDesktopMetadata({

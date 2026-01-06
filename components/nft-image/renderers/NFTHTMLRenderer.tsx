@@ -3,7 +3,7 @@
 import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
-import { BaseRendererProps } from "../types/renderer-props";
+import type { BaseRendererProps } from "../types/renderer-props";
 
 function getSrc(nft: BaseRendererProps["nft"]): string | undefined {
   const hasMetadata = "metadata" in nft;

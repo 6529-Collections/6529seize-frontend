@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes } from "react";
-import { ExtraProps } from "react-markdown";
+import type { ExtraProps } from "react-markdown";
 
 import { publicEnv } from "@/config/env";
 import { isLikelyEnsTarget } from "@/lib/ens/detect";

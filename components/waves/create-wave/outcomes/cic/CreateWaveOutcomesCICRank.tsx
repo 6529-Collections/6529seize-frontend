@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
+import type {
   CreateWaveOutcomeConfig,
-  CreateWaveOutcomeConfigWinnersConfig,
+  CreateWaveOutcomeConfigWinnersConfig} from "@/types/waves.types";
+import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";

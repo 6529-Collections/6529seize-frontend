@@ -1,4 +1,4 @@
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import { AnimatePresence, motion } from "framer-motion";

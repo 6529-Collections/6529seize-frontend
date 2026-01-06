@@ -1,7 +1,8 @@
 "use client";
 
-import { FC, type JSX, useMemo } from "react";
-import { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import type { FC} from "react";
+import { type JSX, useMemo } from "react";
+import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
 import { WaveRepOutcome } from "./WaveRepOutcome";

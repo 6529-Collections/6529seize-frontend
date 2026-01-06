@@ -4,15 +4,16 @@ import {
   MEMELAB_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "@/constants";
+import type {
+  ApiGroupOwnsNft} from "@/generated/models/ApiGroupOwnsNft";
 import {
-  ApiGroupOwnsNft,
   ApiGroupOwnsNftNameEnum,
 } from "@/generated/models/ApiGroupOwnsNft";
 import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
+import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 
 export default function GroupCreateNftSearchItem({
   item,
