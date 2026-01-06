@@ -26,7 +26,7 @@ export default function CreateDropActionsRow({
             className="tw-flex tw-cursor-pointer tw-items-center tw-gap-x-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
           >
             <svg
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+              className="tw-size-5 tw-flex-shrink-0"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"
@@ -45,7 +45,7 @@ export default function CreateDropActionsRow({
               className="tw-hidden"
               accept="image/*,video/*,audio/*"
               multiple
-              onChange={(e: any) => {
+              onChange={(e) => {
                 if (e.target.files) {
                   const files: File[] = Array.from(e.target.files);
                   if (files.length > MAX_DROP_UPLOAD_FILES) {
@@ -73,7 +73,7 @@ export default function CreateDropActionsRow({
           className="tw-flex tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
         >
           <svg
-            className="-tw-mr-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0"
+            className="-tw-mr-0.5 tw-size-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -88,7 +88,7 @@ export default function CreateDropActionsRow({
             />
           </svg>
           <svg
-            className="tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0"
+            className="tw-size-[1.15rem] tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
