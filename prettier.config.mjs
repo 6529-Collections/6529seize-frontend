@@ -40,6 +40,16 @@ const config = {
   // Plugins
   // =============================================================================
   plugins: ["prettier-plugin-tailwindcss"],
+  tailwindFunctions: ["clsx", "cn", "cva"],
+  tailwindAttributes: [
+    "enter",
+    "enterFrom",
+    "enterTo",
+    "leave",
+    "leaveFrom",
+    
+    "leaveTo",
+  ],
 };
 
 export default config;
