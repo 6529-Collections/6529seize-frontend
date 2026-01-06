@@ -38,7 +38,74 @@ cat > "$WORKTREE_PATH/settings.json" <<EOF
     "titleBar.activeBackground": "$RAND_COLOR",
     "titleBar.inactiveBackground": "$RAND_COLOR"
   },
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  / --- Formatting ---
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  // --- Fixes on save ---
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // --- Search / Explorer excludes ---
+  "files.exclude": {
+    "**/.DS_Store": true
+  },
+  "search.exclude": {
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.next": true,
+    "**/generated": true
+  },
+
+  // --- File watcher excludes ---
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/coverage": true,
+    "**/generated": true
+  },
+
+  // --- Whitespace + EOL ---
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "[markdown]": { "files.trimTrailingWhitespace": false },
+
+  // --- TypeScript ---
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+
+  // --- Tailwind IntelliSense (if using the extension) ---
+  "tailwindCSS.experimental.classRegex": [
+    "['\"`]([^'\"`]*tw-[^'\"`]*)['\"`]",
+    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["cva\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ]
 }
 EOF
 echo "VS Code color set to $RAND_COLOR."
@@ -48,6 +115,12 @@ echo "Setting up pre-commit hook..."
 mkdir -p "../$WORKTREE_NAME/.hooks"
 cat > "../$WORKTREE_NAME/.hooks/pre-commit" <<'HOOK'
 #!/bin/sh
+if [ "$SKIP_LINT" = "1" ]; then
+  echo "Skipping lint (SKIP_LINT=1)"
+  exit 0
+fi
+npm run format:uncommitted
+git add -u
 npm run lint:uncommitted:tight
 HOOK
 chmod +x "../$WORKTREE_NAME/.hooks/pre-commit"

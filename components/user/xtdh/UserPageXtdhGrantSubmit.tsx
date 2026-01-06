@@ -27,7 +27,7 @@ const hasFutureExpiry = (value: Date): boolean => {
 const isSelectionError = (
   selection: NftPickerChange
 ): selection is NftPickerSelectionError =>
-  Boolean(selection && "type" in selection && selection.type === "error");
+  Boolean(selection && "type" in selection);
 
 const canSubmit = ({
   contract,
@@ -105,39 +105,45 @@ export default function UserPageXtdhGrantSubmit({
     Number.isFinite(maxGrantRate) &&
     amount > maxGrantRate;
 
+  const onSubmitClick = async (): Promise<void> => await onSubmit();
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <button
         type="button"
-        onClick={() => {
-          if (!disabled) {
-            onSubmit();
-          }
-        }}
+        onClick={onSubmitClick}
         disabled={disabled}
         className={clsx(
-          "tw-w-full tw-rounded-lg tw-border tw-border-transparent tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out tw-shadow-sm",
+          "tw-w-full tw-rounded-lg tw-border tw-border-transparent tw-py-3 tw-text-sm tw-font-semibold tw-shadow-sm tw-transition tw-duration-200 tw-ease-out",
           disabled
-            ? "tw-cursor-not-allowed tw-bg-iron-700 tw-text-iron-200 tw-shadow-none tw-border-iron-600"
-            : "tw-bg-primary-500 tw-text-black hover:tw-bg-primary-400 hover:tw-border-primary-300"
-        )}>
+            ? "tw-cursor-not-allowed tw-border-iron-600 tw-bg-iron-700 tw-text-iron-200 tw-shadow-none"
+            : "tw-bg-primary-500 tw-text-black hover:tw-border-primary-300 hover:tw-bg-primary-400"
+        )}
+      >
         {isSubmitting ? "Submitting..." : "Submit grant"}
       </button>
 
       {isAmountExceeded && (
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-red-400" role="alert">
-          Amount exceeds your available grant rate ({formatNumberWithCommas(Math.floor(maxGrantRate! * 10) / 10)}).
+        <p
+          className="tw-text-red-400 tw-m-0 tw-text-sm tw-font-medium"
+          role="alert"
+        >
+          Amount exceeds your available grant rate (
+          {formatNumberWithCommas(Math.floor(maxGrantRate * 10) / 10)}).
         </p>
       )}
 
       {errorMessage && (
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-red-400" role="alert">
+        <p
+          className="tw-text-red-400 tw-m-0 tw-text-sm tw-font-medium"
+          role="alert"
+        >
           {errorMessage}
         </p>
       )}
 
       {!errorMessage && successMessage && (
-        <output className="tw-block tw-m-0 tw-text-sm tw-font-medium tw-text-emerald-400">
+        <output className="tw-m-0 tw-block tw-text-sm tw-font-medium tw-text-emerald-400">
           {successMessage}
         </output>
       )}
