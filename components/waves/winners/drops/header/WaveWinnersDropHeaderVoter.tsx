@@ -3,8 +3,8 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import { ApiDropRater } from "@/generated/models/ApiDropRater";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiDropRater } from "@/generated/models/ApiDropRater";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";

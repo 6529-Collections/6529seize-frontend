@@ -1,4 +1,4 @@
-import { ProfileActivityLogType } from "@/enums";
+import type { ProfileActivityLogType } from "@/enums";
 import ProfileActivityLogsFilterListItem from "./ProfileActivityLogsFilterListItem";
 
 export default function UserPageIdentityActivityLogFilterList({

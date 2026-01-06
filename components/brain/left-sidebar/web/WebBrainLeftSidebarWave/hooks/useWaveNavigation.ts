@@ -1,5 +1,6 @@
 import type { ReadonlyURLSearchParams } from "next/navigation";
-import React, { useCallback, useMemo } from "react";
+import type React from "react";
+import { useCallback, useMemo } from "react";
 
 interface UseWaveNavigationOptions {
   readonly basePath: string;

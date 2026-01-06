@@ -1,4 +1,4 @@
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import { RECEIVED_RESULT_SUMMARY_MESSAGES } from "@/i18n/messages";
 
 const DIRECTION_LABELS = RECEIVED_RESULT_SUMMARY_MESSAGES.directionLabels;

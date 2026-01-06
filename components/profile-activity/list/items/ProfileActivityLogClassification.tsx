@@ -1,6 +1,7 @@
+import type {
+  ProfileActivityLogClassificationEdit} from "@/entities/IProfile";
 import {
-  CLASSIFICATIONS,
-  ProfileActivityLogClassificationEdit,
+  CLASSIFICATIONS
 } from "@/entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 

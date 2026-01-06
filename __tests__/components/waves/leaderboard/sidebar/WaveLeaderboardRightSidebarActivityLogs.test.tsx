@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { WaveLeaderboardRightSidebarActivityLogs } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 import { useAuth } from '@/components/auth/Auth';
 
 const hook = jest.fn();

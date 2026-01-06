@@ -13,13 +13,15 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import type { ReactNode} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useBalance, useChainId } from "wagmi";
 import { sepolia } from "viem/chains";
 
-import { useAppWallets, AppWallet } from "./AppWalletsContext";
+import type { AppWallet } from "./AppWalletsContext";
+import { useAppWallets } from "./AppWalletsContext";
 
 import {
   areEqualAddresses,

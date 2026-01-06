@@ -1,2 +1,2 @@
 // TODO: remove after codemod
-export * from "./types";
+export type * from "./types";

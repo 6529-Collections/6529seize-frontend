@@ -1,11 +1,11 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
-import { DropRateChangeRequest } from "@/entities/IDrop";
+import type { DropRateChangeRequest } from "@/entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
 
 interface MyStreamWaveMyVoteInputProps {

@@ -1,6 +1,6 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import CreateDropReplying from "./CreateDropReplying";
 
 interface CreateDropReplyingWrapperProps {

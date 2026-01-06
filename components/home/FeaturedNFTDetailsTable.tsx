@@ -1,4 +1,4 @@
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Table } from "react-bootstrap";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { printMintDate } from "@/helpers/Helpers";

@@ -4,7 +4,7 @@ import DatePickerModal from "@/components/datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
 import { publicEnv } from "@/config/env";
 import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
-import { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
+import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { getDateFilters } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";

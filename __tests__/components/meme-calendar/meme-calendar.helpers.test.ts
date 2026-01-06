@@ -1,5 +1,6 @@
+import type {
+  ZoomLevel} from "@/components/meme-calendar/meme-calendar.helpers";
 import {
-  ZoomLevel,
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,

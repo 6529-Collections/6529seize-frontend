@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";

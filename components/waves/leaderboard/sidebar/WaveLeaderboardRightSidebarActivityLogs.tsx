@@ -1,11 +1,11 @@
 import React from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
 import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogsProps {
   readonly wave: ApiWave;

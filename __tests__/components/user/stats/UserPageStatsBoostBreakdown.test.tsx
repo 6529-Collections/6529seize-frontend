@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserPageStatsBoostBreakdown from '@/components/user/stats/UserPageStatsBoostBreakdown';
-import { ConsolidatedTDH } from '@/entities/ITDH';
+import type { ConsolidatedTDH } from '@/entities/ITDH';
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
 

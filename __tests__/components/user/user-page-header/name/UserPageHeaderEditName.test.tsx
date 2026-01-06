@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import UserPageHeaderEditName from '@/components/user/user-page-header/name/UserPageHeaderEditName';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 
 jest.mock('next/navigation', () => ({

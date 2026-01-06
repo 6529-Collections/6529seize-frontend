@@ -5,7 +5,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import WaveHeader, {
   WaveHeaderPinnedSide,
 } from "@/components/waves/header/WaveHeader";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 import { commonApiFetch } from "@/services/api/common-api";
 import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";

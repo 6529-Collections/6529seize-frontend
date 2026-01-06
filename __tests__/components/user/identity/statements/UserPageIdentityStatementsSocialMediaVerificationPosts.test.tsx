@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import UserPageIdentityStatementsSocialMediaVerificationPosts from '@/components/user/identity/statements/social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts';
-import { CicStatement } from '@/entities/IProfile';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { CicStatement } from '@/entities/IProfile';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 let capturedProps: any = null;
 

@@ -1,5 +1,5 @@
-import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
-import { WaveOverviewConfig } from "@/types/waves.types";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import type { WaveOverviewConfig } from "@/types/waves.types";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";

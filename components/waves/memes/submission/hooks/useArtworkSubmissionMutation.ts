@@ -3,14 +3,14 @@
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
-import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { ApiDropMedia } from "@/generated/models/ApiDropMedia";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { commonApiPost } from "@/services/api/common-api";
-import { TraitsData } from "../types/TraitsData";
-import { SubmissionPhase } from "../ui/SubmissionProgress";
+import type { TraitsData } from "../types/TraitsData";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { InteractiveMediaMimeType } from "../constants/media";
@@ -243,15 +243,6 @@ export function useArtworkSubmissionMutation() {
           type: "error",
         });
         return null;
-      }
-
-      // Debug logging for file info
-      if (hasFile && data.imageFile) {
-        console.log("Uploading file:", {
-          name: data.imageFile.name,
-          type: data.imageFile.type,
-          size: data.imageFile.size,
-        });
       }
 
       if (!data.traits.title) {

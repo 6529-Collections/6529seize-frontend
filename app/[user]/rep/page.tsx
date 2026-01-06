@@ -1,7 +1,7 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
-import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";

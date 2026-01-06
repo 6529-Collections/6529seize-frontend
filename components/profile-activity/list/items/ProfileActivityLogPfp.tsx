@@ -1,4 +1,4 @@
-import { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
+import type { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
 import {
     getScaledImageUri,
     ImageScale,

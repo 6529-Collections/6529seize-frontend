@@ -1,8 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import SingleWaveDropVoteSubmit, { SingleWaveDropVoteSubmitHandles } from '@/components/waves/drop/SingleWaveDropVoteSubmit';
-import { ApiDrop } from '@/generated/models/ApiDrop';
+import type { SingleWaveDropVoteSubmitHandles } from '@/components/waves/drop/SingleWaveDropVoteSubmit';
+import SingleWaveDropVoteSubmit from '@/components/waves/drop/SingleWaveDropVoteSubmit';
+import type { ApiDrop } from '@/generated/models/ApiDrop';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import * as commonApi from '@/services/api/common-api';

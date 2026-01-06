@@ -1,7 +1,8 @@
-import { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiPost } from "@/services/api/common-api";
-import { UseMutationResult, useMutation } from "@tanstack/react-query";
+import type { UseMutationResult} from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 /**
  * Custom hook for wave creation mutation

@@ -1,10 +1,11 @@
 "use client";
 
-import {
+import type {
     AllowlistOperation,
-    AllowlistOperationCode,
     CustomTokenPoolParamsToken,
-    ResolvedEns,
+    ResolvedEns} from "@/components/allowlist-tool/allowlist-tool.types";
+import {
+    AllowlistOperationCode
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolCommonModalWrapper, {
     AllowlistToolModalSize,

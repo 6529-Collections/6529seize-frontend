@@ -1,7 +1,7 @@
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiPost } from "@/services/api/common-api";
 import { CreateWaveStepStatus } from "@/types/waves.types";
 

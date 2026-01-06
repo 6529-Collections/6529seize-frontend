@@ -1,9 +1,9 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/enums";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export async function fetchCollection(
   id: string,

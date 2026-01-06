@@ -8,7 +8,8 @@ import styles from "./Delegation.module.scss";
 import { DELEGATION_ABI } from "@/abis";
 import { DELEGATION_CONTRACT } from "@/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import { ALL_USE_CASES, DelegationCollection } from "./delegation-constants";
+import type { DelegationCollection } from "./delegation-constants";
+import { ALL_USE_CASES } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import {
   DelegationAddressDisabledInput,

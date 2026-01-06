@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveContent } from "./WaveContent";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../../hooks/useSidebarState";

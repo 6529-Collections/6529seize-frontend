@@ -1,4 +1,4 @@
-import { MediaItem } from "./media-utils";
+import type { MediaItem } from "./media-utils";
 
 interface MediaThumbnailProps {
   readonly media: MediaItem;

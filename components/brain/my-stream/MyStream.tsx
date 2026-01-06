@@ -1,10 +1,10 @@
 "use client";
 
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { useSetStreamHasNewItems } from "@/contexts/TitleContext";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { TypedFeedItem } from "@/types/feed.types";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { TypedFeedItem } from "@/types/feed.types";
 import { useMemo } from "react";
 import SpinnerLoader from "../../common/SpinnerLoader";
 import FeedWrapper from "../feed/FeedWrapper";

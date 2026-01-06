@@ -3,12 +3,12 @@
 import { useState } from "react";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
-import {
+import type {
   ApiProfileRepRatesState,
   RatingStats,
 } from "@/entities/IProfile";
 import UserPageRepNewRepSearch from "./UserPageRepNewRepSearch";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AnimatePresence } from "framer-motion";
 
 export default function UserPageRepNewRep({

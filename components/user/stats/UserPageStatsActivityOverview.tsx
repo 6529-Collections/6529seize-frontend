@@ -1,10 +1,10 @@
 "use client";
 
-import {
+import type {
     AggregatedActivity,
     AggregatedActivityMemes,
 } from "@/entities/IAggregatedActivity";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Fragment, useEffect, useState } from "react";

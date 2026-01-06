@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function UserPageIdentityStatementsAddButton({

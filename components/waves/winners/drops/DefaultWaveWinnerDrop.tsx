@@ -1,11 +1,12 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import type {
+    ExtendedDrop} from "@/helpers/waves/drop.helpers";
 import {
-    ExtendedDrop,
     convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";

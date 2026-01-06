@@ -2,7 +2,7 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import { HashtagsTypeaheadOption } from "./HashtagsPlugin";
+import type { HashtagsTypeaheadOption } from "./HashtagsPlugin";
 
 export default function HashtagsTypeaheadMenuItem({
   index,

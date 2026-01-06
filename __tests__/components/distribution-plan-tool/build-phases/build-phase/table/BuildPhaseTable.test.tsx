@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import BuildPhaseTable from '@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTable';
-import { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
+import type { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
 jest.mock(
   '@/components/distribution-plan-tool/build-phases/build-phase/table/BuildPhaseTableHeader',

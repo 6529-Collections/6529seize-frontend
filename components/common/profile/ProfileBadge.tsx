@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import ProfileAvatar, { ProfileBadgeSize } from "./ProfileAvatar";
 import ProfileHandle from "./ProfileHandle";
 import ProfileLevel, { ProfileLevelSize } from "./ProfileLevel";
-import { CICType } from "@/entities/IProfile";
+import type { CICType } from "@/entities/IProfile";
 
 interface ProfileBadgeProps {
   readonly handle?: string | null | undefined;

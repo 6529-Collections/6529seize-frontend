@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import WebSidebarNavItem from "./WebSidebarNavItem";
 import WebSidebarExpandableGroup from "./WebSidebarExpandableGroup";
-import { SidebarSection } from "@/components/navigation/navTypes";
+import type { SidebarSection } from "@/components/navigation/navTypes";
 
 interface WebSidebarExpandableProps {
   readonly section: SidebarSection;

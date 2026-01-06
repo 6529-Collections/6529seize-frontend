@@ -5,17 +5,17 @@ import TransferPanel from "@/components/nft-transfer/TransferPanel";
 import { useTransfer } from "@/components/nft-transfer/TransferState";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
+import type { CollectedCard } from "@/entities/IProfile";
 import {
-  CollectedCard,
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { Page } from "@/helpers/Types";
+import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -234,7 +234,7 @@ export default function UserPageCollected({
     const items: QueryUpdateInput[] = [
       {
         name: "collection",
-        value: filters.collection === collection ? null : collection ?? null,
+        value: filters.collection === collection ? null : (collection ?? null),
       },
       {
         name: "page",
@@ -258,11 +258,12 @@ export default function UserPageCollected({
       filters.collection === CollectedCollectionType.NETWORK;
 
     if (
-      collection &&
-      collection !== CollectedCollectionType.NETWORK &&
-      !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
-        filters.sortBy
-      )
+      (collection &&
+        collection !== CollectedCollectionType.NETWORK &&
+        !COLLECTED_COLLECTIONS_META[collection].filters.sort.includes(
+          filters.sortBy
+        )) ||
+      isSwitchingFromNetwork
     ) {
       items.push({
         name: "sortBy",
@@ -276,15 +277,6 @@ export default function UserPageCollected({
       items.push({
         name: "sortBy",
         value: CollectionSort.XTDH,
-      });
-      items.push({
-        name: "sortDirection",
-        value: SortDirection.DESC,
-      });
-    } else if (isSwitchingFromNetwork) {
-      items.push({
-        name: "sortBy",
-        value: CollectionSort.TOKEN_ID,
       });
       items.push({
         name: "sortDirection",

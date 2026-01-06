@@ -1,6 +1,6 @@
 import { keepPreviousData } from "@tanstack/query-core";
 import { useQuery } from "@tanstack/react-query";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
 import GroupCard from "./GroupCard";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";

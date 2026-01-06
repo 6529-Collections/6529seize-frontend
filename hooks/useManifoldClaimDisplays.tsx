@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import {
   formatEditionSize,

@@ -9,7 +9,7 @@ import {
 } from "@/components/common/CompactMenu";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import { WaveGroupType } from "../../../WaveGroup.types";
+import type { WaveGroupType } from "../../../WaveGroup.types";
 import WaveGroupEditButton, {
   type WaveGroupEditButtonHandle,
 } from "../../WaveGroupEditButton";

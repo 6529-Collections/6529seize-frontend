@@ -1,4 +1,4 @@
-import { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 /**

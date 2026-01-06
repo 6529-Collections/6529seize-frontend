@@ -22,7 +22,7 @@ import {
   serializeNormalizedUserPageXtdhGrantedListStatuses,
   areAllGrantedStatusesNormalized,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 
 export interface UseXtdhGrantsQueryParams {
   readonly grantor: string;

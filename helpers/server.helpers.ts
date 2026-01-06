@@ -1,11 +1,12 @@
-import { ActivityLogParamsConverted } from "@/components/profile-activity/ProfileActivityLogs";
-import { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { ProfileActivityLog } from "@/entities/IProfile";
+import type { ActivityLogParamsConverted } from "@/components/profile-activity/ProfileActivityLogs";
+import type { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import type { ProfileActivityLog } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import { ProfileRatersParamsOrderBy, RateMatter } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { RateMatter } from "@/enums";
+import { ProfileRatersParamsOrderBy } from "@/enums";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import { Page } from "./Types";
+import type { Page } from "./Types";
 
 export const getUserProfile = async ({
   user,

@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import {
 } from "@/helpers/image.helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardDropRatersProps {

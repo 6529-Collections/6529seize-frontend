@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";

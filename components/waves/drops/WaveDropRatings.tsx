@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";

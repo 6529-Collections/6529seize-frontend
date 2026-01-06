@@ -1,6 +1,6 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
 
 import {

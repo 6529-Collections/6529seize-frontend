@@ -2,7 +2,7 @@
 "use client";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";

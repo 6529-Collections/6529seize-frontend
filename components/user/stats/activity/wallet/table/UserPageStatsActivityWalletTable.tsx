@@ -1,7 +1,7 @@
-import { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
-import { NextGenCollection } from "@/entities/INextgen";
-import { Transaction } from "@/entities/ITransaction";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageStatsActivityWalletTableRow from "./row/UserPageStatsActivityWalletTableRow";
 
 export default function UserPageStatsActivityWalletTable({

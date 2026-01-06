@@ -9,8 +9,8 @@ import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
-import { SubmissionPhase } from "./ui/SubmissionProgress";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { SubmissionPhase } from "./ui/SubmissionProgress";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface MemesArtSubmissionContainerProps {
@@ -63,7 +63,7 @@ const MemesArtSubmissionContainer: React.FC<
   // Phase change handler
   const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
     // Any additional phase-specific handling can be done here
-    console.log(`Submission phase changed to: ${phase}`);
+    console.warn(`Submission phase changed to: ${phase}`);
   }, []);
 
   // Handle final submission

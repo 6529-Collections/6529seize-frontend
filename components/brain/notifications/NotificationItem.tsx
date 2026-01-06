@@ -1,9 +1,9 @@
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { TypedNotification } from "@/types/feed.types";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { TypedNotification } from "@/types/feed.types";
 import { memo } from "react";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";

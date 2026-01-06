@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
 import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
 import { useSingleWaveDropData } from "./useSingleWaveDropData";

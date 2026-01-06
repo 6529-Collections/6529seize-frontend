@@ -1,7 +1,7 @@
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
-import {
+import type {
   CreateWaveGroupConfigType,
   WaveGroupsConfig,
 } from "@/types/waves.types";

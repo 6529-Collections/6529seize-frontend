@@ -1,31 +1,32 @@
 "use client";
 
-import { UserPageRepPropsRepRates } from "@/app/[user]/rep/page";
-import {
+import type { UserPageRepPropsRepRates } from "@/app/[user]/rep/page";
+import type {
   ApiProfileRepRatesState,
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
 import { RateMatter } from "@/enums";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { wait } from "@/helpers/Helpers";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
-import { CountlessPage, Page } from "@/helpers/Types";
+import type { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
+import type {
+  InfiniteData} from "@tanstack/react-query";
 import {
-  InfiniteData,
   type QueryClient,
   useQueryClient,
 } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { createContext, useMemo } from "react";
-import { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
-import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
+import type { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import {

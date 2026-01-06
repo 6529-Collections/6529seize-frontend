@@ -2,8 +2,8 @@
 
 import Pagination from "@/components/pagination/Pagination";
 import { publicEnv } from "@/config/env";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchUrl } from "@/services/6529api";
 import { useEffect, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";

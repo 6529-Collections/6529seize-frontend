@@ -1,7 +1,7 @@
 "use client";
 
 import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
-import { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
+import type { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
 

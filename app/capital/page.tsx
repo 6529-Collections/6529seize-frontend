@@ -1,6 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default function CapitalPage() {
   return (

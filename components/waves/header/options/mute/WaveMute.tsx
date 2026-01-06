@@ -3,7 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";

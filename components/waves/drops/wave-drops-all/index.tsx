@@ -8,15 +8,16 @@ import {
   useUnreadDivider,
 } from "@/contexts/wave/UnreadDividerContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { Drop, DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";

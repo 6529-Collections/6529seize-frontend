@@ -1,6 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
 import { MemesWaveSmallLeaderboardDrop } from "./MemesWaveSmallLeaderboardDrop";
 import { DefaultWaveSmallLeaderboardDrop } from "./DefaultWaveSmallLeaderboardDrop";

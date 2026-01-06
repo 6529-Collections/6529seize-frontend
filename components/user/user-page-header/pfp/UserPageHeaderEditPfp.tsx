@@ -7,13 +7,14 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
-import UserSettingsImgSelectMeme, {
+import type {
   NFTLite,
 } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import UserSettingsImgSelectMeme from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   commonApiFetch,
@@ -21,7 +22,8 @@ import {
   commonApiPostForm,
 } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import type { FormEvent} from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditPfp({

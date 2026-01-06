@@ -1,6 +1,6 @@
 "use client";
 
-import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanVerifiedIcon from "@/components/distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import {
   formatNumber,

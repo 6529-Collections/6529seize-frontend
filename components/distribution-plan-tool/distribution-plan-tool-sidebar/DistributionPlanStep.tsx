@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DistributionPlanStepDone from "./DistributionPlanStepDone";
-import { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
+import type { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DistributionPlanStepCurrent from "./DistributionPlanStepCurrent";
 import DistributionPlanStepUpcoming from "./DistributionPlanStepUpcoming";

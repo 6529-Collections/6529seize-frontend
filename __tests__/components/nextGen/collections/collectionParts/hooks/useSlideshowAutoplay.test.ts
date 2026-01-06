@@ -6,7 +6,7 @@ jest.mock('@/hooks/scroll/useIntersectionObserver', () => ({
 }));
 
 import { renderHook } from '@testing-library/react';
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { useSlideshowAutoplay } from '@/components/nextGen/collections/collectionParts/hooks/useSlideshowAutoplay';
 
 describe('useSlideshowAutoplay', () => {

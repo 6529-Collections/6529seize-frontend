@@ -6,7 +6,7 @@ jest.mock('@/components/distribution-plan-tool/distribution-plan-tool-sidebar/Di
 jest.mock('@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepUpcoming', () => (props: any) => <div data-testid="upcoming">{props.step.label}</div>);
 
 import DistributionPlanStep from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStep';
-import { DistributionPlanStepDescription } from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar';
+import type { DistributionPlanStepDescription } from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar';
 
 const step: DistributionPlanStepDescription = { label: 'A', description: 'B', key: 1 as any, order: 1 };
 

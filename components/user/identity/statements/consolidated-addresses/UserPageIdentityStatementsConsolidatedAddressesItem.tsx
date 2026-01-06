@@ -11,7 +11,7 @@ import {
   DELEGATION_CONTRACT,
   NEVER_DATE,
 } from "@/constants";
-import { ApiWallet } from "@/generated/models/ApiWallet";
+import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";

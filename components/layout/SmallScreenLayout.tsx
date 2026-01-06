@@ -2,7 +2,8 @@
 
 import { useHeaderContext } from "@/contexts/HeaderContext";
 import { useSearchParams } from "next/navigation";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import type { ReactNode} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider } from "../../hooks/useSidebarState";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";

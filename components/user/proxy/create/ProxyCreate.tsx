@@ -1,12 +1,12 @@
 "use client";
 
 import { ProxyMode } from "../UserPageProxy";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import ProxyCreateTargetSearch from "./target/ProxyCreateTargetSearch";
 import { useMutation } from "@tanstack/react-query";
-import { ApiCreateNewProfileProxy } from "@/generated/models/ApiCreateNewProfileProxy";
+import type { ApiCreateNewProfileProxy } from "@/generated/models/ApiCreateNewProfileProxy";
 import { commonApiPost } from "@/services/api/common-api";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { useContext, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";

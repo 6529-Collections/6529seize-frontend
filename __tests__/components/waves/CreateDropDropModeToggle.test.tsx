@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { CreateDropDropModeToggle } from "@/components/waves/CreateDropDropModeToggle";
-import { ChatRestriction, DropPrivileges } from "@/hooks/useDropPriviledges";
+import type { DropPrivileges } from "@/hooks/useDropPriviledges";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 
 function setup(props: Partial<{isDropMode:boolean; privileges:DropPrivileges}> = {}) {
   const onDropModeChange = jest.fn();

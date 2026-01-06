@@ -1,9 +1,9 @@
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import RepCategorySearch, {
   RepCategorySearchSize,
 } from "@/components/utils/input/rep-category/RepCategorySearch";
-import { CreditDirection } from "../GroupCard";
+import type { CreditDirection } from "../GroupCard";
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
 
 import type { JSX } from "react";

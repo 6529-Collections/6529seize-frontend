@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
-import { CreateWaveDatesConfig } from "@/types/waves.types";
+import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import DateAccordion from "@/components/common/DateAccordion";
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";

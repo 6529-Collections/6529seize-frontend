@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import UserPageIdentityAddStatementsSocialMediaAccountHeader from "./UserPageIdentityAddStatementsSocialMediaAccountHeader";
+import type {
+  SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
-  SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
 } from "@/helpers/Types";
 import UserPageIdentityAddStatementsSocialMediaAccountItems from "./UserPageIdentityAddStatementsSocialMediaAccountItems";
 import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageIdentityAddStatementsSocialMediaAccount({
   onClose,

@@ -2,11 +2,12 @@
 
 import React, { useCallback, useMemo } from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import { TraitsData } from "../types/TraitsData";
+import type { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "@/components/waves/memes/MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
-import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
+import SubmissionProgress from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
 import type {
   InteractiveMediaMimeType,

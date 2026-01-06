@@ -1,14 +1,15 @@
 "use client";
 
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
-import { Drop } from "@/helpers/waves/drop.helpers";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { Drop } from "@/helpers/waves/drop.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+import type {
+  ReactNode} from "react";
 import React, {
   createContext,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -16,19 +17,22 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { WaveMessages } from "./hooks/types";
+import type { WaveMessages } from "./hooks/types";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedDmWavesList from "./hooks/useEnhancedDmWavesList";
-import useEnhancedWavesList, {
+import type {
   MinimalWave,
 } from "./hooks/useEnhancedWavesList";
+import useEnhancedWavesList from "./hooks/useEnhancedWavesList";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
-import useWaveMessagesStore, {
+import type {
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
-import { NextPageProps } from "./hooks/useWavePagination";
+import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
+import type { NextPageProps } from "./hooks/useWavePagination";
+import type {
+  ProcessIncomingDropType} from "./hooks/useWaveRealtimeUpdater";
 import {
-  ProcessIncomingDropType,
   useWaveRealtimeUpdater,
 } from "./hooks/useWaveRealtimeUpdater";
 

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import UserPageStatsActivityWalletTable from '@/components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTable';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
-import { Transaction } from '@/entities/ITransaction';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { Transaction } from '@/entities/ITransaction';
 
 jest.mock('@/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRow', () => ({
   __esModule: true,

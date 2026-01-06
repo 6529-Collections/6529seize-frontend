@@ -8,7 +8,7 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { NULL_ADDRESS } from "@/constants";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   capitalizeFirstChar,
@@ -24,10 +24,11 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,
 } from "@/components/nextGen/nextgen_contracts";
-import {
+import type {
   ProofResponse,
-  Status,
-  TokensPerAddress,
+  TokensPerAddress} from "@/components/nextGen/nextgen_entities";
+import {
+  Status
 } from "@/components/nextGen/nextgen_entities";
 import {
   getStatusFromDates,

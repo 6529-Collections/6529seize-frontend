@@ -1,5 +1,5 @@
-import { ReferencedNft } from "@/entities/IDrop";
-import { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
+import type { ReferencedNft } from "@/entities/IDrop";
+import type { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export default function DropListItemContentNftDetails({

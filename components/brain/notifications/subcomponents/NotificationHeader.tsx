@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { parseIpfsUrl } from "@/helpers/Helpers";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 
 interface NotificationHeaderProps {
   readonly author: ApiProfileMin;

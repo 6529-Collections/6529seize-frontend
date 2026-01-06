@@ -1,5 +1,5 @@
 import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
-import { CreatePhasesPhase } from "../CreatePhases";
+import type { CreatePhasesPhase } from "../CreatePhases";
 import CreatePhasesTableBody from "./CreatePhasesTableBody";
 import CreatePhasesTableHeader from "./CreatePhasesTableHeader";
 

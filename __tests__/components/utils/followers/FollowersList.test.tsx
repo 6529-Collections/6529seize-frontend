@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ApiIdentityAndSubscriptionActions } from '@/generated/models/ApiIdentityAndSubscriptionActions';
+import type { ApiIdentityAndSubscriptionActions } from '@/generated/models/ApiIdentityAndSubscriptionActions';
 
 // Mock the Follower component
 const Follower = jest.fn(({ follower }: any) => <div data-testid="follower">{follower.identity.handle}</div>);

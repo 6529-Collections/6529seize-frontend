@@ -1,4 +1,4 @@
-import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
 export default function GroupCreateLevel({

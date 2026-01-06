@@ -1,6 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatAddress } from "@/helpers/Helpers";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import AppWalletPageClient from "./page.client";
 
 export default async function AppWalletPage({

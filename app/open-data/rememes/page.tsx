@@ -1,7 +1,7 @@
 import styles from "@/styles/Home.module.scss";
 import CommunityDownloadsRememes from "@/components/community-downloads/CommunityDownloadsRememes";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default function RememesDownloads() {
   return (

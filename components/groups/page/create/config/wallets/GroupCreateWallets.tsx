@@ -6,7 +6,7 @@ import {
   faTrash,
   faWallet,
 } from "@fortawesome/free-solid-svg-icons";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { dedupeWallets, walletListsMatch } from "@/helpers/WalletHelpers";
 import { AuthContext } from "@/components/auth/Auth";

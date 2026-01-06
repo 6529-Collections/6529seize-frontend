@@ -14,8 +14,8 @@ import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
 import { useTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFT, Rememe } from "@/entities/INFT";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
@@ -468,22 +468,20 @@ export default function RememePage(props: Readonly<Props>) {
                           </tr>
                         );
                       }
-                    } else {
-                      if (k !== "attributes") {
-                        return Object.keys(value).map((j: any) => {
-                          if (typeof value[j] === "string") {
-                            return (
-                              <tr key={j}>
-                                <td>
-                                  {k}::{j}
-                                </td>
-                                <td>{value[j]}</td>
-                              </tr>
-                            );
-                          }
-                          return;
-                        });
-                      }
+                    } else if (k !== "attributes") {
+                      return Object.keys(value).map((j: any) => {
+                        if (typeof value[j] === "string") {
+                          return (
+                            <tr key={j}>
+                              <td>
+                                {k}::{j}
+                              </td>
+                              <td>{value[j]}</td>
+                            </tr>
+                          );
+                        }
+                        return;
+                      });
                     }
                     return;
                   })}

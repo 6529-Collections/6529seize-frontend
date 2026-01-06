@@ -1,5 +1,5 @@
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { Time } from "@/helpers/time";
 import ProxyActionRow from "./ProxyActionRow";
 

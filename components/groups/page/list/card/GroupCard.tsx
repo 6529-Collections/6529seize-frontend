@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import { useRouter } from "next/navigation";

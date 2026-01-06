@@ -1,6 +1,6 @@
 import React from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
 import { ImageScale } from "@/helpers/image.helpers";

@@ -1,17 +1,17 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { AuthContext } from "@/components/auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "@/services/api/common-api";
-import { CommunityMembersQuery } from "@/app/network/page";
+import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
-import { Page } from "@/helpers/Types";
-import { CommunityMemberOverview } from "@/entities/IProfile";
+import type { Page } from "@/helpers/Types";
+import type { CommunityMemberOverview } from "@/entities/IProfile";
 import { CommunityMembersSortOption } from "@/enums";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";

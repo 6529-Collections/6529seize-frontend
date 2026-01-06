@@ -1,7 +1,8 @@
 "use client";
 
+import type {
+    AllowlistOperation} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-    AllowlistOperation,
     AllowlistOperationCode,
     Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";

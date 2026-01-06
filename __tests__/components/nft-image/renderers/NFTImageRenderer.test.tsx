@@ -1,6 +1,6 @@
 import NFTImageRenderer from "@/components/nft-image/renderers/NFTImageRenderer";
-import { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
-import { BaseNFT } from "@/entities/INFT";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
+import type { BaseNFT } from "@/entities/INFT";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 // Mock next/image

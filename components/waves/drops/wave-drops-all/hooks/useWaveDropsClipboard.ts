@@ -1,13 +1,15 @@
 "use client";
 
-import { RefObject, useEffect, useMemo, useRef } from "react";
-import {
+import type { RefObject} from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type {
   Drop,
-  DropSize,
-  ExtendedDrop,
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import {
+  DropSize
 } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 
 type ClipboardFormat = "plain" | "markdown";
 

@@ -3,7 +3,7 @@
 import Download from "@/components/download/Download";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
-import { MemesExtendedData, NFT } from "@/entities/INFT";
+import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import {
   enterArtFullScreen,
   fullScreenSupported,

@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiWave } from "@/generated/models/ObjectSerializer";
+import type { ApiWave } from "@/generated/models/ObjectSerializer";
 import { useAuth } from "@/components/auth/Auth";
 import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";

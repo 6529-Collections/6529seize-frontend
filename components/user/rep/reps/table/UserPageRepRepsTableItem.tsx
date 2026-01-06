@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { RatingStats } from "@/entities/IProfile";
+import type { RatingStats } from "@/entities/IProfile";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "@/components/user/rep/modify-rep/UserPageRepModifyModal";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AnimatePresence } from "framer-motion";
 export default function UserPageRepRepsTableItem({
   rep,

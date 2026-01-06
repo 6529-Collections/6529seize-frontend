@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
+import type {
   CreateWaveDatesConfig,
-  CreateWaveOutcomeConfig,
+  CreateWaveOutcomeConfig} from "@/types/waves.types";
+import {
   CreateWaveOutcomeType,
   CreateWaveOutcomeConfigWinnersCreditValueType,
 } from "@/types/waves.types";

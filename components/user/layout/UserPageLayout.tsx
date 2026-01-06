@@ -1,5 +1,5 @@
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ReactNode } from "react";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ReactNode } from "react";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import UserPageClientHydrator from "./UserPageClientHydrator";
 import UserPageTabs from "./UserPageTabs";

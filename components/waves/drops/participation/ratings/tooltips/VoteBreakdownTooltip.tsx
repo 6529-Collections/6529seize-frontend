@@ -4,9 +4,9 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { RatingsData } from "../types";
+import type { RatingsData } from "../types";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
 import { useIdentity } from "@/hooks/useIdentity";

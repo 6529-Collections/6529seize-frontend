@@ -1,10 +1,11 @@
 "use client";
 
+import type {
+  ReactNode} from "react";
 import React, {
   useState,
   useRef,
   useEffect,
-  ReactNode,
   useCallback,
 } from "react";
 import { DropSize } from "@/helpers/waves/drop.helpers";

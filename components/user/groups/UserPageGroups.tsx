@@ -2,8 +2,8 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import GroupsList from "@/components/groups/page/list/GroupsList";
-import { GroupsRequestParams } from "@/entities/IGroup";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { GroupsRequestParams } from "@/entities/IGroup";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 export default function UserPageGroups({

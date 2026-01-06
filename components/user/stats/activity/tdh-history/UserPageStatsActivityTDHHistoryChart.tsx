@@ -10,7 +10,7 @@ import {
     PointElement,
     Tooltip,
 } from "chart.js";
-import { ChartProps } from "./UserPageStatsActivityTDHHistoryCharts";
+import type { ChartProps } from "./UserPageStatsActivityTDHHistoryCharts";
 
 ChartJS.register(
   CategoryScale,

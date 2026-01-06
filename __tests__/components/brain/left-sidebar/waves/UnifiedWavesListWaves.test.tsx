@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from '@/components/brain/left-sidebar/waves/UnifiedWavesListWaves';
+import type { UnifiedWavesListWavesHandle } from '@/components/brain/left-sidebar/waves/UnifiedWavesListWaves';
+import UnifiedWavesListWaves from '@/components/brain/left-sidebar/waves/UnifiedWavesListWaves';
 import { useShowFollowingWaves } from '@/hooks/useShowFollowingWaves';
 import { useAuth } from '@/components/auth/Auth';
 import { useVirtualizedWaves } from '@/hooks/useVirtualizedWaves';

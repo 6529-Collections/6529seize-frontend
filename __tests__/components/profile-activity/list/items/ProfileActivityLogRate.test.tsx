@@ -1,6 +1,7 @@
 import ProfileActivityLogRate from "@/components/profile-activity/list/items/ProfileActivityLogRate";
+import type {
+  ProfileActivityLogRatingEdit} from "@/entities/IProfile";
 import {
-  ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
 } from "@/entities/IProfile";
 import { RateMatter } from "@/enums";

@@ -1,6 +1,6 @@
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
-import { ProfileActivityLog } from "@/entities/IProfile";
+import type { ProfileActivityLog } from "@/entities/IProfile";
 import { ProfileActivityLogType, RateMatter } from "@/enums";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 

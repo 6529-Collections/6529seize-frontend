@@ -12,13 +12,14 @@ import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveActions from "./utils/CreateWaveActions";
-import CreateWaveDescription, {
+import type {
   CreateWaveDescriptionHandles,
 } from "./description/CreateWaveDescription";
+import CreateWaveDescription from "./description/CreateWaveDescription";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
 import { useRouter } from "next/navigation";
 import { generateDropPart } from "./services/waveMediaService";
 import { getAdminGroupId } from "./services/waveGroupService";
@@ -27,7 +28,7 @@ import { useWaveConfig } from "./hooks/useWaveConfig";
 import useCapacitor from "@/hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
 import { multiPartUpload } from "./services/multiPartUpload";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 export default function CreateWave({

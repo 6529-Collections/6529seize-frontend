@@ -1,7 +1,8 @@
 "use client";
 
+import type {
+  WaveGroupManageIdentitiesConfirmEvent} from "../../WaveGroupManageIdentitiesModal";
 import WaveGroupManageIdentitiesModal, {
-  WaveGroupManageIdentitiesConfirmEvent,
   WaveGroupManageIdentitiesMode,
 } from "../../WaveGroupManageIdentitiesModal";
 import { WaveGroupIdentitiesModal } from "../hooks/useWaveGroupEditButtonsController";

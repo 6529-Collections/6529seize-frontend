@@ -1,6 +1,6 @@
 import StartDates from "@/components/waves/create-wave/dates/StartDates";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { CreateWaveDatesConfig } from "@/types/waves.types";
+import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/components/utils/calendar/CommonCalendar", () => {

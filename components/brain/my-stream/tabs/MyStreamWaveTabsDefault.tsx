@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import { useSidebarState } from "../../../../hooks/useSidebarState";

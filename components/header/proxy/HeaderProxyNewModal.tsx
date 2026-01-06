@@ -1,7 +1,7 @@
 "use client";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 

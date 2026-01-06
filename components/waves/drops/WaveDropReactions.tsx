@@ -8,16 +8,16 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { useEmoji } from "@/contexts/EmojiContext";
-import { ApiDropReaction } from "@/generated/models/ApiDropReaction";
+import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { Tooltip } from "react-tooltip";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
 import clsx from "clsx";
-import { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
+import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {

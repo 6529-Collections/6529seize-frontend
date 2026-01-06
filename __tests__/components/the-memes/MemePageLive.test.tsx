@@ -3,7 +3,7 @@ import {
   MemePageLiveRightMenu,
   MemePageLiveSubMenu,
 } from "@/components/the-memes/MemePageLive";
-import { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

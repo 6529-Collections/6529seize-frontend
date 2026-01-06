@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 
 interface MemeDropActionsProps {

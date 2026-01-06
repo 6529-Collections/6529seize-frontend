@@ -1,6 +1,6 @@
 import { render, act, fireEvent } from '@testing-library/react';
 import UserPageHeaderEditClassification from '@/components/user/user-page-header/name/classification/UserPageHeaderEditClassification';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';

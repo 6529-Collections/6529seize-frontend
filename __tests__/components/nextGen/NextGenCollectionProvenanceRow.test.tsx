@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { NextGenCollectionProvenanceRow } from '@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance';
-import { NextGenCollection, NextGenLog } from '@/entities/INextgen';
+import type { NextGenCollection, NextGenLog } from '@/entities/INextgen';
 
 jest.mock('next/image', () => ({__esModule:true, default: (props:any) => <img {...props} />}));
 

@@ -4,7 +4,8 @@ import type { MinimalWave } from '@/contexts/wave/hooks/useEnhancedWavesList';
 import BrainLeftSidebarWaveDropTime from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime';
 import BrainLeftSidebarWavePin from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin';
 import { WaveAvatar } from './WaveAvatar';
-import { WaveTooltip, WaveTooltipPlacement } from './WaveTooltip';
+import type { WaveTooltipPlacement } from './WaveTooltip';
+import { WaveTooltip } from './WaveTooltip';
 
 interface ExpandedWaveProps {
   readonly formattedWaveName: string;

@@ -1,5 +1,5 @@
 import React from "react";
-import { DecisionPoint } from "@/helpers/waves/time.types";
+import type { DecisionPoint } from "@/helpers/waves/time.types";
 import { HorizontalTimelineDot } from "./HorizontalTimelineDot";
 import { Time } from "@/helpers/time";
 

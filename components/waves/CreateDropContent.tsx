@@ -1,31 +1,32 @@
 "use client";
 
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-import {
+import type {
   CreateDropConfig,
   CreateDropPart,
   CreateDropRequestPart,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
-import { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { DropPrivileges } from "@/hooks/useDropPriviledges";
+import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { selectEditingDropId } from "@/store/editSlice";
+import type {
+  ActiveDropState} from "@/types/dropInteractionTypes";
 import {
-  ActiveDropAction,
-  ActiveDropState,
+  ActiveDropAction
 } from "@/types/dropInteractionTypes";
 import { AnimatePresence, motion } from "framer-motion";
-import { EditorState } from "lexical";
+import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
 import React, {
   memo,
@@ -46,7 +47,8 @@ import CreateDropActions from "./CreateDropActions";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
-import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
+import type { CreateDropInputHandles } from "./CreateDropInput";
+import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
@@ -54,8 +56,8 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ApiIdentity } from "@/generated/models/ObjectSerializer";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
@@ -65,12 +67,13 @@ import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
-import { DropMutationBody } from "./CreateDrop";
+import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
+import type {
+  MissingRequirements} from "./utils/getMissingRequirements";
 import {
-  getMissingRequirements,
-  MissingRequirements,
+  getMissingRequirements
 } from "./utils/getMissingRequirements";
 
 // Use next/dynamic for lazy loading with SSR support

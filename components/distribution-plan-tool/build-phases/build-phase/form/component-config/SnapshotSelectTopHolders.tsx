@@ -7,13 +7,15 @@ import {
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { useContext, useEffect, useState } from "react";
+import type {
+    PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
 import {
-    PhaseGroupSnapshotConfig,
     TopHolderType,
 } from "../BuildPhaseFormConfigModal";
-import BuildPhaseFormConfigModalSidebar, {
+import type {
     BuildPhaseFormConfigModalSidebarOption,
 } from "./BuildPhaseFormConfigModalSidebar";
+import BuildPhaseFormConfigModalSidebar from "./BuildPhaseFormConfigModalSidebar";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
@@ -123,9 +125,9 @@ export default function SnapshotSelectTopHolders({
     const missingTopHolderTypeError = !topHolderType;
 
     const localUniqueWalletsHigherThanTotalError =
-      !!localUniqueWalletsCount &&
-      !!config.uniqueWalletsCount &&
-      !!(localUniqueWalletsCount > config.uniqueWalletsCount);
+      typeof localUniqueWalletsCount === "number" &&
+      typeof config.uniqueWalletsCount === "number" &&
+      localUniqueWalletsCount > config.uniqueWalletsCount;
 
     const fromAndToMissingError =
       typeof from !== "number" && typeof to !== "number";

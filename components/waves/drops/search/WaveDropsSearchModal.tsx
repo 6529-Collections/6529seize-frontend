@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";

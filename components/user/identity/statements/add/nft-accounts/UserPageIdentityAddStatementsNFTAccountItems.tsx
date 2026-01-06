@@ -1,5 +1,6 @@
+import type {
+  NFT_ACCOUNTS_STATEMENT_TYPE} from "@/helpers/Types";
 import {
-  NFT_ACCOUNTS_STATEMENT_TYPE,
   NFT_ACCOUNTS_STATEMENT_TYPES,
 } from "@/helpers/Types";
 import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";

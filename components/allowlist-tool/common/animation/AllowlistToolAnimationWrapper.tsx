@@ -1,4 +1,5 @@
-import { AnimatePresence, AnimatePresenceProps } from "framer-motion";
+import type { AnimatePresenceProps } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import React from "react";
 
 export default function AllowlistToolAnimationWrapper({

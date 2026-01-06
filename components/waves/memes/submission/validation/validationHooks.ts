@@ -2,9 +2,9 @@
 
 import { publicEnv } from "@/config/env";
 import { useCallback, useMemo, useState } from "react";
-import { TraitsData } from "../types/TraitsData";
+import type { TraitsData } from "../types/TraitsData";
 import { validateTraitsData } from "./traitsValidation";
-import { ValidationOptions, ValidationResult } from "./validationTypes";
+import type { ValidationOptions, ValidationResult } from "./validationTypes";
 
 /**
  * Custom hook for form validation
@@ -101,7 +101,7 @@ export function useTraitsValidation(
           fieldElement = element;
           break;
         }
-      } catch (error) {
+      } catch {
         // Some selectors might not be supported in all browsers
         // Just continue to the next strategy
         continue;
@@ -123,7 +123,7 @@ export function useTraitsValidation(
             block: "center",
             inline: "nearest",
           });
-        } catch (scrollError) {
+        } catch {
           // Fallback for older browsers
           fieldElement.scrollIntoView(false);
         }
@@ -133,7 +133,7 @@ export function useTraitsValidation(
         setTimeout(() => {
           fieldElement?.classList.remove("tw-highlight-focus");
         }, 2000);
-      } catch (focusError) {
+      } catch {
         // Last resort: just scroll to the general area
         const rect = fieldElement.getBoundingClientRect();
         window.scrollTo({

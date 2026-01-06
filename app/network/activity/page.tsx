@@ -1,6 +1,6 @@
 import { getUserProfileActivityLogs } from "@/helpers/server.helpers";
-import { CountlessPage } from "@/helpers/Types";
-import { ProfileActivityLog } from "@/entities/IProfile";
+import type { CountlessPage } from "@/helpers/Types";
+import type { ProfileActivityLog } from "@/entities/IProfile";
 import CommunityActivityPageClient from "./page.client";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import {

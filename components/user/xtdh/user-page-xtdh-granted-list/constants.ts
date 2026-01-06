@@ -2,10 +2,12 @@ import { SortDirection } from "@/entities/ISort";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 
 import type {
+  GrantedActiveFilter,
   GrantedFilterStatus,
   GrantedFilterStatuses,
   GrantedSortField,
   GrantedStatusCounts,
+  GrantedTab,
 } from "./types";
 
 // DEFAULT_STATUSES represents the canonical "all statuses" sentinel ("ALL" only).
@@ -36,14 +38,14 @@ export const GRANTED_TABS = [
   { key: "PENDING", label: "Pending", value: "PENDING" },
   { key: "REVOKED", label: "Revoked", value: "REVOKED" },
   { key: "FAILED", label: "Failed", value: "FAILED" },
-] as const satisfies ReadonlyArray<CommonSelectItem<import("./types").GrantedTab>>;
+] as const satisfies ReadonlyArray<CommonSelectItem<GrantedTab>>;
 
 export const GRANTED_ACTIVE_FILTERS = [
   { key: "ALL", label: "All", value: "ALL" },
   { key: "ENDED", label: "Ended", value: "ENDED" },
   { key: "ACTIVE", label: "Active", value: "ACTIVE" },
   { key: "NOT_STARTED", label: "Not Started", value: "NOT_STARTED" },
-] as const satisfies ReadonlyArray<CommonSelectItem<import("./types").GrantedActiveFilter>>;
+] as const satisfies ReadonlyArray<CommonSelectItem<GrantedActiveFilter>>;
 
 const STATUS_ORDER = BASE_STATUS_ITEMS.map((item) => item.value);
 const STATUS_SET = new Set<string>(STATUS_ORDER);
@@ -85,10 +87,7 @@ export function normalizeGrantedStatuses(
     return DEFAULT_STATUSES;
   }
 
-  if (
-    orderedStatuses.length === 1 &&
-    orderedStatuses[0] === DEFAULT_STATUS
-  ) {
+  if (orderedStatuses.length === 1 && orderedStatuses[0] === DEFAULT_STATUS) {
     return DEFAULT_STATUSES;
   }
 
@@ -149,9 +148,7 @@ export function serializeNormalizedUserPageXtdhGrantedListStatuses(
 export function areAllGrantedStatuses(
   statuses: GrantedFilterStatuses
 ): boolean {
-  return areAllGrantedStatusesNormalized(
-    normalizeGrantedStatuses(statuses)
-  );
+  return areAllGrantedStatusesNormalized(normalizeGrantedStatuses(statuses));
 }
 
 export function areAllGrantedStatusesNormalized(
@@ -178,7 +175,9 @@ export function parseUserPageXtdhGrantedListSortDirection(
 ): SortDirection {
   if (!value) return DEFAULT_DIRECTION;
   const normalized = value.trim().toUpperCase();
-  return normalized === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC;
+  return normalized === SortDirection.ASC
+    ? SortDirection.ASC
+    : SortDirection.DESC;
 }
 
 export function normalizeUserPageXtdhGrantedListSortDirection(
@@ -186,7 +185,9 @@ export function normalizeUserPageXtdhGrantedListSortDirection(
 ): SortDirection {
   const normalized =
     typeof value === "string" ? value.trim().toUpperCase() : value;
-  return normalized === SortDirection.ASC ? SortDirection.ASC : SortDirection.DESC;
+  return normalized === SortDirection.ASC
+    ? SortDirection.ASC
+    : SortDirection.DESC;
 }
 
 export function formatUserPageXtdhGrantedListStatusLabel(
@@ -212,17 +213,46 @@ export function getUserPageXtdhGrantedListStatusItems(
   }));
 }
 
-export function getApiParamsFromFilters(
-  tab: import("./types").GrantedTab,
-  subFilter: import("./types").GrantedActiveFilter
-): {
+type GrantedApiParams = {
   readonly statuses: GrantedFilterStatuses;
   readonly validFromGt?: number | undefined;
   readonly validFromLt?: number | undefined;
   readonly validToGt?: number | undefined;
   readonly validToLt?: number | undefined;
-} {
+};
+
+const getActiveTabApiParams = (
+  subFilter: GrantedActiveFilter,
+  now: number
+): GrantedApiParams => {
+  switch (subFilter) {
+    case "ENDED":
+      return { statuses: ["GRANTED"], validToLt: now };
+    case "ACTIVE":
+      // Active: Started (validFrom < now) AND (Not ended (validTo > now) OR validTo is null)
+      // API supports validToGt including nulls.
+      return {
+        statuses: ["GRANTED"],
+        validFromLt: now,
+        validToGt: now,
+      };
+    case "NOT_STARTED":
+      return { statuses: ["GRANTED"], validFromGt: now };
+    case "ALL":
+    default:
+      return { statuses: ["GRANTED"] };
+  }
+};
+
+export function getApiParamsFromFilters(
+  tab: GrantedTab,
+  subFilter: GrantedActiveFilter
+): GrantedApiParams {
   const now = Date.now();
+
+  if (tab === "ACTIVE") {
+    return getActiveTabApiParams(subFilter, now);
+  }
 
   switch (tab) {
     case "PENDING":
@@ -231,24 +261,6 @@ export function getApiParamsFromFilters(
       return { statuses: ["DISABLED"] };
     case "FAILED":
       return { statuses: ["FAILED"] };
-    case "ACTIVE":
-      switch (subFilter) {
-        case "ENDED":
-          return { statuses: ["GRANTED"], validToLt: now };
-        case "ACTIVE":
-          // Active: Started (validFrom < now) AND (Not ended (validTo > now) OR validTo is null)
-          // API supports validToGt including nulls.
-          return {
-            statuses: ["GRANTED"],
-            validFromLt: now,
-            validToGt: now,
-          };
-        case "NOT_STARTED":
-          return { statuses: ["GRANTED"], validFromGt: now };
-        case "ALL":
-        default:
-          return { statuses: ["GRANTED"] };
-      }
     default:
       return { statuses: ["GRANTED"] };
   }

@@ -5,7 +5,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AnimatePresence, motion } from "framer-motion";
 import GroupCardDelete from "./delete/GroupCardDelete";
 

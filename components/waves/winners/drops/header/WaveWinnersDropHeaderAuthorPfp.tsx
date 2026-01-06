@@ -1,4 +1,4 @@
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersDropHeaderAuthorPfpProps {
   readonly winner: ApiWaveDecisionWinner;

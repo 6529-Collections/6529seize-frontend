@@ -1,4 +1,4 @@
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import GroupCreateIdentitiesSearchItem from "./GroupCreateIdentitiesSearchItem";
 
 export default function GroupCreateIdentitiesSearchItemsContent({

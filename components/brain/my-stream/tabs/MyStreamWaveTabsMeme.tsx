@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
@@ -9,9 +9,10 @@ import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 import { useWave } from "../../../../hooks/useWave";
 import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
 import { Time } from "../../../../helpers/time";
+import type {
+  TimeLeft} from "../../../../helpers/waves/time.utils";
 import {
-  calculateTimeLeft,
-  TimeLeft,
+  calculateTimeLeft
 } from "../../../../helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
 import { useSidebarState } from "../../../../hooks/useSidebarState";

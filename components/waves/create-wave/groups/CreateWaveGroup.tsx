@@ -1,14 +1,15 @@
 "use client";
 
+import type {
+  WaveGroupsConfig} from "@/types/waves.types";
 import {
-  CreateWaveGroupConfigType,
-  WaveGroupsConfig,
+  CreateWaveGroupConfigType
 } from "@/types/waves.types";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import CreateWaveToggle from "../utils/CreateWaveToggle";
 import CreateWaveGroupSearchField from "./CreateWaveGroupSearchField";

@@ -2,8 +2,9 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
+import type {
+  ManifoldClaim} from "@/hooks/useManifoldClaim";
 import {
-  ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
   useMemesManifoldClaim,

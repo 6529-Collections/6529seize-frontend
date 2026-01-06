@@ -3,14 +3,16 @@
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import {
-  DropSize,
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type {
   Drop as DropType,
-  ExtendedDrop,
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import {
+  DropSize
 } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { memo, RefObject, useCallback, useMemo } from "react";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { RefObject} from "react";
+import { memo, useCallback, useMemo } from "react";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
 

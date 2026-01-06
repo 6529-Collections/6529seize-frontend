@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ArtistActiveSubmissionContent } from '@/components/waves/drops/ArtistActiveSubmissionContent';
-import { ApiProfileMin } from '@/generated/models/ApiProfileMin';
+import type { ApiProfileMin } from '@/generated/models/ApiProfileMin';
 
 // Mock dependencies
 const mockPush = jest.fn();

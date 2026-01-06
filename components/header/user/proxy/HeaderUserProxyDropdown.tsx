@@ -9,8 +9,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";

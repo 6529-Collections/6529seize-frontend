@@ -1,6 +1,7 @@
 "use client";
 
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import type { ReactNode} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -8,7 +9,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
@@ -18,7 +20,7 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
 import { useWave } from "@/hooks/useWave";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";

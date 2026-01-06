@@ -1,4 +1,4 @@
-import { NftRank, NftTDH } from "./INFT";
+import type { NftRank, NftTDH } from "./INFT";
 
 export interface TDHBoostBreakdown {
   available: number;

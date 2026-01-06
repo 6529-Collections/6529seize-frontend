@@ -2,7 +2,7 @@ import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchWavesOverview } from "@/helpers/stream.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getAppMetadata } from "@/components/providers/metadata";
 import WavesPageClient from "./page.client";
 import { Time } from "@/helpers/time";

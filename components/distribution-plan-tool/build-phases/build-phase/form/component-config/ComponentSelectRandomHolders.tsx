@@ -8,9 +8,10 @@ import {
     PhaseConfigStep,
     RandomHoldersType,
 } from "../BuildPhaseFormConfigModal";
-import BuildPhaseFormConfigModalSidebar, {
+import type {
     BuildPhaseFormConfigModalSidebarOption,
 } from "./BuildPhaseFormConfigModalSidebar";
+import BuildPhaseFormConfigModalSidebar from "./BuildPhaseFormConfigModalSidebar";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";

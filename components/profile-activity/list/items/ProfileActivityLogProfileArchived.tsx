@@ -1,4 +1,4 @@
-import { ProfileActivityLogArchived } from "@/entities/IProfile";
+import type { ProfileActivityLogArchived } from "@/entities/IProfile";
 
 export default function ProfileActivityLogProfileArchived({
   log,
