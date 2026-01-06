@@ -12,6 +12,7 @@ import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
+import { WaveDropAdditionalInfo } from "./WaveDropAdditionalInfo";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
@@ -178,11 +179,11 @@ export const MemesSingleWaveDropInfoPanel = ({
         <div className="tw-px-4 tw-pb-8 sm:tw-px-6 md:tw-pb-10 xl:tw-px-20">
           <div className="tw-mx-auto tw-max-w-3xl tw-space-y-8">
             <SingleWaveDropTraits drop={drop} />
-
             <SingleWaveDropInfoDetails drop={drop} />
+            <WaveDropAdditionalInfo drop={drop} />
 
             {artworkMedia && fileInfo && (
-              <div className="tw-flex tw-items-center tw-gap-x-3">
+              <div className="tw-flex tw-items-center tw-gap-x-3 tw-border-t tw-border-iron-800 tw-pt-8 tw-border-x-0 tw-border-solid tw-border-b-0 tw-mt-8">
                 <span className="tw-text-xs tw-font-medium tw-text-iron-600">
                   Media Type:{" "}
                   <span className="tw-text-iron-400">

@@ -14,6 +14,9 @@ import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { InteractiveMediaMimeType } from "../constants/media";
+import { validateStrictAddress } from "../utils/addressValidation";
+
+import { OperationalData } from "../types/OperationalData";
 
 /**
  * Interface for the artwork submission data
@@ -27,6 +30,7 @@ interface ArtworkSubmissionData {
       }
     | undefined;
   traits: TraitsData;
+  operationalData?: OperationalData;
   waveId: string;
   termsOfService: string | null;
 }
@@ -34,16 +38,16 @@ interface ArtworkSubmissionData {
 /**
  * Function to transform form data into API request format
  */
-const transformToApiRequest = (data: {
+export const transformToApiRequest = (data: {
   waveId: string;
   traits: TraitsData;
+  operationalData?: OperationalData | undefined;
   mediaUrl: string;
   mimeType: string;
   signerAddress: string;
   isSafeSignature: boolean;
 }): ApiCreateDropRequest => {
-  const { waveId, traits, mediaUrl, mimeType, signerAddress, isSafeSignature } =
-    data;
+  const { waveId, traits, operationalData, mediaUrl, mimeType, signerAddress, isSafeSignature } = data;
 
   // Create metadata array from trait data
   const metadata: ApiDropMetadata[] = Object.entries(traits)
@@ -55,6 +59,57 @@ const transformToApiRequest = (data: {
       (metadata) =>
         metadata.data_value !== undefined && metadata.data_value.length > 0
     );
+
+  // Append operational data if provided
+  if (operationalData) {
+    if (operationalData.airdrop_config && operationalData.airdrop_config.length > 0) {
+      // Filter out entries with empty addresses before saving
+      const validEntries = operationalData.airdrop_config.filter(
+        (e) => {
+          const trimmedAddress = e.address?.trim() ?? "";
+          return validateStrictAddress(trimmedAddress) && e.count > 0;
+        }
+      );
+      if (validEntries.length > 0) {
+        metadata.push({
+          data_key: "airdrop_config",
+          data_value: JSON.stringify(validEntries),
+        });
+      }
+    }
+
+    if (operationalData.payment_info?.payment_address?.trim()) {
+      metadata.push({
+        data_key: "payment_info",
+        data_value: JSON.stringify(operationalData.payment_info),
+      });
+    }
+
+    if (operationalData.allowlist_batches && operationalData.allowlist_batches.length > 0) {
+      const processedBatches = operationalData.allowlist_batches.map((batch) => ({
+        contract: batch.contract,
+        token_ids: batch.token_ids_raw || "",
+      }));
+      metadata.push({
+        data_key: "allowlist_batches",
+        data_value: JSON.stringify(processedBatches),
+      });
+    }
+
+    if (operationalData.additional_media) {
+      metadata.push({
+        data_key: "additional_media",
+        data_value: JSON.stringify(operationalData.additional_media),
+      });
+    }
+
+    if (operationalData.commentary) {
+      metadata.push({
+        data_key: "commentary",
+        data_value: operationalData.commentary,
+      });
+    }
+  }
 
   // Create the request object
   const request: ApiCreateDropRequest = {
@@ -277,6 +332,7 @@ export function useArtworkSubmissionMutation() {
       const transformedRequest = transformToApiRequest({
         waveId: data.waveId,
         traits: data.traits,
+        operationalData: data.operationalData,
         mediaUrl: media.url,
         mimeType: media.mime_type,
         signerAddress,

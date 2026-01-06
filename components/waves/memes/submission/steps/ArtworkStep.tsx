@@ -282,7 +282,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       case "error":
         return "Try Again";
       default:
-        return "Submit to Memes";
+        return "Continue";
     }
   };
 

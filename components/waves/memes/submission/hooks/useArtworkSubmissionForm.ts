@@ -7,15 +7,22 @@ import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import type {
   InteractiveMediaMimeType,
-  InteractiveMediaProvider} from "../constants/media";
-import {
-  DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE
+  InteractiveMediaProvider,
 } from "../constants/media";
+import { DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE } from "../constants/media";
 import {
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
   isInteractiveMediaContentIdentifier,
 } from "../constants/security";
 import { validateInteractivePreview } from "../actions/validateInteractivePreview";
+import type {
+  AirdropEntry,
+  PaymentInfo,
+  AllowlistBatchRaw,
+  AdditionalMedia,
+  OperationalData,
+} from "../types/OperationalData";
+import { AIRDROP_TOTAL } from "../types/OperationalData";
 
 type MediaSource = "upload" | "url";
 
@@ -36,7 +43,7 @@ type FormAction =
   | { type: "SET_AGREEMENTS"; payload: boolean }
   | {
       type: "SET_TRAIT_FIELD";
-      payload: { field: keyof TraitsData; value: any };
+      payload: { field: keyof TraitsData; value: TraitsData[keyof TraitsData] };
     }
   | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> }
   | { type: "SET_MEDIA_SOURCE"; payload: MediaSource }
@@ -53,7 +60,12 @@ type FormAction =
       type: "SET_UPLOAD_MEDIA";
       payload: { file: File; artworkUrl: string };
     }
-  | { type: "RESET_UPLOAD_MEDIA" };
+  | { type: "RESET_UPLOAD_MEDIA" }
+  | { type: "SET_AIRDROP_CONFIG"; payload: AirdropEntry[] }
+  | { type: "SET_PAYMENT_INFO"; payload: Partial<PaymentInfo> }
+  | { type: "SET_ALLOWLIST_BATCHES"; payload: AllowlistBatchRaw[] }
+  | { type: "SET_ADDITIONAL_MEDIA"; payload: Partial<AdditionalMedia> }
+  | { type: "SET_COMMENTARY"; payload: string };
 
 interface FormState {
   currentStep: SubmissionStep;
@@ -65,6 +77,7 @@ interface FormState {
   mediaSource: MediaSource;
   selectedFile: File | null;
   externalMedia: ExternalMediaState;
+  operationalData: OperationalData;
 }
 
 const sanitizeInteractiveHash = (
@@ -81,7 +94,7 @@ const sanitizeInteractiveHash = (
     value = value.replace(/^ipfs:\/\//i, "");
     value = value.replace(/^https?:\/\/[^/]+\/ipfs\//i, "");
     value = value.replace(/^ipfs\//i, "");
-  } else if (provider === "arweave") {
+  } else {
     value = value.replace(/^https?:\/\/(?:www\.)?arweave\.net\//i, "");
   }
 
@@ -241,9 +254,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         ...state,
         mediaSource: nextSource,
         artworkUploaded: state.externalMedia.isValid,
-        artworkUrl: state.externalMedia.isValid
-          ? state.externalMedia.url
-          : "",
+        artworkUrl: state.externalMedia.isValid ? state.externalMedia.url : "",
       };
     }
 
@@ -272,9 +283,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         status,
         isValid,
         error,
-        previewUrl: isValid
-          ? finalUrl ?? state.externalMedia.previewUrl
-          : "",
+        previewUrl: isValid ? (finalUrl ?? state.externalMedia.previewUrl) : "",
       };
 
       const shouldApply = state.mediaSource === "url";
@@ -313,6 +322,57 @@ function formReducer(state: FormState, action: FormAction): FormState {
       };
     }
 
+    case "SET_AIRDROP_CONFIG":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          airdrop_config: action.payload,
+        },
+      };
+
+    case "SET_PAYMENT_INFO":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          payment_info: {
+            ...state.operationalData.payment_info,
+            ...action.payload,
+          },
+        },
+      };
+
+    case "SET_ALLOWLIST_BATCHES":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          allowlist_batches: action.payload,
+        },
+      };
+
+    case "SET_ADDITIONAL_MEDIA":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          additional_media: {
+            ...state.operationalData.additional_media,
+            ...action.payload,
+          },
+        },
+      };
+
+    case "SET_COMMENTARY":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          commentary: action.payload,
+        },
+      };
+
     default:
       return state;
   }
@@ -341,6 +401,18 @@ export function useArtworkSubmissionForm() {
       error: null,
       status: "idle",
       isValid: false,
+    },
+    operationalData: {
+      airdrop_config: [{ id: "initial", address: "", count: AIRDROP_TOTAL }],
+      payment_info: {
+        payment_address: "",
+      },
+      allowlist_batches: [],
+      additional_media: {
+        artist_profile_media: [],
+        artwork_commentary_media: [],
+      },
+      commentary: "",
     },
   };
 
@@ -411,6 +483,14 @@ export function useArtworkSubmissionForm() {
   );
 
   const handleContinueFromTerms = useCallback(() => {
+    dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
+  }, []);
+
+  const handleContinueFromArtwork = useCallback(() => {
+    dispatch({ type: "SET_STEP", payload: SubmissionStep.ADDITIONAL_INFO });
+  }, []);
+
+  const handleBackToArtwork = useCallback(() => {
     dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
   }, []);
 
@@ -498,6 +578,7 @@ export function useArtworkSubmissionForm() {
     state.externalMedia.status,
     state.externalMedia.sanitizedHash,
     state.externalMedia.provider,
+    state.externalMedia,
     dispatch,
   ]);
 
@@ -515,15 +596,15 @@ export function useArtworkSubmissionForm() {
   }, [connectedProfile]);
 
   const getSubmissionData = useCallback(() => {
-    const { traits, artworkUrl } = state;
+    const { traits, artworkUrl, operationalData } = state;
     return {
       imageUrl: artworkUrl,
       traits: {
         ...traits,
-        title: traits.title ?? "Artwork Title",
-        description:
-          traits.description ?? "Artwork for The Memes collection.",
+        title: traits.title,
+        description: traits.description,
       },
+      operationalData,
     };
   }, [state]);
 
@@ -573,18 +654,55 @@ export function useArtworkSubmissionForm() {
     dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
   }, []);
 
+  const setAirdropConfig = useCallback(
+    (entries: AirdropEntry[]) => {
+      dispatch({ type: "SET_AIRDROP_CONFIG", payload: entries });
+    },
+    [dispatch]
+  );
+
+  const setPaymentInfo = useCallback(
+    (paymentInfo: Partial<PaymentInfo>) => {
+      dispatch({ type: "SET_PAYMENT_INFO", payload: paymentInfo });
+    },
+    [dispatch]
+  );
+
+  const setAllowlistBatches = useCallback(
+    (batches: AllowlistBatchRaw[]) => {
+      dispatch({ type: "SET_ALLOWLIST_BATCHES", payload: batches });
+    },
+    [dispatch]
+  );
+
+  const setAdditionalMedia = useCallback(
+    (additionalMedia: Partial<AdditionalMedia>) => {
+      dispatch({ type: "SET_ADDITIONAL_MEDIA", payload: additionalMedia });
+    },
+    [dispatch]
+  );
+
+  const setCommentary = useCallback(
+    (commentary: string) => {
+      dispatch({ type: "SET_COMMENTARY", payload: commentary });
+    },
+    [dispatch]
+  );
+
   return {
     currentStep: state.currentStep,
     agreements: state.agreements,
     setAgreements: (value: boolean) =>
       dispatch({ type: "SET_AGREEMENTS", payload: value }),
     handleContinueFromTerms,
+    handleContinueFromArtwork,
+    handleBackToArtwork,
 
     artworkUploaded: state.artworkUploaded,
-   artworkUrl: state.artworkUrl,
-   selectedFile: state.selectedFile,
-   mediaSource: state.mediaSource,
-   externalMediaUrl: state.externalMedia.url,
+    artworkUrl: state.artworkUrl,
+    selectedFile: state.selectedFile,
+    mediaSource: state.mediaSource,
+    externalMediaUrl: state.externalMedia.url,
     externalMediaPreviewUrl: state.externalMedia.previewUrl,
     externalMediaHashInput: state.externalMedia.input,
     externalMediaProvider: state.externalMedia.provider,
@@ -603,6 +721,13 @@ export function useArtworkSubmissionForm() {
     traits: state.traits,
     setTraits,
     updateTraitField,
+
+    operationalData: state.operationalData,
+    setAirdropConfig,
+    setPaymentInfo,
+    setAllowlistBatches,
+    setAdditionalMedia,
+    setCommentary,
 
     getSubmissionData,
     getMediaSelection,
