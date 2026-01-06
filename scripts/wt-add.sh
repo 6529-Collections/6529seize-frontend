@@ -101,6 +101,7 @@ cat > "$WORKTREE_PATH/settings.json" <<EOF
 
   // --- Tailwind IntelliSense (if using the extension) ---
   "tailwindCSS.experimental.classRegex": [
+    "['\"`]([^'\"`]*tw-[^'\"`]*)['\"`]",
     ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     ["cva\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
