@@ -179,7 +179,10 @@ const rules = {
   "@typescript-eslint/switch-exhaustiveness-check": "error",
   "@typescript-eslint/unbound-method": "error",
   "@typescript-eslint/no-base-to-string": "error",
-  "@typescript-eslint/no-confusing-void-expression": "error",
+  "@typescript-eslint/no-confusing-void-expression": [
+    "error",
+    { ignoreArrowShorthand: true },
+  ],
   "@typescript-eslint/no-unsafe-enum-comparison": "error",
   "@typescript-eslint/no-deprecated": "error",
 
@@ -479,6 +482,14 @@ export default defineConfig([
             "Accessing process.env is restricted. Use environment variables safely.",
         },
       ],
+    },
+  },
+
+  // Disable max-lines-per-function for React components
+  {
+    files: ["**/*.tsx", "**/*.jsx"],
+    rules: {
+      "max-lines-per-function": "off",
     },
   },
 

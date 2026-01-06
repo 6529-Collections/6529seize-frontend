@@ -10,6 +10,7 @@ export const MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS: string[] =
   Object.values(MemesSubmissionAdditionalInfoKey);
 
 export interface AirdropEntry {
+  id: string;
   address: string;
   count: number;
 }
@@ -26,6 +27,7 @@ export interface AllowlistBatch {
 }
 
 export interface AllowlistBatchRaw {
+  id: string;
   contract: string;
   token_ids_raw: string;
 }

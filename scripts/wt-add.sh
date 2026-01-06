@@ -43,7 +43,19 @@ cat > "$WORKTREE_PATH/settings.json" <<EOF
 EOF
 echo "VS Code color set to $RAND_COLOR."
 
-# 4. Run npm install
+# 4. Set up pre-commit hook
+echo "Setting up pre-commit hook..."
+mkdir -p "../$WORKTREE_NAME/.hooks"
+cat > "../$WORKTREE_NAME/.hooks/pre-commit" <<'HOOK'
+#!/bin/sh
+npm run lint:uncommitted:tight
+HOOK
+chmod +x "../$WORKTREE_NAME/.hooks/pre-commit"
+git -C "../$WORKTREE_NAME" config extensions.worktreeConfig true
+git -C "../$WORKTREE_NAME" config --worktree core.hooksPath .hooks
+echo "Pre-commit hook configured."
+
+# 5. Run npm install
 echo "Running npm install in $WORKTREE_NAME..."
 (cd "../$WORKTREE_NAME" && npm install)
 

@@ -4,7 +4,7 @@
  * Returns null if valid, error message if invalid.
  */
 export function validateTokenIdFormat(input: string): string | null {
-  if (!input || !input.trim()) {
+  if (!input.trim()) {
     return null; // Empty is valid
   }
 
@@ -23,9 +23,9 @@ export function validateTokenIdFormat(input: string): string | null {
       if (!startRaw || !endRaw) {
         return "Invalid range format. Use: 1-5";
       }
-      const start = parseInt(startRaw.trim(), 10);
-      const end = parseInt(endRaw.trim(), 10);
-      if (isNaN(start) || isNaN(end)) {
+      const start = Number.parseInt(startRaw.trim(), 10);
+      const end = Number.parseInt(endRaw.trim(), 10);
+      if (Number.isNaN(start) || Number.isNaN(end)) {
         return "Invalid range. Use numbers only: 1-5";
       }
       if (start < 0 || end < 0) {
@@ -38,8 +38,8 @@ export function validateTokenIdFormat(input: string): string | null {
         return "Invalid range. Use a single token ID instead of a range.";
       }
     } else {
-      const id = parseInt(trimmed, 10);
-      if (isNaN(id)) {
+      const id = Number.parseInt(trimmed, 10);
+      if (Number.isNaN(id)) {
         return "Invalid token ID. Use: 1,2,5-10";
       }
       if (id < 0) {

@@ -11,14 +11,14 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
 
   const mockOperationalData: OperationalData = {
     airdrop_config: [
-      { address: "0x1234567890123456789012345678901234567890", count: 15 },
-      { address: "0x0987654321098765432109876543210987654321", count: 5 },
+      { id: "test-1", address: "0x1234567890123456789012345678901234567890", count: 15 },
+      { id: "test-2", address: "0x0987654321098765432109876543210987654321", count: 5 },
     ],
     payment_info: {
       payment_address: "0x789",
     },
     allowlist_batches: [
-      { contract: "0xabc", token_ids_raw: "1-5" },
+      { id: "test-batch-1", contract: "0xabc", token_ids_raw: "1-5" },
     ],
     additional_media: {
       artist_profile_media: ["https://example.com/profile.jpg"],

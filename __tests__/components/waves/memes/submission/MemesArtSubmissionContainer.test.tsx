@@ -50,7 +50,7 @@ describe('MemesArtSubmissionContainer', () => {
       externalMediaValidationStatus: 'idle',
       isExternalMediaValid: false,
       operationalData: {
-        airdrop_config: [{ address: "", count: 20 }],
+        airdrop_config: [{ id: "test-initial", address: "", count: 20 }],
         payment_info: {
           payment_address: "",
         },

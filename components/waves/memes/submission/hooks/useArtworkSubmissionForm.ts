@@ -7,16 +7,22 @@ import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import type {
   InteractiveMediaMimeType,
-  InteractiveMediaProvider} from "../constants/media";
-import {
-  DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE
+  InteractiveMediaProvider,
 } from "../constants/media";
+import { DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE } from "../constants/media";
 import {
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
   isInteractiveMediaContentIdentifier,
 } from "../constants/security";
 import { validateInteractivePreview } from "../actions/validateInteractivePreview";
-import { AirdropEntry, PaymentInfo, AllowlistBatchRaw, AdditionalMedia, OperationalData, AIRDROP_TOTAL } from "../types/OperationalData";
+import type {
+  AirdropEntry,
+  PaymentInfo,
+  AllowlistBatchRaw,
+  AdditionalMedia,
+  OperationalData,
+} from "../types/OperationalData";
+import { AIRDROP_TOTAL } from "../types/OperationalData";
 
 type MediaSource = "upload" | "url";
 
@@ -37,7 +43,7 @@ type FormAction =
   | { type: "SET_AGREEMENTS"; payload: boolean }
   | {
       type: "SET_TRAIT_FIELD";
-      payload: { field: keyof TraitsData; value: any };
+      payload: { field: keyof TraitsData; value: TraitsData[keyof TraitsData] };
     }
   | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> }
   | { type: "SET_MEDIA_SOURCE"; payload: MediaSource }
@@ -88,7 +94,7 @@ const sanitizeInteractiveHash = (
     value = value.replace(/^ipfs:\/\//i, "");
     value = value.replace(/^https?:\/\/[^/]+\/ipfs\//i, "");
     value = value.replace(/^ipfs\//i, "");
-  } else if (provider === "arweave") {
+  } else {
     value = value.replace(/^https?:\/\/(?:www\.)?arweave\.net\//i, "");
   }
 
@@ -248,9 +254,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         ...state,
         mediaSource: nextSource,
         artworkUploaded: state.externalMedia.isValid,
-        artworkUrl: state.externalMedia.isValid
-          ? state.externalMedia.url
-          : "",
+        artworkUrl: state.externalMedia.isValid ? state.externalMedia.url : "",
       };
     }
 
@@ -279,9 +283,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         status,
         isValid,
         error,
-        previewUrl: isValid
-          ? finalUrl ?? state.externalMedia.previewUrl
-          : "",
+        previewUrl: isValid ? (finalUrl ?? state.externalMedia.previewUrl) : "",
       };
 
       const shouldApply = state.mediaSource === "url";
@@ -401,7 +403,7 @@ export function useArtworkSubmissionForm() {
       isValid: false,
     },
     operationalData: {
-      airdrop_config: [{ address: "", count: AIRDROP_TOTAL }],
+      airdrop_config: [{ id: "initial", address: "", count: AIRDROP_TOTAL }],
       payment_info: {
         payment_address: "",
       },
@@ -576,6 +578,7 @@ export function useArtworkSubmissionForm() {
     state.externalMedia.status,
     state.externalMedia.sanitizedHash,
     state.externalMedia.provider,
+    state.externalMedia,
     dispatch,
   ]);
 
@@ -598,9 +601,8 @@ export function useArtworkSubmissionForm() {
       imageUrl: artworkUrl,
       traits: {
         ...traits,
-        title: traits.title ?? "Artwork Title",
-        description:
-          traits.description ?? "Artwork for The Memes collection.",
+        title: traits.title,
+        description: traits.description,
       },
       operationalData,
     };
