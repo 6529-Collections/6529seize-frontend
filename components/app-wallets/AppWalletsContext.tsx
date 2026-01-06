@@ -49,7 +49,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [fetchingAppWallets, setFetchingAppWallets] = useState(true);
   const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
-  const [appWalletsSupported, setAppWalletsSupported] = useState(true);
+  const [appWalletsSupported, setAppWalletsSupported] = useState(false);
 
   const capacitor = useCapacitor();
   const { isCapacitor } = capacitor;
@@ -87,7 +87,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      setAppWalletsSupported(true);
+      setAppWalletsSupported(supported);
 
       if (!supported) {
         setAppWallets([]);
