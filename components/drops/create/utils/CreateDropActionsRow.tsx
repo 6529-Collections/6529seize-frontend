@@ -50,7 +50,7 @@ export default function CreateDropActionsRow({
                   const files: File[] = Array.from(e.target.files);
                   if (files.length > MAX_DROP_UPLOAD_FILES) {
                     setToast({
-                      message: "You can only upload up to 4 files at a time",
+                      message: `You can only upload up to ${MAX_DROP_UPLOAD_FILES} files at a time`,
                       type: "error",
                     });
                     e.target.value = "";
