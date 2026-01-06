@@ -48,6 +48,10 @@ echo "Setting up pre-commit hook..."
 mkdir -p "../$WORKTREE_NAME/.hooks"
 cat > "../$WORKTREE_NAME/.hooks/pre-commit" <<'HOOK'
 #!/bin/sh
+if [ "$SKIP_LINT" = "1" ]; then
+  echo "Skipping lint (SKIP_LINT=1)"
+  exit 0
+fi
 npm run lint:uncommitted:tight
 HOOK
 chmod +x "../$WORKTREE_NAME/.hooks/pre-commit"
