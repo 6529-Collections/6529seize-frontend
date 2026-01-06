@@ -47,7 +47,6 @@ const config = {
     "enterTo",
     "leave",
     "leaveFrom",
-    
     "leaveTo",
   ],
 };
