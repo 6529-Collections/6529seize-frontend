@@ -1,16 +1,16 @@
 "use client";
 
-import { useCallback, useRef, useContext } from "react";
-import { useMutation } from "@tanstack/react-query";
-import {
-  commonApiPostWithoutBodyAndResponse,
-  commonApiDelete,
-} from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import {
+  commonApiDelete,
+  commonApiPostWithoutBodyAndResponse,
+} from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useContext, useRef } from "react";
 
 interface BoostMutationParams {
   readonly drop: ExtendedDrop;
@@ -79,7 +79,7 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
 
   const mutation = useMutation({
     mutationFn: async ({ drop, action }: BoostMutationParams) => {
-      const endpoint = `drops/${drop.id}/pins`;
+      const endpoint = `drops/${drop.id}/boosts`;
 
       if (action === "boost") {
         await commonApiPostWithoutBodyAndResponse({ endpoint });
@@ -95,15 +95,9 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
       rollbackRef.current = applyOptimisticBoost(drop, action);
       pendingDropIdRef.current = drop.id;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       rollbackRef.current = null;
       pendingDropIdRef.current = null;
-
-      const action = data.action === "boost" ? "Boosted!" : "Boost removed";
-      setToast({
-        message: action,
-        type: "success",
-      });
     },
     onError: (error, { action }) => {
       console.error(`Failed to ${action} drop:`, error);

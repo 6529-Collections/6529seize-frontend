@@ -4,7 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -101,7 +101,7 @@ export default function DropListItemRateGiveSubmit({
     const rateIncrement = rate * clickCount;
     const newRate = previousRate + rateIncrement;
 
-    if (applyOptimisticDropUpdate && drop.wave?.id) {
+    if (applyOptimisticDropUpdate && drop.wave.id) {
       const previousHasRating = previousRate !== 0;
       const newHasRating = newRate !== 0;
       const ratersCountDelta = Number(newHasRating) - Number(previousHasRating);

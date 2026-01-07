@@ -377,8 +377,7 @@ const getOptimisticDrop = (
       handle: connectedProfile.handle,
       active_main_stage_submission_ids:
         connectedProfile.active_main_stage_submission_ids,
-      winner_main_stage_drop_ids:
-        connectedProfile.winner_main_stage_drop_ids ?? [],
+      winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids,
       pfp: connectedProfile.pfp,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
@@ -649,7 +648,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     allNfts: ReferencedNft[]
   ): CreateDropConfig => {
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
-    const hasCurrentContent = !!(markdown?.trim().length || files.length);
+    const hasCurrentContent = !!(markdown?.trim().length ?? files.length);
 
     const newParts =
       hasPartsInDrop && !hasCurrentContent
@@ -857,7 +856,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         );
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
-      (document.activeElement as HTMLElement)?.blur();
+      (document.activeElement as HTMLElement).blur();
       if (isApp) {
         import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
