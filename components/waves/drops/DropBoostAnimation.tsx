@@ -49,15 +49,18 @@ const DropBoostAnimation: React.FC<DropBoostAnimationProps> = ({
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    setMounted(true);
+    const timeoutId = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timeoutId);
   }, []);
 
-  // If motion is disabled or component not mounted or no animation, skip rendering and call onComplete
-  if (shouldReduceMotion || !mounted || !animation) {
-    // Call onComplete immediately if animation was present but we're skipping it
+  useEffect(() => {
     if (animation && shouldReduceMotion) {
       onComplete();
     }
+  }, [animation, shouldReduceMotion, onComplete]);
+
+  // If motion is disabled or component not mounted or no animation, skip rendering and call onComplete
+  if (shouldReduceMotion || !mounted || !animation) {
     return null;
   }
 

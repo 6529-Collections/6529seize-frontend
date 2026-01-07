@@ -5,7 +5,13 @@ import BoostIcon from "@/components/common/icons/BoostIcon";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useCallback, useContext, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsBoostProps {
@@ -18,20 +24,34 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const { toggleBoost, isPending } = useDropBoostMutation();
   const [isAnimating, setIsAnimating] = useState(false);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canBoost = !isTemporaryDrop && !!connectedProfile;
   const isBoosted = drop.context_profile_context?.boosted ?? false;
   const boostCount = drop.boosts;
 
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleClick = useCallback(() => {
     if (!canBoost || isPending) return;
+
+    // Clear any existing timeout before setting a new one
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
 
     setIsAnimating(true);
     toggleBoost(drop);
 
     // Reset animation state
-    setTimeout(() => setIsAnimating(false), 300);
+    animationTimeoutRef.current = setTimeout(() => setIsAnimating(false), 300);
   }, [canBoost, isPending, toggleBoost, drop]);
 
   const tooltipId = `boost-drop-${drop.id}`;

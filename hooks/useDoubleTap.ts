@@ -157,9 +157,7 @@ export const useDoubleTap = ({
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       if (!enabled) return;
-      // Only handle mouse clicks on desktop (touch devices use onTouchEnd)
-      // Check if this is a real mouse click vs synthetic from touch
-      if (e.detail > 0) {
+      if (e.nativeEvent.pointerType === "mouse") {
         handleTap(e.clientX, e.clientY, e);
       }
     },
