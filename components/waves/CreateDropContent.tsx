@@ -648,7 +648,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     allNfts: ReferencedNft[]
   ): CreateDropConfig => {
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
-    const hasCurrentContent = !!(markdown?.trim().length ?? files.length);
+    const hasCurrentContent = !!(markdown?.trim().length || files.length);
 
     const newParts =
       hasPartsInDrop && !hasCurrentContent

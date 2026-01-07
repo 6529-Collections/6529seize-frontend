@@ -4,13 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-
-interface ApiDropsPage {
-  data: ApiDrop[];
-  count: number;
-  page: number;
-  next: boolean;
-}
+import type { Page } from "@/helpers/Types";
 
 interface UseWaveBoostedDropsProps {
   readonly waveId: string;
@@ -30,7 +24,7 @@ export function useWaveBoostedDrops({
     queryKey: [QueryKey.BOOSTED_DROPS, { waveId, limit }],
     queryFn: async () => {
       const countOnlyBoostsAfter = Date.now() - TRENDING_WINDOW_MS;
-      const response = await commonApiFetch<ApiDropsPage>({
+      const response = await commonApiFetch<Page<ApiDrop>>({
         endpoint: "boosted-drops",
         params: {
           wave_id: waveId,

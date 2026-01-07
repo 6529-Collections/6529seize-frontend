@@ -120,7 +120,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
   }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
-  const latestSerialNo = waveMessages?.drops?.[0]?.serial_no ?? null;
+  const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
 
   useEffect(() => {
     if (latestSerialNo === null) {
