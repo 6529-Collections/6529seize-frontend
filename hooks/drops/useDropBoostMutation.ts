@@ -1,0 +1,187 @@
+"use client";
+
+import { useCallback, useRef, useContext } from "react";
+import { useMutation } from "@tanstack/react-query";
+import {
+  commonApiPostWithoutBodyAndResponse,
+  commonApiDelete,
+} from "@/services/api/common-api";
+import { AuthContext } from "@/components/auth/Auth";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+
+interface BoostMutationParams {
+  readonly drop: ExtendedDrop;
+  readonly action: "boost" | "unboost";
+}
+
+interface UseDropBoostMutationReturn {
+  readonly boostDrop: (drop: ExtendedDrop) => void;
+  readonly unboostDrop: (drop: ExtendedDrop) => void;
+  readonly toggleBoost: (drop: ExtendedDrop) => void;
+  readonly isPending: boolean;
+}
+
+export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
+  const { setToast, connectedProfile } = useContext(AuthContext);
+  const myStreamContext = useMyStreamOptional();
+  const rollbackRef = useRef<(() => void) | null>(null);
+  const pendingDropIdRef = useRef<string | null>(null);
+
+  const applyOptimisticBoost = useCallback(
+    (drop: ExtendedDrop, action: "boost" | "unboost") => {
+      if (!myStreamContext?.applyOptimisticDropUpdate) {
+        return null;
+      }
+
+      const handle = myStreamContext.applyOptimisticDropUpdate({
+        waveId: drop.wave.id,
+        dropId: drop.id,
+        update: (draft) => {
+          if (draft.type !== DropSize.FULL) {
+            return draft;
+          }
+
+          const isCurrentlyPinned =
+            draft.context_profile_context?.pinned ?? false;
+          const currentPins = draft.pins;
+
+          if (action === "boost" && !isCurrentlyPinned) {
+            draft.pins = currentPins + 1;
+          } else if (action === "unboost" && isCurrentlyPinned) {
+            draft.pins = Math.max(0, currentPins - 1);
+          }
+
+          const baseContext: ApiDropContextProfileContext =
+            draft.context_profile_context ?? {
+              rating: 0,
+              min_rating: 0,
+              max_rating: 0,
+              reaction: null,
+              pinned: false,
+            };
+
+          draft.context_profile_context = {
+            ...baseContext,
+            pinned: action === "boost",
+          };
+
+          return draft;
+        },
+      });
+
+      return handle?.rollback ?? null;
+    },
+    [myStreamContext]
+  );
+
+  const mutation = useMutation({
+    mutationFn: async ({ drop, action }: BoostMutationParams) => {
+      const endpoint = `drops/${drop.id}/pins`;
+
+      if (action === "boost") {
+        await commonApiPostWithoutBodyAndResponse({ endpoint });
+      } else {
+        await commonApiDelete({ endpoint });
+      }
+
+      return { drop, action };
+    },
+    onMutate: ({ drop, action }) => {
+      // Apply optimistic update
+      rollbackRef.current?.();
+      rollbackRef.current = applyOptimisticBoost(drop, action);
+      pendingDropIdRef.current = drop.id;
+    },
+    onSuccess: () => {
+      rollbackRef.current = null;
+      pendingDropIdRef.current = null;
+
+      // Toast handled separately in the component for undo capability
+    },
+    onError: (error, { action }) => {
+      console.error(`Failed to ${action} drop:`, error);
+
+      // Rollback optimistic update
+      rollbackRef.current?.();
+      rollbackRef.current = null;
+      pendingDropIdRef.current = null;
+
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      setToast({
+        message:
+          action === "boost"
+            ? `Failed to boost drop: ${errorMessage}`
+            : `Failed to remove boost: ${errorMessage}`,
+        type: "error",
+      });
+    },
+  });
+
+  const boostDrop = useCallback(
+    (drop: ExtendedDrop) => {
+      if (!connectedProfile) {
+        setToast({
+          message: "Please connect your wallet to boost drops",
+          type: "warning",
+        });
+        return;
+      }
+
+      // Prevent boosting if already pending for this drop
+      if (pendingDropIdRef.current === drop.id) {
+        return;
+      }
+
+      // Prevent boosting temporary drops
+      if (drop.id.startsWith("temp-")) {
+        return;
+      }
+
+      mutation.mutate({ drop, action: "boost" });
+    },
+    [connectedProfile, mutation, setToast]
+  );
+
+  const unboostDrop = useCallback(
+    (drop: ExtendedDrop) => {
+      if (!connectedProfile) {
+        return;
+      }
+
+      // Prevent unboosting if already pending for this drop
+      if (pendingDropIdRef.current === drop.id) {
+        return;
+      }
+
+      mutation.mutate({ drop, action: "unboost" });
+    },
+    [connectedProfile, mutation]
+  );
+
+  const toggleBoost = useCallback(
+    (drop: ExtendedDrop) => {
+      const isPinned = drop.context_profile_context?.pinned ?? false;
+
+      if (isPinned) {
+        unboostDrop(drop);
+      } else {
+        boostDrop(drop);
+      }
+    },
+    [boostDrop, unboostDrop]
+  );
+
+  return {
+    boostDrop,
+    unboostDrop,
+    toggleBoost,
+    isPending: mutation.isPending,
+  };
+};
+
+export default useDropBoostMutation;

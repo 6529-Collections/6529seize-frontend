@@ -9,6 +9,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { useContext } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
+import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
@@ -46,17 +47,17 @@ export default function WaveDropActions({
   const shouldShowVoting =
     showVoting &&
     !(
-      drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave?.id)
+      drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave.id)
     );
 
   return (
     <div
-      className={`tw-absolute tw-z-20 tw-right-2 ${
+      className={`tw-absolute tw-right-2 tw-z-20 ${
         compact ? "-tw-top-4" : "tw-top-0"
-      } group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out`}
+      } tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out group-hover:tw-opacity-100`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
+        <div className="tw-flex tw-h-8 tw-items-center tw-rounded-lg tw-bg-iron-950 tw-shadow tw-ring-1 tw-ring-inset tw-ring-iron-800">
           {connectedProfile?.handle !== drop.author.handle &&
             !activePartIndex && <WaveDropFollowAuthor drop={drop} />}
           <WaveDropActionsMarkUnread drop={drop} />
@@ -73,7 +74,7 @@ export default function WaveDropActions({
           <WaveDropActionsCopyLink drop={drop} />
           <WaveDropActionsOpen drop={drop} />
           {(() => {
-            const media = drop.parts?.at(0)?.media?.at(0);
+            const media = drop.parts.at(0)?.media.at(0);
             const url = media?.url;
             if (!url) return null;
             const info = getFileInfoFromUrl(url);
@@ -92,6 +93,7 @@ export default function WaveDropActions({
           )}
           {canDelete && <WaveDropActionsOptions drop={drop} />}
           <WaveDropActionsAddReaction drop={drop} />
+          <WaveDropActionsBoost drop={drop} />
         </div>
         {shouldShowVoting && <WaveDropActionsRate drop={drop} />}
       </div>
