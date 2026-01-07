@@ -731,12 +731,12 @@ paths:
                 $ref: "#/components/schemas/ApiDrop"
         "400":
           description: Invalid request
-  /pinned-drops/:
+  /boosted-drops/:
     get:
       tags:
         - Drops
-      summary: Get pinned drops.
-      operationId: getPinnedDrops
+      summary: Get boosted drops.
+      operationId: getBoostedDrops
       parameters:
         - name: author
           in: query
@@ -744,9 +744,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: pinner
+        - name: booster
           in: query
-          description: Drops by pinner
+          description: Drops boosted by given identity
           required: false
           schema:
             type: string
@@ -756,9 +756,9 @@ paths:
           required: false
           schema:
             type: string
-        - name: min_pins
+        - name: min_boosts
           in: query
-          description: Must be pinned at least so many times
+          description: Must be boosted at least so many times
           required: false
           schema:
             type: integer
@@ -787,15 +787,15 @@ paths:
             $ref: "#/components/schemas/ApiPageSortDirection"
         - name: sort
           in: query
-          description: Default is last_pin_timestamp
+          description: Default is latest_boost_at
           required: false
           schema:
             type: string
             enum:
-              - last_pin_timestamp
-              - first_pin_timestamp
+              - last_boosted_at
+              - first_boosted_at
               - drop_created_at
-              - pins_count
+              - boosts
       responses:
         "200":
           description: successful operation
@@ -803,12 +803,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropsPage"
-  /drops/{dropId}/pins:
+  /drops/{dropId}/boosts:
     get:
       tags:
         - Drops
-      summary: Get drop pins by Drop ID.
-      operationId: getDropPinsById
+      summary: Get drop boosts by Drop ID.
+      operationId: getDropBoostsById
       parameters:
         - name: dropId
           in: path
@@ -817,16 +817,14 @@ paths:
             type: string
         - name: page_size
           in: query
-          description: Default is 50
           required: false
           schema:
             type: number
             format: int64
             minimum: 1
-            maximum: 100
+            maximum: 2000
         - name: page
           in: query
-          description: Default is 1
           required: false
           schema:
             type: number
@@ -840,26 +838,26 @@ paths:
             $ref: "#/components/schemas/ApiPageSortDirection"
         - name: sort
           in: query
-          description: Default is timestamp
+          description: Default is boosted_at
           required: false
           schema:
             type: string
             enum:
-              - timestamp
+              - boosted_at
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiDropPinsPage"
+                $ref: "#/components/schemas/ApiDropBoostsPage"
         "404":
           description: Drop not found
     post:
       tags:
         - Drops
-      summary: Pin drop
-      operationId: pinDrop
+      summary: Boost drop
+      operationId: boostDrop
       parameters:
         - name: dropId
           in: path
@@ -876,8 +874,8 @@ paths:
     delete:
       tags:
         - Drops
-      summary: Unpin drop
-      operationId: unpinDrop
+      summary: Delete drop boost
+      operationId: deleteDropBoost
       parameters:
         - name: dropId
           in: path
@@ -6040,7 +6038,7 @@ components:
         - rank
         - is_signed
         - reactions
-        - pins
+        - boosts
       properties:
         id:
           type: string
@@ -6129,7 +6127,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropReaction"
-        pins:
+        boosts:
           type: number
           format: int64
     ApiDropAndDropVote:
@@ -6142,6 +6140,29 @@ components:
           $ref: "#/components/schemas/ApiDrop"
         vote:
           $ref: "#/components/schemas/ApiDropVote"
+    ApiDropBoost:
+      type: object
+      required:
+        - booster
+        - boosted_at
+      properties:
+        booster:
+          $ref: "#/components/schemas/ApiProfileMin"
+        boosted_at:
+          type: number
+          format: int64
+          nullable: true
+    ApiDropBoostsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropBoost"
     ApiDropContextProfileContext:
       type: object
       required:
@@ -6149,7 +6170,7 @@ components:
         - min_rating
         - max_rating
         - reaction
-        - pinned
+        - boosted
       properties:
         rating:
           type: number
@@ -6163,7 +6184,7 @@ components:
         reaction:
           type: string
           nullable: true
-        pinned:
+        boosted:
           type: boolean
     ApiDropMedia:
       type: object
@@ -6229,29 +6250,6 @@ components:
           anyOf:
             - $ref: "#/components/schemas/ApiQuotedDropResponse"
             - type: "null"
-    ApiDropPin:
-      type: object
-      required:
-        - pinner
-        - pinned_at
-      properties:
-        pinner:
-          $ref: "#/components/schemas/ApiProfileMin"
-        pinned_at:
-          type: number
-          format: int64
-          nullable: true
-    ApiDropPinsPage:
-      type: object
-      required:
-        - data
-      allOf:
-        - $ref: "#/components/schemas/ApiPageBase"
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiDropPin"
     ApiDropRater:
       type: object
       required:
@@ -6421,7 +6419,7 @@ components:
         - rank
         - is_signed
         - reactions
-        - pins
+        - boosts
       properties:
         id:
           type: string
@@ -6508,7 +6506,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropReaction"
-        pins:
+        boosts:
           type: number
           format: int64
     ApiDropWithoutWavesPageWithoutCount:

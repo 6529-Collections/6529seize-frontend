@@ -91,7 +91,7 @@ const WaveDropActionsAddReaction: React.FC<{
                 min_rating: 0,
                 max_rating: 0,
                 reaction: null,
-                pinned: false,
+                boosted: false,
               };
 
           draft.context_profile_context = {

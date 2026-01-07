@@ -44,14 +44,14 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
             return draft;
           }
 
-          const isCurrentlyPinned =
-            draft.context_profile_context?.pinned ?? false;
-          const currentPins = draft.pins;
+          const isCurrentlyBoosted =
+            draft.context_profile_context?.boosted ?? false;
+          const currentBoosts = draft.boosts;
 
-          if (action === "boost" && !isCurrentlyPinned) {
-            draft.pins = currentPins + 1;
-          } else if (action === "unboost" && isCurrentlyPinned) {
-            draft.pins = Math.max(0, currentPins - 1);
+          if (action === "boost" && !isCurrentlyBoosted) {
+            draft.boosts = currentBoosts + 1;
+          } else if (action === "unboost" && isCurrentlyBoosted) {
+            draft.boosts = Math.max(0, currentBoosts - 1);
           }
 
           const baseContext: ApiDropContextProfileContext =
@@ -60,12 +60,12 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
               min_rating: 0,
               max_rating: 0,
               reaction: null,
-              pinned: false,
+              boosted: false,
             };
 
           draft.context_profile_context = {
             ...baseContext,
-            pinned: action === "boost",
+            boosted: action === "boost",
           };
 
           return draft;
@@ -169,9 +169,9 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
 
   const toggleBoost = useCallback(
     (drop: ExtendedDrop) => {
-      const isPinned = drop.context_profile_context?.pinned ?? false;
+      const isBoosted = drop.context_profile_context?.boosted ?? false;
 
-      if (isPinned) {
+      if (isBoosted) {
         unboostDrop(drop);
       } else {
         boostDrop(drop);

@@ -342,7 +342,7 @@ const WaveDrop = ({
         y = mouseEvent.clientY;
       }
 
-      const isPinned = drop.context_profile_context?.pinned ?? false;
+      const isPinned = drop.context_profile_context?.boosted ?? false;
 
       // Trigger animation
       setBoostAnimation({

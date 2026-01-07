@@ -54,13 +54,13 @@ export * from '../models/ApiCreateWaveOutcome';
 export * from '../models/ApiCreateWaveOutcomeDistributionItem';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
+export * from '../models/ApiDropBoost';
+export * from '../models/ApiDropBoostsPage';
 export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropMedia';
 export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
 export * from '../models/ApiDropPart';
-export * from '../models/ApiDropPin';
-export * from '../models/ApiDropPinsPage';
 export * from '../models/ApiDropRater';
 export * from '../models/ApiDropRatingRequest';
 export * from '../models/ApiDropReaction';
@@ -292,13 +292,13 @@ import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiDrop                           } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
+import { ApiDropBoost } from '../models/ApiDropBoost';
+import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropPart } from '../models/ApiDropPart';
-import { ApiDropPin } from '../models/ApiDropPin';
-import { ApiDropPinsPage } from '../models/ApiDropPinsPage';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropRatingRequest } from '../models/ApiDropRatingRequest';
 import { ApiDropReaction } from '../models/ApiDropReaction';
@@ -575,13 +575,13 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
+    "ApiDropBoost": ApiDropBoost,
+    "ApiDropBoostsPage": ApiDropBoostsPage,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropMedia": ApiDropMedia,
     "ApiDropMentionedUser": ApiDropMentionedUser,
     "ApiDropMetadata": ApiDropMetadata,
     "ApiDropPart": ApiDropPart,
-    "ApiDropPin": ApiDropPin,
-    "ApiDropPinsPage": ApiDropPinsPage,
     "ApiDropRater": ApiDropRater,
     "ApiDropRatingRequest": ApiDropRatingRequest,
     "ApiDropReaction": ApiDropReaction,

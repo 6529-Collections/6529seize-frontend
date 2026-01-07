@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfileMin } from '../models/ApiProfileMin';
+import { ApiDropBoost } from '../models/ApiDropBoost';
 import { HttpFile } from '../http/http';
 
-export class ApiDropPin {
-    'pinner': ApiProfileMin;
-    'pinned_at': number | null;
+export class ApiDropBoostsPage {
+    'data': Array<ApiDropBoost>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,20 +26,32 @@ export class ApiDropPin {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "pinner",
-            "baseName": "pinner",
-            "type": "ApiProfileMin",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiDropBoost>",
             "format": ""
         },
         {
-            "name": "pinned_at",
-            "baseName": "pinned_at",
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropPin.attributeTypeMap;
+        return ApiDropBoostsPage.attributeTypeMap;
     }
 
     public constructor() {

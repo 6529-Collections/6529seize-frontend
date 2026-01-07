@@ -18,7 +18,7 @@ export class ApiDropContextProfileContext {
     'min_rating': number;
     'max_rating': number;
     'reaction': string | null;
-    'pinned': boolean;
+    'boosted': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -50,8 +50,8 @@ export class ApiDropContextProfileContext {
             "format": ""
         },
         {
-            "name": "pinned",
-            "baseName": "pinned",
+            "name": "boosted",
+            "baseName": "boosted",
             "type": "boolean",
             "format": ""
         }    ];

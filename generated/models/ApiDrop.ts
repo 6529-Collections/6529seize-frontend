@@ -64,7 +64,7 @@ export class ApiDrop {
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
     'reactions': Array<ApiDropReaction>;
-    'pins': number;
+    'boosts': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -222,8 +222,8 @@ export class ApiDrop {
             "format": ""
         },
         {
-            "name": "pins",
-            "baseName": "pins",
+            "name": "boosts",
+            "baseName": "boosts",
             "type": "number",
             "format": "int64"
         }    ];

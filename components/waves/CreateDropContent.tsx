@@ -427,7 +427,7 @@ const getOptimisticDrop = (
     is_signed: false,
     rating_prediction: 0,
     reactions: [],
-    pins: 0,
+    boosts: 0,
   };
 };
 

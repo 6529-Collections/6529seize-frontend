@@ -20,8 +20,8 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
 
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canBoost = !isTemporaryDrop && !!connectedProfile;
-  const isPinned = drop.context_profile_context?.pinned ?? false;
-  const boostCount = drop.pins;
+  const isPinned = drop.context_profile_context?.boosted ?? false;
+  const boostCount = drop.boosts;
 
   const handleClick = useCallback(() => {
     if (!canBoost || isPending) return;
