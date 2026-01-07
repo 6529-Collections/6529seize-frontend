@@ -38,7 +38,6 @@ const WaveDropActionsAddReaction: React.FC<{
   const rollbackRef = useRef<(() => void) | null>(null);
 
   const waveId = drop.wave.id;
-  const dropType = drop.type;
   const dropId = drop.id;
   const contextProfileContext = drop.context_profile_context;
 
@@ -111,7 +110,6 @@ const WaveDropActionsAddReaction: React.FC<{
       connectedProfile,
       contextProfileContext,
       dropId,
-      dropType,
       waveId,
     ]
   );

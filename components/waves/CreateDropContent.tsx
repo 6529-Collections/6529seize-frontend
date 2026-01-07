@@ -119,7 +119,7 @@ interface CreateDropContentProps {
 const CONTAINER_WIDTH_THRESHOLD = 500;
 
 const isMetadataValuePresent = (value: string | number | null): boolean => {
-  if (value === null || value === undefined) {
+  if (value === null) {
     return false;
   }
 
@@ -262,7 +262,7 @@ const generateMediaForPart = async (
     ...prev,
     { file: media, isUploading: true, progress: 0 },
   ]);
-  const uploadResponse = await multiPartUpload({
+  return await multiPartUpload({
     file: media,
     path: "drop",
     onProgress: (progress) =>
@@ -272,7 +272,6 @@ const generateMediaForPart = async (
   }).finally(() => {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
   });
-  return uploadResponse;
 };
 
 const generatePart = async (
@@ -298,7 +297,7 @@ const generateParts = async (
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message?.includes("content_type")) {
+    if (message.includes("content_type")) {
       throw new Error("File type not supported. Please use MP4 for videos.");
     }
     throw new Error("Error uploading file. Please try again.");
@@ -380,7 +379,7 @@ const getOptimisticDrop = (
         connectedProfile.active_main_stage_submission_ids,
       winner_main_stage_drop_ids:
         connectedProfile.winner_main_stage_drop_ids ?? [],
-      pfp: connectedProfile.pfp ?? null,
+      pfp: connectedProfile.pfp,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
       cic: connectedProfile.cic,
@@ -392,7 +391,7 @@ const getOptimisticDrop = (
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,
-      primary_address: connectedProfile.primary_wallet ?? "",
+      primary_address: connectedProfile.primary_wallet,
     },
     created_at: Date.now(),
     updated_at: null,
@@ -518,9 +517,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [sendTyping]);
 
   useEffect(() => {
-    if (getMarkdown?.length) {
-      throttleHandle();
+    if (!getMarkdown?.length) {
+      return;
     }
+    throttleHandle();
   }, [getMarkdown, throttleHandle]);
 
   const getCanSubmitStorm = () => {
@@ -916,7 +916,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
-    const hasCurrentContent = !!(getMarkdown?.trim().length || files.length);
+    const hasCurrentContent =
+      (getMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
 
     if (hasPartsInDrop && hasCurrentContent) {
       finalizeAndAddDropPart();
@@ -939,12 +940,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }, delay);
   };
 
-  const focusMobileInput = () => {
+  const focusMobileInput = useCallback(() => {
     if (!createDropInputRef.current) return;
     requestAnimationFrame(() => {
       focusInputWithDelay(300);
     });
-  };
+  }, []);
 
   const focusDesktopInput = () => {
     createDropInputRef.current?.focus();
@@ -965,13 +966,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (isApp) {
       const timer = setTimeout(focusMobileInput, 200);
       return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => {
-        focusDesktopInput();
-      }, 100);
-      return () => clearTimeout(timer);
     }
-  }, [activeDrop, isApp]);
+    const timer = setTimeout(() => {
+      focusDesktopInput();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
     let updatedFiles = [...files, ...newFiles];
@@ -1068,7 +1068,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             ...item,
             value: Number.isNaN(parsedValue) ? null : parsedValue,
           };
-        } else if (item.type === ApiWaveMetadataType.String) {
+        }
+
+        if (item.type === ApiWaveMetadataType.String) {
           if (typeof params.newValue === "string") {
             return { ...item, value: params.newValue };
           }
