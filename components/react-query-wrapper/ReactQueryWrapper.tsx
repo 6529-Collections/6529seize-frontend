@@ -17,8 +17,12 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
 import type { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
-import type { InfiniteData } from "@tanstack/react-query";
-import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+
+import {
+  type QueryClient,
+  type InfiniteData,
+  useQueryClient,
+} from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { createContext, useMemo } from "react";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";

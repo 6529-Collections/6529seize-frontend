@@ -76,50 +76,52 @@ function WaveDropReaction({
   // Sync selected when context reaction changes from server
   useEffect(() => {
     if (
-      drop.context_profile_context?.reaction !== prevContextReactionRef.current
+      drop.context_profile_context?.reaction === prevContextReactionRef.current
     ) {
-      prevContextReactionRef.current = drop.context_profile_context?.reaction;
-      const isSelected =
-        reaction.reaction === drop.context_profile_context?.reaction;
-      const timeoutId = setTimeout(() => {
-        setSelected((current) =>
-          current === isSelected ? current : isSelected
-        );
-      }, 0);
-      return () => clearTimeout(timeoutId);
+      return;
     }
+
+    prevContextReactionRef.current = drop.context_profile_context?.reaction;
+    const isSelected =
+      reaction.reaction === drop.context_profile_context?.reaction;
+    const timeoutId = setTimeout(() => {
+      setSelected((current) => (current === isSelected ? current : isSelected));
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [drop.context_profile_context?.reaction, reaction.reaction]);
 
   // Sync total and handles when profiles change from server
   useEffect(() => {
-    if (reaction.profiles !== prevProfilesRef.current) {
-      prevProfilesRef.current = reaction.profiles;
-
-      const nextTotal = reaction.profiles.length;
-      const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
-
-      const timeoutId = setTimeout(() => {
-        setTotal((current) => (current === nextTotal ? current : nextTotal));
-        setHandles((current) => {
-          const sameLength = current.length === nextHandles.length;
-          const sameValues = sameLength
-            ? current.every((value, index) => value === nextHandles[index])
-            : false;
-          return sameValues ? current : nextHandles;
-        });
-      }, 0);
-      return () => clearTimeout(timeoutId);
+    if (reaction.profiles === prevProfilesRef.current) {
+      return;
     }
+    prevProfilesRef.current = reaction.profiles;
+
+    const nextTotal = reaction.profiles.length;
+    const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
+
+    const timeoutId = setTimeout(() => {
+      setTotal((current) => (current === nextTotal ? current : nextTotal));
+      setHandles((current) => {
+        const sameLength = current.length === nextHandles.length;
+        const sameValues = sameLength
+          ? current.every((value, index) => value === nextHandles[index])
+          : false;
+        return sameValues ? current : nextHandles;
+      });
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [reaction.profiles]);
 
   // Trigger animation when total changes
   useEffect(() => {
-    if (total !== prevTotalRef.current) {
-      prevTotalRef.current = total;
-      // Defer to avoid synchronous setState in effect
-      const timeoutId = setTimeout(() => setAnimate(true), 0);
-      return () => clearTimeout(timeoutId);
+    if (total === prevTotalRef.current) {
+      return;
     }
+    prevTotalRef.current = total;
+    // Defer to avoid synchronous setState in effect
+    const timeoutId = setTimeout(() => setAnimate(true), 0);
+    return () => clearTimeout(timeoutId);
   }, [total]);
 
   useEffect(() => {

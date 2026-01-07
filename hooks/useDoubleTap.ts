@@ -157,7 +157,10 @@ export const useDoubleTap = ({
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       if (!enabled) return;
-      if (e.nativeEvent.pointerType === "mouse") {
+      if (
+        "pointerType" in e.nativeEvent &&
+        e.nativeEvent.pointerType === "mouse"
+      ) {
         handleTap(e.clientX, e.clientY, e);
       }
     },
