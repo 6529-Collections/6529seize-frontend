@@ -787,7 +787,7 @@ paths:
             $ref: "#/components/schemas/ApiPageSortDirection"
         - name: sort
           in: query
-          description: Default is latest_boost_at
+          description: Default is last_boosted_at
           required: false
           schema:
             type: string
@@ -796,6 +796,14 @@ paths:
               - first_boosted_at
               - drop_created_at
               - boosts
+        - name: count_only_boosts_after
+          in: query
+          description: Timestamp in millis
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       responses:
         "200":
           description: successful operation
