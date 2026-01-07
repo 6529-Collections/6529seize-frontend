@@ -95,11 +95,15 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
       rollbackRef.current = applyOptimisticBoost(drop, action);
       pendingDropIdRef.current = drop.id;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       rollbackRef.current = null;
       pendingDropIdRef.current = null;
 
-      // Toast handled separately in the component for undo capability
+      const action = data.action === "boost" ? "Boosted!" : "Boost removed";
+      setToast({
+        message: action,
+        type: "success",
+      });
     },
     onError: (error, { action }) => {
       console.error(`Failed to ${action} drop:`, error);

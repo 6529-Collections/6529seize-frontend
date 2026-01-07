@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface BoostAnimationState {
   readonly id: string;
@@ -62,12 +62,18 @@ const DropBoostAnimation: React.FC<DropBoostAnimationProps> = ({
   onComplete,
 }) => {
   const [mounted, setMounted] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted || !animation) {
+  // If motion is disabled or component not mounted or no animation, skip rendering and call onComplete
+  if (shouldReduceMotion || !mounted || !animation) {
+    // Call onComplete immediately if animation was present but we're skipping it
+    if (animation && shouldReduceMotion) {
+      onComplete();
+    }
     return null;
   }
 
@@ -75,60 +81,62 @@ const DropBoostAnimation: React.FC<DropBoostAnimationProps> = ({
 
   return createPortal(
     <AnimatePresence mode="wait" onExitComplete={onComplete}>
-      <motion.div
-        key={animation.id}
-        className="tw-pointer-events-none tw-fixed tw-z-[9999]"
-        style={{
-          left: animation.x,
-          top: animation.y,
-          transform: "translate(-50%, -50%)",
-        }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{
-          opacity: [0, 1, 1, 0],
-          scale: [0, 1.2, 1, isBoost ? 1.5 : 0.8],
-          y: isBoost ? [0, -20] : [0, -30],
-        }}
-        exit={{ opacity: 0, scale: 0 }}
-        transition={{
-          duration: isBoost ? 0.6 : 0.5,
-          ease: "easeOut",
-          times: [0, 0.3, 0.6, 1],
-        }}
-      >
-        {isBoost ? (
-          <>
-            {/* Glow effect */}
-            <motion.div
-              className="tw-absolute tw-inset-0 tw-rounded-full tw-blur-xl"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(255,140,0,0.6) 0%, rgba(255,69,0,0.3) 50%, transparent 70%)",
-                width: "80px",
-                height: "80px",
-                left: "-40px",
-                top: "-40px",
-              }}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: [0, 0.8, 0], scale: [0.5, 1.5, 2] }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            />
-            {/* Flame icon */}
-            <FlameIcon className="tw-size-12 tw-text-orange-500 tw-drop-shadow-[0_0_8px_rgba(255,140,0,0.8)]" />
-          </>
-        ) : (
-          <>
-            {/* Smoke effect for unboost */}
-            <motion.div
-              initial={{ opacity: 0.8 }}
-              animate={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <SmokeIcon className="tw-size-10 tw-text-iron-400" />
-            </motion.div>
-          </>
-        )}
-      </motion.div>
+      {animation && (
+        <motion.div
+          key={animation.id}
+          className="tw-pointer-events-none tw-fixed tw-z-[9999]"
+          style={{
+            left: animation.x,
+            top: animation.y,
+            transform: "translate(-50%, -50%)",
+          }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            opacity: [0, 1, 1, 0],
+            scale: [0, 1.2, 1, isBoost ? 1.5 : 0.8],
+            y: isBoost ? [0, -20] : [0, -30],
+          }}
+          exit={{ opacity: 0, scale: 0 }}
+          transition={{
+            duration: isBoost ? 0.6 : 0.5,
+            ease: "easeOut",
+            times: [0, 0.3, 0.6, 1],
+          }}
+        >
+          {isBoost ? (
+            <>
+              {/* Glow effect */}
+              <motion.div
+                className="tw-absolute tw-inset-0 tw-rounded-full tw-blur-xl"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(255,140,0,0.6) 0%, rgba(255,69,0,0.3) 50%, transparent 70%)",
+                  width: "80px",
+                  height: "80px",
+                  left: "-40px",
+                  top: "-40px",
+                }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: [0, 0.8, 0], scale: [0.5, 1.5, 2] }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              />
+              {/* Flame icon */}
+              <FlameIcon className="tw-size-12 tw-text-orange-500 tw-drop-shadow-[0_0_8px_rgba(255,140,0,0.8)]" />
+            </>
+          ) : (
+            <>
+              {/* Smoke effect for unboost */}
+              <motion.div
+                initial={{ opacity: 0.8 }}
+                animate={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <SmokeIcon className="tw-size-10 tw-text-iron-400" />
+              </motion.div>
+            </>
+          )}
+        </motion.div>
+      )}
     </AnimatePresence>,
     document.body
   );

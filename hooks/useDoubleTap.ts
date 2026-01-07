@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface DoubleTapOptions {
   /** Maximum time between taps in milliseconds. Default: 300 */
@@ -53,6 +53,15 @@ export const useDoubleTap = ({
       singleTapTimeoutRef.current = null;
     }
   }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearSingleTapTimeout();
+      pendingEventRef.current = null;
+      lastTapRef.current = null;
+    };
+  }, [clearSingleTapTimeout]);
 
   const getDistance = (
     x1: number,

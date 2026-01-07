@@ -1,13 +1,14 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
+import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useDoubleTap } from "@/hooks/useDoubleTap";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
@@ -23,6 +24,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import type { DropInteractionParams } from "./Drop";
 import { DropLocation } from "./Drop";
+import type { BoostAnimationState } from "./DropBoostAnimation";
+import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
@@ -32,9 +35,6 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
-import DropBoostAnimation from "./DropBoostAnimation";
-import type { BoostAnimationState } from "./DropBoostAnimation";
-import { AuthContext } from "@/components/auth/Auth";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -91,10 +91,10 @@ const getColorClasses = ({
     const hoverClass = isWaveView
       ? "desktop-hover:hover:tw-bg-iron-800/50"
       : "";
-    const ringClasses = !isWaveView
-      ? "tw-ring-1 tw-ring-inset tw-ring-iron-800"
-      : "";
-    const bgClass = !isWaveView ? "tw-bg-iron-950" : "";
+    const ringClasses = isWaveView
+      ? ""
+      : "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+    const bgClass = isWaveView ? "" : "tw-bg-iron-950";
 
     return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
   }
@@ -170,7 +170,7 @@ const WaveDrop = ({
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const dropUpdateMutation = useDropUpdateMutation();
   const { toggleBoost, isPending: isBoostPending } = useDropBoostMutation();
-  const { setToast, connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
@@ -352,17 +352,10 @@ const WaveDrop = ({
         type: isPinned ? "unboost" : "boost",
       });
 
-      // Perform the boost/unboost
+      // Perform the boost/unboost (success/error toast handled by mutation)
       toggleBoost(drop);
-
-      // Show toast with undo option
-      const action = isPinned ? "Boost removed" : "Boosted!";
-      setToast({
-        message: action,
-        type: "success",
-      });
     },
-    [drop, isEditing, isSlideUp, isBoostPending, toggleBoost, setToast]
+    [drop, isEditing, isSlideUp, isBoostPending, toggleBoost]
   );
 
   const handleBoostAnimationComplete = useCallback(() => {
@@ -446,12 +439,13 @@ const WaveDrop = ({
                 partsCount={drop.parts.length}
               />
             )}
-            <div
-              className={
+            <button
+              type="button"
+              className={`tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
                 shouldGroupWithPreviousDrop && !isProfileView
                   ? "tw-ml-[3.25rem]"
                   : ""
-              }
+              }`}
               onTouchStart={doubleTapHandlers.onTouchStart}
               onTouchEnd={doubleTapHandlers.onTouchEnd}
               onClick={doubleTapHandlers.onClick}
@@ -469,7 +463,7 @@ const WaveDrop = ({
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}
               />
-            </div>
+            </button>
           </div>
         </div>
         {!isMobile && showReplyAndQuote && !isEditing && (

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useContext, useCallback, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import { AuthContext } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
-import { AuthContext } from "@/components/auth/Auth";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useCallback, useContext, useState } from "react";
+import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsBoostProps {
   readonly drop: ExtendedDrop;
@@ -14,7 +14,7 @@ interface WaveDropActionsBoostProps {
 const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   drop,
 }) => {
-  const { connectedProfile, setToast } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const { toggleBoost, isPending } = useDropBoostMutation();
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -29,15 +29,9 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
     setIsAnimating(true);
     toggleBoost(drop);
 
-    const action = isPinned ? "Boost removed" : "Boosted!";
-    setToast({
-      message: action,
-      type: "success",
-    });
-
     // Reset animation state
     setTimeout(() => setIsAnimating(false), 300);
-  }, [canBoost, isPending, toggleBoost, drop, isPinned, setToast]);
+  }, [canBoost, isPending, toggleBoost, drop]);
 
   const tooltipId = `boost-drop-${drop.id}`;
 
