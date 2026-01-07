@@ -62,6 +62,7 @@ export class ApiDropWithoutWave {
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
     'reactions': Array<ApiDropReaction>;
+    'pins': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -211,6 +212,12 @@ export class ApiDropWithoutWave {
             "baseName": "reactions",
             "type": "Array<ApiDropReaction>",
             "format": ""
+        },
+        {
+            "name": "pins",
+            "baseName": "pins",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

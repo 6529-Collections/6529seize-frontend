@@ -59,6 +59,8 @@ export * from '../models/ApiDropMedia';
 export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
 export * from '../models/ApiDropPart';
+export * from '../models/ApiDropPin';
+export * from '../models/ApiDropPinsPage';
 export * from '../models/ApiDropRater';
 export * from '../models/ApiDropRatingRequest';
 export * from '../models/ApiDropReaction';
@@ -167,7 +169,6 @@ export * from '../models/ApiWaveOutcome';
 export * from '../models/ApiWaveOutcomeCredit';
 export * from '../models/ApiWaveOutcomeDistributionItem';
 export * from '../models/ApiWaveOutcomeDistributionItemsPage';
-export * from '../models/ApiWaveOutcomeOld';
 export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
 export * from '../models/ApiWaveOutcomesPage';
@@ -289,13 +290,15 @@ import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
-import { ApiDrop                          } from '../models/ApiDrop';
+import { ApiDrop                           } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropPart } from '../models/ApiDropPart';
+import { ApiDropPin } from '../models/ApiDropPin';
+import { ApiDropPinsPage } from '../models/ApiDropPinsPage';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropRatingRequest } from '../models/ApiDropRatingRequest';
 import { ApiDropReaction } from '../models/ApiDropReaction';
@@ -307,7 +310,7 @@ import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import { ApiDropWithoutWave                         } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                          } from '../models/ApiDropWithoutWave';
 import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWavesPageWithoutCount';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
@@ -404,7 +407,6 @@ import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
 import { ApiWaveOutcomeDistributionItemsPage } from '../models/ApiWaveOutcomeDistributionItemsPage';
-import { ApiWaveOutcomeOld         } from '../models/ApiWaveOutcomeOld';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
@@ -578,6 +580,8 @@ let typeMap: {[index: string]: any} = {
     "ApiDropMentionedUser": ApiDropMentionedUser,
     "ApiDropMetadata": ApiDropMetadata,
     "ApiDropPart": ApiDropPart,
+    "ApiDropPin": ApiDropPin,
+    "ApiDropPinsPage": ApiDropPinsPage,
     "ApiDropRater": ApiDropRater,
     "ApiDropRatingRequest": ApiDropRatingRequest,
     "ApiDropReaction": ApiDropReaction,
@@ -669,7 +673,6 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveOutcome": ApiWaveOutcome,
     "ApiWaveOutcomeDistributionItem": ApiWaveOutcomeDistributionItem,
     "ApiWaveOutcomeDistributionItemsPage": ApiWaveOutcomeDistributionItemsPage,
-    "ApiWaveOutcomeOld": ApiWaveOutcomeOld,
     "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,

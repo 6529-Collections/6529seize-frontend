@@ -11,14 +11,12 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
-export class ApiDropContextProfileContext {
-    'rating': number;
-    'min_rating': number;
-    'max_rating': number;
-    'reaction': string | null;
-    'pinned': boolean;
+export class ApiDropPin {
+    'pinner': ApiProfileMin;
+    'pinned_at': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,38 +24,20 @@ export class ApiDropContextProfileContext {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "rating",
-            "baseName": "rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "min_rating",
-            "baseName": "min_rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "max_rating",
-            "baseName": "max_rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "reaction",
-            "baseName": "reaction",
-            "type": "string",
+            "name": "pinner",
+            "baseName": "pinner",
+            "type": "ApiProfileMin",
             "format": ""
         },
         {
-            "name": "pinned",
-            "baseName": "pinned",
-            "type": "boolean",
-            "format": ""
+            "name": "pinned_at",
+            "baseName": "pinned_at",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropContextProfileContext.attributeTypeMap;
+        return ApiDropPin.attributeTypeMap;
     }
 
     public constructor() {

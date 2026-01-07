@@ -20,11 +20,8 @@ import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { selectEditingDropId } from "@/store/editSlice";
-import type {
-  ActiveDropState} from "@/types/dropInteractionTypes";
-import {
-  ActiveDropAction
-} from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { AnimatePresence, motion } from "framer-motion";
 import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
@@ -70,11 +67,8 @@ import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
-import type {
-  MissingRequirements} from "./utils/getMissingRequirements";
-import {
-  getMissingRequirements
-} from "./utils/getMissingRequirements";
+import type { MissingRequirements } from "./utils/getMissingRequirements";
+import { getMissingRequirements } from "./utils/getMissingRequirements";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -434,6 +428,7 @@ const getOptimisticDrop = (
     is_signed: false,
     rating_prediction: 0,
     reactions: [],
+    pins: 0,
   };
 };
 
@@ -658,7 +653,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     const newParts =
       hasPartsInDrop && !hasCurrentContent
-        ? drop?.parts ?? []
+        ? (drop?.parts ?? [])
         : [
             ...(drop?.parts ?? []),
             {
@@ -1008,7 +1003,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   );
 
   const removeFile = (file: File, partIndex?: number) => {
-    if (partIndex !== undefined) {
+    if (partIndex === undefined) {
+      // Remove file from the current files array
+      setFiles((prevFiles) => prevFiles.filter((f) => f !== file));
+    } else {
       // Remove file from a specific part
       setDrop((prevDrop) => {
         if (!prevDrop) return null;
@@ -1022,9 +1020,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         };
         return { ...prevDrop, parts: newParts };
       });
-    } else {
-      // Remove file from the current files array
-      setFiles((prevFiles) => prevFiles.filter((f) => f !== file));
     }
   };
 
@@ -1069,13 +1064,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             return { ...item, value: null };
           }
           const parsedValue = Number(params.newValue);
-          return { ...item, value: isNaN(parsedValue) ? null : parsedValue };
+          return {
+            ...item,
+            value: Number.isNaN(parsedValue) ? null : parsedValue,
+          };
         } else if (item.type === ApiWaveMetadataType.String) {
           if (typeof params.newValue === "string") {
             return { ...item, value: params.newValue };
-          } else {
-            return { ...item, value: String(params.newValue) };
           }
+          return { ...item, value: String(params.newValue) };
         }
 
         return item;
@@ -1121,7 +1118,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   if (isChatClosed) {
     return (
-      <div className="tw-flex-grow tw-w-full tw-bg-iron-900 tw-text-iron-500 tw-rounded-lg tw-p-4 tw-text-center tw-text-sm tw-font-medium">
+      <div className="tw-w-full tw-flex-grow tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-center tw-text-sm tw-font-medium tw-text-iron-500">
         Wave is closed
       </div>
     );
@@ -1135,10 +1132,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
-      <div className="tw-flex tw-items-end tw-w-full">
+      <div className="tw-flex tw-w-full tw-items-end">
         <div
           ref={actionsContainerRef}
-          className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+          className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
         >
           <CreateDropActions
             isStormMode={isStormMode}
@@ -1153,7 +1150,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             setShowOptions={setShowOptions}
             onGifDrop={onGifDrop}
           />
-          <div className="tw-flex-grow tw-w-full">
+          <div className="tw-w-full tw-flex-grow">
             <CreateDropInput
               waveId={wave.id}
               key={dropEditorRefreshKey}
