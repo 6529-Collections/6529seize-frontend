@@ -1,25 +1,24 @@
 "use client";
 
-import React, { useRef, useContext, type ReactNode } from "react";
-import type {
-  WebUnifiedWavesListWavesHandle,
-} from "./WebUnifiedWavesListWaves";
-import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
-import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
-import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
+import useCreateModalState from "@/hooks/useCreateModalState";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import React, { useContext, useRef, type ReactNode } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
-import { AuthContext } from "../../../auth/Auth";
-import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
-import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
-import Image from "next/image";
-import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
+import { AuthContext } from "../../../auth/Auth";
+import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
+import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
+import PrimaryButton from "../../../utils/button/PrimaryButton";
 import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
-import useCreateModalState from "@/hooks/useCreateModalState";
+import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
+import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
+import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
+import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -34,19 +33,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
     useCreateModalState();
-
-  const globalScope = globalThis as typeof globalThis & {
-    window?: Window | undefined;
-    navigator?: Navigator | undefined;
-  };
-  const browserWindow = globalScope.window;
-  const browserNavigator = globalScope.navigator;
-
-  const isTouchDevice =
-    !!browserWindow &&
-    ("ontouchstart" in browserWindow ||
-      (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
-      browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
+  const isTouchDevice = useIsTouchDevice();
 
   const shouldRenderCreateDirectMessage = !isApp;
 
@@ -69,10 +56,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   let listContent: ReactNode;
   if (isInitialLoad) {
     listContent = (
-      <UnifiedWavesListLoader
-        isFetching={true}
-        isFetchingNextPage={false}
-      />
+      <UnifiedWavesListLoader isFetching={true} isFetchingNextPage={false} />
     );
   } else if (isEmpty) {
     listContent = (
@@ -101,8 +85,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   if (!isAuthenticated) {
     return (
-      <div className="tw-flex tw-flex-col tw-gap-y-4 tw-h-full">
-        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-text-center tw-pt-8">
+      <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-4">
+        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-pt-8 tw-text-center">
           <Image
             src="/android-chrome-256x256.png"
             alt="6529 Seize"
@@ -128,8 +112,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 
   if (!connectedProfile) {
     return (
-      <div className="tw-flex tw-flex-col tw-gap-y-4 tw-h-full">
-        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-text-center tw-pt-8">
+      <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-4">
+        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-pt-8 tw-text-center">
           <Image
             src="/android-chrome-256x256.png"
             alt="6529 Seize"
@@ -154,13 +138,11 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   }
 
   return (
-    <div className="tw-h-full tw-flex tw-flex-col">
-      <div
-        className="tw-flex-1 tw-flex tw-flex-col tw-py-4 tw-bg-black"
-      >
+    <div className="tw-flex tw-h-full tw-flex-col">
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-bg-black tw-py-4">
         {(shouldRenderCreateDirectMessage || !isCollapsed) && (
           <div
-            className={`tw-flex tw-mb-3 ${
+            className={`tw-mb-3 tw-flex ${
               isCollapsed
                 ? "tw-justify-center tw-px-2"
                 : "tw-items-center tw-justify-between tw-px-4"
@@ -192,7 +174,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
           </div>
         )}
 
-        <div className="tw-flex-1 tw-w-full tw-flex tw-flex-col">
+        <div className="tw-flex tw-w-full tw-flex-1 tw-flex-col">
           {listContent}
 
           <UnifiedWavesListLoader
