@@ -10,9 +10,12 @@ import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import clsx from "clsx";
 import Image from "next/image";
+import Link from "next/link";
 import React, {
   useCallback,
   useEffect,
@@ -28,12 +31,24 @@ import {
   toProfileMin,
 } from "./reaction-utils";
 import styles from "./WaveDropReactions.module.scss";
+import WaveDropReactionsDetailDialog from "./WaveDropReactionsDetailDialog";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
 }
 
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
+  const [dialogReaction, setDialogReaction] = useState<string | null>(null);
+  const isTouchDevice = useIsTouchDevice();
+
+  const handleOpenDialog = useCallback((reactionKey: string) => {
+    setDialogReaction(reactionKey);
+  }, []);
+
+  const handleCloseDialog = useCallback(() => {
+    setDialogReaction(null);
+  }, []);
+
   return (
     <>
       {drop.reactions.map((reaction) => (
@@ -41,8 +56,16 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           key={`${reaction.reaction}-${reaction.profiles.length}`}
           drop={drop}
           reaction={reaction}
+          onOpenDetailDialog={handleOpenDialog}
+          isTouchDevice={isTouchDevice}
         />
       ))}
+      <WaveDropReactionsDetailDialog
+        isOpen={dialogReaction !== null}
+        onClose={handleCloseDialog}
+        reactions={drop.reactions}
+        initialReaction={dialogReaction ?? undefined}
+      />
     </>
   );
 };
@@ -50,21 +73,54 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
 function WaveDropReaction({
   drop,
   reaction,
+  onOpenDetailDialog,
+  isTouchDevice,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
+  readonly onOpenDetailDialog: (reactionKey: string) => void;
+  readonly isTouchDevice: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
 
+  const handleLongPressStart = useCallback(() => {
+    onOpenDetailDialog(reaction.reaction);
+  }, [onOpenDetailDialog, reaction.reaction]);
+
+  const { longPressTriggered, touchHandlers } = useLongPressInteraction({
+    hasTouchScreen: isTouchDevice,
+    onInteractionStart: handleLongPressStart,
+    longPressDuration: 400,
+  });
+
+  const wrappedTouchHandlers = useMemo(
+    () => ({
+      onTouchStart: (e: React.TouchEvent) => {
+        e.stopPropagation();
+        touchHandlers.onTouchStart(e);
+      },
+      onTouchMove: (e: React.TouchEvent) => {
+        e.stopPropagation();
+        touchHandlers.onTouchMove(e);
+      },
+      onTouchEnd: (e: React.TouchEvent) => {
+        e.stopPropagation();
+        touchHandlers.onTouchEnd();
+      },
+      onTouchCancel: (e: React.TouchEvent) => {
+        e.stopPropagation();
+        touchHandlers.onTouchCancel();
+      },
+    }),
+    [touchHandlers]
+  );
+
   const [total, setTotal] = useState(reaction.profiles.length);
   const [selected, setSelected] = useState(
     reaction.reaction === drop.context_profile_context?.reaction
-  );
-  const [handles, setHandles] = useState(
-    reaction.profiles.map((p) => p.handle ?? p.id)
   );
   const [animate, setAnimate] = useState(false);
 
@@ -90,7 +146,6 @@ function WaveDropReaction({
     return () => clearTimeout(timeoutId);
   }, [drop.context_profile_context?.reaction, reaction.reaction]);
 
-  // Sync total and handles when profiles change from server
   useEffect(() => {
     if (reaction.profiles === prevProfilesRef.current) {
       return;
@@ -98,17 +153,9 @@ function WaveDropReaction({
     prevProfilesRef.current = reaction.profiles;
 
     const nextTotal = reaction.profiles.length;
-    const nextHandles = reaction.profiles.map((p) => p.handle ?? p.id);
 
     const timeoutId = setTimeout(() => {
       setTotal((current) => (current === nextTotal ? current : nextTotal));
-      setHandles((current) => {
-        const sameLength = current.length === nextHandles.length;
-        const sameValues = sameLength
-          ? current.every((value, index) => value === nextHandles[index])
-          : false;
-        return sameValues ? current : nextHandles;
-      });
     }, 0);
     return () => clearTimeout(timeoutId);
   }, [reaction.profiles]);
@@ -268,25 +315,12 @@ function WaveDropReaction({
   );
 
   const handleClick = useCallback(async () => {
-    const resolvedHandle =
-      connectedProfile?.handle ?? connectedProfile?.id ?? "";
+    if (longPressTriggered) {
+      return;
+    }
 
-    // optimistic update
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
-    if (selected) {
-      setHandles((h) =>
-        resolvedHandle ? h.filter((value) => value !== resolvedHandle) : h
-      );
-    } else {
-      setHandles((h) => {
-        if (!resolvedHandle) {
-          return h;
-        }
-        const nextHandles = [...h, resolvedHandle];
-        return Array.from(new Set(nextHandles));
-      });
-    }
 
     applyOptimisticReactionChange(!selected);
 
@@ -308,43 +342,34 @@ function WaveDropReaction({
       if (typeof error === "string") msg = error;
       setToast({ message: msg, type: "error" });
 
-      // optimistic revert
       setSelected((s) => !s);
       setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
-      if (selected) {
-        setHandles((h) =>
-          resolvedHandle ? Array.from(new Set([...h, resolvedHandle])) : h
-        );
-      } else {
-        setHandles((h) =>
-          resolvedHandle ? h.filter((value) => value !== resolvedHandle) : h
-        );
-      }
       rollbackRef.current?.();
       rollbackRef.current = null;
     }
     rollbackRef.current = null;
   }, [
     applyOptimisticReactionChange,
-    connectedProfile?.handle,
-    connectedProfile?.id,
     drop.id,
+    longPressTriggered,
     reaction.reaction,
     selected,
     setToast,
   ]);
 
-  // tooltip text
-  const tooltipText = useMemo(() => {
-    const limit = 12;
-    const truncate = (handle: string) =>
-      handle.length > limit ? handle.slice(0, limit) + "…" : handle;
+  const tooltipProfiles = useMemo(() => {
+    const displayProfiles = reaction.profiles.slice(0, 3);
+    const moreCount = total > 3 ? total - 3 : 0;
+    return { displayProfiles, moreCount };
+  }, [reaction.profiles, total]);
 
-    const truncatedHandles = handles.map(truncate);
-
-    if (total <= 3) return truncatedHandles.join(", ");
-    return `${truncatedHandles.slice(0, 3).join(", ")} and ${total - 3} more`;
-  }, [handles, total]);
+  const handleMoreClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onOpenDetailDialog(reaction.reaction);
+    },
+    [onOpenDetailDialog, reaction.reaction]
+  );
 
   // styles
   const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
@@ -366,7 +391,7 @@ function WaveDropReaction({
     <>
       <button
         onClick={handleClick}
-        data-tooltip-id={tooltipId}
+        {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
           "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
@@ -374,6 +399,7 @@ function WaveDropReaction({
           bgStyle,
           hoverStyle
         )}
+        {...wrappedTouchHandlers}
       >
         <div className="tw-flex tw-h-full tw-items-center tw-gap-x-1">
           <div className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
@@ -389,18 +415,59 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      <Tooltip
-        id={tooltipId}
-        delayShow={250}
-        place="bottom"
-        opacity={1}
-        style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}
-      >
-        <div className="tw-flex tw-items-center tw-gap-2">
-          {emojiNodeTooltip}
-          <span className="tw-whitespace-nowrap">by {tooltipText}</span>
-        </div>
-      </Tooltip>
+      {!isTouchDevice && (
+        <Tooltip
+          id={tooltipId}
+          delayShow={250}
+          place="bottom"
+          opacity={1}
+          clickable
+          style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}
+        >
+          <div className="tw-flex tw-items-center tw-gap-2">
+            {emojiNodeTooltip}
+            <span className="tw-whitespace-nowrap">
+              by{" "}
+              {tooltipProfiles.displayProfiles.map((profile, index) => {
+                const displayName = profile.handle ?? profile.id;
+                const isLast =
+                  index === tooltipProfiles.displayProfiles.length - 1;
+                const showComma = !isLast;
+
+                return (
+                  <span key={profile.id}>
+                    {profile.handle ? (
+                      <Link
+                        href={`/${profile.handle}`}
+                        className="tw-text-primary-400 tw-no-underline hover:tw-text-primary-300 hover:tw-underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {displayName}
+                      </Link>
+                    ) : (
+                      <span>{displayName}</span>
+                    )}
+                    {showComma && ", "}
+                  </span>
+                );
+              })}
+              {tooltipProfiles.moreCount > 0 && (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    onClick={handleMoreClick}
+                    className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-400 tw-underline hover:tw-text-primary-300"
+                  >
+                    and {tooltipProfiles.moreCount}{" "}
+                    {tooltipProfiles.moreCount === 1 ? "other" : "others"}
+                  </button>
+                </>
+              )}
+            </span>
+          </div>
+        </Tooltip>
+      )}
     </>
   );
 }
