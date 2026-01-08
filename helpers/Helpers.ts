@@ -605,7 +605,8 @@ export const getTimeAgo = (milliseconds: number): string => {
 
 export const getTimeAgoShort = (
   milliseconds: number,
-  referenceTime: number = Date.now()
+  referenceTime: number = Date.now(),
+  alwaysRelative: boolean = false
 ): string => {
   const timeDifference = referenceTime - milliseconds;
 
@@ -613,6 +614,13 @@ export const getTimeAgoShort = (
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
+
+  if (alwaysRelative) {
+    if (days > 0) return `${days}d`;
+    if (hours > 0) return `${hours}h`;
+    if (minutes > 0) return `${minutes}m`;
+    return "<1m";
+  }
 
   if (days > 1) {
     const date = new Date(milliseconds);

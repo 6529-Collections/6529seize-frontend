@@ -25,9 +25,16 @@ export * from '../models/ApiChangeGroupVisibility';
 export * from '../models/ApiChangeProfileCicRating';
 export * from '../models/ApiChangeProfileRepRating';
 export * from '../models/ApiCommunityMemberMinimal';
+export * from '../models/ApiCommunityMemberOverview';
+export * from '../models/ApiCommunityMembersPage';
+export * from '../models/ApiCommunityMembersSortOption';
+export * from '../models/ApiCommunityMetric';
+export * from '../models/ApiCommunityMetricSample';
+export * from '../models/ApiCommunityMetrics';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
 export * from '../models/ApiCompleteMultipartUploadResponse';
+export * from '../models/ApiConsolidatedTdh';
 export * from '../models/ApiCreateDropPart';
 export * from '../models/ApiCreateDropRequest';
 export * from '../models/ApiCreateGroup';
@@ -137,6 +144,8 @@ export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
 export * from '../models/ApiTdhEditionsPage';
+export * from '../models/ApiTokenTdh';
+export * from '../models/ApiTokenTdhRank';
 export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUpdateDropRequest';
@@ -169,6 +178,7 @@ export * from '../models/ApiWaveOutcome';
 export * from '../models/ApiWaveOutcomeCredit';
 export * from '../models/ApiWaveOutcomeDistributionItem';
 export * from '../models/ApiWaveOutcomeDistributionItemsPage';
+export * from '../models/ApiWaveOutcomeOld';
 export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
 export * from '../models/ApiWaveOutcomesPage';
@@ -263,9 +273,16 @@ import { ApiChangeGroupVisibility } from '../models/ApiChangeGroupVisibility';
 import { ApiChangeProfileCicRating } from '../models/ApiChangeProfileCicRating';
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
 import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
+import { ApiCommunityMemberOverview } from '../models/ApiCommunityMemberOverview';
+import { ApiCommunityMembersPage } from '../models/ApiCommunityMembersPage';
+import { ApiCommunityMembersSortOption } from '../models/ApiCommunityMembersSortOption';
+import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
+import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
+import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
+import { ApiConsolidatedTdh } from '../models/ApiConsolidatedTdh';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropRequest             } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
@@ -375,6 +392,8 @@ import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipar
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
+import { ApiTokenTdh } from '../models/ApiTokenTdh';
+import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
 import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
@@ -407,6 +426,7 @@ import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
 import { ApiWaveOutcomeDistributionItemsPage } from '../models/ApiWaveOutcomeDistributionItemsPage';
+import { ApiWaveOutcomeOld         } from '../models/ApiWaveOutcomeOld';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
@@ -489,6 +509,7 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
+    "ApiCommunityMembersSortOption",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
@@ -546,9 +567,15 @@ let typeMap: {[index: string]: any} = {
     "ApiChangeProfileCicRating": ApiChangeProfileCicRating,
     "ApiChangeProfileRepRating": ApiChangeProfileRepRating,
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
+    "ApiCommunityMemberOverview": ApiCommunityMemberOverview,
+    "ApiCommunityMembersPage": ApiCommunityMembersPage,
+    "ApiCommunityMetric": ApiCommunityMetric,
+    "ApiCommunityMetricSample": ApiCommunityMetricSample,
+    "ApiCommunityMetrics": ApiCommunityMetrics,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
     "ApiCompleteMultipartUploadResponse": ApiCompleteMultipartUploadResponse,
+    "ApiConsolidatedTdh": ApiConsolidatedTdh,
     "ApiCreateDropPart": ApiCreateDropPart,
     "ApiCreateDropRequest": ApiCreateDropRequest,
     "ApiCreateGroup": ApiCreateGroup,
@@ -645,6 +672,8 @@ let typeMap: {[index: string]: any} = {
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
+    "ApiTokenTdh": ApiTokenTdh,
+    "ApiTokenTdhRank": ApiTokenTdhRank,
     "ApiTransaction": ApiTransaction,
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
@@ -673,6 +702,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveOutcome": ApiWaveOutcome,
     "ApiWaveOutcomeDistributionItem": ApiWaveOutcomeDistributionItem,
     "ApiWaveOutcomeDistributionItemsPage": ApiWaveOutcomeDistributionItemsPage,
+    "ApiWaveOutcomeOld": ApiWaveOutcomeOld,
     "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,

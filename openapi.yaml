@@ -255,6 +255,81 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiCommunityMemberMinimal"
+  /community-members/top:
+    get:
+      tags:
+        - CommunityMembers
+      summary: Get top community members with pagination and sorting.
+      operationId: getTopCommunityMembers
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          description: Default is level
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiCommunityMembersSortOption"
+        - name: group_id
+          in: query
+          description: Filter by group ID
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCommunityMembersPage"
+  /community-metrics:
+    get:
+      tags:
+        - CommunityMetrics
+      summary: Get community metrics.
+      operationId: getCommunityMetrics
+      parameters:
+        - name: interval
+          in: query
+          description: Metrics interval
+          required: true
+          schema:
+            type: string
+            enum:
+              - DAY
+              - WEEK
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCommunityMetrics"
   /distribution_phases/{contract}/{nft_id}:
     get:
       tags:
@@ -3205,6 +3280,31 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIncomingIdentitySubscriptionsPage"
+  /tdh/consolidation/{identity}:
+    get:
+      tags:
+        - TDH
+      summary: Get consolidated TDH for an identity
+      description: >-
+        Returns the consolidated TDH data for a given identity. The identity can
+        be a profile handle, wallet address, ENS name, or consolidation key.
+      operationId: getConsolidatedTdh
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Profile handle, wallet address, ENS name, or consolidation key
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiConsolidatedTdh"
+        "404":
+          description: Consolidated TDH not found
   /tdh-editions/wallet/{wallet}:
     get:
       tags:
@@ -5494,6 +5594,131 @@ components:
         pfp:
           type: string
           nullable: true
+    ApiCommunityMemberOverview:
+      type: object
+      required:
+        - display
+        - detail_view_key
+        - level
+        - tdh
+        - tdh_rate
+        - xtdh
+        - xtdh_rate
+        - xtdh_outgoing
+        - xtdh_incoming
+        - combined_tdh
+        - combined_tdh_rate
+        - rep
+        - cic
+        - pfp
+        - last_activity
+        - wallet
+      properties:
+        display:
+          type: string
+        detail_view_key:
+          type: string
+        level:
+          type: number
+          format: int64
+        tdh:
+          type: number
+          format: int64
+        tdh_rate:
+          type: number
+          format: double
+        xtdh:
+          type: number
+          format: double
+        xtdh_rate:
+          type: number
+          format: double
+        xtdh_outgoing:
+          type: number
+          format: double
+        xtdh_incoming:
+          type: number
+          format: double
+        combined_tdh:
+          type: number
+          format: double
+        combined_tdh_rate:
+          type: number
+          format: double
+        rep:
+          type: number
+          format: int64
+        cic:
+          type: number
+          format: int64
+        pfp:
+          type: string
+          nullable: true
+        last_activity:
+          type: number
+          format: int64
+          nullable: true
+        wallet:
+          type: string
+    ApiCommunityMembersPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCommunityMemberOverview"
+    ApiCommunityMembersSortOption:
+      type: string
+      enum:
+        - display
+        - level
+        - tdh
+        - tdh_rate
+        - rep
+        - cic
+        - xtdh
+        - xtdh_rate
+        - xtdh_outgoing
+        - xtdh_incoming
+        - combined_tdh
+        - combined_tdh_rate
+    ApiCommunityMetric:
+      type: object
+      required:
+        - older
+        - newer
+      properties:
+        older:
+          $ref: "#/components/schemas/ApiCommunityMetricSample"
+        newer:
+          $ref: "#/components/schemas/ApiCommunityMetricSample"
+    ApiCommunityMetrics:
+      type: object
+      required:
+        - drops_created
+      properties:
+        drops_created:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+    ApiCommunityMetricSample:
+      type: object
+      required:
+        - period_start
+        - period_end
+        - event_count
+        - value_count
+      properties:
+        period_start:
+          type: number
+        period_end:
+          type: number
+        event_count:
+          type: number
+        value_count:
+          type: number
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id
@@ -5524,6 +5749,127 @@ components:
       properties:
         media_url:
           type: string
+    ApiConsolidatedTdh:
+      type: object
+      properties:
+        block:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date-time
+        consolidation_key:
+          type: string
+        consolidation_display:
+          type: string
+        wallets:
+          type: array
+          items:
+            type: string
+        balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        memes_cards_sets:
+          type: integer
+          format: int64
+        tdh:
+          type: integer
+          format: int64
+        boost:
+          type: number
+          format: double
+        boosted_tdh:
+          type: integer
+          format: int64
+        boosted_tdh_rate:
+          type: number
+          format: double
+        tdh__raw:
+          type: integer
+          format: int64
+        tdh_rank:
+          type: integer
+          format: int64
+        tdh_rank_memes:
+          type: integer
+          format: int64
+        tdh_rank_gradients:
+          type: integer
+          format: int64
+        tdh_rank_nextgen:
+          type: integer
+          format: int64
+        genesis:
+          type: integer
+          format: int64
+        nakamoto:
+          type: integer
+          format: int64
+        boosted_memes_tdh:
+          type: integer
+          format: int64
+        memes_tdh:
+          type: integer
+          format: int64
+        memes_tdh__raw:
+          type: integer
+          format: int64
+        memes_balance:
+          type: integer
+          format: int64
+        memes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTokenTdh"
+        memes_ranks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTokenTdhRank"
+        gradients_balance:
+          type: integer
+          format: int64
+        boosted_gradients_tdh:
+          type: integer
+          format: int64
+        gradients_tdh:
+          type: integer
+          format: int64
+        gradients_tdh__raw:
+          type: integer
+          format: int64
+        gradients:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTokenTdh"
+        gradients_ranks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTokenTdhRank"
+        nextgen_balance:
+          type: integer
+          format: int64
+        boosted_nextgen_tdh:
+          type: integer
+          format: int64
+        nextgen_tdh:
+          type: integer
+          format: int64
+        nextgen_tdh__raw:
+          type: integer
+          format: int64
+        nextgen:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTokenTdh"
+        nextgen_ranks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTokenTdhRank"
+        boost_breakdown:
+          type: object
     ApiCreateDropPart:
       type: object
       required:
@@ -7901,6 +8247,38 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTdhEdition"
+    ApiTokenTdh:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        balance:
+          type: integer
+          format: int64
+        hodl_rate:
+          type: number
+          format: double
+        tdh:
+          type: integer
+          format: int64
+        tdh__raw:
+          type: integer
+          format: int64
+        days_held_per_edition:
+          type: array
+          items:
+            type: integer
+            format: int64
+    ApiTokenTdhRank:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+          format: int64
     ApiTransaction:
       type: object
       required:
@@ -8144,6 +8522,7 @@ components:
         - participation
         - chat
         - wave
+        - outcomes
         - created_at
         - contributors_overview
         - subscribed_actions
@@ -8183,6 +8562,10 @@ components:
           $ref: "#/components/schemas/ApiWaveChatConfig"
         wave:
           $ref: "#/components/schemas/ApiWaveConfig"
+        outcomes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOutcomeOld"
         contributors_overview:
           type: array
           items:
@@ -8617,6 +9000,33 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
+    ApiWaveOutcomeOld:
+      type: object
+      required:
+        - type
+        - description
+        - index
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+        distribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
+        index:
+          type: number
+          format: int64
     ApiWaveOutcomesPage:
       type: object
       required:

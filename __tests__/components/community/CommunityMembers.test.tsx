@@ -31,8 +31,28 @@ jest.mock(
 );
 
 jest.mock(
-  "@/components/utils/animation/CommonCardSkeleton",
+  "@/components/community/members-table/CommunityMembersTableSkeleton",
   () => () => <div data-testid="skeleton" />
+);
+
+jest.mock(
+  "@/components/community/members-table/CommunityMembersSortControls",
+  () => () => <div data-testid="sort-controls" />
+);
+
+jest.mock(
+  "@/components/community/members-table/CommunityMembersMobileSortContent",
+  () => () => <div data-testid="mobile-sort" />
+);
+
+jest.mock(
+  "@/components/groups/sidebar/GroupsSidebar",
+  () => () => <div data-testid="groups-sidebar" />
+);
+
+jest.mock(
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
+  () => ({ children, isOpen }: any) => isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
 );
 
 const push = jest.fn();

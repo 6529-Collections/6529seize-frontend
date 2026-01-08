@@ -11,8 +11,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
 import type { Page } from "@/helpers/Types";
-import type { CommunityMemberOverview } from "@/entities/IProfile";
-import { CommunityMembersSortOption } from "@/enums";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 
@@ -31,12 +31,12 @@ export default function GroupCreateTest({
   const [params, setParams] = useState<CommunityMembersQuery>({
     page: 1,
     page_size: 1,
-    sort: CommunityMembersSortOption.LEVEL,
+    sort: ApiCommunityMembersSortOption.Level,
     sort_direction: SortDirection.DESC,
     group_id: undefined,
   });
 
-  const { isFetching, data: members } = useQuery<Page<CommunityMemberOverview>>(
+  const { isFetching, data: members } = useQuery<Page<ApiCommunityMemberOverview>>(
     {
       queryKey: [
         QueryKey.COMMUNITY_MEMBERS_TOP,
@@ -50,7 +50,7 @@ export default function GroupCreateTest({
       ],
       queryFn: async () =>
         await commonApiFetch<
-          Page<CommunityMemberOverview>,
+          Page<ApiCommunityMemberOverview>,
           CommunityMembersQuery
         >({
           endpoint: `community-members/top`,

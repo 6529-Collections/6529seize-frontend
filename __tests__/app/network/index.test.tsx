@@ -36,9 +36,26 @@ jest.mock(
   "@/components/utils/table/paginator/CommonTablePagination",
   () => () => <div data-testid="pagination" />
 );
-jest.mock("@/components/utils/animation/CommonCardSkeleton", () => () => (
-  <div data-testid="loading-skeleton" />
-));
+jest.mock(
+  "@/components/community/members-table/CommunityMembersTableSkeleton",
+  () => () => <div data-testid="loading-skeleton" />
+);
+jest.mock(
+  "@/components/community/members-table/CommunityMembersSortControls",
+  () => () => <div data-testid="sort-controls" />
+);
+jest.mock(
+  "@/components/community/members-table/CommunityMembersMobileSortContent",
+  () => () => <div data-testid="mobile-sort" />
+);
+jest.mock(
+  "@/components/groups/sidebar/GroupsSidebar",
+  () => () => <div data-testid="groups-sidebar" />
+);
+jest.mock(
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
+  () => ({ children, isOpen }: any) => isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
+);
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -101,7 +118,7 @@ describe("CommunityPage (App Router)", () => {
   });
 
   it("renders loading state", () => {
-    useQueryMock.mockReturnValue({ isLoading: true });
+    useQueryMock.mockReturnValue({ isLoading: true, data: null });
 
     render(<CommunityMembers />);
 
@@ -113,7 +130,7 @@ describe("CommunityPage (App Router)", () => {
       isLoading: false,
       isFetching: false,
       data: {
-        count: 120, // ensures multiple pages
+        count: 120,
         data: [],
         page: 1,
         next: true,
