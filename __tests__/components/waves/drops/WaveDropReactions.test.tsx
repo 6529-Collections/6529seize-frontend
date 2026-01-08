@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import { useEmoji } from "@/contexts/EmojiContext";
-import * as commonApi from "@/services/api/common-api"; // Import directly to mock methods
+import * as commonApi from "@/services/api/common-api";
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
@@ -10,12 +10,10 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   })),
 }));
 
-// Mock useEmoji with sample emojiMap and findNativeEmoji
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
 }));
 
-// Mock formatLargeNumber for predictable output (optional)
 jest.mock("@/helpers/Helpers", () => ({
   formatLargeNumber: (num: number) => `${num}`,
 }));
@@ -23,6 +21,24 @@ jest.mock("@/helpers/Helpers", () => ({
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}));
+
+jest.mock("@/hooks/useLongPressInteraction", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    longPressTriggered: false,
+    touchHandlers: {
+      onTouchStart: jest.fn(),
+      onTouchMove: jest.fn(),
+      onTouchEnd: jest.fn(),
+      onTouchCancel: jest.fn(),
+    },
+  })),
 }));
 
 const mockUseEmoji = useEmoji as jest.Mock;
@@ -221,6 +237,176 @@ describe("WaveDropReactions", () => {
     fireEvent.click(button);
     await waitFor(() => {
       expect(button).toHaveTextContent("2");
+    });
+  });
+
+  it("shows 'and X more' in tooltip when more than 3 profiles", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          {
+            id: "test-drop",
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [
+                  { handle: "user1", id: "1" },
+                  { handle: "user2", id: "2" },
+                  { handle: "user3", id: "3" },
+                  { handle: "user4", id: "4" },
+                  { handle: "user5", id: "5" },
+                ],
+              },
+            ],
+          } as any
+        }
+      />
+    );
+
+    const reactionButton = screen.getAllByRole("button")[0];
+    fireEvent.mouseEnter(reactionButton);
+
+    await waitFor(() => {
+      const moreButton = screen.queryByText(/and 2 others/);
+      expect(moreButton).toBeInTheDocument();
+    });
+  });
+
+  it("opens detail dialog when 'and X more' is clicked", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          {
+            id: "test-drop",
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [
+                  { handle: "user1", id: "1" },
+                  { handle: "user2", id: "2" },
+                  { handle: "user3", id: "3" },
+                  { handle: "user4", id: "4" },
+                ],
+              },
+            ],
+          } as any
+        }
+      />
+    );
+
+    const reactionButton = screen.getAllByRole("button")[0];
+    fireEvent.mouseEnter(reactionButton);
+
+    await waitFor(() => {
+      const moreButton = screen.getByText(/and 1 other/);
+      fireEvent.click(moreButton);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Reactions")).toBeInTheDocument();
+    });
+  });
+
+  it("adds touch handlers for long press on touch devices", () => {
+    const mockUseIsTouchDevice = require("@/hooks/useIsTouchDevice").default;
+    mockUseIsTouchDevice.mockReturnValue(true);
+
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          {
+            id: "test-drop",
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "user1", id: "1" }],
+              },
+            ],
+          } as any
+        }
+      />
+    );
+
+    const reactionButton = screen.getAllByRole("button")[0];
+    expect(reactionButton).toBeInTheDocument();
+
+    mockUseIsTouchDevice.mockReturnValue(false);
+  });
+
+  it("renders profile handles as clickable links in tooltip", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          {
+            id: "test-drop",
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [
+                  { handle: "user1", id: "1" },
+                  { handle: "user2", id: "2" },
+                ],
+              },
+            ],
+          } as any
+        }
+      />
+    );
+
+    const reactionButton = screen.getAllByRole("button")[0];
+    fireEvent.mouseEnter(reactionButton);
+
+    await waitFor(() => {
+      const user1Link = screen.getByRole("link", { name: "user1" });
+      expect(user1Link).toHaveAttribute("href", "/user1");
     });
   });
 });
