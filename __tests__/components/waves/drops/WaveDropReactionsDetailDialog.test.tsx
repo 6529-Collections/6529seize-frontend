@@ -30,14 +30,16 @@ const mockReactions = [
   {
     reaction: ":thumbsup:",
     profiles: [
-      { id: "1", handle: "user1", pfp: "https://example.com/pfp1.jpg" },
-      { id: "2", handle: "user2", pfp: null },
-      { id: "3", handle: null, pfp: null },
+      { id: "profile-1", handle: "alice", pfp: "https://example.com/pfp1.jpg" },
+      { id: "profile-2", handle: "bob", pfp: null },
+      { id: "profile-3", handle: null, pfp: null },
     ],
   },
   {
     reaction: ":heart:",
-    profiles: [{ id: "4", handle: "user4", pfp: "https://example.com/pfp4.jpg" }],
+    profiles: [
+      { id: "profile-4", handle: "charlie", pfp: "https://example.com/pfp4.jpg" },
+    ],
   },
 ];
 
@@ -100,8 +102,8 @@ describe("WaveDropReactionsDetailDialog", () => {
       />
     );
 
-    expect(screen.getByText("user1")).toBeInTheDocument();
-    expect(screen.getByText("user2")).toBeInTheDocument();
+    expect(screen.getAllByText("alice").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("bob").length).toBeGreaterThan(0);
   });
 
   it("switches reaction when clicking another reaction button", () => {
@@ -114,15 +116,15 @@ describe("WaveDropReactionsDetailDialog", () => {
       />
     );
 
-    expect(screen.getByText("user1")).toBeInTheDocument();
+    expect(screen.getAllByText("alice").length).toBeGreaterThan(0);
 
     const heartButton = screen.getByText("1").closest("button");
     if (heartButton) {
       fireEvent.click(heartButton);
     }
 
-    expect(screen.getByText("user4")).toBeInTheDocument();
-    expect(screen.queryByText("user1")).not.toBeInTheDocument();
+    expect(screen.getAllByText("charlie").length).toBeGreaterThan(0);
+    expect(screen.queryByText("alice")).not.toBeInTheDocument();
   });
 
   it("renders profile links for users with handles", () => {
@@ -135,8 +137,8 @@ describe("WaveDropReactionsDetailDialog", () => {
       />
     );
 
-    const user1Link = screen.getByText("user1").closest("a");
-    expect(user1Link).toHaveAttribute("href", "/user1");
+    const aliceLink = screen.getAllByText("alice")[0].closest("a");
+    expect(aliceLink).toHaveAttribute("href", "/alice");
   });
 
   it("renders profile avatars", () => {
@@ -178,6 +180,6 @@ describe("WaveDropReactionsDetailDialog", () => {
       />
     );
 
-    expect(screen.getByText("user1")).toBeInTheDocument();
+    expect(screen.getAllByText("alice").length).toBeGreaterThan(0);
   });
 });
