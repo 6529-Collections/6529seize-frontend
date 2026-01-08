@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-export default function SidebarLayoutApp({
+export default function NetworkPageLayoutApp({
   children,
 }: {
   readonly children: ReactNode;

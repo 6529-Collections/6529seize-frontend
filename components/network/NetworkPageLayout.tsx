@@ -6,9 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import SidebarLayoutApp from "./SidebarLayoutApp";
+import NetworkPageLayoutApp from "./NetworkPageLayoutApp";
 
-export default function SidebarLayout({
+export default function NetworkPageLayout({
   children,
 }: {
   readonly children: ReactNode;
@@ -31,7 +31,7 @@ export default function SidebarLayout({
   }, []);
 
   if (isApp) {
-    return <SidebarLayoutApp>{children}</SidebarLayoutApp>;
+    return <NetworkPageLayoutApp>{children}</NetworkPageLayoutApp>;
   }
 
   return (
