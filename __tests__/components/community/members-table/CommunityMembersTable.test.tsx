@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import CommunityMembersTable from '@/components/community/members-table/CommunityMembersTable';
 import type { ApiCommunityMemberOverview } from '@/generated/models/ApiCommunityMemberOverview';
+import { ApiCommunityMembersSortOption } from '@/generated/models/ApiCommunityMembersSortOption';
 
 jest.mock('@/components/community/members-table/CommunityMembersTableHeader', () => ({
   __esModule: true,
@@ -68,6 +69,7 @@ const baseProps = {
   members,
   page: 2,
   pageSize: 5,
+  activeSort: ApiCommunityMembersSortOption.CombinedTdh,
 };
 
 describe('CommunityMembersTable', () => {

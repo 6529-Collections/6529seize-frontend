@@ -245,9 +245,7 @@ export default function CommunityMembers() {
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
 
   useEffect(() => {
-    if (mobileFilterOpen) {
-      setMobileFilterOpen(false);
-    }
+    setMobileFilterOpen(false);
   }, [activeGroupId]);
 
   return (
