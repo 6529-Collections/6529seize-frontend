@@ -1,7 +1,7 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
 import WaveDropReactionsDetailDialog from "@/components/waves/drops/WaveDropReactionsDetailDialog";
 import { useEmoji } from "@/contexts/EmojiContext";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: jest.fn(),
@@ -38,7 +38,11 @@ const mockReactions = [
   {
     reaction: ":heart:",
     profiles: [
-      { id: "profile-4", handle: "charlie", pfp: "https://example.com/pfp4.jpg" },
+      {
+        id: "profile-4",
+        handle: "charlie",
+        pfp: "https://example.com/pfp4.jpg",
+      },
     ],
   },
 ];
