@@ -8,6 +8,7 @@ import {
 } from "@/hooks/useWaveDropsLeaderboard";
 import SubmissionArtworkCard from "./SubmissionArtworkCard";
 import CarouselArrow from "./CarouselArrow";
+import CarouselActiveItemDetails from "./CarouselActiveItemDetails";
 
 export default function SubmissionCarousel() {
   const { seizeSettings, isLoaded } = useSeizeSettings();
@@ -21,7 +22,7 @@ export default function SubmissionCarousel() {
 
   const trackRef = useRef<HTMLDivElement>(null);
   const hasInitialScrolled = useRef(false);
-  const [activeIndex, setActiveIndex] = useState(1);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
@@ -69,7 +70,7 @@ export default function SubmissionCarousel() {
     setCanScrollRight(closestIndex < shuffledDrops.length - 1);
   }, [shuffledDrops.length]);
 
-  const scrollToIndex = useCallback((index: number) => {
+  const scrollToIndex = useCallback((index: number, instant = false) => {
     const track = trackRef.current;
     if (!track) return;
 
@@ -84,7 +85,10 @@ export default function SubmissionCarousel() {
     const scrollLeft =
       card.offsetLeft - trackRect.width / 2 + cardRect.width / 2;
 
-    track.scrollTo({ left: scrollLeft, behavior: "smooth" });
+    track.scrollTo({
+      left: scrollLeft,
+      behavior: instant ? "instant" : "smooth",
+    });
   }, []);
 
   useEffect(() => {
@@ -101,12 +105,12 @@ export default function SubmissionCarousel() {
     };
   }, [updateActiveIndex, drops]);
 
-  // Scroll to second item on initial load
+  // Scroll to second item on initial load (instant, no animation)
   useEffect(() => {
     if (shuffledDrops.length > 1 && !hasInitialScrolled.current) {
       hasInitialScrolled.current = true;
       requestAnimationFrame(() => {
-        scrollToIndex(1);
+        scrollToIndex(1, true);
       });
     }
   }, [shuffledDrops.length, scrollToIndex]);
@@ -186,6 +190,10 @@ export default function SubmissionCarousel() {
         direction="right"
         onClick={() => scroll("right")}
         disabled={!canScrollRight}
+      />
+
+      <CarouselActiveItemDetails
+        drop={shuffledDrops[activeIndex] ?? shuffledDrops[0] ?? null}
       />
     </div>
   );
