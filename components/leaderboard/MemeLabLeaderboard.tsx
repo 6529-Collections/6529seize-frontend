@@ -8,10 +8,11 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import { LeaderboardCollector } from "./LeaderboardCollector";
+import type {
+  NftTDHRanked} from "./NFTLeaderboard";
 import {
   fetchNftTdhResults,
   PAGE_SIZE,
-  NftTDHRanked,
   setScrollPosition,
 } from "./NFTLeaderboard";
 import {

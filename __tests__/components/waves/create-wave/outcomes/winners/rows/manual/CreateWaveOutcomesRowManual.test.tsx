@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import CreateWaveOutcomesRowManual from '@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import { CreateWaveOutcomeConfig } from '@/types/waves.types';
+import type { CreateWaveOutcomeConfig } from '@/types/waves.types';
 
 jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualApprove', () => 
   function MockApprove(props: any) {

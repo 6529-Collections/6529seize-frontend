@@ -1,9 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import FinalizeComponent from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/FinalizeComponent';
-import { RandomHoldersType, PhaseGroupConfig, PhaseGroupSnapshotConfig } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import type { PhaseGroupConfig, PhaseGroupSnapshotConfig } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
+import { RandomHoldersType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 import { ComponentRandomHoldersWeightType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/utils/ComponentRandomHoldersWeight';
-import { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
+import type { BuildPhasesPhase } from '@/components/distribution-plan-tool/build-phases/BuildPhases';
 
 // Mock child components to keep tests focused
 jest.mock(

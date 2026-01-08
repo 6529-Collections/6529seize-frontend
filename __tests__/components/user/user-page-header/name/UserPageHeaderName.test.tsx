@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 import { CLASSIFICATIONS } from '@/entities/IProfile';
 import UserPageHeaderName from '@/components/user/user-page-header/name/UserPageHeaderName';

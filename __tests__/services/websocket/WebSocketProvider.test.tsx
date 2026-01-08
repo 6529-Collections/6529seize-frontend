@@ -2,7 +2,8 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { WebSocketProvider } from '@/services/websocket/WebSocketProvider';
 import { WebSocketContext } from '@/services/websocket/WebSocketContext';
-import { WebSocketStatus, WebSocketConfig } from '@/services/websocket/WebSocketTypes';
+import type { WebSocketConfig } from '@/services/websocket/WebSocketTypes';
+import { WebSocketStatus } from '@/services/websocket/WebSocketTypes';
 import { WsMessageType } from '@/helpers/Types';
 import * as authUtils from '@/services/auth/auth.utils';
 

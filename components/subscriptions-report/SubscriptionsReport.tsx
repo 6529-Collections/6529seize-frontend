@@ -5,18 +5,20 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import type {
+  SeasonMintRow} from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   displayedSeasonNumberFromIndex,
   formatFullDate,
   getCardsRemainingUntilEndOf,
   getUpcomingMintsAcrossSeasons,
-  isMintingToday,
-  SeasonMintRow,
+  isMintingToday
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import Pagination, { Paginated } from "@/components/pagination/Pagination";
+import type { Paginated } from "@/components/pagination/Pagination";
+import Pagination from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
-import { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
-import { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
+import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
+import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";

@@ -1,4 +1,4 @@
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Image from "next/image";
 import {
   getScaledImageUri,

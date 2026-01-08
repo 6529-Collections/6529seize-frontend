@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useMemo } from "react";
 

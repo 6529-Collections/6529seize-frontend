@@ -1,4 +1,5 @@
-import { TimeUnit, MIN_MINUTES, MAX_MINUTES, MAX_HOURS } from './types';
+import type { TimeUnit} from './types';
+import { MIN_MINUTES, MAX_MINUTES, MAX_HOURS } from './types';
 
 /**
  * Converts a time value from its current unit to minutes

@@ -1,5 +1,5 @@
 import { publicEnv } from "@/config/env";
-import { SecurityEventContext, SecurityEventType } from "../types/security";
+import type { SecurityEventContext, SecurityEventType } from "../types/security";
 
 /**
  * CRITICAL SECURITY NOTICE:

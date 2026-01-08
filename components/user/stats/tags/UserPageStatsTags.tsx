@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
-import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 
 export interface UserPageStatsTag {
   readonly id: string;

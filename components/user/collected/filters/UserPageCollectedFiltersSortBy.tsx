@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type {
+  CollectedCollectionType} from "@/entities/IProfile";
 import {
-  CollectedCollectionType,
   CollectionSort,
 } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
-import CommonSelect, {
+import type { SortDirection } from "@/entities/ISort";
+import type {
   CommonSelectItem,
 } from "@/components/utils/select/CommonSelect";
+import CommonSelect from "@/components/utils/select/CommonSelect";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 
 export default function UserPageCollectedFiltersSortBy({

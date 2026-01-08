@@ -1,5 +1,5 @@
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { CreateWaveOutcomeConfig } from "@/types/waves.types";
+import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import CreateWaveOutcomesRowManualApprove from "./CreateWaveOutcomesRowManualApprove";
 import CreateWaveOutcomesRowManualRank from "./CreateWaveOutcomesRowManualRank";
 

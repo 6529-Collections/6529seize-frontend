@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import CreateDropFullMobileMetadata from '@/components/drops/create/full/mobile/CreateDropFullMobileMetadata';
-import { DropMetadata } from '@/entities/IDrop';
+import type { DropMetadata } from '@/entities/IDrop';
 
 describe('CreateDropFullMobileMetadata', () => {
   const metadata: DropMetadata[] = [

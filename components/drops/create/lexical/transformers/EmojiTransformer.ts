@@ -1,4 +1,4 @@
-import { TextMatchTransformer } from "@lexical/markdown";
+import type { TextMatchTransformer } from "@lexical/markdown";
 import { EmojiNode } from "../nodes/EmojiNode";
 import { $applyNodeReplacement } from "lexical";
 import { EMOJI_MATCH_REGEX } from "../plugins/emoji/EmojiPlugin";

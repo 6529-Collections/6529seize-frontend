@@ -4,7 +4,7 @@ import {
   useUnreadDividerOptional,
 } from "@/contexts/wave/UnreadDividerContext";
 import { act, renderHook } from "@testing-library/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 function createWrapper(initialSerialNo: number | null) {
   return function Wrapper({ children }: { children: ReactNode }) {

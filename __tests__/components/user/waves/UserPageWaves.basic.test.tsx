@@ -1,7 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageWaves from "@/components/user/waves/UserPageWaves";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";

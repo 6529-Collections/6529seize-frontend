@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GroupsRequestParams } from "@/entities/IGroup";
+import type { GroupsRequestParams } from "@/entities/IGroup";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import GroupCard from "./card/GroupCard";
 import GroupsListSearch from "./search/GroupsListSearch";

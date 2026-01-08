@@ -1,12 +1,12 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyCreateActionSelectType from "./select-type/ProxyCreateActionSelectType";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import ProxyCreateActionConfig from "./config/ProxyCreateActionConfig";
-import { CreateProxyAction } from "@/entities/IProxy";
+import type { CreateProxyAction } from "@/entities/IProxy";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";

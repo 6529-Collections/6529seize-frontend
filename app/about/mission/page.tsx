@@ -1,5 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default function AboutMissionPage() {
   return (

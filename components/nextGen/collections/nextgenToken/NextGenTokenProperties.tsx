@@ -3,7 +3,7 @@
 import styles from "./NextGenToken.module.scss";
 
 import { Accordion, Col, Container, Row } from "react-bootstrap";
-import {
+import type {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,

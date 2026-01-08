@@ -1,8 +1,9 @@
 import React from "react";
-import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useUserWinningArtworks } from "@/hooks/useUserWinningArtworks";
+import type {
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
 import {
-  ExtendedDrop,
   convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";

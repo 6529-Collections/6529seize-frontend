@@ -1,4 +1,4 @@
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import Link from "next/link";
 
 interface WaveRatingRepProps {

@@ -1,7 +1,7 @@
-import { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
+import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import { ETHEREUM_ICON_TEXT, NEXTGEN_MEDIA_BASE_URL } from "@/constants";
-import { NextGenToken } from "@/entities/INextgen";
+import type { NextGenToken } from "@/entities/INextgen";
 import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";

@@ -3,8 +3,8 @@
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import OutsideLinkIcon from "@/components/utils/icons/OutsideLinkIcon";
-import { CicStatement } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_META } from "@/helpers/Types";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";

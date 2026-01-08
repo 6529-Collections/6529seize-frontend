@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreateProxyAllocateRepAction } from "@/entities/IProxy";
+import type { CreateProxyAllocateRepAction } from "@/entities/IProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import CommonInput from "@/components/utils/input/CommonInput";
 import CircleLoader, {

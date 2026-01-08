@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import {
+import type {
   ApiProfileRepRatesState,
   RatingStats,
 } from "@/entities/IProfile";
@@ -9,7 +9,7 @@ import UserPageRepRepsTop from "./UserPageRepRepsTop";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 const TOP_REPS_COUNT = 5;
 
 export default function UserPageRepReps({

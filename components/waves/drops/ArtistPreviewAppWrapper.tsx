@@ -7,8 +7,10 @@ import {
     TransitionChild,
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { motion, PanInfo, useDragControls } from "framer-motion";
-import { Fragment, ReactNode, useRef } from "react";
+import type { PanInfo} from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
+import type { ReactNode} from "react";
+import { Fragment, useRef } from "react";
 
 export default function ArtistPreviewAppWrapper({
   isOpen,

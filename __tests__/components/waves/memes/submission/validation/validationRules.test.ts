@@ -1,6 +1,6 @@
 import { validationRulesByType } from '@/components/waves/memes/submission/validation/validationRules';
 import { FieldType } from '@/components/waves/memes/traits/schema';
-import {
+import type {
   FieldValidationContext,
   FieldValidationResult,
 } from '@/components/waves/memes/submission/validation/validationTypes';

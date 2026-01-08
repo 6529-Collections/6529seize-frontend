@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { createPossessionStr } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";

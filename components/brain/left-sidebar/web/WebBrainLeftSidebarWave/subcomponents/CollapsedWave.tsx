@@ -1,7 +1,8 @@
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import Link from "next/link";
 import { WaveAvatar } from "./WaveAvatar";
-import { WaveTooltip, WaveTooltipPlacement } from "./WaveTooltip";
+import type { WaveTooltipPlacement } from "./WaveTooltip";
+import { WaveTooltip } from "./WaveTooltip";
 
 interface CollapsedWaveProps {
   readonly formattedWaveName: string;

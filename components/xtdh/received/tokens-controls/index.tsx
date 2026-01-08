@@ -1,5 +1,5 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
 
 import { TOKENS_SORT_ITEMS } from "../constants";

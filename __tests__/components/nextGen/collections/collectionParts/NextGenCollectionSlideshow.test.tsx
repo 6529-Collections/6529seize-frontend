@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import NextGenCollectionSlideshow from "@/components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
-import { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 
 // Mock the child components
 jest.mock("@/components/nextGen/collections/collectionParts/hooks/SlideshowHeader", () => {

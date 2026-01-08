@@ -1,10 +1,10 @@
 import { sha256 } from "ethereum-cryptography/sha256.js";
 import { utf8ToBytes } from "ethereum-cryptography/utils.js";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
-import { TypedFeedItem } from "@/types/feed.types";
+import type { TypedFeedItem } from "@/types/feed.types";
 import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
-import { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
 
 export enum DropSize {
   LIGHT = "LIGHT",

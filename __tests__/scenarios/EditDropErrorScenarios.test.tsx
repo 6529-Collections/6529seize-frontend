@@ -5,7 +5,7 @@ import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPost } from "@/services/api/common-api";
-import { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import {
   createMockDrop,
   createMockRequest,

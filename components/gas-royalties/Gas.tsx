@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import styles from "./GasRoyalties.module.scss";
-import { Gas } from "@/entities/IGas";
+import type { Gas } from "@/entities/IGas";
 import { fetchUrl } from "@/services/6529api";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
 import {

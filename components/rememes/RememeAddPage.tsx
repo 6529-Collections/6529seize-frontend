@@ -3,9 +3,9 @@
 import { publicEnv } from "@/config/env";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFT } from "@/entities/INFT";
-import { ConsolidatedTDH } from "@/entities/ITDH";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT } from "@/entities/INFT";
+import type { ConsolidatedTDH } from "@/entities/ITDH";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl, postData } from "@/services/6529api";
@@ -22,7 +22,8 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import { useSignMessage } from "wagmi";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
+import type { ProcessedRememe } from "./RememeAddComponent";
+import RememeAddComponent from "./RememeAddComponent";
 import styles from "./Rememes.module.scss";
 
 interface CheckList {
@@ -79,28 +80,26 @@ export default function RememeAddPage() {
             status: true,
             note: "Rememe can be added (Rememe Contract Deployer)",
           });
+        } else if (!userTDH) {
+          mychecklist.push({
+            status: false,
+            note: "You need to have some TDH before you can add Rememes",
+          });
         } else {
-          if (!userTDH) {
-            mychecklist.push({
-              status: false,
-              note: "You need to have some TDH before you can add Rememes",
-            });
-          } else {
-            mychecklist.push({
-              status:
-                userTDH.boosted_tdh >=
-                seizeSettings.rememes_submission_tdh_threshold,
-              note: `You need ${numberWithCommas(
-                seizeSettings.rememes_submission_tdh_threshold
-              )} TDH to add ${
-                addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
-              }${
-                userTDH
-                  ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
-                  : ``
-              }`,
-            });
-          }
+          mychecklist.push({
+            status:
+              userTDH.boosted_tdh >=
+              seizeSettings.rememes_submission_tdh_threshold,
+            note: `You need ${numberWithCommas(
+              seizeSettings.rememes_submission_tdh_threshold
+            )} TDH to add ${
+              addRememe.nfts.length > 1 ? `these Rememes` : `this Rememe`
+            }${
+              userTDH
+                ? ` (you have ${numberWithCommas(userTDH.boosted_tdh)} TDH)`
+                : ``
+            }`,
+          });
         }
       }
     }

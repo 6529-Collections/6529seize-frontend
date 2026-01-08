@@ -1,4 +1,3 @@
-import { FIELD_TO_LABEL_MAP } from "@/components/waves/memes/traits/schema";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import React from "react";
@@ -25,24 +24,27 @@ const convertValue = (value: string) => {
   return value;
 };
 
-const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value, dropId }) => {
+const MemeDropTrait: React.FC<MemeDropTraitProps> = ({
+  label,
+  value,
+  dropId,
+}) => {
   const isMobile = useIsMobileDevice();
   const convertedValue = convertValue(value);
-  const tooltipId = dropId ? `meme-drop-trait-${dropId}-${label}` : `meme-drop-trait-${label}`;
-
-  if (label === FIELD_TO_LABEL_MAP.pointsLoki) {
-    console.log(value, typeof value);
-  }
+  const tooltipId = dropId
+    ? `meme-drop-trait-${dropId}-${label}`
+    : `meme-drop-trait-${label}`;
 
   return (
-    <div className="tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-px-3 tw-py-1.5 tw-flex tw-flex-col">
-      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-normal tw-mb-1">
+    <div className="tw-flex tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-1.5">
+      <span className="tw-mb-1 tw-block tw-text-[9px] tw-font-normal tw-uppercase tw-tracking-wide tw-text-iron-500">
         {label}
       </span>
       <>
         <span
-          className="tw-text-xs tw-text-iron-200 tw-font-medium tw-truncate"
-          data-tooltip-id={tooltipId}>
+          className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-200"
+          data-tooltip-id={tooltipId}
+        >
           {convertedValue}
         </span>
         {!isMobile && (
@@ -61,7 +63,8 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value, dropId }) =
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
               zIndex: 99999,
               pointerEvents: "none",
-            }}>
+            }}
+          >
             <span className="tw-text-xs">{convertedValue}</span>
           </Tooltip>
         )}

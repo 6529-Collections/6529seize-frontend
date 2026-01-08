@@ -1,13 +1,12 @@
 "use client";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
-import { Device, DeviceInfo } from "@capacitor/device";
-import {
-  PushNotifications,
-  PushNotificationSchema,
-} from "@capacitor/push-notifications";
+import type { DeviceInfo } from "@capacitor/device";
+import { Device } from "@capacitor/device";
+import type { PushNotificationSchema } from "@capacitor/push-notifications";
+import { PushNotifications } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import React, {
@@ -131,7 +130,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       notification: PushNotificationSchema,
       profileInstance?: ApiIdentity
     ) => {
-      console.log("Push notification action performed", notification);
       const notificationData = notification.data ?? {};
       const notificationProfileId = notificationData.profile_id;
 
@@ -140,7 +138,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         notificationProfileId &&
         notificationProfileId !== profileInstance.id
       ) {
-        console.log("Notification profile id does not match connected profile");
+        console.warn(
+          "Notification profile id does not match connected profile"
+        );
         return;
       }
 
@@ -148,10 +148,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const redirectUrl = resolveRedirectUrl(notificationData);
       if (redirectUrl) {
-        console.log("Redirecting to", redirectUrl);
         routerInstance.push(redirectUrl);
       } else {
-        console.log(
+        console.warn(
           "No redirect url found in notification data",
           notificationData
         );
@@ -194,7 +193,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await PushNotifications.addListener(
           "pushNotificationReceived",
           (notification) => {
-            console.log("Push notification received: ", notification);
+            console.warn("Push notification received: ", notification);
           }
         );
 
@@ -210,7 +209,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         );
 
         const permStatus = await PushNotifications.requestPermissions();
-        console.log("Push permission status", permStatus);
 
         if (permStatus.receive === "granted") {
           if (isIos) {
@@ -233,7 +231,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const initializeNotifications = useCallback(
     async (profile?: ApiIdentity) => {
       if (isCapacitor) {
-        console.log("Initializing push notifications");
         await initializePushNotifications(profile);
       }
     },
@@ -319,7 +316,7 @@ const registerPushNotification = async (
   profile?: ApiIdentity
 ) => {
   try {
-    const response = await commonApiPost({
+    await commonApiPost({
       endpoint: `push-notifications/register`,
       body: {
         device_id: deviceId,
@@ -328,7 +325,6 @@ const registerPushNotification = async (
         profile_id: profile?.id,
       },
     });
-    console.log("Push registration success", response);
   } catch (error) {
     console.error("Push registration error", error);
     Sentry.captureException(error, {
@@ -344,7 +340,7 @@ const resolveRedirectUrl = (notificationData: NotificationData) => {
   const { redirect, ...params } = notificationData;
 
   if (!redirect) {
-    console.log(
+    console.warn(
       "No redirect type found in notification data",
       notificationData
     );

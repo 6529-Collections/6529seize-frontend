@@ -1,15 +1,17 @@
 "use client";
 
+import type {
+  DropInteractionParams} from "@/components/waves/drops/Drop";
 import Drop, {
-  DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type {
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
 import {
-  convertApiDropToExtendedDrop,
-  ExtendedDrop,
+  convertApiDropToExtendedDrop
 } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 interface NotificationDropProps {
   readonly drop: ApiDrop;

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { WaveLeaderboardRightSidebarVoters } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters';
-import { ApiWave } from '@/generated/models/ObjectSerializer';
+import type { ApiWave } from '@/generated/models/ObjectSerializer';
 import { useAuth } from '@/components/auth/Auth';
 import { useWaveTopVoters } from '@/hooks/useWaveTopVoters';
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';

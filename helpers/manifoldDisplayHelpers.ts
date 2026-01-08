@@ -1,4 +1,4 @@
-import { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import {
   numberWithCommas,
   fromGWEI,

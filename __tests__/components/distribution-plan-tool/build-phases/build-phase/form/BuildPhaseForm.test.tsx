@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import BuildPhaseForm from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm";
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,

@@ -93,7 +93,6 @@ export default function DelegationPageClient(props: {
 
   useEffect(() => {
     updateQueryParams(section);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (

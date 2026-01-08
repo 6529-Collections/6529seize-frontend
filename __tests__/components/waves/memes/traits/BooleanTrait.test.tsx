@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { BooleanTrait } from '@/components/waves/memes/traits/BooleanTrait';
-import { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
+import type { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
 
 // Mock TraitWrapper
 jest.mock('@/components/waves/memes/traits/TraitWrapper', () => ({

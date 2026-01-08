@@ -6,12 +6,13 @@ import {
   useMyStreamQuery,
   usePollingQuery,
 } from "../../hooks/useMyStreamQuery";
+import type {
+  ActiveDropState} from "../../types/dropInteractionTypes";
 import {
-  ActiveDropAction,
-  ActiveDropState,
+  ActiveDropAction
 } from "../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../waves/drops/Drop";
+import type { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import type { DropInteractionParams } from "../waves/drops/Drop";
 import BrainContent from "../brain/content/BrainContent";
 import MyStream from "../brain/my-stream/MyStream";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";

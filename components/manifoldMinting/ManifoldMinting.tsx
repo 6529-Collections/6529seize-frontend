@@ -5,7 +5,7 @@ import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintC
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants";
-import { Distribution } from "@/entities/IDistribution";
+import type { Distribution } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
@@ -16,17 +16,19 @@ import {
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
+import type {
+  ManifoldClaim,
+  MemePhase} from "@/hooks/useManifoldClaim";
 import {
   buildMemesPhases,
-  ManifoldClaim,
   ManifoldClaimStatus,
-  MemePhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { getTraitValue, ManifoldInstance } from "./manifold-types";
+import type { ManifoldInstance } from "./manifold-types";
+import { getTraitValue } from "./manifold-types";
 import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 

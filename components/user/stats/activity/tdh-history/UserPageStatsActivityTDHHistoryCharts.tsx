@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TDHHistory } from "@/entities/ITDH";
+import type { TDHHistory } from "@/entities/ITDH";
 import UserPageStatsActivityTDHHistoryChart from "./UserPageStatsActivityTDHHistoryChart";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 

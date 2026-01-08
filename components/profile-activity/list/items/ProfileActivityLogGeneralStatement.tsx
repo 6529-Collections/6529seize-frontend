@@ -1,4 +1,4 @@
-import { ProfileActivityLogGeneralCicStatementEdit } from "@/entities/IProfile";
+import type { ProfileActivityLogGeneralCicStatementEdit } from "@/entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 export default function ProfileActivityLogGeneralStatement({

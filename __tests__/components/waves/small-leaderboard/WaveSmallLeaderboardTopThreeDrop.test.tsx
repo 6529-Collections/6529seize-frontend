@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { WaveSmallLeaderboardTopThreeDrop } from '@/components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop';
-import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import type { ApiWave } from '@/generated/models/ApiWave';
 
 // Mock dependencies
 jest.mock('next/link', () => {

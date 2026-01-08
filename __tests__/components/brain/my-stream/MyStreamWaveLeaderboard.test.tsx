@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import MyStreamWaveLeaderboard from '@/components/brain/my-stream/MyStreamWaveLeaderboard';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 import { WaveDropsLeaderboardSort } from '@/hooks/useWaveDropsLeaderboard';
 
 const useWave = jest.fn();

@@ -1,4 +1,4 @@
-import { CreateProxyRateWaveDropAction } from "@/entities/IProxy";
+import type { CreateProxyRateWaveDropAction } from "@/entities/IProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigRateWaveDrop({

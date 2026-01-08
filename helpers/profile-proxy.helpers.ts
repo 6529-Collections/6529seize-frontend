@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 import { ProfileProxyActionStatus, ProfileProxySide } from "@/entities/IProxy";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import { assertUnreachable } from "./AllowlistToolHelpers";
 import { Time } from "./time";
 import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "@/constants";

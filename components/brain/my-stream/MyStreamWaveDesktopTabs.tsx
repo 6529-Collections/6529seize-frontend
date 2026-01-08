@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { TabToggle } from "@/components/common/TabToggle";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
 import { useWave } from "@/hooks/useWave";

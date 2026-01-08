@@ -1,4 +1,4 @@
-import { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
+import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 import { validateTraitsData } from "@/components/waves/memes/submission/validation/traitsValidation";
 import { useTraitsValidation } from "@/components/waves/memes/submission/validation/validationHooks";
 import { act, renderHook } from "@testing-library/react";

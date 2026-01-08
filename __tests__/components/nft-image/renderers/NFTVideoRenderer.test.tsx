@@ -1,6 +1,6 @@
 import NFTVideoRenderer from "@/components/nft-image/renderers/NFTVideoRenderer";
-import { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
-import { BaseNFT } from "@/entities/INFT";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
+import type { BaseNFT } from "@/entities/INFT";
 import { render, screen } from "@testing-library/react";
 
 // Mock NFTImageBalance to match the new showBalance API

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import DropPartMarkdownWithPropLogger from '@/components/drops/view/part/DropPartMarkdownWithPropLogger';
-import { DropPartMarkdownProps } from '@/components/drops/view/part/DropPartMarkdown';
+import type { DropPartMarkdownProps } from '@/components/drops/view/part/DropPartMarkdown';
 
 jest.mock('@/components/drops/view/part/DropPartMarkdown', () => {
   return function MockDropPartMarkdown(props: any) {

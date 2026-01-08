@@ -1,6 +1,6 @@
 import { useWaveDataFetching } from "./useWaveDataFetching";
 import { useWavePagination } from "./useWavePagination";
-import { WaveDataStoreUpdater } from "./types";
+import type { WaveDataStoreUpdater } from "./types";
 
 /**
  * Main hook that manages wave data loading and caching

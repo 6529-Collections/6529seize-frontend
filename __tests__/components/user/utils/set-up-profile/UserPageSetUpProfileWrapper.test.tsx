@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserPageSetUpProfileWrapper from '@/components/user/utils/set-up-profile/UserPageSetUpProfileWrapper';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 
 jest.mock('@/components/user/utils/set-up-profile/UserPageSetUpProfile', () => ({

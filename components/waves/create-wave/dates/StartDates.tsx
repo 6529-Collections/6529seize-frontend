@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
-import { CreateWaveDatesConfig } from "@/types/waves.types";
+import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";

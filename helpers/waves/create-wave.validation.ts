@@ -1,18 +1,18 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { assertUnreachable } from "../AllowlistToolHelpers";
-import {
+import type {
   CreateWaveApprovalConfig,
   CreateWaveConfig,
   CreateWaveDatesConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
   CreateWaveOutcomeConfig,
-  CreateWaveStep,
   CreateWaveVotingConfig,
   WaveGroupsConfig,
   WaveOverviewConfig,
 } from "@/types/waves.types";
+import { CreateWaveStep } from "@/types/waves.types";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",
@@ -129,23 +129,40 @@ const getDropsValidationErrors = ({
   if (waveType === ApiWaveType.Chat) {
     // Chat waves cannot have any drops configuration
     if (drops.noOfApplicationsAllowedPerParticipant !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT
+      );
     }
     if (drops.requiredTypes.length > 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES
+      );
     }
     if (drops.requiredMetadata.length > 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA
+      );
     }
   } else {
     // Rank and Approve waves
-    if (drops.noOfApplicationsAllowedPerParticipant !== null && drops.noOfApplicationsAllowedPerParticipant <= 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE);
+    if (
+      drops.noOfApplicationsAllowedPerParticipant !== null &&
+      drops.noOfApplicationsAllowedPerParticipant <= 0
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE
+      );
     }
 
     // Check for unique metadata keys
-    if (isRequiredMetadataRowsNonUnique({ requiredMetadata: drops.requiredMetadata })) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE);
+    if (
+      isRequiredMetadataRowsNonUnique({
+        requiredMetadata: drops.requiredMetadata,
+      })
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
+      );
     }
   }
 
@@ -163,7 +180,11 @@ const getVotingValidationErrors = ({
 
   if (waveType === ApiWaveType.Chat) {
     // Chat waves must have null type and null category/profileId
-    if (voting.type !== null || voting.category !== null || voting.profileId !== null) {
+    if (
+      voting.type !== null ||
+      voting.category !== null ||
+      voting.profileId !== null
+    ) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING);
     }
     return errors;
@@ -179,13 +200,9 @@ const getVotingValidationErrors = ({
     // REP voting requires non-empty category and profileId
     if (!voting.category) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_CATEGORY);
-    } else if (voting.category.trim() === "") {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_CATEGORY);
     }
 
-    if (!voting.profileId) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
-    } else if (voting.profileId.trim() === "") {
+    if (!voting.profileId || voting.profileId.trim() === "") {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
     }
   } else {
@@ -194,7 +211,9 @@ const getVotingValidationErrors = ({
       errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
     }
     if (voting.profileId !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID
+      );
     }
   }
 
@@ -206,18 +225,23 @@ const getVotingValidationErrors = ({
     const MAX_MINUTES = MAX_HOURS * 60;
 
     // Calculate the interval in minutes for validation
-    const intervalInMinutes = voting.timeWeighted.averagingIntervalUnit === "minutes"
-      ? voting.timeWeighted.averagingInterval
-      : voting.timeWeighted.averagingInterval * 60;
+    const intervalInMinutes =
+      voting.timeWeighted.averagingIntervalUnit === "minutes"
+        ? voting.timeWeighted.averagingInterval
+        : voting.timeWeighted.averagingInterval * 60;
 
     // Validate minimum
     if (intervalInMinutes < MIN_MINUTES) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL
+      );
     }
 
     // Validate maximum
     if (intervalInMinutes > MAX_MINUTES) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE
+      );
     }
   }
 
@@ -255,7 +279,9 @@ const getApprovalValidationErrors = ({
   if (approval.thresholdTimeMs && dates.endDate) {
     const waveDuration = dates.endDate - dates.submissionStartDate;
     if (approval.thresholdTimeMs >= waveDuration) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
+      );
     }
   }
 
@@ -311,25 +337,58 @@ export const getCreateWaveValidationErrors = ({
 
   switch (step) {
     case CreateWaveStep.OVERVIEW:
-      errors.push(...getOverviewValidationErrors({ overview: config.overview }));
+      errors.push(
+        ...getOverviewValidationErrors({ overview: config.overview })
+      );
       break;
     case CreateWaveStep.GROUPS:
-      errors.push(...getGroupsValidationErrors({ waveType: config.overview.type, groups: config.groups }));
+      errors.push(
+        ...getGroupsValidationErrors({
+          waveType: config.overview.type,
+          groups: config.groups,
+        })
+      );
       break;
     case CreateWaveStep.DATES:
-      errors.push(...getDatesValidationErrors({ waveType: config.overview.type, dates: config.dates }));
+      errors.push(
+        ...getDatesValidationErrors({
+          waveType: config.overview.type,
+          dates: config.dates,
+        })
+      );
       break;
     case CreateWaveStep.DROPS:
-      errors.push(...getDropsValidationErrors({ waveType: config.overview.type, drops: config.drops }));
+      errors.push(
+        ...getDropsValidationErrors({
+          waveType: config.overview.type,
+          drops: config.drops,
+        })
+      );
       break;
     case CreateWaveStep.VOTING:
-      errors.push(...getVotingValidationErrors({ waveType: config.overview.type, voting: config.voting }));
+      errors.push(
+        ...getVotingValidationErrors({
+          waveType: config.overview.type,
+          voting: config.voting,
+        })
+      );
       break;
     case CreateWaveStep.APPROVAL:
-      errors.push(...getApprovalValidationErrors({ waveType: config.overview.type, approval: config.approval, dates: config.dates }));
+      errors.push(
+        ...getApprovalValidationErrors({
+          waveType: config.overview.type,
+          approval: config.approval,
+          dates: config.dates,
+        })
+      );
       break;
     case CreateWaveStep.OUTCOMES:
-      errors.push(...getOutcomesValidationErrors({ waveType: config.overview.type, outcomes: config.outcomes }));
+      errors.push(
+        ...getOutcomesValidationErrors({
+          waveType: config.overview.type,
+          outcomes: config.outcomes,
+        })
+      );
       break;
     case CreateWaveStep.DESCRIPTION:
       // No validation for description step
@@ -339,4 +398,4 @@ export const getCreateWaveValidationErrors = ({
   }
 
   return errors;
-}; 
+};

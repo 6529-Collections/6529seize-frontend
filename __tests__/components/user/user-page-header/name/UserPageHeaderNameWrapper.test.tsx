@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageHeaderNameWrapper from '@/components/user/user-page-header/name/UserPageHeaderNameWrapper';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/utils/icons/PencilIcon', () => () => <span data-testid="pencil" />);
 jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ children }: any) => <div>{children}</div>);

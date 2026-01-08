@@ -1,4 +1,5 @@
-import { RefinementCtx, ZodIssueCode } from "zod";
+import type { RefinementCtx} from "zod";
+import { ZodIssueCode } from "zod";
 
 const BASE_ENDPOINT_ALLOWED_DOMAINS = [
   "6529.io",

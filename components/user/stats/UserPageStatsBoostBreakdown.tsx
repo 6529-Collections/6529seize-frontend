@@ -1,4 +1,4 @@
-import { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
+import type { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

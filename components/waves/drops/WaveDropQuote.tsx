@@ -5,8 +5,8 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import Link from "next/link";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDropTime from "./time/WaveDropTime";
 import { getWaveRoute } from "@/helpers/navigation.helpers";

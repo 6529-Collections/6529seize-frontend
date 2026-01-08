@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import type { ReactNode} from "react";
+import { useMemo } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";

@@ -6,7 +6,7 @@ import {
   MissingActiveProfileError,
   InvalidRoleStateError
 } from "@/errors/authentication";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { getNodeEnv, publicEnv } from "@/config/env";
 
 interface ImmediateValidationParams {

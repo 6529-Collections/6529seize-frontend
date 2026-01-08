@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import Notifications from "../brain/notifications";
-import { ActiveDropState } from "../../types/dropInteractionTypes";
+import type { ActiveDropState } from "../../types/dropInteractionTypes";
 import BrainContent from "../brain/content/BrainContent";
 import { useDropModal } from "@/hooks/useDropModal";
 import BrainDesktopDrop from "@/components/brain/BrainDesktopDrop";

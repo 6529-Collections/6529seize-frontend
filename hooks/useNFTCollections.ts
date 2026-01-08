@@ -1,6 +1,6 @@
 import { publicEnv } from "@/config/env";
-import { NFT } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NFT } from "@/entities/INFT";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";

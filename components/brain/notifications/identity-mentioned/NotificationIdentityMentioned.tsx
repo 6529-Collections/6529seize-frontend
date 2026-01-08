@@ -1,9 +1,9 @@
 "use client";
 
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { INotificationIdentityMentioned } from "@/types/feed.types";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { INotificationIdentityMentioned } from "@/types/feed.types";
 import NotificationWithDrop from "../subcomponents/NotificationWithDrop";
 
 export default function NotificationIdentityMentioned({

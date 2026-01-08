@@ -1,7 +1,7 @@
 import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import { numberWithCommas } from "@/helpers/Helpers";
-import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_MINT_PRICE } from "@/constants";

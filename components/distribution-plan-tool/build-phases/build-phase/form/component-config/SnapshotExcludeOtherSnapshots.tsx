@@ -1,10 +1,11 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import AllowlistToolSelectMenuMultiple, {
+import type {
   AllowlistToolSelectMenuMultipleOption,
 } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
-import {
+import AllowlistToolSelectMenuMultiple from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import type {
   DistributionPlanSnapshot,
   PhaseGroupSnapshotConfig,
   PhaseGroupSnapshotConfigExcludeSnapshot,
@@ -12,9 +13,10 @@ import {
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import type {
+  CustomTokenPoolParamsToken} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   AllowlistOperationCode,
-  CustomTokenPoolParamsToken,
   Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";

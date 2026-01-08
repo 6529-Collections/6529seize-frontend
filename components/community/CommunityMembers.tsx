@@ -1,9 +1,9 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { CommunityMemberOverview } from "@/entities/IProfile";
-import { Page } from "@/helpers/Types";
-import { CommunityMembersQuery } from "@/app/network/page";
+import type { CommunityMemberOverview } from "@/entities/IProfile";
+import type { Page } from "@/helpers/Types";
+import type { CommunityMembersQuery } from "@/app/network/page";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import { SortDirection } from "@/entities/ISort";

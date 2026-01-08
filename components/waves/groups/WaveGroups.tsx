@@ -1,4 +1,4 @@
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveGroup from "../specs/groups/group/WaveGroup";
 import { WaveGroupType } from "../specs/groups/group/WaveGroup.types";

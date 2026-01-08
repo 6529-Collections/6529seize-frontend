@@ -31,5 +31,5 @@ export const useProgressiveDebounce = (
       // Optionally adjust delay on cleanup
       delayRef.current = Math.max(minDelay, delayRef.current / decreaseFactor);
     };
-  }, dependencies); // eslint-disable-line react-hooks/exhaustive-deps
+  }, dependencies);
 };

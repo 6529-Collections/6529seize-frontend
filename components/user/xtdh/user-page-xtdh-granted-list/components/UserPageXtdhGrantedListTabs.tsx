@@ -1,6 +1,7 @@
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { GRANTED_TABS } from "../constants";
 import type { GrantedTab } from "../types";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 
 interface UserPageXtdhGrantedListTabsProps {
   readonly activeTab: GrantedTab;
@@ -15,7 +16,7 @@ export function UserPageXtdhGrantedListTabs({
   fill,
   pendingCount,
 }: UserPageXtdhGrantedListTabsProps) {
-  const items: import("@/components/utils/select/CommonSelect").CommonSelectItem<GrantedTab>[] = GRANTED_TABS.map((tab) => ({
+  const items: CommonSelectItem<GrantedTab>[] = GRANTED_TABS.map((tab) => ({
     ...tab,
     label: tab.label,
     badge: tab.value === "PENDING" ? pendingCount : undefined,

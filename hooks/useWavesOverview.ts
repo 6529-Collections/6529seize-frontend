@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
-import { WavesOverviewParams } from "@/types/waves.types";
-import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import type { WavesOverviewParams } from "@/types/waves.types";
+import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 

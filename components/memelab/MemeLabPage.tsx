@@ -32,10 +32,10 @@ import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
 import { useTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import { Transaction } from "@/entities/ITransaction";
+import type { Transaction } from "@/entities/ITransaction";
 import { ContractType } from "@/enums";
 import {
   addProtocol,

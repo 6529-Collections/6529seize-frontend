@@ -1,10 +1,10 @@
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { RatingsSectionProps, RatingsData, ThemeColors } from "./types";
+import type { RatingsSectionProps, RatingsData, ThemeColors } from "./types";
 
 interface ParticipationDropRatingsUserSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;

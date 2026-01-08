@@ -1,6 +1,7 @@
-import { TraitsData } from "../types/TraitsData";
-import { traitDefinitions, FieldDefinition } from "@/components/waves/memes/traits/schema";
-import {
+import type { TraitsData } from "../types/TraitsData";
+import type { FieldDefinition } from "@/components/waves/memes/traits/schema";
+import { traitDefinitions } from "@/components/waves/memes/traits/schema";
+import type {
   ValidationOptions,
   ValidationResult,
   FieldValidationContext,

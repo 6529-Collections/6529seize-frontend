@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { areEqualAddresses, formatStatFloor } from "@/helpers/Helpers";
-import { ApiWallet } from "@/generated/models/ApiWallet";
+import type { ApiWallet } from "@/generated/models/ApiWallet";
 
 export default function UserSettingsPrimaryWalletItem({
   wallet,

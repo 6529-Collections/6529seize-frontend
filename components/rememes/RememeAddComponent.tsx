@@ -2,7 +2,7 @@
 
 import { publicEnv } from "@/config/env";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
-import { NFT } from "@/entities/INFT";
+import type { NFT } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,
@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
-import { Nft, NftContract } from "./alchemy-sdk-types";
+import type { Nft, NftContract } from "./alchemy-sdk-types";
 import styles from "./Rememes.module.scss";
 
 export interface ProcessedRememe {

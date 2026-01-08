@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveHeaderDescription from '@/components/waves/header/WaveHeaderDescription';
 import { WaveHeaderPinnedSide } from '@/components/waves/header/WaveHeader';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 
 jest.mock('react-use', () => ({
   useClickAway: jest.fn(),

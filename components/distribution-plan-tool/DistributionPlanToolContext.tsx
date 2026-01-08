@@ -1,10 +1,11 @@
 "use client";
 
-import { Slide, TypeOptions, toast } from "react-toastify";
+import type { TypeOptions} from "react-toastify";
+import { Slide, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createContext, useState } from "react";
 
-import {
+import type {
   AllowlistCustomTokenPool,
   AllowlistDescription,
   AllowlistOperation,

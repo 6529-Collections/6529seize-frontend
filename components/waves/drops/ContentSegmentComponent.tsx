@@ -1,4 +1,4 @@
-import { ContentSegment } from "./media-utils";
+import type { ContentSegment } from "./media-utils";
 import MediaThumbnail from "./MediaThumbnail";
 
 interface ContentSegmentComponentProps {

@@ -1,9 +1,10 @@
-import { TypedFeedItem } from "@/types/feed.types";
+import type { TypedFeedItem } from "@/types/feed.types";
 import FeedItem from "./FeedItem";
-import { ExtendedDrop, getFeedItemKey } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import { getFeedItemKey } from "@/helpers/waves/drop.helpers";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 interface FeedItemsProps {
   readonly items: TypedFeedItem[];

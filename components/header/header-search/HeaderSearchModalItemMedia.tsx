@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Image from "next/image";
-import { NFTSearchResult } from "./HeaderSearchModalItem";
+import type { NFTSearchResult } from "./HeaderSearchModalItem";
 
 interface HeaderSearchModalItemMediaProps {
   readonly nft?: NFTSearchResult | undefined;

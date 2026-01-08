@@ -1,6 +1,6 @@
 "use client";
 
-import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
 import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
@@ -10,12 +10,13 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
-import {
-  FetchResultsType,
+import type {
   FullResultWallet,
   ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTableItemType,
-  ReviewDistributionPlanTablePhase,
+  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
+import {
+  FetchResultsType,
+  ReviewDistributionPlanTableItemType
 } from "./ReviewDistributionPlanTable";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenTokenProvenance from '@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance';
-import { NextGenCollection } from '@/entities/INextgen';
+import type { NextGenCollection } from '@/entities/INextgen';
 
 jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),

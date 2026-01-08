@@ -1,11 +1,12 @@
-import {
+import type {
   FieldValidationContext,
   FieldValidationResult,
 } from "./validationTypes";
-import {
-  FieldType,
+import type {
   NumberFieldDefinition,
-  DropdownFieldDefinition,
+  DropdownFieldDefinition} from "@/components/waves/memes/traits/schema";
+import {
+  FieldType
 } from "@/components/waves/memes/traits/schema";
 
 /**

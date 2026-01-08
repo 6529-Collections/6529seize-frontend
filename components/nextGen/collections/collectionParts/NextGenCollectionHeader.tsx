@@ -4,9 +4,10 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DateCountdown from "@/components/date-countdown/DateCountdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
+import type {
+  CollectionWithMerkle} from "@/components/nextGen/nextgen_entities";
 import {
   AllowlistType,
-  CollectionWithMerkle,
   Status,
 } from "@/components/nextGen/nextgen_entities";
 import {
@@ -19,7 +20,7 @@ import {
 } from "@/components/nextGen/nextgen_helpers";
 import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";

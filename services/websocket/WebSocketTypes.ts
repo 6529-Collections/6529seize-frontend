@@ -1,4 +1,4 @@
-import { WsMessageType } from "@/helpers/Types";
+import type { WsMessageType } from "@/helpers/Types";
 
 /**
  * WebSocket message structure for type-safe message handling

@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import GroupCreateCIC from '@/components/groups/page/create/config/GroupCreateCIC';
 import { ApiGroupFilterDirection } from '@/generated/models/ApiGroupFilterDirection';
-import { ApiCreateGroupDescription } from '@/generated/models/ApiCreateGroupDescription';
+import type { ApiCreateGroupDescription } from '@/generated/models/ApiCreateGroupDescription';
 
 let identityProps: any = null;
 let numericProps: any = null;

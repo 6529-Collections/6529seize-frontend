@@ -1,4 +1,4 @@
-import {
+import type {
   CreateDropPart,
   CreateDropRequestPart,
 } from "@/entities/IDrop";

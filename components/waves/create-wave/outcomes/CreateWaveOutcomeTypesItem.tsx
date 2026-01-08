@@ -1,4 +1,4 @@
-import { CreateWaveOutcomeType } from "@/types/waves.types";
+import type { CreateWaveOutcomeType } from "@/types/waves.types";
 
 export default function CreateWaveOutcomeTypesItem({
   outcomeType,

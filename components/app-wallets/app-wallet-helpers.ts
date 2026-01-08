@@ -12,7 +12,10 @@ function deriveKey(password: string, salt: string): Promise<Buffer> {
       32,
       "sha256",
       (err, derivedKey) => {
-        if (err) reject(new Error(err.message || "Error deriving key"));
+        if (err) {
+          reject(new Error(err.message || "Error deriving key"));
+          return;
+        }
         resolve(derivedKey);
       }
     );

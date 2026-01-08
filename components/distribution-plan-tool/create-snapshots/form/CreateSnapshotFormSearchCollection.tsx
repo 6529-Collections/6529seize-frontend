@@ -5,7 +5,7 @@ import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSear
 import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,

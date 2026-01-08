@@ -1,19 +1,20 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { RateMatter } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import ProfileRatersTableWrapper, {
+import type {
   ProfileRatersParams,
 } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import ProfileRatersTableWrapper from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import UserPageRepReps from "./reps/UserPageRepReps";

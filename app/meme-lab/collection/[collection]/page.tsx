@@ -3,7 +3,7 @@ import styles from "@/styles/Home.module.scss";
 import MemeLabCollection from "@/components/memelab/MemeLabCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export default async function MemeLabCollectionPage({
   params,

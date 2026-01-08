@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import PrivilegedDropCreator, { DropMode } from "@/components/waves/PrivilegedDropCreator";
 
 interface WaveDropCreateProps {

@@ -1,5 +1,5 @@
-import { SortDirection } from "@/entities/ISort";
-import { RefObject } from "react";
+import type { SortDirection } from "@/entities/ISort";
+import type { RefObject } from "react";
 import { createBreakpoint } from "react-use";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import React from "react";
 import WavesListSearchResults from '@/components/waves/list/WavesListSearchResults';
 import { useWaves } from '@/hooks/useWaves';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
 
 // Mock dependencies

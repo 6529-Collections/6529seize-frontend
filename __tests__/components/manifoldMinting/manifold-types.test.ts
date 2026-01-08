@@ -1,4 +1,5 @@
-import { getTraitValue, ManifoldInstance } from '@/components/manifoldMinting/manifold-types';
+import type { ManifoldInstance } from '@/components/manifoldMinting/manifold-types';
+import { getTraitValue } from '@/components/manifoldMinting/manifold-types';
 
 describe('getTraitValue', () => {
   const instance: ManifoldInstance = {

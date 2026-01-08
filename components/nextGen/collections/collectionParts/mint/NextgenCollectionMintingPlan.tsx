@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import {
+import type {
   NextGenCollection,
   NextgenAllowlist,
   NextgenAllowlistCollection,

@@ -1,4 +1,4 @@
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 
 export default function GroupItemWrapper({

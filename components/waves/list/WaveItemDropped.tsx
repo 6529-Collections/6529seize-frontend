@@ -1,8 +1,9 @@
 "use client";
 
-import { MouseEvent, useCallback } from "react";
+import type { MouseEvent} from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 

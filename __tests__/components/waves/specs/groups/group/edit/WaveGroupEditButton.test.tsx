@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import WaveGroupEditButton from '@/components/waves/specs/groups/group/edit/WaveGroupEditButton';
-import { ApiWave } from '@/generated/models/ApiWave';
+import type { ApiWave } from '@/generated/models/ApiWave';
 
 let editProps: any;
 

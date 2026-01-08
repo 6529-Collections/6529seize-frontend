@@ -1,5 +1,5 @@
 import { validateTraitsData } from '@/components/waves/memes/submission/validation/traitsValidation';
-import { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
+import type { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
 
 function createTraits(): TraitsData {
   return {

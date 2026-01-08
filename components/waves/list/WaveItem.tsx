@@ -1,9 +1,10 @@
 "use client";
 
-import {
+import type {
   KeyboardEvent,
   MouseEvent,
-  ReactNode,
+  ReactNode} from "react";
+import {
   useCallback,
   useId,
 } from "react";
@@ -13,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WaveItemDropped from "./WaveItemDropped";

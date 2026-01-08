@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { NextPageProps } from "@/contexts/wave/hooks/useWavePagination";
+import type { NextPageProps } from "@/contexts/wave/hooks/useWavePagination";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
 /**

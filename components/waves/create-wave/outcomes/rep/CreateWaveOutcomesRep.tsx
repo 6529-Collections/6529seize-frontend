@@ -1,4 +1,4 @@
-import {
+import type {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
 } from "@/types/waves.types";

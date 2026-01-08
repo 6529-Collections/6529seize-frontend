@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { RatingStats } from "@/entities/IProfile";
+import type { RatingStats } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import Link from "next/link";

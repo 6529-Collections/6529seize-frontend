@@ -1,13 +1,14 @@
 "use client";
 
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
-import { DropInteractionParams, DropLocation } from "../Drop";
+import type { DropInteractionParams} from "../Drop";
+import { DropLocation } from "../Drop";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";

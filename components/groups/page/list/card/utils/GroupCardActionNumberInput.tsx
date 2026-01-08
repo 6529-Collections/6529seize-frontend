@@ -1,4 +1,4 @@
-import { CreditDirection } from "../GroupCard";
+import type { CreditDirection } from "../GroupCard";
 import GroupCardActionCreditDirection from "./GroupCardActionCreditDirection";
 
 export default function GroupCardActionNumberInput({

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Transaction } from "@/entities/ITransaction";
+import type { Transaction } from "@/entities/ITransaction";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import {
   formatAddress,

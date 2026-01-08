@@ -1,5 +1,5 @@
-import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiPost } from "@/services/api/common-api";
 
 const GROUP_INCLUDE_LIMIT = 10000;

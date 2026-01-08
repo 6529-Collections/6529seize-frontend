@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { INotificationWaveCreated } from "@/types/feed.types";
+import type { INotificationWaveCreated } from "@/types/feed.types";
 import WaveHeaderFollow, {
   WaveFollowBtnSize,
 } from "@/components/waves/header/WaveHeaderFollow";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";

@@ -1,15 +1,16 @@
 "use client";
 
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { Collector, Content } from "./Leaderboard";
+import type { Collector, Content } from "./Leaderboard";
 import styles from "./Leaderboard.module.scss";
+import type {
+  LeaderboardMetrics} from "./leaderboard_helpers";
 import {
   LeaderboardCardsCollectedSort,
-  LeaderboardMetrics,
   useFetchLeaderboard,
 } from "./leaderboard_helpers";
 import { LeaderboardCollector } from "./LeaderboardCollector";

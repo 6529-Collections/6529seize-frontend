@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, memo } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -13,12 +13,12 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ImageScale } from "@/helpers/image.helpers";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 

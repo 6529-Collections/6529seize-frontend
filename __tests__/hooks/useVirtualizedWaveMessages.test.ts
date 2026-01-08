@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useVirtualizedWaveMessages } from '@/hooks/useVirtualizedWaveMessages';
-import { Drop } from '@/helpers/waves/drop.helpers';
+import type { Drop } from '@/helpers/waves/drop.helpers';
 
 jest.useFakeTimers();
 

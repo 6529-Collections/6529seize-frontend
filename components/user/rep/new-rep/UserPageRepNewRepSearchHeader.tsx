@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
@@ -10,7 +10,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
 import CommonInfoBox from "@/components/utils/CommonInfoBox";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function UserPageRepNewRepSearchHeader({
   repRates,
   profile,

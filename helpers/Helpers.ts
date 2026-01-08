@@ -16,13 +16,15 @@ import {
   NULL_DEAD_ADDRESS,
   ROYALTIES_PERCENTAGE,
 } from "@/constants";
-import { BaseNFT, VolumeType } from "@/entities/INFT";
+import type { BaseNFT} from "@/entities/INFT";
+import { VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
 import { DateIntervalsSelection } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
-import { PageSSRMetadata, Period } from "./Types";
+import type { PageSSRMetadata} from "./Types";
+import { Period } from "./Types";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 

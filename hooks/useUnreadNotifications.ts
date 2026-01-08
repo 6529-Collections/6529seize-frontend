@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
+import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
 import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";

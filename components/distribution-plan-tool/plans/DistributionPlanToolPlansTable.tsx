@@ -1,6 +1,6 @@
 "use client";
 
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanToolPlansTableItem from "./DistributionPlanToolPlansTableItem";
 
 export default function DistributionPlanToolPlansTable({

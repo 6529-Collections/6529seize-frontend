@@ -1,6 +1,6 @@
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFT } from "@/entities/INFT";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT } from "@/entities/INFT";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { useNFTCollections } from "@/hooks/useNFTCollections";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";

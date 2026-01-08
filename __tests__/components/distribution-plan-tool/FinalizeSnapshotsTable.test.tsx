@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
-import FinalizeSnapshotsTable, { FinalizeSnapshotRow } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
+import type { FinalizeSnapshotRow } from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
+import FinalizeSnapshotsTable from '@/components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
 import { Pool } from '@/components/allowlist-tool/allowlist-tool.types';
 import { TopHolderType } from '@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 

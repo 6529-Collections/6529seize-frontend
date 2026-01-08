@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import CreateDropStormView from '@/components/drops/create/utils/storm/CreateDropStormView';
-import { CreateDropConfig } from '@/entities/IDrop';
+import type { CreateDropConfig } from '@/entities/IDrop';
 
 jest.mock('@/components/drops/create/utils/storm/CreateDropStormViewPart', () => {
   return jest.fn(() => <div data-testid="part" />);

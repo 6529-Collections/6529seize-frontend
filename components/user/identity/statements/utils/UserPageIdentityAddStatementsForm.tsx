@@ -2,15 +2,16 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
+import type {
     ApiCreateOrUpdateProfileCicStatement,
     CicStatement,
 } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type {
     STATEMENT_GROUP,
-    STATEMENT_META,
-    STATEMENT_TYPE,
+    STATEMENT_TYPE} from "@/helpers/Types";
+import {
+    STATEMENT_META
 } from "@/helpers/Types";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";

@@ -7,9 +7,10 @@ import React, {
   useEffectEvent,
   useMemo,
 } from "react";
-import UnifiedWavesListWaves, {
+import type {
   UnifiedWavesListWavesHandle,
 } from "../left-sidebar/waves/UnifiedWavesListWaves";
+import UnifiedWavesListWaves from "../left-sidebar/waves/UnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
 import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";

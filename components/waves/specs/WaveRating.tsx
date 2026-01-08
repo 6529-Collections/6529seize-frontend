@@ -1,4 +1,4 @@
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import WaveRatingRep from "./WaveRatingRep";
 

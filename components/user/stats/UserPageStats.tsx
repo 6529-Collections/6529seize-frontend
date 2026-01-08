@@ -1,8 +1,8 @@
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { MemeSeason } from "@/entities/ISeason";
-import { ConsolidatedTDH, TDH } from "@/entities/ITDH";
-import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { MemeSeason } from "@/entities/ISeason";
+import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import { getStatsPath } from "./userPageStats.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import UserPageStatsClient from "./UserPageStatsClient";

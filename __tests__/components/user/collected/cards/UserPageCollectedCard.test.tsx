@@ -1,5 +1,6 @@
 import UserPageCollectedCard from "@/components/user/collected/cards/UserPageCollectedCard";
-import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
+import type { CollectedCard} from "@/entities/IProfile";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

@@ -3,7 +3,7 @@
 import { CollectedCollectionType, CollectionSeized } from "@/entities/IProfile";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
-import { ProfileCollectedFilters } from "../UserPageCollected";
+import type { ProfileCollectedFilters } from "../UserPageCollected";
 
 export default function UserPageCollectedCardsNoCards({
   filters,

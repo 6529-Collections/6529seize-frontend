@@ -5,7 +5,7 @@ if (typeof window !== "undefined") {
   throw new Error("Alchemy services must be used server-side");
 }
 
-export * from "./types";
+export type * from "./types";
 export { searchNftCollections, getContractOverview } from "./collections";
 export { getTokensMetadata } from "./tokens";
 export { getNftsForContractAndOwner } from "./owner-nfts";

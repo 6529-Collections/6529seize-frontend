@@ -7,7 +7,7 @@ import {
   NEXTGEN_CONTRACT,
 } from "@/constants";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiNftsPage } from "@/generated/models/ApiNftsPage";
+import type { ApiNftsPage } from "@/generated/models/ApiNftsPage";
 import {
   getScaledImageUri,
   ImageScale,

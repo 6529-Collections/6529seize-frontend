@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesRowManualApprove from '@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualApprove';
-import { CreateWaveOutcomeConfig } from '@/types/waves.types';
+import type { CreateWaveOutcomeConfig } from '@/types/waves.types';
 
 
 jest.mock('@/helpers/Helpers', () => ({

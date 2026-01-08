@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { GroupsRequestParams } from "@/entities/IGroup";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import type { GroupsRequestParams } from "@/entities/IGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import SelectGroupModalHeader from "./SelectGroupModalHeader";

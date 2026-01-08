@@ -1,9 +1,9 @@
 import { memo, useMemo } from "react";
-import { TypedNotification } from "@/types/feed.types";
+import type { TypedNotification } from "@/types/feed.types";
 import NotificationItem from "./NotificationItem";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { DropInteractionParams } from "@/components/waves/drops/Drop";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface NotificationItemsProps {
   readonly items: TypedNotification[];

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateWaveDates from '@/components/waves/create-wave/dates/CreateWaveDates';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '@/types/waves.types';
+import type { CreateWaveDatesConfig } from '@/types/waves.types';
 
 jest.mock('@/components/waves/create-wave/dates/StartDates', () => (props: any) => (
   <button

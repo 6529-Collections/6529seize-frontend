@@ -13,7 +13,7 @@ import GroupsList from "./list/GroupsList";
 import { AuthContext } from "@/components/auth/Auth";
 import { useRouter } from "next/navigation";
 import { usePathname, useSearchParams } from "next/navigation";
-import { GroupsRequestParams } from "@/entities/IGroup";
+import type { GroupsRequestParams } from "@/entities/IGroup";
 import { useDebounce } from "react-use";
 
 const IDENTITY_SEARCH_PARAM = "identity";

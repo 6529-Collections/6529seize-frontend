@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import GroupCardDeleteModal from "./GroupCardDeleteModal";

@@ -1,5 +1,6 @@
+import type {
+  CommunityMemberOverview} from "@/entities/IProfile";
 import {
-  CommunityMemberOverview,
   CIC_TO_TEXT,
 } from "@/entities/IProfile";
 import {

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import AllowlistToolSelectMenuMultipleListItem from '@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultipleListItem';
-import { AllowlistToolSelectMenuMultipleOption } from '@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple';
+import type { AllowlistToolSelectMenuMultipleOption } from '@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple';
 
 describe('AllowlistToolSelectMenuMultipleListItem', () => {
   const option: AllowlistToolSelectMenuMultipleOption = { value: '1', title: 'Item 1', subTitle: 'Sub' };

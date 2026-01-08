@@ -1,6 +1,7 @@
-import ProfileActivityLogs, {
+import type {
   ActivityLogParams,
 } from "@/components/profile-activity/ProfileActivityLogs";
+import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import ProfileName, {
   ProfileNameType,
 } from "@/components/profile-activity/ProfileName";

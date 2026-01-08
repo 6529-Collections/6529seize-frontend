@@ -7,8 +7,9 @@ import React, {
   useRef,
   useState,
 } from "react";
+import type {
+  InitialConfigType} from "@lexical/react/LexicalComposer";
 import {
-  InitialConfigType,
   LexicalComposer,
 } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -18,13 +19,14 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { $convertFromMarkdownString } from "@lexical/markdown";
+import type {
+  EditorState,
+  TextNode} from "lexical";
 import {
   $getRoot,
-  EditorState,
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
-  TextNode,
   $createParagraphNode,
   $createTextNode,
   $isElementNode,
@@ -49,11 +51,12 @@ import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode
 import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
-import NewMentionsPlugin, {
+import type {
   NewMentionsPluginHandles,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
-import { MentionedUser } from "@/entities/IDrop";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import NewMentionsPlugin from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type { MentionedUser } from "@/entities/IDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import Link from "next/link";
 import GroupItemWrapper from "./GroupItemWrapper";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getTimeAgo } from "@/helpers/Helpers";
 
 export default function GroupItem({

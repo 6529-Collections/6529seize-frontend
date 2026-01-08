@@ -21,7 +21,7 @@ import {
 } from "@/services/distribution-plan-api";
 import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 const { isEthereumAddress } = require("@/helpers/AllowlistToolHelpers");
 
 jest.mock(

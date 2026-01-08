@@ -2,7 +2,7 @@
 
 import { useKeyPressEvent } from "react-use";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MentionTypeaheadOption } from "./MentionsPlugin";
+import type { MentionTypeaheadOption } from "./MentionsPlugin";
 import MentionsTypeaheadMenuItem from "./MentionsTypeaheadMenuItem";
 
 export default function MentionsTypeaheadMenu({

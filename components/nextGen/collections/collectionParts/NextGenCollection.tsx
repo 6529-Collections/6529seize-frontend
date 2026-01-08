@@ -6,7 +6,7 @@ import {
 } from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
 import { useTitle } from "@/contexts/TitleContext";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/enums";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";

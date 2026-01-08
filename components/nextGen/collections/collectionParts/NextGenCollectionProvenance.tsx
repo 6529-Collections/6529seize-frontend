@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { NULL_ADDRESS } from "@/constants";
-import { NextGenCollection, NextGenLog } from "@/entities/INextgen";
+import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
 import {
   areEqualAddresses,
   formatAddress,

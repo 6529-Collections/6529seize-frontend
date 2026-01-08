@@ -12,7 +12,7 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
 } from "@/constants";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";

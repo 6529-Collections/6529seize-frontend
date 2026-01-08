@@ -1,9 +1,9 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
-import { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
+import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,

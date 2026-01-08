@@ -7,7 +7,7 @@ import {
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolLoader, {
   AllowlistToolLoaderSize,
 } from "@/components/allowlist-tool/common/AllowlistToolLoader";

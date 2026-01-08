@@ -1,13 +1,14 @@
 "use client";
 
-import {
+import type {
   AllowlistOperation,
   AllowlistOperationBase,
+  DistributionPlanSearchContractMetadataResult} from "@/components/allowlist-tool/allowlist-tool.types";
+import {
   AllowlistOperationCode,
-  DistributionPlanSearchContractMetadataResult,
   Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   assertUnreachable,

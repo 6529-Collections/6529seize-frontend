@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import type {
     CustomTokenPoolParamsToken,
     Mutable,
 } from "@/components/allowlist-tool/allowlist-tool.types";

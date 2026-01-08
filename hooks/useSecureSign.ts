@@ -381,8 +381,9 @@ const getMobileErrorMessage = (error: unknown): string => {
         // Use JSON stringification for plain objects
         message = JSON.stringify(error);
       } else {
-        // Use custom toString method
-        message = error.toString();
+        // Use custom toString method (verified above to not be Object.prototype.toString)
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        message = String(error);
       }
     } catch {
       message = "Unknown error";

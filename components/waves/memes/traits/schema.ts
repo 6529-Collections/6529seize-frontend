@@ -1,5 +1,5 @@
 import { publicEnv } from "@/config/env";
-import { TraitsData } from "../submission/types/TraitsData";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 /**
  * Enum defining all possible field types

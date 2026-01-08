@@ -1,7 +1,7 @@
 import React from "react";
 
 import CreateDropMetadataRow from "./CreateDropMetadataRow";
-import { CreateDropMetadataType } from "./CreateDropContent";
+import type { CreateDropMetadataType } from "./CreateDropContent";
 import { Tooltip } from "react-tooltip";
 
 interface CreateDropMetadataProps {

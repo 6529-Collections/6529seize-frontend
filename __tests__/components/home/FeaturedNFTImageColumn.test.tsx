@@ -1,5 +1,5 @@
 import FeaturedNFTImageColumn from "@/components/home/FeaturedNFTImageColumn";
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { render, screen } from "@testing-library/react";
 
 // Mock dependencies

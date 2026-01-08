@@ -1,5 +1,5 @@
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropContent from "../WaveDropContent";
 
 interface ParticipationDropContentProps {

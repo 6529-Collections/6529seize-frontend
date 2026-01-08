@@ -9,7 +9,7 @@ import NFTImage from "@/components/nft-image/NFTImage";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { NFT } from "@/entities/INFT";
+import type { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";

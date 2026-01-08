@@ -7,19 +7,21 @@ import {
   useRef,
   useState,
 } from "react";
-import CreateDropWrapper, {
+import type {
   CreateDropWrapperHandles,
 } from "./utils/CreateDropWrapper";
-import {
+import CreateDropWrapper from "./utils/CreateDropWrapper";
+import type {
   CreateDropConfig,
   CreateDropPart,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
-import { CreateDropType, CreateDropViewType } from "./types";
+import type { CreateDropType} from "./types";
+import { CreateDropViewType } from "./types";
 import CreateDropStormView from "./utils/storm/CreateDropStormView";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;

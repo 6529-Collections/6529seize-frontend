@@ -1,6 +1,6 @@
 "use client";
 
-import { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
 import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
@@ -9,10 +9,11 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
-import {
-  FetchResultsType,
+import type {
   FullResultWallet,
-  ReviewDistributionPlanTablePhase,
+  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
+import {
+  FetchResultsType
 } from "./ReviewDistributionPlanTable";
 
 export default function ReviewDistributionPlanTableHeader({

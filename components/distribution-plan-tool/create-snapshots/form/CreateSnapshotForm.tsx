@@ -1,8 +1,9 @@
 "use client";
 
+import type {
+  DistributionPlanSearchContractMetadataResult} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-  AllowlistOperationCode,
-  DistributionPlanSearchContractMetadataResult,
+  AllowlistOperationCode
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import styles from "@/components/distribution-plan-tool/DistributionPlan.module.scss";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";

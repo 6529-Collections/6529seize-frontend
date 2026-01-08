@@ -8,27 +8,30 @@ import {
   useState,
   type JSX,
 } from "react";
-import CreateDropCompact, {
+import type {
   CreateDropCompactHandles,
 } from "../compact/CreateDropCompact";
+import CreateDropCompact from "../compact/CreateDropCompact";
 
-import CreateDropFull, { CreateDropFullHandles } from "../full/CreateDropFull";
-import { EditorState } from "lexical";
-import {
+import type { CreateDropFullHandles } from "../full/CreateDropFull";
+import CreateDropFull from "../full/CreateDropFull";
+import type { EditorState } from "lexical";
+import type {
   CreateDropConfig,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
 import { createBreakpoint } from "react-use";
-import { CreateDropType, CreateDropViewType } from "../types";
+import type { CreateDropType} from "../types";
+import { CreateDropViewType } from "../types";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
 import { useQuery } from "@tanstack/react-query";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";

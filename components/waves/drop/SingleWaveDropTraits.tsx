@@ -1,12 +1,12 @@
 "use client";
 
-import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { isNumber } from "lodash";
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
-import { TraitsData } from "../memes/submission/types/TraitsData";
+import type { TraitsData } from "../memes/submission/types/TraitsData";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   FIELD_TO_LABEL_MAP,

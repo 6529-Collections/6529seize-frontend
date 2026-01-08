@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type {
+  DropInteractionParams} from "@/components/waves/drops/Drop";
 import {
-  DropInteractionParams,
   DropLocation,
 } from "@/components/waves/drops/Drop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";

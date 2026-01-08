@@ -1,4 +1,4 @@
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Container, Row } from "react-bootstrap";
 import FeaturedNFTDetailsColumn from "./FeaturedNFTDetailsColumn";
 import FeaturedNFTImageColumn from "./FeaturedNFTImageColumn";

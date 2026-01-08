@@ -1,8 +1,8 @@
 "use client";
 
 import { CompactModeProvider } from "@/contexts/CompactModeContext";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Transition } from "@headlessui/react";
 import {

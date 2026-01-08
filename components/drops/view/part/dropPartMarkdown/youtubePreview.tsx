@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import type {
+  YoutubeOEmbedResponse} from "@/services/api/youtube";
 import {
-  fetchYoutubePreview,
-  YoutubeOEmbedResponse,
+  fetchYoutubePreview
 } from "@/services/api/youtube";
 
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";

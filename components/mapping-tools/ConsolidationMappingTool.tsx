@@ -1,7 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { Consolidation } from "@/entities/IDelegation";
+import type { Consolidation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";

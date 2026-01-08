@@ -25,13 +25,6 @@ export const validateFile = (file: File): FileValidationResult => {
     };
   }
 
-  // Debug logging
-  console.log("Validating file:", {
-    name: file.name,
-    type: file.type,
-    size: file.size
-  });
-
   // Check file type with support for generic video types
   const isImageType =
     file.type.startsWith("image/") &&
@@ -42,10 +35,12 @@ export const validateFile = (file: File): FileValidationResult => {
 
   const isVideoType = file.type.startsWith("video/");
 
-  const isModelType = 
+  const isModelType =
     file.type === "model/gltf-binary" ||
     file.type === "model/gltf+json" ||
-    file.type === "application/octet-stream" && (file.name.toLowerCase().endsWith(".glb") || file.name.toLowerCase().endsWith(".gltf")) ||
+    (file.type === "application/octet-stream" &&
+      (file.name.toLowerCase().endsWith(".glb") ||
+        file.name.toLowerCase().endsWith(".gltf"))) ||
     file.name.toLowerCase().endsWith(".glb") ||
     file.name.toLowerCase().endsWith(".gltf");
 

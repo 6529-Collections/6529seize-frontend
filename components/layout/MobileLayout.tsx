@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import AppLayout from "./AppLayout";

@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageSubscriptions from '@/components/user/subscriptions/UserPageSubscriptions';
 import { renderWithAuth } from '@/__tests__/utils/testContexts';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import * as commonApi from '@/services/api/common-api';
 import * as memeCalendarHelpers from '@/components/meme-calendar/meme-calendar.helpers';
 

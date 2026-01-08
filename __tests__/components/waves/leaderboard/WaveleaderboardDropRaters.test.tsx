@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { WaveLeaderboardDropRaters } from '@/components/waves/leaderboard/drops/header/WaveleaderboardDropRaters';
-import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));

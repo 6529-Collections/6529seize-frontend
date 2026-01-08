@@ -1,6 +1,6 @@
 import { useEffect, useId } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import CommonProfileSearchItem from "./CommonProfileSearchItem";
 import { getSelectableIdentity } from "./getSelectableIdentity";
 

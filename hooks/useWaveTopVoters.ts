@@ -7,8 +7,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiWaveVotersPage } from "@/generated/models/ApiWaveVotersPage";
-import { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
+import type { ApiWaveVotersPage } from "@/generated/models/ApiWaveVotersPage";
+import type { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { useContext, useEffect, useState, type JSX } from "react";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyActions from "../proxy/list/ProxyActions";
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";

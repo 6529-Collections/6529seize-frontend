@@ -1,6 +1,7 @@
 import React, { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import CreateDropFull, { CreateDropFullHandles } from '@/components/drops/create/full/CreateDropFull';
+import type { CreateDropFullHandles } from '@/components/drops/create/full/CreateDropFull';
+import CreateDropFull from '@/components/drops/create/full/CreateDropFull';
 import { CreateDropScreenType } from '@/components/drops/create/utils/CreateDropWrapper';
 import { CreateDropType } from '@/components/drops/create/types';
 

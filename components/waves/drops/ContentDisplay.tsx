@@ -1,4 +1,4 @@
-import { ProcessedContent } from "./media-utils";
+import type { ProcessedContent } from "./media-utils";
 import ContentSegmentComponent from "./ContentSegmentComponent";
 import MediaThumbnail from "./MediaThumbnail";
 
