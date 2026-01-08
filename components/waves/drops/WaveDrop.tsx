@@ -163,6 +163,7 @@ const WaveDrop = ({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [boostAnimation, setBoostAnimation] =
     useState<BoostAnimationState | null>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const editingDropId = useSelector(selectEditingDropId);
   const isEditing = editingDropId === drop.id;
@@ -362,6 +363,24 @@ const WaveDrop = ({
     setBoostAnimation(null);
   }, []);
 
+  // Handler for mobile menu boost animation
+  const handleMobileBoostAnimation = useCallback(() => {
+    if (!dropRef.current) return;
+
+    const rect = dropRef.current.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    const isBoosted = drop.context_profile_context?.boosted ?? false;
+
+    setBoostAnimation({
+      id: `${drop.id}-${Date.now()}`,
+      x,
+      y,
+      type: isBoosted ? "unboost" : "boost",
+    });
+  }, [drop.id, drop.context_profile_context?.boosted]);
+
   // Set up double-tap detection for boosting (mobile only)
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canBoost =
@@ -400,6 +419,7 @@ const WaveDrop = ({
       } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}
     >
       <div
+        ref={dropRef}
         className={dropClasses}
         data-wave-drop-id={drop.stableHash}
         data-serial-no={drop.serial_no}
@@ -498,6 +518,7 @@ const WaveDrop = ({
           onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
           onEdit={handleOnEdit}
+          onBoostAnimation={handleMobileBoostAnimation}
         />
         <DropBoostAnimation
           animation={boostAnimation}

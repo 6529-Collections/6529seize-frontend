@@ -10,11 +10,13 @@ import { useContext, useState } from "react";
 interface WaveDropMobileMenuBoostProps {
   readonly drop: ExtendedDrop;
   readonly onBoostChange: () => void;
+  readonly onBoostAnimation?: (() => void) | undefined;
 }
 
 const WaveDropMobileMenuBoost: FC<WaveDropMobileMenuBoostProps> = ({
   drop,
   onBoostChange,
+  onBoostAnimation,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { toggleBoost, isPending } = useDropBoostMutation();
@@ -30,6 +32,7 @@ const WaveDropMobileMenuBoost: FC<WaveDropMobileMenuBoostProps> = ({
 
     setIsLocalPending(true);
     try {
+      onBoostAnimation?.();
       toggleBoost(drop);
       onBoostChange();
     } catch (error) {
