@@ -1,7 +1,7 @@
 "use client";
 
-import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";

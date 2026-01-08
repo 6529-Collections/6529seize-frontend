@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
+import type {
   TypedNotificationsResponse,
 } from "@/types/feed.types";
-import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseNotificationsQueryProps {

@@ -1,6 +1,6 @@
 "use client";
 
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
 import { useState } from "react";
 import DistributionPlanPrimaryBtn from "../common/DistributionPlanPrimaryBtn";

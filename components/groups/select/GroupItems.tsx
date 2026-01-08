@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import GroupItem from "./item/GroupItem";
 import {
   selectActiveGroupId,

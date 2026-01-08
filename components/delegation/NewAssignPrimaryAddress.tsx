@@ -14,8 +14,9 @@ import {
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
+import type {
+  DelegationCollection} from "./delegation-constants";
 import {
-  DelegationCollection,
   PRIMARY_ADDRESS_USE_CASE,
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";

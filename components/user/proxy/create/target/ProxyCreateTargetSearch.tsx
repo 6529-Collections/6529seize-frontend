@@ -2,11 +2,11 @@
 
 import { Combobox } from "@headlessui/react";
 import { useContext, useEffect, useState } from "react";
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useDebounce } from "react-use";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 

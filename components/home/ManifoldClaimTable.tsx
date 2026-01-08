@@ -1,5 +1,5 @@
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Table } from "react-bootstrap";
 
 interface ManifoldClaimTableProps {

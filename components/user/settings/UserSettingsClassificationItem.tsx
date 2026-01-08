@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CLASSIFICATIONS } from "@/entities/IProfile";
-import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 export default function UserSettingsClassificationItem({
   classification,
   selected,

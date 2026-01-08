@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React, { createRef } from 'react';
-import CreateDropFullDesktop, { CreateDropFullDesktopHandles } from '@/components/drops/create/full/desktop/CreateDropFullDesktop';
+import type { CreateDropFullDesktopHandles } from '@/components/drops/create/full/desktop/CreateDropFullDesktop';
+import CreateDropFullDesktop from '@/components/drops/create/full/desktop/CreateDropFullDesktop';
 import { CreateDropType, CreateDropViewType } from '@/components/drops/create/types';
 
 jest.mock('@/components/drops/create/utils/CreateDropContent', () =>

@@ -1,4 +1,4 @@
-import { CalendarDay } from "@/helpers/calendar/calendar.helpers";
+import type { CalendarDay } from "@/helpers/calendar/calendar.helpers";
 import { Time } from "@/helpers/time";
 
 enum CalendarDaySate {

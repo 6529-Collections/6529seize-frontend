@@ -2,7 +2,7 @@
 
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
-import {
+import type {
   NextGenCollection,
   NextGenToken,
   TraitValuePair,
@@ -16,7 +16,7 @@ import {
   NextGenTokenListedType,
   NextGenTokenRarityType,
 } from "../nextgen_helpers";
-import { SortDirection } from "@/entities/ISort";
+import type { SortDirection } from "@/entities/ISort";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 interface Props {

@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesRows from '@/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRows';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
 import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
-import { CreateWaveOutcomeConfig, CreateWaveOutcomeType } from '@/types/waves.types';
+import type { CreateWaveOutcomeConfig} from '@/types/waves.types';
+import { CreateWaveOutcomeType } from '@/types/waves.types';
 
 jest.mock('@/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRow', () => {
   return function MockRow(props: any) {

@@ -1,7 +1,7 @@
 
 import { LeaderboardFocus } from "@/enums";
 import CommunityNerdPageClient from "./page.client";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 
 

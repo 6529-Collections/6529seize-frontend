@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { TimeWeightedVotingConfig, TimeUnit } from "./types";
+import type { TimeWeightedVotingConfig, TimeUnit } from "./types";
 import {
   convertToMinutes,
   convertFromMinutes,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";

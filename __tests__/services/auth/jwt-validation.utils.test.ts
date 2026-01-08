@@ -22,7 +22,7 @@ import {
   MissingActiveProfileError,
   InvalidRoleStateError,
 } from '@/errors/authentication';
-import { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
+import type { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
 
 // Mock all dependencies
 jest.mock('jwt-decode');

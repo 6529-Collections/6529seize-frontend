@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { SortDirection } from "@/entities/ISort";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
-import { CommonSelectItemProps } from "../CommonSelect";
+import type { CommonSelectItemProps } from "../CommonSelect";
 
 export default function CommonTabsTab<T, U = unknown>(
   props: Readonly<

@@ -6,8 +6,8 @@ import {
   PrivateKeyDecryptionError,
   WalletAuthenticationError,
 } from "@/src/errors/wallet-auth";
-import type { Address, Chain, Hex } from "viem";
-import { createWalletClient, fallback, http, WalletClient } from "viem";
+import type { Address, Chain, Hex , WalletClient } from "viem";
+import { createWalletClient, fallback, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { createConnector } from "wagmi";
 
@@ -93,7 +93,7 @@ export function createAppWalletConnector(
       try {
         // Check if we're in Capacitor for more lenient validation
         const isCapacitor =
-          !!globalThis?.window?.Capacitor?.isNativePlatform?.();
+          !!globalThis.window.Capacitor?.isNativePlatform?.();
 
         // Validate password by decrypting address hash
         const decryptedAddress = await decryptData(

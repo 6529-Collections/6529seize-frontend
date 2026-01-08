@@ -6,8 +6,9 @@ import {
     DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 
+import type {
+    AllowlistCustomTokenPool} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-    AllowlistCustomTokenPool,
     AllowlistOperationCode,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolCsvIcon from "@/components/allowlist-tool/icons/AllowlistToolCsvIcon";

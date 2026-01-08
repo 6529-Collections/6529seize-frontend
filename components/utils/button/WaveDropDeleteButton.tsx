@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";

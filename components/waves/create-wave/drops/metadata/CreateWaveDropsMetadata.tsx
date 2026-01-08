@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreateWaveDropsRequiredMetadata } from "@/types/waves.types";
+import type { CreateWaveDropsRequiredMetadata } from "@/types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";

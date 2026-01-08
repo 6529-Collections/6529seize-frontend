@@ -3,7 +3,7 @@
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import React, { useState } from "react";
 import UserPageHeaderEditName from "./UserPageHeaderEditName";
 

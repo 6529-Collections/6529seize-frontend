@@ -1,9 +1,10 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import type {
+  ReactNode} from "react";
 import {
   createContext,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -11,7 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
 import { fetchUrl } from "@/services/6529api";
 
 type SeizeSettingsContextType = {

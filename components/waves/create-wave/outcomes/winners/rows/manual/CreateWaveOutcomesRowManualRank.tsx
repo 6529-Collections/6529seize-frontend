@@ -1,5 +1,5 @@
 import { Tooltip } from "react-tooltip";
-import { CreateWaveOutcomeConfig } from "@/types/waves.types";
+import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 
 export default function CreateWaveOutcomesRowManualRank({
   outcome,

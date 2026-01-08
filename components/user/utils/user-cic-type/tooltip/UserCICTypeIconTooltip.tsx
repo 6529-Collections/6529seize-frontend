@@ -2,12 +2,13 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { CICType, RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { CICType } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
 import { ProfileRatersParamsOrderBy, RateMatter } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser, cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
-import { Page } from "@/helpers/Types";
+import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";

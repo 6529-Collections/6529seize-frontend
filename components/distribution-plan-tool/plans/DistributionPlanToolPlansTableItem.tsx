@@ -1,6 +1,6 @@
 "use client";
 
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolLoader from "@/components/allowlist-tool/common/AllowlistToolLoader";
 import { distributionPlanApiDelete } from "@/services/distribution-plan-api";
 import { useRouter } from "next/navigation";

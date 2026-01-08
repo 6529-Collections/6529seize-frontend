@@ -3,13 +3,14 @@
 import { useState } from "react";
 import UserPageIdentityAddStatementsContactItems from "./UserPageIdentityAddStatementsContactItems";
 import UserPageIdentityAddStatementsContactHeader from "./UserPageIdentityAddStatementsContactHeader";
+import type {
+  CONTACT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
-  CONTACT_STATEMENT_TYPE,
   STATEMENT_GROUP,
   STATEMENT_TYPE,
 } from "@/helpers/Types";
 import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export default function UserPageIdentityAddStatementsContact({
   profile,

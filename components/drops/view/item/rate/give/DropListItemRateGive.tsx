@@ -5,7 +5,7 @@ import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
+import type {
   ActiveDropState,
 } from "@/types/dropInteractionTypes";
 import BrainContent from "../content/BrainContent";

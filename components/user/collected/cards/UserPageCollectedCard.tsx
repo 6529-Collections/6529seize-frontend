@@ -1,7 +1,8 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { CollectedCard, CollectedCollectionType } from "@/entities/IProfile";
+import type { CollectedCard} from "@/entities/IProfile";
+import { CollectedCollectionType } from "@/entities/IProfile";
 import { ContractType } from "@/enums";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import {

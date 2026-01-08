@@ -4,8 +4,8 @@ import {
 } from "@/components/nextGen/nextgen_contracts";
 import { publicEnv } from "@/config/env";
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
-import { Transaction } from "@/entities/ITransaction";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";
 import { useEffect, useState } from "react";
 

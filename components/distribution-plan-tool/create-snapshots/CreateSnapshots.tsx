@@ -1,8 +1,9 @@
 "use client";
 
+import type {
+    DistributionPlanTokenPoolDownload} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
     AllowlistOperationCode,
-    DistributionPlanTokenPoolDownload,
     DistributionPlanTokenPoolDownloadStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";

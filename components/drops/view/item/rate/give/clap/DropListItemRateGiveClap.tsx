@@ -6,7 +6,7 @@ import mojs from "@mojs/core";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { Tooltip } from "react-tooltip";
-import { DropVoteState } from "@/hooks/drops/types";
+import type { DropVoteState } from "@/hooks/drops/types";
 import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
 
 enum RateStatus {

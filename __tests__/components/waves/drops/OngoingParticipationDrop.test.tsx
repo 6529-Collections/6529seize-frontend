@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import OngoingParticipationDrop from '@/components/waves/drops/participation/OngoingParticipationDrop';
-import { ExtendedDrop } from '@/helpers/waves/drop.helpers';
+import type { ExtendedDrop } from '@/helpers/waves/drop.helpers';
 
 // Mock hooks and child components
 const useIsMobileDevice = jest.fn();

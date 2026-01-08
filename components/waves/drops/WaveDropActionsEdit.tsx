@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 import { AuthContext } from "@/components/auth/Auth";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveDropActionsEditProps {
   readonly drop: ExtendedDrop;

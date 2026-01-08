@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveDropActionsMarkUnread from '@/components/waves/drops/WaveDropActionsMarkUnread';
 import { AuthContext } from '@/components/auth/Auth';
-import { ApiDrop } from '@/generated/models/ApiDrop';
+import type { ApiDrop } from '@/generated/models/ApiDrop';
 
 jest.mock('@/services/api/common-api', () => ({
   commonApiPost: jest.fn(),

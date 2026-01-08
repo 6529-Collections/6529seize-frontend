@@ -1,7 +1,8 @@
 "use client";
 
 import { useContext } from "react";
-import { WebSocketContext, WebSocketContextValue } from "./WebSocketContext";
+import type { WebSocketContextValue } from "./WebSocketContext";
+import { WebSocketContext } from "./WebSocketContext";
 
 /**
  * Hook to access WebSocket functionality

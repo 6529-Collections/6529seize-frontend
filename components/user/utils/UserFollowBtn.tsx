@@ -7,7 +7,7 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
+import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiFetch,

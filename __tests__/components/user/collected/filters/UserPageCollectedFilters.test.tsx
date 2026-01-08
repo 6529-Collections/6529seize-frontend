@@ -1,12 +1,13 @@
 import UserPageCollectedFilters from "@/components/user/collected/filters/UserPageCollectedFilters";
+import type {
+  CollectionSeized} from "@/entities/IProfile";
 import {
   CollectedCollectionType,
-  CollectionSeized,
   CollectionSort,
 } from "@/entities/IProfile";
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import {
   act,
@@ -15,7 +16,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { RefObject } from "react";
+import type { RefObject } from "react";
 
 jest.mock("@/components/nft-transfer/TransferToggle", () => {
   return function MockTransferToggle() {

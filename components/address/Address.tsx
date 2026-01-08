@@ -1,6 +1,6 @@
 "use client";
 
-import { IProfileConsolidation } from "@/entities/IProfile";
+import type { IProfileConsolidation } from "@/entities/IProfile";
 import { numberWithCommas, parseEmojis } from "@/helpers/Helpers";
 import { faArrowsTurnRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,21 +17,23 @@ interface Props {
   display: string | undefined;
   displayEns?: string | undefined;
   hideCopy?: boolean | undefined;
-  tags?: {
-    memesCardsSets: number;
-    memesCardsSetS1: number;
-    memesCardsSetS2: number;
-    memesCardsSetS3: number;
-    memesCardsSetS4: number;
-    memesCardsSetS5: number;
-    memesCardsSetS6: number;
-    memesBalance: number;
-    genesis: number;
-    gradientsBalance: number;
-    tdh_rank?: number | undefined;
-    balance_rank?: number | undefined;
-    unique_rank?: number | undefined;
-  } | undefined;
+  tags?:
+    | {
+        memesCardsSets: number;
+        memesCardsSetS1: number;
+        memesCardsSetS2: number;
+        memesCardsSetS3: number;
+        memesCardsSetS4: number;
+        memesCardsSetS5: number;
+        memesCardsSetS6: number;
+        memesBalance: number;
+        genesis: number;
+        gradientsBalance: number;
+        tdh_rank?: number | undefined;
+        balance_rank?: number | undefined;
+        unique_rank?: number | undefined;
+      }
+    | undefined;
   isUserPage?: boolean | undefined;
   disableLink?: boolean | undefined;
   viewingWallet?: `0x${string}` | undefined;
@@ -59,7 +61,7 @@ const GRADIENT_ICON = "";
 
 export default function Address(props: Readonly<Props>) {
   const [consolidationExpanded, setConsolidationExpanded] = useState(
-    props.isUserPage ? true : false
+    !!props.isUserPage
   );
 
   const getWalletDisplayAndEns = (
@@ -109,10 +111,12 @@ export default function Address(props: Readonly<Props>) {
       ) : (
         <Dropdown
           className={`${styles["consolidationDropdown"]}`}
-          autoClose="outside">
+          autoClose="outside"
+        >
           <Dropdown.Toggle
             name={`consolidation-toggle`}
-            aria-label={`consolidation-toggle`}>
+            aria-label={`consolidation-toggle`}
+          >
             <Image
               unoptimized
               loading="eager"
@@ -136,14 +140,16 @@ export default function Address(props: Readonly<Props>) {
             &nbsp;&nbsp;
             <Link
               className="decoration-none decoration-hover-underline"
-              href={getProfileLink()}>
+              href={getProfileLink()}
+            >
               <span
                 className={`${styles["consolidationDisplay"]} ${
                   props.isUserPage ? styles["consolidationDisplayUserPage"] : ""
                 }`}
                 dangerouslySetInnerHTML={{
                   __html: props.display ? parseEmojis(props.display) : ``,
-                }}></span>
+                }}
+              ></span>
             </Link>
           </Dropdown.Toggle>
         </Dropdown>
@@ -153,7 +159,8 @@ export default function Address(props: Readonly<Props>) {
           props.isUserPage
             ? `d-flex flex-wrap align-items-center gap-2`
             : `d-flex flex-column`
-        }>
+        }
+      >
         {(consolidationExpanded || props.isUserPage) &&
           props.wallets.length > 1 &&
           props.wallets.map((w, index) => (
@@ -161,7 +168,8 @@ export default function Address(props: Readonly<Props>) {
               key={w}
               className={`d-flex align-items-center justify-content-start ${
                 props.isUserPage ? styles["consolidationDiv"] : ""
-              }`}>
+              }`}
+            >
               <FontAwesomeIcon
                 icon={faArrowsTurnRight}
                 name={`arrow-turn-right`}
@@ -186,14 +194,18 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.balance_rank &&
                 props.tags.balance_rank > 0 &&
                 props.expandedTags && (
-                  <span className={`${styles["addressTag"]} ${styles["rankTag"]}`}>
+                  <span
+                    className={`${styles["addressTag"]} ${styles["rankTag"]}`}
+                  >
                     All Cards Rank #{numberWithCommas(props.tags.balance_rank)}
                   </span>
                 )}
               {props.tags.unique_rank &&
                 props.tags.unique_rank > 0 &&
                 props.expandedTags && (
-                  <span className={`${styles["addressTag"]} ${styles["rankTag"]}`}>
+                  <span
+                    className={`${styles["addressTag"]} ${styles["rankTag"]}`}
+                  >
                     Unique Cards Rank #
                     {numberWithCommas(props.tags.unique_rank)}
                   </span>
@@ -201,7 +213,9 @@ export default function Address(props: Readonly<Props>) {
               {props.tags.tdh_rank &&
                 props.tags.tdh_rank > 0 &&
                 props.expandedTags && (
-                  <span className={`${styles["addressTag"]} ${styles["rankTag"]}`}>
+                  <span
+                    className={`${styles["addressTag"]} ${styles["rankTag"]}`}
+                  >
                     TDH Rank #{numberWithCommas(props.tags.tdh_rank)}
                   </span>
                 )}
@@ -212,7 +226,8 @@ export default function Address(props: Readonly<Props>) {
             <span
               className={`${styles["addressTag"]} ${
                 !MEMES_SETS_ICON ? styles["memesSetTag"] : ""
-              }`}>
+              }`}
+            >
               {(props.isUserPage || !MEMES_SETS_ICON) && `Memes Sets x`}
               {props.tags.memesCardsSets}
               {MEMES_SETS_ICON && (
@@ -227,7 +242,8 @@ export default function Address(props: Readonly<Props>) {
             <span
               className={`${styles["addressTag"]} ${
                 !UNIQUE_MEMES_ICON ? styles["memesTag"] : ""
-              }`}>
+              }`}
+            >
               {(props.isUserPage || !UNIQUE_MEMES_ICON) && `Memes x`}
               {props.tags.memesBalance}
               {props.tags.genesis > 0 ? ` (+Genesis) ` : ""}
@@ -246,7 +262,8 @@ export default function Address(props: Readonly<Props>) {
             <span
               className={`${styles["addressTag"]} ${
                 !GRADIENT_ICON ? styles["gradientTag"] : ""
-              }`}>
+              }`}
+            >
               {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
               {props.tags.gradientsBalance}
               {GRADIENT_ICON && (
@@ -264,7 +281,8 @@ export default function Address(props: Readonly<Props>) {
                   <span
                     className={`${styles["addressTag"]} ${
                       !SZN_1_ICON ? styles["memeSzn1Tag"] : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_1_ICON) && `SZN1 Sets x`}
                     {props.tags.memesCardsSetS1}
                     {SZN_1_ICON && (
@@ -281,7 +299,8 @@ export default function Address(props: Readonly<Props>) {
                   <span
                     className={`${styles["addressTag"]} ${
                       !SZN_2_ICON ? styles["memeSzn2Tag"] : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_2_ICON) && `SZN2 Sets x`}
                     {props.tags.memesCardsSetS2}
                     {SZN_2_ICON && (
@@ -298,7 +317,8 @@ export default function Address(props: Readonly<Props>) {
                   <span
                     className={`${styles["addressTag"]} ${
                       !SZN_3_ICON ? styles["memeSzn3Tag"] : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_3_ICON) && `SZN3 Sets x`}
                     {props.tags.memesCardsSetS3}
                     {SZN_3_ICON && (
@@ -315,7 +335,8 @@ export default function Address(props: Readonly<Props>) {
                   <span
                     className={`${styles["addressTag"]} ${
                       !SZN_4_ICON ? styles["memeSzn4Tag"] : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_4_ICON) && `SZN4 Sets x`}
                     {props.tags.memesCardsSetS4}
                     {SZN_4_ICON && (
@@ -332,7 +353,8 @@ export default function Address(props: Readonly<Props>) {
                   <span
                     className={`${styles["addressTag"]} ${
                       !SZN_5_ICON ? styles["memeSzn5Tag"] : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_5_ICON) && `SZN5 Sets x`}
                     {props.tags.memesCardsSetS5}
                     {SZN_5_ICON && (
@@ -349,7 +371,8 @@ export default function Address(props: Readonly<Props>) {
                   <span
                     className={`${styles["addressTag"]} ${
                       !SZN_6_ICON ? styles["memeSzn6Tag"] : ""
-                    }`}>
+                    }`}
+                  >
                     {(props.isUserPage || !SZN_6_ICON) && `SZN6 Sets x`}
                     {props.tags.memesCardsSetS6}
                     {SZN_6_ICON && (
@@ -365,7 +388,8 @@ export default function Address(props: Readonly<Props>) {
                 <span
                   className={`${styles["addressTag"]} ${
                     !GRADIENT_ICON ? styles["gradientTag"] : ""
-                  }`}>
+                  }`}
+                >
                   {(props.isUserPage || !GRADIENT_ICON) && `Gradients x`}
                   {props.tags.gradientsBalance}
                   {GRADIENT_ICON && (

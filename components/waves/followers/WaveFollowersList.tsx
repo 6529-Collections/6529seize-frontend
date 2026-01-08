@@ -1,4 +1,4 @@
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import FollowersListWrapper from "@/components/utils/followers/FollowersListWrapper";
 import { useWaveFollowers } from "@/hooks/useWaveFollowers";
 

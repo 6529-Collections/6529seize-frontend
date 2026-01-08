@@ -3,7 +3,7 @@
 import React, { type JSX, useMemo } from "react";
 import { useSetWaveData } from "@/contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import { useWaveData } from "@/hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenCollectionProvenance from '@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance';
-import { NextGenCollection, NextGenLog } from '@/entities/INextgen';
+import type { NextGenCollection, NextGenLog } from '@/entities/INextgen';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p} /> }));
 jest.mock('@/services/api/common-api', () => ({ commonApiFetch: jest.fn() }));

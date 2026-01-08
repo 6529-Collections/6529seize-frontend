@@ -1,8 +1,9 @@
 "use client";
 
+import type {
+  ReactNode} from "react";
 import {
   forwardRef,
-  ReactNode,
   useCallback,
   useImperativeHandle,
   useState,
@@ -10,7 +11,7 @@ import {
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../WaveGroup.types";
+import type { WaveGroupType } from "../WaveGroup.types";
 import WaveGroupRemove from "./WaveGroupRemove";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 

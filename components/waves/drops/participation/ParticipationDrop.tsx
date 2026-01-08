@@ -1,7 +1,7 @@
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ActiveDropState } from "@/types/dropInteractionTypes";
-import { DropInteractionParams, DropLocation } from "../Drop";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { DropInteractionParams, DropLocation } from "../Drop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import React from "react";
 import DefaultParticipationDrop from "./DefaultParticipationDrop";
 import MemeParticipationDrop from "@/components/memes/drops/MemeParticipationDrop";

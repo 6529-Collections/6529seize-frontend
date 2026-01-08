@@ -2,8 +2,8 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { CicStatement } from "@/entities/IProfile";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiDelete } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useRef, useState } from "react";

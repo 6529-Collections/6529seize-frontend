@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ApiWave } from "@/generated/models/ObjectSerializer";
+import type { ApiWave } from "@/generated/models/ObjectSerializer";
 import MemesArtSubmissionModal from "../MemesArtSubmissionModal";
 import { SubmissionStatus, useWave } from "@/hooks/useWave";
 

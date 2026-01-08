@@ -6,13 +6,14 @@ import React, {
   useImperativeHandle,
   useRef,
 } from "react";
-import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
+import type { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
+import type {
+  VirtualItem} from "../../../../hooks/useVirtualizedWaves";
 import {
-  useVirtualizedWaves,
-  VirtualItem,
+  useVirtualizedWaves
 } from "../../../../hooks/useVirtualizedWaves";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

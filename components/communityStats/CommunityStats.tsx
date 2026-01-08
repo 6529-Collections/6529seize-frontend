@@ -2,8 +2,8 @@
 
 import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { GlobalTDHHistory } from "@/entities/ITDH";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { GlobalTDHHistory } from "@/entities/ITDH";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import {

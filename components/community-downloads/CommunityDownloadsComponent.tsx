@@ -4,8 +4,8 @@ import { useState, useCallback } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchUrl } from "@/services/6529api";
 import Pagination from "@/components/pagination/Pagination";
-import { ApiUploadsPage } from "@/generated/models/ApiUploadsPage";
-import { ApiUploadItem } from "@/generated/models/ApiUploadItem";
+import type { ApiUploadsPage } from "@/generated/models/ApiUploadsPage";
+import type { ApiUploadItem } from "@/generated/models/ApiUploadItem";
 
 import {
   formatDate,

@@ -483,7 +483,9 @@ paths:
       tags:
         - Distributions
       summary: Save uploaded distribution photos to database
-      description: Requires the user to be authenticated as a Subscription Admin. Replaces all existing photos for the card.
+      description: >-
+        Requires the user to be authenticated as a Subscription Admin. Replaces
+        all existing photos for the card.
       operationId: completeDistributionPhotosUpload
       parameters:
         - name: contract
@@ -729,6 +731,170 @@ paths:
                 $ref: "#/components/schemas/ApiDrop"
         "400":
           description: Invalid request
+  /boosted-drops/:
+    get:
+      tags:
+        - Drops
+      summary: Get boosted drops.
+      operationId: getBoostedDrops
+      parameters:
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
+        - name: booster
+          in: query
+          description: Drops boosted by given identity
+          required: false
+          schema:
+            type: string
+        - name: wave_id
+          in: query
+          description: Drops by wave
+          required: false
+          schema:
+            type: string
+        - name: min_boosts
+          in: query
+          description: Must be boosted at least so many times
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 200
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          description: Default is last_boosted_at
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_boosted_at
+              - first_boosted_at
+              - drop_created_at
+              - boosts
+        - name: count_only_boosts_after
+          in: query
+          description: Timestamp in millis
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropsPage"
+  /drops/{dropId}/boosts:
+    get:
+      tags:
+        - Drops
+      summary: Get drop boosts by Drop ID.
+      operationId: getDropBoostsById
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 2000
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          description: Default is boosted_at
+          required: false
+          schema:
+            type: string
+            enum:
+              - boosted_at
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropBoostsPage"
+        "404":
+          description: Drop not found
+    post:
+      tags:
+        - Drops
+      summary: Boost drop
+      operationId: boostDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+        "400":
+          description: Invalid request
+        "404":
+          description: Drop not found
+    delete:
+      tags:
+        - Drops
+      summary: Delete drop boost
+      operationId: deleteDropBoost
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+        "404":
+          description: Drop not found
   /drops/{dropId}:
     get:
       tags:
@@ -923,7 +1089,9 @@ paths:
       tags:
         - Drops
       summary: Mark a drop and all subsequent drops in the wave as unread
-      description: Sets the user's latest_read_timestamp to just before this drop's created_at, making this drop and all newer drops unread.
+      description: >-
+        Sets the user"s latest_read_timestamp to just before this drop"s
+        created_at, making this drop and all newer drops unread.
       operationId: markDropUnread
       parameters:
         - name: dropId
@@ -5878,6 +6046,7 @@ components:
         - rank
         - is_signed
         - reactions
+        - boosts
       properties:
         id:
           type: string
@@ -5966,6 +6135,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropReaction"
+        boosts:
+          type: number
+          format: int64
     ApiDropAndDropVote:
       type: object
       required:
@@ -5976,6 +6148,29 @@ components:
           $ref: "#/components/schemas/ApiDrop"
         vote:
           $ref: "#/components/schemas/ApiDropVote"
+    ApiDropBoost:
+      type: object
+      required:
+        - booster
+        - boosted_at
+      properties:
+        booster:
+          $ref: "#/components/schemas/ApiProfileMin"
+        boosted_at:
+          type: number
+          format: int64
+          nullable: true
+    ApiDropBoostsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropBoost"
     ApiDropContextProfileContext:
       type: object
       required:
@@ -5983,6 +6178,7 @@ components:
         - min_rating
         - max_rating
         - reaction
+        - boosted
       properties:
         rating:
           type: number
@@ -5996,6 +6192,8 @@ components:
         reaction:
           type: string
           nullable: true
+        boosted:
+          type: boolean
     ApiDropMedia:
       type: object
       required:
@@ -6156,16 +6354,6 @@ components:
       enum:
         - DROP_REPLIED
         - DROP_VOTED
-    ApiMarkDropUnreadResponse:
-      type: object
-      required:
-        - your_unread_drops_count
-      properties:
-        your_unread_drops_count:
-          type: integer
-        first_unread_drop_serial_no:
-          type: integer
-          nullable: true
     ApiDropTraceItem:
       type: object
       required:
@@ -6239,6 +6427,7 @@ components:
         - rank
         - is_signed
         - reactions
+        - boosts
       properties:
         id:
           type: string
@@ -6325,6 +6514,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropReaction"
+        boosts:
+          type: number
+          format: int64
     ApiDropWithoutWavesPageWithoutCount:
       type: object
       required:
@@ -6773,6 +6965,16 @@ components:
           type: string
         refresh_token:
           type: string
+    ApiMarkDropUnreadResponse:
+      type: object
+      required:
+        - your_unread_drops_count
+      properties:
+        your_unread_drops_count:
+          type: integer
+        first_unread_drop_serial_no:
+          type: integer
+          nullable: true
     ApiNft:
       type: object
       required:
@@ -7942,7 +8144,6 @@ components:
         - participation
         - chat
         - wave
-        - outcomes
         - created_at
         - contributors_overview
         - subscribed_actions
@@ -7982,10 +8183,6 @@ components:
           $ref: "#/components/schemas/ApiWaveChatConfig"
         wave:
           $ref: "#/components/schemas/ApiWaveConfig"
-        outcomes:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveOutcomeOld"
         contributors_overview:
           type: array
           items:
@@ -8420,33 +8617,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
-    ApiWaveOutcomeOld:
-      type: object
-      required:
-        - type
-        - description
-        - index
-      properties:
-        type:
-          $ref: "#/components/schemas/ApiWaveOutcomeType"
-        subtype:
-          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
-        description:
-          type: string
-        credit:
-          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
-        rep_category:
-          type: string
-        amount:
-          type: number
-          format: int64
-        distribution:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
-        index:
-          type: number
-          format: int64
     ApiWaveOutcomesPage:
       type: object
       required:
@@ -9172,25 +9342,6 @@ components:
         updated_at:
           type: string
           format: date-time
-    DistributionPhotosPage:
-      type: object
-      required:
-        - data
-      allOf:
-        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/DistributionPhoto"
-    DistributionPhotoCompleteRequestPhoto:
-      type: object
-      required:
-        - media_url
-      properties:
-        media_url:
-          type: string
-          description: The CloudFront URL of the uploaded photo
     DistributionPhotoCompleteRequest:
       type: object
       required:
@@ -9201,6 +9352,14 @@ components:
           minItems: 1
           items:
             $ref: "#/components/schemas/DistributionPhotoCompleteRequestPhoto"
+    DistributionPhotoCompleteRequestPhoto:
+      type: object
+      required:
+        - media_url
+      properties:
+        media_url:
+          type: string
+          description: The CloudFront URL of the uploaded photo
     DistributionPhotoCompleteResponse:
       type: object
       required:
@@ -9214,6 +9373,17 @@ components:
           items:
             type: string
             description: CloudFront URLs of the saved photos
+    DistributionPhotosPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DistributionPhoto"
     NFTFinalSubscription:
       type: object
       required:

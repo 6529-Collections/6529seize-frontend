@@ -1,8 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { useDropContent } from '@/components/waves/drops/useDropContent';
-import { ApiDrop } from '@/generated/models/ApiDrop';
+import type { ApiDrop } from '@/generated/models/ApiDrop';
 import { commonApiFetch } from '@/services/api/common-api';
 
 // Mock dependencies

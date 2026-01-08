@@ -15,16 +15,17 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { PhaseTimes } from "../nextgen_entities";
+import type { PhaseTimes } from "../nextgen_entities";
 import { NULL_MERKLE } from "@/constants";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import type {
+  NextgenAllowlistCollection} from "@/entities/INextgen";
 import {
-  NextgenAllowlistCollectionType,
-  NextgenAllowlistCollection,
+  NextgenAllowlistCollectionType
 } from "@/entities/INextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";

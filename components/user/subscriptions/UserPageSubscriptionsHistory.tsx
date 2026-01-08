@@ -1,15 +1,15 @@
 import Pagination from "@/components/pagination/Pagination";
 import { MEMES_CONTRACT } from "@/constants";
-import { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
-import { SubscriptionLog } from "@/generated/models/SubscriptionLog";
-import { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
+import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
+import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
+import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import {
   areEqualAddresses,
   formatAddress,
   getDateDisplay,
   getTransactionLink,
 } from "@/helpers/Helpers";
-import { Page } from "@/helpers/Types";
+import type { Page } from "@/helpers/Types";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CreateDropMetadataType } from "./CreateDropContent";
+import type { CreateDropMetadataType } from "./CreateDropContent";
 import { Tooltip } from "react-tooltip";
 
 interface CreateDropMetadataRowProps {

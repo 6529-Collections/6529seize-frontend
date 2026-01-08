@@ -3,7 +3,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";

@@ -13,8 +13,8 @@ import {
 import UpcomingMemePage from "@/components/the-memes/UpcomingMemePage";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
-import { Distribution, DistributionPhoto } from "@/entities/IDistribution";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { Distribution, DistributionPhoto } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
   capitalizeEveryWord,

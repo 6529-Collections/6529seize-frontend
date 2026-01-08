@@ -1,4 +1,4 @@
-import { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
+import type { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
 import BlockPickerResultHeader from "./BlockPickerResultHeader";
 import BlockPickerResultTable from "./BlockPickerResultTable";
 

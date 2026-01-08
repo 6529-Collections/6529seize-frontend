@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import { ApiProfileClassification } from '@/generated/models/ApiProfileClassification';
 import UserCICTypeIconTooltipRate from '@/components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipRate';
 

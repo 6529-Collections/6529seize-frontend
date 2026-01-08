@@ -1,5 +1,5 @@
 import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
 const mockSeasons: MemeSeason[] = [

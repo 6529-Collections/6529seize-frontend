@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserCICTypeIconWrapper from '@/components/user/utils/user-cic-type/UserCICTypeIconWrapper';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIcon', () => ({
   __esModule: true,

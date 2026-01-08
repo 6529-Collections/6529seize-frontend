@@ -1,4 +1,4 @@
-import { CreateProxyCreateWaveAction } from "@/entities/IProxy";
+import type { CreateProxyCreateWaveAction } from "@/entities/IProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigCreateWave({

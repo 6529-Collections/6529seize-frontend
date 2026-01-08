@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { AnimatePresence, motion } from "framer-motion";
 import EmmaListSearchItemsContent from "./EmmaListSearchItemsContent";

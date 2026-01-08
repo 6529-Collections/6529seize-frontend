@@ -1,5 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";

@@ -2,8 +2,8 @@
 
 import { publicEnv } from "@/config/env";
 import { useCallback, useEffect, useState } from "react";
-import { CICType } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
+import type { CICType } from "@/entities/IProfile";
+import type { SortDirection } from "@/entities/ISort";
 import { cicToType } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Collector, Content } from "./Leaderboard";

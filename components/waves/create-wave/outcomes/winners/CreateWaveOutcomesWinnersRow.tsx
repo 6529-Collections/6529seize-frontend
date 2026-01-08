@@ -1,5 +1,6 @@
+import type {
+  CreateWaveOutcomeConfigWinner} from "@/types/waves.types";
 import {
-  CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";

@@ -1,6 +1,6 @@
 import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
 import { RateMatter } from "@/enums";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 

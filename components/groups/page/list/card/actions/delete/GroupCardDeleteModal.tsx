@@ -2,7 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
 import { useContext, useRef } from "react";

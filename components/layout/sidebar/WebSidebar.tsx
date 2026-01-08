@@ -1,14 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useIdentity } from "../../../hooks/useIdentity";
+import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import HeaderShare from "../../header/share/HeaderShare";
 import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
+import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarUser from "./WebSidebarUser";
+import { UserIcon } from "@heroicons/react/24/outline";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;
@@ -32,10 +35,16 @@ function WebSidebar({
   const navRef = useRef<{ closeSubmenu: () => void }>(null);
   const pathname = usePathname();
   const { address } = useSeizeConnectContext();
+  const { connectedProfile } = useAuth();
   const { profile } = useIdentity({
     handleOrWallet: address || "",
     initialProfile: null,
   });
+  const profilePath = useMemo(() => {
+    if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
+    if (address) return `/${address}`;
+    return null;
+  }, [connectedProfile?.handle, address]);
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
@@ -165,6 +174,19 @@ function WebSidebar({
               <div className="tw-flex-1">
                 <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
               </div>
+
+              {profilePath && (
+                <div className="tw-px-3 tw-pt-2">
+                  <WebSidebarNavItem
+                    href={profilePath}
+                    icon={UserIcon}
+                    iconSizeClass="tw-h-6 tw-w-6"
+                    active={pathname === profilePath}
+                    collapsed={shouldShowCollapsed}
+                    label="Profile"
+                  />
+                </div>
+              )}
 
               <HeaderShare isCollapsed={shouldShowCollapsed} />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import {
   commonApiDeleteWithBody,
   commonApiPost,
 } from "@/services/api/common-api";
-import { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
+import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import ActionButton from "@/components/utils/button/ActionButton";

@@ -1,5 +1,5 @@
-import { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
-import { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
+import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
+import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import GroupCreateNftSearchItem from "./GroupCreateNftSearchItem";
 
 export default function GroupCreateNftSearchItemsContent({

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { TraitsData } from "./submission/types/TraitsData";
+import type { TraitsData } from "./submission/types/TraitsData";
 import { Section, TraitField } from "./traits";
 import { getFormSections } from "./traits/schema";
 import { useAuth } from "@/components/auth/Auth";

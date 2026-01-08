@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getTimeAgo } from "@/helpers/Helpers";
 import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";

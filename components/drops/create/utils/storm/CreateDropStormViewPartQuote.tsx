@@ -1,16 +1,16 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiQuotedDrop } from "@/generated/models/ApiQuotedDrop";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiQuotedDrop } from "@/generated/models/ApiQuotedDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
-import { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import DropPart from "@/components/drops/view/part/DropPart";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface PartConfigWave {

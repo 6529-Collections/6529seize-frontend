@@ -1,10 +1,10 @@
 "use client";
 
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useParams } from "next/navigation";
-import { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+import type { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
 import UserPageRep from "./UserPageRep";
 export default function UserPageRepWrapper({

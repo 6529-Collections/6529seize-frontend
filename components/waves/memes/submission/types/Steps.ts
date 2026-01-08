@@ -3,5 +3,6 @@
  */
 export enum SubmissionStep {
   AGREEMENT = 'agreement',
-  ARTWORK = 'artwork'
+  ARTWORK = 'artwork',
+  ADDITIONAL_INFO = 'additional_info'
 }

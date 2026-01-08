@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import UserPageFollowers from '@/components/user/followers/UserPageFollowers';
-import { ApiIdentity } from '@/generated/models/ApiIdentity';
+import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
 let wrapperProps: any;
 const fetchNextPage = jest.fn();

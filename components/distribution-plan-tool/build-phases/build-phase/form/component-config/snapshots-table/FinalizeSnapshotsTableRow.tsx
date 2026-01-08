@@ -1,7 +1,7 @@
-import { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import { Tooltip } from "react-tooltip";
-import { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
+import type { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
 import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
 import FinalizeSnapshotsTableExcludedSnapshotsTooltip from "./FinalizeSnapshotsTableExcludedSnapshotsTooltip";
 import FinalizeSnapshotsTableSnapshotTooltip from "./FinalizeSnapshotsTableSnapshotTooltip";

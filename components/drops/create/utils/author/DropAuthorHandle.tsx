@@ -1,9 +1,10 @@
 "use client";
 
-import { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
-import ProfileHandle, {
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import type {
   ProfileHandleProps,
 } from "@/components/common/profile/ProfileHandle";
+import ProfileHandle from "@/components/common/profile/ProfileHandle";
 import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 

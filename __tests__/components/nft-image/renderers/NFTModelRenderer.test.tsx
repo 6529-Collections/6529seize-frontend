@@ -1,6 +1,6 @@
 import NFTModelRenderer from "@/components/nft-image/renderers/NFTModelRenderer";
-import { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
-import { BaseNFT } from "@/entities/INFT";
+import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
+import type { BaseNFT } from "@/entities/INFT";
 import { render, screen } from "@testing-library/react";
 
 // Mock @google/model-viewer

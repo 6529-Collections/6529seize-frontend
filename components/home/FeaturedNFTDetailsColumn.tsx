@@ -4,7 +4,7 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import MemeCalendarPeriods from "@/components/the-memes/MemeCalendarPeriods";
-import { NFTWithMemesExtendedData } from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
 import { useManifoldClaimDisplays } from "@/hooks/useManifoldClaimDisplays";

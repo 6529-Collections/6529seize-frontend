@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
     faArrowRight,

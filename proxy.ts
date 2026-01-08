@@ -5,7 +5,8 @@ import {
   getWaveRoute,
   getWavesBaseRoute,
 } from "@/helpers/navigation.helpers";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants";
 

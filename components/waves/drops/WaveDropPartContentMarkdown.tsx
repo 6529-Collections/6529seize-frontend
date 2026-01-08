@@ -2,11 +2,11 @@ import React from "react";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 import EditDropLexical from "./EditDropLexical";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
-import { ApiDropPart } from "@/generated/models/ApiDropPart";
-import { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;

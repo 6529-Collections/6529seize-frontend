@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { useState } from "react";

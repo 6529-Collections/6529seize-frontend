@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveSmallLeaderboardItemOutcomes } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 
 interface WaveLeaderboardDropFooterProps {

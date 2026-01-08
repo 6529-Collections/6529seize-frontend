@@ -1,5 +1,5 @@
 import { Tooltip } from "react-tooltip";
-import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 
 export default function CreateDropContentMissingMetadataWarning({
   missingMetadata,

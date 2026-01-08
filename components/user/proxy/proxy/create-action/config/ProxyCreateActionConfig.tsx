@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, type JSX } from "react";
+import type {
+  CreateProxyAction} from "@/entities/IProxy";
 import {
-  CreateProxyAction,
   PROFILE_PROXY_ACTION_LABELS,
 } from "@/entities/IProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";

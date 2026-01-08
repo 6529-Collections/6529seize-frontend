@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WaveLeaderboardRightSidebarActivityLog } from '@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog';
-import { ApiWaveLog } from '@/generated/models/ApiWaveLog';
+import type { ApiWaveLog } from '@/generated/models/ApiWaveLog';
 import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 
 // Mock dependencies

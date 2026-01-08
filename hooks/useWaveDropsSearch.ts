@@ -1,9 +1,9 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
-import { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { generateUniqueKeys, mapToExtendedDrops } from "@/helpers/waves/wave-drops.helpers";
 import { commonApiFetch } from "@/services/api/common-api";

@@ -8,18 +8,19 @@ import {
   NEXTGEN_CORE,
   NEXTGEN_MINTER,
 } from "@/components/nextGen/nextgen_contracts";
-import {
+import type {
   CollectionWithMerkle,
   ProofResponse,
-  Status,
-  TokensPerAddress,
+  TokensPerAddress} from "@/components/nextGen/nextgen_entities";
+import {
+  Status
 } from "@/components/nextGen/nextgen_entities";
 import {
   getStatusFromDates,
   useMintSharedState,
 } from "@/components/nextGen/nextgen_helpers";
 import { publicEnv } from "@/config/env";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses, getNetworkName } from "@/helpers/Helpers";
 import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
 import { fetchUrl } from "@/services/6529api";

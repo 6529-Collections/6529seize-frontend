@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactElement, RefObject, useEffect, useState } from "react";
+import type { ReactElement, RefObject} from "react";
+import { useEffect, useState } from "react";
 import CommonDropdownItemsMobileWrapper from "./CommonDropdownItemsMobileWrapper";
 import { createBreakpoint } from "react-use";
 import CommonDropdownItemsDefaultWrapper from "./CommonDropdownItemsDefaultWrapper";

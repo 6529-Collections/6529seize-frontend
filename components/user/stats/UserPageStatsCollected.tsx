@@ -1,5 +1,5 @@
-import { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
-import { MemeSeason } from "@/entities/ISeason";
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import type { MemeSeason } from "@/entities/ISeason";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { Fragment } from "react";
 import { Accordion, Col, Container, Row, Table } from "react-bootstrap";

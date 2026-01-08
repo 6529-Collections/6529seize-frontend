@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import CommunityMembersTable from '@/components/community/members-table/CommunityMembersTable';
-import { CommunityMemberOverview } from '@/entities/IProfile';
+import type { CommunityMemberOverview } from '@/entities/IProfile';
 import { CommunityMembersSortOption } from '@/enums';
 import { SortDirection } from '@/entities/ISort';
 

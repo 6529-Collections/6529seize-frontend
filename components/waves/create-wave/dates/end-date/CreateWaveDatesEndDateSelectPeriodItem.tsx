@@ -1,5 +1,5 @@
 import { PERIOD_LABELS } from "@/helpers/Helpers";
-import { Period } from "@/helpers/Types";
+import type { Period } from "@/helpers/Types";
 
 export default function CreateWaveDatesEndDateSelectPeriodItem({
   period,

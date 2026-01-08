@@ -1,6 +1,7 @@
 "use client";
 
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { TrophyIcon, ChevronDownIcon } from "@heroicons/react/24/outline";

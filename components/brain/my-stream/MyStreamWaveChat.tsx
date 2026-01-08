@@ -6,15 +6,16 @@ import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/Mob
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { selectEditingDropId } from "@/store/editSlice";
+import type {
+  ActiveDropState} from "@/types/dropInteractionTypes";
 import {
-  ActiveDropAction,
-  ActiveDropState,
+  ActiveDropAction
 } from "@/types/dropInteractionTypes";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";

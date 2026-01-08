@@ -4,7 +4,7 @@ import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNav
 import NextGenTokenComponent from "@/components/nextGen/collections/nextgenToken/NextGenToken";
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
 import { useTitle } from "@/contexts/TitleContext";
-import {
+import type {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,

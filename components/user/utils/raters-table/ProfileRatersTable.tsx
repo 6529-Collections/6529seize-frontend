@@ -1,7 +1,7 @@
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
-import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
+import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import type { SortDirection } from "@/entities/ISort";
+import type { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
 import ProfileRatersTableBody from "./ProfileRatersTableBody";
 import ProfileRatersTableHeader from "./ProfileRatersTableHeader";
 

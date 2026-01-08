@@ -9,8 +9,8 @@ import Pagination from "@/components/pagination/Pagination";
 import { publicEnv } from "@/config/env";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { DBResponse } from "@/entities/IDBResponse";
-import { NFTLite, Rememe } from "@/entities/INFT";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFTLite, Rememe } from "@/entities/INFT";
 import {
   areEqualAddresses,
   formatAddress,

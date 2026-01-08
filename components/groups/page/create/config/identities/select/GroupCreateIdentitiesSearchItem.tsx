@@ -1,4 +1,4 @@
-import { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   getScaledImageUri,
   ImageScale,

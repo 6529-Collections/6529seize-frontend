@@ -10,7 +10,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, type FormEvent } from "react";
 import { Tooltip } from "react-tooltip";
-import type { DisplayTz } from "./meme-calendar.helpers";
+import type { DisplayTz ,
+  ZoomLevel} from "./meme-calendar.helpers";
 import {
   addMonths,
   dateFromMintNumber,
@@ -40,8 +41,7 @@ import {
   SZN1_RANGE,
   SZN1_SEASON_INDEX,
   toISO,
-  ymd,
-  ZoomLevel,
+  ymd
 } from "./meme-calendar.helpers";
 import { getMintOverrideNoteForUtcDay } from "./meme-calendar.overrides";
 import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";

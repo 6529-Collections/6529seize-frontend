@@ -18,7 +18,7 @@ import Providers from "@/components/providers/Providers";
 import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import { Viewport } from "next";
+import type { Viewport } from "next";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {

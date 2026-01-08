@@ -1,6 +1,7 @@
-import UserSettingsImgSelectMeme, {
+import type {
   NFTLite,
 } from "@/components/user/settings/UserSettingsImgSelectMeme";
+import UserSettingsImgSelectMeme from "@/components/user/settings/UserSettingsImgSelectMeme";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserPageStatsActivityTDHHistoryCharts from '@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryCharts';
-import { TDHHistory } from '@/entities/ITDH';
+import type { TDHHistory } from '@/entities/ITDH';
 
 jest.mock('@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryChart', () => ({
   __esModule: true,

@@ -1,6 +1,7 @@
-import { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
-import { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { DropSize, ExtendedDrop, getStableDropKey } from "./drop.helpers";
+import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import type { ExtendedDrop} from "./drop.helpers";
+import { DropSize, getStableDropKey } from "./drop.helpers";
 
 const createExtendedDrop = (
   drop: ApiDropWithoutWave,

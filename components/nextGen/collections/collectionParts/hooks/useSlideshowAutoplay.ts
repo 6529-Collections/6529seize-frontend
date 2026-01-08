@@ -1,4 +1,5 @@
-import { useEffect, useState, RefObject } from "react";
+import type { RefObject } from "react";
+import { useEffect, useState } from "react";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 interface UseSlideshowAutoplayReturn {

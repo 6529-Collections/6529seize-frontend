@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import UserPageHeaderAboutStatement from '@/components/user/user-page-header/about/UserPageHeaderAboutStatement';
-import { CicStatement } from '@/entities/IProfile';
+import type { CicStatement } from '@/entities/IProfile';
 
 describe('UserPageHeaderAboutStatement', () => {
   it('shows placeholder when statement is null', () => {

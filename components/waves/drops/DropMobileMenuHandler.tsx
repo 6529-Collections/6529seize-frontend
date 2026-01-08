@@ -2,7 +2,7 @@
 
 import React, { useCallback, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 interface DropMobileMenuHandlerProps {

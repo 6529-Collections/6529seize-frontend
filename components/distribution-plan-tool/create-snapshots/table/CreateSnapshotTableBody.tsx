@@ -2,7 +2,7 @@
 
 import CreateSnapshotTableRow from "./CreateSnapshotTableRow";
 import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
-import { CreateSnapshotSnapshot } from "../CreateSnapshots";
+import type { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTableBody({
   snapshots,

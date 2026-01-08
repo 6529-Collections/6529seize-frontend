@@ -2,7 +2,7 @@
 
 import { useRef, useCallback } from "react";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
-import { GroupCreateWalletsType } from "./GroupCreateWallets";
+import type { GroupCreateWalletsType } from "./GroupCreateWallets";
 
 export default function CreateGroupWalletsUpload({
   type,

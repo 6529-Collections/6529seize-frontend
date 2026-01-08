@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { BaseNFT, NFTHistory } from "@/entities/INFT";
+import type { BaseNFT, NFTHistory } from "@/entities/INFT";
 import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { numberWithCommasFromString } from "@/helpers/Helpers";

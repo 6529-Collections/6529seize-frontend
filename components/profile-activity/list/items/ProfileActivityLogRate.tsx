@@ -3,8 +3,9 @@
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
+import type {
+  ProfileActivityLogRatingEdit} from "@/entities/IProfile";
 import {
-  ProfileActivityLogRatingEdit,
   ProfileActivityLogRatingEditContentChangeReason,
 } from "@/entities/IProfile";
 import { RateMatter } from "@/enums";

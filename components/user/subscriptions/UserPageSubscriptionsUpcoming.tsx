@@ -2,17 +2,18 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import type {
+  SeasonMintRow} from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   displayedSeasonNumberFromIndex,
   formatFullDate,
   getUpcomingMintsAcrossSeasons,
-  isMintingToday,
-  SeasonMintRow,
+  isMintingToday
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
-import { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
-import { NFTSubscription } from "@/generated/models/NFTSubscription";
-import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
+import type { NFTSubscription } from "@/generated/models/NFTSubscription";
+import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";

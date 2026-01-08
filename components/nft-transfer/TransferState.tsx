@@ -1,6 +1,6 @@
 "use client";
 
-import { ContractType } from "@/enums";
+import type { ContractType } from "@/enums";
 import React, {
   createContext,
   useCallback,

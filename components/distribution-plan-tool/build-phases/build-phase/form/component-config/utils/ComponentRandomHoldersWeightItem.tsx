@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
+import type {
     ComponentRandomHoldersWeightItemI,
     ComponentRandomHoldersWeightType,
 } from "./ComponentRandomHoldersWeight";

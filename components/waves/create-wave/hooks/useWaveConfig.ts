@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
+import type {
   CreateWaveConfig,
-  CreateWaveGroupConfigType,
   CreateWaveOutcomeType,
-  CreateWaveStep,
-  TimeWeightedVotingSettings,
+  TimeWeightedVotingSettings} from "@/types/waves.types";
+import {
+  CreateWaveGroupConfigType,
+  CreateWaveStep
 } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { Period } from "../types/period";
+import type { Period } from "../types/period";
+import type {
+  CREATE_WAVE_VALIDATION_ERROR} from "@/helpers/waves/create-wave.validation";
 import {
-  getCreateWaveValidationErrors,
-  CREATE_WAVE_VALIDATION_ERROR,
+  getCreateWaveValidationErrors
 } from "@/helpers/waves/create-wave.validation";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 

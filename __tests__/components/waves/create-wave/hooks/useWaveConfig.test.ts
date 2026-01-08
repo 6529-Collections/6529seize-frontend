@@ -3,7 +3,7 @@ import { useWaveConfig } from '@/components/waves/create-wave/hooks/useWaveConfi
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
 import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 import { CreateWaveStep, CreateWaveGroupConfigType, CreateWaveOutcomeType } from '@/types/waves.types';
-import { ApiGroupFull } from '@/generated/models/ApiGroupFull';
+import type { ApiGroupFull } from '@/generated/models/ApiGroupFull';
 import * as createWaveValidation from '@/helpers/waves/create-wave.validation';
 
 // Mock dependencies

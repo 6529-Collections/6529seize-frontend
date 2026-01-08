@@ -1,7 +1,7 @@
 import { isAddress } from "viem";
 import { commonApiPost } from "../api/common-api";
-import { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemRefreshTokenRequest";
-import { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
+import type { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemRefreshTokenRequest";
+import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import {
   TokenRefreshError,
   TokenRefreshCancelledError,

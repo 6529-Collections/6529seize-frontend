@@ -1,15 +1,16 @@
 "use client";
 
 import { useContext } from "react";
-import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import GroupCreateTest from "./GroupCreateTest";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import type {
+  SubmitArgs} from "@/hooks/groups/useGroupMutations";
 import {
-  SubmitArgs,
   useGroupMutations,
 } from "@/hooks/groups/useGroupMutations";
 

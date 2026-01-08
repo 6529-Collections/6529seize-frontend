@@ -10,7 +10,8 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
+import type { TypeOptions} from "react-toastify";
+import { Slide, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   useSecureSign,
@@ -34,15 +35,15 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
-import { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
-import { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
-import { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
+import type { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
+import type { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { Modal, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   sanitizeErrorForUser,
   logErrorSecurely,

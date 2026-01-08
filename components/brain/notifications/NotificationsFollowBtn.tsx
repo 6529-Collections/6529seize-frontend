@@ -1,7 +1,8 @@
 "use client";
 
-import { FC, useState, useContext } from "react";
-import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { FC} from "react";
+import { useState, useContext } from "react";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import {
   FOLLOW_BTN_BUTTON_CLASSES,
   FOLLOW_BTN_LOADER_SIZES,
@@ -12,7 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
+import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,

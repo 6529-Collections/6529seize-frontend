@@ -1,8 +1,8 @@
 "use client";
 
-import { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
-import { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useState, type JSX } from "react";
 import ProxyActionRowDataMode from "./ProxyActionRowDataMode";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";

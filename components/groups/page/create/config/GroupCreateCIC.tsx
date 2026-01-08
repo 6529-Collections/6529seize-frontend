@@ -1,4 +1,4 @@
-import { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch, {
   IdentitySearchSize,

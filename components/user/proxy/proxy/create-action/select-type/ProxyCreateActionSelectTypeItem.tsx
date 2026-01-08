@@ -1,5 +1,5 @@
 import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionSelectTypeItem({
   actionType,

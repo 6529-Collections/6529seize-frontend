@@ -1,7 +1,7 @@
 import { AppKitAdapterManager } from '@/components/providers/AppKitAdapterManager'
 import { AdapterError } from '@/src/errors/adapter'
 import { WalletValidationError } from '@/src/errors/wallet-validation'
-import { AppWallet } from '@/components/app-wallets/AppWalletsContext'
+import type { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 
 const VALID_PRIVATE_KEY =

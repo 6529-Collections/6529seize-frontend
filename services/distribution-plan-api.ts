@@ -1,5 +1,5 @@
 import { publicEnv } from "@/config/env";
-import { AllowlistToolResponse } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistToolResponse } from "@/components/allowlist-tool/allowlist-tool.types";
 import { getAuthJwt, removeAuthJwt } from "./auth/auth.utils";
 import { makeErrorToast } from "./distribution-plan.utils";
 
@@ -52,7 +52,7 @@ export async function distributionPlanApiFetch<T>(endpoint: string): Promise<{
     });
 
     return await handleResponse<T>(res);
-  } catch (error) {
+  } catch {
     makeErrorToast("Something went wrong, try again");
     return {
       success: false,
@@ -86,7 +86,7 @@ export const distributionPlanApiPost = async <T>({
     });
 
     return await handleResponse<T>(res);
-  } catch (error) {
+  } catch {
     makeErrorToast("Something went wrong, try again");
     return {
       success: false,
@@ -117,7 +117,7 @@ export const distributionPlanApiDelete = async <T>({
     });
     try {
       return await handleResponse<T>(res);
-    } catch (e) {
+    } catch {
       if (res.status === 200 && res.statusText === "OK") {
         return {
           success: true,
@@ -131,7 +131,7 @@ export const distributionPlanApiDelete = async <T>({
         };
       }
     }
-  } catch (error) {
+  } catch {
     makeErrorToast("Something went wrong, try again");
     return {
       success: false,

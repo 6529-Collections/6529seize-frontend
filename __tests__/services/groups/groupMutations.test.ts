@@ -1,8 +1,9 @@
+import type {
+  ValidationIssue} from '@/services/groups/groupMutations';
 import {
-  ValidationIssue,
   validateGroupPayload,
 } from '@/services/groups/groupMutations';
-import { ApiCreateGroup } from '@/generated/models/ApiCreateGroup';
+import type { ApiCreateGroup } from '@/generated/models/ApiCreateGroup';
 import { ApiGroupTdhInclusionStrategy } from '@/generated/models/ApiGroupTdhInclusionStrategy';
 
 const createPayload = (overrides: Partial<ApiCreateGroup> = {}): ApiCreateGroup => {

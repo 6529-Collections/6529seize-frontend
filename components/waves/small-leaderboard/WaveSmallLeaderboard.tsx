@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useContext, useMemo } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 import { WaveSmallLeaderboardDrop } from "./WaveSmallLeaderboardDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveSmallLeaderboardProps {
   readonly wave: ApiWave;

@@ -1,6 +1,6 @@
 import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
-import { Transaction } from "@/entities/ITransaction";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { Transaction } from "@/entities/ITransaction";
 import {
   ContractFilter,
   TypeFilter,

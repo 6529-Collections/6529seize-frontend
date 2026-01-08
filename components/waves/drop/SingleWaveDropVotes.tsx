@@ -1,7 +1,7 @@
 "use client";
 
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import { ApiDrop } from "@/generated/models/ObjectSerializer";
+import type { ApiDrop } from "@/generated/models/ObjectSerializer";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
     WAVE_VOTE_STATS_LABELS,

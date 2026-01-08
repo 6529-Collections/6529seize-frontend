@@ -2,7 +2,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
 import { TitleProvider } from "@/contexts/TitleContext";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { useParams, usePathname, useSearchParams } from "next/navigation";

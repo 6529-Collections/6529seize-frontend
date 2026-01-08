@@ -1,7 +1,7 @@
 "use client";
 
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants";
-import { NextGenToken } from "@/entities/INextgen";
+import type { NextGenToken } from "@/entities/INextgen";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";

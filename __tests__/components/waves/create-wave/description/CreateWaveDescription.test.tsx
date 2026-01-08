@@ -37,7 +37,8 @@ jest.mock('@/components/drops/create/DropEditor', () =>
 );
 
 import { render, screen } from '@testing-library/react';
-import CreateWaveDescription, { CreateWaveDescriptionHandles } from '@/components/waves/create-wave/description/CreateWaveDescription';
+import type { CreateWaveDescriptionHandles } from '@/components/waves/create-wave/description/CreateWaveDescription';
+import CreateWaveDescription from '@/components/waves/create-wave/description/CreateWaveDescription';
 
 describe('CreateWaveDescription', () => {
   const mockProfile = {

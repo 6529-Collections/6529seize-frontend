@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { TweetProps, TwitterComponents } from "react-tweet";
 
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { SeizeQuoteLinkInfo } from "@/helpers/SeizeLinkParser";
 
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";

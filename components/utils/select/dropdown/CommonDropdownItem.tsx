@@ -4,7 +4,7 @@ import { cloneElement, isValidElement, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
-import { CommonSelectItemProps } from "../CommonSelect";
+import type { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "@/entities/ISort";
 
 export default function CommonDropdownItem<T, U = unknown>(

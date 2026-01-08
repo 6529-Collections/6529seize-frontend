@@ -1,4 +1,4 @@
-import { CreateProxyCreateDropToWaveAction } from "@/entities/IProxy";
+import type { CreateProxyCreateDropToWaveAction } from "@/entities/IProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigCreateDropToWave({

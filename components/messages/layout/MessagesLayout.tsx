@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import type { ReactNode} from "react";
+import { useMemo } from "react";
 import Head from "next/head";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import MessagesDesktop from "../MessagesDesktop";

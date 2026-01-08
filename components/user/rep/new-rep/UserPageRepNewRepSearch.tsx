@@ -5,13 +5,13 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import UserPageRepNewRepSearchHeader from "./UserPageRepNewRepSearchHeader";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import UserPageRepNewRepError from "./UserPageRepNewRepError";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,

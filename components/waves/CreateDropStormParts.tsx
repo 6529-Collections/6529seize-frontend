@@ -1,11 +1,12 @@
 "use client";
 
-import { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
-import { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import type {
+  FC} from "react";
 import {
-  FC,
   memo,
   useContext,
   useEffect,

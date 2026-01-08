@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateWaveOutcomesManual from '@/components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import { CreateWaveDatesConfig } from '@/types/waves.types';
+import type { CreateWaveDatesConfig } from '@/types/waves.types';
 
 // Mock dependencies
 jest.mock('@/components/waves/create-wave/outcomes/CreateWaveOutcomeWarning', () => {

@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import WaveDropContent from "@/components/waves/drops/WaveDropContent";
-import { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { useRouter } from "next/navigation";
-import { DropSize, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveWinnersDropContentProps {

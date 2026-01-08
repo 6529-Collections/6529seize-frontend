@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 
-import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import MemeDropTrait from "./MemeDropTrait";
 import {
   FIELD_TO_LABEL_MAP,
   MEME_TRAITS_SORT_ORDER,
 } from "@/components/waves/memes/traits/schema";
+import { MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS } from "@/components/waves/memes/submission/types/OperationalData";
 
 interface MemeDropTraitsProps {
   readonly drop: ApiDrop;
@@ -21,11 +22,13 @@ interface MemeDropTrait {
 const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
   const [showAllTraits, setShowAllTraits] = useState(false);
 
-  const traits = drop.metadata.sort((a, b) => {
-    const aIndex = MEME_TRAITS_SORT_ORDER.indexOf(a.data_key);
-    const bIndex = MEME_TRAITS_SORT_ORDER.indexOf(b.data_key);
-    return aIndex - bIndex;
-  });
+  const traits = drop.metadata
+    .filter((i) => !MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS.includes(i.data_key))
+    .sort((a, b) => {
+      const aIndex = MEME_TRAITS_SORT_ORDER.indexOf(a.data_key);
+      const bIndex = MEME_TRAITS_SORT_ORDER.indexOf(b.data_key);
+      return aIndex - bIndex;
+    });
 
   const handleShowLess = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,14 +72,16 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
             ))}
             <button
               onClick={handleShowLess}
-              className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer">
+              className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer"
+            >
               Show less
             </button>
           </>
         ) : (
           <button
             onClick={handleShowAll}
-            className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer">
+            className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer"
+          >
             Show all
           </button>
         )}

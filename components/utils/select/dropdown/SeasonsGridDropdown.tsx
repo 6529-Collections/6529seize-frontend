@@ -1,6 +1,6 @@
 "use client";
 
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";

@@ -1,11 +1,11 @@
 "use client";
 
-import { FC } from "react";
+import type { FC } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
+import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import { useWave } from "@/hooks/useWave";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;

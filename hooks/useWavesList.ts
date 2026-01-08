@@ -12,7 +12,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 

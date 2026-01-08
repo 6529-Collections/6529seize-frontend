@@ -1,4 +1,4 @@
-import { BaseNFT, NFTLite } from "@/entities/INFT";
+import type { BaseNFT, NFTLite } from "@/entities/INFT";
 
 type MediaType = 'html' | 'glb' | 'video' | 'image';
 

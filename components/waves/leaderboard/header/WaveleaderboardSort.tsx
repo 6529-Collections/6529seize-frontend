@@ -5,7 +5,7 @@ import { debounce } from "lodash";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useQueryClient } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS, getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 

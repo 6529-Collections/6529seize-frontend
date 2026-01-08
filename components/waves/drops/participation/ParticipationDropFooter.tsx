@@ -2,7 +2,7 @@
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { format } from "date-fns";

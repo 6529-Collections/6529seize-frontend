@@ -4,22 +4,23 @@ import {
   CreateDropType,
   CreateDropViewType,
 } from "@/components/drops/create/types";
-import CreateDropContent, {
+import type {
   CreateDropContentHandles,
 } from "@/components/drops/create/utils/CreateDropContent";
+import CreateDropContent from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropDesktopFooter from "@/components/drops/create/utils/CreateDropDesktopFooter";
 import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
-import {
+import type {
   CreateDropConfig,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
 } from "@/entities/IDrop";
-import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { EditorState } from "lexical";
+import type { EditorState } from "lexical";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 

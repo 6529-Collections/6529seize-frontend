@@ -1,4 +1,4 @@
-import { InteractiveMediaProvider } from "./media";
+import type { InteractiveMediaProvider } from "./media";
 
 const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>([
   "ipfs.io",

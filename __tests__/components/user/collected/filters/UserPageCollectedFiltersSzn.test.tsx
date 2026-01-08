@@ -1,5 +1,5 @@
 import UserPageCollectedFiltersSzn from "@/components/user/collected/filters/UserPageCollectedFiltersSzn";
-import { MemeSeason } from "@/entities/ISeason";
+import type { MemeSeason } from "@/entities/ISeason";
 import { render } from "@testing-library/react";
 
 let capturedProps: any = null;

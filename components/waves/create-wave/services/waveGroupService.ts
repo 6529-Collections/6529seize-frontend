@@ -1,4 +1,4 @@
-import { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import {

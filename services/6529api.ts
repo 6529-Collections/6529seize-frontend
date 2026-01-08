@@ -1,6 +1,6 @@
-import { Paginated } from "@/components/pagination/Pagination";
+import type { Paginated } from "@/components/pagination/Pagination";
 import { API_AUTH_COOKIE } from "@/constants";
-import { DBResponse } from "@/entities/IDBResponse";
+import type { DBResponse } from "@/entities/IDBResponse";
 import Cookies from "js-cookie";
 import { getStagingAuth } from "./auth/auth.utils";
 

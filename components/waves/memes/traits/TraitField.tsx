@@ -3,8 +3,9 @@ import { TextTrait } from "./TextTrait";
 import { NumberTrait } from "./NumberTrait";
 import { DropdownTrait } from "./DropdownTrait";
 import { BooleanTrait } from "./BooleanTrait";
-import { FieldDefinition, FieldType } from "./schema";
-import { TraitsData } from "../submission/types/TraitsData";
+import type { FieldDefinition} from "./schema";
+import { FieldType } from "./schema";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 interface TraitFieldProps {
   readonly definition: FieldDefinition;

@@ -1,8 +1,8 @@
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageSubscriptionsUpcoming from "@/components/user/subscriptions/UserPageSubscriptionsUpcoming";
-import { NFTSubscription } from "@/generated/models/NFTSubscription";
-import { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import type { NFTSubscription } from "@/generated/models/NFTSubscription";
+import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 

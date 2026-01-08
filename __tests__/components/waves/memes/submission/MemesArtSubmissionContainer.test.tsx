@@ -33,6 +33,7 @@ describe('MemesArtSubmissionContainer', () => {
       agreements: false,
       setAgreements: jest.fn(),
       handleContinueFromTerms: jest.fn(),
+      handleContinueFromArtwork: jest.fn(async () => true),
       traits: { title: 't', description: 'd' },
       setTraits: jest.fn(),
       updateTraitField: jest.fn(),
@@ -48,6 +49,24 @@ describe('MemesArtSubmissionContainer', () => {
       externalMediaError: null,
       externalMediaValidationStatus: 'idle',
       isExternalMediaValid: false,
+      operationalData: {
+        airdrop_config: [{ id: "test-initial", address: "", count: 20 }],
+        payment_info: {
+          payment_address: "",
+        },
+        allowlist_batches: [],
+        additional_media: {
+          artist_profile_media: [],
+          artwork_commentary_media: [],
+        },
+        commentary: "",
+      },
+      setAirdropConfig: jest.fn(),
+      setPaymentInfo: jest.fn(),
+      setAllowlistBatches: jest.fn(),
+      setAdditionalMedia: jest.fn(),
+      setCommentary: jest.fn(),
+      handleBackToArtwork: jest.fn(),
     };
 
     formState.setArtworkUploaded = jest.fn((value: boolean) => {

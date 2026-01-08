@@ -1,16 +1,18 @@
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import type {
+  ApiLightDrop} from "@/generated/models/ObjectSerializer";
 import {
-  ApiDropSearchStrategy,
-  ApiLightDrop,
+  ApiDropSearchStrategy
 } from "@/generated/models/ObjectSerializer";
-import { Drop, DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
+import type { Drop} from "@/helpers/waves/drop.helpers";
+import { DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
 } from "@/services/api/common-api";
-import { WaveMessagesUpdate } from "../hooks/types";
+import type { WaveMessagesUpdate } from "../hooks/types";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -377,7 +379,7 @@ export async function fetchNewestWaveMessages(
     return { drops: fetchedDrops, highestSerialNo };
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      console.log(`[Utils] Fetch newest for ${waveId} aborted.`);
+      console.warn(`[Utils] Fetch newest for ${waveId} aborted.`);
       throw error; // Re-throw abort errors
     }
     console.error(

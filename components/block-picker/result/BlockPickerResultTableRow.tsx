@@ -1,6 +1,6 @@
 "use client";
 
-import { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
+import type { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
 import AllowlistToolCommonModalWrapper, {
     AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";

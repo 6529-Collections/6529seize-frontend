@@ -1,7 +1,8 @@
 "use client";
 
-import { FC, useMemo, useRef } from "react";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { FC} from "react";
+import { useMemo, useRef } from "react";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
 import { useLayout } from "./layout/LayoutContext";
 import SpinnerLoader from "@/components/common/SpinnerLoader";

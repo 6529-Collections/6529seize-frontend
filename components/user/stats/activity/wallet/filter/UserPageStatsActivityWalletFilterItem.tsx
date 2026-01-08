@@ -1,4 +1,4 @@
-import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
+import type { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
 
 export default function UserPageStatsActivityWalletFilterItem({
   filter,

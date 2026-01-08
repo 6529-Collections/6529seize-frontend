@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import GroupsList from '@/components/groups/page/list/GroupsList';
-import { ApiGroupFull } from '@/generated/models/ApiGroupFull';
+import type { ApiGroupFull } from '@/generated/models/ApiGroupFull';
 
 let wrapperProps: any = null;
 let searchProps: any = null;

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import EmmaListSearchItems from "./EmmaListSearchItems";
-import { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 

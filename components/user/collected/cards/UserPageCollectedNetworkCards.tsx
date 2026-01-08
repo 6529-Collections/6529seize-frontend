@@ -1,5 +1,5 @@
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
+import type { ApiXTdhToken } from "@/generated/models/ApiXTdhToken";
 import { formatStatFloor } from "@/helpers/Helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
 import { useMemo, useState } from "react";

@@ -1,6 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ApiWave } from "@/generated/models/ObjectSerializer";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ObjectSerializer";
 import { MemesLeaderboardDrop } from "@/components/memes/drops/MemesLeaderboardDrop";
 import { useWave } from "@/hooks/useWave";
 import { DefaultWaveLeaderboardDrop } from "./DefaultWaveLeaderboardDrop";

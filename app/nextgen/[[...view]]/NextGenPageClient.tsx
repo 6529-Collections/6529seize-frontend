@@ -6,7 +6,7 @@ import NextgenArtistsComponent from "@/components/nextGen/collections/NextGenArt
 import NextgenCollectionsComponent from "@/components/nextGen/collections/NextGenCollections";
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import { useTitle } from "@/contexts/TitleContext";
-import { NextGenCollection } from "@/entities/INextgen";
+import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenView } from "@/enums";
 import styles from "@/styles/Home.module.scss";
 import Image from "next/image";

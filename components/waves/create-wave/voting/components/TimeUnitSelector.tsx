@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { TimeUnit } from "../types";
+import type { TimeUnit } from "../types";
 
 interface TimeUnitSelectorProps {
   /** Currently selected time unit */

@@ -1,6 +1,6 @@
 import UserStatsRow from "../user/utils/stats/UserStatsRow";
 import { useQuery } from "@tanstack/react-query";
-import { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 

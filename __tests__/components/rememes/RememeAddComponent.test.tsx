@@ -1,5 +1,5 @@
 import RememeAddComponent from "@/components/rememes/RememeAddComponent";
-import { NFT } from "@/entities/INFT";
+import type { NFT } from "@/entities/INFT";
 import * as api from "@/services/6529api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

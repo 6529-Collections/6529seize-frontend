@@ -21,7 +21,6 @@ export const useDeepLinkNavigation = () => {
       );
       const url = `${pathname}?${searchParams.toString()}`;
 
-      console.log("Deep Link Navigation", url);
       router.push(url);
     },
     [router]
@@ -56,7 +55,7 @@ export const useDeepLinkNavigation = () => {
           doNavigation("/accept-connection-sharing", queryParams);
           break;
         default:
-          console.log("Unknown Deep Link Scope", scope);
+          console.warn("Unknown Deep Link Scope", scope);
           break;
       }
     });

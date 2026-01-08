@@ -8,7 +8,7 @@ import ClockIcon from "@/components/utils/icons/ClockIcon";
 import CalendarClosedIcon from "@/components/utils/icons/CalendarClosedIcon";
 import LimitIcon from "@/components/utils/icons/LimitIcon";
 import PermissionIcon from "@/components/utils/icons/PermissionIcon";
-import { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
 
