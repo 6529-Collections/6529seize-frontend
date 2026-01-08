@@ -8,12 +8,13 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import type { FC} from "react";
+import type { FC } from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsRate from "./WaveDropActionsRate";
+import WaveDropMobileMenuBoost from "./WaveDropMobileMenuBoost";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
@@ -29,6 +30,7 @@ interface WaveDropMobileMenuProps {
   readonly onQuote: () => void;
   readonly onAddReaction: () => void;
   readonly onEdit?: (() => void) | undefined;
+  readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption?: boolean | undefined;
   readonly showCopyOption?: boolean | undefined;
   readonly showFollowOption?: boolean | undefined;
@@ -44,6 +46,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   onQuote,
   onAddReaction,
   onEdit,
+  onBoostAnimation,
   showOpenOption = true,
   showCopyOption = true,
   showFollowOption = true,
@@ -152,9 +155,9 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         {showReplyAndQuote && (
           <>
             <button
-              className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
+              className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
                 isTemporaryDrop
-                  ? "tw-opacity-50 tw-cursor-default"
+                  ? "tw-cursor-default tw-opacity-50"
                   : "active:tw-bg-iron-800"
               } tw-transition-colors tw-duration-200`}
               onClick={() => {
@@ -164,7 +167,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               disabled={isTemporaryDrop}
             >
               <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
                 fill="none"
@@ -178,14 +181,14 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                   d="M7.49 12L3.74 8.248m0 0l3.75-3.75m-3.75 3.75h16.5V19.5"
                 />
               </svg>
-              <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
+              <span className="tw-text-base tw-font-semibold tw-text-iron-300">
                 Reply
               </span>
             </button>
             <button
-              className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
+              className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
                 isTemporaryDrop
-                  ? "tw-opacity-50 tw-cursor-default"
+                  ? "tw-cursor-default tw-opacity-50"
                   : "active:tw-bg-iron-800"
               } tw-transition-colors tw-duration-200`}
               onClick={() => {
@@ -195,7 +198,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               disabled={isTemporaryDrop}
             >
               <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+                className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
                 fill="none"
@@ -210,12 +213,18 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                   fill="currentColor"
                 />
               </svg>
-              <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
+              <span className="tw-text-base tw-font-semibold tw-text-iron-300">
                 Quote
               </span>
             </button>
           </>
         )}
+
+        <WaveDropMobileMenuBoost
+          drop={extendedDrop}
+          onBoostChange={closeMenu}
+          onBoostAnimation={onBoostAnimation}
+        />
 
         {showOpenOption && (
           <WaveDropMobileMenuOpen
@@ -231,16 +240,16 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 
         {showCopyOption && (
           <button
-            className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
+            className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
               isTemporaryDrop
-                ? "tw-opacity-50 tw-cursor-default"
+                ? "tw-cursor-default tw-opacity-50"
                 : "active:tw-bg-iron-800"
             } tw-transition-colors tw-duration-200`}
             onClick={copyToClipboard}
             disabled={isTemporaryDrop}
           >
             <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -254,7 +263,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               />
             </svg>
             <span
-              className={`tw-font-semibold tw-text-base ${
+              className={`tw-text-base tw-font-semibold ${
                 copied ? "tw-text-primary-400" : "tw-text-iron-300"
               }`}
             >

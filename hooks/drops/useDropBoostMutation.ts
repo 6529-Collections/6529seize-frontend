@@ -9,8 +9,9 @@ import {
   commonApiDelete,
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext, useRef } from "react";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface BoostMutationParams {
   readonly drop: ExtendedDrop;
@@ -27,6 +28,7 @@ interface UseDropBoostMutationReturn {
 export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
   const { setToast, connectedProfile } = useContext(AuthContext);
   const myStreamContext = useMyStreamOptional();
+  const queryClient = useQueryClient();
   const rollbackRef = useRef<(() => void) | null>(null);
   const pendingDropIdRef = useRef<string | null>(null);
 
@@ -95,9 +97,14 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
       rollbackRef.current = applyOptimisticBoost(drop, action);
       pendingDropIdRef.current = drop.id;
     },
-    onSuccess: () => {
+    onSuccess: async ({ drop }) => {
       rollbackRef.current = null;
       pendingDropIdRef.current = null;
+
+      // Invalidate boosted drops query to refresh the data
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKey.BOOSTED_DROPS, { waveId: drop.wave.id }],
+      });
     },
     onError: (error, { action }) => {
       console.error(`Failed to ${action} drop:`, error);
