@@ -1,29 +1,26 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import SidebarLayoutApp from '@/components/utils/sidebar/SidebarLayoutApp';
 
-jest.mock('@/components/groups/sidebar/GroupsSidebarApp', () => ({
-  __esModule: true,
-  default: ({ open }: any) => <div data-testid="sidebar">{open ? 'open' : 'closed'}</div>,
-}));
-
-jest.mock('@/components/groups/sidebar/GroupsSidebarAppToggle', () => ({
-  __esModule: true,
-  default: ({ open, setOpen }: any) => (
-    <button data-testid="toggle" onClick={() => setOpen(!open)}>toggle</button>
-  ),
-}));
-
 describe('SidebarLayoutApp', () => {
-  it('toggles sidebar open state when toggle clicked', async () => {
+  it('renders children', () => {
     render(
       <SidebarLayoutApp>
-        <div data-testid="child" />
+        <div data-testid="child">Child Content</div>
       </SidebarLayoutApp>
     );
 
-    expect(screen.getByTestId('sidebar')).toHaveTextContent('closed');
-    await userEvent.click(screen.getByTestId('toggle'));
-    expect(screen.getByTestId('sidebar')).toHaveTextContent('open');
+    expect(screen.getByTestId('child')).toBeInTheDocument();
+    expect(screen.getByText('Child Content')).toBeInTheDocument();
+  });
+
+  it('renders with correct layout classes', () => {
+    const { container } = render(
+      <SidebarLayoutApp>
+        <div>Content</div>
+      </SidebarLayoutApp>
+    );
+
+    const main = container.querySelector('main');
+    expect(main).toHaveClass('tw-bg-iron-950');
   });
 });

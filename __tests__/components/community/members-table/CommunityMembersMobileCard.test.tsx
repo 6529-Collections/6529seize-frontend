@@ -1,13 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
-jest.mock('@/components/utils/CommonTimeAgo', () => ({ __esModule: true, default: ({ timestamp }: any) => <span data-testid="time">{timestamp}</span> }));
-jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIcon', () => ({ __esModule: true, default: () => <span data-testid="cic" /> }));
-jest.mock('@/components/user/utils/level/UserLevel', () => ({ __esModule: true, default: () => <div data-testid="level" /> }));
+jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
+  __esModule: true,
+  default: () => <div data-testid="level" />,
+  UserCICAndLevelSize: { SMALL: 'small' },
+}));
 jest.mock('@/helpers/Helpers', () => ({
   formatNumberWithCommasOrDash: (n: number) => `f${n}`,
-  cicToType: (c: number) => c,
+  getTimeAgoShort: () => '2d',
 }));
 jest.mock('@/helpers/AllowlistToolHelpers', () => ({
   isEthereumAddress: () => false,
@@ -25,7 +26,14 @@ const member = {
   detail_view_key: 'alice',
   level: 1,
   tdh: 100,
-  rep: 50,
+  tdh_rate: 10,
+  xtdh: 55,
+  xtdh_rate: 5,
+  combined_tdh: 150,
+  combined_tdh_rate: 15,
+  xtdh_incoming: 20,
+  xtdh_outgoing: 10,
+  rep: 60,
   cic: 1,
   pfp: 'url',
   last_activity: 10,
@@ -38,8 +46,13 @@ describe('CommunityMembersMobileCard', () => {
     expect(screen.getByText('#2')).toBeInTheDocument();
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('f100')).toBeInTheDocument();
-    expect(screen.getByText('f50')).toBeInTheDocument();
-    expect(screen.getByTestId('cic')).toBeInTheDocument();
+    expect(screen.getByText('f55')).toBeInTheDocument();
+    expect(screen.getByTestId('level')).toBeInTheDocument();
     expect(screen.getByRole('link')).toHaveAttribute('href', '/alice');
+    expect(screen.getByText('REP:')).toBeInTheDocument();
+    expect(screen.getByText('NIC:')).toBeInTheDocument();
+    expect(screen.getByText('xTDH Grants')).toBeInTheDocument();
+    expect(screen.getByText('In:')).toBeInTheDocument();
+    expect(screen.getByText('Out:')).toBeInTheDocument();
   });
 });

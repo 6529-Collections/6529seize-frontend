@@ -1,56 +1,44 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import CommunityMembersTableHeader from '@/components/community/members-table/CommunityMembersTableHeader';
-import { CommunityMembersSortOption } from '@/enums';
-import { SortDirection } from '@/entities/ISort';
-
-const mockSortable = jest.fn();
-jest.mock('@/components/community/members-table/CommunityMembersTableHeaderSortableContent', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    mockSortable(props);
-    return <div data-testid={`content-${props.sort}`} />;
-  }
-}));
+import { ApiCommunityMembersSortOption } from '@/generated/models/ApiCommunityMembersSortOption';
 
 describe('CommunityMembersTableHeader', () => {
-  const baseProps = {
-    activeSort: CommunityMembersSortOption.LEVEL,
-    sortDirection: SortDirection.ASC,
-    isLoading: false,
-    onSort: jest.fn(),
-  };
+  it('renders all column headers', () => {
+    render(
+      <table>
+        <CommunityMembersTableHeader activeSort={ApiCommunityMembersSortOption.CombinedTdh} />
+      </table>
+    );
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+    expect(screen.getByText('Rank')).toBeInTheDocument();
+    expect(screen.getByText('Profile')).toBeInTheDocument();
+    expect(screen.getByText('TDH')).toBeInTheDocument();
+    expect(screen.getByText('xTDH')).toBeInTheDocument();
+    expect(screen.getByText('Combined')).toBeInTheDocument();
+    expect(screen.getByText('Grants')).toBeInTheDocument();
+    expect(screen.getByText('Peer Score')).toBeInTheDocument();
+    expect(screen.getByText('Last Seen')).toBeInTheDocument();
   });
 
-  it('calls onSort when header clicked', () => {
-    render(<table><CommunityMembersTableHeader {...baseProps} /></table>);
-    fireEvent.click(screen.getByTestId('content-rep').parentElement!);
-    expect(baseProps.onSort).toHaveBeenCalledWith(CommunityMembersSortOption.REP);
+  it('highlights active sort column for TDH', () => {
+    render(
+      <table>
+        <CommunityMembersTableHeader activeSort={ApiCommunityMembersSortOption.Tdh} />
+      </table>
+    );
+
+    const tdhHeader = screen.getByText('TDH');
+    expect(tdhHeader).toHaveClass('tw-text-primary-300');
   });
 
-  it('passes hover option on mouse enter', () => {
-    render(<table><CommunityMembersTableHeader {...baseProps} /></table>);
-    const th = screen.getByTestId('content-nic').parentElement as HTMLElement;
-    fireEvent.mouseEnter(th);
-    expect(mockSortable).toHaveBeenCalledWith(
-      expect.objectContaining({ hoveringOption: CommunityMembersSortOption.NIC })
+  it('highlights active sort column for Combined TDH', () => {
+    render(
+      <table>
+        <CommunityMembersTableHeader activeSort={ApiCommunityMembersSortOption.CombinedTdh} />
+      </table>
     );
-    fireEvent.mouseLeave(th);
-    expect(mockSortable).toHaveBeenCalledWith(
-      expect.objectContaining({ hoveringOption: null })
-    );
-  });
 
-  it('forwards sort props to content component', () => {
-    render(<table><CommunityMembersTableHeader {...baseProps} isLoading={true} /></table>);
-    expect(mockSortable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        activeSort: baseProps.activeSort,
-        sortDirection: baseProps.sortDirection,
-        isLoading: true,
-      })
-    );
+    const combinedHeader = screen.getByText('Combined');
+    expect(combinedHeader).toHaveClass('tw-text-primary-300');
   });
 });

@@ -1,23 +1,30 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { CommunityMemberOverview } from "@/entities/IProfile";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { Page } from "@/helpers/Types";
 import type { CommunityMembersQuery } from "@/app/network/page";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import { SortDirection } from "@/entities/ISort";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
+import CommunityMembersSortControls from "./members-table/CommunityMembersSortControls";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useDebounce } from "react-use";
-import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
+import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
 import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "@/store/groupSlice";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { CommunityMembersSortOption } from "@/enums";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSetTitle } from "@/contexts/TitleContext";
+import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import CommunityMembersMobileSortContent from "./members-table/CommunityMembersMobileSortContent";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -34,7 +41,7 @@ const SEARCH_PARAMS_FIELDS = {
 export default function CommunityMembers() {
   useSetTitle("Network");
 
-  const defaultSortBy = CommunityMembersSortOption.LEVEL;
+  const defaultSortBy = ApiCommunityMembersSortOption.CombinedTdh;
   const defaultSortDirection = SortDirection.DESC;
   const defaultPageSize = 50;
   const defaultPage = 1;
@@ -46,14 +53,14 @@ export default function CommunityMembers() {
   const activeGroupId = useSelector(selectActiveGroupId);
 
   const convertSortBy = useCallback(
-    (sort: string | null): CommunityMembersSortOption => {
+    (sort: string | null): ApiCommunityMembersSortOption => {
       if (!sort) return defaultSortBy;
       if (
-        Object.values(CommunityMembersSortOption).includes(
+        Object.values(ApiCommunityMembersSortOption).includes(
           sort.toLowerCase() as any
         )
       ) {
-        return sort.toLowerCase() as CommunityMembersSortOption;
+        return sort.toLowerCase() as ApiCommunityMembersSortOption;
       }
       return defaultSortBy;
     },
@@ -118,23 +125,6 @@ export default function CommunityMembers() {
     [searchParams]
   );
 
-  const calculateSortDirection = ({
-    newSortBy,
-    currentSortBy,
-    currentSortDirection,
-  }: {
-    newSortBy: CommunityMembersSortOption;
-    currentSortBy: CommunityMembersSortOption;
-    currentSortDirection: SortDirection;
-  }): SortDirection | null => {
-    if (newSortBy === currentSortBy) {
-      if (currentSortDirection === SortDirection.ASC) {
-        return SortDirection.DESC;
-      }
-      return SortDirection.ASC;
-    }
-    return defaultSortDirection;
-  };
 
   const [debouncedParams, setDebouncedParams] = useState<CommunityMembersQuery>(
     () => params
@@ -142,11 +132,7 @@ export default function CommunityMembers() {
 
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
-  const {
-    isLoading,
-    isFetching,
-    data: members,
-  } = useQuery<Page<CommunityMemberOverview>>({
+  const { isLoading, data: members } = useQuery<Page<ApiCommunityMemberOverview>>({
     queryKey: [
       QueryKey.COMMUNITY_MEMBERS_TOP,
       {
@@ -159,7 +145,7 @@ export default function CommunityMembers() {
     ],
     queryFn: async () =>
       await commonApiFetch<
-        Page<CommunityMemberOverview>,
+        Page<ApiCommunityMemberOverview>,
         CommunityMembersQuery
       >({
         endpoint: `community-members/top`,
@@ -179,29 +165,27 @@ export default function CommunityMembers() {
     [createQueryString, pathname, router]
   );
 
-  const setSortBy = async (
-    sortBy: CommunityMembersSortOption
-  ): Promise<void> => {
-    const items: QueryUpdateInput[] = [
-      {
-        name: "sortBy",
-        value: sortBy,
-      },
-      {
-        name: "sortDirection",
-        value: calculateSortDirection({
-          newSortBy: sortBy,
-          currentSortBy: debouncedParams.sort,
-          currentSortDirection: debouncedParams.sort_direction,
-        }),
-      },
-      {
-        name: "page",
-        value: "1",
-      },
-    ];
-    await updateFields(items);
-  };
+  const setSortBy = useCallback(
+    async (sortBy: ApiCommunityMembersSortOption): Promise<void> => {
+      const items: QueryUpdateInput[] = [
+        { name: "sortBy", value: sortBy },
+        { name: "page", value: "1" },
+      ];
+      await updateFields(items);
+    },
+    [updateFields]
+  );
+
+  const setSortDirection = useCallback(
+    async (direction: SortDirection): Promise<void> => {
+      const items: QueryUpdateInput[] = [
+        { name: "sortDirection", value: direction },
+        { name: "page", value: "1" },
+      ];
+      await updateFields(items);
+    },
+    [updateFields]
+  );
 
   useEffect(() => {
     const urlGroup = params.group_id ?? null;
@@ -257,12 +241,43 @@ export default function CommunityMembers() {
 
   const goToNerd = () => router.push("/network/nerd");
 
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileSortOpen, setMobileSortOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileFilterOpen) {
+      setMobileFilterOpen(false);
+    }
+  }, [activeGroupId]);
+
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">
-          Network
-        </h1>
+        <div className="tw-flex tw-items-center tw-gap-x-3">
+          <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">
+            Network
+          </h1>
+          <button
+            type="button"
+            className={`tw-size-9 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out ${
+              activeGroupId
+                ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300"
+                : "tw-bg-iron-800 hover:tw-bg-iron-700 tw-border-iron-600 tw-text-iron-300"
+            }`}
+            onClick={() => setMobileFilterOpen(true)}
+            aria-label="Open filter panel"
+          >
+            <FunnelIcon className="tw-w-5 tw-h-5" />
+          </button>
+          <button
+            type="button"
+            className="tw-size-9 tw-flex tw-items-center tw-justify-center tw-bg-iron-800 hover:tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-600 tw-rounded-lg focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out tw-text-iron-300 sm:tw-hidden"
+            onClick={() => setMobileSortOpen(true)}
+            aria-label="Open sort options"
+          >
+            <FontAwesomeIcon icon={faArrowDownWideShort} className="tw-w-5 tw-h-5" />
+          </button>
+        </div>
         <div className="tw-inline-flex tw-space-x-3 tw-items-center tw-ml-auto">
           <button
             type="button"
@@ -283,37 +298,71 @@ export default function CommunityMembers() {
           </button>
         </div>
       </div>
-      {members ? (
-        <div>
-          <div className="tailwind-scope tw-mt-4 lg:tw-mt-6 tw-flow-root">
-            <div className="sm:tw-overflow-auto tw-bg-iron-950 tw-shadow sm:tw-border sm:tw-border-solid sm:tw-border-iron-700 tw-rounded-lg sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800">
+      <div className="tailwind-scope tw-mt-2 lg:tw-mt-3 tw-flow-root">
+        <div className="tw-hidden sm:tw-block">
+          <CommunityMembersSortControls
+            activeSort={params.sort}
+            sortDirection={params.sort_direction}
+            onSortChange={setSortBy}
+            onDirectionChange={setSortDirection}
+          />
+        </div>
+        {members ? (
+          <>
+            <div className="tw-mt-2 lg:tw-mt-3 sm:tw-overflow-auto tw-bg-iron-950 tw-shadow sm:tw-border sm:tw-border-solid sm:tw-border-iron-700 tw-rounded-lg sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800">
               <CommunityMembersTable
                 members={members.data}
-                activeSort={params.sort}
-                sortDirection={params.sort_direction}
                 page={members.page}
                 pageSize={params.page_size}
-                isLoading={isFetching}
-                onSort={setSortBy}
+                activeSort={params.sort}
               />
             </div>
+            {totalPages > 1 && (
+              <CommonTablePagination
+                currentPage={members.page}
+                setCurrentPage={setPage}
+                totalPages={totalPages}
+                haveNextPage={members.next}
+                small={false}
+                loading={isLoading}
+              />
+            )}
+          </>
+        ) : (
+          <div className="tw-mt-2 lg:tw-mt-3">
+            <CommunityMembersTableSkeleton />
           </div>
-          {totalPages > 1 && (
-            <CommonTablePagination
-              currentPage={members.page}
-              setCurrentPage={setPage}
-              totalPages={totalPages}
-              haveNextPage={members.next}
-              small={false}
-              loading={isLoading}
-            />
-          )}
+        )}
+      </div>
+
+      <MobileWrapperDialog
+        title="Filter"
+        isOpen={mobileFilterOpen}
+        onClose={() => setMobileFilterOpen(false)}
+        tall
+      >
+        <div className="tw-px-4">
+          <GroupsSidebar />
         </div>
-      ) : (
-        <div className="tw-h-screen tw-w-full">
-          <CommonCardSkeleton />
-        </div>
-      )}
+      </MobileWrapperDialog>
+
+      <MobileWrapperDialog
+        title="Sort"
+        isOpen={mobileSortOpen}
+        onClose={() => setMobileSortOpen(false)}
+      >
+        <CommunityMembersMobileSortContent
+          activeSort={params.sort}
+          sortDirection={params.sort_direction}
+          onSortChange={(sort) => {
+            setSortBy(sort);
+            setMobileSortOpen(false);
+          }}
+          onDirectionChange={(dir) => {
+            setSortDirection(dir);
+          }}
+        />
+      </MobileWrapperDialog>
     </div>
   );
 }
