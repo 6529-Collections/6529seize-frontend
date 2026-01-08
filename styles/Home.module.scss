@@ -3,7 +3,6 @@
 
 .main {
   min-height: 100vh;
-  background-color: variables.$bg-color-2;
 }
 
 .latestDropImage {
@@ -163,7 +162,8 @@
   color: white;
   width: 100%;
   position: relative;
-  box-shadow: 0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
+  box-shadow:
+    0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
     1px 3px 6px 0px rgba(0, 0, 0, 0.15),
     -0.5px -1px 3px 0px rgba(255, 255, 255, 0.02),
     -3px -3px 5px 0px rgba(255, 255, 255, 0.02) inset,

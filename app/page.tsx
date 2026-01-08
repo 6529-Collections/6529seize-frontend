@@ -1,11 +1,14 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-
-import styles from "@/styles/Home.module.scss";
+import HomePageContent from "@/components/home/HomePageContent";
 import type { Metadata } from "next";
 
 export default function Page() {
-  return <main className={styles["main"]}></main>;
+  return (
+    <main className="tw-min-h-screen tw-bg-black">
+      <HomePageContent />
+    </main>
+  );
 }
 
 export function generateMetadata(): Metadata {

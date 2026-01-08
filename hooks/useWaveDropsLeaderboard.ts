@@ -30,7 +30,6 @@ export enum WaveDropsLeaderboardSort {
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
-  readonly connectedProfileHandle: string | null;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly pausePolling?: boolean | undefined;
 }
@@ -62,7 +61,6 @@ function useTabVisibility() {
 
 export function useWaveDropsLeaderboard({
   waveId,
-  connectedProfileHandle,
   sort = WaveDropsLeaderboardSort.RANK,
   pausePolling = false,
 }: UseWaveDropsLeaderboardProps) {
@@ -179,7 +177,7 @@ export function useWaveDropsLeaderboard({
     },
     initialPageParam: null,
     getNextPageParam,
-    enabled: !!connectedProfileHandle && !pausePolling,
+    enabled: !pausePolling,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
   });

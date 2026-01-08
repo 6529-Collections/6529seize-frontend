@@ -1,13 +1,9 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { AuthContext } from "@/components/auth/Auth";
-import type {
-  WaveDropsLeaderboardSort} from "@/hooks/useWaveDropsLeaderboard";
-import {
-  useWaveDropsLeaderboard
-} from "@/hooks/useWaveDropsLeaderboard";
+import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -29,18 +25,16 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams()!;
-  const { connectedProfile } = useContext(AuthContext);
+  const searchParams = useSearchParams();
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.handle ?? null,
       sort,
     });
 
-  const intersectionElementRef = useIntersectionObserver(() => {
+  const intersectionElementRef = useIntersectionObserver(async () => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      fetchNextPage();
+      await fetchNextPage();
     }
   });
 
