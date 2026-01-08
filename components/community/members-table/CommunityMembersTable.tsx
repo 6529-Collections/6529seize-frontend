@@ -1,38 +1,25 @@
-import type { CommunityMemberOverview } from "@/entities/IProfile";
-import type { SortDirection } from "@/entities/ISort";
-import type { CommunityMembersSortOption } from "@/enums";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
+import type { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
-import CommunityMembersMobileFilterBar from "./CommunityMembersMobileFilterBar";
 
 export default function CommunityMembersTable({
   members,
-  activeSort,
-  sortDirection,
   page,
   pageSize,
-  isLoading,
-  onSort,
+  activeSort,
 }: {
-  readonly members: CommunityMemberOverview[];
-  readonly activeSort: CommunityMembersSortOption;
-  readonly sortDirection: SortDirection;
+  readonly members: ApiCommunityMemberOverview[];
   readonly page: number;
   readonly pageSize: number;
-  readonly isLoading: boolean;
-  readonly onSort: (sort: CommunityMembersSortOption) => void;
+  readonly activeSort: ApiCommunityMembersSortOption;
 }) {
   return (
     <>
       <div className="tw-hidden sm:tw-block">
         <table className="tw-min-w-full">
-          <CommunityMembersTableHeader
-            activeSort={activeSort}
-            sortDirection={sortDirection}
-            isLoading={isLoading}
-            onSort={onSort}
-          />
+          <CommunityMembersTableHeader activeSort={activeSort} />
           <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">
             {members.map((member, index) => (
               <CommunityMembersTableRow
@@ -46,13 +33,7 @@ export default function CommunityMembersTable({
       </div>
 
       <div className="sm:tw-hidden">
-        <CommunityMembersMobileFilterBar
-          activeSort={activeSort}
-          sortDirection={sortDirection}
-          isLoading={isLoading}
-          onSort={onSort}
-        />
-        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-2">
+        <div className="tw-flex tw-flex-col tw-gap-y-4">
           {members.map((member, index) => (
             <CommunityMembersMobileCard
               key={member.detail_view_key}
