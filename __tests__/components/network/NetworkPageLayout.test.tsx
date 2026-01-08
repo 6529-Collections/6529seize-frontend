@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
-import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
+import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { configureStore } from "@reduxjs/toolkit";
 import { groupSlice } from "@/store/groupSlice";
@@ -11,13 +11,13 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo");
 
-jest.mock("@/components/utils/sidebar/SidebarLayoutApp", () => {
-  return function SidebarLayoutApp({
+jest.mock("@/components/network/NetworkPageLayoutApp", () => {
+  return function NetworkPageLayoutApp({
     children,
   }: {
     children: React.ReactNode;
   }) {
-    return <div data-testid="sidebar-layout-app">{children}</div>;
+    return <div data-testid="network-page-layout-app">{children}</div>;
   };
 });
 
@@ -25,7 +25,7 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
 >;
 
-describe("SidebarLayout", () => {
+describe("NetworkPageLayout", () => {
   let store: any;
 
   beforeEach(() => {
@@ -47,9 +47,9 @@ describe("SidebarLayout", () => {
   const renderComponent = () => {
     return render(
       <Provider store={store}>
-        <SidebarLayout>
+        <NetworkPageLayout>
           <div data-testid="test-content">Test Content</div>
-        </SidebarLayout>
+        </NetworkPageLayout>
       </Provider>
     );
   };
@@ -58,7 +58,7 @@ describe("SidebarLayout", () => {
     renderComponent();
 
     expect(screen.getByTestId("test-content")).toBeInTheDocument();
-    expect(screen.queryByTestId("sidebar-layout-app")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("network-page-layout-app")).not.toBeInTheDocument();
   });
 
   it("renders app layout when isApp is true", () => {
@@ -70,7 +70,7 @@ describe("SidebarLayout", () => {
 
     renderComponent();
 
-    expect(screen.getByTestId("sidebar-layout-app")).toBeInTheDocument();
+    expect(screen.getByTestId("network-page-layout-app")).toBeInTheDocument();
     expect(screen.getByTestId("test-content")).toBeInTheDocument();
   });
 
@@ -95,9 +95,9 @@ describe("SidebarLayout", () => {
 
     render(
       <Provider store={testStore}>
-        <SidebarLayout>
+        <NetworkPageLayout>
           <div data-testid="test-content">Test Content</div>
-        </SidebarLayout>
+        </NetworkPageLayout>
       </Provider>
     );
 

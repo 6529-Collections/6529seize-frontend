@@ -24,7 +24,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock internal components
-jest.mock("@/components/utils/sidebar/SidebarLayout", () => ({
+jest.mock("@/components/network/NetworkPageLayout", () => ({
   __esModule: true,
   default: ({ children }: any) => <div data-testid="layout">{children}</div>,
 }));
