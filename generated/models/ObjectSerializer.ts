@@ -28,6 +28,9 @@ export * from '../models/ApiCommunityMemberMinimal';
 export * from '../models/ApiCommunityMemberOverview';
 export * from '../models/ApiCommunityMembersPage';
 export * from '../models/ApiCommunityMembersSortOption';
+export * from '../models/ApiCommunityMetric';
+export * from '../models/ApiCommunityMetricSample';
+export * from '../models/ApiCommunityMetrics';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
 export * from '../models/ApiCompleteMultipartUploadResponse';
@@ -273,6 +276,9 @@ import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
 import { ApiCommunityMemberOverview } from '../models/ApiCommunityMemberOverview';
 import { ApiCommunityMembersPage } from '../models/ApiCommunityMembersPage';
 import { ApiCommunityMembersSortOption } from '../models/ApiCommunityMembersSortOption';
+import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
+import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
+import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
@@ -563,6 +569,9 @@ let typeMap: {[index: string]: any} = {
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
     "ApiCommunityMemberOverview": ApiCommunityMemberOverview,
     "ApiCommunityMembersPage": ApiCommunityMembersPage,
+    "ApiCommunityMetric": ApiCommunityMetric,
+    "ApiCommunityMetricSample": ApiCommunityMetricSample,
+    "ApiCommunityMetrics": ApiCommunityMetrics,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
     "ApiCompleteMultipartUploadResponse": ApiCompleteMultipartUploadResponse,

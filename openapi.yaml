@@ -307,6 +307,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCommunityMembersPage"
+  /community-metrics:
+    get:
+      tags:
+        - CommunityMetrics
+      summary: Get community metrics.
+      operationId: getCommunityMetrics
+      parameters:
+        - name: interval
+          in: query
+          description: Metrics interval
+          required: true
+          schema:
+            type: string
+            enum:
+              - DAY
+              - WEEK
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCommunityMetrics"
   /distribution_phases/{contract}/{nft_id}:
     get:
       tags:
@@ -5657,11 +5680,45 @@ components:
         - tdh_rate
         - rep
         - cic
+        - xtdh
         - xtdh_rate
         - xtdh_outgoing
         - xtdh_incoming
         - combined_tdh
         - combined_tdh_rate
+    ApiCommunityMetric:
+      type: object
+      required:
+        - older
+        - newer
+      properties:
+        older:
+          $ref: "#/components/schemas/ApiCommunityMetricSample"
+        newer:
+          $ref: "#/components/schemas/ApiCommunityMetricSample"
+    ApiCommunityMetrics:
+      type: object
+      required:
+        - drops_created
+      properties:
+        drops_created:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+    ApiCommunityMetricSample:
+      type: object
+      required:
+        - period_start
+        - period_end
+        - event_count
+        - value_count
+      properties:
+        period_start:
+          type: number
+        period_end:
+          type: number
+        event_count:
+          type: number
+        value_count:
+          type: number
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id

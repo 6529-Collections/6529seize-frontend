@@ -4,24 +4,24 @@ export default function CommunityMembersTableSkeleton({
   readonly rows?: number;
 }) {
   return (
-    <div className="tw-bg-iron-950 tw-rounded-lg sm:tw-border sm:tw-border-solid sm:tw-border-iron-700 tw-overflow-hidden">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
       <div className="tw-animate-pulse">
-        <div className="tw-h-12 tw-bg-iron-900 tw-border-b tw-border-iron-700" />
+        <div className="tw-h-12 tw-border-b tw-border-iron-700 tw-bg-iron-900" />
         {Array.from({ length: rows }).map((_, i) => (
           <div
-            key={i}
-            className="tw-h-16 tw-border-b tw-border-iron-800 tw-flex tw-items-center tw-gap-4 tw-px-6"
+            key={`skeleton-row-${i}`}
+            className="tw-flex tw-h-16 tw-items-center tw-gap-4 tw-border-b tw-border-iron-800 tw-px-6"
           >
-            <div className="tw-w-8 tw-h-4 tw-bg-iron-800 tw-rounded" />
-            <div className="tw-w-8 tw-h-8 tw-bg-iron-800 tw-rounded-md" />
-            <div className="tw-w-6 tw-h-6 tw-bg-iron-800 tw-rounded-full" />
-            <div className="tw-w-32 tw-h-4 tw-bg-iron-800 tw-rounded" />
+            <div className="tw-h-4 tw-w-8 tw-rounded tw-bg-iron-800" />
+            <div className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-800" />
+            <div className="tw-h-6 tw-w-6 tw-rounded-full tw-bg-iron-800" />
+            <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
             <div className="tw-flex-1" />
-            <div className="tw-w-20 tw-h-4 tw-bg-iron-800 tw-rounded" />
-            <div className="tw-w-20 tw-h-4 tw-bg-iron-800 tw-rounded" />
-            <div className="tw-w-24 tw-h-4 tw-bg-iron-800 tw-rounded" />
-            <div className="tw-w-16 tw-h-4 tw-bg-iron-800 tw-rounded" />
-            <div className="tw-w-16 tw-h-4 tw-bg-iron-800 tw-rounded" />
+            <div className="tw-h-4 tw-w-20 tw-rounded tw-bg-iron-800" />
+            <div className="tw-h-4 tw-w-20 tw-rounded tw-bg-iron-800" />
+            <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-800" />
+            <div className="tw-h-4 tw-w-16 tw-rounded tw-bg-iron-800" />
+            <div className="tw-h-4 tw-w-16 tw-rounded tw-bg-iron-800" />
           </div>
         ))}
       </div>
