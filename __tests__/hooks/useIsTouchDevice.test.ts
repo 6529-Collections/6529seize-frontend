@@ -2,22 +2,22 @@ import { renderHook, act } from "@testing-library/react";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 describe("useIsTouchDevice", () => {
-  const originalWindow = global.window;
-  const originalNavigator = global.navigator;
+  const originalWindow = globalThis.window;
+  const originalNavigator = globalThis.navigator;
 
   afterEach(() => {
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: originalWindow,
       writable: true,
     });
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       value: originalNavigator,
       writable: true,
     });
   });
 
   it("returns false when window is undefined", () => {
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: undefined,
       writable: true,
     });
@@ -32,7 +32,7 @@ describe("useIsTouchDevice", () => {
       ontouchstart: null,
       matchMedia: jest.fn(() => ({ matches: false })),
     };
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: mockWindow,
       writable: true,
     });
@@ -51,11 +51,11 @@ describe("useIsTouchDevice", () => {
       ...originalWindow,
       matchMedia: jest.fn(() => ({ matches: false })),
     };
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: mockWindow,
       writable: true,
     });
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       value: { maxTouchPoints: 5 },
       writable: true,
     });
@@ -76,11 +76,11 @@ describe("useIsTouchDevice", () => {
         matches: query === "(pointer: coarse)",
       })),
     };
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: mockWindow,
       writable: true,
     });
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       value: { maxTouchPoints: 0 },
       writable: true,
     });
@@ -99,11 +99,11 @@ describe("useIsTouchDevice", () => {
       ...originalWindow,
       matchMedia: jest.fn(() => ({ matches: false })),
     };
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: mockWindow,
       writable: true,
     });
-    Object.defineProperty(global, "navigator", {
+    Object.defineProperty(globalThis, "navigator", {
       value: { maxTouchPoints: 0 },
       writable: true,
     });
