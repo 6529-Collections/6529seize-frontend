@@ -23,7 +23,7 @@ export const DROPDOWN_SORT_OPTIONS: DropdownSortOption[] = [
   },
   {
     label: "xTDH",
-    primarySort: ApiCommunityMembersSortOption.XtdhRate,
+    primarySort: ApiCommunityMembersSortOption.Xtdh,
     secondarySort: ApiCommunityMembersSortOption.XtdhRate,
     primaryLabel: "Value",
     secondaryLabel: "Rate",
