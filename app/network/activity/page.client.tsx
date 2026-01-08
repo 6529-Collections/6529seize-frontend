@@ -1,8 +1,8 @@
 "use client";
 
+import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import { INITIAL_ACTIVITY_LOGS_PARAMS } from "@/helpers/profile-logs.helpers";
@@ -25,15 +25,15 @@ export default function CommunityActivityPageClient({
   });
 
   return (
-    <SidebarLayout>
+    <NetworkPageLayout>
       <ProfileActivityLogs
         initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
         withFilters={true}
       >
-        <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
+        <h1 className="tw-float-none tw-block tw-whitespace-nowrap">
           Network Activity
         </h1>
       </ProfileActivityLogs>
-    </SidebarLayout>
+    </NetworkPageLayout>
   );
 }

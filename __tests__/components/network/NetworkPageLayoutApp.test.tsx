@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import SidebarLayoutApp from '@/components/utils/sidebar/SidebarLayoutApp';
+import NetworkPageLayoutApp from '@/components/network/NetworkPageLayoutApp';
 
-describe('SidebarLayoutApp', () => {
+describe('NetworkPageLayoutApp', () => {
   it('renders children', () => {
     render(
-      <SidebarLayoutApp>
+      <NetworkPageLayoutApp>
         <div data-testid="child">Child Content</div>
-      </SidebarLayoutApp>
+      </NetworkPageLayoutApp>
     );
 
     expect(screen.getByTestId('child')).toBeInTheDocument();
@@ -15,9 +15,9 @@ describe('SidebarLayoutApp', () => {
 
   it('renders with correct layout classes', () => {
     const { container } = render(
-      <SidebarLayoutApp>
+      <NetworkPageLayoutApp>
         <div>Content</div>
-      </SidebarLayoutApp>
+      </NetworkPageLayoutApp>
     );
 
     const main = container.querySelector('main');
