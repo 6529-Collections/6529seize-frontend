@@ -7,7 +7,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { MutableRefObject } from "react";
+import type { RefObject } from "react";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
 
@@ -18,8 +18,8 @@ type WaveMessagesResult = ReturnType<
 interface WaveDropsContentProps {
   readonly waveMessages: WaveMessagesResult;
   readonly dropId: string | null;
-  readonly scrollContainerRef: MutableRefObject<HTMLDivElement | null>;
-  readonly bottomAnchorRef: MutableRefObject<HTMLDivElement | null>;
+  readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
+  readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
   readonly onTopIntersection: () => void;
   readonly onReply: ({
     drop,
@@ -38,7 +38,7 @@ interface WaveDropsContentProps {
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly serialTarget: number | null;
-  readonly targetDropRef: MutableRefObject<HTMLDivElement | null>;
+  readonly targetDropRef: RefObject<HTMLDivElement | null>;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isAtBottom: boolean;
   readonly scrollToBottom: () => void;
@@ -47,6 +47,8 @@ interface WaveDropsContentProps {
   readonly pendingCount: number;
   readonly onRevealPending: () => void;
   readonly bottomPaddingClassName?: string | undefined;
+  readonly boostedDrops?: ApiDrop[] | undefined;
+  readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -69,12 +71,14 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   pendingCount,
   onRevealPending,
   bottomPaddingClassName,
+  boostedDrops,
+  onBoostedDropClick,
 }) => {
   const { unreadDividerSerialNo } = useUnreadDivider();
-  const dropsCount = waveMessages?.drops?.length ?? 0;
+  const dropsCount = waveMessages?.drops.length ?? 0;
   const isInitialLoading =
     !!waveMessages?.isLoading &&
-    !waveMessages?.isLoadingNextPage &&
+    !waveMessages.isLoadingNextPage &&
     dropsCount === 0;
   const isHydrating = !waveMessages;
 
@@ -113,6 +117,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onRevealPending={onRevealPending}
         bottomPaddingClassName={bottomPaddingClassName}
         unreadDividerSerialNo={unreadDividerSerialNo}
+        boostedDrops={boostedDrops}
+        onBoostedDropClick={onBoostedDropClick}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

@@ -84,7 +84,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
-      <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}
@@ -93,7 +93,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
-          <BrainRightSidebarContent wave={wave} />
+          <BrainRightSidebarContent wave={wave} onDropClick={onDropClick} />
         ) : (
           <BrainRightSidebarFollowers
             wave={wave}
@@ -129,7 +129,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   if (!isRankWave) {
     return (
-      <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}
@@ -138,7 +138,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
-          <BrainRightSidebarContent wave={wave} />
+          <BrainRightSidebarContent wave={wave} onDropClick={onDropClick} />
         ) : (
           <BrainRightSidebarFollowers
             wave={wave}
@@ -151,7 +151,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-pl-2.5 tw-pb-[1px]">
+      <div className="tw-pb-px tw-pl-2.5">
         <TabToggleWithOverflow
           options={options}
           activeKey={activeTab}
