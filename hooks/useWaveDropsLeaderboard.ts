@@ -208,7 +208,6 @@ export function useWaveDropsLeaderboard({
     if (!data?.pages) {
       return;
     }
-
     setDrops(processedDrops);
     setHasInitialized(true);
   }, [processedDrops, data]);
@@ -286,7 +285,7 @@ export function useWaveDropsLeaderboard({
     if (hasTempDrop) return;
     refetch();
     setHaveNewDrops(false);
-  }, [haveNewDrops, isTabVisible, drops]);
+  }, [haveNewDrops, isTabVisible, drops, refetch]);
 
   useEffect(() => {
     return () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import {
   useWaveDropsLeaderboard,
@@ -20,13 +20,23 @@ export default function SubmissionCarousel() {
   });
 
   const trackRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const hasInitialScrolled = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(1);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const dropsWithMedia = drops.filter(
-    (drop) => (drop.parts[0]?.media.length ?? 0) > 0
-  );
+  const shuffledDrops = useMemo(() => {
+    const filtered = drops.filter(
+      (drop) => (drop.parts[0]?.media.length ?? 0) > 0
+    );
+    // Fisher-Yates shuffle
+    const shuffled = [...filtered];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [drops]);
 
   const updateActiveIndex = useCallback(() => {
     const track = trackRef.current;
@@ -56,22 +66,8 @@ export default function SubmissionCarousel() {
 
     setActiveIndex(closestIndex);
     setCanScrollLeft(closestIndex > 0);
-    setCanScrollRight(closestIndex < dropsWithMedia.length - 1);
-  }, [dropsWithMedia.length]);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    updateActiveIndex();
-    track.addEventListener("scroll", updateActiveIndex);
-    window.addEventListener("resize", updateActiveIndex);
-
-    return () => {
-      track.removeEventListener("scroll", updateActiveIndex);
-      window.removeEventListener("resize", updateActiveIndex);
-    };
-  }, [updateActiveIndex, drops]);
+    setCanScrollRight(closestIndex < shuffledDrops.length - 1);
+  }, [shuffledDrops.length]);
 
   const scrollToIndex = useCallback((index: number) => {
     const track = trackRef.current;
@@ -91,22 +87,46 @@ export default function SubmissionCarousel() {
     track.scrollTo({ left: scrollLeft, behavior: "smooth" });
   }, []);
 
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    updateActiveIndex();
+    track.addEventListener("scroll", updateActiveIndex);
+    window.addEventListener("resize", updateActiveIndex);
+
+    return () => {
+      track.removeEventListener("scroll", updateActiveIndex);
+      window.removeEventListener("resize", updateActiveIndex);
+    };
+  }, [updateActiveIndex, drops]);
+
+  // Scroll to second item on initial load
+  useEffect(() => {
+    if (shuffledDrops.length > 1 && !hasInitialScrolled.current) {
+      hasInitialScrolled.current = true;
+      requestAnimationFrame(() => {
+        scrollToIndex(1);
+      });
+    }
+  }, [shuffledDrops.length, scrollToIndex]);
+
   const scroll = useCallback(
     (direction: "left" | "right") => {
       const newIndex =
         direction === "left"
           ? Math.max(0, activeIndex - 1)
-          : Math.min(dropsWithMedia.length - 1, activeIndex + 1);
+          : Math.min(shuffledDrops.length - 1, activeIndex + 1);
       scrollToIndex(newIndex);
     },
-    [activeIndex, dropsWithMedia.length, scrollToIndex]
+    [activeIndex, shuffledDrops.length, scrollToIndex]
   );
 
   if (!isLoaded || !waveId) {
     return null;
   }
 
-  if (isFetching && dropsWithMedia.length === 0) {
+  if (isFetching && shuffledDrops.length === 0) {
     return (
       <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
         <div className="tw-text-sm tw-text-iron-500">Loading...</div>
@@ -114,7 +134,7 @@ export default function SubmissionCarousel() {
     );
   }
 
-  if (dropsWithMedia.length === 0) {
+  if (shuffledDrops.length === 0) {
     return null;
   }
 
@@ -128,16 +148,16 @@ export default function SubmissionCarousel() {
 
       <div
         ref={trackRef}
-        className="tw-flex tw-items-center tw-gap-6 tw-overflow-x-auto tw-scroll-smooth tw-py-12 tw-scrollbar-none"
+        className="tw-flex tw-items-center tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-none"
         style={{
-          paddingLeft: "calc(50% - 150px)",
-          paddingRight: "calc(50% - 150px)",
+          gap: "16px",
+          paddingLeft: "calc(50% - 175px)",
+          paddingRight: "calc(50% - 175px)",
         }}
       >
-        {dropsWithMedia.map((drop, index) => {
+        {shuffledDrops.map((drop, index) => {
           const isActive = index === activeIndex;
           const distance = Math.abs(index - activeIndex);
-          const scale = isActive ? 1.15 : Math.max(0.75, 1 - distance * 0.1);
 
           return (
             <button
@@ -147,13 +167,13 @@ export default function SubmissionCarousel() {
               onClick={() => scrollToIndex(index)}
               className="tw-flex-shrink-0 tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               style={{
-                width: "260px",
-                transform: `scale(${scale})`,
-                opacity: isActive ? 1 : 0.6,
-                filter: isActive ? "none" : "grayscale(30%)",
+                width: "350px",
+                transform: `scale(${isActive ? 1 : 0.85})`,
+                opacity: isActive ? 1 : 0.4,
+                filter: isActive ? "none" : "grayscale(50%)",
                 zIndex: isActive ? 10 : 10 - distance,
                 transition:
-                  "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "transform 0.4s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1), filter 0.4s cubic-bezier(0.33, 1, 0.68, 1)",
               }}
             >
               <SubmissionArtworkCard drop={drop} />
