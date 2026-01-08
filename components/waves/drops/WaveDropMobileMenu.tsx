@@ -30,6 +30,7 @@ interface WaveDropMobileMenuProps {
   readonly onQuote: () => void;
   readonly onAddReaction: () => void;
   readonly onEdit?: (() => void) | undefined;
+  readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption?: boolean | undefined;
   readonly showCopyOption?: boolean | undefined;
   readonly showFollowOption?: boolean | undefined;
@@ -45,6 +46,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   onQuote,
   onAddReaction,
   onEdit,
+  onBoostAnimation,
   showOpenOption = true,
   showCopyOption = true,
   showFollowOption = true,
@@ -221,6 +223,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         <WaveDropMobileMenuBoost
           drop={extendedDrop}
           onBoostChange={closeMenu}
+          onBoostAnimation={onBoostAnimation}
         />
 
         {showOpenOption && (

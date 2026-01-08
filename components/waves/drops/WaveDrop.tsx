@@ -1,26 +1,16 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { useDoubleTap } from "@/hooks/useDoubleTap";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { DropInteractionParams } from "./Drop";
 import { DropLocation } from "./Drop";
@@ -163,14 +153,13 @@ const WaveDrop = ({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [boostAnimation, setBoostAnimation] =
     useState<BoostAnimationState | null>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const editingDropId = useSelector(selectEditingDropId);
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const dropUpdateMutation = useDropUpdateMutation();
-  const { toggleBoost, isPending: isBoostPending } = useDropBoostMutation();
-  const { connectedProfile } = useContext(AuthContext);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
@@ -314,65 +303,27 @@ const WaveDrop = ({
     dispatch(setEditingDropId(null));
   }, [dispatch]);
 
-  // Double-tap to boost handler
-  const handleDoubleTapBoost = useCallback(
-    (event: React.TouchEvent | React.MouseEvent) => {
-      // Don't boost if editing, if long press menu is open, or if already pending
-      if (isEditing || isSlideUp || isBoostPending) {
-        return;
-      }
-
-      // Don't boost temporary drops
-      if (drop.id.startsWith("temp-")) {
-        return;
-      }
-
-      // Get tap coordinates for animation
-      let x: number;
-      let y: number;
-
-      if ("touches" in event || "changedTouches" in event) {
-        const touchEvent = event as React.TouchEvent;
-        const touch = touchEvent.changedTouches[0];
-        x = touch?.clientX ?? 0;
-        y = touch?.clientY ?? 0;
-      } else {
-        const mouseEvent = event;
-        x = mouseEvent.clientX;
-        y = mouseEvent.clientY;
-      }
-
-      const isPinned = drop.context_profile_context?.boosted ?? false;
-
-      // Trigger animation
-      setBoostAnimation({
-        id: `${drop.id}-${Date.now()}`,
-        x,
-        y,
-        type: isPinned ? "unboost" : "boost",
-      });
-
-      // Perform the boost/unboost (success/error toast handled by mutation)
-      toggleBoost(drop);
-    },
-    [drop, isEditing, isSlideUp, isBoostPending, toggleBoost]
-  );
-
   const handleBoostAnimationComplete = useCallback(() => {
     setBoostAnimation(null);
   }, []);
 
-  // Set up double-tap detection for boosting (mobile only)
-  const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canBoost =
-    !isTemporaryDrop && !isEditing && !!connectedProfile && isMobile;
+  // Handler for mobile menu boost animation
+  const handleMobileBoostAnimation = useCallback(() => {
+    if (!dropRef.current) return;
 
-  const doubleTapHandlers = useDoubleTap({
-    onDoubleTap: handleDoubleTapBoost,
-    enabled: canBoost,
-    maxDelay: 300,
-    maxDistance: 30,
-  });
+    const rect = dropRef.current.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    const isBoosted = drop.context_profile_context?.boosted ?? false;
+
+    setBoostAnimation({
+      id: `${drop.id}-${Date.now()}`,
+      x,
+      y,
+      type: isBoosted ? "unboost" : "boost",
+    });
+  }, [drop.id, drop.context_profile_context?.boosted]);
 
   useEffect(() => {
     return () => {
@@ -400,6 +351,7 @@ const WaveDrop = ({
       } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}
     >
       <div
+        ref={dropRef}
         className={dropClasses}
         data-wave-drop-id={drop.stableHash}
         data-serial-no={drop.serial_no}
@@ -439,16 +391,12 @@ const WaveDrop = ({
                 partsCount={drop.parts.length}
               />
             )}
-            <button
-              type="button"
-              className={`tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+            <div
+              className={`tw-w-full ${
                 shouldGroupWithPreviousDrop && !isProfileView
                   ? "tw-ml-[3.25rem]"
                   : ""
               }`}
-              onTouchStart={doubleTapHandlers.onTouchStart}
-              onTouchEnd={doubleTapHandlers.onTouchEnd}
-              onClick={doubleTapHandlers.onClick}
             >
               <WaveDropContent
                 drop={drop}
@@ -463,7 +411,7 @@ const WaveDrop = ({
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}
               />
-            </button>
+            </div>
           </div>
         </div>
         {!isMobile && showReplyAndQuote && !isEditing && (
@@ -498,6 +446,7 @@ const WaveDrop = ({
           onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
           onEdit={handleOnEdit}
+          onBoostAnimation={handleMobileBoostAnimation}
         />
         <DropBoostAnimation
           animation={boostAnimation}
