@@ -1,13 +1,16 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
 import BoostIcon from "@/components/common/icons/BoostIcon";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import Image from "next/image";
-import { memo } from "react";
+import { memo, useCallback, useContext, useMemo } from "react";
 
 interface BoostedDropCardProps {
   readonly drop: ApiDrop;
@@ -17,6 +20,14 @@ interface BoostedDropCardProps {
 
 const BoostedDropCard = memo(
   ({ drop, onClick, rank }: BoostedDropCardProps) => {
+    const { connectedProfile } = useContext(AuthContext);
+    const { toggleBoost, isPending } = useDropBoostMutation();
+
+    const extendedDrop = useMemo(
+      () => convertApiDropToExtendedDrop(drop),
+      [drop]
+    );
+
     const resolvedPfp = drop.author.pfp
       ? resolveIpfsUrlSync(drop.author.pfp)
       : null;
@@ -25,6 +36,19 @@ const BoostedDropCard = memo(
       drop.parts[0]?.content?.slice(0, 100) ?? "View drop...";
     const truncatedContent =
       contentPreview.length >= 100 ? `${contentPreview}...` : contentPreview;
+
+    const isBoosted = drop.context_profile_context?.boosted ?? false;
+    const canBoost = !!connectedProfile && !drop.id.startsWith("temp-");
+
+    const handleBoostClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (canBoost && !isPending) {
+          toggleBoost(extendedDrop);
+        }
+      },
+      [canBoost, isPending, toggleBoost, extendedDrop]
+    );
 
     return (
       <div
@@ -82,13 +106,25 @@ const BoostedDropCard = memo(
             </p>
           </div>
 
-          {/* Boost count */}
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1.5 tw-rounded-lg tw-bg-amber-600/10 tw-px-2 tw-py-1">
-            <BoostIcon className="tw-size-3.5 tw-text-amber-500" />
+          {/* Boost count - clickable toggle */}
+          <button
+            onClick={handleBoostClick}
+            disabled={!canBoost || isPending}
+            className={`tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1.5 tw-rounded-lg tw-border-0 tw-px-2 tw-py-1 tw-transition-colors tw-duration-200 ${
+              canBoost
+                ? "tw-cursor-pointer hover:tw-bg-amber-600/20"
+                : "tw-cursor-default"
+            } ${isBoosted ? "tw-bg-amber-600/20" : "tw-bg-amber-600/10"}`}
+            aria-label={isBoosted ? "Remove boost" : "Boost"}
+          >
+            <BoostIcon
+              className="tw-size-3.5 tw-text-amber-500"
+              variant={isBoosted ? "filled" : "outlined"}
+            />
             <span className="tw-text-xs tw-font-semibold tw-text-amber-400">
               {drop.boosts}
             </span>
-          </div>
+          </button>
 
           {/* Arrow indicator */}
           <svg
