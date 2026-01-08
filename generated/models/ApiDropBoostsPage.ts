@@ -11,14 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropBoost } from '../models/ApiDropBoost';
 import { HttpFile } from '../http/http';
 
-export class ApiDropContextProfileContext {
-    'rating': number;
-    'min_rating': number;
-    'max_rating': number;
-    'reaction': string | null;
-    'boosted': boolean;
+export class ApiDropBoostsPage {
+    'data': Array<ApiDropBoost>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,38 +26,32 @@ export class ApiDropContextProfileContext {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "rating",
-            "baseName": "rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "min_rating",
-            "baseName": "min_rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "max_rating",
-            "baseName": "max_rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "reaction",
-            "baseName": "reaction",
-            "type": "string",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiDropBoost>",
             "format": ""
         },
         {
-            "name": "boosted",
-            "baseName": "boosted",
+            "name": "count",
+            "baseName": "count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
             "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropContextProfileContext.attributeTypeMap;
+        return ApiDropBoostsPage.attributeTypeMap;
     }
 
     public constructor() {

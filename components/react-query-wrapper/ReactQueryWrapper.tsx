@@ -17,10 +17,10 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
 import type { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
-import type {
-  InfiniteData} from "@tanstack/react-query";
+
 import {
   type QueryClient,
+  type InfiniteData,
   useQueryClient,
 } from "@tanstack/react-query";
 import Cookies from "js-cookie";
@@ -71,6 +71,7 @@ export enum QueryKey {
   RESERVOIR_NFT = "RESERVOIR_NFT",
   DROPS = "DROPS",
   DROPS_LEADERBOARD = "DROPS_LEADERBOARD",
+  BOOSTED_DROPS = "BOOSTED_DROPS",
   DROP = "DROP",
   DROP_DISCUSSION = "DROP_DISCUSSION",
   GROUPS = "GROUPS",

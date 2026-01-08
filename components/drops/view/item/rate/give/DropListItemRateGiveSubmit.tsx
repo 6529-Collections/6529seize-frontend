@@ -1,16 +1,17 @@
 "use client";
 
-import { useContext, useState, useCallback, useRef, useEffect } from "react";
-import type { DropRateChangeRequest } from "@/entities/IDrop";
-import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
-import dynamic from "next/dynamic";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { DropVoteState } from "@/hooks/drops/types";
-import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import type { DropRateChangeRequest } from "@/entities/IDrop";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import { DropVoteState } from "@/hooks/drops/types";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { commonApiPost } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to rate",
@@ -100,7 +101,7 @@ export default function DropListItemRateGiveSubmit({
     const rateIncrement = rate * clickCount;
     const newRate = previousRate + rateIncrement;
 
-    if (applyOptimisticDropUpdate && drop.wave?.id) {
+    if (applyOptimisticDropUpdate && drop.wave.id) {
       const previousHasRating = previousRate !== 0;
       const newHasRating = newRate !== 0;
       const ratersCountDelta = Number(newHasRating) - Number(previousHasRating);
@@ -114,13 +115,15 @@ export default function DropListItemRateGiveSubmit({
           if (draft.type !== DropSize.FULL) {
             return draft;
           }
-          const baseContext = draft.context_profile_context ??
-            drop.context_profile_context ?? {
-              rating: 0,
-              min_rating: 0,
-              max_rating: 0,
-              reaction: null,
-            };
+          const baseContext: ApiDropContextProfileContext =
+            draft.context_profile_context ??
+              drop.context_profile_context ?? {
+                rating: 0,
+                min_rating: 0,
+                max_rating: 0,
+                reaction: null,
+                boosted: false,
+              };
 
           draft.context_profile_context = {
             ...baseContext,

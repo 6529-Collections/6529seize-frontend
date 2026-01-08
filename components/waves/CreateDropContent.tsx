@@ -20,11 +20,8 @@ import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { selectEditingDropId } from "@/store/editSlice";
-import type {
-  ActiveDropState} from "@/types/dropInteractionTypes";
-import {
-  ActiveDropAction
-} from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { AnimatePresence, motion } from "framer-motion";
 import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
@@ -70,11 +67,8 @@ import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
-import type {
-  MissingRequirements} from "./utils/getMissingRequirements";
-import {
-  getMissingRequirements
-} from "./utils/getMissingRequirements";
+import type { MissingRequirements } from "./utils/getMissingRequirements";
+import { getMissingRequirements } from "./utils/getMissingRequirements";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -125,7 +119,7 @@ interface CreateDropContentProps {
 const CONTAINER_WIDTH_THRESHOLD = 500;
 
 const isMetadataValuePresent = (value: string | number | null): boolean => {
-  if (value === null || value === undefined) {
+  if (value === null) {
     return false;
   }
 
@@ -268,7 +262,7 @@ const generateMediaForPart = async (
     ...prev,
     { file: media, isUploading: true, progress: 0 },
   ]);
-  const uploadResponse = await multiPartUpload({
+  return await multiPartUpload({
     file: media,
     path: "drop",
     onProgress: (progress) =>
@@ -278,7 +272,6 @@ const generateMediaForPart = async (
   }).finally(() => {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
   });
-  return uploadResponse;
 };
 
 const generatePart = async (
@@ -304,7 +297,7 @@ const generateParts = async (
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (message?.includes("content_type")) {
+    if (message.includes("content_type")) {
       throw new Error("File type not supported. Please use MP4 for videos.");
     }
     throw new Error("Error uploading file. Please try again.");
@@ -384,9 +377,8 @@ const getOptimisticDrop = (
       handle: connectedProfile.handle,
       active_main_stage_submission_ids:
         connectedProfile.active_main_stage_submission_ids,
-      winner_main_stage_drop_ids:
-        connectedProfile.winner_main_stage_drop_ids ?? [],
-      pfp: connectedProfile.pfp ?? null,
+      winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids,
+      pfp: connectedProfile.pfp,
       banner1_color: connectedProfile.banner1 ?? null,
       banner2_color: connectedProfile.banner2 ?? null,
       cic: connectedProfile.cic,
@@ -398,7 +390,7 @@ const getOptimisticDrop = (
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,
-      primary_address: connectedProfile.primary_wallet ?? "",
+      primary_address: connectedProfile.primary_wallet,
     },
     created_at: Date.now(),
     updated_at: null,
@@ -434,6 +426,7 @@ const getOptimisticDrop = (
     is_signed: false,
     rating_prediction: 0,
     reactions: [],
+    boosts: 0,
   };
 };
 
@@ -523,9 +516,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [sendTyping]);
 
   useEffect(() => {
-    if (getMarkdown?.length) {
-      throttleHandle();
+    if (!getMarkdown?.length) {
+      return;
     }
+    throttleHandle();
   }, [getMarkdown, throttleHandle]);
 
   const getCanSubmitStorm = () => {
@@ -658,7 +652,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     const newParts =
       hasPartsInDrop && !hasCurrentContent
-        ? drop?.parts ?? []
+        ? (drop?.parts ?? [])
         : [
             ...(drop?.parts ?? []),
             {
@@ -862,7 +856,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         );
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
-      (document.activeElement as HTMLElement)?.blur();
+      (document.activeElement as HTMLElement).blur();
       if (isApp) {
         import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
@@ -921,7 +915,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
-    const hasCurrentContent = !!(getMarkdown?.trim().length || files.length);
+    const hasCurrentContent =
+      (getMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
 
     if (hasPartsInDrop && hasCurrentContent) {
       finalizeAndAddDropPart();
@@ -944,12 +939,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }, delay);
   };
 
-  const focusMobileInput = () => {
+  const focusMobileInput = useCallback(() => {
     if (!createDropInputRef.current) return;
     requestAnimationFrame(() => {
       focusInputWithDelay(300);
     });
-  };
+  }, []);
 
   const focusDesktopInput = () => {
     createDropInputRef.current?.focus();
@@ -970,13 +965,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (isApp) {
       const timer = setTimeout(focusMobileInput, 200);
       return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => {
-        focusDesktopInput();
-      }, 100);
-      return () => clearTimeout(timer);
     }
-  }, [activeDrop, isApp]);
+    const timer = setTimeout(() => {
+      focusDesktopInput();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
     let updatedFiles = [...files, ...newFiles];
@@ -1008,7 +1002,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   );
 
   const removeFile = (file: File, partIndex?: number) => {
-    if (partIndex !== undefined) {
+    if (partIndex === undefined) {
+      // Remove file from the current files array
+      setFiles((prevFiles) => prevFiles.filter((f) => f !== file));
+    } else {
       // Remove file from a specific part
       setDrop((prevDrop) => {
         if (!prevDrop) return null;
@@ -1022,9 +1019,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         };
         return { ...prevDrop, parts: newParts };
       });
-    } else {
-      // Remove file from the current files array
-      setFiles((prevFiles) => prevFiles.filter((f) => f !== file));
     }
   };
 
@@ -1069,13 +1063,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             return { ...item, value: null };
           }
           const parsedValue = Number(params.newValue);
-          return { ...item, value: isNaN(parsedValue) ? null : parsedValue };
-        } else if (item.type === ApiWaveMetadataType.String) {
+          return {
+            ...item,
+            value: Number.isNaN(parsedValue) ? null : parsedValue,
+          };
+        }
+
+        if (item.type === ApiWaveMetadataType.String) {
           if (typeof params.newValue === "string") {
             return { ...item, value: params.newValue };
-          } else {
-            return { ...item, value: String(params.newValue) };
           }
+          return { ...item, value: String(params.newValue) };
         }
 
         return item;
@@ -1121,7 +1119,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   if (isChatClosed) {
     return (
-      <div className="tw-flex-grow tw-w-full tw-bg-iron-900 tw-text-iron-500 tw-rounded-lg tw-p-4 tw-text-center tw-text-sm tw-font-medium">
+      <div className="tw-w-full tw-flex-grow tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-center tw-text-sm tw-font-medium tw-text-iron-500">
         Wave is closed
       </div>
     );
@@ -1135,10 +1133,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
-      <div className="tw-flex tw-items-end tw-w-full">
+      <div className="tw-flex tw-w-full tw-items-end">
         <div
           ref={actionsContainerRef}
-          className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+          className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
         >
           <CreateDropActions
             isStormMode={isStormMode}
@@ -1153,7 +1151,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             setShowOptions={setShowOptions}
             onGifDrop={onGifDrop}
           />
-          <div className="tw-flex-grow tw-w-full">
+          <div className="tw-w-full tw-flex-grow">
             <CreateDropInput
               waveId={wave.id}
               key={dropEditorRefreshKey}

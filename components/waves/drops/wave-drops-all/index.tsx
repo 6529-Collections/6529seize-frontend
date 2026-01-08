@@ -16,6 +16,7 @@ import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
@@ -81,6 +82,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     isMuted
   );
 
+  const { data: boostedDrops } = useWaveBoostedDrops({ waveId });
+
   const scrollBehavior = useScrollBehavior();
   const {
     scrollContainerRef,
@@ -117,7 +120,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
   }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
-  const latestSerialNo = waveMessages?.drops?.[0]?.serial_no ?? null;
+  const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
 
   useEffect(() => {
     if (latestSerialNo === null) {
@@ -259,7 +262,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const handleQuoteClick = useCallback(
     (drop: ApiDrop) => {
-      if (drop.wave.id !== waveId) {
+      if (drop.wave.id === waveId) {
+        queueSerialTarget(drop.serial_no);
+      } else {
         const waveDetails =
           (drop.wave as unknown as {
             chat?:
@@ -282,8 +287,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           isApp: false,
         });
         router.push(href);
-      } else {
-        queueSerialTarget(drop.serial_no);
       }
     },
     [router, waveId, queueSerialTarget]
@@ -292,7 +295,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   return (
     <div
       ref={containerRef}
-      className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-hidden tw-bg-iron-950"
+      className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
     >
       <WaveDropsContent
         waveMessages={renderedWaveMessages}
@@ -314,6 +317,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         pendingCount={pendingDropsCount}
         onRevealPending={revealPendingDrops}
         bottomPaddingClassName={bottomPaddingClassName}
+        boostedDrops={boostedDrops}
+        onBoostedDropClick={queueSerialTarget}
       />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>

@@ -1,19 +1,31 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { useDoubleTap } from "@/hooks/useDoubleTap";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import type { DropInteractionParams} from "./Drop";
+import type { DropInteractionParams } from "./Drop";
 import { DropLocation } from "./Drop";
+import type { BoostAnimationState } from "./DropBoostAnimation";
+import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
@@ -79,16 +91,15 @@ const getColorClasses = ({
     const hoverClass = isWaveView
       ? "desktop-hover:hover:tw-bg-iron-800/50"
       : "";
-    const ringClasses = !isWaveView
-      ? "tw-ring-1 tw-ring-inset tw-ring-iron-800"
-      : "";
-    const bgClass = !isWaveView ? "tw-bg-iron-950" : "";
+    const ringClasses = isWaveView
+      ? ""
+      : "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+    const bgClass = isWaveView ? "" : "tw-bg-iron-950";
 
     return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
   }
 
-  const rankClass =
-    RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
+  const rankClass = RANK_STYLES[rank as keyof typeof RANK_STYLES];
   return `${rankClass} tw-transition-shadow tw-duration-300`.trim();
 };
 
@@ -150,12 +161,16 @@ const WaveDrop = ({
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const [boostAnimation, setBoostAnimation] =
+    useState<BoostAnimationState | null>(null);
   const dispatch = useDispatch();
   const editingDropId = useSelector(selectEditingDropId);
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const dropUpdateMutation = useDropUpdateMutation();
+  const { toggleBoost, isPending: isBoostPending } = useDropBoostMutation();
+  const { connectedProfile } = useContext(AuthContext);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
@@ -219,10 +234,11 @@ const WaveDrop = ({
     const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
     const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
 
-    if (deltaX > moveThreshold || deltaY > moveThreshold) {
-      if (longPressTimeoutRef.current) {
-        clearTimeout(longPressTimeoutRef.current);
-      }
+    if (
+      (deltaX > moveThreshold || deltaY > moveThreshold) &&
+      longPressTimeoutRef.current
+    ) {
+      clearTimeout(longPressTimeoutRef.current);
     }
   }, []);
 
@@ -258,9 +274,9 @@ const WaveDrop = ({
   }, [dispatch, drop.id]);
 
   const handleEditSave = useCallback(
-    async (newContent: string, mentions?: ApiDropMentionedUser[]) => {
+    (newContent: string, mentions?: ApiDropMentionedUser[]) => {
       // Clean mentioned users to only include allowed fields for API
-      const cleanedMentions = (mentions || drop.mentioned_users).map(
+      const cleanedMentions = (mentions ?? drop.mentioned_users).map(
         (user) => ({
           mentioned_profile_id: user.mentioned_profile_id,
           handle_in_content: user.handle_in_content,
@@ -271,8 +287,8 @@ const WaveDrop = ({
       const updateRequest: ApiUpdateDropRequest = {
         parts: drop.parts.map((part, index) => ({
           content: index === activePartIndex ? newContent : part.content,
-          quoted_drop: part.quoted_drop || null,
-          media: part.media || [],
+          quoted_drop: part.quoted_drop ?? null,
+          media: part.media,
         })),
         title: drop.title,
         metadata: drop.metadata,
@@ -298,6 +314,66 @@ const WaveDrop = ({
     dispatch(setEditingDropId(null));
   }, [dispatch]);
 
+  // Double-tap to boost handler
+  const handleDoubleTapBoost = useCallback(
+    (event: React.TouchEvent | React.MouseEvent) => {
+      // Don't boost if editing, if long press menu is open, or if already pending
+      if (isEditing || isSlideUp || isBoostPending) {
+        return;
+      }
+
+      // Don't boost temporary drops
+      if (drop.id.startsWith("temp-")) {
+        return;
+      }
+
+      // Get tap coordinates for animation
+      let x: number;
+      let y: number;
+
+      if ("touches" in event || "changedTouches" in event) {
+        const touchEvent = event as React.TouchEvent;
+        const touch = touchEvent.changedTouches[0];
+        x = touch?.clientX ?? 0;
+        y = touch?.clientY ?? 0;
+      } else {
+        const mouseEvent = event;
+        x = mouseEvent.clientX;
+        y = mouseEvent.clientY;
+      }
+
+      const isPinned = drop.context_profile_context?.boosted ?? false;
+
+      // Trigger animation
+      setBoostAnimation({
+        id: `${drop.id}-${Date.now()}`,
+        x,
+        y,
+        type: isPinned ? "unboost" : "boost",
+      });
+
+      // Perform the boost/unboost (success/error toast handled by mutation)
+      toggleBoost(drop);
+    },
+    [drop, isEditing, isSlideUp, isBoostPending, toggleBoost]
+  );
+
+  const handleBoostAnimationComplete = useCallback(() => {
+    setBoostAnimation(null);
+  }, []);
+
+  // Set up double-tap detection for boosting (mobile only)
+  const isTemporaryDrop = drop.id.startsWith("temp-");
+  const canBoost =
+    !isTemporaryDrop && !isEditing && !!connectedProfile && isMobile;
+
+  const doubleTapHandlers = useDoubleTap({
+    onDoubleTap: handleDoubleTapBoost,
+    enabled: canBoost,
+    maxDelay: 300,
+    maxDistance: 30,
+  });
+
   useEffect(() => {
     return () => {
       if (longPressTimeoutRef.current) {
@@ -306,12 +382,8 @@ const WaveDrop = ({
     };
   }, []);
 
-  // Close mobile menu if in edit mode
-  useEffect(() => {
-    if (isEditing && isSlideUp) {
-      setIsSlideUp(false);
-    }
-  }, [isEditing]);
+  // Derive effective menu state - menu can't be open while editing
+  const effectiveIsSlideUp = isSlideUp && !isEditing;
 
   const dropClasses = getDropClasses(
     isActiveDrop,
@@ -324,12 +396,12 @@ const WaveDrop = ({
   return (
     <div
       className={`${
-        isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
+        isDrop && location === DropLocation.WAVE ? "tw-px-4 tw-py-0.5" : ""
       } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}
     >
       <div
         className={dropClasses}
-        data-wave-drop-id={drop.stableHash ?? drop.id}
+        data-wave-drop-id={drop.stableHash}
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -337,7 +409,7 @@ const WaveDrop = ({
       >
         {drop.reply_to &&
           (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
-            drop.author.handle !== previousDrop?.author.handle) &&
+            drop.author.handle !== previousDrop.author.handle) &&
           drop.reply_to.drop_id !== dropViewDropId && (
             <WaveDropReply
               onReplyClick={onReplyClick}
@@ -350,10 +422,10 @@ const WaveDrop = ({
               }
             />
           )}
-        <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
+        <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
           <div
-            className="tw-flex tw-flex-col tw-w-full tw-gap-y-1"
+            className="tw-flex tw-w-full tw-flex-col tw-gap-y-1"
             style={{
               maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
             }}
@@ -367,12 +439,16 @@ const WaveDrop = ({
                 partsCount={drop.parts.length}
               />
             )}
-            <div
-              className={
+            <button
+              type="button"
+              className={`tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
                 shouldGroupWithPreviousDrop && !isProfileView
                   ? "tw-ml-[3.25rem]"
                   : ""
-              }
+              }`}
+              onTouchStart={doubleTapHandlers.onTouchStart}
+              onTouchEnd={doubleTapHandlers.onTouchEnd}
+              onClick={doubleTapHandlers.onClick}
             >
               <WaveDropContent
                 drop={drop}
@@ -387,7 +463,7 @@ const WaveDrop = ({
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}
               />
-            </div>
+            </button>
           </div>
         </div>
         {!isMobile && showReplyAndQuote && !isEditing && (
@@ -400,9 +476,9 @@ const WaveDrop = ({
           />
         )}
         <div
-          className={`tw-mx-2 tw-flex tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap ${
+          className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${
             compact
-              ? "tw-ml-[2.75rem] tw-w-[calc(100%-2.5rem)]"
+              ? "tw-ml-11 tw-w-[calc(100%-2.5rem)]"
               : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
           }`}
         >
@@ -414,7 +490,7 @@ const WaveDrop = ({
         </div>
         <WaveDropMobileMenu
           drop={drop}
-          isOpen={isSlideUp}
+          isOpen={effectiveIsSlideUp}
           longPressTriggered={longPressTriggered}
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}
@@ -422,6 +498,10 @@ const WaveDrop = ({
           onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
           onEdit={handleOnEdit}
+        />
+        <DropBoostAnimation
+          animation={boostAnimation}
+          onComplete={handleBoostAnimationComplete}
         />
       </div>
     </div>
