@@ -55,11 +55,16 @@ export function getDropdownDisplayLabel(
   activeSort: ApiCommunityMembersSortOption
 ): string {
   const isSecondaryActive = activeSort === option.secondarySort && option.primarySort !== option.secondarySort;
+  const isPrimaryActive = activeSort === option.primarySort;
+  
   if (isSecondaryActive) {
-    return `${option.label} (${option.secondaryLabel})`;
+    return `${option.label} ${option.secondaryLabel}`;
   }
-  if (activeSort === option.primarySort) {
-    return `${option.label} (${option.primaryLabel})`;
+  if (isPrimaryActive) {
+    if (option.primaryLabel === "Value") {
+      return option.label;
+    }
+    return `${option.label} ${option.primaryLabel}`;
   }
   return option.label;
 }
