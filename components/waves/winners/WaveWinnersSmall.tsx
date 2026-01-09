@@ -2,11 +2,8 @@
 
 import { useState, memo, useEffect } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type {
-  ExtendedDrop} from "@/helpers/waves/drop.helpers";
-import {
-  convertApiDropToExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 
@@ -42,7 +39,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
       decisionPoints: rawDecisionPoints,
       isFetching: isDecisionsLoading,
     } = useWaveDecisions({
-      wave,
+      waveId: wave.id,
       enabled: true, // Always enabled now that we use it for both types
     });
 
@@ -62,7 +59,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
 
     // Set first decision point as active when loaded
     useEffect(() => {
-      if (decisionPoints?.length > 0 && !activeDecisionPoint) {
+      if (decisionPoints.length > 0 && !activeDecisionPoint) {
         setActiveDecisionPoint(decisionPoints[0]?.id!);
       }
     }, [decisionPoints, activeDecisionPoint]);
@@ -89,7 +86,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
             </h2>
           </div>
 
-          <div className="tw-space-y-3 tw-mt-3">
+          <div className="tw-mt-3 tw-space-y-3">
             {winners.map((winner) => (
               <WaveWinnerItemSmall
                 key={winner.drop.id}

@@ -18,8 +18,9 @@ export default function NowMintingStatsGrid({
   const status = manifoldClaim?.status;
   const isStatusLoading = !manifoldClaim;
 
-  const statusLabel =
-    status && status.charAt(0).toUpperCase() + status.slice(1);
+  const statusLabel = status
+    ? status.charAt(0).toUpperCase() + status.slice(1)
+    : undefined;
 
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-border-y tw-border-iron-800 tw-py-4">
