@@ -68,13 +68,13 @@ export default function CommunityMembersMobileCard({
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-whitespace-nowrap tw-justify-between">
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-font-semibold tw-text-iron-50 tw-text-xs">
-            {formatLargeNumber(member.tdh)}
+            {member.tdh === 0 ? "-" : formatLargeNumber(member.tdh)}
           </span>
           <span className="tw-text-iron-400 tw-text-xxs">TDH</span>
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-font-semibold tw-text-iron-50 tw-text-xs">
-            {formatLargeNumber(Math.round(member.xtdh))}
+            {member.xtdh === 0 ? "-" : formatLargeNumber(Math.round(member.xtdh))}
           </span>
           <span className="tw-text-iron-400 tw-text-xxs">xTDH</span>
         </div>
