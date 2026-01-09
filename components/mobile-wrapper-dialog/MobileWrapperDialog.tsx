@@ -15,7 +15,6 @@ export default function MobileWrapperDialog({
   onAfterLeave,
   children,
   noPadding,
-  tall,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -24,9 +23,7 @@ export default function MobileWrapperDialog({
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: React.ReactNode;
   readonly noPadding?: boolean | undefined;
-  readonly tall?: boolean | undefined;
 }) {
-  const maxHeight = tall ? "calc(100dvh - 5rem)" : "calc(100dvh - 10rem)";
   const bottomPadding = noPadding
     ? "env(safe-area-inset-bottom,0px)"
     : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
@@ -117,7 +114,7 @@ export default function MobileWrapperDialog({
                       noPadding ? "tw-py-0" : "tw-py-6 "
                     }`}
                     style={{
-                      maxHeight,
+                      maxHeight: "calc(100dvh - 10rem)",
                       paddingBottom: bottomPadding,
                     }}
                   >
