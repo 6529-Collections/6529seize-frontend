@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import GroupItem from "./item/GroupItem";
-import type { CommunityMemberOverview } from "@/entities/IProfile";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { Page } from "@/helpers/Types";
 import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useDispatch } from "react-redux";
 import { setActiveGroupId } from "@/store/groupSlice";
-import { CommunityMembersSortOption } from "@/enums";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupsSelectActiveGroup({
@@ -28,27 +28,27 @@ export default function GroupsSelectActiveGroup({
     placeholderData: keepPreviousData,
   });
 
-  const { data: members } = useQuery<Page<CommunityMemberOverview>>({
+  const { data: members } = useQuery<Page<ApiCommunityMemberOverview>>({
     queryKey: [
       QueryKey.COMMUNITY_MEMBERS_TOP,
       {
         page: 1,
         pageSize: 1,
-        sort: CommunityMembersSortOption.LEVEL,
+        sort: ApiCommunityMembersSortOption.Level,
         sortDirection: SortDirection.DESC,
         groupId: activeGroupId,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<
-        Page<CommunityMemberOverview>,
+        Page<ApiCommunityMemberOverview>,
         CommunityMembersQuery
       >({
         endpoint: `community-members/top`,
         params: {
           page: 1,
           page_size: 1,
-          sort: CommunityMembersSortOption.LEVEL,
+          sort: ApiCommunityMembersSortOption.Level,
           sort_direction: SortDirection.DESC,
           group_id: activeGroupId,
         },

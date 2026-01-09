@@ -1,19 +1,18 @@
-import type { FullPageRequest } from "@/helpers/Types";
-import SidebarLayout from "@/components/utils/sidebar/SidebarLayout";
 import CommunityMembers from "@/components/community/CommunityMembers";
-import type { CommunityMembersSortOption } from "@/enums";
+import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import { getAppMetadata } from "@/components/providers/metadata";
+import type { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import type { FullPageRequest } from "@/helpers/Types";
 
-export interface CommunityMembersQuery
-  extends FullPageRequest<CommunityMembersSortOption> {
+export interface CommunityMembersQuery extends FullPageRequest<ApiCommunityMembersSortOption> {
   group_id?: string | undefined;
 }
 
 export default function CommunityPage() {
   return (
-    <SidebarLayout>
+    <NetworkPageLayout>
       <CommunityMembers />
-    </SidebarLayout>
+    </NetworkPageLayout>
   );
 }
 

@@ -1,56 +1,64 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import CommunityMembersTableHeader from '@/components/community/members-table/CommunityMembersTableHeader';
-import { CommunityMembersSortOption } from '@/enums';
-import { SortDirection } from '@/entities/ISort';
+import CommunityMembersTableHeader from "@/components/community/members-table/CommunityMembersTableHeader";
+import { SortDirection } from "@/entities/ISort";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import { fireEvent, render, screen } from "@testing-library/react";
 
-const mockSortable = jest.fn();
-jest.mock('@/components/community/members-table/CommunityMembersTableHeaderSortableContent', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    mockSortable(props);
-    return <div data-testid={`content-${props.sort}`} />;
-  }
-}));
+jest.mock(
+  "@/components/community/members-table/CommunityMembersTableHeaderSortableContent",
+  () => ({
+    __esModule: true,
+    default: ({ sort }: { sort: string }) => <span>{sort}</span>,
+  })
+);
 
-describe('CommunityMembersTableHeader', () => {
-  const baseProps = {
-    activeSort: CommunityMembersSortOption.LEVEL,
-    sortDirection: SortDirection.ASC,
+describe("CommunityMembersTableHeader", () => {
+  const defaultProps = {
+    activeSort: ApiCommunityMembersSortOption.Level,
+    sortDirection: SortDirection.DESC,
     isLoading: false,
     onSort: jest.fn(),
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  it("renders all column headers", () => {
+    render(
+      <table>
+        <CommunityMembersTableHeader {...defaultProps} />
+      </table>
+    );
+
+    expect(screen.getByText("Rank")).toBeInTheDocument();
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+    expect(
+      screen.getByText(ApiCommunityMembersSortOption.Level)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(ApiCommunityMembersSortOption.Tdh)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(ApiCommunityMembersSortOption.Xtdh)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(ApiCommunityMembersSortOption.Rep)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(ApiCommunityMembersSortOption.Cic)
+    ).toBeInTheDocument();
+    expect(screen.getByText("Last Seen")).toBeInTheDocument();
   });
 
-  it('calls onSort when header clicked', () => {
-    render(<table><CommunityMembersTableHeader {...baseProps} /></table>);
-    fireEvent.click(screen.getByTestId('content-rep').parentElement!);
-    expect(baseProps.onSort).toHaveBeenCalledWith(CommunityMembersSortOption.REP);
-  });
+  it("calls onSort when clicking sortable column", () => {
+    const onSort = jest.fn();
+    render(
+      <table>
+        <CommunityMembersTableHeader {...defaultProps} onSort={onSort} />
+      </table>
+    );
 
-  it('passes hover option on mouse enter', () => {
-    render(<table><CommunityMembersTableHeader {...baseProps} /></table>);
-    const th = screen.getByTestId('content-nic').parentElement as HTMLElement;
-    fireEvent.mouseEnter(th);
-    expect(mockSortable).toHaveBeenCalledWith(
-      expect.objectContaining({ hoveringOption: CommunityMembersSortOption.NIC })
-    );
-    fireEvent.mouseLeave(th);
-    expect(mockSortable).toHaveBeenCalledWith(
-      expect.objectContaining({ hoveringOption: null })
-    );
-  });
+    const tdhHeader = screen
+      .getByText(ApiCommunityMembersSortOption.Tdh)
+      .closest("th")!;
+    fireEvent.click(tdhHeader);
 
-  it('forwards sort props to content component', () => {
-    render(<table><CommunityMembersTableHeader {...baseProps} isLoading={true} /></table>);
-    expect(mockSortable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        activeSort: baseProps.activeSort,
-        sortDirection: baseProps.sortDirection,
-        isLoading: true,
-      })
-    );
+    expect(onSort).toHaveBeenCalledWith(ApiCommunityMembersSortOption.Tdh);
   });
 });

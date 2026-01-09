@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useSelector } from "react-redux";
 
-// Mocks
 jest.mock("react-redux", () => ({
   useSelector: jest.fn(),
 }));
@@ -23,10 +22,11 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-// Mock internal components
-jest.mock("@/components/utils/sidebar/SidebarLayout", () => ({
+jest.mock("@/components/network/NetworkPageLayout", () => ({
   __esModule: true,
-  default: ({ children }: any) => <div data-testid="layout">{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="layout">{children}</div>
+  ),
 }));
 jest.mock(
   "@/components/community/members-table/CommunityMembersTable",
@@ -36,11 +36,26 @@ jest.mock(
   "@/components/utils/table/paginator/CommonTablePagination",
   () => () => <div data-testid="pagination" />
 );
-jest.mock("@/components/utils/animation/CommonCardSkeleton", () => () => (
-  <div data-testid="loading-skeleton" />
+jest.mock(
+  "@/components/community/members-table/CommunityMembersTableSkeleton",
+  () => () => <div data-testid="loading-skeleton" />
+);
+jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
+  <div data-testid="groups-sidebar" />
 ));
+jest.mock(
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
+  () =>
+    ({
+      children,
+      isOpen,
+    }: {
+      children: React.ReactNode;
+      isOpen: boolean;
+    }) =>
+      isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
+);
 
-// Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
@@ -101,7 +116,7 @@ describe("CommunityPage (App Router)", () => {
   });
 
   it("renders loading state", () => {
-    useQueryMock.mockReturnValue({ isLoading: true });
+    useQueryMock.mockReturnValue({ isLoading: true, data: null });
 
     render(<CommunityMembers />);
 
@@ -113,7 +128,7 @@ describe("CommunityPage (App Router)", () => {
       isLoading: false,
       isFetching: false,
       data: {
-        count: 120, // ensures multiple pages
+        count: 120,
         data: [],
         page: 1,
         next: true,
