@@ -39,7 +39,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           collection={nft.collection}
           season={nft.season}
         />
-        <NowMintingCountdown phaseLabel="Public phase" />
+        <NowMintingCountdown nftId={nft.id} />
       </div>
     </div>
   );
