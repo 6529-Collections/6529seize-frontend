@@ -1,5 +1,5 @@
 import {
-  MintCountdownState,
+  type MintCountdownState,
   useMintCountdownState,
 } from "@/hooks/useMintCountdownState";
 import NowMintingCountdownActive from "./NowMintingCountdownActive";
@@ -28,6 +28,15 @@ function NowMintingCountdownContent({
 }: {
   readonly state: MintCountdownState;
 }) {
+  // const tempState: MintCountdownState = {
+  //   type: "countdown",
+  //   countdown: {
+  //     title: "something",
+  //     targetDate: 123,
+  //     showAllowlistInfo: true,
+  //     showMintBtn: true,
+  //   },
+  // };
   switch (state.type) {
     case "loading":
       return <NowMintingCountdownLoading />;
@@ -38,6 +47,6 @@ function NowMintingCountdownContent({
     case "finalized":
       return <NowMintingCountdownFinalized />;
     case "countdown":
-      return <NowMintingCountdownActive />;
+      return <NowMintingCountdownActive countdown={state.countdown} />;
   }
 }

@@ -1,13 +1,12 @@
 export default function NowMintingCountdownLoading() {
   return (
     <>
-      <span className="tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-400">
-        Loading...
-      </span>
-      <div className="tw-my-2 tw-text-3xl tw-font-bold tw-text-iron-50">
-        --:--:--
-      </div>
-      <div className="tw-h-12" />
+      {/* Label skeleton */}
+      <div className="tw-h-3 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-700" />
+      {/* Time skeleton */}
+      <div className="tw-my-2 tw-h-9 tw-w-40 tw-animate-pulse tw-rounded tw-bg-iron-700" />
+      {/* Button skeleton */}
+      <div className="tw-h-12 tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-700" />
     </>
   );
 }

@@ -10,10 +10,10 @@ import {
 import { useMemo, useState } from "react";
 
 export interface CountdownData {
-  title: string;
-  targetDate: number;
-  showAllowlistInfo: boolean;
-  showMintBtn: boolean;
+  readonly title: string;
+  readonly targetDate: number;
+  readonly showAllowlistInfo: boolean;
+  readonly showMintBtn: boolean;
 }
 
 export type MintCountdownState =
