@@ -358,7 +358,6 @@ export default function CommunityMembers() {
         title="Filter"
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
-        tall
       >
         <div className="tw-px-4">
           <GroupsSidebar />

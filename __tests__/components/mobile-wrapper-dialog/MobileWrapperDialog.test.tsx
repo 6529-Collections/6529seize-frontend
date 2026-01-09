@@ -48,14 +48,6 @@ describe("MobileWrapperDialog", () => {
   });
 
   describe("props variations", () => {
-    it("applies tall styling when tall prop is true", () => {
-      render(
-        <MobileWrapperDialog {...defaultProps} isOpen={true} tall={true} />
-      );
-
-      expect(screen.getByTestId("child-content")).toBeInTheDocument();
-    });
-
     it("applies noPadding styling when noPadding prop is true", () => {
       render(
         <MobileWrapperDialog {...defaultProps} isOpen={true} noPadding={true} />
