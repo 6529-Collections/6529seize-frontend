@@ -348,9 +348,7 @@ export default function CommunityMembers() {
             )}
           </>
         ) : (
-          <div className="tw-mt-2 lg:tw-mt-3">
-            <CommunityMembersTableSkeleton />
-          </div>
+          <CommunityMembersTableSkeleton />
         )}
       </div>
 

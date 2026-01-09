@@ -13,7 +13,7 @@ export default function CommunityMembersTableSkeleton({
 
   return (
     <>
-      <div className="tw-hidden tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 sm:tw-block sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
+      <div className="tw-hidden tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-block sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
         <div className="tw-animate-pulse">
           <div className="tw-h-12 tw-border-b tw-border-iron-700 tw-bg-iron-900" />
           {rowKeys.map((key) => (
@@ -36,7 +36,7 @@ export default function CommunityMembersTableSkeleton({
         </div>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-y-4 sm:tw-hidden">
+      <div className="tw-flex tw-flex-col tw-gap-y-3 tw-mt-3 sm:tw-hidden">
         {rowKeys.map((key) => (
           <div
             key={key}
