@@ -76,7 +76,7 @@ export default function CommunityMembersTableRow({
           data-tooltip-id={`tdh-tooltip-${member.detail_view_key}`}
           className="tw-cursor-default"
         >
-          {formatLargeNumber(member.tdh)}
+          {member.tdh === 0 ? "-" : formatLargeNumber(member.tdh)}
         </span>
         <Tooltip
           id={`tdh-tooltip-${member.detail_view_key}`}
@@ -103,7 +103,7 @@ export default function CommunityMembersTableRow({
           data-tooltip-id={`xtdh-tooltip-${member.detail_view_key}`}
           className="tw-cursor-default"
         >
-          {formatLargeNumber(Math.round(member.xtdh))}
+          {member.xtdh === 0 ? "-" : formatLargeNumber(Math.round(member.xtdh))}
         </span>
         <Tooltip
           id={`xtdh-tooltip-${member.detail_view_key}`}
