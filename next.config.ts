@@ -1,4 +1,4 @@
-import {withSentryConfig} from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs";
 import dotenv from "dotenv";
 import {
   PHASE_DEVELOPMENT_SERVER,
@@ -9,62 +9,17 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { createSecurityHeaders } from "@/config/securityHeaders";
+import { NextConfig } from "next";
 const require = createRequire(import.meta.url);
-const sentryEnabled = Boolean(process.env.SENTRY_DSN);
+const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 
-function logOnce(label, message) {
+function logOnce(label: string, message: string) {
   if (!process.env[`__LOG_${label}_ONCE__`]) {
     process.env[`__LOG_${label}_ONCE__`] = "1";
-    process.env.__LOG_ENV_ONCE__ = "1";
+    process.env["__LOG_ENV_ONCE__"] = "1";
     console.log(`${label}: ${message}`);
   }
-}
-
-function createSecurityHeaders(apiEndpoint = "") {
-  return [
-    {
-      key: "Strict-Transport-Security",
-      value: "max-age=31536000; includeSubDomains; preload",
-    },
-    {
-      key: "Content-Security-Policy",
-      value: `default-src 'none'; script-src 'self' 'unsafe-inline' https://dnclu2fna0b2b.cloudfront.net https://www.google-analytics.com https://www.googletagmanager.com/ https://dataplane.rum.us-east-1.amazonaws.com 'unsafe-eval'; connect-src * 'self' blob: ${apiEndpoint} https://registry.walletconnect.com/api/v2/wallets wss://*.bridge.walletconnect.org wss://*.walletconnect.com wss://www.walletlink.org/rpc https://explorer-api.walletconnect.com/v3/wallets https://www.googletagmanager.com https://*.google-analytics.com https://cloudflare-eth.com/ https://arweave.net/* https://rpc.walletconnect.com/v1/ https://sts.us-east-1.amazonaws.com https://sts.us-west-2.amazonaws.com; font-src 'self' data: https://fonts.gstatic.com https://fonts.reown.com https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com; img-src 'self' data: blob: ipfs: https://artblocks.io https://*.artblocks.io *; media-src 'self' blob: https://*.cloudfront.net https://videos.files.wordpress.com https://arweave.net https://*.arweave.net https://cf-ipfs.com/ipfs/* https://*.twimg.com https://artblocks.io https://*.artblocks.io; frame-src 'self' https://ipfs.io https://ipfs.io/ipfs/ https://cf-ipfs.com https://cf-ipfs.com/ipfs/ https://media.generator.seize.io https://media.generator.6529.io https://generator.seize.io https://arweave.net https://*.arweave.net https://nftstorage.link https://*.ipfs.nftstorage.link https://verify.walletconnect.com https://verify.walletconnect.org https://secure.walletconnect.com https://d3lqz0a4bldqgf.cloudfront.net https://www.youtube.com https://www.youtube-nocookie.com https://*.youtube.com https://artblocks.io https://*.artblocks.io https://docs.google.com https://drive.google.com https://*.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/css2 https://dnclu2fna0b2b.cloudfront.net https://cdnjs.cloudflare.com http://cdnjs.cloudflare.com https://cdn.jsdelivr.net; object-src data:;`,
-    },
-    { key: "X-Frame-Options", value: "SAMEORIGIN" },
-    { key: "X-Content-Type-Options", value: "nosniff" },
-    { key: "Referrer-Policy", value: "same-origin" },
-    {
-      key: "Permissions-Policy",
-      value: [
-        "accelerometer=()",
-        "ambient-light-sensor=()",
-        "autoplay=()",
-        "battery=()",
-        "camera=()",
-        "cross-origin-isolated=()",
-        "display-capture=()",
-        "document-domain=()",
-        "encrypted-media=()",
-        "execution-while-not-rendered=()",
-        "execution-while-out-of-viewport=()",
-        "fullscreen=()",
-        "geolocation=()",
-        "gyroscope=()",
-        "keyboard-map=()",
-        "magnetometer=()",
-        "microphone=()",
-        "midi=()",
-        "payment=()",
-        "picture-in-picture=()",
-        "publickey-credentials-get=()",
-        "screen-wake-lock=()",
-        "sync-xhr=()",
-        "usb=()",
-        "web-share=()",
-        "xr-spatial-tracking=()",
-      ].join(", "),
-    },
-  ];
 }
 
 // ───────
@@ -74,7 +29,7 @@ const schemaMod = require("./config/env.schema.runtime.cjs");
 const { publicEnvSchema } = schemaMod;
 
 function computeVersionFromEnvOrGit() {
-  let VERSION = process.env.VERSION;
+  let VERSION = process.env["VERSION"];
   if (VERSION) {
     logOnce("VERSION (explicit)", VERSION);
     return VERSION;
@@ -91,11 +46,12 @@ function computeVersionFromEnvOrGit() {
 
 function resolveAssetsFlagFromEnv() {
   return (
-    (process.env.ASSETS_FROM_S3 ?? "false").toString().toLowerCase() === "true"
+    (process.env["ASSETS_FROM_S3"] ?? "false").toString().toLowerCase() ===
+    "true"
   );
 }
 
-function persistBakedArtifacts(publicEnv, ASSETS_FROM_S3) {
+function persistBakedArtifacts(publicEnv: string, ASSETS_FROM_S3: boolean) {
   try {
     fs.mkdirSync(".next", { recursive: true });
     fs.writeFileSync(
@@ -111,10 +67,10 @@ function persistBakedArtifacts(publicEnv, ASSETS_FROM_S3) {
   } catch {}
 }
 
-function loadBakedRuntimeConfig(VERSION) {
+function loadBakedRuntimeConfig(VERSION: string) {
   let baked = {};
-  if (process.env.PUBLIC_RUNTIME) {
-    baked = JSON.parse(process.env.PUBLIC_RUNTIME);
+  if (process.env["PUBLIC_RUNTIME"]) {
+    baked = JSON.parse(process.env["PUBLIC_RUNTIME"]);
   } else if (fs.existsSync(".next/PUBLIC_RUNTIME.json")) {
     baked = JSON.parse(fs.readFileSync(".next/PUBLIC_RUNTIME.json", "utf8"));
   }
@@ -124,14 +80,17 @@ function loadBakedRuntimeConfig(VERSION) {
 }
 
 function loadAssetsFlagAtRuntime() {
-  let flag = (process.env.ASSETS_FROM_S3 ?? "").toString().toLowerCase();
+  let flag = (process.env["ASSETS_FROM_S3"] ?? "").toString().toLowerCase();
   if (!flag && fs.existsSync(".next/ASSETS_FROM_S3")) {
     flag = fs.readFileSync(".next/ASSETS_FROM_S3", "utf8").trim().toLowerCase();
   }
   return flag === "true";
 }
 
-function sharedConfig(publicEnv, assetPrefix) {
+function sharedConfig(
+  publicEnv: Record<string, string>,
+  assetPrefix: string
+): NextConfig {
   return {
     assetPrefix,
     reactCompiler: true,
@@ -169,11 +128,14 @@ function sharedConfig(publicEnv, assetPrefix) {
       return [
         {
           source: "/:path*",
-          headers: createSecurityHeaders(publicEnv.API_ENDPOINT),
+          headers: createSecurityHeaders(publicEnv["API_ENDPOINT"]),
         },
       ];
     },
-    webpack: (config, { dev, isServer }) => {
+    webpack: (
+      config: any,
+      { dev, isServer }: { dev: boolean; isServer: boolean }
+    ) => {
       config.resolve.alias.canvas = false;
       config.resolve.alias.encoding = false;
       config.resolve.alias["@react-native-async-storage/async-storage"] = false;
@@ -199,7 +161,7 @@ function sharedConfig(publicEnv, assetPrefix) {
   };
 }
 
-const nextConfigFactory = (phase) => {
+const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnce("NODE_ENV", mode);
 
@@ -210,14 +172,14 @@ const nextConfigFactory = (phase) => {
 
     const VERSION = computeVersionFromEnvOrGit();
     const ASSETS_FROM_S3 = resolveAssetsFlagFromEnv();
-    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
+    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
     // Prepare and validate public runtime from process.env
     const shape = publicEnvSchema._def.shape();
-    const publicRuntime = {};
+    const publicRuntime: Record<string, string | undefined> = {};
     for (const key of Object.keys(shape)) publicRuntime[key] = process.env[key];
-    publicRuntime.VERSION = VERSION;
-    publicRuntime.ASSETS_FROM_S3 = String(ASSETS_FROM_S3);
+    publicRuntime["VERSION"] = VERSION;
+    publicRuntime["ASSETS_FROM_S3"] = String(ASSETS_FROM_S3);
 
     const parsed = publicEnvSchema.safeParse(publicRuntime);
     if (!parsed.success) throw parsed.error; // FAIL-FAST at build
@@ -280,7 +242,7 @@ const nextConfigFactory = (phase) => {
 
     const publicEnv = loadBakedRuntimeConfig(VERSION); // FAIL-FAST inside
     const ASSETS_FROM_S3 = loadAssetsFlagAtRuntime();
-    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3);
+    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
     const assetPrefix = ASSETS_FROM_S3
       ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
@@ -302,7 +264,7 @@ const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
   project: "6529-frontend",
 
   // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
+  silent: !process.env["CI"],
 
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
@@ -326,9 +288,9 @@ const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
   automaticVercelMonitors: true,
 });
 
-export default (phase, ...rest) => {
+export default (phase: string): NextConfig => {
   if (!sentryEnabled) {
     return nextConfigFactory(phase);
   }
-  return sentryWrappedConfig(phase, ...rest);
+  return sentryWrappedConfig(phase);
 };

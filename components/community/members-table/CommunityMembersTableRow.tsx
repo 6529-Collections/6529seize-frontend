@@ -1,14 +1,17 @@
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
+import UserCICTypeIcon from "@/components/user/utils/user-cic-type/UserCICTypeIcon";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
 import {
+  formatLargeNumber,
   formatNumberWithCommasOrDash,
   getTimeAgoShort,
 } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import Link from "next/link";
+import { Tooltip } from "react-tooltip";
 
 export default function CommunityMembersTableRow({
   member,
@@ -24,14 +27,14 @@ export default function CommunityMembersTableRow({
   const path = `/${member.detail_view_key}`;
   return (
     <tr className="tw-transition tw-duration-300 tw-ease-out even:tw-bg-iron-900">
-      <td className="tw-group tw-whitespace-nowrap tw-py-3 tw-pl-4 tw-pr-2 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pl-4">
+      <td className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pl-6 sm:tw-text-base">
         {rank}
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-py-3 tw-pr-3 tw-text-sm lg:tw-text-base tw-font-medium ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-py-3 tw-pr-4 tw-text-sm tw-font-medium sm:tw-text-base ${textColorClass}`}
       >
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-h-8 tw-w-8 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
+        <div className="tw-flex tw-items-center tw-gap-x-4">
+          <div className="tw-h-8 tw-w-8 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
             <div className="tw-h-full tw-w-full tw-max-w-full">
               <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                 {member.pfp && (
@@ -44,12 +47,8 @@ export default function CommunityMembersTableRow({
               </div>
             </div>
           </div>
-          <UserCICAndLevel
-            level={member.level}
-            size={UserCICAndLevelSize.SMALL}
-          />
           <div
-            className={`tw-max-w-[8rem] tw-truncate sm:tw-max-w-[14rem] lg:tw-max-w-[18rem] ${textColorClass}`}
+            className={`tw-max-w-[6rem] tw-truncate sm:tw-max-w-[15rem] ${textColorClass}`}
           >
             <Link
               href={path}
@@ -61,70 +60,88 @@ export default function CommunityMembersTableRow({
         </div>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right tw-text-sm lg:tw-text-base tw-font-medium tw-tabular-nums ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-base ${
+          isNotProfile ? "tw-opacity-50" : ""
+        }`}
       >
-        <div className="tw-flex tw-flex-col tw-items-end">
-          <span>{formatNumberWithCommasOrDash(member.tdh)}</span>
-          <span className="tw-text-xs tw-text-iron-400">
-            {member.tdh_rate > 0 ? "+" : ""}
-            {formatNumberWithCommasOrDash(Math.round(member.tdh_rate))}
-          </span>
-        </div>
+        <UserCICAndLevel
+          level={member.level}
+          size={UserCICAndLevelSize.MEDIUM}
+        />
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right tw-text-sm lg:tw-text-base tw-font-medium tw-tabular-nums ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
       >
-        <div className="tw-flex tw-flex-col tw-items-end">
-          <span>{formatNumberWithCommasOrDash(Math.round(member.xtdh))}</span>
-          <span className="tw-text-xs tw-text-iron-400">
-            {member.xtdh_rate > 0 ? "+" : ""}
-            {formatNumberWithCommasOrDash(Math.round(member.xtdh_rate))}
-          </span>
-        </div>
-      </td>
-      <td
-        className={`tw-group tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right tw-text-sm lg:tw-text-base tw-font-medium tw-tabular-nums ${textColorClass}`}
-      >
-        <div className="tw-flex tw-flex-col tw-items-end">
-          <span>
-            {formatNumberWithCommasOrDash(Math.round(member.combined_tdh))}
-          </span>
-          <span className="tw-text-xs tw-text-iron-400">
-            {member.combined_tdh_rate > 0 ? "+" : ""}
-            {formatNumberWithCommasOrDash(Math.round(member.combined_tdh_rate))}
-          </span>
-        </div>
-      </td>
-      <td
-        className={`tw-group tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right tw-text-sm lg:tw-text-base tw-font-medium tw-tabular-nums ${textColorClass}`}
-      >
-        <div className="tw-flex tw-flex-col tw-items-end tw-gap-y-0.5">
-          <div className="tw-flex tw-items-center tw-gap-x-1">
-            <span className="tw-text-xs tw-text-iron-400">In:</span>
-            <span>{formatNumberWithCommasOrDash(Math.round(member.xtdh_incoming))}</span>
+        <span
+          data-tooltip-id={`tdh-tooltip-${member.detail_view_key}`}
+          className="tw-cursor-default"
+        >
+          {formatLargeNumber(member.tdh)}
+        </span>
+        <Tooltip
+          id={`tdh-tooltip-${member.detail_view_key}`}
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "8px 12px",
+          }}
+        >
+          <div className="tw-flex tw-flex-col tw-gap-y-1">
+            <span>TDH: {formatNumberWithCommasOrDash(member.tdh)}</span>
+            <span>
+              TDH Rate: {member.tdh_rate > 0 ? "+" : ""}
+              {formatNumberWithCommasOrDash(Math.round(member.tdh_rate))}
+            </span>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-x-1">
-            <span className="tw-text-xs tw-text-iron-400">Out:</span>
-            <span>{formatNumberWithCommasOrDash(Math.round(member.xtdh_outgoing))}</span>
-          </div>
-        </div>
+        </Tooltip>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right tw-text-sm lg:tw-text-base tw-font-medium tw-tabular-nums ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
       >
-        <div className="tw-flex tw-flex-col tw-items-end tw-gap-y-0.5">
-          <div className="tw-flex tw-items-center tw-gap-x-1">
-            <span className="tw-text-xs tw-text-iron-400">REP:</span>
-            <span>{formatNumberWithCommasOrDash(member.rep)}</span>
+        <span
+          data-tooltip-id={`xtdh-tooltip-${member.detail_view_key}`}
+          className="tw-cursor-default"
+        >
+          {formatLargeNumber(Math.round(member.xtdh))}
+        </span>
+        <Tooltip
+          id={`xtdh-tooltip-${member.detail_view_key}`}
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "8px 12px",
+          }}
+        >
+          <div className="tw-flex tw-flex-col tw-gap-y-1">
+            <span>
+              xTDH: {formatNumberWithCommasOrDash(Math.round(member.xtdh))}
+            </span>
+            <span>
+              xTDH Rate: {member.xtdh_rate > 0 ? "+" : ""}
+              {formatNumberWithCommasOrDash(Math.round(member.xtdh_rate))}
+            </span>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-x-1">
-            <span className="tw-text-xs tw-text-iron-400">NIC:</span>
-            <span>{formatNumberWithCommasOrDash(member.cic)}</span>
+        </Tooltip>
+      </td>
+      <td
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+      >
+        {formatNumberWithCommasOrDash(member.rep)}
+      </td>
+      <td
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-text-base ${textColorClass}`}
+      >
+        <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
+          {formatNumberWithCommasOrDash(member.cic)}
+          <div className="tw-h-5 tw-w-5">
+            <UserCICTypeIcon cic={member.cic} />
           </div>
         </div>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-4 ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium sm:tw-pr-6 sm:tw-text-base ${textColorClass}`}
       >
         {member.last_activity && (
           <span>

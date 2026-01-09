@@ -4,5 +4,12 @@
     "jsx": "react-jsx",
     "sourceMap": true,
     "isolatedModules": true
-  }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "__tests__/**/*",
+    "__mocks__/**/*"
+  ],
+  "exclude": ["node_modules", "generated/**"]
 }
