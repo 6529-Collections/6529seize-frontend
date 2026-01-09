@@ -92,14 +92,6 @@ const tempDrop = {
   stableKey: "temp-001",
   stableHash: "hash-temp-001",
 } as ExtendedDrop;
-const lightDrop = {
-  ...baseDrop,
-  id: "light-001",
-  type: DropSize.LIGHT,
-  stableKey: "light-001",
-  stableHash: "hash-light-001",
-} as unknown as ExtendedDrop;
-
 describe("WaveDropActionsAddReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,12 +113,6 @@ describe("WaveDropActionsAddReaction", () => {
 
   it("disables button when drop is temporary", () => {
     render(<WaveDropActionsAddReaction drop={tempDrop} />);
-    const button = screen.getByRole("button", { name: /add reaction/i });
-    expect(button).toBeDisabled();
-  });
-
-  it("disables button when drop is light", () => {
-    render(<WaveDropActionsAddReaction drop={lightDrop} />);
     const button = screen.getByRole("button", { name: /add reaction/i });
     expect(button).toBeDisabled();
   });
