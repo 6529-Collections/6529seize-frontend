@@ -1,5 +1,5 @@
-import { createSecurityHeaders } from "@/config/securityHeaders";
-import { PublicEnv } from "@/config/env.schema";
+import { createSecurityHeaders } from "./securityHeaders";
+import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import path from "node:path";
 

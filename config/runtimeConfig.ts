@@ -1,4 +1,4 @@
-import { publicEnvSchema } from "@/config/env.schema";
+import { publicEnvSchema } from "./env.schema";
 import fs from "node:fs";
 
 export function persistBakedArtifacts(
