@@ -1,7 +1,8 @@
 "use client";
 
-import Image from "next/image";
+import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 import { useIdentity } from "@/hooks/useIdentity";
+import Image from "next/image";
 
 interface NowMintingHeaderProps {
   readonly cardNumber: number;
@@ -28,7 +29,7 @@ export default function NowMintingHeader({
       <div className="tw-flex tw-items-center tw-gap-2">
         {profile?.pfp ? (
           <Image
-            src={profile.pfp}
+            src={resolveIpfsUrl(profile.pfp)}
             alt={artistHandle}
             width={24}
             height={24}

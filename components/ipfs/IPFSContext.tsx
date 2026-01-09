@@ -34,7 +34,12 @@ const readIpfsConfig = () => {
     : trimmed;
   const mfsPath = publicEnv.IPFS_MFS_PATH;
 
-  return { apiEndpoint, gatewayEndpoint: trimmed, gatewayBase, mfsPath } as const;
+  return {
+    apiEndpoint,
+    gatewayEndpoint: trimmed,
+    gatewayBase,
+    mfsPath,
+  } as const;
 };
 
 const getEnv = async () => readIpfsConfig();
@@ -88,6 +93,6 @@ export const resolveIpfsUrlSync = (url: string) => {
   }
 };
 
-export const resolveIpfsUrl = async (url: string) => {
+export const resolveIpfsUrl = (url: string) => {
   return resolveIpfsUrlSync(url);
 };

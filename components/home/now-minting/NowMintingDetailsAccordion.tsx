@@ -1,29 +1,55 @@
+import { printMintDate } from "@/helpers/Helpers";
+
 interface NowMintingDetailsAccordionProps {
+  readonly mintDate: Date | undefined;
+  readonly fileType: string;
+  readonly dimensions: string;
   readonly collection: string;
   readonly season: number;
-  readonly memeName: string;
-  readonly artist: string;
 }
 
 export default function NowMintingDetailsAccordion({
+  mintDate,
+  fileType,
+  dimensions,
   collection,
   season,
-  memeName,
-  artist,
 }: NowMintingDetailsAccordionProps) {
+  const details = [
+    { label: "Mint date", value: printMintDate(mintDate) },
+    { label: "File type", value: fileType },
+    { label: "Dimensions", value: dimensions },
+    { label: "Collection", value: collection },
+    { label: "Season", value: `Season ${season}` },
+  ];
+
   return (
     <details className="tw-group">
-      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-py-2 tw-text-sm tw-text-iron-300">
-        <span>Details</span>
-        <span className="tw-transition-transform group-open:tw-rotate-180">
-          ▼
-        </span>
+      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-py-2 tw-text-sm tw-text-iron-300">
+        <span>Technical Details</span>
+        <svg
+          className="tw-h-4 tw-w-4 tw-transition-transform group-open:tw-rotate-180"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 15l7-7 7 7"
+          />
+        </svg>
       </summary>
-      <div className="tw-space-y-1 tw-py-2 tw-text-sm tw-text-iron-400">
-        <div>Collection: {collection}</div>
-        <div>Season: {season}</div>
-        <div>Meme: {memeName}</div>
-        <div>Artist: {artist}</div>
+      <div className="tw-mt-2 tw-border-t tw-border-iron-700 tw-pt-4">
+        <div className="tw-space-y-3 tw-text-sm">
+          {details.map(({ label, value }) => (
+            <div key={label} className="tw-flex tw-justify-between">
+              <span className="tw-text-iron-500">{label}</span>
+              <span className="tw-text-iron-300">{value}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </details>
   );

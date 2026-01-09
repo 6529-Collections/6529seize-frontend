@@ -1,4 +1,8 @@
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+import {
+  getDimensionsFromMetadata,
+  getFileTypeFromMetadata,
+} from "@/helpers/nft.helpers";
 import NowMintingCountdown from "./NowMintingCountdown";
 import NowMintingDetailsAccordion from "./NowMintingDetailsAccordion";
 import NowMintingHeader from "./NowMintingHeader";
@@ -29,10 +33,11 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           floorPrice={formatEth(nft.floor_price)}
         />
         <NowMintingDetailsAccordion
+          mintDate={nft.mint_date}
+          fileType={getFileTypeFromMetadata(nft.metadata)}
+          dimensions={getDimensionsFromMetadata(nft.metadata)}
           collection={nft.collection}
           season={nft.season}
-          memeName={nft.meme_name}
-          artist={nft.artist}
         />
         <NowMintingCountdown phaseLabel="Public phase" />
       </div>

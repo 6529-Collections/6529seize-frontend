@@ -1,25 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import {
-  generateUniqueKeys,
-  mapToExtendedDrops,
-} from "@/helpers/waves/wave-drops.helpers";
-import { useDebounce } from "react-use";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   getDefaultQueryRetry,
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  generateUniqueKeys,
+  mapToExtendedDrops,
+} from "@/helpers/waves/wave-drops.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDebounce } from "react-use";
 import useCapacitor from "./useCapacitor";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
@@ -116,6 +116,7 @@ export function useWaveDropsLeaderboard({
   );
 
   useEffect(() => {
+    if (!waveId) return;
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -177,7 +178,7 @@ export function useWaveDropsLeaderboard({
     },
     initialPageParam: null,
     getNextPageParam,
-    enabled: !pausePolling,
+    enabled: !pausePolling && !!waveId,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
   });
