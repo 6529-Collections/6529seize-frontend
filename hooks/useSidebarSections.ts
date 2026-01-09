@@ -84,7 +84,7 @@ export function useSidebarSections(
               ...(!isIos || country?.toUpperCase() === "US"
                 ? [
                     {
-                      name: "Memes Subscriptions",
+                      name: "Subscriptions Report",
                       href: "/tools/subscriptions-report",
                     },
                   ]
