@@ -25,17 +25,22 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
 >;
 
+const createTestStore = () =>
+  configureStore({
+    reducer: {
+      group: groupSlice.reducer,
+    },
+  });
+
+type TestStore = ReturnType<typeof createTestStore>;
+
 describe("NetworkPageLayout", () => {
-  let store: any;
+  let store: TestStore;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    store = configureStore({
-      reducer: {
-        group: groupSlice.reducer,
-      },
-    });
+    store = createTestStore();
 
     useDeviceInfoMock.mockReturnValue({
       isApp: false,
@@ -87,11 +92,7 @@ describe("NetworkPageLayout", () => {
       new URLSearchParams({ group: "test-group-id" })
     );
 
-    const testStore = configureStore({
-      reducer: {
-        group: groupSlice.reducer,
-      },
-    });
+    const testStore = createTestStore();
 
     render(
       <Provider store={testStore}>
