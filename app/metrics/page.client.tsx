@@ -67,6 +67,38 @@ function SubmissionsIcon() {
   );
 }
 
+function VotersIcon() {
+  return (
+    <svg
+      className="tw-size-5 tw-text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+}
+
+function VotesIcon() {
+  return (
+    <svg
+      className="tw-size-5 tw-text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+    </svg>
+  );
+}
+
 export default function MetricsPageClient() {
   useSetTitle("Metrics");
 
@@ -119,6 +151,23 @@ export default function MetricsPageClient() {
               icon={<SubmissionsIcon />}
               iconBgColor="tw-bg-orange-500"
               accentColor="tw-text-orange-400"
+            />
+            <MetricCard
+              title="Distinct Voters"
+              dailyData={dailyQuery.data.mainStageDistinctVoters}
+              weeklyData={weeklyQuery.data.mainStageDistinctVoters}
+              icon={<VotersIcon />}
+              iconBgColor="tw-bg-emerald-500"
+              accentColor="tw-text-emerald-400"
+            />
+            <MetricCard
+              title="Votes"
+              dailyData={dailyQuery.data.mainStageVotes}
+              weeklyData={weeklyQuery.data.mainStageVotes}
+              icon={<VotesIcon />}
+              iconBgColor="tw-bg-cyan-500"
+              accentColor="tw-text-cyan-400"
+              useValueCount
             />
           </div>
         )}

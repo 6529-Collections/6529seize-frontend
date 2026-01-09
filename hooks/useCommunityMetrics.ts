@@ -17,13 +17,16 @@ export interface MetricSample {
 export interface MetricData {
   readonly current: MetricSample;
   readonly previous: MetricSample;
-  readonly changePercent: number | null;
+  readonly eventCountChangePercent: number | null;
+  readonly valueCountChangePercent: number | null;
 }
 
 export interface CommunityMetrics {
   readonly dropsCreated: MetricData;
   readonly distinctDroppers: MetricData;
   readonly mainStageSubmissions: MetricData;
+  readonly mainStageDistinctVoters: MetricData;
+  readonly mainStageVotes: MetricData;
 }
 
 function sanitizeNumber(value: unknown): number {
@@ -62,9 +65,13 @@ function transformMetric(metric: {
   return {
     current,
     previous,
-    changePercent: calculateChangePercent(
+    eventCountChangePercent: calculateChangePercent(
       current.eventCount,
       previous.eventCount
+    ),
+    valueCountChangePercent: calculateChangePercent(
+      current.valueCount,
+      previous.valueCount
     ),
   };
 }
@@ -81,6 +88,10 @@ async function fetchCommunityMetrics(
     dropsCreated: transformMetric(response.drops_created),
     distinctDroppers: transformMetric(response.distinct_droppers),
     mainStageSubmissions: transformMetric(response.main_stage_submissions),
+    mainStageDistinctVoters: transformMetric(
+      response.main_stage_distinct_voters
+    ),
+    mainStageVotes: transformMetric(response.main_stage_votes),
   };
 }
 

@@ -1,3 +1,4 @@
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { MetricData } from "@/hooks/useCommunityMetrics";
 
 interface MetricCardProps {
@@ -7,10 +8,21 @@ interface MetricCardProps {
   readonly icon: React.ReactNode;
   readonly iconBgColor: string;
   readonly accentColor: string;
+  readonly useValueCount?: boolean;
 }
 
-function formatNumber(value: number): string {
+function formatNumberWithCommas(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
+}
+
+function formatCompactNumber(value: number): string {
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  }
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  }
+  return formatNumberWithCommas(value);
 }
 
 function formatPercent(value: number | null): string {
@@ -50,13 +62,27 @@ function StatBlock({
       >
         {label}
       </p>
-      <p
-        className={`tw-font-bold tw-text-white ${isPrimary ? "tw-text-4xl" : "tw-text-2xl"}`}
+      <CustomTooltip
+        content={formatNumberWithCommas(currentValue)}
+        placement="top"
       >
-        {formatNumber(currentValue)}
-      </p>
+        <p
+          className={`tw-cursor-default tw-font-bold tw-text-white ${isPrimary ? "tw-text-4xl" : "tw-text-2xl"}`}
+        >
+          {formatCompactNumber(currentValue)}
+        </p>
+      </CustomTooltip>
       <p className="tw-mt-1 tw-text-xs tw-text-neutral-500">
-        vs {formatNumber(previousValue)} {previousLabel}
+        vs{" "}
+        <CustomTooltip
+          content={formatNumberWithCommas(previousValue)}
+          placement="top"
+        >
+          <span className="tw-cursor-default">
+            {formatCompactNumber(previousValue)}
+          </span>
+        </CustomTooltip>{" "}
+        {previousLabel}
       </p>
       <span
         className={`tw-mt-2 tw-inline-block tw-rounded tw-px-2 tw-py-0.5 tw-text-sm tw-font-semibold ${badgeClasses}`}
@@ -74,7 +100,14 @@ export default function MetricCard({
   icon,
   iconBgColor,
   accentColor,
+  useValueCount = false,
 }: MetricCardProps) {
+  const getCount = (data: MetricData, period: "current" | "previous") =>
+    useValueCount ? data[period].valueCount : data[period].eventCount;
+
+  const getChangePercent = (data: MetricData) =>
+    useValueCount ? data.valueCountChangePercent : data.eventCountChangePercent;
+
   return (
     <div className="tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
       <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between">
@@ -89,20 +122,20 @@ export default function MetricCard({
       <div className="tw-flex tw-gap-6">
         <StatBlock
           label="Last 24h"
-          currentValue={dailyData.current.eventCount}
-          previousValue={dailyData.previous.eventCount}
+          currentValue={getCount(dailyData, "current")}
+          previousValue={getCount(dailyData, "previous")}
           previousLabel="prev day"
-          changePercent={dailyData.changePercent}
+          changePercent={getChangePercent(dailyData)}
           accentColor={accentColor}
           isPrimary
         />
         <div className="tw-w-px tw-bg-iron-700/50" />
         <StatBlock
           label="Last 7 Days"
-          currentValue={weeklyData.current.eventCount}
-          previousValue={weeklyData.previous.eventCount}
+          currentValue={getCount(weeklyData, "current")}
+          previousValue={getCount(weeklyData, "previous")}
           previousLabel="prev week"
-          changePercent={weeklyData.changePercent}
+          changePercent={getChangePercent(weeklyData)}
           accentColor={accentColor}
         />
       </div>
