@@ -1,26 +1,28 @@
 "use client";
 
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import useCreateModalState from "@/hooks/useCreateModalState";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, {
-  useMemo,
   forwardRef,
   useImperativeHandle,
+  useMemo,
   useRef,
 } from "react";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
-import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
-import SectionHeader from "../waves/SectionHeader";
-import WavesFilterToggle from "../waves/WavesFilterToggle";
 import type {
-  VirtualItem} from "../../../../hooks/useVirtualizedWaves";
+  VirtualItem
+} from "../../../../hooks/useVirtualizedWaves";
 import {
   useVirtualizedWaves
 } from "../../../../hooks/useVirtualizedWaves";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useAuth } from "../../../auth/Auth";
-import { Tooltip as ReactTooltip } from "react-tooltip";
-import useCreateModalState from "@/hooks/useCreateModalState";
+import SectionHeader from "../waves/SectionHeader";
+import WavesFilterToggle from "../waves/WavesFilterToggle";
+import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
 
 function isValidWave(wave: unknown): wave is MinimalWave {
   if (wave === null || wave === undefined || typeof wave !== "object") {
@@ -77,19 +79,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
     const { openWave, isApp } = useCreateModalState();
-
-    const globalScope = globalThis as typeof globalThis & {
-      window?: Window | undefined;
-      navigator?: Navigator | undefined;
-    };
-    const browserWindow = globalScope.window;
-    const browserNavigator = globalScope.navigator;
-
-    const isTouchDevice =
-      !!browserWindow &&
-      ("ontouchstart" in browserWindow ||
-        (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
-        browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
+    const isTouchDevice = useIsTouchDevice();
 
     useImperativeHandle(ref, () => ({
       sentinelRef,
