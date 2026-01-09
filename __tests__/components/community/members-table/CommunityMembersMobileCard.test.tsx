@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
+  default: ({ href, children }: { href: string; children: ReactNode }) => (
     <a href={href}>{children}</a>
   ),
 }));

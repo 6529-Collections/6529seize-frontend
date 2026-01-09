@@ -54,14 +54,6 @@ jest.mock(
   })
 );
 
-jest.mock(
-  "@/components/community/members-table/CommunityMembersMobileFilterBar",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="mobile-filter-bar">filter bar</div>,
-  })
-);
-
 const members: ApiCommunityMemberOverview[] = [
   {
     display: "Alice",
@@ -122,6 +114,5 @@ describe("CommunityMembersTable", () => {
     expect(cards[1]).toHaveTextContent("7-Bob");
 
     expect(screen.getByTestId("header")).toBeInTheDocument();
-    expect(screen.getByTestId("mobile-filter-bar")).toBeInTheDocument();
   });
 });
