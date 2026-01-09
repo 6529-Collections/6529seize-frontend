@@ -61,10 +61,10 @@ export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
         service.init();
         setIpfsService(service);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error("Error initializing IPFS service", error);
       });
-  }, []);
+  }, [ipfsService]);
 
   const value = useMemo(() => ({ ipfsService }), [ipfsService]);
 

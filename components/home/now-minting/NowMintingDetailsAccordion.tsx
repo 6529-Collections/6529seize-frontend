@@ -28,7 +28,7 @@ export default function NowMintingDetailsAccordion({
       <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-py-2 tw-text-sm tw-text-iron-300">
         <span>Technical Details</span>
         <svg
-          className="tw-h-4 tw-w-4 tw-transition-transform group-open:tw-rotate-180"
+          className="tw-size-4 tw-transition-transform group-open:tw-rotate-180"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
