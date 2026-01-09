@@ -44,9 +44,8 @@ describe("CommunityMembersTableHeader", () => {
       </table>
     );
 
-    const tdhHeader = screen.getByText(ApiCommunityMembersSortOption.Tdh).closest("th");
-    expect(tdhHeader).not.toBeNull();
-    fireEvent.click(tdhHeader!);
+    const tdhHeader = screen.getByText(ApiCommunityMembersSortOption.Tdh).closest("th")!;
+    fireEvent.click(tdhHeader);
 
     expect(onSort).toHaveBeenCalledWith(ApiCommunityMembersSortOption.Tdh);
   });
