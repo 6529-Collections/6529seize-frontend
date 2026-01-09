@@ -28,10 +28,10 @@ export default function UserCICAndLevel({
   readonly size?: UserCICAndLevelSize | undefined;
 }) {
   const LEVEL_SIZE_CLASSES: Record<UserCICAndLevelSize, string> = {
-    [UserCICAndLevelSize.SMALL]: "tw-h-6 tw-w-6 tw-text-[10px]",
-    [UserCICAndLevelSize.MEDIUM]: "tw-h-7 tw-w-7 tw-text-[11px]",
-    [UserCICAndLevelSize.LARGE]: "tw-h-9 tw-w-9 tw-text-xs",
-    [UserCICAndLevelSize.XLARGE]: "tw-h-11 tw-w-11 tw-text-sm",
+    [UserCICAndLevelSize.SMALL]: "tw-h-5 tw-w-5 tw-text-[9px]",
+    [UserCICAndLevelSize.MEDIUM]: "tw-h-6 tw-w-6 tw-text-[0.65rem]",
+    [UserCICAndLevelSize.LARGE]: "tw-h-8 tw-w-8 tw-text-[0.8rem]",
+    [UserCICAndLevelSize.XLARGE]: "tw-h-10 tw-w-10 tw-text-[1rem]",
   };
 
   const colorClasses = color

@@ -27,11 +27,11 @@ export default function CommunityMembersTableRow({
   const path = `/${member.detail_view_key}`;
   return (
     <tr className="tw-transition tw-duration-300 tw-ease-out even:tw-bg-iron-900">
-      <td className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pl-6 sm:tw-text-base">
+      <td className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pl-6 sm:tw-text-base">
         {rank}
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-py-3 tw-pr-4 tw-text-sm tw-font-medium sm:tw-text-base ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-py-4 tw-pr-4 tw-text-sm tw-font-medium sm:tw-text-base ${textColorClass}`}
       >
         <div className="tw-flex tw-items-center tw-gap-x-4">
           <div className="tw-h-8 tw-w-8 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
@@ -60,17 +60,17 @@ export default function CommunityMembersTableRow({
         </div>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-base ${
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-base ${
           isNotProfile ? "tw-opacity-50" : ""
         }`}
       >
         <UserCICAndLevel
           level={member.level}
-          size={UserCICAndLevelSize.MEDIUM}
+          size={UserCICAndLevelSize.LARGE}
         />
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
       >
         <span
           data-tooltip-id={`tdh-tooltip-${member.detail_view_key}`}
@@ -97,7 +97,7 @@ export default function CommunityMembersTableRow({
         </Tooltip>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
       >
         <span
           data-tooltip-id={`xtdh-tooltip-${member.detail_view_key}`}
@@ -126,12 +126,12 @@ export default function CommunityMembersTableRow({
         </Tooltip>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-px-6 sm:tw-text-base ${textColorClass}`}
       >
         {formatNumberWithCommasOrDash(member.rep)}
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-text-base ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums sm:tw-text-base ${textColorClass}`}
       >
         <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-2">
           {formatNumberWithCommasOrDash(member.cic)}
@@ -141,7 +141,7 @@ export default function CommunityMembersTableRow({
         </div>
       </td>
       <td
-        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium sm:tw-pr-6 sm:tw-text-base ${textColorClass}`}
+        className={`tw-group tw-whitespace-nowrap tw-px-4 tw-py-4 tw-text-sm tw-font-medium sm:tw-pr-6 sm:tw-text-base ${textColorClass}`}
       >
         {member.last_activity && (
           <span>
