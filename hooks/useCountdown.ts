@@ -66,6 +66,7 @@ export function useCountdownAdaptive(targetTimestampSeconds: number): string {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const intervalMsRef = useRef<number | null>(null);
+  const pendingIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     const targetMs = targetTimestampSeconds * 1000;
@@ -80,6 +81,7 @@ export function useCountdownAdaptive(targetTimestampSeconds: number): string {
 
     const createInterval = (intervalMs: number) => {
       intervalMsRef.current = intervalMs;
+      pendingIntervalRef.current = null;
       intervalRef.current = setInterval(() => {
         forceUpdate();
         // Check if we need to switch to per-second updates
@@ -89,11 +91,19 @@ export function useCountdownAdaptive(targetTimestampSeconds: number): string {
           if (intervalRef.current) clearInterval(intervalRef.current);
           intervalRef.current = null;
         } else if (newInterval !== intervalMsRef.current) {
-          // Interval needs to change, clear old and create new
+          // Signal that interval needs to change, then clear current
+          pendingIntervalRef.current = newInterval;
           if (intervalRef.current) clearInterval(intervalRef.current);
-          createInterval(newInterval);
+          intervalRef.current = null;
         }
       }, intervalMs);
+    };
+
+    // Check if there's a pending interval change from a previous callback
+    const checkPendingInterval = () => {
+      if (pendingIntervalRef.current !== null && intervalRef.current === null) {
+        createInterval(pendingIntervalRef.current);
+      }
     };
 
     const intervalMs = getInterval();
@@ -101,8 +111,13 @@ export function useCountdownAdaptive(targetTimestampSeconds: number): string {
 
     createInterval(intervalMs);
 
+    // Use a monitoring interval to handle pending interval changes
+    const monitorInterval = setInterval(checkPendingInterval, 50);
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(monitorInterval);
+      pendingIntervalRef.current = null;
     };
   }, [targetTimestampSeconds]);
 

@@ -25,7 +25,7 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      fetchNextPage().then();
+      fetchNextPage();
     }
   });
 
