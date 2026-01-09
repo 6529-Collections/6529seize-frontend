@@ -1,17 +1,17 @@
 "use client";
 
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
   readonly rank: number;
 }
 
-export default function LeadingCard({ drop, rank }: LeadingCardProps) {
+export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   const media = drop.parts[0]?.media[0];
   const title =
     drop.title ??
@@ -60,4 +60,4 @@ export default function LeadingCard({ drop, rank }: LeadingCardProps) {
       </div>
     </div>
   );
-}
+};

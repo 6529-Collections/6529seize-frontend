@@ -1,15 +1,15 @@
 "use client";
 
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
-import NextMintCard from "./NextMintCard";
-import LeadingCard from "./LeadingCard";
+import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { LeadingCard } from "./LeadingCard";
+import { NextMintCard } from "./NextMintCard";
 
-export default function NextMintLeadingSection() {
+export function NextMintLeadingSection() {
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
 

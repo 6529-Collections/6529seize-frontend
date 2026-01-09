@@ -3,6 +3,7 @@
 import SubmissionCarousel from "./carousel/SubmissionCarousel";
 import { NowMintingSection } from "./now-minting";
 import { NextMintLeadingSection } from "./next-mint-leading";
+import { BoostedSection } from "./boosted";
 
 export default function HomePageContent() {
   return (
@@ -10,6 +11,7 @@ export default function HomePageContent() {
       <SubmissionCarousel />
       <NowMintingSection />
       <NextMintLeadingSection />
+      <BoostedSection />
     </div>
   );
 }

@@ -1,16 +1,16 @@
 "use client";
 
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface NextMintCardProps {
   readonly drop: ApiDrop;
 }
 
-export default function NextMintCard({ drop }: NextMintCardProps) {
+export const NextMintCard = ({ drop }: NextMintCardProps) => {
   const media = drop.parts[0]?.media[0];
   const title =
     drop.title ??
@@ -59,4 +59,4 @@ export default function NextMintCard({ drop }: NextMintCardProps) {
       </div>
     </div>
   );
-}
+};
