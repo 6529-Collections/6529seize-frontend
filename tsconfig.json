@@ -61,12 +61,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "tests",
-    "__tests__",
-    "e2e",
-    "**/__mocks__/**",
-    "generated/**"
-  ]
+  "exclude": ["node_modules", "generated/**"]
 }

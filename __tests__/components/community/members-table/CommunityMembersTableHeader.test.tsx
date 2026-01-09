@@ -1,44 +1,53 @@
-import { render, screen } from '@testing-library/react';
-import CommunityMembersTableHeader from '@/components/community/members-table/CommunityMembersTableHeader';
-import { ApiCommunityMembersSortOption } from '@/generated/models/ApiCommunityMembersSortOption';
+import { render, screen, fireEvent } from "@testing-library/react";
+import CommunityMembersTableHeader from "@/components/community/members-table/CommunityMembersTableHeader";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import { SortDirection } from "@/entities/ISort";
 
-describe('CommunityMembersTableHeader', () => {
-  it('renders all column headers', () => {
+jest.mock(
+  "@/components/community/members-table/CommunityMembersTableHeaderSortableContent",
+  () => ({
+    __esModule: true,
+    default: ({ sort }: { sort: string }) => <span>{sort}</span>,
+  })
+);
+
+describe("CommunityMembersTableHeader", () => {
+  const defaultProps = {
+    activeSort: ApiCommunityMembersSortOption.Level,
+    sortDirection: SortDirection.DESC,
+    isLoading: false,
+    onSort: jest.fn(),
+  };
+
+  it("renders all column headers", () => {
     render(
       <table>
-        <CommunityMembersTableHeader activeSort={ApiCommunityMembersSortOption.CombinedTdh} />
+        <CommunityMembersTableHeader {...defaultProps} />
       </table>
     );
 
-    expect(screen.getByText('Rank')).toBeInTheDocument();
-    expect(screen.getByText('Profile')).toBeInTheDocument();
-    expect(screen.getByText('TDH')).toBeInTheDocument();
-    expect(screen.getByText('xTDH')).toBeInTheDocument();
-    expect(screen.getByText('Combined')).toBeInTheDocument();
-    expect(screen.getByText('Grants')).toBeInTheDocument();
-    expect(screen.getByText('Peer Score')).toBeInTheDocument();
-    expect(screen.getByText('Last Seen')).toBeInTheDocument();
+    expect(screen.getByText("Rank")).toBeInTheDocument();
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+    expect(screen.getByText(ApiCommunityMembersSortOption.Level)).toBeInTheDocument();
+    expect(screen.getByText(ApiCommunityMembersSortOption.Tdh)).toBeInTheDocument();
+    expect(screen.getByText(ApiCommunityMembersSortOption.Xtdh)).toBeInTheDocument();
+    expect(screen.getByText(ApiCommunityMembersSortOption.Rep)).toBeInTheDocument();
+    expect(screen.getByText(ApiCommunityMembersSortOption.Cic)).toBeInTheDocument();
+    expect(screen.getByText("Last Seen")).toBeInTheDocument();
   });
 
-  it('highlights active sort column for TDH', () => {
+  it("calls onSort when clicking sortable column", () => {
+    const onSort = jest.fn();
     render(
       <table>
-        <CommunityMembersTableHeader activeSort={ApiCommunityMembersSortOption.Tdh} />
+        <CommunityMembersTableHeader {...defaultProps} onSort={onSort} />
       </table>
     );
 
-    const tdhHeader = screen.getByText('TDH');
-    expect(tdhHeader).toHaveClass('tw-text-primary-300');
-  });
+    const tdhHeader = screen.getByText(ApiCommunityMembersSortOption.Tdh).closest("th");
+    expect(tdhHeader).not.toBeNull();
+    fireEvent.click(tdhHeader!);
 
-  it('highlights active sort column for Combined TDH', () => {
-    render(
-      <table>
-        <CommunityMembersTableHeader activeSort={ApiCommunityMembersSortOption.CombinedTdh} />
-      </table>
-    );
-
-    const combinedHeader = screen.getByText('Combined');
-    expect(combinedHeader).toHaveClass('tw-text-primary-300');
+    expect(onSort).toHaveBeenCalledWith(ApiCommunityMembersSortOption.Tdh);
   });
 });

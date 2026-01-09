@@ -1,95 +1,122 @@
+"use client";
+
+import type { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-
-const TDH_SORTS = new Set([
-  ApiCommunityMembersSortOption.Tdh,
-  ApiCommunityMembersSortOption.TdhRate,
-]);
-
-const XTDH_SORTS = new Set([
-  ApiCommunityMembersSortOption.Xtdh,
-  ApiCommunityMembersSortOption.XtdhRate,
-]);
-
-const XTDH_GRANTS_SORTS = new Set([
-  ApiCommunityMembersSortOption.XtdhIncoming,
-  ApiCommunityMembersSortOption.XtdhOutgoing,
-]);
-
-const COMBINED_TDH_SORTS = new Set([
-  ApiCommunityMembersSortOption.CombinedTdh,
-  ApiCommunityMembersSortOption.CombinedTdhRate,
-]);
-
-const PEER_SCORE_SORTS = new Set([
-  ApiCommunityMembersSortOption.Rep,
-  ApiCommunityMembersSortOption.Cic,
-]);
+import { useState } from "react";
+import CommunityMembersTableHeaderSortableContent from "./CommunityMembersTableHeaderSortableContent";
 
 export default function CommunityMembersTableHeader({
   activeSort,
+  sortDirection,
+  isLoading,
+  onSort,
 }: {
   readonly activeSort: ApiCommunityMembersSortOption;
+  readonly sortDirection: SortDirection;
+  readonly isLoading: boolean;
+  readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
 }) {
-  const baseClass = "tw-whitespace-nowrap tw-py-3 tw-text-sm tw-font-medium";
-  const activeClass = "tw-text-primary-300";
-  const inactiveClass = "tw-text-iron-400";
-
-  const isTdhActive = TDH_SORTS.has(activeSort);
-  const isXtdhActive = XTDH_SORTS.has(activeSort);
-  const isXtdhGrantsActive = XTDH_GRANTS_SORTS.has(activeSort);
-  const isCombinedTdhActive = COMBINED_TDH_SORTS.has(activeSort);
-  const isPeerScoreActive = PEER_SCORE_SORTS.has(activeSort);
-
+  const [hoverOption, setHoverOption] =
+    useState<ApiCommunityMembersSortOption | null>(null);
   return (
     <thead className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-iron-700 tw-bg-iron-900">
       <tr>
         <th
           scope="col"
-          className={`${baseClass} tw-pl-4 tw-pr-2 tw-text-left ${inactiveClass}`}
+          className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md"
         >
           Rank
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-pr-3 tw-text-left ${inactiveClass}`}
+          className="tw-whitespace-nowrap tw-py-3 tw-pr-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-text-md"
         >
           Profile
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-px-3 tw-text-right ${isTdhActive ? activeClass : inactiveClass}`}
+          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md"
+          onClick={() => onSort(ApiCommunityMembersSortOption.Level)}
+          onMouseEnter={() =>
+            setHoverOption(ApiCommunityMembersSortOption.Level)
+          }
+          onMouseLeave={() => setHoverOption(null)}
         >
-          TDH
+          <CommunityMembersTableHeaderSortableContent
+            sort={ApiCommunityMembersSortOption.Level}
+            activeSort={activeSort}
+            sortDirection={sortDirection}
+            isLoading={isLoading}
+            hoveringOption={hoverOption}
+          />
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-px-3 tw-text-right ${isXtdhActive ? activeClass : inactiveClass}`}
+          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md"
+          onClick={() => onSort(ApiCommunityMembersSortOption.Tdh)}
+          onMouseEnter={() => setHoverOption(ApiCommunityMembersSortOption.Tdh)}
+          onMouseLeave={() => setHoverOption(null)}
         >
-          xTDH
+          <CommunityMembersTableHeaderSortableContent
+            sort={ApiCommunityMembersSortOption.Tdh}
+            activeSort={activeSort}
+            sortDirection={sortDirection}
+            isLoading={isLoading}
+            hoveringOption={hoverOption}
+          />
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-px-3 tw-text-right ${isCombinedTdhActive ? activeClass : inactiveClass}`}
+          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md"
+          onClick={() => onSort(ApiCommunityMembersSortOption.Xtdh)}
+          onMouseEnter={() =>
+            setHoverOption(ApiCommunityMembersSortOption.Xtdh)
+          }
+          onMouseLeave={() => setHoverOption(null)}
         >
-          Combined
+          <CommunityMembersTableHeaderSortableContent
+            sort={ApiCommunityMembersSortOption.Xtdh}
+            activeSort={activeSort}
+            sortDirection={sortDirection}
+            isLoading={isLoading}
+            hoveringOption={hoverOption}
+          />
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-px-3 tw-text-right ${isXtdhGrantsActive ? activeClass : inactiveClass}`}
+          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md"
+          onClick={() => onSort(ApiCommunityMembersSortOption.Rep)}
+          onMouseEnter={() => setHoverOption(ApiCommunityMembersSortOption.Rep)}
+          onMouseLeave={() => setHoverOption(null)}
         >
-          Grants
+          <CommunityMembersTableHeaderSortableContent
+            sort={ApiCommunityMembersSortOption.Rep}
+            activeSort={activeSort}
+            sortDirection={sortDirection}
+            isLoading={isLoading}
+            hoveringOption={hoverOption}
+          />
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-px-3 tw-text-right ${isPeerScoreActive ? activeClass : inactiveClass}`}
+          className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md"
+          onClick={() => onSort(ApiCommunityMembersSortOption.Cic)}
+          onMouseEnter={() => setHoverOption(ApiCommunityMembersSortOption.Cic)}
+          onMouseLeave={() => setHoverOption(null)}
         >
-          Peer Score
+          <CommunityMembersTableHeaderSortableContent
+            sort={ApiCommunityMembersSortOption.Cic}
+            activeSort={activeSort}
+            sortDirection={sortDirection}
+            isLoading={isLoading}
+            hoveringOption={hoverOption}
+          />
         </th>
         <th
           scope="col"
-          className={`${baseClass} tw-px-3 tw-text-right sm:tw-pr-4 ${inactiveClass}`}
+          className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pr-6 sm:tw-text-md"
         >
-          Last Seen
+          <span>Last Seen</span>
         </th>
       </tr>
     </thead>
