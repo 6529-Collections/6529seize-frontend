@@ -1,3 +1,4 @@
+import useCapacitor from "@/hooks/useCapacitor";
 import {
   Dialog,
   DialogPanel,
@@ -15,6 +16,8 @@ export default function MobileWrapperDialog({
   onAfterLeave,
   children,
   noPadding,
+  tall,
+  fixedHeight,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -23,10 +26,21 @@ export default function MobileWrapperDialog({
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: React.ReactNode;
   readonly noPadding?: boolean | undefined;
+  readonly tall?: boolean | undefined;
+  readonly fixedHeight?: boolean | undefined;
 }) {
+  const { isCapacitor } = useCapacitor();
+
   const bottomPadding = noPadding
     ? "env(safe-area-inset-bottom,0px)"
     : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
+
+  const getHeight = () => {
+    if (tall && !isCapacitor) {
+      return "calc(100dvh - 4rem)";
+    }
+    return "calc(100dvh - 10rem)";
+  };
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -37,10 +51,10 @@ export default function MobileWrapperDialog({
       >
         <TransitionChild
           as={Fragment}
-          enter="tw-ease-in-out tw-duration-250"
+          enter="tw-duration-250 tw-ease-in-out"
           enterFrom="tw-opacity-0"
           enterTo="tw-opacity-100"
-          leave="tw-ease-in-out tw-duration-250"
+          leave="tw-duration-250 tw-ease-in-out"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
           {...(onBeforeLeave ? { beforeLeave: onBeforeLeave } : {})}
@@ -60,39 +74,39 @@ export default function MobileWrapperDialog({
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-max-w-full tw-pt-10">
+            <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10">
               <TransitionChild
                 as={Fragment}
-                enter="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
+                enter="tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out"
                 enterFrom="tw-translate-y-full"
                 enterTo="tw-translate-y-0"
-                leave="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
+                leave="tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
                 <DialogPanel
-                  className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md tw-transform-gpu tw-will-change-transform"
+                  className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu tw-will-change-transform md:tw-max-w-screen-md"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <TransitionChild
                     as={Fragment}
-                    enter="tw-ease-in-out tw-duration-250"
+                    enter="tw-duration-250 tw-ease-in-out"
                     enterFrom="tw-opacity-0"
                     enterTo="tw-opacity-100"
-                    leave="tw-ease-in-out tw-duration-250"
+                    leave="tw-duration-250 tw-ease-in-out"
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >
-                    <div className="tw-absolute tw-right-0 -tw-top-16 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
+                    <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
                       <button
                         type="button"
                         title="Close panel"
                         aria-label="Close panel"
-                        className="tw-p-2.5 tw-relative tw-bg-transparent tw-rounded-md focus:tw-outline-none tw-border-none focus:tw-ring-2 focus:tw-ring-white"
+                        className="tw-relative tw-rounded-md tw-border-none tw-bg-transparent tw-p-2.5 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white"
                         onClick={onClose}
                       >
                         <svg
-                          className="tw-w-6 tw-h-6 tw-flex-shrink-0 tw-text-white"
+                          className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-white"
                           viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"
@@ -110,11 +124,13 @@ export default function MobileWrapperDialog({
                     </div>
                   </TransitionChild>
                   <div
-                    className={`tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 ${
-                      noPadding ? "tw-py-0" : "tw-py-6 "
+                    className={`tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 ${
+                      noPadding ? "tw-py-0" : "tw-py-6"
                     }`}
                     style={{
-                      maxHeight: "calc(100dvh - 10rem)",
+                      ...(fixedHeight
+                        ? { height: getHeight() }
+                        : { maxHeight: getHeight() }),
                       paddingBottom: bottomPadding,
                     }}
                   >
