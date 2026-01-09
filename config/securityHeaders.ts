@@ -1,4 +1,4 @@
-export function createSecurityHeaders(apiEndpoint = "") {
+export function createSecurityHeaders(apiEndpoint: string | undefined = "") {
   return [
     {
       key: "Strict-Transport-Security",
