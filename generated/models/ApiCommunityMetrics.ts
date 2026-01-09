@@ -20,6 +20,7 @@ export class ApiCommunityMetrics {
     'main_stage_submissions': ApiCommunityMetric;
     'main_stage_distinct_voters': ApiCommunityMetric;
     'main_stage_votes': ApiCommunityMetric;
+    'network_tdh': ApiCommunityMetric;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -53,6 +54,12 @@ export class ApiCommunityMetrics {
         {
             "name": "main_stage_votes",
             "baseName": "main_stage_votes",
+            "type": "ApiCommunityMetric",
+            "format": ""
+        },
+        {
+            "name": "network_tdh",
+            "baseName": "network_tdh",
             "type": "ApiCommunityMetric",
             "format": ""
         }    ];
