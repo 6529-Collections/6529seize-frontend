@@ -1,5 +1,8 @@
 "use client";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+
 interface CarouselArrowProps {
   readonly direction: "left" | "right";
   readonly onClick: () => void;
@@ -22,19 +25,10 @@ export default function CarouselArrow({
         isLeft ? "tw-left-0" : "tw-right-0"
       }`}
     >
-      <svg
+      <FontAwesomeIcon
+        icon={faChevronLeft}
         className={`tw-size-5 ${isLeft ? "" : "tw-rotate-180"}`}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 19l-7-7 7-7"
-        />
-      </svg>
+      />
     </button>
   );
 }

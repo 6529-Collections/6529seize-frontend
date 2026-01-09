@@ -23,9 +23,9 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
-  const intersectionElementRef = useIntersectionObserver(async () => {
+  const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      await fetchNextPage();
+      fetchNextPage().then();
     }
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import {
   formatCountdown,
   formatCountdownAdaptive,
@@ -64,6 +64,8 @@ export function useCountdown(targetTime: number | null): string {
 export function useCountdownAdaptive(targetTimestampSeconds: number): string {
   // Use reducer to trigger re-renders; display value is calculated during render
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalMsRef = useRef<number | null>(null);
 
   useEffect(() => {
     const targetMs = targetTimestampSeconds * 1000;
@@ -76,19 +78,32 @@ export function useCountdownAdaptive(targetTimestampSeconds: number): string {
       return 60 * 1000; // > 1 day: every minute
     };
 
+    const createInterval = (intervalMs: number) => {
+      intervalMsRef.current = intervalMs;
+      intervalRef.current = setInterval(() => {
+        forceUpdate();
+        // Check if we need to switch to per-second updates
+        const newInterval = getInterval();
+        if (newInterval === null) {
+          // Target reached, stop updating
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        } else if (newInterval !== intervalMsRef.current) {
+          // Interval needs to change, clear old and create new
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          createInterval(newInterval);
+        }
+      }, intervalMs);
+    };
+
     const intervalMs = getInterval();
     if (intervalMs === null) return;
 
-    const interval = setInterval(() => {
-      forceUpdate();
-      // Check if we need to switch to per-second updates
-      const newInterval = getInterval();
-      if (newInterval !== intervalMs) {
-        clearInterval(interval);
-      }
-    }, intervalMs);
+    createInterval(intervalMs);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [targetTimestampSeconds]);
 
   // ✅ Calculate display during rendering (not in effect)

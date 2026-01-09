@@ -28,15 +28,6 @@ function NowMintingCountdownContent({
 }: {
   readonly state: MintCountdownState;
 }) {
-  // const tempState: MintCountdownState = {
-  //   type: "countdown",
-  //   countdown: {
-  //     title: "something",
-  //     targetDate: 123,
-  //     showAllowlistInfo: true,
-  //     showMintBtn: true,
-  //   },
-  // };
   switch (state.type) {
     case "loading":
       return <NowMintingCountdownLoading />;
