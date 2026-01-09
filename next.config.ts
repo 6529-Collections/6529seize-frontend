@@ -5,22 +5,24 @@ import {
   PHASE_PRODUCTION_BUILD,
   PHASE_PRODUCTION_SERVER,
 } from "next/constants.js";
-import { execSync } from "node:child_process";
+
 import fs from "node:fs";
-import path from "node:path";
+
 import { createRequire } from "node:module";
-import { createSecurityHeaders } from "@/config/securityHeaders";
+
 import { NextConfig } from "next";
+import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
+import {
+  loadAssetsFlagAtRuntime,
+  resolveAssetsFlagFromEnv,
+} from "@/config/assets";
+import {
+  loadBakedRuntimeConfig,
+  persistBakedArtifacts,
+} from "@/config/runtimeConfig";
+import { sharedConfig } from "@/config/nextConfig";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
-
-function logOnce(label: string, message: string) {
-  if (!process.env[`__LOG_${label}_ONCE__`]) {
-    process.env[`__LOG_${label}_ONCE__`] = "1";
-    process.env["__LOG_ENV_ONCE__"] = "1";
-    console.log(`${label}: ${message}`);
-  }
-}
 
 // ───────
 // Helpers
@@ -28,142 +30,9 @@ function logOnce(label: string, message: string) {
 const schemaMod = require("./config/env.schema.runtime.cjs");
 const { publicEnvSchema } = schemaMod;
 
-function computeVersionFromEnvOrGit() {
-  let VERSION = process.env["VERSION"];
-  if (VERSION) {
-    logOnce("VERSION (explicit)", VERSION);
-    return VERSION;
-  }
-  try {
-    VERSION = execSync("git rev-parse HEAD").toString().trim();
-    logOnce("VERSION (from git HEAD)", VERSION);
-  } catch {
-    VERSION = "6529seize";
-    logOnce("VERSION (default)", VERSION);
-  }
-  return VERSION;
-}
-
-function resolveAssetsFlagFromEnv() {
-  return (
-    (process.env["ASSETS_FROM_S3"] ?? "false").toString().toLowerCase() ===
-    "true"
-  );
-}
-
-function persistBakedArtifacts(publicEnv: string, ASSETS_FROM_S3: boolean) {
-  try {
-    fs.mkdirSync(".next", { recursive: true });
-    fs.writeFileSync(
-      ".next/PUBLIC_RUNTIME.json",
-      JSON.stringify(publicEnv),
-      "utf8"
-    );
-    fs.writeFileSync(
-      ".next/ASSETS_FROM_S3",
-      ASSETS_FROM_S3 ? "true" : "false",
-      "utf8"
-    );
-  } catch {}
-}
-
-function loadBakedRuntimeConfig(VERSION: string) {
-  let baked = {};
-  if (process.env["PUBLIC_RUNTIME"]) {
-    baked = JSON.parse(process.env["PUBLIC_RUNTIME"]);
-  } else if (fs.existsSync(".next/PUBLIC_RUNTIME.json")) {
-    baked = JSON.parse(fs.readFileSync(".next/PUBLIC_RUNTIME.json", "utf8"));
-  }
-  const parsed = publicEnvSchema.safeParse({ ...baked, VERSION });
-  if (!parsed.success) throw parsed.error; // FAIL-FAST
-  return parsed.data;
-}
-
-function loadAssetsFlagAtRuntime() {
-  let flag = (process.env["ASSETS_FROM_S3"] ?? "").toString().toLowerCase();
-  if (!flag && fs.existsSync(".next/ASSETS_FROM_S3")) {
-    flag = fs.readFileSync(".next/ASSETS_FROM_S3", "utf8").trim().toLowerCase();
-  }
-  return flag === "true";
-}
-
-function sharedConfig(
-  publicEnv: Record<string, string>,
-  assetPrefix: string
-): NextConfig {
-  return {
-    assetPrefix,
-    reactCompiler: true,
-    reactStrictMode: false,
-    compress: true,
-    productionBrowserSourceMaps: true,
-    sassOptions: { quietDeps: true },
-    experimental: {
-      webpackMemoryOptimizations: true,
-      webpackBuildWorker: true,
-    },
-    images: {
-      loader: "default",
-      remotePatterns: [
-        { protocol: "https", hostname: "6529.io" },
-        { protocol: "https", hostname: "staging.6529.io" },
-        { protocol: "https", hostname: "arweave.net" },
-        { protocol: "http", hostname: "localhost" },
-        { protocol: "https", hostname: "media.generator.seize.io" },
-        { protocol: "https", hostname: "d3lqz0a4bldqgf.cloudfront.net" },
-        { protocol: "https", hostname: "i.seadn.io" },
-        { protocol: "https", hostname: "i2.seadn.io" },
-        { protocol: "https", hostname: "i2c.seadn.io" },
-        { protocol: "https", hostname: "res.cloudinary.com" },
-        { protocol: "https", hostname: "ipfs.6529.io" },
-        { protocol: "https", hostname: "ipfs.io" },
-      ],
-      minimumCacheTTL: 86400,
-      formats: ["image/avif", "image/webp"],
-      qualities: [100, 75],
-    },
-    transpilePackages: ["react-tweet"],
-    poweredByHeader: false,
-    async headers() {
-      return [
-        {
-          source: "/:path*",
-          headers: createSecurityHeaders(publicEnv["API_ENDPOINT"]),
-        },
-      ];
-    },
-    webpack: (
-      config: any,
-      { dev, isServer }: { dev: boolean; isServer: boolean }
-    ) => {
-      config.resolve.alias.canvas = false;
-      config.resolve.alias.encoding = false;
-      config.resolve.alias["@react-native-async-storage/async-storage"] = false;
-      config.resolve.alias["react-native"] = false;
-      config.resolve.alias["idb-keyval"] = path.resolve(
-        process.cwd(),
-        "lib/storage/idb-keyval.ts"
-      );
-      if (!dev && !isServer) config.devtool = "source-map";
-      config.optimization.minimize = false;
-      return config;
-    },
-    turbopack: {
-      resolveAlias: {
-        canvas: "./stubs/empty.js",
-        encoding: "./stubs/empty.js",
-        "@react-native-async-storage/async-storage": "./stubs/empty.js",
-        "react-native": "./stubs/empty.js",
-        "idb-keyval": "./lib/storage/idb-keyval.ts",
-      },
-    },
-    serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],
-  };
-}
-
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
-  logOnce("NODE_ENV", mode);
+  logOnceConfig("NODE_ENV", mode);
 
   // Build & Dev phases
   if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
@@ -172,7 +41,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     const VERSION = computeVersionFromEnvOrGit();
     const ASSETS_FROM_S3 = resolveAssetsFlagFromEnv();
-    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
+    logOnceConfig("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
     // Prepare and validate public runtime from process.env
     const shape = publicEnvSchema._def.shape();
@@ -238,11 +107,11 @@ const nextConfigFactory = (phase: string): NextConfig => {
   // Production server phase
   if (phase === PHASE_PRODUCTION_SERVER) {
     const VERSION = fs.readFileSync(".next/BUILD_ID", "utf8").trim();
-    logOnce("VERSION (from BUILD_ID)", VERSION);
+    logOnceConfig("VERSION (from BUILD_ID)", VERSION);
 
     const publicEnv = loadBakedRuntimeConfig(VERSION); // FAIL-FAST inside
     const ASSETS_FROM_S3 = loadAssetsFlagAtRuntime();
-    logOnce("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
+    logOnceConfig("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
     const assetPrefix = ASSETS_FROM_S3
       ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
