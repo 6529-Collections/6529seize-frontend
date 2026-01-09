@@ -734,10 +734,11 @@ export const formatLargeNumber = (num: number): string => {
   const absNum = Math.abs(num);
 
   const format = (value: number, suffix: string) => {
-    if (value % 1 === 0) {
-      return `${value.toLocaleString()}${suffix}`;
+    const rounded = Math.round(value * 10) / 10;
+    if (rounded % 1 === 0) {
+      return `${rounded.toLocaleString()}${suffix}`;
     } else {
-      return `${value.toLocaleString(undefined, {
+      return `${rounded.toLocaleString(undefined, {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,
       })}${suffix}`;

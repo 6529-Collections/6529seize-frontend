@@ -9,7 +9,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "react-use";
-import CommunityMembersSortControls from "./members-table/CommunityMembersSortControls";
+import CommunityMembersMobileSortContent from "./members-table/CommunityMembersMobileSortContent";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
@@ -24,7 +24,6 @@ import { FunnelIcon } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
 import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
-import CommunityMembersMobileSortContent from "./members-table/CommunityMembersMobileSortContent";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -57,7 +56,7 @@ export default function CommunityMembers() {
       if (!sort) return defaultSortBy;
       if (
         Object.values(ApiCommunityMembersSortOption).includes(
-          sort.toLowerCase() as any
+          sort.toLowerCase() as ApiCommunityMembersSortOption
         )
       ) {
         return sort.toLowerCase() as ApiCommunityMembersSortOption;
@@ -72,7 +71,7 @@ export default function CommunityMembers() {
       if (!sortDirection) return defaultSortDirection;
       if (
         Object.values(SortDirection).includes(
-          sortDirection.toUpperCase() as any
+          sortDirection.toUpperCase() as SortDirection
         )
       ) {
         return sortDirection.toUpperCase() as SortDirection;
@@ -125,15 +124,35 @@ export default function CommunityMembers() {
     [searchParams]
   );
 
+  const calculateSortDirection = ({
+    newSortBy,
+    currentSortBy,
+    currentSortDirection,
+  }: {
+    newSortBy: ApiCommunityMembersSortOption;
+    currentSortBy: ApiCommunityMembersSortOption;
+    currentSortDirection: SortDirection;
+  }): SortDirection | null => {
+    if (newSortBy === currentSortBy) {
+      if (currentSortDirection === SortDirection.ASC) {
+        return SortDirection.DESC;
+      }
+      return SortDirection.ASC;
+    }
+    return defaultSortDirection;
+  };
+
   const [debouncedParams, setDebouncedParams] = useState<CommunityMembersQuery>(
     () => params
   );
 
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
-  const { isLoading, data: members } = useQuery<
-    Page<ApiCommunityMemberOverview>
-  >({
+  const {
+    isLoading,
+    isFetching,
+    data: members,
+  } = useQuery<Page<ApiCommunityMemberOverview>>({
     queryKey: [
       QueryKey.COMMUNITY_MEMBERS_TOP,
       {
@@ -166,27 +185,29 @@ export default function CommunityMembers() {
     [createQueryString, pathname, router]
   );
 
-  const setSortBy = useCallback(
-    async (sortBy: ApiCommunityMembersSortOption): Promise<void> => {
-      const items: QueryUpdateInput[] = [
-        { name: "sortBy", value: sortBy },
-        { name: "page", value: "1" },
-      ];
-      await updateFields(items);
-    },
-    [updateFields]
-  );
-
-  const setSortDirection = useCallback(
-    async (direction: SortDirection): Promise<void> => {
-      const items: QueryUpdateInput[] = [
-        { name: "sortDirection", value: direction },
-        { name: "page", value: "1" },
-      ];
-      await updateFields(items);
-    },
-    [updateFields]
-  );
+  const setSortBy = async (
+    sortBy: ApiCommunityMembersSortOption
+  ): Promise<void> => {
+    const items: QueryUpdateInput[] = [
+      {
+        name: "sortBy",
+        value: sortBy,
+      },
+      {
+        name: "sortDirection",
+        value: calculateSortDirection({
+          newSortBy: sortBy,
+          currentSortBy: debouncedParams.sort,
+          currentSortDirection: debouncedParams.sort_direction,
+        }),
+      },
+      {
+        name: "page",
+        value: "1",
+      },
+    ];
+    await updateFields(items);
+  };
 
   useEffect(() => {
     const urlGroup = params.group_id ?? null;
@@ -302,22 +323,17 @@ export default function CommunityMembers() {
         </div>
       </div>
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
-        <div className="tw-hidden sm:tw-block">
-          <CommunityMembersSortControls
-            activeSort={params.sort}
-            sortDirection={params.sort_direction}
-            onSortChange={setSortBy}
-            onDirectionChange={setSortDirection}
-          />
-        </div>
         {members ? (
           <>
-            <div className="tw-mt-2 tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700 lg:tw-mt-3">
+            <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
               <CommunityMembersTable
                 members={members.data}
+                activeSort={params.sort}
+                sortDirection={params.sort_direction}
                 page={members.page}
                 pageSize={params.page_size}
-                activeSort={params.sort}
+                isLoading={isFetching}
+                onSort={setSortBy}
               />
             </div>
             {totalPages > 1 && (
@@ -357,12 +373,8 @@ export default function CommunityMembers() {
         <CommunityMembersMobileSortContent
           activeSort={params.sort}
           sortDirection={params.sort_direction}
-          onSortChange={(sort) => {
+          onSort={(sort) => {
             setSortBy(sort);
-            setMobileSortOpen(false);
-          }}
-          onDirectionChange={(dir) => {
-            setSortDirection(dir);
           }}
         />
       </MobileWrapperDialog>

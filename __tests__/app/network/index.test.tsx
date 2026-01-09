@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useSelector } from "react-redux";
 
-// Mocks
 jest.mock("react-redux", () => ({
   useSelector: jest.fn(),
 }));
@@ -23,10 +22,11 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-// Mock internal components
 jest.mock("@/components/network/NetworkPageLayout", () => ({
   __esModule: true,
-  default: ({ children }: any) => <div data-testid="layout">{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="layout">{children}</div>
+  ),
 }));
 jest.mock(
   "@/components/community/members-table/CommunityMembersTable",
@@ -40,24 +40,22 @@ jest.mock(
   "@/components/community/members-table/CommunityMembersTableSkeleton",
   () => () => <div data-testid="loading-skeleton" />
 );
-jest.mock(
-  "@/components/community/members-table/CommunityMembersSortControls",
-  () => () => <div data-testid="sort-controls" />
-);
-jest.mock(
-  "@/components/community/members-table/CommunityMembersMobileSortContent",
-  () => () => <div data-testid="mobile-sort" />
-);
-jest.mock(
-  "@/components/groups/sidebar/GroupsSidebar",
-  () => () => <div data-testid="groups-sidebar" />
-);
+jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
+  <div data-testid="groups-sidebar" />
+));
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
-  () => ({ children, isOpen }: any) => isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
+  () =>
+    ({
+      children,
+      isOpen,
+    }: {
+      children: React.ReactNode;
+      isOpen: boolean;
+    }) =>
+      isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
 );
 
-// Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
     title: "Test Title",
