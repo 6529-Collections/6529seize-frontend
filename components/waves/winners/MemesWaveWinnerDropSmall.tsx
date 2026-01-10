@@ -15,7 +15,7 @@ import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
   readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
 
@@ -57,8 +57,8 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
       "";
 
     const handleDropClick = useCallback(() => {
-      onDropClick(drop);
-    }, [drop, onDropClick]);
+      onDropClick();
+    }, [onDropClick]);
 
     return (
       <div

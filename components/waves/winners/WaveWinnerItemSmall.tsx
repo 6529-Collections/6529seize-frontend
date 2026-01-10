@@ -7,7 +7,7 @@ import { DefaultWaveWinnerDropSmall } from "./DefaultWaveWinnerDropSmall";
 
 interface WaveWinnerItemSmallProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
   readonly wave: ApiWave;
   readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
