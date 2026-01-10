@@ -99,6 +99,24 @@ function VotesIcon() {
   );
 }
 
+function TdhIcon() {
+  return (
+    <svg
+      className="tw-size-5 tw-text-white"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+      />
+    </svg>
+  );
+}
+
 export default function MetricsPageClient() {
   useSetTitle("Metrics");
 
@@ -167,6 +185,15 @@ export default function MetricsPageClient() {
               icon={<VotesIcon />}
               iconBgColor="tw-bg-cyan-500"
               accentColor="tw-text-cyan-400"
+              useValueCount
+            />
+            <MetricCard
+              title="Main Stage TDH"
+              dailyData={dailyQuery.data.tdhOnMainStageSubmissions}
+              weeklyData={weeklyQuery.data.tdhOnMainStageSubmissions}
+              icon={<TdhIcon />}
+              iconBgColor="tw-bg-amber-500"
+              accentColor="tw-text-amber-400"
               useValueCount
             />
           </div>

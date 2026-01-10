@@ -27,6 +27,7 @@ export interface CommunityMetrics {
   readonly mainStageSubmissions: MetricData;
   readonly mainStageDistinctVoters: MetricData;
   readonly mainStageVotes: MetricData;
+  readonly tdhOnMainStageSubmissions: MetricData;
 }
 
 function sanitizeNumber(value: unknown): number {
@@ -92,6 +93,9 @@ async function fetchCommunityMetrics(
       response.main_stage_distinct_voters
     ),
     mainStageVotes: transformMetric(response.main_stage_votes),
+    tdhOnMainStageSubmissions: transformMetric(
+      response.tdh_on_main_stage_submissions
+    ),
   };
 }
 

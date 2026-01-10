@@ -5705,6 +5705,7 @@ components:
         - main_stage_distinct_voters
         - main_stage_votes
         - network_tdh
+        - tdh_on_main_stage_submissions
       properties:
         drops_created:
           $ref: "#/components/schemas/ApiCommunityMetric"
@@ -5717,6 +5718,8 @@ components:
         main_stage_votes:
           $ref: "#/components/schemas/ApiCommunityMetric"
         network_tdh:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        tdh_on_main_stage_submissions:
           $ref: "#/components/schemas/ApiCommunityMetric"
     ApiCommunityMetricSample:
       type: object
