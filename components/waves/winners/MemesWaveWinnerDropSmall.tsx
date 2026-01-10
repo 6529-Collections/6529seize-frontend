@@ -11,7 +11,6 @@ import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import WaveDropTime from "../drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -52,7 +51,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
     const userVoteStyle = getUserVoteStyle();
 
     const votingLabel =
-      WAVE_VOTING_LABELS[drop.wave.voting_credit_type as ApiWaveCreditType] ??
+      WAVE_VOTING_LABELS[drop.wave.voting_credit_type] ??
       drop.wave.voting_credit_type ??
       "";
 
