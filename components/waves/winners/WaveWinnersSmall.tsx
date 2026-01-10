@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useEffect, useCallback } from "react";
+import { useState, memo, useCallback } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
@@ -39,9 +39,9 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(({ wave }) => {
   const {
     decisions: { multiDecision },
   } = useWave(wave);
-  const [activeDecisionPoint, setActiveDecisionPoint] = useState<string | null>(
-    null
-  );
+  const [selectedDecisionPoint, setSelectedDecisionPoint] = useState<
+    string | null
+  >(null);
 
   // Fetch data using decisions endpoint for all waves - same approach as WaveWinners
   const { decisionPoints: rawDecisionPoints, isFetching: isDecisionsLoading } =
@@ -64,12 +64,9 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(({ wave }) => {
     }
   );
 
-  // Set first decision point as active when loaded
-  useEffect(() => {
-    if (decisionPoints?.length > 0 && !activeDecisionPoint) {
-      setActiveDecisionPoint(decisionPoints[0]?.id!);
-    }
-  }, [decisionPoints, activeDecisionPoint]);
+  // Derive the effective active decision point (defaults to first if none selected)
+  const activeDecisionPoint =
+    selectedDecisionPoint ?? decisionPoints[0]?.id ?? null;
 
   // Loading state
   if (isDecisionsLoading) {
@@ -77,13 +74,13 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(({ wave }) => {
   }
 
   // Empty state
-  if (!decisionPoints || decisionPoints.length === 0) {
+  if (decisionPoints.length === 0) {
     return <WaveWinnersSmallEmpty isMultiDecision={multiDecision} />;
   }
 
   // For single decision waves, just render the first decision point's drops
   if (!multiDecision) {
-    const winners = decisionPoints[0]?.winners || [];
+    const winners = decisionPoints[0]?.winners ?? [];
 
     return (
       <div className="tw-p-3">
@@ -125,7 +122,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(({ wave }) => {
           winnersCount: point.winners.length,
         }))}
         activeDecisionPoint={activeDecisionPoint}
-        onChange={setActiveDecisionPoint}
+        onChange={setSelectedDecisionPoint}
       />
 
       {/* Show winners for selected decision point */}

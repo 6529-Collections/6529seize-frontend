@@ -24,15 +24,14 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
           rank={rank}
         />
       );
-    } else {
-      return (
-        <DefaultWaveWinnerDropSmall
-          drop={drop}
-          onDropClick={onDropClick}
-          rank={rank}
-        />
-      );
     }
+    return (
+      <DefaultWaveWinnerDropSmall
+        drop={drop}
+        onDropClick={onDropClick}
+        rank={rank}
+      />
+    );
   }
 );
 
