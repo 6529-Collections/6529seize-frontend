@@ -10,10 +10,12 @@ export default function UserLevel({
   level,
   size = "base",
   asSpan = false,
+  showLabel = true,
 }: {
   readonly level: number;
   readonly size?: "xxs" | "xs" | "sm" | "base" | undefined;
   readonly asSpan?: boolean | undefined;
+  readonly showLabel?: boolean | undefined;
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
@@ -37,8 +39,8 @@ export default function UserLevel({
     window.open("/network/levels", "_blank");
   };
 
-  const content = `Level ${level}`;
-  const sharedClasses = `tw-inline-flex tw-items-center tw-rounded-xl tw-px-2 tw-ring-inset ${classes}`;
+  const content = showLabel ? `Level ${level}` : `${level}`;
+  const sharedClasses = `tw-inline-flex tw-items-center tw-justify-center ${showLabel ? "tw-rounded-xl tw-px-2" : "tw-rounded-full tw-min-w-[2rem]"} tw-ring-inset ${classes}`;
 
   if (asSpan) {
     return <span className={sharedClasses}>{content}</span>;

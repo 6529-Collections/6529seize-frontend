@@ -1,10 +1,9 @@
-import type { CommunityMemberOverview } from "@/entities/IProfile";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { SortDirection } from "@/entities/ISort";
-import type { CommunityMembersSortOption } from "@/enums";
+import type { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
-import CommunityMembersMobileFilterBar from "./CommunityMembersMobileFilterBar";
 
 export default function CommunityMembersTable({
   members,
@@ -15,13 +14,13 @@ export default function CommunityMembersTable({
   isLoading,
   onSort,
 }: {
-  readonly members: CommunityMemberOverview[];
-  readonly activeSort: CommunityMembersSortOption;
+  readonly members: ApiCommunityMemberOverview[];
+  readonly activeSort: ApiCommunityMembersSortOption;
   readonly sortDirection: SortDirection;
   readonly page: number;
   readonly pageSize: number;
   readonly isLoading: boolean;
-  readonly onSort: (sort: CommunityMembersSortOption) => void;
+  readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
 }) {
   return (
     <>
@@ -45,14 +44,8 @@ export default function CommunityMembersTable({
         </table>
       </div>
 
-      <div className="sm:tw-hidden">
-        <CommunityMembersMobileFilterBar
-          activeSort={activeSort}
-          sortDirection={sortDirection}
-          isLoading={isLoading}
-          onSort={onSort}
-        />
-        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-2">
+      <div className="sm:tw-hidden tw-mt-3">
+        <div className="tw-flex tw-flex-col tw-gap-y-3">
           {members.map((member, index) => (
             <CommunityMembersMobileCard
               key={member.detail_view_key}

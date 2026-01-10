@@ -5,7 +5,7 @@ import { test as baseTest, expect } from "@playwright/test";
 export const test = baseTest.extend({
   page: async ({ page }, use, testInfo) => {
     // Use testDelay from metadata or default to 0 if undefined
-    const delay = testInfo.project.metadata?.testDelay ?? 0;
+    const delay = testInfo.project.metadata?.["testDelay"] ?? 0;
     await page.waitForTimeout(delay);
     await use(page);
   },

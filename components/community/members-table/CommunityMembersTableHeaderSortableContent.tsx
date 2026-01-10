@@ -6,7 +6,16 @@ import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIc
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { CommunityMembersSortOption } from "@/enums";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+
+const TITLE: Record<string, string> = {
+  [ApiCommunityMembersSortOption.Display]: "Profile",
+  [ApiCommunityMembersSortOption.Level]: "Level",
+  [ApiCommunityMembersSortOption.Tdh]: "TDH",
+  [ApiCommunityMembersSortOption.Xtdh]: "xTDH",
+  [ApiCommunityMembersSortOption.Rep]: "REP",
+  [ApiCommunityMembersSortOption.Cic]: "NIC",
+};
 
 export default function CommunityMembersTableHeaderSortableContent({
   sort,
@@ -15,21 +24,14 @@ export default function CommunityMembersTableHeaderSortableContent({
   hoveringOption,
   isLoading,
 }: {
-  readonly sort: CommunityMembersSortOption;
-  readonly activeSort: CommunityMembersSortOption;
+  readonly sort: ApiCommunityMembersSortOption;
+  readonly activeSort: ApiCommunityMembersSortOption;
   readonly sortDirection: SortDirection;
-  readonly hoveringOption: CommunityMembersSortOption | null;
+  readonly hoveringOption: ApiCommunityMembersSortOption | null;
   readonly isLoading: boolean;
 }) {
   const isActive = sort === activeSort;
   const direction = isActive ? sortDirection : SortDirection.DESC;
-  const TITLE: Record<CommunityMembersSortOption, string> = {
-    [CommunityMembersSortOption.DISPLAY]: "Profile",
-    [CommunityMembersSortOption.LEVEL]: "Level",
-    [CommunityMembersSortOption.TDH]: "TDH",
-    [CommunityMembersSortOption.REP]: "REP",
-    [CommunityMembersSortOption.NIC]: "NIC",
-  };
 
   const [rotate, setRotate] = useState<boolean>(false);
   useEffect(() => setRotate(false), [sortDirection]);
@@ -43,7 +45,8 @@ export default function CommunityMembersTableHeaderSortableContent({
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
-        } tw-transition tw-duration-300 tw-ease-out`}>
+        } tw-transition tw-duration-300 tw-ease-out`}
+      >
         {TITLE[sort]}
       </span>
       {showLoader ? (
