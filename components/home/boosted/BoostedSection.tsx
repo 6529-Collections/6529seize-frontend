@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import BoostedDropCard from "./BoostedDropCard";
+import BoostedDropCardHome from "./BoostedDropCardHome";
 
 const BOOSTED_DROPS_LIMIT = 10;
 
@@ -53,7 +53,7 @@ export function BoostedSection() {
       {/* Horizontal scroll container */}
       <div className="tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-pb-2 tw-scrollbar-none">
         {drops.map((drop) => (
-          <BoostedDropCard
+          <BoostedDropCardHome
             key={drop.id}
             drop={drop}
             onClick={() => handleDropClick(drop)}
