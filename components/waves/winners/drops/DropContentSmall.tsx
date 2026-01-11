@@ -6,7 +6,7 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 
 interface DropContentSmallProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
 }
 
 export const DropContentSmall = memo<DropContentSmallProps>(
@@ -14,8 +14,8 @@ export const DropContentSmall = memo<DropContentSmallProps>(
     const [activePartIndex, setActivePartIndex] = useState(0);
 
     const handleDropClick = useCallback(() => {
-      onDropClick(drop);
-    }, [drop, onDropClick]);
+      onDropClick();
+    }, [onDropClick]);
 
     return (
       <div>
