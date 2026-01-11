@@ -11,7 +11,7 @@
     "base-build": "cross-env NODE_OPTIONS=--max-old-space-size=7680 next build",
     "build": "npm run lint:quiet && npm run base-build",
     "prebuild": "npm run build:env-schema && npm run generate",
-    "postbuild": "next-sitemap",
+    "postbuild": "next-sitemap --config next-sitemap.config.ts",
     "start": "next start -p 3001",
     "test": "jest --silent --verbose=false --coverageReporters=none",
     "test-json": "jest --silent --json --outputFile=test-results/jest-results.json ; npm run test-extract-failed-names",
