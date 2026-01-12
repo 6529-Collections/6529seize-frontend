@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useEffect } from "react";
+import { useState, memo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -30,7 +30,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     const {
       decisions: { multiDecision },
     } = useWave(wave);
-    const [activeDecisionPoint, setActiveDecisionPoint] = useState<
+    const [selectedDecisionPoint, setSelectedDecisionPoint] = useState<
       string | null
     >(null);
 
@@ -57,12 +57,13 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
       }
     );
 
-    // Set first decision point as active when loaded
-    useEffect(() => {
-      if (decisionPoints.length > 0 && !activeDecisionPoint) {
-        setActiveDecisionPoint(decisionPoints[0]!.id);
-      }
-    }, [decisionPoints, activeDecisionPoint]);
+    // Derive the effective active decision point during render
+    // Falls back to first decision point when selection is null or invalid
+    const activeDecisionPoint =
+      selectedDecisionPoint &&
+      decisionPoints.some((p) => p.id === selectedDecisionPoint)
+        ? selectedDecisionPoint
+        : (decisionPoints[0]?.id ?? null);
 
     // Loading state
     if (isDecisionsLoading) {
@@ -70,13 +71,13 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     }
 
     // Empty state
-    if (!decisionPoints || decisionPoints.length === 0) {
+    if (decisionPoints.length === 0) {
       return <WaveWinnersSmallEmpty isMultiDecision={multiDecision} />;
     }
 
     // For single decision waves, just render the first decision point's drops
     if (!multiDecision) {
-      const winners = decisionPoints[0]?.winners || [];
+      const winners = decisionPoints[0]?.winners ?? [];
 
       return (
         <div className="tw-p-3">
@@ -93,7 +94,9 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
                 drop={convertApiDropToExtendedDrop(winner.drop)}
                 wave={wave}
                 rank={winner.place}
-                onDropClick={onDropClick}
+                onDropClick={() =>
+                  onDropClick(convertApiDropToExtendedDrop(winner.drop))
+                }
               />
             ))}
           </div>
@@ -118,7 +121,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
             winnersCount: point.winners.length,
           }))}
           activeDecisionPoint={activeDecisionPoint}
-          onChange={setActiveDecisionPoint}
+          onChange={setSelectedDecisionPoint}
         />
 
         {/* Show winners for selected decision point */}
@@ -132,7 +135,9 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
                   drop={convertApiDropToExtendedDrop(winner.drop)}
                   wave={wave}
                   rank={winner.place}
-                  onDropClick={onDropClick}
+                  onDropClick={() =>
+                    onDropClick(convertApiDropToExtendedDrop(winner.drop))
+                  }
                 />
               ))}
         </div>
