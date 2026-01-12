@@ -1,25 +1,24 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  useCallback
-} from "react";
+import {
+  CONSENT_ESSENTIAL_COOKIE,
+  CONSENT_PERFORMANCE_COOKIE,
+} from "@/constants/constants";
 import {
   commonApiDelete,
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
 import Cookies from "js-cookie";
-import {
-  CONSENT_ESSENTIAL_COOKIE,
-  CONSENT_PERFORMANCE_COOKIE,
-} from "@/constants";
+import type { ReactNode } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { AuthContext } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
 
@@ -93,42 +92,47 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     document.head.appendChild(script2);
   }, []);
 
-  const getCookieConsent = useCallback(async (isFirstLoad: boolean = false) => {
-    try {
-      const essentialCookies = getCookieConsentByName(CONSENT_ESSENTIAL_COOKIE);
-      const performanceCookies = getCookieConsentByName(
-        CONSENT_PERFORMANCE_COOKIE
-      );
-
-      if (performanceCookies) {
-        loadPerformanceCookies();
-      }
-
-      if (essentialCookies != undefined && performanceCookies != undefined) {
-        setShowCookieConsent(false);
-      }
-
-      if (!isFirstLoad) {
-        return;
-      }
-
-      const response = await commonApiFetch<CookieConsentResponse>({
-        endpoint: `policies/country-check`,
-      });
-      setCountry(response.country);
-      if (response.is_eu) {
-        setShowCookieConsent(
-          essentialCookies == undefined && performanceCookies == undefined
+  const getCookieConsent = useCallback(
+    async (isFirstLoad: boolean = false) => {
+      try {
+        const essentialCookies = getCookieConsentByName(
+          CONSENT_ESSENTIAL_COOKIE
         );
-      } else {
-        Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
-        Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
-        getCookieConsent();
+        const performanceCookies = getCookieConsentByName(
+          CONSENT_PERFORMANCE_COOKIE
+        );
+
+        if (performanceCookies) {
+          loadPerformanceCookies();
+        }
+
+        if (essentialCookies != undefined && performanceCookies != undefined) {
+          setShowCookieConsent(false);
+        }
+
+        if (!isFirstLoad) {
+          return;
+        }
+
+        const response = await commonApiFetch<CookieConsentResponse>({
+          endpoint: `policies/country-check`,
+        });
+        setCountry(response.country);
+        if (response.is_eu) {
+          setShowCookieConsent(
+            essentialCookies == undefined && performanceCookies == undefined
+          );
+        } else {
+          Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
+          Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
+          getCookieConsent();
+        }
+      } catch (error) {
+        console.error("Failed to fetch cookie consent status", error);
       }
-    } catch (error) {
-      console.error("Failed to fetch cookie consent status", error);
-    }
-  }, [loadPerformanceCookies]);
+    },
+    [loadPerformanceCookies]
+  );
 
   const consent = useCallback(async () => {
     try {

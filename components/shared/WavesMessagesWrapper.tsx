@@ -3,11 +3,10 @@
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
-import type { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
 import { commonApiFetch } from "../../services/api/common-api";
@@ -20,6 +19,7 @@ import BrainRightSidebar, {
 } from "../brain/right-sidebar/BrainRightSidebar";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
+import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -53,7 +53,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const waveId = searchParams?.get("wave") ?? undefined;
 
   // Validate drop ID format (assuming alphanumeric + hyphens)
-  const dropId = rawDropId && /^[a-zA-Z0-9-_]+$/.test(rawDropId) ? rawDropId : undefined;
+  const dropId =
+    rawDropId && /^[a-zA-Z0-9-_]+$/.test(rawDropId) ? rawDropId : undefined;
 
   // Check if we're on mobile (below LG breakpoint)
   const isMobile = breakpoint === "S";
@@ -85,15 +86,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     router.push(newUrl, { scroll: false });
   }, [searchParams, pathname, defaultPath, router]);
 
-  const onDropClick = useCallback(
-    (drop: ExtendedDrop) => {
-      const params = new URLSearchParams(searchParams?.toString() || "");
-      params.set("drop", drop.id);
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [searchParams, pathname, router]
-  );
-
   const isDropOpen = useMemo(
     () => Boolean(dropId && drop?.id?.toLowerCase() === dropId?.toLowerCase()),
     [dropId, drop?.id]
@@ -103,7 +95,9 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
   const shouldShowMainContent = !isMobile || waveId;
   const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
-  const shouldShowRightSidebar = Boolean(isRightSidebarOpen && waveId && !isDropOpen);
+  const shouldShowRightSidebar = Boolean(
+    isRightSidebarOpen && waveId && !isDropOpen
+  );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   let rightVariant: "inline" | "overlay" | null = null;
   if (shouldShowRightSidebar) {
@@ -116,12 +110,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   }
 
   return (
-    <>
+    <WaveChatScrollProvider>
       <div className="tw-relative tw-flex tw-flex-col">
         <div className="tw-relative tw-flex tw-flex-grow">
-          <div
-            className="tw-relative tw-flex tw-flex-grow tw-w-full tw-max-w-full tw-mx-auto"
-          >
+          <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-full tw-flex-grow">
             <div
               className="tw-relative tw-flex tw-w-full tw-overflow-hidden"
               style={contentContainerStyle}
@@ -130,10 +122,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 <WebBrainLeftSidebar isCollapsed={rightVariant === "inline"} />
               )}
               {shouldShowMainContent && (
-                <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full tw-min-w-0 tw-border-solid tw-border-r tw-border-iron-800 tw-border-y-0 tw-border-l-0">
+                <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
                   {children}
                   {shouldShowDropOverlay && (
-                    <div className="tw-fixed tw-inset-y-0 tw-right-0 tw-left-[var(--left-rail,0px)] tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
+                    <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[60] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[49]">
                       <BrainDesktopDrop
                         drop={{
                           type: DropSize.FULL,
@@ -148,11 +140,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 </div>
               )}
               {rightVariant === "inline" && (
-                <div className="tw-hidden lg:tw-block tw-flex-shrink-0 tw-pl-6 tw-pt-2">
+                <div className="tw-hidden tw-flex-shrink-0 tw-pl-6 tw-pt-2 lg:tw-block">
                   <BrainRightSidebar
                     variant="inline"
                     waveId={waveId}
-                    onDropClick={onDropClick}
                     activeTab={sidebarTab}
                     setActiveTab={setSidebarTab}
                   />
@@ -167,7 +158,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
         <BrainRightSidebar
           variant="overlay"
           waveId={waveId}
-          onDropClick={onDropClick}
           activeTab={sidebarTab}
           setActiveTab={setSidebarTab}
         />
@@ -180,7 +170,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
           profile={connectedProfile}
         />
       )}
-    </>
+    </WaveChatScrollProvider>
   );
 };
 

@@ -1,37 +1,45 @@
-import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { EULAConsentProvider, useEULAConsent } from '@/components/eula/EULAConsentContext';
-import { AuthContext } from '@/components/auth/Auth';
-import { CONSENT_EULA_COOKIE } from '@/constants';
+import { AuthContext } from "@/components/auth/Auth";
+import {
+  EULAConsentProvider,
+  useEULAConsent,
+} from "@/components/eula/EULAConsentContext";
+import { CONSENT_EULA_COOKIE } from "@/constants/constants";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
-jest.mock('js-cookie', () => ({
+jest.mock("js-cookie", () => ({
   get: jest.fn(),
   set: jest.fn(),
 }));
 
-jest.mock('@/components/eula/EULAModal', () => () => <div data-testid="modal" />);
+jest.mock("@/components/eula/EULAModal", () => () => (
+  <div data-testid="modal" />
+));
 
-jest.mock('@/services/api/common-api', () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
-jest.mock('@/hooks/useCapacitor', () => ({
+jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: true, platform: 'ios' }),
+  default: () => ({ isIos: true, platform: "ios" }),
 }));
 
-jest.mock('@capacitor/device', () => ({
+jest.mock("@capacitor/device", () => ({
   Device: { getId: jest.fn() },
 }));
 
-const { get, set } = require('js-cookie');
-const { commonApiFetch, commonApiPost } = require('@/services/api/common-api');
-const { Device } = require('@capacitor/device');
+const { get, set } = require("js-cookie");
+const { commonApiFetch, commonApiPost } = require("@/services/api/common-api");
+const { Device } = require("@capacitor/device");
 
-const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-function renderProvider(children: React.ReactNode, auth: any = { setToast: jest.fn() }) {
+function renderProvider(
+  children: React.ReactNode,
+  auth: any = { setToast: jest.fn() }
+) {
   return render(
     <AuthContext.Provider value={auth}>
       <EULAConsentProvider>{children}</EULAConsentProvider>
@@ -39,51 +47,51 @@ function renderProvider(children: React.ReactNode, auth: any = { setToast: jest.
   );
 }
 
-describe('EULAConsentContext', () => {
+describe("EULAConsentContext", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('useEULAConsent throws outside provider', () => {
+  it("useEULAConsent throws outside provider", () => {
     const Wrapper = () => {
       useEULAConsent();
       return null;
     };
-    expect(() => render(<Wrapper />)).toThrow('useEULAConsent must be used within a EULAConsentProvider');
+    expect(() => render(<Wrapper />)).toThrow(
+      "useEULAConsent must be used within a EULAConsentProvider"
+    );
   });
 
-  it('shows modal when no cookie and consent not found', async () => {
+  it("shows modal when no cookie and consent not found", async () => {
     get.mockReturnValueOnce(undefined);
-    Device.getId.mockResolvedValue({ identifier: 'device' });
+    Device.getId.mockResolvedValue({ identifier: "device" });
     commonApiFetch.mockResolvedValue({});
 
     renderProvider(<div />);
     await act(flushPromises);
 
     expect(commonApiFetch).toHaveBeenCalled();
-    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
     expect(set).not.toHaveBeenCalled();
   });
 
-  it('sets cookie and hides modal when consent exists', async () => {
+  it("sets cookie and hides modal when consent exists", async () => {
     get.mockReturnValueOnce(undefined);
-    Device.getId.mockResolvedValue({ identifier: 'device' });
+    Device.getId.mockResolvedValue({ identifier: "device" });
     commonApiFetch.mockResolvedValue({ accepted_at: Date.now() });
 
     renderProvider(<div />);
     await act(flushPromises);
 
-    expect(set).toHaveBeenCalledWith(
-      CONSENT_EULA_COOKIE,
-      'true',
-      { expires: expect.any(Date) }
-    );
-    expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+    expect(set).toHaveBeenCalledWith(CONSENT_EULA_COOKIE, "true", {
+      expires: expect.any(Date),
+    });
+    expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
   });
 
-  it('posts consent and hides modal when consent() called', async () => {
+  it("posts consent and hides modal when consent() called", async () => {
     get.mockReturnValueOnce(undefined);
-    Device.getId.mockResolvedValue({ identifier: 'device' });
+    Device.getId.mockResolvedValue({ identifier: "device" });
     commonApiFetch.mockResolvedValue({});
     commonApiPost.mockResolvedValue({});
 
@@ -95,18 +103,19 @@ describe('EULAConsentContext', () => {
     renderProvider(<TestComp />);
     await act(flushPromises);
 
-    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
 
     await act(async () => {
-      fireEvent.click(screen.getByText('agree'));
+      fireEvent.click(screen.getByText("agree"));
       await flushPromises();
     });
 
     expect(commonApiPost).toHaveBeenCalledWith({
-      endpoint: 'policies/eula-consent',
-      body: { device_id: 'device', platform: 'ios' },
+      endpoint: "policies/eula-consent",
+      body: { device_id: "device", platform: "ios" },
     });
-    expect(set).toHaveBeenCalledWith(CONSENT_EULA_COOKIE, 'true', { expires: 365 });
+    expect(set).toHaveBeenCalledWith(CONSENT_EULA_COOKIE, "true", {
+      expires: 365,
+    });
   });
 });
-

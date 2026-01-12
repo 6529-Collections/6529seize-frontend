@@ -1,14 +1,31 @@
 "use client";
 
-import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_ABI } from "@/abis/abis";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   ALL_USE_CASE,
   MINTING_USE_CASE,
 } from "@/components/delegation/delegation-constants";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
+} from "@/components/nextGen/nextgen_contracts";
+import type { CollectionWithMerkle } from "@/components/nextGen/nextgen_entities";
+import { AllowlistType, Status } from "@/components/nextGen/nextgen_entities";
+import {
+  formatNameForUrl,
+  getStatusFromDates,
+  useCollectionCostsHook,
+  useMintSharedState,
+  useSharedState,
+} from "@/components/nextGen/nextgen_helpers";
 import { publicEnv } from "@/config/env";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+} from "@/constants/constants";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fromGWEI } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
@@ -17,24 +34,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract, useReadContracts } from "wagmi";
-import {
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
-import type {
-  CollectionWithMerkle} from "@/components/nextGen/nextgen_entities";
-import {
-  AllowlistType,
-  Status,
-} from "@/components/nextGen/nextgen_entities";
-import {
-  formatNameForUrl,
-  getStatusFromDates,
-  useCollectionCostsHook,
-  useMintSharedState,
-  useSharedState,
-} from "@/components/nextGen/nextgen_helpers";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import {
   NextGenCountdown,
   NextGenMintCounts,

@@ -1,5 +1,5 @@
 import DistributionPage from "@/components/distribution/Distribution";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -61,7 +61,8 @@ jest.mock("@/components/address/Address", () => {
       data-testid="address-component"
       data-wallet={wallets?.[0]}
       data-display={display}
-      data-hide-copy={hideCopy}>
+      data-hide-copy={hideCopy}
+    >
       {display || wallets?.[0]}
     </div>
   );
@@ -79,7 +80,8 @@ jest.mock("@/components/searchModal/SearchModal", () => ({
     <div data-testid="search-wallets-display">
       <button
         onClick={() => setShowSearchModal(true)}
-        data-testid="open-search-modal">
+        data-testid="open-search-modal"
+      >
         Search ({searchWallets.length})
       </button>
       {searchWallets.length > 0 && (
@@ -102,7 +104,8 @@ jest.mock("@/components/searchModal/SearchModal", () => ({
         </button>
         <button
           onClick={() => setSearchWallets(["0x123", "0x456"])}
-          data-testid="add-wallets">
+          data-testid="add-wallets"
+        >
           Add Test Wallets
         </button>
       </div>
@@ -118,7 +121,8 @@ jest.mock("@/components/pagination/Pagination", () => {
       <button
         onClick={() => setPage(page + 1)}
         data-testid="next-page"
-        disabled={page >= Math.ceil(totalResults / pageSize)}>
+        disabled={page >= Math.ceil(totalResults / pageSize)}
+      >
         Next
       </button>
     </div>

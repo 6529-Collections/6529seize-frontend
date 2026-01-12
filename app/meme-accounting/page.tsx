@@ -1,9 +1,9 @@
 import Royalties from "@/components/gas-royalties/Royalties";
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
-import styles from "@/styles/Home.module.scss";
-import { GasRoyaltiesCollectionFocus } from "@/enums";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
+import styles from "@/styles/Home.module.scss";
+import { GasRoyaltiesCollectionFocus } from "@/types/enums";
+import type { Metadata } from "next";
 
 export default function MemeAccountingPage() {
   return (

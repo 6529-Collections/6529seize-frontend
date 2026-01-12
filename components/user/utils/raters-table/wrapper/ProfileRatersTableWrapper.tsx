@@ -5,15 +5,11 @@ import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoa
 import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 
 import { SortDirection } from "@/entities/ISort";
-import type {
-  ProfileRatersParamsOrderBy} from "@/enums";
-import {
-  ProfileRatersTableType,
-  RateMatter,
-} from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import type { ProfileRatersParamsOrderBy } from "@/types/enums";
+import { ProfileRatersTableType, RateMatter } from "@/types/enums";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -140,11 +136,11 @@ export default function ProfileRatersTableWrapper({
   };
 
   return (
-    <div className="tw-flex-1 tw-min-h-full tw-flex tw-flex-col">
+    <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col">
       <div>
         <ProfileRatersTableWrapperHeader type={type} />
       </div>
-      <div className="tw-flex-1 tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-max-h-[29rem] tw-scroll-py-3 tw-overflow-y-auto tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-mt-2 tw-max-h-[29rem] tw-flex-1 tw-scroll-py-3 tw-overflow-x-auto tw-overflow-y-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-mt-4">
         {isLoading ? (
           <div className="tw-p-4">
             <CommonSkeletonLoader />

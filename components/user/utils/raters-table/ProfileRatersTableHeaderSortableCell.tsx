@@ -4,7 +4,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { SortDirection } from "@/entities/ISort";
-import type { ProfileRatersParamsOrderBy } from "@/enums";
+import type { ProfileRatersParamsOrderBy } from "@/types/enums";
 import { useEffect, useState } from "react";
 import CommonTableSortIcon from "../icons/CommonTableSortIcon";
 
@@ -31,13 +31,15 @@ export default function ProfileRatersTableHeaderSortableCell({
   return (
     <th
       onClick={() => onSortTypeClick(sortType)}
-      className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-py-3.5 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+      className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+    >
       <span
         className={`${
           isActive
             ? "tw-text-primary-400"
-            : "group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
-        }`}>
+            : "tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-200"
+        }`}
+      >
         {title}
       </span>
       {isLoading && isActive ? (

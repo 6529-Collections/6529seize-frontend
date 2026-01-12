@@ -1,13 +1,13 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { publicEnv } from "@/config/env";
+import { NULL_ADDRESS } from "@/constants/constants";
+import { postData } from "@/services/6529api";
 import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useReadContract, useSignMessage } from "wagmi";
-import { NULL_ADDRESS } from "@/constants";
-import { postData } from "@/services/6529api";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   FunctionSelectors,
   NEXTGEN_CHAIN_ID,
@@ -198,7 +198,8 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
                 onChange={(e) => {
                   setStatus(false);
                   setBurnCollectionID(e.target.value);
-                }}>
+                }}
+              >
                 <option value="" disabled>
                   Select Collection
                 </option>
@@ -217,7 +218,8 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
                 onChange={(e) => {
                   setStatus(false);
                   setMintCollectionID(e.target.value);
-                }}>
+                }}
+              >
                 <option value="" disabled>
                   Select Collection
                 </option>
@@ -237,7 +239,8 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => syncDB()}>
+              onClick={() => syncDB()}
+            >
               Submit
             </Button>
           </Form>

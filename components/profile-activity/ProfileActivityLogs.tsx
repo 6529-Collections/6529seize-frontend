@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import type { CountlessPage } from "@/helpers/Types";
@@ -9,13 +9,13 @@ import CommonFilterTargetSelect from "../utils/CommonFilterTargetSelect";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
+import { selectActiveGroupId } from "@/store/groupSlice";
 import type {
   ProfileActivityFilterTargetType,
   ProfileActivityLogType,
   RateMatter,
-} from "@/enums";
-import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
-import { selectActiveGroupId } from "@/store/groupSlice";
+} from "@/types/enums";
 import { useSelector } from "react-redux";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
@@ -57,9 +57,7 @@ export default function ProfileActivityLogs({
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
-  const [targetType, setTargetType] = useState<
-    ProfileActivityFilterTargetType
-  >(
+  const [targetType, setTargetType] = useState<ProfileActivityFilterTargetType>(
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
@@ -149,13 +147,14 @@ export default function ProfileActivityLogs({
     }
   }, [logs?.page, isLoading]);
   return (
-    <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
-      <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-4 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
+    <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
+      <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-center min-[1200px]:tw-justify-between min-[1200px]:tw-gap-x-16">
         {children && <div>{children}</div>}
         {withFilters && (
           <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
             <div
-              className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-80`}>
+              className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-80`}
+            >
               <ProfileActivityLogsFilter
                 user={initialParams.handleOrWallet}
                 options={initialParams.logTypes}
@@ -175,7 +174,7 @@ export default function ProfileActivityLogs({
       {logs ? (
         <div>
           {logs?.data.length ? (
-            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-y-auto tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-x-auto tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
               <ProfileActivityLogsList
                 logs={logs.data}
                 user={initialParams.handleOrWallet}
@@ -193,7 +192,8 @@ export default function ProfileActivityLogs({
               <span
                 className={`${
                   initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
-                } tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500`}>
+                } tw-text-sm tw-italic tw-text-iron-500 sm:tw-text-md`}
+              >
                 No Activity Log
               </span>
             </div>

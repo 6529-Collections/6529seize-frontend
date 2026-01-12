@@ -12,18 +12,18 @@ import {
   printVolumeTypeDropdown,
 } from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
-import { MEMELAB_CONTRACT } from "@/constants";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
-import type { LabExtendedData, LabNFT} from "@/entities/INFT";
+import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort } from "@/enums";
 import {
   getValuesForVolumeType,
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
+import { MemeLabSort } from "@/types/enums";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -173,10 +173,10 @@ export function printNftContent(
             (volumeType === VolumeType.HOURS_24
               ? nft.total_volume_last_24_hours
               : volumeType === VolumeType.DAYS_7
-              ? nft.total_volume_last_7_days
-              : volumeType === VolumeType.DAYS_30
-              ? nft.total_volume_last_1_month
-              : nft.total_volume) * 100
+                ? nft.total_volume_last_7_days
+                : volumeType === VolumeType.DAYS_30
+                  ? nft.total_volume_last_1_month
+                  : nft.total_volume) * 100
           ) / 100
         )} ETH`}
     </>
@@ -543,10 +543,12 @@ export default function MemeLabComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <Link
           href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={isConnected ? styles["nftImagePadding"] : ""}>
               <NFTImage
@@ -610,7 +612,8 @@ export default function MemeLabComponent() {
                 className={styles["collectionLink"]}
                 href={`/meme-lab/collection/${encodeURIComponent(
                   collection.replace(" ", "-")
-                )}`}>
+                )}`}
+              >
                 view
               </a>
             </h4>
@@ -701,7 +704,7 @@ export default function MemeLabComponent() {
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
+                <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                   {printSortButtons(sort, volumeType, setSort, setVolumeType)}
                 </Col>
               </Row>

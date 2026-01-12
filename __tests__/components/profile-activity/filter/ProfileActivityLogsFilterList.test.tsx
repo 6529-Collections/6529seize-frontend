@@ -1,5 +1,5 @@
 import ProfileActivityLogsFilterList from "@/components/profile-activity/filter/ProfileActivityLogsFilterList";
-import { ProfileActivityLogType } from "@/enums";
+import { ProfileActivityLogType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock(

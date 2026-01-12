@@ -32,6 +32,7 @@ const MENU = [
       { label: "Memes Calendar", path: "/meme-calendar" },
       { label: "TDH", path: "/network/tdh" },
       { label: "Metrics", section: true },
+      { label: "Metrics", path: "/metrics" },
       { label: "Definitions", path: "/network/definitions" },
       { label: "Network Stats", path: "/network/stats" },
       { label: "Levels", path: "/network/levels" },
@@ -128,7 +129,7 @@ export default function AppSidebar({
     let startX: number | null = null;
 
     const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0]?.clientX || null;
+      startX = e.touches[0]?.clientX ?? null;
     };
 
     const onTouchEnd = (e: TouchEvent) => {
@@ -152,15 +153,15 @@ export default function AppSidebar({
     <Transition appear show={open} as={Fragment}>
       <Dialog
         as="div"
-        className="tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden tailwind-scope"
+        className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
         onClose={handleClose}
       >
         <TransitionChild
           as={Fragment}
-          enter="tw-ease-out tw-duration-300"
+          enter="tw-duration-300 tw-ease-out"
           enterFrom="tw-opacity-0"
           enterTo="tw-opacity-100"
-          leave="tw-ease-in tw-duration-200"
+          leave="tw-duration-200 tw-ease-in"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
@@ -170,21 +171,21 @@ export default function AppSidebar({
         <div className="tw-fixed tw-inset-0 tw-flex">
           <TransitionChild
             as={Fragment}
-            enter="tw-transform tw-ease-out tw-duration-300"
+            enter="tw-transform tw-duration-300 tw-ease-out"
             enterFrom="-tw-translate-x-full"
             enterTo="tw-translate-x-0"
-            leave="tw-transform tw-ease-in tw-duration-200"
+            leave="tw-transform tw-duration-200 tw-ease-in"
             leaveFrom="tw-translate-x-0"
             leaveTo="-tw-translate-x-full"
           >
-            <DialogPanel className="tw-pointer-events-auto tw-max-w-[22.75rem] tw-w-full tw-h-full tw-bg-iron-950 tw-shadow-xl tw-flex tw-flex-col tw-pt-[env(safe-area-inset-top,0px)] tw-pb-[env(safe-area-inset-bottom,0px)]">
+            <DialogPanel className="tw-pointer-events-auto tw-flex tw-size-full tw-max-w-[22.75rem] tw-flex-col tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-pt-[env(safe-area-inset-top,0px)] tw-shadow-xl">
               <AppSidebarHeader onClose={handleClose} />
-              <nav className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-6">
-                <div className="tw-flex tw-flex-col tw-h-full">
+              <nav className="tw-flex-1 tw-overflow-y-auto tw-py-6 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
+                <div className="tw-flex tw-h-full tw-flex-col">
                   <div className="tw-flex-1 tw-px-2">
                     <AppSidebarMenuItems menu={menu} onNavigate={handleClose} />
                   </div>
-                  <div className="tw-px-2 tw-mt-auto tw-border-t tw-border-iron-800 tw-border-solid tw-pt-6 tw-border-b-0 tw-border-x-0">
+                  <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-2 tw-pt-6">
                     <AppUserConnect onNavigate={handleClose} />
                   </div>
                 </div>

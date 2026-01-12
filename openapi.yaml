@@ -5700,8 +5700,29 @@ components:
       type: object
       required:
         - drops_created
+        - distinct_droppers
+        - main_stage_submissions
+        - main_stage_distinct_voters
+        - main_stage_votes
+        - network_tdh
+        - tdh_on_main_stage_submissions
+        - consolidations_formed
       properties:
         drops_created:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        distinct_droppers:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        main_stage_submissions:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        main_stage_distinct_voters:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        main_stage_votes:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        network_tdh:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        tdh_on_main_stage_submissions:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        consolidations_formed:
           $ref: "#/components/schemas/ApiCommunityMetric"
     ApiCommunityMetricSample:
       type: object

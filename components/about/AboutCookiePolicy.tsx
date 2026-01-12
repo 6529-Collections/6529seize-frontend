@@ -4,7 +4,7 @@ import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
-} from "@/constants";
+} from "@/constants/constants";
 import { useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Toggle from "react-toggle";
@@ -33,9 +33,7 @@ export default function AboutCookiePolicy() {
     <Container>
       <Row>
         <Col>
-          <h1>
-            Cookie Policy
-          </h1>
+          <h1>Cookie Policy</h1>
         </Col>
       </Row>
       <Row>
@@ -103,7 +101,8 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS"
                           target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                        >
                           AWSALBTGCORS
                         </a>{" "}
                         (Amazon Web Services)
@@ -117,7 +116,8 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTG"
                           target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                        >
                           AWSALBTG
                         </a>{" "}
                         (Amazon Web Services)
@@ -159,7 +159,8 @@ export default function AboutCookiePolicy() {
                 <span className="d-flex align-items-center gap-2">
                   <label
                     htmlFor={"performance-cookies-toggle"}
-                    className={"font-color"}>
+                    className={"font-color"}
+                  >
                     <b>
                       {isPerformanceCookiesEnabled ? "Enabled" : "Disabled"}
                     </b>
@@ -210,7 +211,8 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga_"
                           target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                        >
                           _ga_71NLVV3KY3
                         </a>{" "}
                         (Google Analytics)
@@ -224,7 +226,8 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga"
                           target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                        >
                           _ga
                         </a>{" "}
                         (Google Analytics)
@@ -238,7 +241,8 @@ export default function AboutCookiePolicy() {
                         <a
                           href="https://cookiepedia.co.uk/cookies/_gid"
                           target="_blank"
-                          rel="noopener noreferrer">
+                          rel="noopener noreferrer"
+                        >
                           _gid
                         </a>{" "}
                         (Google Analytics)

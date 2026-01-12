@@ -8,12 +8,12 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { ContractType } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getUserProfile } from "@/helpers/server.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
+import { ContractType } from "@/types/enums";
 import {
   faAnglesDown,
   faAnglesUp,
@@ -24,13 +24,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import type {
-  Address,
-  PublicClient} from "viem";
-import {
-  isAddress,
-  type WriteContractParameters,
-} from "viem";
+import type { Address, PublicClient } from "viem";
+import { isAddress, type WriteContractParameters } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import TransferModalPfp from "./TransferModalPfp";
 
@@ -197,7 +192,7 @@ function FlowTitle({
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
       <span>{label}</span>
-      <img src={icon} alt="status" className="tw-w-6 tw-h-6" />
+      <img src={icon} alt="status" className="tw-h-6 tw-w-6" />
     </span>
   );
 }
@@ -219,8 +214,8 @@ function SelectedSummaryList({
   readonly leftAtEnd: boolean;
 }) {
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0 tw-max-h-full tw-overflow-hidden">
-      <div className="tw-font-semibold tw-flex-shrink-0">
+    <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-space-y-2 tw-overflow-hidden">
+      <div className="tw-flex-shrink-0 tw-font-semibold">
         You're transferring <span className="tw-font-bold">{items.length}</span>{" "}
         {items.length === 1 ? "NFT" : "NFTs"} ·{" "}
         <span className="tw-font-bold">
@@ -232,15 +227,17 @@ function SelectedSummaryList({
       </div>
       <ul
         ref={leftListRef}
-        className="tw-flex-1 tw-min-h-0 tw-overflow-auto tw-space-y-2 tw-pl-0 tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
+        className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pl-0 tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"
+      >
         {items.map((it) => {
           const [collection, tokenId] = it.key.split(":");
           return (
             <li
               key={it.key}
-              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-p-2">
+              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-p-2"
+            >
               {it.thumbUrl ? (
-                <div className="tw-relative tw-h-10 tw-w-10 tw-rounded-md tw-overflow-hidden tw-bg-white/10">
+                <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-white/10">
                   <Image
                     alt={it.title ?? it.key}
                     src={it.thumbUrl}
@@ -267,7 +264,7 @@ function SelectedSummaryList({
         })}
       </ul>
       {leftHasOverflow && (
-        <div className="tw-text-xs tw-opacity-75 tw-text-center tw-flex-shrink-0">
+        <div className="tw-flex-shrink-0 tw-text-center tw-text-xs tw-opacity-75">
           <FontAwesomeIcon icon={leftAtEnd ? faAnglesUp : faAnglesDown} />{" "}
           Scroll for more
         </div>
@@ -326,9 +323,10 @@ function RecipientSelected({
             type="button"
             onClick={() => setSelectedWallet(w.wallet)}
             className={[
-              "tw-w-full tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-flex-col tw-items-start tw-justify-between",
+              "tw-flex tw-w-full tw-flex-col tw-items-start tw-justify-between tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 hover:tw-bg-white/15",
               isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
-            ].join(" ")}>
+            ].join(" ")}
+          >
             <div className="tw-text-sm tw-font-medium">
               {w.display || w.wallet}
             </div>
@@ -342,7 +340,7 @@ function RecipientSelected({
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
-        <div className="tw-flex tw-items-center tw-gap-3 tw-min-w-0">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
           <TransferModalPfp
             src={selectedProfile.pfp}
             alt={
@@ -364,27 +362,29 @@ function RecipientSelected({
         </div>
         <button
           type="button"
-          className="!tw-text-xs tw-rounded-md tw-bg-white/10 hover:tw-bg-white/15 tw-px-2 tw-py-1 tw-border-2 tw-border-solid tw-border-[#444] tw-font-medium"
+          className="tw-rounded-md tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-2 tw-py-1 !tw-text-xs tw-font-medium hover:tw-bg-white/15"
           onClick={() => {
             setSelectedProfile(null);
             setSelectedWallet(null);
             setResults([]);
             setQuery("");
             setTimeout(() => searchInputRef.current?.focus(), 0);
-          }}>
+          }}
+        >
           Change
         </button>
       </div>
 
-      <div className="tw-pt-4 tw-space-y-2 tw-flex tw-flex-col tw-min-h-0">
+      <div className="tw-flex tw-min-h-0 tw-flex-col tw-space-y-2 tw-pt-4">
         <div className="tw-text-sm">Choose destination wallet</div>
         <div
           ref={walletsListRef}
-          className="tw-space-y-2 tw-flex-1 tw-min-h-0 tw-overflow-auto tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
+          className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"
+        >
           {walletsContent}
         </div>
         {walletsHasOverflow && (
-          <div className="tw-text-xs tw-opacity-75 tw-text-center">
+          <div className="tw-text-center tw-text-xs tw-opacity-75">
             <FontAwesomeIcon icon={walletsAtEnd ? faAnglesUp : faAnglesDown} />{" "}
             Scroll for more
           </div>
@@ -423,19 +423,21 @@ function RecipientSearch({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search by handle, ens or wallet"
-        className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-outline-none focus:tw-bg-white/20"
+        className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-bg-white/20 focus:tw-outline-none"
         ref={searchInputRef}
       />
       <div className="tw-text-[12px] tw-opacity-60">{searchStatusText}</div>
       <div
         ref={resultsListRef}
-        className="tw-space-y-2 tw-flex-1 tw-min-h-0 tw-overflow-auto tw-pr-3 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-thumb-white/30 tw-scrollbar-track-transparent hover:tw-scrollbar-thumb-white/50">
+        className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"
+      >
         {results.map((r) => (
           <button
             key={r.profile_id ?? r.wallet}
             type="button"
             onClick={() => onPick(r)}
-            className="tw-w-full tw-text-left tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 hover:tw-bg-white/15 tw-p-2 tw-flex tw-items-center tw-gap-3">
+            className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 tw-text-left hover:tw-bg-white/15"
+          >
             <TransferModalPfp
               src={r.pfp}
               alt={r.display || r.handle || r.wallet}
@@ -453,7 +455,7 @@ function RecipientSearch({
         ))}
       </div>
       {resultsHasOverflow && (
-        <div className="tw-text-xs tw-opacity-75 tw-text-center">
+        <div className="tw-text-center tw-text-xs tw-opacity-75">
           <FontAwesomeIcon icon={resultsAtEnd ? faAnglesUp : faAnglesDown} />{" "}
           Scroll for more
         </div>
@@ -497,7 +499,8 @@ function TxStatusList({
         href={`${explorer}/tx/${hash}`}
         target="_blank"
         rel="noreferrer"
-        className="tw-inline-block tw-no-underline tw-ml-2 !tw-text-sm tw-rounded-md tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-px-2 tw-py-1 tw-border tw-border-solid tw-border-black">
+        className="tw-ml-2 tw-inline-block tw-rounded-md tw-border tw-border-solid tw-border-black tw-bg-white tw-px-2 tw-py-1 !tw-text-sm tw-text-black tw-no-underline hover:tw-bg-white/80 hover:tw-text-black"
+      >
         View Tx
       </Link>
     );
@@ -512,14 +515,15 @@ function TxStatusList({
           style={{
             backgroundColor: getBgColor(t.state),
             color: getTextColor(t.state),
-          }}>
+          }}
+        >
           <div className="tw-font-medium">
             {index + 1}/ {t.label}
           </div>
           <div className="tw-text-xs tw-opacity-60">
             Originator: {t.originKey}
           </div>
-          <div className="tw-text-sm tw-mt-2">
+          <div className="tw-mt-2 tw-text-sm">
             {t.state === "pending" && <span>Pending</span>}
             {t.state === "awaiting_approval" && (
               <span>Approve in your wallet</span>
@@ -586,7 +590,8 @@ function HeaderRight({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="tw-bg-transparent tw-border-none tw-p-0 tw-flex tw-items-center tw-justify-center">
+          className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0"
+        >
           <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
         </button>
       )}
@@ -615,14 +620,16 @@ function FooterActions({
         <button
           type="button"
           onClick={onCancel}
-          className="tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/15 tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] tw-font-medium">
+          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium hover:tw-bg-white/15"
+        >
           Cancel
         </button>
         <button
           type="button"
           disabled={!canConfirm}
           onClick={onConfirm}
-          className="tw-rounded-lg tw-bg-white tw-text-black tw-px-4 tw-py-2 tw-border-2 tw-border-solid tw-border-[#444] disabled:tw-opacity-60 disabled:tw-cursor-not-allowed tw-font-medium">
+          className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white tw-px-4 tw-py-2 tw-font-medium tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        >
           Transfer
         </button>
       </div>
@@ -635,7 +642,8 @@ function FooterActions({
       <button
         type="button"
         disabled
-        className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-opacity-60 tw-font-medium">
+        className="tw-rounded-lg tw-bg-white/10 tw-px-4 tw-py-2 tw-font-medium tw-opacity-60"
+      >
         Processing…
       </button>
     );
@@ -645,7 +653,8 @@ function FooterActions({
     <button
       type="button"
       onClick={onClose}
-      className="tw-rounded-lg tw-bg-white hover:tw-bg-white/80 tw-text-black hover:tw-text-black tw-px-4 tw-py-2">
+      className="tw-rounded-lg tw-bg-white tw-px-4 tw-py-2 tw-text-black hover:tw-bg-white/80 hover:tw-text-black"
+    >
       Close
     </button>
   );
@@ -717,8 +726,8 @@ function BodyByFlow({
     const anyPending = anyTxsPending(txs);
 
     return (
-      <div className="tw-flex-1 tw-overflow-auto tw-p-4 sm:tw-p-6 tw-space-y-4">
-        <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs sm:tw-text-sm tw-opacity-80">
+      <div className="tw-flex-1 tw-space-y-4 tw-overflow-auto tw-p-4 sm:tw-p-6">
+        <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-opacity-80 sm:tw-text-sm">
           <span>
             {anyPending
               ? "Follow the prompts in your wallet and keep this tab open."
@@ -732,8 +741,8 @@ function BodyByFlow({
   }
 
   return (
-    <div className="tw-flex-1 tw-overflow-hidden tw-flex tw-flex-col lg:tw-grid lg:tw-grid-cols-2 tw-gap-6 tw-px-4 tw-py-2">
-      <div className="tw-min-h-0 tw-max-h-[50%] lg:tw-max-h-none">
+    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-6 tw-overflow-hidden tw-px-4 tw-py-2 lg:tw-grid lg:tw-grid-cols-2">
+      <div className="tw-max-h-[50%] tw-min-h-0 lg:tw-max-h-none">
         <SelectedSummaryList
           items={items}
           leftListRef={leftListRef}
@@ -741,11 +750,12 @@ function BodyByFlow({
           leftAtEnd={leftAtEnd}
         />
       </div>
-      <div className="tw-flex tw-flex-col tw-space-y-2 tw-min-h-0 tw-flex-1 lg:tw-flex-initial">
+      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-space-y-2 lg:tw-flex-initial">
         <div
           className={`tw-font-semibold ${
             selectedProfile ? "tw-mb-2" : "tw-mb-0"
-          }`}>
+          }`}
+        >
           Recipient
         </div>
         {selectedProfile ? (
@@ -1388,24 +1398,26 @@ export default function TransferModal({
         if (!trxPending) handleClose();
       }}
       className={[
-        "tw-w-full tw-h-full tw-fixed tw-inset-0 tw-z-[1000] tw-bg-white/10 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-0",
+        "tw-fixed tw-inset-0 tw-z-[1000] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-white/10 tw-p-0 tw-backdrop-blur-sm",
         isClosing
           ? "tw-opacity-0 tw-transition-opacity tw-duration-150"
           : "tw-opacity-100 tw-transition-opacity tw-duration-150",
-      ].join(" ")}>
+      ].join(" ")}
+    >
       <div
         className={[
-          "tw-w-[95vw] tw-h-[90dvh] sm:tw-w-[90vw] sm:tw-h-[85dvh] md:tw-w-[70vw] md:tw-h-[75vh] tw-max-w-[1100px] tw-max-h-[900px] tw-rounded-2xl tw-bg-[#0c0c0d] tw-ring-[3px] tw-ring-white/30 tw-text-white tw-shadow-xl tw-overflow-hidden tw-flex tw-flex-col",
+          "tw-flex tw-h-[90dvh] tw-max-h-[900px] tw-w-[95vw] tw-max-w-[1100px] tw-flex-col tw-overflow-hidden tw-rounded-2xl tw-bg-[#0c0c0d] tw-text-white tw-shadow-xl tw-ring-[3px] tw-ring-white/30 sm:tw-h-[85dvh] sm:tw-w-[90vw] md:tw-h-[75vh] md:tw-w-[70vw]",
           isClosing
             ? "tw-scale-95 tw-opacity-0 tw-transition-all tw-duration-150"
             : "tw-scale-100 tw-opacity-100 tw-transition-all tw-duration-150",
           flow === "submission" || isClosing
             ? "tw-h-fit sm:tw-max-h-[90dvh] md:tw-max-h-[90vh]"
             : "",
-        ].join(" ")}>
+        ].join(" ")}
+      >
         {/* header */}
         <div className="tw-flex tw-items-center tw-justify-between tw-border-0 tw-border-b-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
-          <div className="tw-text-base sm:tw-text-lg tw-font-semibold tw-flex-1 tw-min-w-0 tw-pr-2">
+          <div className="tw-min-w-0 tw-flex-1 tw-pr-2 tw-text-base tw-font-semibold sm:tw-text-lg">
             <FlowTitle flow={flow} txs={txs} />
           </div>
           <HeaderRight
@@ -1455,7 +1467,7 @@ export default function TransferModal({
         />
 
         {/* footer */}
-        <div className="tw-flex tw-justify-between tw-items-center tw-gap-2 sm:tw-gap-3 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-p-4">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-border-t-[3px] tw-border-solid tw-border-white/30 tw-p-3 sm:tw-gap-3 sm:tw-p-4">
           <div className="tw-flex tw-items-center tw-gap-2">
             {flow === "submission" && anyTxsPending(txs) && (
               <>

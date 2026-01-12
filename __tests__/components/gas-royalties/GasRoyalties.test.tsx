@@ -3,7 +3,10 @@ import {
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "@/components/gas-royalties/GasRoyalties";
-import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
+import {
+  DateIntervalsSelection,
+  GasRoyaltiesCollectionFocus,
+} from "@/types/enums";
 import {
   act,
   fireEvent,
@@ -31,14 +34,13 @@ jest.mock("@/components/dotLoader/DotLoader", () => () => (
 ));
 jest.mock(
   "@/components/downloadUrlWidget/DownloadUrlWidget",
-  () => (props: any) =>
-    (
-      <button
-        data-testid="download"
-        data-name={props.name}
-        data-url={props.url}
-      />
-    )
+  () => (props: any) => (
+    <button
+      data-testid="download"
+      data-name={props.name}
+      data-url={props.url}
+    />
+  )
 );
 jest.mock(
   "@/components/datePickerModal/DatePickerModal",

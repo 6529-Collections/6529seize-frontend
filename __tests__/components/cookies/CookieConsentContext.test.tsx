@@ -1,6 +1,3 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import Cookies from "js-cookie";
-import React from "react";
 import {
   CookieConsentProvider,
   useCookieConsent,
@@ -8,8 +5,11 @@ import {
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
-} from "@/constants";
+} from "@/constants/constants";
 import * as api from "@/services/api/common-api";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import Cookies from "js-cookie";
+import React from "react";
 
 // Mock APIs and Cookies
 jest.mock("js-cookie", () => ({

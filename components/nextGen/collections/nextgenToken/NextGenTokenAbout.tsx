@@ -14,7 +14,7 @@ import {
 import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
-import { ETHEREUM_ICON_TEXT } from "@/constants";
+import { ETHEREUM_ICON_TEXT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import {
@@ -100,7 +100,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {props.token.mint_price ? (
               <span className="d-flex align-items-center">
                 {props.token.mint_price}
-                <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                   <EthereumIcon />
                 </div>
               </span>
@@ -127,7 +127,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   Burnt
                 </Tooltip>
               </>
@@ -135,7 +136,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {profile?.level ? (
               <Link
                 href={`/${profile?.handle ?? props.token.owner}`}
-                className="d-flex gap-2 decoration-hover-underline align-items-center">
+                className="d-flex gap-2 decoration-hover-underline align-items-center"
+              >
                 <UserCICAndLevel level={profile.level} />
                 <span className="decoration-underline">
                   {profile?.handle ??
@@ -175,7 +177,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
-                  data-tooltip-id={`opensea-${props.token.id}`}>
+                  data-tooltip-id={`opensea-${props.token.id}`}
+                >
                   <Image
                     unoptimized
                     className={styles["marketplace"]}
@@ -188,7 +191,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     <span className="d-flex gap-2 align-items-center">
                       <span className="d-flex align-items-center">
                         <span>{props.token.opensea_price}</span>
-                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                        <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                           <EthereumIcon />
                         </div>
                       </span>
@@ -217,7 +220,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -241,7 +245,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
-                  data-tooltip-id={`blur-${props.token.id}`}>
+                  data-tooltip-id={`blur-${props.token.id}`}
+                >
                   <Image
                     unoptimized
                     className={styles["marketplace"]}
@@ -254,7 +259,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     <span className="d-flex gap-2 align-items-center">
                       <span className="d-flex align-items-center">
                         <span>{props.token.blur_price}</span>
-                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                        <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                           <EthereumIcon />
                         </div>
                       </span>
@@ -270,7 +275,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -289,7 +295,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="d-flex gap-2 align-items-center decoration-none"
-                  data-tooltip-id={`magic-eden-${props.token.id}`}>
+                  data-tooltip-id={`magic-eden-${props.token.id}`}
+                >
                   <Image
                     unoptimized
                     className={styles["marketplace"]}
@@ -302,7 +309,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     <span className="d-flex gap-2 align-items-center">
                       <span className="d-flex align-items-center">
                         <span>{props.token.me_price}</span>
-                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                        <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                           <EthereumIcon />
                         </div>
                       </span>
@@ -331,7 +338,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                     backgroundColor: "#1F2937",
                     color: "white",
                     padding: "4px 8px",
-                  }}>
+                  }}
+                >
                   <Container>
                     <Row>
                       <Col>
@@ -360,7 +368,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
-              )}`}>
+              )}`}
+            >
               {props.collection.name}
             </Link>
           </span>

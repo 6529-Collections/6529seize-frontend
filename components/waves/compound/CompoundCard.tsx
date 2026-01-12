@@ -71,8 +71,12 @@ function MarketStatsRow({
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-1">
-      <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400">{label}</span>
-      <span className="tw-text-base tw-font-semibold tw-text-iron-50">{value}</span>
+      <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400">
+        {label}
+      </span>
+      <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+        {value}
+      </span>
     </div>
   );
 }
@@ -82,7 +86,9 @@ function renderMarketV2(response: CompoundMarketV2Response) {
   return (
     <div className={cardContainerClass}>
       <div className="tw-flex tw-flex-col tw-gap-y-1">
-        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">Compound v2 Market</span>
+        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+          Compound v2 Market
+        </span>
         <h3 className="tw-text-xl tw-font-semibold tw-text-white">
           {market.symbol}
           <span className="tw-ml-2 tw-text-sm tw-font-normal tw-text-iron-400">
@@ -95,17 +101,38 @@ function renderMarketV2(response: CompoundMarketV2Response) {
         </div>
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
-        <MarketStatsRow label="Supply APY" value={formatPercent(metrics.supplyApy)} />
-        <MarketStatsRow label="Borrow APY" value={formatPercent(metrics.borrowApy)} />
-        <MarketStatsRow label="Utilization" value={formatPercent(metrics.utilization)} />
-        <MarketStatsRow label="Exchange Rate" value={formatNumber(metrics.exchangeRate)} />
+        <MarketStatsRow
+          label="Supply APY"
+          value={formatPercent(metrics.supplyApy)}
+        />
+        <MarketStatsRow
+          label="Borrow APY"
+          value={formatPercent(metrics.borrowApy)}
+        />
+        <MarketStatsRow
+          label="Utilization"
+          value={formatPercent(metrics.utilization)}
+        />
+        <MarketStatsRow
+          label="Exchange Rate"
+          value={formatNumber(metrics.exchangeRate)}
+        />
         <MarketStatsRow
           label={`TVL (${market.underlying.symbol})`}
           value={formatNumber(metrics.tvlUnderlying)}
         />
-        <MarketStatsRow label="TVL (USD)" value={formatCurrency(metrics.tvlUsd)} />
-        <MarketStatsRow label="Collateral Factor" value={formatPercent(metrics.collateralFactor)} />
-        <MarketStatsRow label="Reserve Factor" value={formatPercent(metrics.reserveFactor)} />
+        <MarketStatsRow
+          label="TVL (USD)"
+          value={formatCurrency(metrics.tvlUsd)}
+        />
+        <MarketStatsRow
+          label="Collateral Factor"
+          value={formatPercent(metrics.collateralFactor)}
+        />
+        <MarketStatsRow
+          label="Reserve Factor"
+          value={formatPercent(metrics.reserveFactor)}
+        />
       </div>
       <div className="tw-flex tw-flex-wrap tw-gap-4">
         {links.marketUrl && (
@@ -113,7 +140,7 @@ function renderMarketV2(response: CompoundMarketV2Response) {
             href={links.marketUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-300"
           >
             View on Compound
           </Link>
@@ -123,7 +150,7 @@ function renderMarketV2(response: CompoundMarketV2Response) {
             href={links.etherscan}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-300"
           >
             View on Etherscan
           </Link>
@@ -138,10 +165,14 @@ function renderMarketV3(response: CompoundMarketV3Response) {
   return (
     <div className={cardContainerClass}>
       <div className="tw-flex tw-flex-col tw-gap-y-1">
-        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">Compound v3 Market</span>
+        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+          Compound v3 Market
+        </span>
         <h3 className="tw-text-xl tw-font-semibold tw-text-white">
           {market.base.symbol}
-          <span className="tw-ml-2 tw-text-sm tw-font-normal tw-text-iron-400">Base Asset</span>
+          <span className="tw-ml-2 tw-text-sm tw-font-normal tw-text-iron-400">
+            Base Asset
+          </span>
         </h3>
         <div className="tw-flex tw-flex-wrap tw-gap-x-4 tw-text-xs tw-text-iron-400">
           <span>Comet: {market.comet}</span>
@@ -149,9 +180,18 @@ function renderMarketV3(response: CompoundMarketV3Response) {
         </div>
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
-        <MarketStatsRow label="Supply APY" value={formatPercent(metrics.supplyApy)} />
-        <MarketStatsRow label="Borrow APY" value={formatPercent(metrics.borrowApy)} />
-        <MarketStatsRow label="Utilization" value={formatPercent(metrics.utilization)} />
+        <MarketStatsRow
+          label="Supply APY"
+          value={formatPercent(metrics.supplyApy)}
+        />
+        <MarketStatsRow
+          label="Borrow APY"
+          value={formatPercent(metrics.borrowApy)}
+        />
+        <MarketStatsRow
+          label="Utilization"
+          value={formatPercent(metrics.utilization)}
+        />
         <MarketStatsRow
           label={`Total Supply (${market.base.symbol})`}
           value={formatNumber(metrics.totalSupplyBase)}
@@ -160,7 +200,10 @@ function renderMarketV3(response: CompoundMarketV3Response) {
           label={`Total Borrow (${market.base.symbol})`}
           value={formatNumber(metrics.totalBorrowBase)}
         />
-        <MarketStatsRow label="TVL (USD)" value={formatCurrency(metrics.tvlUsd)} />
+        <MarketStatsRow
+          label="TVL (USD)"
+          value={formatCurrency(metrics.tvlUsd)}
+        />
       </div>
       {market.collaterals.length > 0 && (
         <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -190,7 +233,7 @@ function renderMarketV3(response: CompoundMarketV3Response) {
             href={links.marketUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-300"
           >
             View on Compound
           </Link>
@@ -200,7 +243,7 @@ function renderMarketV3(response: CompoundMarketV3Response) {
             href={links.etherscan}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-300"
           >
             View on Etherscan
           </Link>
@@ -217,28 +260,43 @@ function renderAccount(response: CompoundAccountResponse) {
   return (
     <div className={cardContainerClass}>
       <div className="tw-flex tw-flex-col tw-gap-y-1">
-        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">Compound Account</span>
+        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+          Compound Account
+        </span>
         <h3 className="tw-text-xl tw-font-semibold tw-text-white">{address}</h3>
       </div>
       {risk && (
         <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3">
-          <MarketStatsRow label="Liquidity" value={formatCurrency(risk.liquidityUsd)} />
-          <MarketStatsRow label="Shortfall" value={formatCurrency(risk.shortfallUsd)} />
+          <MarketStatsRow
+            label="Liquidity"
+            value={formatCurrency(risk.liquidityUsd)}
+          />
+          <MarketStatsRow
+            label="Shortfall"
+            value={formatCurrency(risk.shortfallUsd)}
+          />
           <MarketStatsRow label="Health" value={risk.healthLabel ?? "-"} />
         </div>
       )}
       {hasV2 && (
         <div className="tw-flex tw-flex-col tw-gap-y-2">
-          <h4 className="tw-text-lg tw-font-semibold tw-text-iron-50">Compound v2 Positions</h4>
+          <h4 className="tw-text-lg tw-font-semibold tw-text-iron-50">
+            Compound v2 Positions
+          </h4>
           <div className="tw-flex tw-flex-col tw-gap-2">
             {positions.v2.map((position) => (
               <div
                 key={position.cToken}
-                className="tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-3 tw-flex tw-flex-col tw-gap-2"
+                className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-3"
               >
-                <div className="tw-flex tw-justify-between tw-text-sm tw-text-iron-100 tw-font-semibold">
+                <div className="tw-flex tw-justify-between tw-text-sm tw-font-semibold tw-text-iron-100">
                   <span>{position.symbol}</span>
-                  <span>Price: {position.usdPrice ? formatCurrency(position.usdPrice) : "-"}</span>
+                  <span>
+                    Price:{" "}
+                    {position.usdPrice
+                      ? formatCurrency(position.usdPrice)
+                      : "-"}
+                  </span>
                 </div>
                 <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3">
                   <MarketStatsRow
@@ -253,8 +311,14 @@ function renderAccount(response: CompoundAccountResponse) {
                     label="Collateral Factor"
                     value={formatPercent(position.collateralFactor)}
                   />
-                  <MarketStatsRow label="Supply APY" value={formatPercent(position.supplyApy)} />
-                  <MarketStatsRow label="Borrow APY" value={formatPercent(position.borrowApy)} />
+                  <MarketStatsRow
+                    label="Supply APY"
+                    value={formatPercent(position.supplyApy)}
+                  />
+                  <MarketStatsRow
+                    label="Borrow APY"
+                    value={formatPercent(position.borrowApy)}
+                  />
                 </div>
               </div>
             ))}
@@ -263,14 +327,16 @@ function renderAccount(response: CompoundAccountResponse) {
       )}
       {hasV3 && (
         <div className="tw-flex tw-flex-col tw-gap-y-2">
-          <h4 className="tw-text-lg tw-font-semibold tw-text-iron-50">Compound v3 Positions</h4>
+          <h4 className="tw-text-lg tw-font-semibold tw-text-iron-50">
+            Compound v3 Positions
+          </h4>
           <div className="tw-flex tw-flex-col tw-gap-2">
             {positions.v3.map((position) => (
               <div
                 key={position.comet}
-                className="tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-3 tw-flex tw-flex-col tw-gap-2"
+                className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-3"
               >
-                <div className="tw-flex tw-justify-between tw-text-sm tw-text-iron-100 tw-font-semibold">
+                <div className="tw-flex tw-justify-between tw-text-sm tw-font-semibold tw-text-iron-100">
                   <span>{position.baseSymbol}</span>
                 </div>
                 <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3">
@@ -282,8 +348,14 @@ function renderAccount(response: CompoundAccountResponse) {
                     label="Borrowed"
                     value={`${formatNumber(position.borrowBase)} ${position.baseSymbol}`}
                   />
-                  <MarketStatsRow label="Supply APY" value={formatPercent(position.supplyApy)} />
-                  <MarketStatsRow label="Borrow APY" value={formatPercent(position.borrowApy)} />
+                  <MarketStatsRow
+                    label="Supply APY"
+                    value={formatPercent(position.supplyApy)}
+                  />
+                  <MarketStatsRow
+                    label="Borrow APY"
+                    value={formatPercent(position.borrowApy)}
+                  />
                 </div>
                 {position.collateral.length > 0 && (
                   <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -335,7 +407,7 @@ function renderAccount(response: CompoundAccountResponse) {
             href={links.etherscan}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-300"
           >
             View on Etherscan
           </Link>
@@ -379,7 +451,7 @@ function renderTx(response: CompoundTxResponse) {
             href={links.etherscan}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+            className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-300"
           >
             View on Etherscan
           </Link>

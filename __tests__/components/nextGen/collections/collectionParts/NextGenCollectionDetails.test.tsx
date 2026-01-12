@@ -1,6 +1,6 @@
 import NextGenCollectionDetails from "@/components/nextGen/collections/collectionParts/NextGenCollectionDetails";
 import type { NextGenCollection } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock(

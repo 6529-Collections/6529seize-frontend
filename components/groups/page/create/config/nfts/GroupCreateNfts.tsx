@@ -1,17 +1,14 @@
-import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
-import type {
-  ApiGroupOwnsNft} from "@/generated/models/ApiGroupOwnsNft";
-import {
-  ApiGroupOwnsNftNameEnum,
-} from "@/generated/models/ApiGroupOwnsNft";
 import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "@/constants";
+} from "@/constants/constants";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import GroupCreateNftsSelect from "./GroupCreateNftsSelect";
 import GroupCreateNftsSelected from "./GroupCreateNftsSelected";
 
 export default function GroupCreateNfts({
@@ -73,9 +70,9 @@ export default function GroupCreateNfts({
   };
 
   return (
-    <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
           Required NFTs
         </p>
         <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">

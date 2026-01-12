@@ -1,26 +1,26 @@
 "use client";
 
-import { useEnsResolution } from "@/hooks/useEnsResolution";
+import Address from "@/components/address/Address";
 import { publicEnv } from "@/config/env";
+import {
+  DELEGATION_ALL_ADDRESS,
+  MEMES_CONTRACT,
+  NEVER_DATE,
+} from "@/constants/constants";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
+import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
+import { useEnsResolution } from "@/hooks/useEnsResolution";
+import { fetchUrl } from "@/services/6529api";
 import {
   faCheck,
   faPlusCircle,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
-import {
-  DELEGATION_ALL_ADDRESS,
-  MEMES_CONTRACT,
-  NEVER_DATE,
-} from "@/constants";
-import type { DBResponse } from "@/entities/IDBResponse";
-import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
-import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
-import { fetchUrl } from "@/services/6529api";
-import Address from "@/components/address/Address";
 import {
   ALL_USE_CASES,
   MINTING_USE_CASE,
@@ -89,23 +89,24 @@ export default function WalletCheckerComponent(
 
   const shouldFetchDelegations = checking && isValidEthAddress(walletAddress);
 
-  const {
-    data: delegationsResponse,
-    status: delegationsStatus,
-  } = useQuery<DBResponse>({
-    queryKey: ["delegations", walletAddress],
-    queryFn: async () => {
-      try {
-        const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
-        return await fetchUrl(url);
-      } catch (error) {
-        console.error(`Failed to fetch delegations for ${walletAddress}`, error);
-        throw error;
-      }
-    },
-    enabled: shouldFetchDelegations,
-    refetchOnWindowFocus: false,
-  });
+  const { data: delegationsResponse, status: delegationsStatus } =
+    useQuery<DBResponse>({
+      queryKey: ["delegations", walletAddress],
+      queryFn: async () => {
+        try {
+          const url = `${publicEnv.API_ENDPOINT}/api/delegations/${walletAddress}`;
+          return await fetchUrl(url);
+        } catch (error) {
+          console.error(
+            `Failed to fetch delegations for ${walletAddress}`,
+            error
+          );
+          throw error;
+        }
+      },
+      enabled: shouldFetchDelegations,
+      refetchOnWindowFocus: false,
+    });
 
   useEffect(() => {
     if (delegationsStatus === "success" && delegationsResponse) {
@@ -183,40 +184,48 @@ export default function WalletCheckerComponent(
     []
   );
 
-  const {
-    data: consolidationsResponse,
-    status: consolidationsStatus,
-  } = useQuery<WalletConsolidation[]>({
-    queryKey: ["consolidations", walletAddress],
-    queryFn: async () => {
-      try {
-        const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
-        const firstResponse: DBResponse<WalletConsolidation> = await fetchUrl(baseUrl);
-        const firstData = firstResponse.data;
+  const { data: consolidationsResponse, status: consolidationsStatus } =
+    useQuery<WalletConsolidation[]>({
+      queryKey: ["consolidations", walletAddress],
+      queryFn: async () => {
+        try {
+          const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${walletAddress}?show_incomplete=true`;
+          const firstResponse: DBResponse<WalletConsolidation> =
+            await fetchUrl(baseUrl);
+          const firstData = firstResponse.data;
 
-        if (firstData.length > 0) {
-          const newWallet = areEqualAddresses(walletAddress, firstData[0]?.wallet1)
-            ? firstData[0]?.wallet2
-            : firstData[0]?.wallet1;
-          const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
-          try {
-            const secondResponse: DBResponse<WalletConsolidation> = await fetchUrl(nextUrl);
-            return [...firstData, ...secondResponse.data];
-          } catch {
-            console.error(`Failed to fetch consolidations for related wallet: ${newWallet}`);
-            return firstData;
+          if (firstData.length > 0) {
+            const newWallet = areEqualAddresses(
+              walletAddress,
+              firstData[0]?.wallet1
+            )
+              ? firstData[0]?.wallet2
+              : firstData[0]?.wallet1;
+            const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
+            try {
+              const secondResponse: DBResponse<WalletConsolidation> =
+                await fetchUrl(nextUrl);
+              return [...firstData, ...secondResponse.data];
+            } catch {
+              console.error(
+                `Failed to fetch consolidations for related wallet: ${newWallet}`
+              );
+              return firstData;
+            }
           }
-        }
 
-        return firstData;
-      } catch (error) {
-        console.error(`Failed to fetch consolidations for ${walletAddress}`, error);
-        throw error;
-      }
-    },
-    enabled: shouldFetchDelegations,
-    refetchOnWindowFocus: false,
-  });
+          return firstData;
+        } catch (error) {
+          console.error(
+            `Failed to fetch consolidations for ${walletAddress}`,
+            error
+          );
+          throw error;
+        }
+      },
+      enabled: shouldFetchDelegations,
+      refetchOnWindowFocus: false,
+    });
 
   useEffect(() => {
     if (consolidationsStatus === "success" && consolidationsResponse) {
@@ -242,7 +251,10 @@ export default function WalletCheckerComponent(
         const response: DBResponse<string> = await fetchUrl(url);
         const wallets = response.data;
 
-        const mappedWallets: { address: string; display: string | undefined }[] = [];
+        const mappedWallets: {
+          address: string;
+          display: string | undefined;
+        }[] = [];
 
         for (const wallet of wallets) {
           mappedWallets.push({
@@ -253,7 +265,10 @@ export default function WalletCheckerComponent(
 
         return mappedWallets;
       } catch (error) {
-        console.error(`Failed to fetch consolidated wallets for ${fetchedAddress}`, error);
+        console.error(
+          `Failed to fetch consolidated wallets for ${fetchedAddress}`,
+          error
+        );
         throw error;
       }
     },
@@ -262,7 +277,10 @@ export default function WalletCheckerComponent(
   });
 
   useEffect(() => {
-    if (consolidatedWalletsStatus === "success" && consolidatedWalletsResponse) {
+    if (
+      consolidatedWalletsStatus === "success" &&
+      consolidatedWalletsResponse
+    ) {
       setConsolidatedWallets(consolidatedWalletsResponse);
       return;
     }
@@ -279,11 +297,7 @@ export default function WalletCheckerComponent(
       return undefined;
     }
 
-    const searchTargets: Array<[
-      string,
-      string,
-      number
-    ]> = [
+    const searchTargets: Array<[string, string, number]> = [
       [walletAddress, MEMES_CONTRACT, MINTING_USE_CASE.use_case],
       [walletAddress, MEMES_CONTRACT, 1],
       [walletAddress, DELEGATION_ALL_ADDRESS, MINTING_USE_CASE.use_case],
@@ -443,9 +457,7 @@ export default function WalletCheckerComponent(
     <Container className="pt-3 pb-3">
       <Row>
         <Col>
-          <h1>
-            Wallet Checker
-          </h1>
+          <h1>Wallet Checker</h1>
         </Col>
       </Row>
       <Row>
@@ -456,7 +468,8 @@ export default function WalletCheckerComponent(
               if (!formDisabled) {
                 setChecking(true);
               }
-            }}>
+            }}
+          >
             <Form.Group as={Row}>
               <Form.Label column sm={12} className="d-flex align-items-center">
                 Wallet Address
@@ -478,13 +491,16 @@ export default function WalletCheckerComponent(
             </Form.Group>
             {addressError && (
               <Form.Group as={Row}>
-                <Form.Text className={styles["error"]}>Invalid address</Form.Text>
+                <Form.Text className={styles["error"]}>
+                  Invalid address
+                </Form.Text>
               </Form.Group>
             )}
             <Form.Group as={Row} className="pt-3 text-center">
               <Col
                 sm={12}
-                className="d-flex align-items-center justify-content-center gap-3">
+                className="d-flex align-items-center justify-content-center gap-3"
+              >
                 <Button
                   onClick={() => {
                     handleWalletInputChange("");
@@ -495,13 +511,15 @@ export default function WalletCheckerComponent(
                     setChecking(false);
                     setAddressQuery("");
                   }}
-                  className={styles["clearBtn"]}>
+                  className={styles["clearBtn"]}
+                >
                   Clear
                 </Button>
                 <Button
                   disabled={formDisabled}
                   onClick={() => setChecking(true)}
-                  className={styles["checkBtn"]}>
+                  className={styles["checkBtn"]}
+                >
                   {checking ? `Checking...` : `Check`}
                 </Button>
               </Col>
@@ -825,7 +843,8 @@ export default function WalletCheckerComponent(
                           {consolidationActions.map((c, index) => (
                             <li
                               key={`consolidated-wallets-${index}`}
-                              className="d-flex align-items-center gap-2">
+                              className="d-flex align-items-center gap-2"
+                            >
                               &bull;&nbsp;Register Consolidation from{" "}
                               {areEqualAddresses(fetchedAddress, c.to) ? (
                                 <Address

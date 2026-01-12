@@ -24,7 +24,7 @@ export default function NetworkPageLayout({
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      const group = searchParams?.get("group");
+      const group = searchParams.get("group");
       if (group && group !== activeGroupId) {
         dispatch(setActiveGroupId(group));
       }
@@ -37,8 +37,8 @@ export default function NetworkPageLayout({
   }
 
   return (
-    <main className="tailwind-scope tw-bg-black tw-overflow-x-hidden">
-      <div className="tailwind-scope tw-bg-black tw-min-h-dvh tw-mt-6 lg:tw-mt-8 tw-pb-6 tw-mx-auto">
+    <main className="tailwind-scope tw-overflow-x-hidden tw-bg-black">
+      <div className="tailwind-scope tw-mx-auto tw-mt-6 tw-min-h-dvh tw-bg-black tw-pb-6 lg:tw-mt-8">
         <div className="tw-w-full">
           <div className="tw-mt-4 tw-px-3 lg:tw-px-6 xl:tw-px-8">
             {isReady && children}

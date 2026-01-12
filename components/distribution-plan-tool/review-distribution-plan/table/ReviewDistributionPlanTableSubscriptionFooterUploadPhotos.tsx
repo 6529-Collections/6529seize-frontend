@@ -1,7 +1,7 @@
 "use client";
 
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
   formatAddress,
@@ -198,14 +198,16 @@ export function UploadDistributionPhotosModal(
                   {selectedFiles.map((file, index) => (
                     <div
                       key={`${file.name}-${file.size}-${file.lastModified}`}
-                      className="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded">
+                      className="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded"
+                    >
                       <span className="text-truncate flex-grow-1 me-2">
                         {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveFile(index)}
-                        className="btn btn-sm btn-outline-danger">
+                        className="btn btn-sm btn-outline-danger"
+                      >
                         Remove
                       </button>
                     </div>
@@ -222,10 +224,12 @@ export function UploadDistributionPhotosModal(
         </Button>
         <Button
           disabled={
-            !isValidPositiveInteger(displayTokenId) || selectedFiles.length === 0
+            !isValidPositiveInteger(displayTokenId) ||
+            selectedFiles.length === 0
           }
           variant="primary"
-          onClick={handleUpload}>
+          onClick={handleUpload}
+        >
           Upload Photos
         </Button>
       </Modal.Footer>

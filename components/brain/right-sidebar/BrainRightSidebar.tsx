@@ -6,7 +6,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveContent } from "./WaveContent";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../../hooks/useSidebarState";
@@ -14,7 +13,6 @@ import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 
 interface BrainRightSidebarProps {
   readonly waveId: string | null | undefined;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
   readonly variant?: "overlay" | "inline" | undefined;
@@ -72,14 +70,12 @@ const SidebarContent = ({
   setMode,
   activeTab,
   setActiveTab,
-  onDropClick,
 }: {
   wave: ApiWave | undefined;
   mode: Mode;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
   activeTab: SidebarTab;
   setActiveTab: (tab: SidebarTab) => void;
-  onDropClick: (drop: ExtendedDrop) => void;
 }) => {
   if (!wave) return null;
 
@@ -90,14 +86,12 @@ const SidebarContent = ({
       setMode={setMode}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
-      onDropClick={onDropClick}
     />
   );
 };
 
 const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   waveId,
-  onDropClick,
   activeTab,
   setActiveTab,
   variant = "overlay",
@@ -107,18 +101,18 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
   const panel = (
     <div
-      className={`tw-flex tw-flex-col tw-w-[20.5rem] tw-bg-iron-950 ${
+      className={`tw-flex tw-w-[20.5rem] tw-flex-col tw-bg-iron-950 ${
         isOverlay
-          ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-shadow-2xl lg:tw-bg-opacity-95 min-[1300px]:tw-bg-opacity-100 lg:tw-backdrop-blur min-[1300px]:tw-backdrop-blur-none tw-border-l tw-border-solid tw-border-iron-800 tw-border-y-0 tw-border-r-0`
-          : "tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg overflow-hidden tw-max-h-[calc(100vh-16px)]"
+          ? `tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-800 tw-shadow-2xl lg:tw-bg-opacity-95 lg:tw-backdrop-blur min-[1300px]:tw-bg-opacity-100 min-[1300px]:tw-backdrop-blur-none`
+          : "overflow-hidden tw-max-h-[calc(100vh-16px)] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800"
       }`}
     >
       {isOverlay && (
-        <div className="tw-absolute tw-top-2 -tw-left-5 tw-z-[110]">
+        <div className="tw-absolute -tw-left-5 tw-top-2 tw-z-[110]">
           <button
             type="button"
             onClick={close}
-            className="tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-bg-iron-700 tw-border tw-border-iron-650 tw-border-solid tw-border-r-0 tw-rounded-xl tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)]"
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-r-0 tw-border-solid tw-border-iron-650 tw-bg-iron-700 tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)]"
             aria-label="Close sidebar"
           >
             <ChevronDoubleRightIcon
@@ -129,14 +123,13 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         </div>
       )}
 
-      <div className="tw-text-iron-500 tw-text-sm tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full">
+      <div className="tw-h-full tw-overflow-y-auto tw-text-sm tw-text-iron-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
         <SidebarContent
           wave={wave}
           mode={mode}
           setMode={setMode}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          onDropClick={onDropClick}
         />
       </div>
     </div>
@@ -149,7 +142,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           type="button"
           onClick={close}
           aria-label="Close right overlay"
-          className="tw-fixed tw-inset-0 tw-bg-black/50 tw-z-[90] tw-border-0 focus:tw-outline-none"
+          className="tw-fixed tw-inset-0 tw-z-[90] tw-border-0 tw-bg-black/50 focus:tw-outline-none"
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               event.preventDefault();

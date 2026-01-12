@@ -2,16 +2,16 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
-import { NEXTGEN_CONTRACT } from "@/constants";
+import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import type {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import { ContractType, NextgenCollectionView } from "@/enums";
 import { areEqualAddresses, isNullAddress } from "@/helpers/Helpers";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { ContractType, NextgenCollectionView } from "@/types/enums";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
@@ -196,7 +196,8 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             variant="light"
             style={{
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Previous Token
           </Tooltip>
         )}
@@ -242,7 +243,8 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             variant="light"
             style={{
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Next Token
           </Tooltip>
         )}
@@ -276,7 +278,8 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                                 backgroundColor: "#1F2937",
                                 color: "white",
                                 padding: "4px 8px",
-                              }}>
+                              }}
+                            >
                               Burnt
                             </Tooltip>
                           </>

@@ -1,14 +1,6 @@
 "use client";
 
-import { MANIFOLD_NETWORK } from "@/constants";
-import { useEffect, useState, type JSX } from "react";
-import { Col, Container, Form, Row, Table } from "react-bootstrap";
-import {
-  useReadContract,
-  useReadContracts,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { MANIFOLD_NETWORK } from "@/constants/constants";
 import {
   areEqualAddresses,
   fromGWEI,
@@ -17,6 +9,14 @@ import {
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
+import { useEffect, useState, type JSX } from "react";
+import { Col, Container, Form, Row, Table } from "react-bootstrap";
+import {
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import type { ManifoldMerkleProof } from "./manifold-types";

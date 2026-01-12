@@ -1,7 +1,7 @@
 "use client";
 
-import { DELEGATION_ABI } from "@/abis";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

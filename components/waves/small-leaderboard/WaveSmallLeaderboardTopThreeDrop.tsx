@@ -12,13 +12,12 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 
 interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
 }
 
 export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   WaveSmallLeaderboardTopThreeDropProps
 > = ({ drop, onDropClick }) => {
-
   const getRankTextColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-text-[#E8D48A]";
     if (rank === 2) return "tw-text-[#DDDDDD]";
@@ -59,36 +58,40 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
       <div className="tw-space-y-3">
         <li className="tw-relative tw-flex tw-flex-col">
           <div
-            className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-relative tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-transition-all tw-duration-300 tw-ease-out tw-@container desktop-hover:hover:tw-bg-iron-800/80"
             style={{
               border: "1px solid transparent",
-              boxShadow: `inset 2px 0 0 ${drop.rank && drop.rank <= 3
-                ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
-                : "#60606C"
-                }, 
-                         inset 0 1px 0 ${drop.rank && drop.rank <= 3
-                  ? getRankTextColor(drop.rank)
-                    ?.replace("tw-text-", "")
-                    .trim()
+              boxShadow: `inset 2px 0 0 ${
+                drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
                   : "#60606C"
-                }20, 
-                         inset -1px 0 0 ${drop.rank && drop.rank <= 3
-                  ? getRankTextColor(drop.rank)
-                    ?.replace("tw-text-", "")
-                    .trim()
-                  : "#60606C"
-                }20, 
-                         inset 0 -1px 0 ${drop.rank && drop.rank <= 3
-                  ? getRankTextColor(drop.rank)
-                    ?.replace("tw-text-", "")
-                    .trim()
-                  : "#60606C"
-                }20`,
+              }, 
+                         inset 0 1px 0 ${
+                           drop.rank && drop.rank <= 3
+                             ? getRankTextColor(drop.rank)
+                                 ?.replace("tw-text-", "")
+                                 .trim()
+                             : "#60606C"
+                         }20, 
+                         inset -1px 0 0 ${
+                           drop.rank && drop.rank <= 3
+                             ? getRankTextColor(drop.rank)
+                                 ?.replace("tw-text-", "")
+                                 .trim()
+                             : "#60606C"
+                         }20, 
+                         inset 0 -1px 0 ${
+                           drop.rank && drop.rank <= 3
+                             ? getRankTextColor(drop.rank)
+                                 ?.replace("tw-text-", "")
+                                 .trim()
+                             : "#60606C"
+                         }20`,
               transition: "box-shadow 0.2s ease, background-color 0.2s ease",
             }}
           >
             <div>
-              <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
+              <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
                 {trophyIcon(drop.rank, drop.winning_context?.decision_time)}
                 {/* Removed WaveDropActionsRate (clap icon) */}
               </div>
@@ -98,7 +101,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   drop={drop}
                   onDropClick={onDropClick}
                 />
-                <div className="tw-flex tw-justify-between tw-items-center">
+                <div className="tw-flex tw-items-center tw-justify-between">
                   <Link
                     href={`/${drop.author.handle}`}
                     onClick={(e) => e.stopPropagation()}
@@ -106,26 +109,28 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   >
                     {drop.author.pfp ? (
                       <img
-                        className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-object-contain tw-p-[1px]"
+                        className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-object-contain tw-p-[1px] tw-ring-1 tw-ring-inset tw-ring-iron-700"
                         src={drop.author.pfp}
                         alt={drop.author.handle ?? ""}
                       />
                     ) : (
                       <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />
                     )}
-                    <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
-                      <span className="desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-text-sm tw-font-semibold">
+                    <UserProfileTooltipWrapper
+                      user={drop.author.handle ?? drop.author.id}
+                    >
+                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline">
                         {drop.author.handle}
                       </span>
                     </UserProfileTooltipWrapper>
                     <div className="tw-relative">
-                      <div className="tw-size-5 tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset">
+                      <div className="tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-font-bold tw-leading-3 tw-ring-1 tw-ring-inset tw-ring-iron-700">
                         <span className="tw-text-[10px] tw-text-iron-200">
                           {drop.author.level}
                         </span>
                       </div>
                       <div
-                        className={`tw-absolute -tw-top-1 -tw-right-0.5 tw-size-2 tw-rounded-full ${getCICColor(
+                        className={`tw-absolute -tw-right-0.5 -tw-top-1 tw-size-2 tw-rounded-full ${getCICColor(
                           drop.author.cic
                         )}`}
                       ></div>
@@ -133,12 +138,12 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   </Link>
                 </div>
                 <div
-                  className={`tw-flex tw-items-center tw-gap-x-1.5 tw-mt-3 ${getRankTextColor(
+                  className={`tw-mt-3 tw-flex tw-items-center tw-gap-x-1.5 ${getRankTextColor(
                     drop.rank
                   )}`}
                 >
                   <svg
-                    className="tw-size-3.5 -tw-mt-0.5 tw-flex-shrink-0"
+                    className="-tw-mt-0.5 tw-size-3.5 tw-flex-shrink-0"
                     id="clap--icon-672c9d44f92440a3a313a608"
                     viewBox="0 0 346 360"
                     fill="none"

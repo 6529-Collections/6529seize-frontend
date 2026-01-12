@@ -1,16 +1,16 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { NULL_MERKLE } from "@/constants/constants";
 import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useCoreContractWrite } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
-import { useCoreContractWrite } from "../nextgen_helpers";
 import {
+  NextGenAdminHeadingRow,
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
-  NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
-import { NULL_MERKLE } from "@/constants";
 
 interface Props {
   close: () => void;
@@ -157,7 +157,8 @@ export default function NextGenAdminCreateCollection(props: Readonly<Props>) {
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => submit()}>
+              onClick={() => submit()}
+            >
               Submit
             </Button>
           </Form>

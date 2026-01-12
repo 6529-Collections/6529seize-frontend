@@ -1,11 +1,11 @@
-import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import {
   CONSOLIDATION_USE_CASE,
   DELEGATION_USE_CASES,
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
 
 export interface ContractWalletDelegation {
   wallet: string;
@@ -103,8 +103,8 @@ export function getDelegationsFromData(data: any) {
           new Date().getTime() / 1000 > myDate
             ? `expired`
             : myDate >= NEVER_DATE
-            ? `active - non-expiring`
-            : `active - expires ${formatExpiry(myDate)}`;
+              ? `active - non-expiring`
+              : `active - expires ${formatExpiry(myDate)}`;
         walletDelegations.push({
           wallet: wallet,
           expiry: myDateDisplay,

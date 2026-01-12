@@ -1,12 +1,11 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { render, screen } from "@testing-library/react";
 
 import MemeDistributionPage, {
   generateMetadata,
 } from "@/app/the-memes/[id]/distribution/page";
-import { MEMES_CONTRACT } from "@/constants";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
+import { MEMES_CONTRACT } from "@/constants/constants";
 
 jest.mock("@/components/distribution/Distribution", () => ({
   __esModule: true,

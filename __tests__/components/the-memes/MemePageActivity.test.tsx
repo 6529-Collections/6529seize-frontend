@@ -1,5 +1,5 @@
 import { MemePageActivity } from "@/components/the-memes/MemePageActivity";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { TypeFilter } from "@/hooks/useActivityData";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -124,7 +124,9 @@ describe("MemePageActivity", () => {
 
       await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(1));
 
-      await userEvent.click(screen.getByRole("button", { name: /Transaction Type/ }));
+      await userEvent.click(
+        screen.getByRole("button", { name: /Transaction Type/ })
+      );
       await userEvent.click(
         screen.getByRole("menuitem", { name: TypeFilter.SALES })
       );
@@ -168,7 +170,9 @@ describe("MemePageActivity", () => {
       ];
 
       for (const { filter, param } of filterTypes) {
-        await userEvent.click(screen.getByRole("button", { name: /Transaction Type/ }));
+        await userEvent.click(
+          screen.getByRole("button", { name: /Transaction Type/ })
+        );
         await userEvent.click(screen.getByRole("menuitem", { name: filter }));
 
         await waitFor(() => {
@@ -201,7 +205,9 @@ describe("MemePageActivity", () => {
       });
 
       // Change filter - should reset to page 1
-      await userEvent.click(screen.getByRole("button", { name: /Transaction Type/ }));
+      await userEvent.click(
+        screen.getByRole("button", { name: /Transaction Type/ })
+      );
       await userEvent.click(
         screen.getByRole("menuitem", { name: TypeFilter.SALES })
       );

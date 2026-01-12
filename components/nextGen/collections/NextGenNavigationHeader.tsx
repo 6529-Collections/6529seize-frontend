@@ -2,12 +2,12 @@
 
 import styles from "./NextGen.module.scss";
 
-import { NextgenView } from "@/enums";
+import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
-import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 
 export default function NextGenNavigationHeader(
   props: Readonly<{

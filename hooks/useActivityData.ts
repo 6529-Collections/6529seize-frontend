@@ -3,7 +3,7 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import { publicEnv } from "@/config/env";
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";

@@ -3,9 +3,9 @@ import type {
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { NextgenCollectionView } from "@/types/enums";
 
 interface TokenData {
   tokenId: number;

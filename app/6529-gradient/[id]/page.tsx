@@ -1,7 +1,7 @@
 import GradientPageComponent from "@/components/6529Gradient/GradientPage";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import { GRADIENT_CONTRACT } from "@/constants";
+import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";

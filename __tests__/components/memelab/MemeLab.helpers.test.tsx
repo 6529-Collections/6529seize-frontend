@@ -4,10 +4,10 @@ import {
   printSortButtons,
   sortChanged,
 } from "@/components/memelab/MemeLab";
-import type { LabExtendedData, LabNFT} from "@/entities/INFT";
+import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort } from "@/enums";
+import { MemeLabSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 // Mock helper functions
@@ -38,7 +38,7 @@ jest.mock("@/components/the-memes/TheMemes", () => ({
   printVolumeTypeDropdown: jest.fn(() => <div data-testid="volume-dropdown" />),
 }));
 
-const routerMock = (query: any) => ({ query, replace: jest.fn() } as any);
+const routerMock = (query: any) => ({ query, replace: jest.fn() }) as any;
 
 describe("MemeLab helpers", () => {
   test("getInitialRouterValues resolves from router", () => {

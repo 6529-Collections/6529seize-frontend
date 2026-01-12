@@ -4,7 +4,7 @@ import {
   getContentViewKeyByValue,
 } from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 import { render } from "@testing-library/react";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));

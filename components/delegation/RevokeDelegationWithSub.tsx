@@ -5,8 +5,8 @@ import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";
 
-import { DELEGATION_ABI } from "@/abis";
-import { DELEGATION_CONTRACT } from "@/constants";
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import { ALL_USE_CASES } from "./delegation-constants";
@@ -102,7 +102,8 @@ export default function RevokeDelegationWithSubComponent(
         </Col>
         <Col
           xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
+        >
           <DelegationCloseButton onHide={props.onHide} title="Revocation" />
         </Col>
       </Row>
@@ -169,14 +170,16 @@ export default function RevokeDelegationWithSubComponent(
                       display ? display.display : ""
                     );
                     clearErrors();
-                  }}>
+                  }}
+                >
                   <option value={0} disabled>
                     Select Use Case
                   </option>
                   {ALL_USE_CASES.map((uc) => (
                     <option
                       key={`revoke-delegation-select-use-case-${uc.use_case}`}
-                      value={uc.use_case}>
+                      value={uc.use_case}
+                    >
                       #{uc.use_case} - {uc.display}
                     </option>
                   ))}

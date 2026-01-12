@@ -11,9 +11,9 @@ import {
   type WikimediaCardResponse,
   type WikimediaCommonsFileCard,
   type WikimediaDisambiguationCard,
+  type WikimediaSource,
   type WikimediaUnavailableCard,
   type WikimediaWikidataCard,
-  type WikimediaSource,
 } from "@/services/api/wikimedia-card";
 
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
@@ -39,7 +39,11 @@ const PRIMARY_ACTION_LABEL: Record<WikimediaSource, string> = {
   wikidata: "Open on Wikidata",
 };
 
-const formatCoordinate = (value: number, positive: string, negative: string): string => {
+const formatCoordinate = (
+  value: number,
+  positive: string,
+  negative: string
+): string => {
   const suffix = value >= 0 ? positive : negative;
   const magnitude = Math.abs(value);
   return `${magnitude.toFixed(2)}° ${suffix}`;
@@ -66,7 +70,8 @@ const renderSourceAttribution = (source: WikimediaSource, url: string) => (
 );
 
 const renderArticleCard = (data: WikimediaArticleCard) => {
-  const { thumbnail, title, description, extract, lang, coordinates, section } = data;
+  const { thumbnail, title, description, extract, lang, coordinates, section } =
+    data;
 
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
@@ -95,7 +100,9 @@ const renderArticleCard = (data: WikimediaArticleCard) => {
         )}
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-3">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <span className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100">{title}</span>
+            <span className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100">
+              {title}
+            </span>
             <span className="tw-rounded-full tw-bg-iron-800/80 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200">
               {lang}
             </span>
@@ -112,10 +119,14 @@ const renderArticleCard = (data: WikimediaArticleCard) => {
           </div>
           <div className="tw-space-y-2" lang={lang}>
             {description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-200 tw-font-medium">{description}</p>
+              <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+                {description}
+              </p>
             )}
             {extract && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-leading-relaxed tw-line-clamp-3">{extract}</p>
+              <p className="tw-m-0 tw-line-clamp-3 tw-text-sm tw-leading-relaxed tw-text-iron-300">
+                {extract}
+              </p>
             )}
           </div>
           {renderSourceAttribution(data.source, data.pageUrl)}
@@ -130,7 +141,9 @@ const renderDisambiguationCard = (data: WikimediaDisambiguationCard) => {
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
       <div className="tw-flex tw-flex-col tw-gap-y-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-          <span className="tw-text-lg tw-font-semibold tw-text-iron-100">{data.title}</span>
+          <span className="tw-text-lg tw-font-semibold tw-text-iron-100">
+            {data.title}
+          </span>
           <span className="tw-rounded-full tw-bg-iron-800/80 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-200">
             {data.lang}
           </span>
@@ -146,10 +159,14 @@ const renderDisambiguationCard = (data: WikimediaDisambiguationCard) => {
         {(data.description || data.extract) && (
           <div className="tw-space-y-2" lang={data.lang}>
             {data.description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-200 tw-font-medium">{data.description}</p>
+              <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+                {data.description}
+              </p>
             )}
             {data.extract && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300">{data.extract}</p>
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                {data.extract}
+              </p>
             )}
           </div>
         )}
@@ -177,12 +194,14 @@ const renderDisambiguationCard = (data: WikimediaDisambiguationCard) => {
                   />
                 </div>
               )}
-              <div className="tw-flex tw-flex-col tw-gap-1 tw-min-w-0">
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">
+              <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+                <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
                   {item.title}
                 </span>
                 {item.description && (
-                  <span className="tw-text-xs tw-text-iron-300 tw-line-clamp-2">{item.description}</span>
+                  <span className="tw-line-clamp-2 tw-text-xs tw-text-iron-300">
+                    {item.description}
+                  </span>
                 )}
               </div>
             </Link>
@@ -199,7 +218,7 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
   const licenseName = data.license?.name ?? undefined;
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 tw-space-y-4">
+    <div className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
       {data.thumbnail?.url && (
         <Link
           href={data.pageUrl}
@@ -213,7 +232,7 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
               alt={data.description ?? data.title}
               width={data.thumbnail.width ?? 1200}
               height={data.thumbnail.height ?? 800}
-              className="tw-h-full tw-w-full tw-object-contain tw-bg-iron-900"
+              className="tw-h-full tw-w-full tw-bg-iron-900 tw-object-contain"
               loading="lazy"
               decoding="async"
               sizes="(max-width: 768px) 100vw, 480px"
@@ -223,9 +242,13 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
         </Link>
       )}
       <div className="tw-space-y-2">
-        <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">{data.title}</h3>
+        <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+          {data.title}
+        </h3>
         {data.description && (
-          <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-leading-relaxed">{data.description}</p>
+          <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
+            {data.description}
+          </p>
         )}
       </div>
       <div className="tw-space-y-1 tw-text-xs tw-text-iron-300">
@@ -245,7 +268,9 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
             ) : (
               <span>{licenseName}</span>
             )}
-            {data.license?.requiresAttribution ? " (attribution required)" : null}
+            {data.license?.requiresAttribution
+              ? " (attribution required)"
+              : null}
           </div>
         )}
       </div>
@@ -254,7 +279,7 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
           href={data.pageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 hover:tw-text-primary-200"
+          className="tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 hover:tw-text-primary-300"
         >
           Open on Commons
         </Link>
@@ -263,7 +288,7 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
             href={data.original.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 hover:tw-text-primary-200"
+            className="tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 hover:tw-text-primary-300"
           >
             View original
           </Link>
@@ -276,15 +301,20 @@ const renderCommonsCard = (data: WikimediaCommonsFileCard) => {
 
 const renderWikidataCard = (data: WikimediaWikidataCard) => {
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4 tw-space-y-4">
+    <div className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">{data.title}</h3>
+        <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+          {data.title}
+        </h3>
         <span className="tw-rounded-full tw-bg-iron-800/80 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-200">
           Wikidata
         </span>
       </div>
       {data.description && (
-        <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-leading-relaxed" lang={data.lang}>
+        <p
+          className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300"
+          lang={data.lang}
+        >
           {data.description}
         </p>
       )}
@@ -295,7 +325,7 @@ const renderWikidataCard = (data: WikimediaWikidataCard) => {
             alt={data.image.alt ?? data.title}
             width={data.image.width ?? 1200}
             height={data.image.height ?? 800}
-            className="tw-h-full tw-w-full tw-object-contain tw-bg-iron-900"
+            className="tw-h-full tw-w-full tw-bg-iron-900 tw-object-contain"
             loading="lazy"
             decoding="async"
             sizes="(max-width: 768px) 100vw, 360px"
@@ -306,11 +336,16 @@ const renderWikidataCard = (data: WikimediaWikidataCard) => {
       {data.facts.length > 0 && (
         <dl className="tw-grid tw-grid-cols-1 tw-gap-y-3">
           {data.facts.map((fact) => (
-            <div key={`${fact.propertyId}-${fact.value}`} className="tw-flex tw-flex-col tw-gap-1">
+            <div
+              key={`${fact.propertyId}-${fact.value}`}
+              className="tw-flex tw-flex-col tw-gap-1"
+            >
               <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
                 {fact.propertyLabel}
               </dt>
-              <dd className="tw-m-0 tw-text-sm tw-text-iron-200">{fact.value}</dd>
+              <dd className="tw-m-0 tw-text-sm tw-text-iron-200">
+                {fact.value}
+              </dd>
             </div>
           ))}
         </dl>
@@ -323,7 +358,7 @@ const renderWikidataCard = (data: WikimediaWikidataCard) => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 hover:tw-text-primary-200"
+              className="tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-2 hover:tw-text-primary-300"
             >
               {link.title}
             </Link>
@@ -341,7 +376,7 @@ const renderUnavailableCard = (
 ) => {
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6">
-      <div className="tw-text-center tw-space-y-3">
+      <div className="tw-space-y-3 tw-text-center">
         <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
           This page is unavailable.
         </p>
@@ -349,7 +384,7 @@ const renderUnavailableCard = (
           href={data.pageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-200 tw-no-underline tw-transition hover:tw-border-primary-300/60 hover:tw-text-white"
+          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition hover:tw-border-primary-300/60 hover:tw-text-white"
         >
           {actionLabel}
         </Link>
@@ -427,7 +462,7 @@ export default function WikimediaCard({ href }: WikimediaCardProps) {
     return (
       <LinkPreviewCardLayout href={layoutHref}>
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6">
-          <div className="tw-text-center tw-space-y-2">
+          <div className="tw-space-y-2 tw-text-center">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
               Unable to load preview
             </p>
@@ -444,7 +479,7 @@ export default function WikimediaCard({ href }: WikimediaCardProps) {
     return (
       <LinkPreviewCardLayout href={layoutHref}>
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6">
-          <div className="tw-text-center tw-space-y-2">
+          <div className="tw-space-y-2 tw-text-center">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
               Preview unavailable
             </p>
@@ -457,6 +492,7 @@ export default function WikimediaCard({ href }: WikimediaCardProps) {
     );
   }
 
-  return <LinkPreviewCardLayout href={layoutHref}>{content}</LinkPreviewCardLayout>;
+  return (
+    <LinkPreviewCardLayout href={layoutHref}>{content}</LinkPreviewCardLayout>
+  );
 }
-

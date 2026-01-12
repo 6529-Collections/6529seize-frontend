@@ -3,7 +3,6 @@
 import React, { useMemo, useEffect, type JSX } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ObjectSerializer";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,
@@ -23,7 +22,6 @@ interface WaveContentProps {
   readonly setMode: (mode: Mode) => void;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 interface TabOption {
@@ -37,7 +35,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   setMode,
   activeTab,
   setActiveTab,
-  onDropClick,
 }) => {
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
@@ -93,7 +90,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
-          <BrainRightSidebarContent wave={wave} onDropClick={onDropClick} />
+          <BrainRightSidebarContent wave={wave} />
         ) : (
           <BrainRightSidebarFollowers
             wave={wave}
@@ -104,12 +101,12 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.LEADERBOARD]: (
       <div>
-        <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        <WaveSmallLeaderboard wave={wave} />
       </div>
     ),
     [SidebarTab.WINNERS]: (
       <div>
-        <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
+        <WaveWinnersSmall wave={wave} />
       </div>
     ),
     [SidebarTab.TOP_VOTERS]: (
@@ -119,10 +116,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.ACTIVITY_LOG]: (
       <div className="tw-p-4">
-        <WaveLeaderboardRightSidebarActivityLogs
-          wave={wave}
-          onDropClick={onDropClick}
-        />
+        <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
       </div>
     ),
   };
@@ -138,7 +132,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
-          <BrainRightSidebarContent wave={wave} onDropClick={onDropClick} />
+          <BrainRightSidebarContent wave={wave} />
         ) : (
           <BrainRightSidebarFollowers
             wave={wave}

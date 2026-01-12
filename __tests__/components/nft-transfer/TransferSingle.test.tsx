@@ -19,7 +19,10 @@ jest.mock("@/entities/IProfile", () => ({
   CollectedCollectionType: {} as any,
 }));
 
-let mockSelected = new Map<string, { qty?: number | undefined; max?: number | undefined }>();
+let mockSelected = new Map<
+  string,
+  { qty?: number | undefined; max?: number | undefined }
+>();
 const mockFns = {
   select: jest.fn(),
   unselect: jest.fn(),
@@ -61,7 +64,8 @@ jest.mock("@/components/nft-transfer/TransferModal", () => ({
       data-testid="transfer-modal"
       data-open={open}
       aria-expanded={open}
-      onClick={onClose}>
+      onClick={onClose}
+    >
       {open ? "OPEN" : "CLOSED"}
     </button>
   ),
@@ -90,8 +94,8 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
-import { ContractType } from "@/enums";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { ContractType } from "@/types/enums";
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo

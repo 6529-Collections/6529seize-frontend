@@ -1,9 +1,9 @@
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
-import { capitalizeEveryWord } from "@/helpers/Helpers";
-import { GasRoyaltiesCollectionFocus } from "@/enums";
-import styles from "@/styles/Home.module.scss";
 import Gas from "@/components/gas-royalties/Gas";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { capitalizeEveryWord } from "@/helpers/Helpers";
+import styles from "@/styles/Home.module.scss";
+import { GasRoyaltiesCollectionFocus } from "@/types/enums";
+import type { Metadata } from "next";
 
 export default function GasPage() {
   return (

@@ -3,10 +3,10 @@ import {
   printNftContent,
   printSortButtons,
 } from "@/components/memelab/MemeLab";
-import type { LabExtendedData, LabNFT} from "@/entities/INFT";
+import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort } from "@/enums";
+import { MemeLabSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

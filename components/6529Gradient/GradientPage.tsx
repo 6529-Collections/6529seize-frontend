@@ -15,13 +15,12 @@ import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import YouOwnNftBadge from "@/components/you-own-nft-badge/YouOwnNftBadge";
 import { publicEnv } from "@/config/env";
-import { GRADIENT_CONTRACT } from "@/constants";
+import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { Transaction } from "@/entities/ITransaction";
-import { ContractType } from "@/enums";
 import {
   areEqualAddresses,
   numberWithCommas,
@@ -29,6 +28,7 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
+import { ContractType } from "@/types/enums";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 
@@ -65,7 +65,9 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         return;
       }
       try {
-        const response = await fetchUrl(url, { ...(signal !== undefined ? { signal: signal } : {}) });
+        const response = await fetchUrl(url, {
+          ...(signal !== undefined ? { signal: signal } : {}),
+        });
         const combined = [...mynfts, ...response.data];
         if (response.next) {
           await fetchNftsInner(response.next, combined, signal);
@@ -140,7 +142,10 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
         if (error instanceof Error && error.name === "AbortError") {
           return;
         }
-        console.error(`Failed to fetch gradient transactions for id ${id}`, error);
+        console.error(
+          `Failed to fetch gradient transactions for id ${id}`,
+          error
+        );
         setTransactions([]);
       });
     return () => abortController.abort();
@@ -155,7 +160,8 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
             sm={{ span: 12 }}
             md={{ span: 6 }}
             lg={{ span: 6 }}
-            className="pt-2 position-relative">
+            className="pt-2 position-relative"
+          >
             {nft && (
               <NFTImage
                 id={fullscreenElementId}
@@ -172,7 +178,8 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                 <Row>
                   <Col
                     xs={isConnectedAddressOwner ? 7 : 12}
-                    className="tw-flex tw-items-center tw-gap-2">
+                    className="tw-flex tw-items-center tw-gap-2"
+                  >
                     <Container className="no-padding">
                       <Row>
                         <Col>
@@ -312,9 +319,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
           <Container className="pt-4 pb-4">
             <Row>
               <Col>
-                <h1>
-                  6529 Gradient
-                </h1>
+                <h1>6529 Gradient</h1>
               </Col>
             </Row>
             {nft && (

@@ -8,7 +8,7 @@ import { DefaultWaveSmallLeaderboardDrop } from "./DefaultWaveSmallLeaderboardDr
 interface WaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
 }
 
 export const WaveSmallLeaderboardDrop: React.FC<
@@ -17,17 +17,11 @@ export const WaveSmallLeaderboardDrop: React.FC<
   const { isMemesWave } = useWave(wave);
   if (isMemesWave) {
     return (
-      <MemesWaveSmallLeaderboardDrop
-        drop={drop}
-        onDropClick={onDropClick}
-      />
+      <MemesWaveSmallLeaderboardDrop drop={drop} onDropClick={onDropClick} />
     );
   } else {
     return (
-      <DefaultWaveSmallLeaderboardDrop
-        drop={drop}
-        onDropClick={onDropClick}
-      />
+      <DefaultWaveSmallLeaderboardDrop drop={drop} onDropClick={onDropClick} />
     );
   }
 };

@@ -1,9 +1,9 @@
+import { AuthContext } from "@/components/auth/Auth";
 import { render, screen } from "@testing-library/react";
 import React, { useMemo } from "react";
-import { AuthContext } from "@/components/auth/Auth";
 /* eslint-disable react/display-name */
 import AboutPage from "@/app/about/[section]/page";
-import { AboutSection } from "@/enums";
+import { AboutSection } from "@/types/enums";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
@@ -21,7 +21,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
 const setTitle = jest.fn();
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const contextValue = useMemo(() => ({ setTitle } as any), [setTitle]);
+  const contextValue = useMemo(() => ({ setTitle }) as any, [setTitle]);
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );

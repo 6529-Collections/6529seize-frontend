@@ -2,7 +2,7 @@ import {
   NEXTGEN_ADMIN_ABI,
   NEXTGEN_CORE_ABI,
   NEXTGEN_MINTER_ABI,
-} from "@/abis";
+} from "@/abis/abis";
 import { publicEnv } from "@/config/env";
 import { goerli, mainnet, sepolia } from "viem/chains";
 

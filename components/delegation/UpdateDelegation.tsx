@@ -6,8 +6,8 @@ import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import styles from "./Delegation.module.scss";
 
-import { DELEGATION_ABI } from "@/abis";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { DelegationCollection } from "./delegation-constants";
 import {

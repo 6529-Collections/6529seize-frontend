@@ -1,10 +1,10 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
-import ClientCommunityNerdPage from "@/app/network/nerd/[[...focus]]/page.client";
 import { generateMetadata } from "@/app/network/nerd/[[...focus]]/page";
-import { LeaderboardFocus } from "@/enums";
+import ClientCommunityNerdPage from "@/app/network/nerd/[[...focus]]/page.client";
+import { LeaderboardFocus } from "@/types/enums";
 
 // 🧪 Mock dynamic Leaderboard
 jest.mock("@/components/leaderboard/Leaderboard", () => {
@@ -19,7 +19,8 @@ jest.mock("@/components/leaderboard/Leaderboard", () => {
         <span data-testid="focus">{focus}</span>
         <button
           data-testid="set-focus"
-          onClick={() => setFocus("Interactions")}>
+          onClick={() => setFocus("Interactions")}
+        >
           Change Focus
         </button>
       </div>

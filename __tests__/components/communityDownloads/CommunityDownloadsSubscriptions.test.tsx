@@ -1,7 +1,7 @@
-import { render, screen, act } from "@testing-library/react";
 import CommunityDownloadsSubscriptions from "@/components/community-downloads/CommunityDownloadsSubscriptions";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { act, render, screen } from "@testing-library/react";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),

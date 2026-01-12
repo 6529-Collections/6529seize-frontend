@@ -1,20 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Distribution } from "@/entities/IDistribution";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  areEqualAddresses,
-  capitalizeEveryWord,
-} from "@/helpers/Helpers";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
-} from "@/constants";
+} from "@/constants/constants";
+import type { Distribution } from "@/entities/IDistribution";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses, capitalizeEveryWord } from "@/helpers/Helpers";
+import { useEffect, useState } from "react";
 import UserPageStatsActivityDistributionsTableItem from "./UserPageStatsActivityDistributionsTableItem";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export enum DistributionCollection {
   MEMES = "MEMES",
@@ -52,9 +49,8 @@ export default function UserPageStatsActivityDistributionsTable({
     return Array.from(phases);
   };
 
-  const [availablePhases, setAvailablePhases] = useState<string[]>(
-    getAvailablePhases()
-  );
+  const [availablePhases, setAvailablePhases] =
+    useState<string[]>(getAvailablePhases());
 
   const [results, setResults] = useState<DistributionTableItem[]>([]);
 
@@ -119,46 +115,54 @@ export default function UserPageStatsActivityDistributionsTable({
         <tr>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
+          >
             Collection
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+          >
             Token
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3  tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+          >
             Name
           </th>
 
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+          >
             Wallet
           </th>
           {availablePhases.map((phase) => (
             <th
               key={getRandomObjectId()}
               scope="col"
-              className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+              className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+            >
               {capitalizeEveryWord(phase.replaceAll("_", " "))}
             </th>
           ))}
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+          >
             Minted
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+          >
             Total
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+          >
             <div className={loading ? "tw-opacity-100" : "tw-opacity-0"}>
               <CircleLoader />
             </div>

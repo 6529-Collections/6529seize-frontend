@@ -5,12 +5,12 @@ import {
   getContentViewKeyByValue,
 } from "@/app/nextgen/collection/[collection]/page-utils";
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import styles from "../NextGen.module.scss";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
@@ -29,11 +29,13 @@ export function printViewButton(
       onClick={() => setView(v)}
       className={`btn-link decoration-none ${
         v === currentView ? styles["nextgenTokenDetailsLinkSelected"] : ""
-      }`}>
+      }`}
+    >
       <h4
         className={
           v === currentView ? "font-color" : "font-color-h cursor-pointer"
-        }>
+        }
+      >
         {v}
       </h4>
     </button>

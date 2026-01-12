@@ -1,30 +1,21 @@
-import Image from "next/image";
-import styles from "./LatestActivity.module.scss";
+import { MANIFOLD } from "@/constants/constants";
+import type { NextGenCollection } from "@/entities/INextgen";
+import type { NFTLite } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   areEqualAddresses,
   areEqualURLS,
   displayDecimal,
   getDateDisplay,
-  isNextgenContract,
+  getRoyaltyImage,
   isGradientsContract,
   isMemeLabContract,
   isMemesContract,
+  isNextgenContract,
   isNullAddress,
   numberWithCommas,
-  getRoyaltyImage,
 } from "@/helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MANIFOLD } from "@/constants";
-import type { NFTLite } from "@/entities/INFT";
-import Address from "../address/Address";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
-import type { NextGenCollection } from "@/entities/INextgen";
-import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
-import {
-  getNextGenIconUrl,
-  getNextGenImageUrl,
-} from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 import {
   faCartPlus,
   faExchange,
@@ -34,9 +25,18 @@ import {
   faParachuteBox,
   faShoppingCart,
 } from "@fortawesome/free-solid-svg-icons";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { Tooltip } from "react-tooltip";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 import Link from "next/link";
+import { Tooltip } from "react-tooltip";
+import Address from "../address/Address";
+import {
+  getNextGenIconUrl,
+  getNextGenImageUrl,
+} from "../nextGen/collections/nextgenToken/NextGenTokenImage";
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
+import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+import styles from "./LatestActivity.module.scss";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
   return Math.round((royalties / value) * 10000) / 10000;
@@ -116,10 +116,10 @@ export function printGas(
           ].map(([label, value]) => (
             <div
               key={label}
-              className="tw-flex tw-justify-between tw-w-full tw-gap-4"
+              className="tw-flex tw-w-full tw-justify-between tw-gap-4"
             >
-              <span className="tw-text-left tw-w-1/2">{label}</span>
-              <span className="tw-text-right tw-w-1/2">{value}</span>
+              <span className="tw-w-1/2 tw-text-left">{label}</span>
+              <span className="tw-w-1/2 tw-text-right">{value}</span>
             </div>
           ))}
         </div>

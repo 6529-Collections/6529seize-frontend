@@ -1,7 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
-import { RateMatter } from "@/enums";
+import { RateMatter } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/auth/SeizeConnectContext");

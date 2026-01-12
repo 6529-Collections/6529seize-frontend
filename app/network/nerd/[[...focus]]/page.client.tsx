@@ -1,12 +1,12 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
-import { LeaderboardFocus } from "@/enums";
-import { useEffect, useState, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { useTitle } from "@/contexts/TitleContext";
 import Leaderboard from "@/components/leaderboard/Leaderboard";
+import { useTitle } from "@/contexts/TitleContext";
+import styles from "@/styles/Home.module.scss";
+import { LeaderboardFocus } from "@/types/enums";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function CommunityNerdPageClient({
   focus: initialFocus,
@@ -17,8 +17,6 @@ export default function CommunityNerdPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const [focus, setFocus] = useState<LeaderboardFocus>(initialFocus);
-
-
 
   const syncPath = useCallback(
     (newFocus: LeaderboardFocus) => {

@@ -9,7 +9,7 @@ import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSumm
 import Pagination from "@/components/pagination/Pagination";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";

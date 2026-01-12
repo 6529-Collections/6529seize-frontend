@@ -3,7 +3,7 @@ import {
   ProfileRatersParamsOrderBy,
   ProfileRatersTableType,
   RateMatter,
-} from "@/enums";
+} from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { act, render } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";

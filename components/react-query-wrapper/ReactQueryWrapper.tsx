@@ -6,7 +6,6 @@ import type {
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
-import { RateMatter } from "@/enums";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -17,10 +16,11 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
 import type { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
+import { RateMatter } from "@/types/enums";
 
 import {
-  type QueryClient,
   type InfiniteData,
+  type QueryClient,
   useQueryClient,
 } from "@tanstack/react-query";
 import Cookies from "js-cookie";
@@ -100,6 +100,7 @@ export enum QueryKey {
   WAVE_OUTCOMES = "WAVE_OUTCOMES",
   WAVE_OUTCOME_DISTRIBUTION = "WAVE_OUTCOME_DISTRIBUTION",
   WAVE_OUTCOME_DISTRIBUTION_PAGE = "WAVE_OUTCOME_DISTRIBUTION_PAGE",
+  COMMUNITY_METRICS = "COMMUNITY_METRICS",
 }
 
 interface InitProfileRatersParamsAndData {
