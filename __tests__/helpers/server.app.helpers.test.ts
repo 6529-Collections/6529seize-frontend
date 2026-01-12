@@ -1,4 +1,4 @@
-import { API_AUTH_COOKIE } from "@/constants";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
 
@@ -36,9 +36,7 @@ describe("getAppCommonHeaders", () => {
   it("includes Authorization header when wallet-auth cookie exists", async () => {
     (cookies as jest.Mock).mockResolvedValue({
       get: (name: string) =>
-        name === WALLET_AUTH_COOKIE
-          ? { value: "wallet-token" }
-          : undefined,
+        name === WALLET_AUTH_COOKIE ? { value: "wallet-token" } : undefined,
     });
 
     const headers = await getAppCommonHeaders();

@@ -3,13 +3,13 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "@/constants";
-import type { RateMatter } from "@/enums";
-import { ContractType, ProfileActivityLogType } from "@/enums";
+} from "@/constants/constants";
 import type { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import type { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import type { RateMatter } from "@/types/enums";
+import { ContractType, ProfileActivityLogType } from "@/types/enums";
 
 interface IProfileWallet {
   readonly address: string;

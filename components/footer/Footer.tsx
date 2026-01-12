@@ -1,4 +1,4 @@
-import { AboutSection } from "@/enums";
+import { AboutSection } from "@/types/enums";
 
 export default function Footer() {
   function printLink(href: string, text: string, newTab: boolean = false) {
@@ -7,7 +7,8 @@ export default function Footer() {
       <a
         href={href}
         target={target}
-        rel={newTab ? "noopener noreferrer" : undefined}>
+        rel={newTab ? "noopener noreferrer" : undefined}
+      >
         {text}
       </a>
     );
@@ -24,7 +25,8 @@ export default function Footer() {
       <a
         href={href}
         target={target}
-        rel={newTab ? "noopener noreferrer" : undefined}>
+        rel={newTab ? "noopener noreferrer" : undefined}
+      >
         <img
           width="0"
           height="0"
@@ -44,7 +46,8 @@ export default function Footer() {
   return (
     <footer
       className="d-flex flex-column align-items-center justify-content-center gap-2"
-      id="footer">
+      id="footer"
+    >
       <span className="d-flex align-items-center justify-content-center flex-wrap gap-2">
         {printLinkWithImage(
           "https://x.com/punk6529",

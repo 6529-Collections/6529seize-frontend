@@ -1,5 +1,8 @@
 "use client";
 
+import { classNames } from "@/helpers/Helpers";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   useCallback,
   useEffect,
@@ -11,9 +14,6 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useClickAway } from "react-use";
-import { classNames } from "@/helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 export interface CollectionsAutocompleteOption {
   readonly id: string;
@@ -112,7 +112,9 @@ export default function CollectionsAutocomplete({
       return;
     }
     if (highlightedIndex >= filteredOptions.length) {
-      setHighlightedIndex(filteredOptions.length > 0 ? filteredOptions.length - 1 : 0);
+      setHighlightedIndex(
+        filteredOptions.length > 0 ? filteredOptions.length - 1 : 0
+      );
     }
   }, [filteredOptions.length, highlightedIndex, open]);
 
@@ -213,8 +215,8 @@ export default function CollectionsAutocomplete({
       if (filteredOptionsCount === 0) {
         return;
       }
-      setHighlightedIndex((prev) =>
-        (prev + delta + filteredOptionsCount) % filteredOptionsCount
+      setHighlightedIndex(
+        (prev) => (prev + delta + filteredOptionsCount) % filteredOptionsCount
       );
     },
     [filteredOptionsCount, open, openDropdown]
@@ -269,12 +271,7 @@ export default function CollectionsAutocomplete({
       Escape: handleEscapeKey,
       Backspace: handleBackspaceKey,
     }),
-    [
-      handleArrowNavigation,
-      handleBackspaceKey,
-      handleEnterKey,
-      handleEscapeKey,
-    ]
+    [handleArrowNavigation, handleBackspaceKey, handleEnterKey, handleEscapeKey]
   );
 
   const handleKeyDown = useCallback(
@@ -339,7 +336,7 @@ export default function CollectionsAutocomplete({
           {selectedOptions.map((option) => (
             <span
               key={option.id}
-              className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-850 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-100"
+              className="tw-bg-iron-850 tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-iron-700 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-100"
             >
               <span>{option.name}</span>
               <button
@@ -376,12 +373,15 @@ export default function CollectionsAutocomplete({
             aria-describedby={nativeSelectDescriptionId}
             aria-label="Collections search input"
             className={classNames(
-              "tw-flex-1 tw-min-w-[140px] tw-border-none tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-50 focus:tw-outline-none",
-              disabled ? "tw-cursor-not-allowed tw-text-iron-400" : "tw-cursor-text"
+              "tw-min-w-[140px] tw-flex-1 tw-border-none tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-50 focus:tw-outline-none",
+              disabled
+                ? "tw-cursor-not-allowed tw-text-iron-400"
+                : "tw-cursor-text"
             )}
           />
           <p id={nativeSelectDescriptionId} className="tw-sr-only">
-            Type to filter collections, then select a result from the following list.
+            Type to filter collections, then select a result from the following
+            list.
           </p>
           <select
             id={nativeSelectId}
@@ -398,18 +398,15 @@ export default function CollectionsAutocomplete({
             {!hasNoResults &&
               filteredOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {`${option.name} (${option.id})${typeof option.tokenCount === "number"
+                  {`${option.name} (${option.id})${
+                    typeof option.tokenCount === "number"
                       ? ` • ${option.tokenCount.toLocaleString()} tokens`
                       : ""
-                    }`}
+                  }`}
                 </option>
               ))}
           </select>
-          <output
-            className="tw-sr-only"
-            aria-live="polite"
-            aria-atomic="true"
-          >
+          <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
             {liveRegionMessage}
           </output>
         </fieldset>
@@ -420,9 +417,7 @@ export default function CollectionsAutocomplete({
             className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-max-h-64 tw-list-none tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-shadow-xl"
           >
             {hasNoResults ? (
-              <li
-                className="tw-px-3.5 tw-py-3 tw-text-sm tw-text-iron-300"
-              >
+              <li className="tw-px-3.5 tw-py-3 tw-text-sm tw-text-iron-300">
                 {noResultsText}
               </li>
             ) : (
@@ -440,13 +435,15 @@ export default function CollectionsAutocomplete({
                       className={classNames(
                         "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3.5 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out",
                         isHighlighted
-                          ? "tw-bg-primary-500/20 tw-text-primary-200"
-                          : "hover:tw-bg-iron-900 tw-text-iron-100"
+                          ? "tw-bg-primary-500/20 tw-text-primary-300"
+                          : "tw-text-iron-100 hover:tw-bg-iron-900"
                       )}
                     >
                       <span className="tw-flex tw-flex-col">
                         <span>{option.name}</span>
-                        <span className="tw-text-xs tw-text-iron-400">{option.id}</span>
+                        <span className="tw-text-xs tw-text-iron-400">
+                          {option.id}
+                        </span>
                       </span>
                       {typeof option.tokenCount === "number" ? (
                         <span className="tw-text-xs tw-text-iron-400">

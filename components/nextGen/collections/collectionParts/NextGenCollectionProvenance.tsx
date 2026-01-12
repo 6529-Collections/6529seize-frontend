@@ -1,12 +1,12 @@
 "use client";
 
-import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { Accordion, Col, Container, Row } from "react-bootstrap";
-import { NULL_ADDRESS } from "@/constants";
+import {
+  printGas,
+  printRoyalties,
+} from "@/components/latest-activity/LatestActivityRow";
+import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
+import Pagination from "@/components/pagination/Pagination";
+import { NULL_ADDRESS } from "@/constants/constants";
 import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
 import {
   areEqualAddresses,
@@ -15,12 +15,12 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
-  printGas,
-  printRoyalties,
-} from "@/components/latest-activity/LatestActivityRow";
-import Pagination from "@/components/pagination/Pagination";
-import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
+import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Accordion, Col, Container, Row } from "react-bootstrap";
 import styles from "../NextGen.module.scss";
 import {
   getNextGenIconUrl,
@@ -240,7 +240,7 @@ export function NextGenCollectionProvenanceRow(
       }
       return logSpan;
     }
-    return
+    return;
   }
 
   return (

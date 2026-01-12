@@ -1,7 +1,7 @@
 "use client";
 
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
-import type { ProfileActivityLogType } from "@/enums";
+import type { ProfileActivityLogType } from "@/types/enums";
 import { useEffect, useState } from "react";
 import ProfileActivityLogsIcon from "../icons/ProfileActivityLogsIcon";
 
@@ -25,17 +25,17 @@ export default function ProfileActivityLogsFilterListItem({
   return (
     <li>
       <button
-        className="tw-bg-transparent tw-border-none tw-w-full tw-h-full tw-group tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-py-2.5 tw-pl-3 tw-pr-9 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-group tw-relative tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-rounded-lg tw-border-none tw-bg-transparent tw-py-2.5 tw-pl-3 tw-pr-9 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700"
         onClick={() => setSelected(itemType)}
       >
-        <div className="tw-w-full tw-flex tw-items-center tw-space-x-3 tw-pr-4">
+        <div className="tw-flex tw-w-full tw-items-center tw-space-x-3 tw-pr-4">
           <ProfileActivityLogsIcon logType={itemType} />
-          <span className="tw-font-normal tw-block tw-truncate">
+          <span className="tw-block tw-truncate tw-font-normal">
             {PROFILE_ACTIVITY_TYPE_TO_TEXT[itemType]}
           </span>
         </div>
         {isSelected && (
-          <span className="tw-text-iron-50 tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
+          <span className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4 tw-text-iron-50">
             <svg
               className="tw-h-4 tw-w-4 tw-text-primary-400"
               viewBox="0 0 20 20"

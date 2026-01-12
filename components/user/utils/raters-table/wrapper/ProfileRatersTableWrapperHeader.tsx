@@ -1,8 +1,8 @@
 import ProfileName, {
   ProfileNameType,
 } from "@/components/profile-activity/ProfileName";
-import { ProfileRatersTableType } from "@/enums";
 import UserTableHeaderWrapper from "@/components/user/utils/UserTableHeaderWrapper";
+import { ProfileRatersTableType } from "@/types/enums";
 
 export default function ProfileRatersTableWrapperHeader({
   type,

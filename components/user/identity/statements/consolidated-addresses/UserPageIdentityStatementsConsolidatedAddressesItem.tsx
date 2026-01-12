@@ -1,6 +1,6 @@
 "use client";
 
-import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_ABI } from "@/abis/abis";
 import { useAuth } from "@/components/auth/Auth";
 import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
 import EtherscanIcon from "@/components/user/utils/icons/EtherscanIcon";
@@ -10,7 +10,7 @@ import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
-} from "@/constants";
+} from "@/constants/constants";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
 import { useEffect, useState } from "react";
@@ -142,15 +142,15 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-h-5 tw-group tw-flex tw-items-center tw-group tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-200 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-space-x-3">
+      <div className="tw-group tw-flex tw-h-5 tw-items-center tw-space-x-3 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400 sm:tw-text-md">
         <button
           onClick={goToOpensea}
           aria-label="Go to Opensea"
-          className="tw-bg-transparent tw-border-none tw-p-0"
+          className="tw-border-none tw-bg-transparent tw-p-0"
           data-tooltip-id={`opensea-tooltip-${address.wallet}`}
           {...(isTouchScreen ? null : { "data-tooltip-content": "Opensea" })}
         >
-          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110 sm:tw-h-5 sm:tw-w-5">
             <OpenseaIcon />
           </div>
         </button>
@@ -169,11 +169,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         <button
           onClick={goToEtherscan}
           aria-label="Go to Etherscan"
-          className="tw-bg-transparent tw-border-none tw-p-0"
+          className="tw-border-none tw-bg-transparent tw-p-0"
           data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
           {...(!isTouchScreen ? { "data-tooltip-content": "Etherscan" } : null)}
         >
-          <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+          <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110 sm:tw-h-5 sm:tw-w-5">
             <EtherscanIcon />
           </div>
         </button>
@@ -189,8 +189,8 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             }}
           />
         )}
-        <div className="tw-space-x-3 tw-inline-flex tw-items-center">
-          <div className="tw-truncate md:tw-max-w-[8rem] lg:tw-max-w-[11rem] tw-text-iron-200">
+        <div className="tw-inline-flex tw-items-center tw-space-x-3">
+          <div className="tw-truncate tw-text-iron-200 md:tw-max-w-[8rem] lg:tw-max-w-[11rem]">
             <span>
               {title === "Copied!" ? (
                 <span className="tw-text-primary-400">{title}</span>
@@ -204,7 +204,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           </div>
           <div className="tw-inline-flex tw-items-center">
             <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -230,7 +230,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 isTouchScreen
                   ? "tw-opacity-100"
                   : "tw-opacity-0 group-hover:tw-opacity-100"
-              } tw-ml-2 tw-p-1.5 tw-bg-transparent tw-cursor-pointer tw-text-xs tw-font-semibold tw-text-iron-400 hover:tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+              } tw-ml-2 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none`}
               onClick={handleCopy}
               data-tooltip-id={`copy-tooltip-${address.wallet}`}
               {...(!isTouchScreen ? { "data-tooltip-content": "Copy" } : null)}
@@ -253,7 +253,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         </div>
       </div>
       {statusMessage && (
-        <div className="pt-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-200 d-flex flex-column gap-1">
+        <div className="pt-3 d-flex flex-column gap-1 tw-text-sm tw-font-medium tw-text-iron-200 sm:tw-text-md">
           {statusMessage}
         </div>
       )}

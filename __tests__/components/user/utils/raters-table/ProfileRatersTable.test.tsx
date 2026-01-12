@@ -1,6 +1,9 @@
 import ProfileRatersTable from "@/components/user/utils/raters-table/ProfileRatersTable";
 import { SortDirection } from "@/entities/ISort";
-import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
+import {
+  ProfileRatersParamsOrderBy,
+  ProfileRatersTableType,
+} from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 let headerProps: any;

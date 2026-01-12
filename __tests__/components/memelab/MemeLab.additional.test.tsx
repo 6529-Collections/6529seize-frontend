@@ -2,10 +2,10 @@ import {
   getInitialRouterValues,
   printNftContent,
 } from "@/components/memelab/MemeLab";
-import type { LabExtendedData, LabNFT} from "@/entities/INFT";
+import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort } from "@/enums";
+import { MemeLabSort } from "@/types/enums";
 import { render } from "@testing-library/react";
 
 // Mock the printMintDate helper function
@@ -220,7 +220,12 @@ describe("MemeLab extra tests", () => {
 
     const { container } = render(
       <div>
-        {printNftContent(nft, MemeLabSort.COLLECTIONS, [meta], VolumeType.ALL_TIME)}
+        {printNftContent(
+          nft,
+          MemeLabSort.COLLECTIONS,
+          [meta],
+          VolumeType.ALL_TIME
+        )}
       </div>
     );
     expect(container.textContent).toContain("Artists: Test Artist");

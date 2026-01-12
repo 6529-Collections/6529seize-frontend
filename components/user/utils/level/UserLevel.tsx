@@ -1,10 +1,10 @@
 const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
-  { minLevel: 0, classes: "tw-text-[#DA8C60] tw-ring-[#DA8C60]" },
-  { minLevel: 20, classes: "tw-text-[#DAAC60] tw-ring-[#DAAC60]" },
-  { minLevel: 40, classes: "tw-text-[#DAC660] tw-ring-[#DAC660]" },
-  { minLevel: 60, classes: "tw-text-[#AABE68] tw-ring-[#AABE68]" },
   { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
-].reverse();
+  { minLevel: 60, classes: "tw-text-[#AABE68] tw-ring-[#AABE68]" },
+  { minLevel: 40, classes: "tw-text-[#DAC660] tw-ring-[#DAC660]" },
+  { minLevel: 20, classes: "tw-text-[#DAAC60] tw-ring-[#DAAC60]" },
+  { minLevel: 0, classes: "tw-text-[#DA8C60] tw-ring-[#DA8C60]" },
+] as const;
 
 export default function UserLevel({
   level,
@@ -19,7 +19,7 @@ export default function UserLevel({
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
-    LEVEL_CLASSES[0]?.classes;
+    LEVEL_CLASSES.at(0)!.classes;
 
   const getSizeClasses = () => {
     if (size === "sm") {

@@ -1,20 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSearchCollectionDropdown";
-import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import type { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
-import { MEMES_CONTRACT } from "@/constants";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
-import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
 } from "@/services/distribution-plan-api";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSearchCollectionDropdown";
+import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
+import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";
 
 export default function CreateSnapshotFormSearchCollection({
   setCollection,

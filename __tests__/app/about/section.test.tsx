@@ -3,7 +3,7 @@
  */
 
 import AboutPage, { generateMetadata } from "@/app/about/[section]/page";
-import { AboutSection } from "@/enums";
+import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import { notFound, redirect } from "next/navigation";
 

@@ -1,11 +1,11 @@
 "use client";
 
+import FooterWrapper from "@/components/footer/FooterWrapper";
 import MobileLayout from "@/components/layout/MobileLayout";
 import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
 import WebLayout from "@/components/layout/WebLayout";
 import LayoutErrorFallback from "@/components/providers/LayoutErrorFallback";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
-import FooterWrapper from "@/FooterWrapper";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { usePathname } from "next/navigation";
@@ -87,7 +87,8 @@ export default function LayoutWrapper({
     <LayoutComponent>
       <ErrorBoundary
         FallbackComponent={LayoutErrorFallback}
-        resetKeys={[pathname]}>
+        resetKeys={[pathname]}
+      >
         {children}
         <FooterWrapper />
       </ErrorBoundary>

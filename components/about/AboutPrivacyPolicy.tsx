@@ -1,4 +1,4 @@
-import { AboutSection } from "@/enums";
+import { AboutSection } from "@/types/enums";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
@@ -8,9 +8,7 @@ export default function AboutPrivacyPolicy() {
     <Container>
       <Row>
         <Col>
-          <h1>
-            Privacy Policy
-          </h1>
+          <h1>Privacy Policy</h1>
         </Col>
       </Row>
       <Row>
@@ -314,7 +312,8 @@ export default function AboutPrivacyPolicy() {
               <a
                 href={`http://www.allaboutdnt.com`}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 http://www.allaboutdnt.com
               </a>
               .
@@ -531,7 +530,8 @@ export default function AboutPrivacyPolicy() {
                 <a
                   href="mailto:privacy@6529.io"
                   target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                >
                   privacy&#64;6529.io
                 </a>
               </li>

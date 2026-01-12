@@ -4,16 +4,14 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
-import { RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
+import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import type {
-  ProfileRatersParams,
-} from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
+import type { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import ProfileRatersTableWrapper from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
@@ -62,7 +60,7 @@ export default function UserPageRep({
       </UserPageRateWrapper>
       <UserPageRepReps repRates={repRates ?? null} profile={profile} />
 
-      <div className="tw-mt-6 lg:tw-mt-8 tw-grid tw-grid-cols-1 xl:tw-grid-cols-2 tw-gap-y-6 lg:tw-gap-y-10 tw-gap-x-8 lg:tw-gap-x-10">
+      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 lg:tw-mt-8 lg:tw-gap-x-10 lg:tw-gap-y-10 xl:tw-grid-cols-2">
         <div>
           <ProfileRatersTableWrapper initialParams={initialRepGivenParams} />
         </div>

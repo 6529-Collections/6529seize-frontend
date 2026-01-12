@@ -1,5 +1,5 @@
 import ProfileRatersTableBody from "@/components/user/utils/raters-table/ProfileRatersTableBody";
-import { ProfileRatersTableType } from "@/enums";
+import { ProfileRatersTableType } from "@/types/enums";
 import { render } from "@testing-library/react";
 
 let itemProps: any[] = [];

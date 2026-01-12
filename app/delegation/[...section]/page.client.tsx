@@ -2,8 +2,8 @@
 
 import DelegationCenterMenu from "@/components/delegation/DelegationCenterMenu";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { DelegationCenterSection } from "@/enums";
 import styles from "@/styles/Home.module.scss";
+import { DelegationCenterSection } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

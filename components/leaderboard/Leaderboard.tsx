@@ -1,10 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { publicEnv } from "@/config/env";
-import { LeaderboardFocus } from "@/enums";
-import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { GlobalTDHHistory, TDHCalc } from "@/entities/ITDH";
@@ -12,6 +8,10 @@ import type { ApiBlocksPage } from "@/generated/models/ApiBlocksPage";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
+import { LeaderboardFocus } from "@/types/enums";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import {
   SearchModalDisplay,

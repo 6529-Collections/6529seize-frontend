@@ -1,5 +1,5 @@
 import Footer from "@/components/footer/Footer";
-import { AboutSection } from "@/enums";
+import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 describe("Footer", () => {
