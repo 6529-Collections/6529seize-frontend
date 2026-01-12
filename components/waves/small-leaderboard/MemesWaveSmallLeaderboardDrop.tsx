@@ -5,13 +5,15 @@ import { WaveSmallLeaderboardDefaultDrop } from "./WaveSmallLeaderboardDefaultDr
 
 interface MemesWaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
 }
 
-export const MemesWaveSmallLeaderboardDrop: React.FC<MemesWaveSmallLeaderboardDropProps> = ({ drop, onDropClick }) => {
+export const MemesWaveSmallLeaderboardDrop: React.FC<
+  MemesWaveSmallLeaderboardDropProps
+> = ({ drop, onDropClick }) => {
   return (
-    <div className="tw-cursor-pointer" onClick={() => onDropClick(drop)}>
-      {drop.rank && drop.rank <= 3 ? (
+    <div className="tw-cursor-pointer" onClick={onDropClick}>
+      {typeof drop.rank === "number" && drop.rank <= 3 ? (
         <WaveSmallLeaderboardTopThreeDrop
           drop={drop}
           onDropClick={onDropClick}
@@ -24,4 +26,4 @@ export const MemesWaveSmallLeaderboardDrop: React.FC<MemesWaveSmallLeaderboardDr
       )}
     </div>
   );
-}; 
+};

@@ -7,7 +7,7 @@ import { DefaultWaveWinnerDropSmall } from "./DefaultWaveWinnerDropSmall";
 
 interface WaveWinnerItemSmallProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
   readonly wave: ApiWave;
   readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
@@ -24,15 +24,14 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
           rank={rank}
         />
       );
-    } else {
-      return (
-        <DefaultWaveWinnerDropSmall
-          drop={drop}
-          onDropClick={onDropClick}
-          rank={rank}
-        />
-      );
     }
+    return (
+      <DefaultWaveWinnerDropSmall
+        drop={drop}
+        onDropClick={onDropClick}
+        rank={rank}
+      />
+    );
   }
 );
 
