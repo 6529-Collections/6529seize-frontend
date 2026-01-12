@@ -17,7 +17,6 @@ import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
-import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -36,11 +35,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams?.toString() || '');
-      params.delete('wave');
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.delete("wave");
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
-        : (pathname || getHomeFeedRoute());
+        : pathname || getHomeFeedRoute();
       router.push(newUrl, { scroll: false });
     },
   });
@@ -73,8 +72,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.set('drop', drop.id);
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -105,22 +104,21 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   };
 
   return (
-    <WaveChatScrollProvider>
-      <div
-        className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
-        key={stableWaveKey}>
-        {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
-        <MyStreamWaveTabs wave={wave} />
+    <div
+      className="tailwind-scope tw-relative tw-flex tw-h-full tw-flex-col"
+      key={stableWaveKey}
+    >
+      {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
+      <MyStreamWaveTabs wave={wave} />
 
-        <div
-          className="tw-flex-grow tw-overflow-hidden tw-relative"
-          role="tabpanel"
-          id={getContentTabPanelId(activeContentTab)}
-        >
-          {components[activeContentTab]}
-        </div>
+      <div
+        className="tw-relative tw-flex-grow tw-overflow-hidden"
+        role="tabpanel"
+        id={getContentTabPanelId(activeContentTab)}
+      >
+        {components[activeContentTab]}
       </div>
-    </WaveChatScrollProvider>
+    </div>
   );
 };
 

@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useCallback } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 import { WaveSmallLeaderboardDrop } from "./WaveSmallLeaderboardDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 
 interface WaveSmallLeaderboardProps {
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
   wave,
-  onDropClick,
 }) => {
+  const waveChatScroll = useWaveChatScrollOptional();
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -25,6 +24,16 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
     });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
+
+  const handleDropClick = useCallback(
+    (serialNo: number) => {
+      waveChatScroll?.requestScrollToSerialNo({
+        waveId: wave.id,
+        serialNo,
+      });
+    },
+    [waveChatScroll, wave.id]
+  );
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -36,7 +45,7 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
     <div className="tw-p-4">
       <div className="tw-flex tw-flex-col">
         {memoizedDrops.length === 0 && !isFetching ? (
-          <div className="tw-text-iron-400 tw-text-center tw-py-4">
+          <div className="tw-py-4 tw-text-center tw-text-iron-400">
             No drops have been made yet in this wave
           </div>
         ) : (
@@ -46,14 +55,14 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
                 drop={drop}
                 wave={wave}
                 key={drop.id}
-                onDropClick={onDropClick}
+                onDropClick={() => handleDropClick(drop.serial_no)}
               />
             ))}
           </ul>
         )}
         {isFetchingNextPage && (
-          <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-            <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+          <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
+            <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400"></div>
           </div>
         )}
         <div ref={intersectionElementRef}></div>

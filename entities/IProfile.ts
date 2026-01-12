@@ -128,8 +128,7 @@ export interface ProfileActivityLogHandleEdit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogClassificationEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogClassificationEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.CLASSIFICATION_EDIT;
   readonly contents: {
     new_value: ApiProfileClassification;
@@ -182,8 +181,7 @@ export interface ProfileActivityLogSocialsEdit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogNftAccountsEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogNftAccountsEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.NFT_ACCOUNTS_EDIT;
   readonly contents: {
     action: ProfileActivityLogSocialsEditContentAction;
@@ -199,8 +197,7 @@ export interface ProfileActivityLogContactsEdit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogSocialVerificationPostEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogSocialVerificationPostEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT;
   readonly contents: {
     action: ProfileActivityLogSocialsEditContentAction;
@@ -216,8 +213,7 @@ export interface ProfileActivityLogArchived extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogGeneralCicStatementEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogGeneralCicStatementEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT;
   readonly contents: {
     readonly statement: CicStatement;
@@ -229,8 +225,7 @@ export interface ProfileActivityLogProxyCreated extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-export interface ProfileActivityLogProxyActionCreated
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyActionCreated extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_ACTION_CREATED;
   readonly contents: {
     readonly action_id: string;
@@ -239,8 +234,7 @@ export interface ProfileActivityLogProxyActionCreated
   };
 }
 
-export interface ProfileActivityLogProxyActionStateChanged
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyActionStateChanged extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED;
   readonly contents: {
     readonly action_id: string;
@@ -250,8 +244,7 @@ export interface ProfileActivityLogProxyActionStateChanged
   };
 }
 
-export interface ProfileActivityLogProxyActionChanged
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyActionChanged extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_ACTION_CHANGED;
   readonly contents: {
     readonly action_id: string;
@@ -267,8 +260,7 @@ export interface ProfileActivityLogDropComment extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-export interface ProfileActivityLogDropRatingEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogDropRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.DROP_RATING_EDIT;
   readonly contents: {};
 }
@@ -420,18 +412,6 @@ export interface CollectedCard {
   readonly rank: number | null;
   readonly seized_count: number | null;
   readonly szn: number | null;
-}
-
-export interface CommunityMemberOverview {
-  readonly display: string;
-  readonly detail_view_key: string;
-  readonly level: number;
-  readonly tdh: number;
-  readonly rep: number;
-  readonly cic: number;
-  readonly pfp: string | null;
-  readonly last_activity: number | null;
-  readonly wallet: string;
 }
 
 export interface ProfileMinimal {

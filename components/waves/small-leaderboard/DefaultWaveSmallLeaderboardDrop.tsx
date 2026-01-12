@@ -5,14 +5,14 @@ import { WaveSmallLeaderboardDefaultDrop } from "./WaveSmallLeaderboardDefaultDr
 
 interface DefaultWaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
 }
 
 export const DefaultWaveSmallLeaderboardDrop: React.FC<
   DefaultWaveSmallLeaderboardDropProps
 > = ({ drop, onDropClick }) => {
   return (
-    <div className="tw-cursor-pointer" onClick={() => onDropClick(drop)}>
+    <div className="tw-cursor-pointer" onClick={onDropClick}>
       {drop.rank && drop.rank <= 3 ? (
         <WaveSmallLeaderboardTopThreeDrop
           drop={drop}

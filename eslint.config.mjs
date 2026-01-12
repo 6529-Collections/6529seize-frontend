@@ -420,6 +420,7 @@ export default defineConfig([
     "**/tests/**",
     "**/__mocks__/**",
     "**/e2e/**",
+    "**/test-results/**",
     "config/**",
     "*.js",
     "*.mjs",

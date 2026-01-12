@@ -1,23 +1,29 @@
 "use client";
 
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { CommunityMemberOverview } from "@/entities/IProfile";
-import type { Page } from "@/helpers/Types";
 import type { CommunityMembersQuery } from "@/app/network/page";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
 import { SortDirection } from "@/entities/ISort";
-import CommunityMembersTable from "./members-table/CommunityMembersTable";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
+import type { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "react-use";
-import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
+import CommunityMembersMobileSortContent from "./members-table/CommunityMembersMobileSortContent";
+import CommunityMembersTable from "./members-table/CommunityMembersTable";
+import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
-import { useSelector } from "react-redux";
-import { selectActiveGroupId } from "@/store/groupSlice";
-import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { CommunityMembersSortOption } from "@/enums";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import { selectActiveGroupId } from "@/store/groupSlice";
+import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import { useSelector } from "react-redux";
+import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
+import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -34,7 +40,7 @@ const SEARCH_PARAMS_FIELDS = {
 export default function CommunityMembers() {
   useSetTitle("Network");
 
-  const defaultSortBy = CommunityMembersSortOption.LEVEL;
+  const defaultSortBy = ApiCommunityMembersSortOption.Level;
   const defaultSortDirection = SortDirection.DESC;
   const defaultPageSize = 50;
   const defaultPage = 1;
@@ -46,14 +52,14 @@ export default function CommunityMembers() {
   const activeGroupId = useSelector(selectActiveGroupId);
 
   const convertSortBy = useCallback(
-    (sort: string | null): CommunityMembersSortOption => {
+    (sort: string | null): ApiCommunityMembersSortOption => {
       if (!sort) return defaultSortBy;
       if (
-        Object.values(CommunityMembersSortOption).includes(
-          sort.toLowerCase() as any
+        Object.values(ApiCommunityMembersSortOption).includes(
+          sort.toLowerCase() as ApiCommunityMembersSortOption
         )
       ) {
-        return sort.toLowerCase() as CommunityMembersSortOption;
+        return sort.toLowerCase() as ApiCommunityMembersSortOption;
       }
       return defaultSortBy;
     },
@@ -65,7 +71,7 @@ export default function CommunityMembers() {
       if (!sortDirection) return defaultSortDirection;
       if (
         Object.values(SortDirection).includes(
-          sortDirection.toUpperCase() as any
+          sortDirection.toUpperCase() as SortDirection
         )
       ) {
         return sortDirection.toUpperCase() as SortDirection;
@@ -123,8 +129,8 @@ export default function CommunityMembers() {
     currentSortBy,
     currentSortDirection,
   }: {
-    newSortBy: CommunityMembersSortOption;
-    currentSortBy: CommunityMembersSortOption;
+    newSortBy: ApiCommunityMembersSortOption;
+    currentSortBy: ApiCommunityMembersSortOption;
     currentSortDirection: SortDirection;
   }): SortDirection | null => {
     if (newSortBy === currentSortBy) {
@@ -146,7 +152,7 @@ export default function CommunityMembers() {
     isLoading,
     isFetching,
     data: members,
-  } = useQuery<Page<CommunityMemberOverview>>({
+  } = useQuery<Page<ApiCommunityMemberOverview>>({
     queryKey: [
       QueryKey.COMMUNITY_MEMBERS_TOP,
       {
@@ -159,7 +165,7 @@ export default function CommunityMembers() {
     ],
     queryFn: async () =>
       await commonApiFetch<
-        Page<CommunityMemberOverview>,
+        Page<ApiCommunityMemberOverview>,
         CommunityMembersQuery
       >({
         endpoint: `community-members/top`,
@@ -180,7 +186,7 @@ export default function CommunityMembers() {
   );
 
   const setSortBy = async (
-    sortBy: CommunityMembersSortOption
+    sortBy: ApiCommunityMembersSortOption
   ): Promise<void> => {
     const items: QueryUpdateInput[] = [
       {
@@ -219,7 +225,6 @@ export default function CommunityMembers() {
       },
     ];
     updateFields(items, false);
-
   }, [activeGroupId, params.group_id, updateFields]);
 
   const setPage = useCallback(
@@ -257,23 +262,57 @@ export default function CommunityMembers() {
 
   const goToNerd = () => router.push("/network/nerd");
 
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileSortOpen, setMobileSortOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileFilterOpen(false);
+  }, [activeGroupId]);
+
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h1 className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-0">
-          Network
-        </h1>
-        <div className="tw-inline-flex tw-space-x-3 tw-items-center tw-ml-auto">
+        <div className="tw-flex tw-items-center tw-gap-x-3">
+          <h1 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+            Network
+          </h1>
           <button
             type="button"
-            className="tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-            onClick={goToNerd}>
+            className={`tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
+              activeGroupId
+                ? "tw-border-primary-500 tw-bg-primary-500/20 tw-text-primary-300"
+                : "tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 hover:tw-bg-iron-700"
+            }`}
+            onClick={() => setMobileFilterOpen(true)}
+            aria-label="Open filter panel"
+          >
+            <FunnelIcon className="tw-h-5 tw-w-5" />
+          </button>
+          <button
+            type="button"
+            className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none sm:tw-hidden"
+            onClick={() => setMobileSortOpen(true)}
+            aria-label="Open sort options"
+          >
+            <FontAwesomeIcon
+              icon={faArrowDownWideShort}
+              className="tw-h-5 tw-w-5"
+            />
+          </button>
+        </div>
+        <div className="tw-ml-auto tw-inline-flex tw-items-center tw-space-x-3">
+          <button
+            type="button"
+            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+            onClick={goToNerd}
+          >
             <span>Nerd view</span>
             <svg
               className="-tw-mr-1.5 tw-h-5 tw-w-5"
               viewBox="0 0 20 20"
               fill="currentColor"
-              aria-hidden="true">
+              aria-hidden="true"
+            >
               <path
                 fillRule="evenodd"
                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
@@ -283,10 +322,10 @@ export default function CommunityMembers() {
           </button>
         </div>
       </div>
-      {members ? (
-        <div>
-          <div className="tailwind-scope tw-mt-4 lg:tw-mt-6 tw-flow-root">
-            <div className="sm:tw-overflow-auto tw-bg-iron-950 tw-shadow sm:tw-border sm:tw-border-solid sm:tw-border-iron-700 tw-rounded-lg sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800">
+      <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
+        {members ? (
+          <>
+            <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
               <CommunityMembersTable
                 members={members.data}
                 activeSort={params.sort}
@@ -297,23 +336,47 @@ export default function CommunityMembers() {
                 onSort={setSortBy}
               />
             </div>
-          </div>
-          {totalPages > 1 && (
-            <CommonTablePagination
-              currentPage={members.page}
-              setCurrentPage={setPage}
-              totalPages={totalPages}
-              haveNextPage={members.next}
-              small={false}
-              loading={isLoading}
-            />
-          )}
+            {totalPages > 1 && (
+              <CommonTablePagination
+                currentPage={members.page}
+                setCurrentPage={setPage}
+                totalPages={totalPages}
+                haveNextPage={members.next}
+                small={false}
+                loading={isLoading}
+              />
+            )}
+          </>
+        ) : (
+          <CommunityMembersTableSkeleton />
+        )}
+      </div>
+
+      <MobileWrapperDialog
+        title="Filter"
+        isOpen={mobileFilterOpen}
+        onClose={() => setMobileFilterOpen(false)}
+        tall
+        fixedHeight
+      >
+        <div className="tw-px-4">
+          <GroupsSidebar />
         </div>
-      ) : (
-        <div className="tw-h-screen tw-w-full">
-          <CommonCardSkeleton />
-        </div>
-      )}
+      </MobileWrapperDialog>
+
+      <MobileWrapperDialog
+        title="Sort"
+        isOpen={mobileSortOpen}
+        onClose={() => setMobileSortOpen(false)}
+      >
+        <CommunityMembersMobileSortContent
+          activeSort={params.sort}
+          sortDirection={params.sort_direction}
+          onSort={(sort) => {
+            setSortBy(sort);
+          }}
+        />
+      </MobileWrapperDialog>
     </div>
   );
 }

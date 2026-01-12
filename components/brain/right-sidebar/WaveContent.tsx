@@ -3,7 +3,6 @@
 import React, { useMemo, useEffect, type JSX } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ObjectSerializer";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,
@@ -23,7 +22,6 @@ interface WaveContentProps {
   readonly setMode: (mode: Mode) => void;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 interface TabOption {
@@ -37,7 +35,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   setMode,
   activeTab,
   setActiveTab,
-  onDropClick,
 }) => {
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
@@ -84,7 +81,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
-      <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}
@@ -104,12 +101,12 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.LEADERBOARD]: (
       <div>
-        <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        <WaveSmallLeaderboard wave={wave} />
       </div>
     ),
     [SidebarTab.WINNERS]: (
       <div>
-        <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
+        <WaveWinnersSmall wave={wave} />
       </div>
     ),
     [SidebarTab.TOP_VOTERS]: (
@@ -119,17 +116,14 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.ACTIVITY_LOG]: (
       <div className="tw-p-4">
-        <WaveLeaderboardRightSidebarActivityLogs
-          wave={wave}
-          onDropClick={onDropClick}
-        />
+        <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
       </div>
     ),
   };
 
   if (!isRankWave) {
     return (
-      <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
+      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}
@@ -151,7 +145,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-pl-2.5 tw-pb-[1px]">
+      <div className="tw-pb-px tw-pl-2.5">
         <TabToggleWithOverflow
           options={options}
           activeKey={activeTab}

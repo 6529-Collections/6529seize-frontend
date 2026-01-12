@@ -16,10 +16,12 @@ import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsBoostProps {
   readonly drop: ExtendedDrop;
+  readonly showCount?: boolean;
 }
 
 const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   drop,
+  showCount = true,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { toggleBoost, isPending } = useDropBoostMutation();
@@ -87,7 +89,7 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
             />
           </motion.div>
         </AnimatePresence>
-        {boostCount > 0 && (
+        {showCount && boostCount > 0 && (
           <motion.span
             key={boostCount}
             initial={{ opacity: 0, y: -5 }}

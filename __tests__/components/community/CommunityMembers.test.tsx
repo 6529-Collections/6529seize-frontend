@@ -1,10 +1,9 @@
-import { render, screen, fireEvent } from "@testing-library/react";
 import CommunityMembers from "@/components/community/CommunityMembers";
-import { useRouter } from "next/navigation";
-import { useSearchParams, usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { useQuery } from "@tanstack/react-query";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSelector } from "react-redux";
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
@@ -31,8 +30,24 @@ jest.mock(
 );
 
 jest.mock(
-  "@/components/utils/animation/CommonCardSkeleton",
+  "@/components/community/members-table/CommunityMembersTableSkeleton",
   () => () => <div data-testid="skeleton" />
+);
+
+jest.mock(
+  "@/components/community/members-table/CommunityMembersMobileSortContent",
+  () => () => <div data-testid="mobile-sort" />
+);
+
+jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
+  <div data-testid="groups-sidebar" />
+));
+
+jest.mock(
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
+  () =>
+    ({ children, isOpen }: any) =>
+      isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
 );
 
 const push = jest.fn();
