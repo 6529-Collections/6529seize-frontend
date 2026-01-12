@@ -12,7 +12,10 @@ import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketpla
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { publicEnv } from "@/config/env";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import {
+  MEMES_CONTRACT,
+  OPENSEA_STORE_FRONT_CONTRACT,
+} from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT, Rememe } from "@/entities/INFT";

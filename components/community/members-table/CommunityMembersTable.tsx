@@ -44,7 +44,7 @@ export default function CommunityMembersTable({
         </table>
       </div>
 
-      <div className="sm:tw-hidden tw-mt-3">
+      <div className="tw-mt-3 sm:tw-hidden">
         <div className="tw-flex tw-flex-col tw-gap-y-3">
           {members.map((member, index) => (
             <CommunityMembersMobileCard

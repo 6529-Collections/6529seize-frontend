@@ -1,5 +1,5 @@
 import Pagination from "@/components/pagination/Pagination";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
 import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
 import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
@@ -33,7 +33,7 @@ export default function UserPageSubscriptionsHistory(
           <h5 className="mb-0 tw-font-semibold">Subscription History</h5>
         </Col>
       </Row>
-      <hr className="tw-border-white tw-opacity-100 tw-border-2 tw-mt-1" />
+      <hr className="tw-mt-1 tw-border-2 tw-border-white tw-opacity-100" />
       <Row className="pb-2">
         <Col>
           <RedeemedSubscriptionsAccordion
@@ -183,7 +183,7 @@ function TopUpEntry(
         <div className="d-flex align-items-center gap-3">
           <div className="d-flex align-items-center gap-1 no-wrap">
             <b>+ {props.topUp.amount}</b>
-            <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
               <EthereumIcon />
             </div>
           </div>
@@ -193,13 +193,14 @@ function TopUpEntry(
           <div className="font-color-silver no-wrap">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </div>
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
+          <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
             <a
               className="d-flex align-items-center"
               target="_blank"
               rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.topUp.hash)}
-              aria-label="View transaction on Etherscan">
+              aria-label="View transaction on Etherscan"
+            >
               <EtherscanIcon />
             </a>
           </div>
@@ -268,13 +269,14 @@ function RedeemedEntry(
                 )
               )}
           </div>
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
+          <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center">
             <a
               className="d-flex align-items-center"
               target="_blank"
               rel="noopener noreferrer"
               href={getTransactionLink(mainnet.id, props.redeem.transaction)}
-              aria-label="View transaction on Etherscan">
+              aria-label="View transaction on Etherscan"
+            >
               <EtherscanIcon />
             </a>
           </div>

@@ -15,7 +15,7 @@ import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropClick: () => void;
   readonly rank?: number | undefined; // For explicitly setting rank from decision winners
 }
 
@@ -55,8 +55,8 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
     const userVoteStyle = getUserVoteStyle();
 
     const handleDropClick = useCallback(() => {
-      onDropClick(drop);
-    }, [drop, onDropClick]);
+      onDropClick();
+    }, [onDropClick]);
 
     return (
       <div

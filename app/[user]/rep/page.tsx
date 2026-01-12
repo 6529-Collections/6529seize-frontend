@@ -1,15 +1,15 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
-import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
-import { getInitialRatersParams } from "@/helpers/server.helpers";
 import {
   USER_PAGE_TAB_IDS,
   USER_PAGE_TAB_MAP,
 } from "@/components/user/layout/userTabs.config";
+import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
+import { getInitialRatersParams } from "@/helpers/server.helpers";
+import { ProfileActivityFilterTargetType, RateMatter } from "@/types/enums";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;

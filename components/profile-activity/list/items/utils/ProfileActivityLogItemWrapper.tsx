@@ -1,7 +1,7 @@
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLog } from "@/entities/IProfile";
-import { ProfileActivityLogType, RateMatter } from "@/enums";
+import { ProfileActivityLogType, RateMatter } from "@/types/enums";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 
 export default function ProfileActivityLogItemWrapper({
@@ -36,7 +36,7 @@ export default function ProfileActivityLogItemWrapper({
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
       <td className="tw-py-2.5">
-        <span className="tw-space-x-1.5 tw-inline-flex tw-items-center">
+        <span className="tw-inline-flex tw-items-center tw-space-x-1.5">
           {!isArchived && (
             <CommonProfileLink
               handleOrWallet={handleOrWallet}

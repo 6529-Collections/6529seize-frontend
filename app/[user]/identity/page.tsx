@@ -1,14 +1,14 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
-import { ProfileActivityFilterTargetType, RateMatter } from "@/enums";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
-import { getInitialRatersParams } from "@/helpers/server.helpers";
 import {
   USER_PAGE_TAB_IDS,
   USER_PAGE_TAB_MAP,
 } from "@/components/user/layout/userTabs.config";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
+import { getInitialRatersParams } from "@/helpers/server.helpers";
+import { ProfileActivityFilterTargetType, RateMatter } from "@/types/enums";
 
 const MATTER_TYPE = RateMatter.NIC;
 

@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import FooterWrapper from "@/FooterWrapper";
+import FooterWrapper from "@/components/footer/FooterWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({

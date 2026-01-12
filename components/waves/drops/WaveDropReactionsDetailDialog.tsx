@@ -61,7 +61,7 @@ function ReactionsSidebar({
   readonly onSelectReaction: (reaction: string) => void;
 }) {
   return (
-    <div className="tw-w-32 tw-flex-shrink-0 tw-border-r tw-border-solid tw-border-iron-700 tw-border-t-0 tw-border-b-0 tw-border-l-0 tw-overflow-y-auto tw-px-2 tw-py-2">
+    <div className="tw-w-32 tw-flex-shrink-0 tw-overflow-y-auto tw-border-b-0 tw-border-l-0 tw-border-r tw-border-t-0 tw-border-solid tw-border-iron-700 tw-px-2 tw-py-2">
       <div className="tw-flex tw-flex-col tw-gap-y-1">
         {reactions.map((reaction) => (
           <ReactionButton
@@ -125,13 +125,13 @@ function ReactionButton({
       type="button"
       onClick={onClick}
       className={clsx(
-        "tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-border-0 tw-px-2 tw-py-1.5 tw-transition-colors tw-cursor-pointer",
+        "tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-lg tw-border-0 tw-px-2 tw-py-1.5 tw-transition-colors",
         isSelected
           ? "tw-bg-primary-500/20 tw-text-iron-50"
           : "tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800"
       )}
     >
-      <div className="tw-flex tw-items-center tw-justify-center tw-size-6">
+      <div className="tw-flex tw-size-6 tw-items-center tw-justify-center">
         {emojiNode}
       </div>
       <span className="tw-text-sm tw-font-medium">
@@ -167,7 +167,7 @@ function ProfileItem({
 
   const content = (
     <div className="tw-flex tw-items-center tw-gap-x-3 tw-py-1">
-      <div className="tw-size-8 tw-flex-shrink-0 tw-rounded-full tw-overflow-hidden tw-bg-iron-800">
+      <div className="tw-size-8 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
         {profile.pfp ? (
           <img
             src={getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)}
@@ -178,12 +178,12 @@ function ProfileItem({
           <div className="tw-h-full tw-w-full tw-bg-iron-700" />
         )}
       </div>
-      <div className="tw-flex tw-flex-col tw-min-w-0">
-        <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+      <div className="tw-flex tw-min-w-0 tw-flex-col">
+        <span className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-50">
           {displayName}
         </span>
         {profile.handle && (
-          <span className="tw-text-xs tw-text-iron-400 tw-truncate">
+          <span className="tw-truncate tw-text-xs tw-text-iron-400">
             {profile.handle}
           </span>
         )}
@@ -195,12 +195,12 @@ function ProfileItem({
     return (
       <Link
         href={profileLink}
-        className="tw-no-underline hover:tw-bg-iron-800 tw-rounded-lg tw-px-2 tw--mx-2 tw-transition-colors"
+        className="tw--mx-2 tw-rounded-lg tw-px-2 tw-no-underline tw-transition-colors hover:tw-bg-iron-800"
       >
         {content}
       </Link>
     );
   }
 
-  return <div className="tw-px-2 tw--mx-2">{content}</div>;
+  return <div className="tw--mx-2 tw-px-2">{content}</div>;
 }

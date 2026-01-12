@@ -3,7 +3,7 @@ import {
   MEMES_MINT_PRICE,
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_CHAIN,
-} from "@/constants";
+} from "@/constants/constants";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";

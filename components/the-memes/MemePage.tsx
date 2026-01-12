@@ -2,7 +2,7 @@
 
 import styles from "./TheMemes.module.scss";
 
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import dynamic from "next/dynamic";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -226,7 +226,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }, [nftId, connectedWallets]);
 
   useEffect(() => {
-    if (connectedWallets.length > 0 && nftId && connectedProfile?.consolidation_key) {
+    if (
+      connectedWallets.length > 0 &&
+      nftId &&
+      connectedProfile?.consolidation_key
+    ) {
       commonApiFetch<ConsolidatedTDH>({
         endpoint: `tdh/consolidation/${connectedProfile.consolidation_key}`,
       })
@@ -260,7 +264,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}
-                    className={`${styles["nftImageWrapper"]} pt-2 pb-5`}>
+                    className={`${styles["nftImageWrapper"]} pt-2 pb-5`}
+                  >
                     <NFTImage
                       nft={nft}
                       animation={true}
@@ -341,9 +346,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 <Container className="no-padding">
                   <Row>
                     <Col>
-                      <h1>
-                        The Memes
-                      </h1>
+                      <h1>The Memes</h1>
                     </Col>
                   </Row>
                   {nftMeta && nft && (
@@ -363,7 +366,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                         <Col>
                           <h2 className="float-left">
                             <Link
-                              href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
+                              href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                            >
                               SZN{nftMeta.season}
                             </Link>
                           </h2>
@@ -386,7 +390,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             {nftMeta && nft && (
               <>
                 <Row className="pt-3 pb-3">
-                  <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
+                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                     {MEME_TABS.map((tab) => (
                       <TabButton
                         key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}

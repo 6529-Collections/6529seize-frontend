@@ -1,13 +1,13 @@
 "use client";
 
-import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants";
+import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
+import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { mainnet } from "wagmi/chains";
-import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import styles from "./NextGenToken.module.scss";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 
@@ -106,7 +106,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
     <Container
       style={{
         minHeight: "150px",
-      }}>
+      }}
+    >
       <Row>
         <Col>
           <span className="font-color-h">Custom Render:</span>
@@ -116,7 +117,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
         <Col className="d-flex flex-wrap gap-2">
           <Dropdown
             drop={"down-centered"}
-            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}>
+            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}
+          >
             <span className="font-color-h">Render Type:</span>
             <Dropdown.Toggle>{renderType}</Dropdown.Toggle>
             <Dropdown.Menu>
@@ -125,7 +127,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
                   key={getRandomObjectId()}
                   onClick={() => {
                     setRenderType(type as RenderType);
-                  }}>
+                  }}
+                >
                   {type}
                 </Dropdown.Item>
               ))}
@@ -133,7 +136,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           </Dropdown>
           <Dropdown
             drop={"down-centered"}
-            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}>
+            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}
+          >
             <span className="font-color-h">Script Version:</span>
             <Dropdown.Toggle>{scriptVersion}</Dropdown.Toggle>
             <Dropdown.Menu>
@@ -142,7 +146,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
                   key={getRandomObjectId()}
                   onClick={() => {
                     setScriptVersion(version as ScriptVersion);
-                  }}>
+                  }}
+                >
                   {version}
                 </Dropdown.Item>
               ))}
@@ -150,7 +155,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           </Dropdown>
           <Dropdown
             drop={"down-centered"}
-            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}>
+            className={`${styles["customRenderDropdown"]} d-flex align-items-center gap-2`}
+          >
             <span className="font-color-h">Height:</span>
             <Dropdown.Toggle>
               {height ? `${numberWithCommas(height)} px` : "Screen Size"}
@@ -159,14 +165,16 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
               <Dropdown.Item
                 onClick={() => {
                   setHeight(null);
-                }}>
+                }}
+              >
                 Screen Size
               </Dropdown.Item>
               <Dropdown.Item
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                }}>
+                }}
+              >
                 <span className="d-flex gap-2">
                   <span>Custom Height (pixels):</span>
                   <input
@@ -186,7 +194,8 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             className={`pt-2 pb-2 seize-btn no-wrap ${styles["sceneBtn"]}`}
             onClick={() => {
               go();
-            }}>
+            }}
+          >
             <span>GO!</span>
           </button>
         </Col>

@@ -7,7 +7,7 @@ import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { publicEnv } from "@/config/env";
-import { GRADIENT_CONTRACT } from "@/constants";
+import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
@@ -132,10 +132,12 @@ export default function GradientsComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <Link
           href={`/6529-gradient/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid className="no-padding">
             <Row>
               <Col>
@@ -231,14 +233,16 @@ export default function GradientsComponent() {
                     onClick={() => setSort(Sort.ID)}
                     className={`${styles["sort"]} ${
                       sort != Sort.ID ? styles["disabled"] : ""
-                    }`}>
+                    }`}
+                  >
                     ID
                   </span>
                   <span
                     onClick={() => setSort(Sort.TDH)}
                     className={`${styles["sort"]} ${
                       sort != Sort.TDH ? styles["disabled"] : ""
-                    }`}>
+                    }`}
+                  >
                     TDH
                   </span>
                 </Col>

@@ -1,7 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFT, NFTHistory } from "@/entities/INFT";
 import { fetchAllPages } from "@/services/6529api";
 import { useEffect, useState } from "react";

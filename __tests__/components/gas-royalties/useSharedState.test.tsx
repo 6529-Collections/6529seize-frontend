@@ -1,5 +1,5 @@
 import { useSharedState } from "@/components/gas-royalties/GasRoyalties";
-import { GasRoyaltiesCollectionFocus } from "@/enums";
+import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import { act, renderHook } from "@testing-library/react";
 
 // Mock getDateFilters to simplify URL generation

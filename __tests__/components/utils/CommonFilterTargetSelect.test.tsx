@@ -1,7 +1,7 @@
 import CommonFilterTargetSelect from "@/components/utils/CommonFilterTargetSelect";
+import { ProfileActivityFilterTargetType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ProfileActivityFilterTargetType } from "@/enums";
 
 describe("CommonFilterTargetSelect", () => {
   it("renders the filter target options and triggers change on click", async () => {
@@ -65,8 +65,6 @@ describe("CommonFilterTargetSelect", () => {
 
     await user.keyboard("{ArrowLeft}");
 
-    expect(onChange).toHaveBeenCalledWith(
-      ProfileActivityFilterTargetType.ALL
-    );
+    expect(onChange).toHaveBeenCalledWith(ProfileActivityFilterTargetType.ALL);
   });
 });

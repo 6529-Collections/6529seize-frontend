@@ -1,4 +1,4 @@
-import { API_AUTH_COOKIE } from "@/constants";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import * as api from "@/services/6529api";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import Cookies from "js-cookie";

@@ -82,7 +82,11 @@ describe("CommunityMembersTableRow", () => {
   });
 
   it("renders address member with correct href", () => {
-    const member = { ...baseMember, detail_view_key: "0xabc", display: "0xabc" };
+    const member = {
+      ...baseMember,
+      detail_view_key: "0xabc",
+      display: "0xabc",
+    };
     render(
       <table>
         <tbody>

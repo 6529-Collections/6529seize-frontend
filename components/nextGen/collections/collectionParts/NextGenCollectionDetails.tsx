@@ -1,16 +1,16 @@
 "use client";
 
-import type { NextGenCollection } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
-import { formatAddress } from "@/helpers/Helpers";
-import Link from "next/link";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
-import { goerli, sepolia } from "viem/chains";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
+import type { NextGenCollection } from "@/entities/INextgen";
+import { formatAddress } from "@/helpers/Helpers";
+import { NextgenCollectionView } from "@/types/enums";
+import Link from "next/link";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { goerli, sepolia } from "viem/chains";
 import { DistributionLink } from "../NextGen";
 import styles from "../NextGen.module.scss";
 import NextGenCollectionProvenance from "./NextGenCollectionProvenance";

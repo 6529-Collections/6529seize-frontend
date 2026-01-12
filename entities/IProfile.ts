@@ -3,13 +3,13 @@ import {
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "@/constants";
-import type { RateMatter } from "@/enums";
-import { ContractType, ProfileActivityLogType } from "@/enums";
+} from "@/constants/constants";
 import type { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import type { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import type { RateMatter } from "@/types/enums";
+import { ContractType, ProfileActivityLogType } from "@/types/enums";
 
 interface IProfileWallet {
   readonly address: string;
@@ -128,8 +128,7 @@ export interface ProfileActivityLogHandleEdit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogClassificationEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogClassificationEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.CLASSIFICATION_EDIT;
   readonly contents: {
     new_value: ApiProfileClassification;
@@ -182,8 +181,7 @@ export interface ProfileActivityLogSocialsEdit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogNftAccountsEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogNftAccountsEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.NFT_ACCOUNTS_EDIT;
   readonly contents: {
     action: ProfileActivityLogSocialsEditContentAction;
@@ -199,8 +197,7 @@ export interface ProfileActivityLogContactsEdit extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogSocialVerificationPostEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogSocialVerificationPostEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.SOCIAL_VERIFICATION_POST_EDIT;
   readonly contents: {
     action: ProfileActivityLogSocialsEditContentAction;
@@ -216,8 +213,7 @@ export interface ProfileActivityLogArchived extends ProfileActivityLogBase {
   };
 }
 
-export interface ProfileActivityLogGeneralCicStatementEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogGeneralCicStatementEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.GENERAL_CIC_STATEMENT_EDIT;
   readonly contents: {
     readonly statement: CicStatement;
@@ -229,8 +225,7 @@ export interface ProfileActivityLogProxyCreated extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-export interface ProfileActivityLogProxyActionCreated
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyActionCreated extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_ACTION_CREATED;
   readonly contents: {
     readonly action_id: string;
@@ -239,8 +234,7 @@ export interface ProfileActivityLogProxyActionCreated
   };
 }
 
-export interface ProfileActivityLogProxyActionStateChanged
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyActionStateChanged extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_ACTION_STATE_CHANGED;
   readonly contents: {
     readonly action_id: string;
@@ -250,8 +244,7 @@ export interface ProfileActivityLogProxyActionStateChanged
   };
 }
 
-export interface ProfileActivityLogProxyActionChanged
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogProxyActionChanged extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_ACTION_CHANGED;
   readonly contents: {
     readonly action_id: string;
@@ -267,8 +260,7 @@ export interface ProfileActivityLogDropComment extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-export interface ProfileActivityLogDropRatingEdit
-  extends ProfileActivityLogBase {
+export interface ProfileActivityLogDropRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.DROP_RATING_EDIT;
   readonly contents: {};
 }
@@ -421,7 +413,6 @@ export interface CollectedCard {
   readonly seized_count: number | null;
   readonly szn: number | null;
 }
-
 
 export interface ProfileMinimal {
   readonly id: string;

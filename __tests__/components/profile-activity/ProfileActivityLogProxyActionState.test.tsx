@@ -1,7 +1,7 @@
 import ProfileActivityLogProxyActionState from "@/components/profile-activity/list/items/ProfileActivityLogProxyActionState";
-import { ProfileActivityLogType } from "@/enums";
 import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { ProfileActivityLogType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/user/utils/CommonProfileLink", () => ({

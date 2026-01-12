@@ -1,7 +1,7 @@
-import { NextgenView } from "@/enums";
+import type { NextGenCollection } from "@/entities/INextgen";
+import { NextgenView } from "@/types/enums";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
-import type { NextGenCollection } from "@/entities/INextgen";
 import { Status } from "../nextgen_entities";
 import { formatNameForUrl, getStatusFromDates } from "../nextgen_helpers";
 import NextGenCollectionArtist from "./collectionParts/NextGenCollectionArtist";
@@ -49,7 +49,8 @@ export default function NextGen(props: Readonly<Props>) {
                             props.collection.name
                           )}`}
                           className="decoration-none font-bolder"
-                          style={{ fontSize: "60px" }}>
+                          style={{ fontSize: "60px" }}
+                        >
                           {props.collection.name}
                         </Link>
                       </Col>
@@ -57,11 +58,13 @@ export default function NextGen(props: Readonly<Props>) {
                     <Row className="font-larger font-color font-bolder">
                       <Col
                         className="font-larger font-lighter"
-                        style={{ fontSize: "48px", lineHeight: "48px" }}>
+                        style={{ fontSize: "48px", lineHeight: "48px" }}
+                      >
                         by{" "}
                         <Link
                           href={`/${props.collection.artist_address}`}
-                          className="decoration-hover-underline">
+                          className="decoration-hover-underline"
+                        >
                           {props.collection.artist}
                         </Link>
                       </Col>
@@ -76,9 +79,11 @@ export default function NextGen(props: Readonly<Props>) {
                         <Link
                           href={`/nextgen/collection/${formatNameForUrl(
                             props.collection.name
-                          )}`}>
+                          )}`}
+                        >
                           <button
-                            className={`font-larger pt-2 pb-2 no-wrap ${styles["exploreBtn"]}`}>
+                            className={`font-larger pt-2 pb-2 no-wrap ${styles["exploreBtn"]}`}
+                          >
                             <span className="font-larger">
                               Explore Collection
                             </span>
@@ -101,7 +106,8 @@ export default function NextGen(props: Readonly<Props>) {
       <Container
         fluid
         className="pt-5 pb-5"
-        style={{ backgroundColor: "black" }}>
+        style={{ backgroundColor: "black" }}
+      >
         <Row>
           <Col>
             <Container className="pt-3 pb-3">
@@ -117,7 +123,8 @@ export default function NextGen(props: Readonly<Props>) {
                     onClick={() => {
                       props.setView(NextgenView.ABOUT);
                       window.scrollTo(0, 120);
-                    }}>
+                    }}
+                  >
                     <span className="font-larger">Learn More</span>
                   </button>
                 </Col>
@@ -129,9 +136,7 @@ export default function NextGen(props: Readonly<Props>) {
       <Container className="pt-5">
         <Row>
           <Col>
-            <h1>
-              Explore {props.collection.name}
-            </h1>
+            <h1>Explore {props.collection.name}</h1>
           </Col>
         </Row>
         <Row className="pt-3">
@@ -143,9 +148,7 @@ export default function NextGen(props: Readonly<Props>) {
       <Container className="pt-5 pb-5">
         <Row>
           <Col>
-            <h1>
-              Featured Artist
-            </h1>
+            <h1>Featured Artist</h1>
           </Col>
         </Row>
         <Row>
@@ -186,7 +189,8 @@ export function DistributionLink(
             <Link
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
-              )}/distribution-plan`}>
+              )}/distribution-plan`}
+            >
               Distribution Plan
             </Link>
           </Col>

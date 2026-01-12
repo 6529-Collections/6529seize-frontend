@@ -5,20 +5,11 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
-import type {
-  VirtualItem
-} from "../../../../hooks/useVirtualizedWaves";
-import {
-  useVirtualizedWaves
-} from "../../../../hooks/useVirtualizedWaves";
+import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
+import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
@@ -109,7 +100,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
       "web-unified-waves-regular",
-      scrollContainerRef || listContainerRef,
+      scrollContainerRef ?? listContainerRef,
       listContainerRef,
       rowHeight,
       5
@@ -121,7 +112,7 @@ const WebUnifiedWavesListWaves = forwardRef<
           {!hideHeaders &&
             (isCollapsed ? (
               showCreateWaveButton && (
-                <div className="tw-flex tw-justify-center tw-px-2 tw-mb-3.5">
+                <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
                   <div
                     data-tooltip-id="create-wave-tooltip"
                     data-tooltip-content="Create wave"
@@ -166,7 +157,7 @@ const WebUnifiedWavesListWaves = forwardRef<
               />
             ))}
           {!hideHeaders && !hideToggle && !isCollapsed && (
-            <div className="tw-pb-3 tw-mt-4 tw-flex tw-px-4">
+            <div className="tw-mt-4 tw-flex tw-px-4 tw-pb-3">
               <WavesFilterToggle />
             </div>
           )}
@@ -175,7 +166,7 @@ const WebUnifiedWavesListWaves = forwardRef<
             {!hideHeaders && pinnedWaves.length > 0 && (
               <section
                 className={`tw-flex tw-flex-col ${
-                  isCollapsed ? "tw-gap-y-2 tw-items-center" : ""
+                  isCollapsed ? "tw-items-center tw-gap-y-2" : ""
                 }`}
                 aria-label="Pinned waves"
               >
@@ -203,7 +194,7 @@ const WebUnifiedWavesListWaves = forwardRef<
             {!hideHeaders &&
               pinnedWaves.length > 0 &&
               regularWaves.length > 0 && (
-                <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
+                <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
               )}
             {regularWaves.length > 0 ? (
               <section

@@ -11,7 +11,7 @@ import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
-} from "@/constants";
+} from "@/constants/constants";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
@@ -102,7 +102,9 @@ export default function HeaderSearchModalItem({
   const getNft = () => content as NFTSearchResult;
   const getPage = () => content as PageSearchResult;
 
-  const getMediaIcon = (Icon: ComponentType<{ className?: string | undefined }>) => {
+  const getMediaIcon = (
+    Icon: ComponentType<{ className?: string | undefined }>
+  ) => {
     return (
       <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900">
         <Icon className="tw-h-5 tw-w-5" />
@@ -223,25 +225,29 @@ export default function HeaderSearchModalItem({
       ref={ref}
       className={`${
         isSelected ? "tw-bg-iron-800" : ""
-      } tw-rounded-lg tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
+      } tw-my-1 tw-w-full tw-rounded-lg tw-px-2 tw-py-2 tw-transition tw-duration-300 tw-ease-out`}
+    >
       <Link
         href={getPath()}
         onClick={onClose}
-        className="tw-group tw-no-underline tw-select-none tw-flex tw-items-center tw-gap-3 tw-w-full tw-min-w-0 tw-text-left tw-text-sm tw-font-medium">
+        className="tw-group tw-flex tw-w-full tw-min-w-0 tw-select-none tw-items-center tw-gap-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline"
+      >
         {getMedia()}
-        <div className="tw-flex-1 tw-min-w-0">
-          <div className="tw-flex tw-items-center tw-gap-3 tw-min-w-0">
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
             <span
-              className="tw-flex-1 tw-min-w-0 tw-text-sm tw-font-semibold tw-text-white"
-              title={primaryText}>
-              <span className="tw-block tw-truncate tw-min-w-0">
+              className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-semibold tw-text-white"
+              title={primaryText}
+            >
+              <span className="tw-block tw-min-w-0 tw-truncate">
                 {primaryText}
               </span>
             </span>
           </div>
           <p
-            className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-min-w-0"
-            title={secondaryText || undefined}>
+            className="tw-mb-0 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
+            title={secondaryText || undefined}
+          >
             {secondaryText}
           </p>
         </div>

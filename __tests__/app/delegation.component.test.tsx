@@ -1,19 +1,19 @@
 import DelegationPage from "@/app/delegation/[...section]/page.client";
 import { AuthContext } from "@/components/auth/Auth";
-import { DelegationCenterSection } from "@/enums";
+import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
 jest.mock(
   "@/components/delegation/DelegationCenterMenu",
-  () => (props: any) =>
-    (
-      <button
-        data-testid="menu"
-        onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}>
-        Menu
-      </button>
-    )
+  () => (props: any) => (
+    <button
+      data-testid="menu"
+      onClick={() => props.setActiveSection(DelegationCenterSection.CHECKER)}
+    >
+      Menu
+    </button>
+  )
 );
 
 const push = jest.fn();

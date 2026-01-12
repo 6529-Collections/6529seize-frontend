@@ -1,5 +1,5 @@
 import { publicEnv } from "@/config/env";
-import { API_AUTH_COOKIE } from "@/constants";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";

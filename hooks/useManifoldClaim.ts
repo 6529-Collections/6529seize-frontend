@@ -1,13 +1,13 @@
 "use client";
 
-import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis";
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   MANIFOLD_NETWORK,
   MEMES_CONTRACT,
   MEMES_MANIFOLD_PROXY_CONTRACT,
   NULL_MERKLE,
-} from "@/constants";
+} from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { useCallback, useEffect, useState } from "react";

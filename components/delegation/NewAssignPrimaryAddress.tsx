@@ -3,22 +3,19 @@
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 
-import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_ABI } from "@/abis/abis";
 import { AuthContext } from "@/components/auth/Auth";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
-} from "@/constants";
+} from "@/constants/constants";
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import type {
-  DelegationCollection} from "./delegation-constants";
-import {
-  PRIMARY_ADDRESS_USE_CASE,
-} from "./delegation-constants";
+import type { DelegationCollection } from "./delegation-constants";
+import { PRIMARY_ADDRESS_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import {
   DelegationAddressDisabledInput,

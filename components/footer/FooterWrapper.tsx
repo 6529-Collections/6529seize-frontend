@@ -8,7 +8,7 @@ import {
 } from "@/components/home/useHomeTabs";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import useDeviceInfo from "./hooks/useDeviceInfo";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 const HOME_TAB_QUERY_PARAM = "tab";
 
@@ -22,21 +22,21 @@ export default function FooterWrapper() {
     getStoredHomeTab()
   );
   useEffect(() => {
-    const win = (globalThis as typeof globalThis & { window?: Window | undefined }).window;
+    const win = (
+      globalThis as typeof globalThis & { window?: Window | undefined }
+    ).window;
     if (win === undefined) {
       return;
     }
 
     const params = new URLSearchParams(win.location?.search ?? "");
     const tabFromQuery = params.get(HOME_TAB_QUERY_PARAM);
-    const nextTab = isHomeTab(tabFromQuery)
-      ? tabFromQuery
-      : getStoredHomeTab();
-    setHomeActiveTab((current) =>
-      current === nextTab ? current : nextTab
-    );
+    const nextTab = isHomeTab(tabFromQuery) ? tabFromQuery : getStoredHomeTab();
+    setHomeActiveTab((current) => (current === nextTab ? current : nextTab));
 
-    const handleTabChange = (event: CustomEvent<{ tab?: HomeTab | undefined }>) => {
+    const handleTabChange = (
+      event: CustomEvent<{ tab?: HomeTab | undefined }>
+    ) => {
       const detail = event.detail;
       if (!detail?.tab || !isHomeTab(detail.tab)) {
         return;

@@ -1,6 +1,9 @@
 import type { SortDirection } from "@/entities/ISort";
-import { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import {
+  ProfileRatersParamsOrderBy,
+  ProfileRatersTableType,
+} from "@/types/enums";
 import ProfileRatersTableHeaderSortableCell from "./ProfileRatersTableHeaderSortableCell";
 
 export default function ProfileRatersTableHeader({
@@ -31,9 +34,9 @@ export default function ProfileRatersTableHeader({
   };
 
   return (
-    <thead className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
+    <thead className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-white/10">
       <tr>
-        <th className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-py-3.5 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+        <th className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
           Name
         </th>
         <ProfileRatersTableHeaderSortableCell

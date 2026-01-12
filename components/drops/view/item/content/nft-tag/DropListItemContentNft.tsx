@@ -1,23 +1,23 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import type { ReferencedNft } from "@/entities/IDrop";
-import type {
-  ReservoirTokensResponse,
-  ReservoirTokensResponseTokenElement,
-} from "@/entities/IReservoir";
-import { useEffect, useRef, useState } from "react";
-import DropListItemContentNftDetails from "./DropListItemContentNftDetails";
-import { areEqualAddresses } from "@/helpers/Helpers";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "@/constants";
-import Link from "next/link";
+} from "@/constants/constants";
+import type { ReferencedNft } from "@/entities/IDrop";
+import type {
+  ReservoirTokensResponse,
+  ReservoirTokensResponseTokenElement,
+} from "@/entities/IReservoir";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { isMemesEcosystemContract } from "@/helpers/nft.helpers";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import DropListItemContentNftDetails from "./DropListItemContentNftDetails";
 
 export default function DropListItemContentNft({
   nft: { contract, token, name },
@@ -82,14 +82,15 @@ export default function DropListItemContentNft({
       onClick={(e) => e.stopPropagation()}
       href={nftHref}
       className="tw-no-underline"
-      target={target}>
-      <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col" ref={elementRef}>
-        <div className="tw-w-full tw-h-64">
+      target={target}
+    >
+      <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2" ref={elementRef}>
+        <div className="tw-h-64 tw-w-full">
           {nft && (
             <img
               src={nft.token.imageLarge}
               alt="NFT token"
-              className="tw-w-full tw-h-full tw-object-center tw-object-contain"
+              className="tw-h-full tw-w-full tw-object-contain tw-object-center"
             />
           )}
         </div>

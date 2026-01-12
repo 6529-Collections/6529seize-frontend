@@ -1,7 +1,7 @@
 "use client";
 
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
   formatAddress,

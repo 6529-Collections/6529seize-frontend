@@ -1,3 +1,4 @@
+import { DELEGATION_ABI } from "@/abis/abis";
 import {
   getDelegationsFromData,
   getParams,
@@ -9,8 +10,7 @@ import {
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "@/components/delegation/delegation-constants";
-import { DELEGATION_ABI } from "@/abis";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 
 describe("CollectionDelegation utility functions", () => {
   it("builds params with extra use cases", () => {

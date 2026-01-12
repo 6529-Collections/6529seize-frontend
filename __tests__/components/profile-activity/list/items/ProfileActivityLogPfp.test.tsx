@@ -1,6 +1,6 @@
 import ProfileActivityLogPfp from "@/components/profile-activity/list/items/ProfileActivityLogPfp";
 import type { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
-import { ProfileActivityLogType } from "@/enums";
+import { ProfileActivityLogType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("next/image", () => ({

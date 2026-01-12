@@ -1,8 +1,8 @@
 import styles from "@/styles/Home.module.scss";
 
-import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
-import { MEMES_CONTRACT } from "@/constants";
 import MemePageComponent from "@/components/the-memes/MemePage";
+import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { Metadata } from "next";
 
 export default async function MemePage({

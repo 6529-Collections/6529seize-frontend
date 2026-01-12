@@ -30,13 +30,16 @@ import {
 import Timeline from "@/components/timeline/Timeline";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
+import {
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+  NULL_ADDRESS,
+} from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { Transaction } from "@/entities/ITransaction";
-import { ContractType } from "@/enums";
 import {
   addProtocol,
   areEqualAddresses,
@@ -53,6 +56,7 @@ import {
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
+import { ContractType } from "@/types/enums";
 import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";

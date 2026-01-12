@@ -9,17 +9,17 @@ import { VolumeTypeDropdown } from "@/components/the-memes/MemeShared";
 import styles from "@/components/the-memes/TheMemes.module.scss";
 import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
 import { publicEnv } from "@/config/env";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { NFTWithMemesExtendedData} from "@/entities/INFT";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
-import type { MemeLabSort} from "@/enums";
-import { MEMES_EXTENDED_SORT, MemesSort } from "@/enums";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
+import type { MemeLabSort } from "@/types/enums";
+import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -477,7 +477,7 @@ export default function TheMemesComponent() {
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
+                <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                   {Object.values(MemesSort)
                     .filter((v) => v != MemesSort.VOLUME)
                     .map((v) => (
@@ -527,9 +527,9 @@ export function SortButton(
     <button
       type="button"
       onClick={() => props.select()}
-      className={`tw-bg-transparent tw-border-none tw-p-0 tw-m-0 tw-no-underline tw-cursor-pointer tw-transition-colors tw-duration-200 ${
+      className={`tw-m-0 tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-no-underline tw-transition-colors tw-duration-200 ${
         isActive
-          ? "tw-text-white tw-font-semibold"
+          ? "tw-font-semibold tw-text-white"
           : "tw-text-gray-400 hover:tw-text-white"
       }`}
     >

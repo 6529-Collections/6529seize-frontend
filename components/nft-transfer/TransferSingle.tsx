@@ -2,9 +2,9 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { CollectedCollectionType } from "@/entities/IProfile";
-import { ContractType } from "@/enums";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import styles from "@/styles/Home.module.scss";
+import { ContractType } from "@/types/enums";
 import {
   faMinusCircle,
   faPlusCircle,

@@ -4,7 +4,10 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { MEMES_CONTRACT, SUBSCRIPTIONS_ADMIN_WALLETS } from "@/constants";
+import {
+  MEMES_CONTRACT,
+  SUBSCRIPTIONS_ADMIN_WALLETS,
+} from "@/constants/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";

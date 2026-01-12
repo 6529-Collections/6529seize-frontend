@@ -1,9 +1,9 @@
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import { NextgenCollectionView } from "@/enums";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import styles from "@/styles/Home.module.scss";
+import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchCollection, getCollectionView } from "../page-utils";

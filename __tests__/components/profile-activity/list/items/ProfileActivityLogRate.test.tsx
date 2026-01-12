@@ -1,10 +1,7 @@
 import ProfileActivityLogRate from "@/components/profile-activity/list/items/ProfileActivityLogRate";
-import type {
-  ProfileActivityLogRatingEdit} from "@/entities/IProfile";
-import {
-  ProfileActivityLogRatingEditContentChangeReason,
-} from "@/entities/IProfile";
-import { RateMatter } from "@/enums";
+import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
+import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
+import { RateMatter } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("next/navigation", () => ({

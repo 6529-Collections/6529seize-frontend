@@ -1,4 +1,4 @@
-import { API_AUTH_COOKIE } from "@/constants";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfileActivityLogs } from "@/helpers/server.helpers";

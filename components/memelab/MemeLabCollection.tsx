@@ -6,12 +6,12 @@ import { AuthContext } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { publicEnv } from "@/config/env";
-import type { LabExtendedData, LabNFT} from "@/entities/INFT";
+import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort } from "@/enums";
 import { addProtocol } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
+import { MemeLabSort } from "@/types/enums";
 import {
   faChevronCircleDown,
   faChevronCircleUp,
@@ -200,7 +200,7 @@ export default function LabCollection({
                 </Col>
               </Row>
               <Row className="pt-2">
-                <Col className="tw-flex tw-gap-3 tw-items-center tw-flex-wrap">
+                <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
                   {printSortButtons(
                     sort,
                     volumeType,

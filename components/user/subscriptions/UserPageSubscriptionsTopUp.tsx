@@ -22,7 +22,7 @@ import {
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_ADDRESS_ENS,
   SUBSCRIPTIONS_CHAIN,
-} from "@/constants";
+} from "@/constants/constants";
 import {
   formatAddress,
   getTransactionLink,

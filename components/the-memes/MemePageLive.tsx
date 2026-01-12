@@ -8,7 +8,7 @@ import Pagination from "@/components/pagination/Pagination";
 import { printMemeReferences } from "@/components/rememes/RememePage";
 import { RememeSort } from "@/components/rememes/Rememes";
 import { publicEnv } from "@/config/env";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
 import {
@@ -57,7 +57,8 @@ export function MemePageLiveRightMenu(props: {
         sm={{ span: 12 }}
         md={{ span: 6 }}
         lg={{ span: 6 }}
-        className="pt-2">
+        className="pt-2"
+      >
         <Container className="p-0">
           <Row>
             <Col>
@@ -230,7 +231,8 @@ export function MemePageLiveRightMenu(props: {
                     props.nft.has_distribution
                       ? undefined
                       : "noopener noreferrer"
-                  }>
+                  }
+                >
                   Distribution Plan
                 </Link>
               </Col>
@@ -353,7 +355,8 @@ export function MemePageLiveSubMenu(props: {
               <span className="d-flex align-items-center gap-2 pt-2">
                 <Dropdown
                   className={styles["rememesSortDropdown"]}
-                  drop={"down-centered"}>
+                  drop={"down-centered"}
+                >
                   <Dropdown.Toggle>
                     Sort: {selectedRememeSorting}
                   </Dropdown.Toggle>
@@ -365,7 +368,8 @@ export function MemePageLiveSubMenu(props: {
                           setRememesPage(1);
                           setRememesTotalResults(0);
                           setSelectedRememeSorting(s);
-                        }}>
+                        }}
+                      >
                         {s}
                       </Dropdown.Item>
                     ))}
@@ -391,7 +395,8 @@ export function MemePageLiveSubMenu(props: {
                         backgroundColor: "#f8f9fa",
                         color: "#212529",
                         padding: "4px 8px",
-                      }}>
+                      }}
+                    >
                       Refresh results
                     </Tooltip>
                   </>
@@ -423,10 +428,12 @@ export function MemePageLiveSubMenu(props: {
                     xs={{ span: 6 }}
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
-                    lg={{ span: 3 }}>
+                    lg={{ span: 3 }}
+                  >
                     <Link
                       href={`/rememes/${rememe.contract}/${rememe.id}`}
-                      className="decoration-none scale-hover">
+                      className="decoration-none scale-hover"
+                    >
                       <Container fluid className="no-padding">
                         <Row>
                           <Col>

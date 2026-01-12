@@ -1,4 +1,4 @@
-import { NextgenView } from "@/enums";
+import { NextgenView } from "@/types/enums";
 
 export function getNextGenView(view: string): NextgenView | undefined {
   const normalizedView = view.toLowerCase();

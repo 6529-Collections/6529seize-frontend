@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TransferModal from "@/components/nft-transfer/TransferModal";
-import { ContractType } from "@/enums";
+import { ContractType } from "@/types/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("@/components/nft-transfer/TransferState", () => ({

@@ -5,7 +5,7 @@ import {
   getSharedAppServerSideProps,
   MEME_FOCUS,
 } from "@/components/the-memes/MemeShared";
-import { MEMELAB_CONTRACT } from "@/constants";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { Metadata } from "next";
 
 export default function MemeDistributionPage() {

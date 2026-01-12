@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 // Sandbox policy for external interactive media:
 // - allow-scripts: Required for interactive HTML content.
@@ -142,7 +142,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
           href={canonicalSrc}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-text-xs tw-font-medium tw-text-primary-300 hover:tw-text-primary-200 tw-transition"
+          className="tw-text-xs tw-font-medium tw-text-primary-300 tw-transition hover:tw-text-primary-300"
         >
           {parsedCanonicalUrl.hostname}
         </a>
@@ -152,14 +152,19 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     </div>
   );
 
-  const containerClasses = ["tw-flex", "tw-flex-col", "tw-h-full", containerClassName]
+  const containerClasses = [
+    "tw-flex",
+    "tw-flex-col",
+    "tw-h-full",
+    containerClassName,
+  ]
     .filter((value): value is string => Boolean(value))
     .join(" ");
 
   return (
     <div ref={containerRef} className={containerClasses}>
       {banner}
-      <div className="tw-flex-1 tw-min-h-0 tw-overflow-hidden">
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         {isVisible ? <iframe {...iframeProps} /> : placeholder}
       </div>
     </div>

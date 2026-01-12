@@ -1,5 +1,5 @@
 import ProfileActivityLogsIcon from "@/components/profile-activity/icons/ProfileActivityLogsIcon";
-import { ProfileActivityLogType } from "@/enums";
+import { ProfileActivityLogType } from "@/types/enums";
 import { render } from "@testing-library/react";
 
 jest.mock(

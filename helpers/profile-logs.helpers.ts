@@ -5,7 +5,7 @@ import type {
 import {
   ProfileActivityFilterTargetType,
   ProfileActivityLogType,
-} from "@/enums";
+} from "@/types/enums";
 
 const DISABLED_LOG_TYPES = [
   ProfileActivityLogType.DROP_COMMENT,

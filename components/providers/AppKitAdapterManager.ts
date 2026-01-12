@@ -1,4 +1,4 @@
-import { CW_PROJECT_ID } from "@/constants";
+import { CW_PROJECT_ID } from "@/constants/constants";
 import {
   AdapterCacheError,
   AdapterCleanupError,

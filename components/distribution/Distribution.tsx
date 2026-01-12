@@ -12,7 +12,8 @@ import {
 } from "@/components/searchModal/SearchModal";
 import UpcomingMemePage from "@/components/the-memes/UpcomingMemePage";
 import { publicEnv } from "@/config/env";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
+import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Distribution, DistributionPhoto } from "@/entities/IDistribution";
 import {
@@ -23,7 +24,6 @@ import {
 } from "@/helpers/Helpers";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import Image from "next/image";
-import { useTitle } from "@/contexts/TitleContext";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
@@ -155,7 +155,8 @@ export default function DistributionPage(props: Readonly<Props>) {
               wrap={false}
               touch={true}
               fade={true}
-              className={styles["distributionCarousel"]}>
+              className={styles["distributionCarousel"]}
+            >
               {distributionPhotos.map((dp, index) => (
                 <Carousel.Item key={dp.id}>
                   <Image
@@ -204,7 +205,7 @@ export default function DistributionPage(props: Readonly<Props>) {
       }
 
       return (
-        <span className="tw-text-iron-400 tw-text-sm">
+        <span className="tw-text-sm tw-text-iron-400">
           {spotsAirdrop > 0 ? numberWithCommas(spotsAirdrop) : "0"}
           {" | "}
           {spotsAllowlist > 0 ? numberWithCommas(spotsAllowlist) : "0"}
@@ -238,7 +239,8 @@ export default function DistributionPage(props: Readonly<Props>) {
                     <th colSpan={2}></th>
                     <th
                       colSpan={distributionsPhases.length}
-                      className="text-center">
+                      className="text-center"
+                    >
                       ALLOWLIST SPOTS
                     </th>
                     <th colSpan={2} className="text-center">
@@ -336,7 +338,8 @@ export default function DistributionPage(props: Readonly<Props>) {
           <a
             href="https://x.com/6529Collections"
             target="_blank"
-            rel="noopener noreferrer">
+            rel="noopener noreferrer"
+          >
             &#64;6529Collections
           </a>{" "}
           account on X for drop updates.
@@ -359,7 +362,10 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   return (
     <>
-      <Container fluid className={`${styles["mainContainer"]} tw-pt-6 tw-pb-10`}>
+      <Container
+        fluid
+        className={`${styles["mainContainer"]} tw-pb-10 tw-pt-6`}
+      >
         <Row>
           <Col>
             <Container>
@@ -385,7 +391,7 @@ export default function DistributionPage(props: Readonly<Props>) {
               {distributions.length > 0 && (
                 <Row>
                   <Col>
-                    <span className="tw-text-iron-400 tw-text-sm">
+                    <span className="tw-text-sm tw-text-iron-400">
                       * Note: Each column shows the total allowlist spots for
                       that phase. The breakdown next to it displays: airdrops
                       from subscriptions | allowlist spots for mint.

@@ -1,7 +1,10 @@
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
-import type { ProfileRatersParamsOrderBy, ProfileRatersTableType } from "@/enums";
+import type {
+  ProfileRatersParamsOrderBy,
+  ProfileRatersTableType,
+} from "@/types/enums";
 import ProfileRatersTableBody from "./ProfileRatersTableBody";
 import ProfileRatersTableHeader from "./ProfileRatersTableHeader";
 
@@ -32,7 +35,7 @@ export default function ProfileRatersTable({
     <>
       {ratings.length ? (
         <div className="tw-flow-root">
-          <div className="tw-inline-block tw-min-w-full tw-align-middle tw-pb-2">
+          <div className="tw-inline-block tw-min-w-full tw-pb-2 tw-align-middle">
             <table className="tw-min-w-full">
               <ProfileRatersTableHeader
                 type={type}
@@ -57,7 +60,7 @@ export default function ProfileRatersTable({
         </div>
       ) : (
         <div className="tw-py-4">
-          <span className="tw-px-4 sm:tw-px-6 tw-text-sm sm:tw-text-md tw-italic tw-text-iron-500">
+          <span className="tw-px-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-md">
             {noRatingsMessage}
           </span>
         </div>

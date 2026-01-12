@@ -1,4 +1,4 @@
-import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants";
+import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Transaction } from "@/entities/ITransaction";
 import {

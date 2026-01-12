@@ -1,8 +1,8 @@
 import { sortChanged } from "@/components/memelab/MemeLab";
-import type { LabNFT} from "@/entities/INFT";
+import type { LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
-import { MemeLabSort } from "@/enums";
+import { MemeLabSort } from "@/types/enums";
 
 // Mock helper functions
 jest.mock("@/helpers/Helpers", () => ({

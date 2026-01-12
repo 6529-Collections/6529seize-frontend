@@ -1,9 +1,12 @@
 "use client";
 
-import { useEnsResolution } from "@/hooks/useEnsResolution";
-import { DELEGATION_ALL_ADDRESS, DELEGATION_CONTRACT } from "@/constants";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+} from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
@@ -14,11 +17,8 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import type {
-  DelegationCollection} from "./delegation-constants";
-import {
-  SUPPORTED_COLLECTIONS,
-} from "./delegation-constants";
+import type { DelegationCollection } from "./delegation-constants";
+import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
 
@@ -58,12 +58,14 @@ export function DelegationFormLabel(
     <Form.Label
       column
       sm={props.span ?? 3}
-      className="d-flex align-items-center">
+      className="d-flex align-items-center"
+    >
       {props.title}
       <FontAwesomeIcon
         className={styles["infoIcon"]}
         icon={faInfoCircle}
-        data-tooltip-id={tooltipId}></FontAwesomeIcon>
+        data-tooltip-id={tooltipId}
+      ></FontAwesomeIcon>
       <Tooltip
         id={tooltipId}
         place="top"
@@ -71,7 +73,8 @@ export function DelegationFormLabel(
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
-        }}>
+        }}
+      >
         {props.tooltip}
       </Tooltip>
     </Form.Label>
@@ -152,7 +155,8 @@ export function DelegationFormOptionsFormGroup(
         <Form.Select
           className={`${styles["formInput"]}`}
           value={props.selected}
-          onChange={(e) => props.setSelected(e.target.value)}>
+          onChange={(e) => props.setSelected(e.target.value)}
+        >
           <option value="" disabled>
             Select
           </option>
@@ -171,10 +175,12 @@ export function DelegationFormCollectionFormGroup(
   props: Readonly<{
     collection: string;
     setCollection: (collection: string) => void;
-    subdelegation?: {
-      originalDelegator: string;
-      collection: DelegationCollection;
-    } | undefined;
+    subdelegation?:
+      | {
+          originalDelegator: string;
+          collection: DelegationCollection;
+        }
+      | undefined;
     consolidation?: boolean | undefined;
   }>
 ) {
@@ -199,14 +205,16 @@ export function DelegationFormCollectionFormGroup(
         <Form.Select
           className={`${styles["formInput"]}`}
           value={props.collection}
-          onChange={(e) => props.setCollection(e.target.value)}>
+          onChange={(e) => props.setCollection(e.target.value)}
+        >
           <option value="0" disabled>
             Select Collection
           </option>
           {collections.map((sc) => (
             <option
               key={`add-delegation-select-collection-${sc.contract}`}
-              value={sc.contract}>
+              value={sc.contract}
+            >
               {`${sc.display}`}
             </option>
           ))}
@@ -332,14 +340,17 @@ export function DelegationSubmitGroups(
         <Form.Label
           column
           sm={4}
-          className="d-flex align-items-center"></Form.Label>
+          className="d-flex align-items-center"
+        ></Form.Label>
         <Col
           sm={8}
-          className="d-flex align-items-center justify-content-center">
+          className="d-flex align-items-center justify-content-center"
+        >
           {showCancel && (
             <button
               className={styles["newDelegationCancelBtn"]}
-              onClick={() => onHide()}>
+              onClick={() => onHide()}
+            >
               Cancel
             </button>
           )}
@@ -350,7 +361,8 @@ export function DelegationSubmitGroups(
             onClick={(e) => {
               e.preventDefault();
               submitDelegation();
-            }}>
+            }}
+          >
             {submitBtnLabel ?? "Submit"}{" "}
             {isLoading() && (
               <div className="d-inline">
@@ -365,7 +377,8 @@ export function DelegationSubmitGroups(
       {(errors.length > 0 || gasError) && (
         <Form.Group
           as={Row}
-          className={`pt-2 pb-2 ${styles["newDelegationError"]}`}>
+          className={`pt-2 pb-2 ${styles["newDelegationError"]}`}
+        >
           <Form.Label column sm={4} className="d-flex align-items-center">
             Errors
           </Form.Label>
@@ -456,7 +469,8 @@ export function DelegationCloseButton(
         className={styles["closeNewDelegationForm"]}
         icon={faTimesCircle}
         onClick={() => props.onHide()}
-        data-tooltip-id={tooltipId}></FontAwesomeIcon>
+        data-tooltip-id={tooltipId}
+      ></FontAwesomeIcon>
       <Tooltip
         id={tooltipId}
         place="top"
@@ -465,7 +479,8 @@ export function DelegationCloseButton(
           backgroundColor: "#1F2937",
           color: "white",
           padding: "4px 8px",
-        }}>
+        }}
+      >
         {`Cancel ${props.title}`}
       </Tooltip>
     </>

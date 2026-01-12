@@ -52,7 +52,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/NextGenToken";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("react-bootstrap", () => {
