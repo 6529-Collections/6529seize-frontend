@@ -1,8 +1,8 @@
+import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import {
   ProfileActivityFilterTargetType,
   ProfileActivityLogType,
-} from "@/enums";
-import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
+} from "@/types/enums";
 
 describe("convertActivityLogParams", () => {
   const base = {

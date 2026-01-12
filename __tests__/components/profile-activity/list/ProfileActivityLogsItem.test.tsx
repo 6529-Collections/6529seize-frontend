@@ -1,5 +1,5 @@
 import ProfileActivityLogsItem from "@/components/profile-activity/list/ProfileActivityLogsItem";
-import { ProfileActivityLogType } from "@/enums";
+import { ProfileActivityLogType } from "@/types/enums";
 import { render } from "@testing-library/react";
 
 jest.mock(

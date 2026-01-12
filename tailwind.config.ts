@@ -15,6 +15,9 @@ export default {
   corePlugins: {
     preflight: false,
   },
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       boxShadow: {

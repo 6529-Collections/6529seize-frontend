@@ -3,13 +3,10 @@
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
-import type {
-  ProfileActivityLogRatingEdit} from "@/entities/IProfile";
-import {
-  ProfileActivityLogRatingEditContentChangeReason,
-} from "@/entities/IProfile";
-import { RateMatter } from "@/enums";
+import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
+import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { RateMatter } from "@/types/enums";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
@@ -101,7 +98,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+          className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline"
         >
           (Proxy for {proxyHandle})
         </Link>
@@ -138,7 +135,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-no-underline tw-whitespace-nowrap tw-text-xs tw-text-iron-400 tw-font-medium"
+          className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline"
         >
           (Proxy: {proxyHandle})
         </Link>

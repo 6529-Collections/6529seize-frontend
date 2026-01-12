@@ -3,14 +3,11 @@
 import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 
-import { DELEGATION_ABI } from "@/abis";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants";
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import type {
-  DelegationCollection} from "./delegation-constants";
-import {
-  SUB_DELEGATION_USE_CASE,
-} from "./delegation-constants";
+import type { DelegationCollection } from "./delegation-constants";
+import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import {
   DelegationAddressDisabledInput,
@@ -24,10 +21,12 @@ import {
 
 interface Props {
   address: string;
-  subdelegation?: {
-    originalDelegator: string;
-    collection: DelegationCollection;
-  } | undefined;
+  subdelegation?:
+    | {
+        originalDelegator: string;
+        collection: DelegationCollection;
+      }
+    | undefined;
   ens: string | null | undefined;
   onHide(): any;
   onSetToast(toast: any): any;
@@ -120,7 +119,8 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
         </Col>
         <Col
           xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
+        >
           <DelegationCloseButton
             onHide={props.onHide}
             title="Delegation Manager"

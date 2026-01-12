@@ -1,7 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import { NextgenCollectionView } from "@/enums";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";

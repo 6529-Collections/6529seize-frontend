@@ -4,7 +4,7 @@ import { Spinner } from "@/components/dotLoader/DotLoader";
 import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
-import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants";
+import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants/constants";
 import type { Distribution } from "@/entities/IDistribution";
 import {
   areEqualAddresses,
@@ -16,9 +16,7 @@ import {
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import type {
-  ManifoldClaim,
-  MemePhase} from "@/hooks/useManifoldClaim";
+import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
 import {
   buildMemesPhases,
   ManifoldClaimStatus,

@@ -1,8 +1,6 @@
-import type {
-  HeaderSearchModalItemType,
-} from "@/components/header/header-search/HeaderSearchModalItem";
+import type { HeaderSearchModalItemType } from "@/components/header/header-search/HeaderSearchModalItem";
 import HeaderSearchModalItem from "@/components/header/header-search/HeaderSearchModalItem";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 

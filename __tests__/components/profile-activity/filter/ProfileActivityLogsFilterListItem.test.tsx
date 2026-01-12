@@ -1,5 +1,5 @@
 import ProfileActivityLogsFilterListItem from "@/components/profile-activity/filter/ProfileActivityLogsFilterListItem";
-import { ProfileActivityLogType } from "@/enums";
+import { ProfileActivityLogType } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 describe("ProfileActivityLogsFilterListItem", () => {

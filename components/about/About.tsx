@@ -1,8 +1,8 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
-import { AboutSection } from "@/enums";
 import useCapacitor from "@/hooks/useCapacitor";
+import { AboutSection } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 
@@ -90,13 +90,13 @@ export default function About({ section }: { readonly section: AboutSection }) {
       <Row>
         <Col>
           <div className="tw-flex tw-flex-col md:tw-flex-row">
-            <div className="tw-hidden md:tw-block tw-w-1/5">
+            <div className="tw-hidden tw-w-1/5 md:tw-block">
               <AboutMenu currentSection={section} setSection={setNewSection} />
             </div>
             <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
           </div>
 
-          <div className="tw-block md:tw-hidden tw-mt-6 tw-text-center">
+          <div className="tw-mt-6 tw-block tw-text-center md:tw-hidden">
             <AboutMenu currentSection={section} setSection={setNewSection} />
           </div>
         </Col>
@@ -117,7 +117,7 @@ function AboutMenu({
 
   return (
     <div>
-      <h3 className="tw-text-xl tw-font-semibold tw-mb-2">About</h3>
+      <h3 className="tw-mb-2 tw-text-xl tw-font-semibold">About</h3>
       <MenuItem
         section={AboutSection.MEMES}
         title="The Memes"
@@ -271,10 +271,11 @@ function MenuItem({
     <div className="tw-py-1">
       <button
         onClick={() => setSection(section)}
-        className="btn-link tw-no-underline tw-font-medium hover:tw-text-gray-400"
+        className="btn-link tw-font-medium tw-no-underline hover:tw-text-gray-400"
         style={{
           borderBottom: currentSection === section ? "1px solid" : "none",
-        }}>
+        }}
+      >
         {title}
       </button>
     </div>

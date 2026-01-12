@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useSetTitle } from "@/contexts/TitleContext";
-import { AboutSection } from "@/enums";
 import styles from "@/styles/Home.module.scss";
+import { AboutSection } from "@/types/enums";
+import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
 
 export default function DisputeResolutionPage() {
@@ -14,9 +14,7 @@ export default function DisputeResolutionPage() {
       <Container>
         <Row className="pt-4 pb-4">
           <Col>
-            <h1>
-              Dispute Resolution
-            </h1>
+            <h1>Dispute Resolution</h1>
           </Col>
         </Row>
         <Row>

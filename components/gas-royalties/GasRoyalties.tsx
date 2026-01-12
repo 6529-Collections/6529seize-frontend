@@ -3,10 +3,13 @@
 import DatePickerModal from "@/components/datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
 import { publicEnv } from "@/config/env";
-import { DateIntervalsSelection, GasRoyaltiesCollectionFocus } from "@/enums";
 import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { getDateFilters } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
+import {
+  DateIntervalsSelection,
+  GasRoyaltiesCollectionFocus,
+} from "@/types/enums";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -87,11 +90,11 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   useEffect(() => {
     const path =
       props.focus === GasRoyaltiesCollectionFocus.MEMES ? "memes" : "memelab";
-    fetchUrl<ApiArtistNameItem[]>(`${publicEnv.API_ENDPOINT}/api/${path}/artists_names`).then(
-      (res: ApiArtistNameItem[]) => {
-        setArtists(res);
-      }
-    );
+    fetchUrl<ApiArtistNameItem[]>(
+      `${publicEnv.API_ENDPOINT}/api/${path}/artists_names`
+    ).then((res: ApiArtistNameItem[]) => {
+      setArtists(res);
+    });
   }, [props.focus]);
 
   function getDateSelectionLabel() {
@@ -143,8 +146,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
           <Col className="d-flex align-items-center justify-content-between">
             <span className="d-flex align-items-center gap-2">
               <h1>
-                Meme {props.title}{" "}
-                {props.fetching && <DotLoader />}
+                Meme {props.title} {props.fetching && <DotLoader />}
               </h1>
             </span>
             <span className="d-flex align-items-center gap-3">
@@ -166,7 +168,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     );
                   }
                 }}
-                aria-label="The Memes">
+                aria-label="The Memes"
+              >
                 The Memes
               </span>
               <span
@@ -187,7 +190,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     );
                   }
                 }}
-                aria-label="Meme Lab">
+                aria-label="Meme Lab"
+              >
                 Meme Lab
               </span>
             </span>
@@ -218,7 +222,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       props.setSelectedArtist("");
-                    }}>
+                    }}
+                  >
                     All
                   </Dropdown.Item>
                   {artists.map((a) => (
@@ -226,7 +231,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                       key={`artist-${a.name.replaceAll(" ", "-")}`}
                       onClick={() => {
                         props.setSelectedArtist(a.name);
-                      }}>
+                      }}
+                    >
                       {a.name}
                     </Dropdown.Item>
                   ))}
@@ -255,7 +261,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                           } else {
                             props.setDateSelection(dateSelection);
                           }
-                        }}>
+                        }}
+                      >
                         {dateSelection}
                       </Dropdown.Item>
                     )
@@ -263,7 +270,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       setShowBlockPicker(true);
-                    }}>
+                    }}
+                  >
                     Custom Blocks
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -313,7 +321,8 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
     <a
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
-      rel="noopener noreferrer">
+      rel="noopener noreferrer"
+    >
       <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
         <Image

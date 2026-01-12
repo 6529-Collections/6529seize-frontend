@@ -1,9 +1,8 @@
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import type {
-  CollectedCard} from "@/entities/IProfile";
+import type { CollectedCard } from "@/entities/IProfile";
 import {
   COLLECTED_COLLECTION_TYPE_TO_CONTRACT,
-  COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE
+  COLLECTED_COLLECTION_TYPE_TO_CONTRACT_TYPE,
 } from "@/entities/IProfile";
 import type { ProfileCollectedFilters } from "../UserPageCollected";
 import UserPageCollectedCard from "./UserPageCollectedCard";
@@ -13,7 +12,7 @@ import {
   buildTransferKey,
   useTransfer,
 } from "@/components/nft-transfer/TransferState";
-import type { ContractType } from "@/enums";
+import type { ContractType } from "@/types/enums";
 
 export default function UserPageCollectedCards({
   cards,
@@ -41,7 +40,7 @@ export default function UserPageCollectedCards({
     <div>
       {cards.length ? (
         <div className="tw-flow-root">
-          <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 tw-gap-4 lg:tw-gap-6 tw-pb-2">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6">
             {cards.map((card) => {
               const selKey = buildTransferKey({
                 collection: card.collection,

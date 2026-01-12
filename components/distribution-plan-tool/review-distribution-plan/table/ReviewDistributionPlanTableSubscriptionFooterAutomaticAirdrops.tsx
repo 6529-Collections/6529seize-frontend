@@ -1,7 +1,7 @@
 "use client";
 
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { MEMES_CONTRACT } from "@/constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   extractAllNumbers,
   formatAddress,
@@ -231,7 +231,8 @@ export function AutomaticAirdropsModal(
                     className="p-1 bg-dark text-light rounded"
                     style={{
                       fontSize: "12px",
-                    }}>
+                    }}
+                  >
                     address,value
                   </code>
                 </div>
@@ -243,7 +244,8 @@ export function AutomaticAirdropsModal(
                   style={{
                     fontSize: "12px",
                     overflowX: "auto",
-                  }}>
+                  }}
+                >
                   <code>
                     {`0x33FD426905F149f8376e227d0C9D3340AaD17aF1,5
 0x9f6ae0370d74f0e591c64cec4a8ae0d627817014,10`}
@@ -293,7 +295,8 @@ export function AutomaticAirdropsModal(
             parsedRows.length === 0
           }
           variant="primary"
-          onClick={handleUpload}>
+          onClick={handleUpload}
+        >
           Upload Airdrops
         </Button>
       </Modal.Footer>

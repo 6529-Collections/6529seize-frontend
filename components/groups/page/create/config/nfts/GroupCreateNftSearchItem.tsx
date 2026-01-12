@@ -1,19 +1,13 @@
+import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import {
   GRADIENT_CONTRACT,
-  MEMES_CONTRACT,
   MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "@/constants";
-import type {
-  ApiGroupOwnsNft} from "@/generated/models/ApiGroupOwnsNft";
-import {
-  ApiGroupOwnsNftNameEnum,
-} from "@/generated/models/ApiGroupOwnsNft";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
-import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
+} from "@/constants/constants";
+import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export default function GroupCreateNftSearchItem({
   item,
@@ -58,37 +52,37 @@ export default function GroupCreateNftSearchItem({
     <li className="tw-h-full">
       <button
         type="button"
-        className="hover:tw-bg-iron-700 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
         onClick={() => onSelect(item)}
       >
-        <div className="tw-w-full tw-flex tw-justify-between tw-items-center">
-          <div className="tw-flex tw-space-x-2 tw-items-center">
-            <div className="tw-h-6 tw-w-6 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-900">
+        <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
+          <div className="tw-flex tw-items-center tw-space-x-2">
+            <div className="tw-h-6 tw-w-6 tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10">
               <div className="tw-h-full tw-w-full tw-max-w-full">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center">
+                <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                   <img
                     src={getScaledImageUri(
                       item.image_url,
                       ImageScale.W_AUTO_H_50
                     )}
                     alt="Network Table Profile Picture"
-                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                    className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
                   />
                 </div>
               </div>
             </div>
             <div className="tw-truncate">
-              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-white tw-truncate tw-whitespace-nowrap">
+              <p className="tw-mb-0 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
                 {item.name}
               </p>
-              <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-truncate tw-whitespace-nowrap">
+              <p className="tw-mb-0 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
                 {contractName}
               </p>
             </div>
           </div>
           {isSelected && (
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

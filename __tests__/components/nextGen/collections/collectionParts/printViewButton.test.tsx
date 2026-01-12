@@ -1,5 +1,5 @@
 import { printViewButton } from "@/components/nextGen/collections/collectionParts/NextGenCollection";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 describe("printViewButton", () => {

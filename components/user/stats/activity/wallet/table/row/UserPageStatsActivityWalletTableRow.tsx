@@ -12,7 +12,7 @@ import {
   MEMES_CONTRACT,
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
-} from "@/constants";
+} from "@/constants/constants";
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -297,7 +297,7 @@ export default function UserPageStatsActivityWalletTableRow({
 
   return (
     <tr className="tw-flex tw-items-center tw-justify-between">
-      <td className="tw-py-2.5 tw-flex-1">
+      <td className="tw-flex-1 tw-py-2.5">
         <span className="tw-inline-flex tw-items-center tw-gap-x-1">
           <UserPageStatsActivityWalletTableRowIcon type={type} />
           <UserPageStatsActivityWalletTableRowMainAddress
@@ -305,27 +305,28 @@ export default function UserPageStatsActivityWalletTableRow({
             type={type}
             profile={profile}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-400 tw-font-medium">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-text-base">
             {TYPE_TP_ACTION[type]}
           </span>
           {transaction.token_count > 1 && (
-            <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
+            <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-300">
               x{transaction.token_count}
             </span>
           )}
-          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-font-medium">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-text-base">
             <Link
-              className="tw-text-iron-100 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-              href={getPath()}>
+              className="tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+              href={getPath()}
+            >
               {getLinkContent()}
             </Link>
           </span>
           <img
-            className="tw-mx-0.5 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
+            className="tw-mx-0.5 tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/30"
             src={getImageSrc()}
             alt={nftLite?.name ?? ""}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-100 tw-font-medium">
+          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-text-base">
             {showAnotherSide && (
               <UserPageStatsActivityWalletTableRowSecondAddress
                 type={type}
@@ -334,7 +335,7 @@ export default function UserPageStatsActivityWalletTableRow({
             )}
           </span>
           {showValue() && (
-            <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm sm:tw-text-base tw-text-iron-400 tw-font-medium">
+            <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-text-base">
               for{" "}
               <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
                 <svg
@@ -343,7 +344,8 @@ export default function UserPageStatsActivityWalletTableRow({
                   aria-label="ethereum"
                   enableBackground="new 0 0 1920 1920"
                   viewBox="0 0 1920 1920"
-                  xmlns="http://www.w3.org/2000/svg">
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="m959.8 80.7-539.7 895.6 539.7-245.3z"
                     fill="#8a92b2"
@@ -368,7 +370,7 @@ export default function UserPageStatsActivityWalletTableRow({
           )}
         </span>
       </td>
-      <td className="tw-py-2.5 tw-h-full tw-text-right tw-px-6 sm:tw-px-4">
+      <td className="tw-h-full tw-px-6 tw-py-2.5 tw-text-right sm:tw-px-4">
         <span className="tw-flex tw-items-center tw-justify-end">
           {showRoyalties && (
             <UserPageStatsActivityWalletTableRowRoyalties
@@ -387,14 +389,15 @@ export default function UserPageStatsActivityWalletTableRow({
             title="Go to etherscan"
             aria-label="Go to etherscan"
             rel="noopener noreferrer"
-            className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
-            <span className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
+            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+          >
+            <span className="tw-h-6 tw-w-6 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5">
               <EtherscanIcon />
             </span>
           </a>
         </span>
       </td>
-      <td className="tw-py-2.5 tw-w-24 sm:tw-w-32 tw-text-right">
+      <td className="tw-w-24 tw-py-2.5 tw-text-right sm:tw-w-32">
         <CommonTimeAgo
           timestamp={new Date(transaction.transaction_date).getTime()}
         />
