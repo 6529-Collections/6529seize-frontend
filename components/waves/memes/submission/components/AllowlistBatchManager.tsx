@@ -48,7 +48,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
 
   return (
     <FormSection title="Allowlist Configuration">
-      <div className="tw-flex tw-flex-col tw-gap-y-4">
+      <div className="tw-flex tw-flex-col tw-gap-y-6">
         {batches.length === 0 ? (
           <div className="tw-py-2 tw-text-sm tw-italic tw-text-iron-500">
             No allowlist batches added.
@@ -58,11 +58,11 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
             <div key={batch.id} className="tw-flex tw-items-start tw-gap-x-3">
               {/* Contract Address */}
               <TraitWrapper
-                label="Contract Address"
+                label="Contract Address *"
                 id={`batch-${index}-contract`}
                 error={errors?.[index]?.contract}
                 isFieldFilled={!!batch.contract && !errors?.[index]?.contract}
-                className="tw-flex-1"
+                className="tw-flex-1 tw-pb-0"
               >
                 <input
                   type="text"
@@ -87,7 +87,7 @@ const AllowlistBatchManager: React.FC<AllowlistBatchManagerProps> = ({
                 isFieldFilled={
                   !!batch.token_ids_raw && !errors?.[index]?.token_ids
                 }
-                className="tw-flex-1"
+                className="tw-flex-1 tw-pb-0"
               >
                 <input
                   type="text"

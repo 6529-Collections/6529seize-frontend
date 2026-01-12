@@ -17,6 +17,7 @@ const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "ogv"]);
 const emptyAdditionalMedia: AdditionalMedia = {
   artist_profile_media: [],
   artwork_commentary_media: [],
+  preview_image: "",
 };
 
 const parseAdditionalMedia = (rawValue?: string): AdditionalMedia => {
@@ -37,6 +38,8 @@ const parseAdditionalMedia = (rawValue?: string): AdditionalMedia => {
       artwork_commentary_media: Array.isArray(parsed.artwork_commentary_media)
         ? parsed.artwork_commentary_media.filter(Boolean)
         : [],
+      preview_image:
+        typeof parsed.preview_image === "string" ? parsed.preview_image : "",
     };
   } catch {
     return emptyAdditionalMedia;
@@ -58,20 +61,30 @@ interface WaveDropAdditionalInfoProps {
 export const WaveDropAdditionalInfo = ({
   drop,
 }: WaveDropAdditionalInfoProps) => {
-  const { commentary, mediaItems } = useMemo(() => {
+  const { commentary, aboutArtist, previewImage, mediaItems } = useMemo(() => {
     const metadata = drop.metadata ?? [];
-    const commentaryEntry = metadata.find(
-      (item) => item.data_key === MemesSubmissionAdditionalInfoKey.COMMENTARY
+    const getMetadataValue = (key: MemesSubmissionAdditionalInfoKey) =>
+      metadata.find((item) => item.data_key === key)?.data_value?.trim() ?? "";
+
+    const commentaryValue = getMetadataValue(
+      MemesSubmissionAdditionalInfoKey.COMMENTARY
     );
+    const aboutArtistValue = getMetadataValue(
+      MemesSubmissionAdditionalInfoKey.ABOUT_ARTIST
+    );
+
     const additionalMediaEntry = metadata.find(
       (item) =>
         item.data_key === MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA
     );
-
-    const commentaryValue = commentaryEntry?.data_value?.trim() ?? "";
     const additionalMedia = parseAdditionalMedia(
       additionalMediaEntry?.data_value
     );
+
+    const previewImageValue = additionalMedia.preview_image
+      ? parseIpfsUrl(additionalMedia.preview_image)
+      : "";
+
     const mediaItemsValue = additionalMedia.artwork_commentary_media
       .filter(
         (url): url is string =>
@@ -87,64 +100,109 @@ export const WaveDropAdditionalInfo = ({
         return { url, displayUrl, isVideo };
       });
 
-    return { commentary: commentaryValue, mediaItems: mediaItemsValue };
+    return {
+      commentary: commentaryValue,
+      aboutArtist: aboutArtistValue,
+      previewImage: previewImageValue,
+      mediaItems: mediaItemsValue,
+    };
   }, [drop.metadata]);
 
   const displayedMedia = mediaItems.slice(0, MAX_MEDIA);
+  const hasContent =
+    previewImage ||
+    displayedMedia.length > 0 ||
+    aboutArtist ||
+    commentary;
 
-  if (!commentary && displayedMedia.length === 0) {
+  if (!hasContent) {
     return null;
   }
 
   return (
-    <section className="tw-space-y-6">
-      <div className="tw-space-y-2">
-        <h2 className="tw-text-lg tw-font-semibold tw-text-iron-100">
-          Additional Media & Notes
-        </h2>
-        {commentary && (
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-leading-relaxed">
-            {commentary}
-          </p>
-        )}
-      </div>
+    <section className="tw-space-y-8">
+      {previewImage && (
+        <div className="tw-space-y-2">
+          <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
+            Preview Image
+          </h3>
+          <div className="tw-flex tw-justify-center">
+            <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-max-w-2xl tw-overflow-hidden tw-bg-white/[0.02]">
+              <Image
+                src={getScaledImageUri(previewImage, ImageScale.AUTOx600)}
+                alt="Preview image"
+                fill
+                sizes="(min-width: 768px) 400px, 100vw"
+                className="tw-object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {displayedMedia.length > 0 && (
-        <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
-          {displayedMedia.map((item, index) => (
-            <div
-              key={`${item.url}-${index}`}
-              className={`tw-relative tw-overflow-hidden tw-bg-white/[0.02] ${
-                item.isVideo
-                  ? "tw-aspect-video sm:tw-col-span-2"
-                  : "tw-aspect-[4/3]"
-              }`}
-            >
-              {item.isVideo ? (
-                <video
-                  src={item.url}
-                  className="tw-h-full tw-w-full tw-object-cover"
-                  controls
-                  preload="metadata"
-                >
-                  <track
-                    kind="captions"
-                    src="data:text/vtt,WEBVTT"
-                    srcLang="en"
-                    label="Captions"
+        <div className="tw-space-y-2">
+          <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
+            Additional Media
+          </h3>
+          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
+            {displayedMedia.map((item, index) => (
+              <div
+                key={`${item.url}-${index}`}
+                className={`tw-relative tw-overflow-hidden tw-bg-white/[0.02] ${
+                  item.isVideo
+                    ? "tw-aspect-video sm:tw-col-span-2"
+                    : "tw-aspect-[4/3]"
+                }`}
+              >
+                {item.isVideo ? (
+                  <video
+                    src={item.url}
+                    className="tw-h-full tw-w-full tw-object-cover"
+                    controls
+                    preload="metadata"
+                  >
+                    <track
+                      kind="captions"
+                      src="data:text/vtt,WEBVTT"
+                      srcLang="en"
+                      label="Captions"
+                    />
+                  </video>
+                ) : (
+                  <Image
+                    src={item.displayUrl}
+                    alt={`Additional media ${index + 1}`}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                    className="tw-object-contain"
                   />
-                </video>
-              ) : (
-                <Image
-                  src={item.displayUrl}
-                  alt={`Process media ${index + 1}`}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                  className="tw-object-contain"
-                />
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {aboutArtist && (
+        <div className="tw-space-y-2">
+          <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
+            About the Artist
+          </h3>
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-leading-relaxed tw-whitespace-pre-wrap">
+            {aboutArtist}
+          </p>
+        </div>
+      )}
+
+      {commentary && (
+        <div className="tw-space-y-2">
+          <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
+            Artwork Commentary
+          </h3>
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-leading-relaxed tw-whitespace-pre-wrap">
+            {commentary}
+          </p>
         </div>
       )}
     </section>

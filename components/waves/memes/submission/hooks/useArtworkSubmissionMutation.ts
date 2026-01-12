@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import type { InteractiveMediaMimeType } from "../constants/media";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
-import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
-import type { InteractiveMediaMimeType } from "../constants/media";
 import { validateStrictAddress } from "../utils/addressValidation";
 
 import { OperationalData } from "../types/OperationalData";
@@ -47,7 +47,15 @@ export const transformToApiRequest = (data: {
   signerAddress: string;
   isSafeSignature: boolean;
 }): ApiCreateDropRequest => {
-  const { waveId, traits, operationalData, mediaUrl, mimeType, signerAddress, isSafeSignature } = data;
+  const {
+    waveId,
+    traits,
+    operationalData,
+    mediaUrl,
+    mimeType,
+    signerAddress,
+    isSafeSignature,
+  } = data;
 
   // Create metadata array from trait data
   const metadata: ApiDropMetadata[] = Object.entries(traits)
@@ -62,14 +70,15 @@ export const transformToApiRequest = (data: {
 
   // Append operational data if provided
   if (operationalData) {
-    if (operationalData.airdrop_config && operationalData.airdrop_config.length > 0) {
+    if (
+      operationalData.airdrop_config &&
+      operationalData.airdrop_config.length > 0
+    ) {
       // Filter out entries with empty addresses before saving
-      const validEntries = operationalData.airdrop_config.filter(
-        (e) => {
-          const trimmedAddress = e.address?.trim() ?? "";
-          return validateStrictAddress(trimmedAddress) && e.count > 0;
-        }
-      );
+      const validEntries = operationalData.airdrop_config.filter((e) => {
+        const trimmedAddress = e.address?.trim() ?? "";
+        return validateStrictAddress(trimmedAddress) && e.count > 0;
+      });
       if (validEntries.length > 0) {
         metadata.push({
           data_key: "airdrop_config",
@@ -78,18 +87,21 @@ export const transformToApiRequest = (data: {
       }
     }
 
-    if (operationalData.payment_info?.payment_address?.trim()) {
-      metadata.push({
-        data_key: "payment_info",
-        data_value: JSON.stringify(operationalData.payment_info),
-      });
-    }
+    metadata.push({
+      data_key: "payment_info",
+      data_value: JSON.stringify(operationalData.payment_info),
+    });
 
-    if (operationalData.allowlist_batches && operationalData.allowlist_batches.length > 0) {
-      const processedBatches = operationalData.allowlist_batches.map((batch) => ({
-        contract: batch.contract,
-        token_ids: batch.token_ids_raw || "",
-      }));
+    if (
+      operationalData.allowlist_batches &&
+      operationalData.allowlist_batches.length > 0
+    ) {
+      const processedBatches = operationalData.allowlist_batches.map(
+        (batch) => ({
+          contract: batch.contract,
+          token_ids: batch.token_ids_raw || "",
+        })
+      );
       metadata.push({
         data_key: "allowlist_batches",
         data_value: JSON.stringify(processedBatches),
@@ -103,12 +115,15 @@ export const transformToApiRequest = (data: {
       });
     }
 
-    if (operationalData.commentary) {
-      metadata.push({
-        data_key: "commentary",
-        data_value: operationalData.commentary,
-      });
-    }
+    metadata.push({
+      data_key: "commentary",
+      data_value: operationalData.commentary,
+    });
+
+    metadata.push({
+      data_key: "about_artist",
+      data_value: operationalData.about_artist,
+    });
   }
 
   // Create the request object

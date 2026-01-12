@@ -58,14 +58,18 @@ describe('MemesArtSubmissionContainer', () => {
         additional_media: {
           artist_profile_media: [],
           artwork_commentary_media: [],
+          preview_image: "",
         },
         commentary: "",
+        about_artist: "",
       },
       setAirdropConfig: jest.fn(),
       setPaymentInfo: jest.fn(),
       setAllowlistBatches: jest.fn(),
       setAdditionalMedia: jest.fn(),
       setCommentary: jest.fn(),
+      setAboutArtist: jest.fn(),
+      setPaymentInfo: jest.fn(),
       handleBackToArtwork: jest.fn(),
     };
 

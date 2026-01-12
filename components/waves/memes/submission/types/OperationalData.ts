@@ -4,6 +4,7 @@ export enum MemesSubmissionAdditionalInfoKey {
   ALLOWLIST_BATCHES = "allowlist_batches",
   ADDITIONAL_MEDIA = "additional_media",
   COMMENTARY = "commentary",
+  ABOUT_ARTIST = "about_artist",
 }
 
 export const MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS: string[] =
@@ -35,6 +36,7 @@ export interface AllowlistBatchRaw {
 export interface AdditionalMedia {
   artist_profile_media: string[];
   artwork_commentary_media: string[];
+  preview_image: string;
 }
 
 export interface OperationalData {
@@ -43,4 +45,5 @@ export interface OperationalData {
   allowlist_batches: AllowlistBatchRaw[];
   additional_media: AdditionalMedia;
   commentary: string;
+  about_artist: string;
 }
