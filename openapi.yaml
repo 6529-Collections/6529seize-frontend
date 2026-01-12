@@ -2679,7 +2679,7 @@ paths:
       tags:
         - Ratings
       summary: >-
-        Change REP rating of multiple targets and categories in one go. Targets
+        Change REP rating of multiple targets and categories in one go. Targets 
         final REP value will be the value you supply here. If you supply
         multiple  addresses for one consolidation group then those amounts will
         be summed together.
@@ -6172,7 +6172,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:
@@ -8680,7 +8680,7 @@ components:
           type: string
     ApiWaveCreditScope:
       description: |
-        The scope of the credit.
+        The scope of the credit. 
         * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
@@ -9091,7 +9091,7 @@ components:
           nullable: true
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:

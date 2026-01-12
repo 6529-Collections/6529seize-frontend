@@ -6,6 +6,7 @@ import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
 import MetricsSkeleton from "./components/MetricsSkeleton";
 import {
+  ConsolidationsIcon,
   DropsIcon,
   DroppersIcon,
   NetworkTdhIcon,
@@ -113,6 +114,14 @@ export default function MetricsPageClient() {
               accentColor="tw-text-rose-400"
               useValueCount
               suffix="%"
+            />
+            <MetricCard
+              title="Consolidations Formed"
+              dailyData={dailyQuery.data.consolidationsFormed}
+              weeklyData={weeklyQuery.data.consolidationsFormed}
+              icon={<ConsolidationsIcon />}
+              iconBgColor="tw-bg-indigo-500"
+              accentColor="tw-text-indigo-400"
             />
           </div>
         )}

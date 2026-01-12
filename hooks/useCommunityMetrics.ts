@@ -30,6 +30,7 @@ export interface CommunityMetrics {
   readonly tdhOnMainStageSubmissions: MetricData;
   readonly networkTdh: MetricData;
   readonly tdhOnMainStagePercentage: MetricData;
+  readonly consolidationsFormed: MetricData;
 }
 
 function sanitizeNumber(value: unknown): number {
@@ -142,6 +143,7 @@ async function fetchCommunityMetrics(
       tdhOnMainStageSubmissions,
       networkTdh
     ),
+    consolidationsFormed: transformMetric(response.consolidations_formed),
   };
 }
 
