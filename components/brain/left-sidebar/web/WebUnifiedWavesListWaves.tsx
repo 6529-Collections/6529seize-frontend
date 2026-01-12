@@ -100,7 +100,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const virtual = useVirtualizedWaves<MinimalWave>(
       regularWaves,
       "web-unified-waves-regular",
-      scrollContainerRef || listContainerRef,
+      scrollContainerRef ?? listContainerRef,
       listContainerRef,
       rowHeight,
       5

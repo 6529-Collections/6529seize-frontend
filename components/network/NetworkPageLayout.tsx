@@ -24,7 +24,7 @@ export default function NetworkPageLayout({
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      const group = searchParams?.get("group");
+      const group = searchParams.get("group");
       if (group && group !== activeGroupId) {
         dispatch(setActiveGroupId(group));
       }
