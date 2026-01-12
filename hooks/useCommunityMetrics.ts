@@ -152,7 +152,7 @@ export function useCommunityMetrics(interval: CommunityMetricsInterval) {
     staleTime: 60_000,
     gcTime: 300_000,
     retry: 3,
-    retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 30_000),
+    retryDelay: (attemptIndex) => Math.min(1_000 * 2 ** attemptIndex, 30_000),
     refetchOnWindowFocus: false,
     refetchOnMount: true,
   });
