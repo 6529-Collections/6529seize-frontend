@@ -8,9 +8,13 @@ import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 
 interface Props {
   readonly src: string;
+  readonly disableAutoPlay?: boolean | undefined;
 }
 
-function DropListItemContentMediaVideo({ src }: Props) {
+function DropListItemContentMediaVideo({
+  src,
+  disableAutoPlay = false,
+}: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const { isApp } = useDeviceInfo();
 
@@ -27,15 +31,17 @@ function DropListItemContentMediaVideo({ src }: Props) {
     src: playableUrl,
     isHls,
     fallbackSrc: src,
-    autoPlay: inView && !isApp,
+    autoPlay: inView && !isApp && !disableAutoPlay,
   });
 
   // 3) Play/pause & mute based on scroll visibility
+  const shouldAutoPlay = inView && !isApp && !disableAutoPlay;
+
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl || isLoading) return;
 
-    if (inView) {
+    if (shouldAutoPlay) {
       // ensure muted autoplay works
       videoEl.muted = true;
       if (!isApp) videoEl.play().catch(() => {});
@@ -43,7 +49,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
       videoEl.pause();
       videoEl.muted = true;
     }
-  }, [inView, isApp, isLoading, videoRef]);
+  }, [shouldAutoPlay, isApp, isLoading, videoRef]);
 
   // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {

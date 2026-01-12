@@ -1,16 +1,24 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperInstance } from "swiper";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import SubmissionArtworkCard from "./SubmissionArtworkCard";
 import CarouselArrow from "./CarouselArrow";
-import CarouselActiveItemDetails from "./CarouselActiveItemDetails";
 
-export default function SubmissionCarousel() {
+interface SubmissionCarouselProps {
+  readonly onActiveDropChange?: (drop: ExtendedDrop | null) => void;
+}
+
+export default function SubmissionCarousel({
+  onActiveDropChange,
+}: SubmissionCarouselProps) {
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
 
@@ -20,11 +28,15 @@ export default function SubmissionCarousel() {
     pausePolling: !waveId,
   });
 
-  const trackRef = useRef<HTMLDivElement>(null);
-  const hasInitialScrolled = useRef(false);
+  const swiperRef = useRef<SwiperInstance | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const baseCardWidth = 440;
+  const inactiveScale = 0.68;
+  const cardGap = 4;
+  const arrowOffset =
+    baseCardWidth / 2 + cardGap + (baseCardWidth * inactiveScale) / 2;
 
   const shuffledDrops = useMemo(() => {
     const filtered = drops.filter(
@@ -39,91 +51,42 @@ export default function SubmissionCarousel() {
     return shuffled;
   }, [drops]);
 
-  const updateActiveIndex = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
+  const activeDrop = useMemo(
+    () => shuffledDrops[activeIndex] ?? shuffledDrops[0] ?? null,
+    [activeIndex, shuffledDrops]
+  );
 
-    const cards = track.querySelectorAll<HTMLDivElement>(
-      "[data-carousel-item]"
-    );
-    if (cards.length === 0) return;
-
-    const trackRect = track.getBoundingClientRect();
-    const trackCenter = trackRect.left + trackRect.width / 2;
-
-    let closestIndex = 0;
-    let closestDistance = Infinity;
-
-    cards.forEach((card, index) => {
-      const cardRect = card.getBoundingClientRect();
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      const distance = Math.abs(trackCenter - cardCenter);
-
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestIndex = index;
-      }
-    });
-
-    setActiveIndex(closestIndex);
-    setCanScrollLeft(closestIndex > 0);
-    setCanScrollRight(closestIndex < shuffledDrops.length - 1);
-  }, [shuffledDrops.length]);
-
-  const scrollToIndex = useCallback((index: number, instant = false) => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const cards = track.querySelectorAll<HTMLDivElement>(
-      "[data-carousel-item]"
-    );
-    const card = cards[index];
-    if (!card) return;
-
-    const trackRect = track.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    const scrollLeft =
-      card.offsetLeft - trackRect.width / 2 + cardRect.width / 2;
-
-    track.scrollTo({
-      left: scrollLeft,
-      behavior: instant ? "instant" : "smooth",
-    });
-  }, []);
+  const handleSlideChange = useCallback(
+    (swiper: SwiperInstance) => {
+      setActiveIndex(swiper.activeIndex);
+      setCanScrollLeft(!swiper.isBeginning);
+      setCanScrollRight(!swiper.isEnd);
+    },
+    [setActiveIndex]
+  );
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
+    onActiveDropChange?.(activeDrop);
+  }, [activeDrop, onActiveDropChange]);
 
-    updateActiveIndex();
-    track.addEventListener("scroll", updateActiveIndex);
-    window.addEventListener("resize", updateActiveIndex);
-
-    return () => {
-      track.removeEventListener("scroll", updateActiveIndex);
-      window.removeEventListener("resize", updateActiveIndex);
-    };
-  }, [updateActiveIndex, drops]);
-
-  // Scroll to second item on initial load (instant, no animation)
   useEffect(() => {
-    if (shuffledDrops.length > 1 && !hasInitialScrolled.current) {
-      hasInitialScrolled.current = true;
-      requestAnimationFrame(() => {
-        scrollToIndex(1, true);
-      });
+    if (activeIndex >= shuffledDrops.length && shuffledDrops.length > 0) {
+      setActiveIndex(0);
+      swiperRef.current?.slideTo(0, 0);
     }
-  }, [shuffledDrops.length, scrollToIndex]);
+  }, [activeIndex, shuffledDrops.length]);
 
   const scroll = useCallback(
     (direction: "left" | "right") => {
-      const newIndex =
-        direction === "left"
-          ? Math.max(0, activeIndex - 1)
-          : Math.min(shuffledDrops.length - 1, activeIndex + 1);
-      scrollToIndex(newIndex);
+      const swiper = swiperRef.current;
+      if (!swiper) return;
+      if (direction === "left") {
+        swiper.slidePrev();
+      } else {
+        swiper.slideNext();
+      }
     },
-    [activeIndex, shuffledDrops.length, scrollToIndex]
+    []
   );
 
   if (!isLoaded || !waveId) {
@@ -143,58 +106,73 @@ export default function SubmissionCarousel() {
   }
 
   return (
-    <div className="tw-relative tw-@container">
-      <CarouselArrow
-        direction="left"
-        onClick={() => scroll("left")}
-        disabled={!canScrollLeft}
-      />
+    <div className="tw-relative tw-@container tw-h-full tw-min-h-0">
+      <div className="tw-relative tw-mx-auto tw-h-full tw-w-full tw-max-w-4xl tw-overflow-hidden">
+        <CarouselArrow
+          direction="left"
+          onClick={() => scroll("left")}
+          disabled={!canScrollLeft}
+          style={{ left: `calc(50% - ${arrowOffset}px)` }}
+        />
 
-      <div
-        ref={trackRef}
-        className="tw-flex tw-items-center tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-none"
-        style={{
-          gap: "16px",
-          paddingLeft: "calc(50% - 175px)",
-          paddingRight: "calc(50% - 175px)",
-        }}
-      >
-        {shuffledDrops.map((drop, index) => {
-          const isActive = index === activeIndex;
-          const distance = Math.abs(index - activeIndex);
+        <Swiper
+          className="submission-carousel-swiper tw-h-full tw-overflow-hidden"
+          slidesPerView="auto"
+          centeredSlides
+          spaceBetween={cardGap}
+          speed={450}
+          initialSlide={shuffledDrops.length > 1 ? 1 : 0}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+            handleSlideChange(swiper);
+          }}
+          onSlideChange={handleSlideChange}
+        >
+          {shuffledDrops.map((drop, index) => {
+            const isActive = index === activeIndex;
+            const distance = Math.abs(index - activeIndex);
+            const scale = isActive ? 1 : inactiveScale;
+            const opacity = isActive ? 1 : 0.22;
+            const filter = isActive ? "none" : "grayscale(100%) blur(6px)";
+            const transitionEasing = "cubic-bezier(0.25, 1, 0.5, 1)";
+            const transition = `transform 0.45s ${transitionEasing}, opacity 0.45s ${transitionEasing}`;
+            const shouldHint = distance <= 1;
 
-          return (
-            <button
-              type="button"
-              key={drop.id}
-              data-carousel-item
-              onClick={() => scrollToIndex(index)}
-              className="tw-flex-shrink-0 tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              style={{
-                width: "350px",
-                transform: `scale(${isActive ? 1 : 0.85})`,
-                opacity: isActive ? 1 : 0.4,
-                filter: isActive ? "none" : "grayscale(50%)",
-                zIndex: isActive ? 10 : 10 - distance,
-                transition:
-                  "transform 0.4s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1), filter 0.4s cubic-bezier(0.33, 1, 0.68, 1)",
-              }}
-            >
-              <SubmissionArtworkCard drop={drop} />
-            </button>
-          );
-        })}
+            return (
+              <SwiperSlide
+                key={drop.id}
+                className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-visible"
+                style={{ width: `${baseCardWidth}px` }}
+              >
+                <button
+                  type="button"
+                  onClick={() => swiperRef.current?.slideTo(index)}
+                  className="tw-h-full tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  style={{
+                    opacity,
+                    filter,
+                    zIndex: isActive ? 10 : 10 - distance,
+                    transition,
+                    transform: `translate3d(0, 0, 0) scale(${scale})`,
+                    transformOrigin: "center",
+                    willChange: shouldHint ? "transform, opacity" : "auto",
+                  }}
+                >
+                  <SubmissionArtworkCard drop={drop} isActive={isActive} />
+                </button>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+
+        <CarouselArrow
+          direction="right"
+          onClick={() => scroll("right")}
+          disabled={!canScrollRight}
+          style={{ left: `calc(50% + ${arrowOffset}px)` }}
+        />
       </div>
 
-      <CarouselArrow
-        direction="right"
-        onClick={() => scroll("right")}
-        disabled={!canScrollRight}
-      />
-
-      <CarouselActiveItemDetails
-        drop={shuffledDrops[activeIndex] ?? shuffledDrops[0] ?? null}
-      />
     </div>
   );
 }

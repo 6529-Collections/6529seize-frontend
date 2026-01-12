@@ -12,7 +12,7 @@ export default function NowMintingStatsItem({
   isLoading,
 }: NowMintingStatsItemProps) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-1">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
       <span className="tw-text-xs tw-text-iron-400">{label}</span>
       {isLoading ? (
         <span className="tw-h-5 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-700" />

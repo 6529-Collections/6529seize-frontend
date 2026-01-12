@@ -15,7 +15,7 @@ export default function NowMintingArtwork({
 
   return (
     <div className="tw-w-full md:tw-w-1/2">
-      <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900">
+      <div className="tw-relative tw-aspect-square tw-w-full">
         {hasVideo ? (
           <video
             src={animationUrl}
@@ -24,10 +24,10 @@ export default function NowMintingArtwork({
             loop
             muted
             playsInline
-            className="tw-size-full tw-object-cover"
+            className="tw-size-full tw-object-contain"
           />
         ) : (
-          <Image src={imageUrl} alt={title} fill className="tw-object-cover" />
+          <Image src={imageUrl} alt={title} fill className="tw-object-contain" />
         )}
       </div>
     </div>

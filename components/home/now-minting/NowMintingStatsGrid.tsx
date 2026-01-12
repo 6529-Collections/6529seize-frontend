@@ -23,7 +23,7 @@ export default function NowMintingStatsGrid({
     : undefined;
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-border-y tw-border-iron-800 tw-py-4">
+    <div className="tw-flex tw-flex-col tw-gap-3 tw-border-y tw-border-iron-800 tw-py-4">
       <NowMintingStatsItem label="Edition" value={edition} />
       <NowMintingStatsItem label="Mint price" value={mintPrice} />
       <NowMintingStatsItem

@@ -25,7 +25,7 @@ export default function NowMintingDetailsAccordion({
 
   return (
     <details className="tw-group">
-      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-py-2 tw-text-sm tw-text-iron-300">
+      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-start tw-gap-2 tw-py-2 tw-text-sm tw-text-iron-300">
         <span>Technical Details</span>
         <svg
           className="tw-size-4 tw-transition-transform group-open:tw-rotate-180"

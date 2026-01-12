@@ -28,12 +28,18 @@ export default function DropListItemContentMedia({
   media_url,
   onContainerClick,
   isCompetitionDrop = false,
+  disableModal = false,
+  disableAutoPlay = false,
+  imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
   readonly onContainerClick?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly disableModal?: boolean | undefined;
+  readonly disableAutoPlay?: boolean | undefined;
+  readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
 }) {
   const getMediaType = (): MediaType => {
@@ -69,11 +75,18 @@ export default function DropListItemContentMedia({
           src={media_url}
           onContainerClick={onContainerClick}
           isCompetitionDrop={isCompetitionDrop}
+          disableModal={disableModal}
+          imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
         />
       );
     case MediaType.VIDEO:
-      return <DropListItemContentMediaVideo src={media_url} />;
+      return (
+        <DropListItemContentMediaVideo
+          src={media_url}
+          disableAutoPlay={disableAutoPlay}
+        />
+      );
     case MediaType.AUDIO:
       return <DropListItemContentMediaAudio src={media_url} />;
     case MediaType.GLB:
