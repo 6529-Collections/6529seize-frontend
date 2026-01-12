@@ -49,7 +49,8 @@ export default function UserLevel({
   return (
     <button
       onClick={openLevelsPage}
-      className={`tw-border-none tw-bg-transparent ${sharedClasses}`}>
+      className={`tw-border-none tw-bg-transparent ${sharedClasses}`}
+    >
       {content}
     </button>
   );
