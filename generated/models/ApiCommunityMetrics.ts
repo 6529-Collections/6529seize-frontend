@@ -22,6 +22,7 @@ export class ApiCommunityMetrics {
     'main_stage_votes': ApiCommunityMetric;
     'network_tdh': ApiCommunityMetric;
     'tdh_on_main_stage_submissions': ApiCommunityMetric;
+    'consolidations_formed': ApiCommunityMetric;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -67,6 +68,12 @@ export class ApiCommunityMetrics {
         {
             "name": "tdh_on_main_stage_submissions",
             "baseName": "tdh_on_main_stage_submissions",
+            "type": "ApiCommunityMetric",
+            "format": ""
+        },
+        {
+            "name": "consolidations_formed",
+            "baseName": "consolidations_formed",
             "type": "ApiCommunityMetric",
             "format": ""
         }    ];

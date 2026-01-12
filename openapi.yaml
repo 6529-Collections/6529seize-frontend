@@ -5706,6 +5706,7 @@ components:
         - main_stage_votes
         - network_tdh
         - tdh_on_main_stage_submissions
+        - consolidations_formed
       properties:
         drops_created:
           $ref: "#/components/schemas/ApiCommunityMetric"
@@ -5720,6 +5721,8 @@ components:
         network_tdh:
           $ref: "#/components/schemas/ApiCommunityMetric"
         tdh_on_main_stage_submissions:
+          $ref: "#/components/schemas/ApiCommunityMetric"
+        consolidations_formed:
           $ref: "#/components/schemas/ApiCommunityMetric"
     ApiCommunityMetricSample:
       type: object
