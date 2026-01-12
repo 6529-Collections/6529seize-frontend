@@ -28,6 +28,8 @@ export interface CommunityMetrics {
   readonly mainStageDistinctVoters: MetricData;
   readonly mainStageVotes: MetricData;
   readonly tdhOnMainStageSubmissions: MetricData;
+  readonly networkTdh: MetricData;
+  readonly tdhOnMainStagePercentage: MetricData;
 }
 
 function sanitizeNumber(value: unknown): number {
@@ -77,6 +79,42 @@ function transformMetric(metric: {
   };
 }
 
+function calculateTdhPercentage(
+  tdhOnMainStage: MetricData,
+  networkTdh: MetricData
+): MetricData {
+  const currentPercent =
+    networkTdh.current.valueCount > 0
+      ? (tdhOnMainStage.current.valueCount / networkTdh.current.valueCount) *
+        100
+      : 0;
+  const previousPercent =
+    networkTdh.previous.valueCount > 0
+      ? (tdhOnMainStage.previous.valueCount / networkTdh.previous.valueCount) *
+        100
+      : 0;
+
+  return {
+    current: {
+      eventCount: 0,
+      valueCount: currentPercent,
+      periodStart: tdhOnMainStage.current.periodStart,
+      periodEnd: tdhOnMainStage.current.periodEnd,
+    },
+    previous: {
+      eventCount: 0,
+      valueCount: previousPercent,
+      periodStart: tdhOnMainStage.previous.periodStart,
+      periodEnd: tdhOnMainStage.previous.periodEnd,
+    },
+    eventCountChangePercent: null,
+    valueCountChangePercent: calculateChangePercent(
+      currentPercent,
+      previousPercent
+    ),
+  };
+}
+
 async function fetchCommunityMetrics(
   interval: CommunityMetricsInterval
 ): Promise<CommunityMetrics> {
@@ -84,6 +122,11 @@ async function fetchCommunityMetrics(
     endpoint: "community-metrics",
     params: { interval },
   });
+
+  const tdhOnMainStageSubmissions = transformMetric(
+    response.tdh_on_main_stage_submissions
+  );
+  const networkTdh = transformMetric(response.network_tdh);
 
   return {
     dropsCreated: transformMetric(response.drops_created),
@@ -93,8 +136,11 @@ async function fetchCommunityMetrics(
       response.main_stage_distinct_voters
     ),
     mainStageVotes: transformMetric(response.main_stage_votes),
-    tdhOnMainStageSubmissions: transformMetric(
-      response.tdh_on_main_stage_submissions
+    tdhOnMainStageSubmissions,
+    networkTdh,
+    tdhOnMainStagePercentage: calculateTdhPercentage(
+      tdhOnMainStageSubmissions,
+      networkTdh
     ),
   };
 }

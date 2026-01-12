@@ -9,6 +9,7 @@ interface MetricCardProps {
   readonly iconBgColor: string;
   readonly accentColor: string;
   readonly useValueCount?: boolean;
+  readonly suffix?: string;
 }
 
 function formatNumberWithCommas(value: number): string {
@@ -39,6 +40,7 @@ function StatBlock({
   changePercent,
   accentColor,
   isPrimary = false,
+  suffix,
 }: {
   readonly label: string;
   readonly currentValue: number;
@@ -47,6 +49,7 @@ function StatBlock({
   readonly changePercent: number | null;
   readonly accentColor: string;
   readonly isPrimary?: boolean;
+  readonly suffix?: string;
 }) {
   const isPositive = changePercent !== null && changePercent >= 0;
   const colorClasses = isPositive
@@ -63,23 +66,25 @@ function StatBlock({
         {label}
       </p>
       <CustomTooltip
-        content={formatNumberWithCommas(currentValue)}
+        content={`${formatNumberWithCommas(currentValue)}${suffix ?? ""}`}
         placement="top"
       >
         <p
           className={`tw-cursor-default tw-font-bold tw-text-white ${isPrimary ? "tw-text-4xl" : "tw-text-2xl"}`}
         >
           {formatCompactNumber(currentValue)}
+          {suffix}
         </p>
       </CustomTooltip>
       <p className="tw-mt-1 tw-text-xs tw-text-neutral-500">
         vs{" "}
         <CustomTooltip
-          content={formatNumberWithCommas(previousValue)}
+          content={`${formatNumberWithCommas(previousValue)}${suffix ?? ""}`}
           placement="top"
         >
           <span className="tw-cursor-default">
             {formatCompactNumber(previousValue)}
+            {suffix}
           </span>
         </CustomTooltip>{" "}
         {previousLabel}
@@ -101,6 +106,7 @@ export default function MetricCard({
   iconBgColor,
   accentColor,
   useValueCount = false,
+  suffix,
 }: MetricCardProps) {
   const getCount = (data: MetricData, period: "current" | "previous") =>
     useValueCount ? data[period].valueCount : data[period].eventCount;
@@ -128,6 +134,7 @@ export default function MetricCard({
           changePercent={getChangePercent(dailyData)}
           accentColor={accentColor}
           isPrimary
+          {...(suffix !== undefined && { suffix })}
         />
         <div className="tw-w-px tw-bg-iron-700/50" />
         <StatBlock
@@ -137,6 +144,7 @@ export default function MetricCard({
           previousLabel="prev week"
           changePercent={getChangePercent(weeklyData)}
           accentColor={accentColor}
+          {...(suffix !== undefined && { suffix })}
         />
       </div>
     </div>
