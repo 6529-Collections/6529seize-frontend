@@ -2,7 +2,7 @@ import {
   fetchTokenData,
   getContentView,
 } from "@/app/nextgen/token/[token]/[[...view]]/page-utils";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/helpers/Helpers", () => ({ isEmptyObject: jest.fn(() => false) }));

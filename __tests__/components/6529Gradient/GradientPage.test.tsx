@@ -3,7 +3,7 @@ import GradientPageComponent from "@/components/6529Gradient/GradientPage";
 import { AuthContext } from "@/components/auth/Auth";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { GRADIENT_CONTRACT } from "@/constants";
+import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -102,7 +102,8 @@ function renderPage(wallet: string = "0x1") {
   return render(
     <TitleProvider>
       <AuthContext.Provider
-        value={{ connectedProfile: { wallets: [{ wallet }] } } as any}>
+        value={{ connectedProfile: { wallets: [{ wallet }] } } as any}
+      >
         <CookieConsentProvider>
           <SeizeConnectProvider>
             <GradientPageComponent id="1" />
@@ -287,7 +288,8 @@ describe("GradientPage", () => {
     rerender(
       <TitleProvider>
         <AuthContext.Provider
-          value={{ connectedProfile: { wallets: [{ wallet: "0x1" }] } } as any}>
+          value={{ connectedProfile: { wallets: [{ wallet: "0x1" }] } } as any}
+        >
           <CookieConsentProvider>
             <GradientPageComponent id="1" />
           </CookieConsentProvider>

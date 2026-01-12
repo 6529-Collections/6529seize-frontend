@@ -1,7 +1,7 @@
 import NextGen, {
   DistributionLink,
 } from "@/components/nextGen/collections/NextGen";
-import { NextgenView } from "@/enums";
+import { NextgenView } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

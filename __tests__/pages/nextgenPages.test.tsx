@@ -1,7 +1,7 @@
 import NextGenTokenPageClient from "@/app/nextgen/token/[token]/[[...view]]/NextGenTokenPageClient";
 import { AuthContext } from "@/components/auth/Auth";
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
-import { NextgenCollectionView } from "@/enums";
+import { NextgenCollectionView } from "@/types/enums";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 

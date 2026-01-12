@@ -36,7 +36,7 @@ export default function CommunityMembersTableSkeleton({
         </div>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-y-3 tw-mt-3 sm:tw-hidden">
+      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3 sm:tw-hidden">
         {rowKeys.map((key) => (
           <div
             key={key}

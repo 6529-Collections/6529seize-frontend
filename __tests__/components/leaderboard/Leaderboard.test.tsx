@@ -1,5 +1,5 @@
 import Leaderboard from "@/components/leaderboard/Leaderboard";
-import { LeaderboardFocus } from "@/enums";
+import { LeaderboardFocus } from "@/types/enums";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 

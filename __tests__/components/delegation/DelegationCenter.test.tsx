@@ -10,7 +10,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 import DelegationCenterComponent from "@/components/delegation/DelegationCenter";
-import { DelegationCenterSection } from "@/enums";
+import { DelegationCenterSection } from "@/types/enums";
 
 jest.mock("next/image", () => ({
   __esModule: true,

@@ -1,6 +1,9 @@
 import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
-import { ETHEREUM_ICON_TEXT, NEXTGEN_MEDIA_BASE_URL } from "@/constants";
+import {
+  ETHEREUM_ICON_TEXT,
+  NEXTGEN_MEDIA_BASE_URL,
+} from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
 import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -61,7 +64,8 @@ export function NextGenTokenImage(
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-          }}>
+          }}
+        >
           <FontAwesomeIcon
             height={18}
             icon={faInfoCircle}
@@ -75,7 +79,8 @@ export function NextGenTokenImage(
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             <Container>
               <Row className="pt-2 pb-2">
                 <Col>{ownerInfo}</Col>
@@ -225,7 +230,8 @@ export function NextGenTokenImage(
           style={{
             overflow: "hidden",
             height: height,
-          }}>
+          }}
+        >
           <Image
             quality={100}
             priority
@@ -255,7 +261,8 @@ export function NextGenTokenImage(
               props.show_owner_info
                 ? "justify-content-between"
                 : "justify-content-center"
-            }`}>
+            }`}
+          >
             <span className={props.info_class ?? ""}>
               #{props.token.normalised_id}
             </span>
@@ -278,8 +285,8 @@ export function NextGenTokenImage(
             height: props.is_fullscreen
               ? "100vh"
               : isMobileScreen
-              ? "60vh"
-              : "85vh",
+                ? "60vh"
+                : "85vh",
             marginBottom: "-8px",
           }}
           src={props.token.animation_url ?? props.token.generator?.html}
@@ -297,7 +304,8 @@ export function NextGenTokenImage(
     return (
       <Link
         href={`/nextgen/token/${props.token.id}`}
-        className="decoration-none scale-hover unselectable">
+        className="decoration-none scale-hover unselectable"
+      >
         {getContent()}
       </Link>
     );

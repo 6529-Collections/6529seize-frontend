@@ -1,4 +1,4 @@
-import { MOBILE_APP_IOS, MOBILE_APP_ANDROID } from "@/constants";
+import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -41,7 +41,7 @@ export function ShareMobileApp({
         width={200}
         height={60}
         placeholder="empty"
-        className="hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
+        className="tw-transition-all tw-duration-300 tw-ease-out hover:tw-scale-[1.03]"
       />
     </Link>
   );

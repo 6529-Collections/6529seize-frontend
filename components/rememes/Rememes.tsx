@@ -7,7 +7,7 @@ import RememeImage from "@/components/nft-image/RememeImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
 import { publicEnv } from "@/config/env";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFTLite, Rememe } from "@/entities/INFT";

@@ -9,8 +9,8 @@ import type {
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
-import { NextgenCollectionView } from "@/enums";
 import styles from "@/styles/Home.module.scss";
+import { NextgenCollectionView } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

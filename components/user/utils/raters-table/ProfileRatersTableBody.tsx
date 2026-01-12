@@ -1,6 +1,6 @@
 import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
-import type { ProfileRatersTableType } from "@/enums";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import type { ProfileRatersTableType } from "@/types/enums";
 import ProfileRatersTableItem from "./ProfileRatersTableItem";
 
 export default function ProfileRatersTableBody({
@@ -11,7 +11,7 @@ export default function ProfileRatersTableBody({
   readonly type: ProfileRatersTableType;
 }) {
   return (
-    <tbody className="tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
+    <tbody className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
       {ratings.map((rating) => (
         <ProfileRatersTableItem
           key={getRandomObjectId()}

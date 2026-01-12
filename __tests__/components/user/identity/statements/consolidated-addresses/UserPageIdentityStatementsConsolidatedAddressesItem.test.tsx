@@ -1,4 +1,4 @@
-import { DELEGATION_ABI } from "@/abis";
+import { DELEGATION_ABI } from "@/abis/abis";
 import { AuthContext } from "@/components/auth/Auth";
 import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem";
@@ -6,7 +6,7 @@ import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
   NEVER_DATE,
-} from "@/constants";
+} from "@/constants/constants";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
 jest.useFakeTimers();

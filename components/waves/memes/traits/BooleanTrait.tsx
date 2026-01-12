@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
 
@@ -42,7 +42,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         yesButton?.classList.add(
           "tw-bg-primary-400/30",
           "tw-ring-primary-400/60",
-          "tw-text-primary-200"
+          "tw-text-primary-300"
         );
         yesButton?.classList.remove(
           "tw-bg-iron-800/50",
@@ -53,7 +53,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         noButton?.classList.remove(
           "tw-bg-primary-400/30",
           "tw-ring-primary-400/60",
-          "tw-text-primary-200"
+          "tw-text-primary-300"
         );
         noButton?.classList.add(
           "tw-bg-iron-800/50",
@@ -64,7 +64,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         yesButton?.classList.remove(
           "tw-bg-primary-400/30",
           "tw-ring-primary-400/60",
-          "tw-text-primary-200"
+          "tw-text-primary-300"
         );
         yesButton?.classList.add(
           "tw-bg-iron-800/50",
@@ -75,7 +75,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         noButton?.classList.add(
           "tw-bg-primary-400/30",
           "tw-ring-primary-400/60",
-          "tw-text-primary-200"
+          "tw-text-primary-300"
         );
         noButton?.classList.remove(
           "tw-bg-iron-800/50",
@@ -125,16 +125,15 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
       >
         <div
           ref={uiStateRef}
-          className="tw-flex tw-gap-3 tw-w-full"
+          className="tw-flex tw-w-full tw-gap-3"
           data-field={field}
         >
           <button
             onClick={handleYesClick}
-            className={`yes-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
-            ${
+            className={`yes-button tw-flex-1 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-transition-all ${
               traits[field]
-                ? "tw-bg-primary-400/30 tw-ring-primary-400/60 tw-text-primary-200"
-                : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
+                ? "tw-bg-primary-400/30 tw-text-primary-300 tw-ring-primary-400/60"
+                : "tw-bg-iron-800/50 tw-text-iron-400 tw-ring-iron-700/50"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
             type="button"
           >
@@ -142,11 +141,10 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
           </button>
           <button
             onClick={handleNoClick}
-            className={`no-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
-            ${
+            className={`no-button tw-flex-1 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-transition-all ${
               traits[field] === false
-                ? "tw-bg-primary-400/30 tw-ring-primary-400/60 tw-text-primary-200"
-                : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
+                ? "tw-bg-primary-400/30 tw-text-primary-300 tw-ring-primary-400/60"
+                : "tw-bg-iron-800/50 tw-text-iron-400 tw-ring-iron-700/50"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
             type="button"
           >

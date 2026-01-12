@@ -1,6 +1,6 @@
 import ProfileActivityLogItemWrapper from "@/components/profile-activity/list/items/utils/ProfileActivityLogItemWrapper";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
-import { ProfileActivityLogType, RateMatter } from "@/enums";
+import { ProfileActivityLogType, RateMatter } from "@/types/enums";
 import { render } from "@testing-library/react";
 
 jest.mock("@/components/user/utils/CommonProfileLink", () => ({

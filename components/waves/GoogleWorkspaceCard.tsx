@@ -7,8 +7,8 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 
-import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 import type { GoogleWorkspaceLinkPreview } from "@/services/api/link-preview-api";
+import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 
 interface GoogleWorkspaceCardProps {
   readonly href: string;
@@ -45,7 +45,7 @@ const getActionButtonClasses = (variant: "primary" | "secondary") =>
     "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60",
     variant === "primary"
       ? "tw-border-primary-500 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400"
-      : "tw-border-iron-700 tw-bg-transparent tw-text-iron-100 hover:tw-border-primary-400 hover:tw-text-primary-200"
+      : "tw-border-iron-700 tw-bg-transparent tw-text-iron-100 hover:tw-border-primary-400 hover:tw-text-primary-300"
   );
 
 export default function GoogleWorkspaceCard({
@@ -101,7 +101,8 @@ export default function GoogleWorkspaceCard({
       return rawEmbedUrl;
     }
 
-    return typeof data.links.preview === "string" && data.links.preview.length > 0
+    return typeof data.links.preview === "string" &&
+      data.links.preview.length > 0
       ? data.links.preview
       : undefined;
   }, [data.links]);
@@ -137,7 +138,7 @@ export default function GoogleWorkspaceCard({
         <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
             <div className="md:tw-w-64 md:tw-flex-shrink-0">
-              <div className="tw-relative tw-w-full tw-aspect-video tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
+              <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
                 {data.thumbnail && !imageError ? (
                   <Image
                     src={data.thumbnail}
@@ -167,12 +168,13 @@ export default function GoogleWorkspaceCard({
                   {domain}
                 </span>
               </div>
-              <h3 className="tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-line-clamp-2">
+              <h3 className="tw-line-clamp-2 tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100">
                 {displayTitle}
               </h3>
               {data.availability === "restricted" ? (
                 <p className="tw-m-0 tw-text-sm tw-text-amber-300">
-                  This file may require permission to view. You can still open it directly in {productName}.
+                  This file may require permission to view. You can still open
+                  it directly in {productName}.
                 </p>
               ) : null}
             </div>

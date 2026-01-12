@@ -1,4 +1,3 @@
-import { DateIntervalsSelection } from "@/enums";
 import {
   addProtocol,
   areEqualURLS,
@@ -14,6 +13,7 @@ import {
   parseNftDescriptionToHtml,
   printMintDate,
 } from "@/helpers/Helpers";
+import { DateIntervalsSelection } from "@/types/enums";
 
 describe("Helpers utility functions", () => {
   test("addProtocol adds https scheme when missing", () => {
@@ -110,7 +110,7 @@ jest.mock("@/helpers/Helpers", () => ({
         day: "numeric",
         month: "short",
         year: "numeric",
-      })} 
+      })}
       (${Math.floor(
         (Date.now() - mintDate.getTime()) / (1000 * 60 * 60 * 24)
       )} days ago)

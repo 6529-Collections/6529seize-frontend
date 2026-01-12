@@ -1,15 +1,15 @@
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
-import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants";
+import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants/constants";
 import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
-import { ContractType } from "@/enums";
 import {
   areEqualAddresses,
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import { ContractType } from "@/types/enums";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import styles from "./TheMemes.module.scss";
@@ -93,7 +93,8 @@ export function MemePageYourCardsRightMenu(props: {
         xs={{ span: 12 }}
         sm={{ span: 12 }}
         md={{ span: 6 }}
-        lg={{ span: 6 }}>
+        lg={{ span: 6 }}
+      >
         <Container className="p-0">
           <Row>
             {props.wallets.length === 0 && (
@@ -123,7 +124,8 @@ export function MemePageYourCardsRightMenu(props: {
                         xs={{ span: 12 }}
                         sm={{ span: 12 }}
                         md={{ span: 12 }}
-                        lg={{ span: 8 }}>
+                        lg={{ span: 8 }}
+                      >
                         <Table bordered={false}>
                           <tbody>
                             <tr className={`${styles["overviewColumn"]}`}>
@@ -157,10 +159,13 @@ export function MemePageYourCardsRightMenu(props: {
                           xs={{ span: 12 }}
                           sm={{ span: 12 }}
                           md={{ span: 12 }}
-                          lg={{ span: 8 }}>
+                          lg={{ span: 8 }}
+                        >
                           <Table bordered={false}>
                             <tbody>
-                              <tr className={`pt-1 ${styles["overviewColumn"]}`}>
+                              <tr
+                                className={`pt-1 ${styles["overviewColumn"]}`}
+                              >
                                 <td>TDH</td>
                                 <td className="text-right">
                                   {numberWithCommas(

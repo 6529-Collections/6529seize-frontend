@@ -57,35 +57,35 @@ export default function GroupCardVoteAll({
     CreditDirection.ADD
   );
 
-  const { data: members, isFetching } = useQuery<Page<ApiCommunityMemberOverview>>(
-    {
-      queryKey: [
-        QueryKey.COMMUNITY_MEMBERS_TOP,
-        {
+  const { data: members, isFetching } = useQuery<
+    Page<ApiCommunityMemberOverview>
+  >({
+    queryKey: [
+      QueryKey.COMMUNITY_MEMBERS_TOP,
+      {
+        page: 1,
+        pageSize: 1,
+        sort: ApiCommunityMembersSortOption.Level,
+        sortDirection: SortDirection.DESC,
+        groupId: group?.id ?? null,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<
+        Page<ApiCommunityMemberOverview>,
+        CommunityMembersQuery
+      >({
+        endpoint: `community-members/top`,
+        params: {
           page: 1,
-          pageSize: 1,
+          page_size: 1,
           sort: ApiCommunityMembersSortOption.Level,
-          sortDirection: SortDirection.DESC,
-          groupId: group?.id ?? null,
+          sort_direction: SortDirection.DESC,
+          group_id: group?.id,
         },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<
-          Page<ApiCommunityMemberOverview>,
-          CommunityMembersQuery
-        >({
-          endpoint: `community-members/top`,
-          params: {
-            page: 1,
-            page_size: 1,
-            sort: ApiCommunityMembersSortOption.Level,
-            sort_direction: SortDirection.DESC,
-            group_id: group?.id,
-          },
-        }),
-      placeholderData: keepPreviousData,
-    }
-  );
+      }),
+    placeholderData: keepPreviousData,
+  });
 
   const [membersCount, setMembersCount] = useState<number | null>(null);
   useEffect(() => {
@@ -223,7 +223,8 @@ export default function GroupCardVoteAll({
       membersCount={membersCount}
       doneMembersCount={doneMembersCount}
       matter={matter}
-      onSave={onSave}>
+      onSave={onSave}
+    >
       {group && (
         <GroupCardVoteAllInputs
           matter={matter}

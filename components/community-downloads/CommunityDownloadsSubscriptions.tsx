@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Pagination from "@/components/pagination/Pagination";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { commonApiFetch } from "@/services/api/common-api";
-import { MEMES_CONTRACT } from "@/constants";
+import { useEffect, useState } from "react";
 
+import { useSetTitle } from "@/contexts/TitleContext";
 import {
-  formatDate,
   DownloadsLayout,
   DownloadsTable,
+  formatDate,
 } from "./CommunityDownloadsHelpers";
-import { useSetTitle } from "@/contexts/TitleContext";
 
 const PAGE_SIZE = 25;
 
@@ -51,7 +51,11 @@ export default function CommunityDownloadsSubscriptions() {
             <td>{formatDate(download.date)}</td>
             <td>#{download.token_id}</td>
             <td>
-              <a href={download.upload_url} target="_blank" rel="noopener noreferrer">
+              <a
+                href={download.upload_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {download.upload_url}
               </a>
             </td>
@@ -60,7 +64,7 @@ export default function CommunityDownloadsSubscriptions() {
       />
 
       {totalResults > PAGE_SIZE && (
-        <div className="tw-text-center tw-pt-2 tw-pb-3">
+        <div className="tw-pb-3 tw-pt-2 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

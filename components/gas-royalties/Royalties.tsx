@@ -1,22 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./GasRoyalties.module.scss";
+import { useTitle } from "@/contexts/TitleContext";
 import type { Royalty } from "@/entities/IRoyalty";
-import { fetchUrl } from "@/services/6529api";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { GasRoyaltiesCollectionFocus } from "@/types/enums";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { useTitle } from "@/contexts/TitleContext";
-import { GasRoyaltiesCollectionFocus } from "@/enums";
+import styles from "./GasRoyalties.module.scss";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 

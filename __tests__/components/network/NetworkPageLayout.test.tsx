@@ -63,7 +63,9 @@ describe("NetworkPageLayout", () => {
     renderComponent();
 
     expect(screen.getByTestId("test-content")).toBeInTheDocument();
-    expect(screen.queryByTestId("network-page-layout-app")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("network-page-layout-app")
+    ).not.toBeInTheDocument();
   });
 
   it("renders app layout when isApp is true", () => {

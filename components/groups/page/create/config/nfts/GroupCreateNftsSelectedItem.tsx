@@ -1,18 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
-} from "@/constants";
-import { commonApiFetch } from "@/services/api/common-api";
+} from "@/constants/constants";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 import type { ApiNftsPage } from "@/generated/models/ApiNftsPage";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
 
 export default function GroupCreateNftsSelectedItem({
   nft,
@@ -58,10 +55,10 @@ export default function GroupCreateNftsSelectedItem({
   });
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-950 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700">
-      <div className="tw-py-1 tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-h-7 tw-w-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-sm">
-          <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-sm tw-overflow-hidden tw-bg-iron-800">
-            <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-sm tw-overflow-hidden">
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-py-1">
+        <div className="tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0 tw-rounded-sm tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800">
+          <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-sm tw-bg-iron-800">
+            <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-sm tw-text-center">
               {data?.data?.[0]?.image ? (
                 <img
                   src={getScaledImageUri(
@@ -80,7 +77,7 @@ export default function GroupCreateNftsSelectedItem({
         <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
           {data?.data?.[0]?.name}
         </span>
-        <span className="tw-bg-iron-600 tw-rounded-full tw-h-1 tw-w-1"></span>
+        <span className="tw-h-1 tw-w-1 tw-rounded-full tw-bg-iron-600"></span>
         <span className="text-xs tw-font-medium tw-text-iron-300">
           {NAME_TO_NAME_MAP[nft.name]}
         </span>
@@ -88,7 +85,7 @@ export default function GroupCreateNftsSelectedItem({
       <button
         type="button"
         onClick={onRemove}
-        className="tw-h-full tw-bg-transparent tw-border-l tw-border-solid tw-border-y-0 tw-border-r-0 tw-border-iron-700 tw-text-iron-400 hover:tw-text-error tw-flex tw-items-center tw-justify-center tw-group tw-relative tw-transition-all -tw-mr-1.5 tw-duration-300 tw-ease-out"
+        className="tw-group tw-relative -tw-mr-1.5 tw-flex tw-h-full tw-items-center tw-justify-center tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-700 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-text-error"
       >
         <span className="tw-sr-only">Remove</span>
         <svg

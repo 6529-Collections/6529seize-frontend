@@ -1,34 +1,31 @@
 "use client";
 
-import styles from "./NextGenAdmin.module.scss";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { NULL_MERKLE } from "@/constants/constants";
+import type { NextgenAllowlistCollection } from "@/entities/INextgen";
+import { NextgenAllowlistCollectionType } from "@/entities/INextgen";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { FunctionSelectors } from "../nextgen_contracts";
+import type { PhaseTimes } from "../nextgen_entities";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
+  useCollectionIndex,
   useCollectionPhases,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useMinterContractWrite,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import type { PhaseTimes } from "../nextgen_entities";
-import { NULL_MERKLE } from "@/constants";
 import { printAdminErrors } from "./NextGenAdmin";
+import styles from "./NextGenAdmin.module.scss";
 import {
-  NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
-import type {
-  NextgenAllowlistCollection} from "@/entities/INextgen";
-import {
-  NextgenAllowlistCollectionType
-} from "@/entities/INextgen";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 interface Props {
   close: () => void;
 }
@@ -189,12 +186,14 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
                     (c) => c.merkle_root === merkleRoot
                   );
                   setSelectedAllowlist(selected);
-                }}>
+                }}
+              >
                 <option value="">Null Merkle Root</option>
                 {availableAllowlistCollections.map((c) => (
                   <option
                     key={`merkle-collection-${c.merkle_root}`}
-                    value={c.merkle_root}>
+                    value={c.merkle_root}
+                  >
                     {c.phase} - {c.merkle_root}
                   </option>
                 ))}
@@ -270,7 +269,8 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
             <Button
               className={`mt-3 mb-3 seize-btn`}
               disabled={submitting || loading}
-              onClick={() => submit()}>
+              onClick={() => submit()}
+            >
               Submit
             </Button>
           </Form>

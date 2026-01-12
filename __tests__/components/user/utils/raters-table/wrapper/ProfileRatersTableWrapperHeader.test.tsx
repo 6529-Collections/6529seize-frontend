@@ -1,5 +1,5 @@
 import ProfileRatersTableWrapperHeader from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapperHeader";
-import { ProfileRatersTableType } from "@/enums";
+import { ProfileRatersTableType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/user/utils/UserTableHeaderWrapper", () => ({
