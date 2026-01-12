@@ -1,7 +1,7 @@
 "use client";
 
 import { useEnsResolution } from "@/hooks/useEnsResolution";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { Form } from "react-bootstrap";
 
 interface EnsAddressInputProps {
@@ -33,38 +33,47 @@ export default function EnsAddressInput({
     inputValue,
     address,
     handleInputChange,
-    setInputValue,
     ensNameQuery,
     ensAddressQuery,
   } = useEnsResolution({ initialValue: value, chainId });
 
-  useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
+  const onAddressChangeEvent = useEffectEvent((addr: string) => {
+    onAddressChange(addr);
+  });
+
+  const onValueChangeEvent = useEffectEvent((val: string) => {
+    onValueChange?.(val);
+  });
+
+  const onLoadingChangeEvent = useEffectEvent((isLoading: boolean) => {
+    onLoadingChange?.(isLoading);
+  });
+
+  const onErrorEvent = useEffectEvent((hasError: boolean) => {
+    onError?.(hasError);
+  });
 
   useEffect(() => {
-    onAddressChange(address);
-  }, [address, onAddressChange]);
+    onAddressChangeEvent(address);
+  }, [address]);
 
   useEffect(() => {
-    onValueChange?.(inputValue);
-  }, [inputValue, onValueChange]);
+    onValueChangeEvent(inputValue);
+  }, [inputValue]);
 
   useEffect(() => {
     const isLoading = ensNameQuery.isLoading || ensAddressQuery.isLoading;
-    onLoadingChange?.(isLoading);
-  }, [ensNameQuery.isLoading, ensAddressQuery.isLoading, onLoadingChange]);
+    onLoadingChangeEvent(isLoading);
+  }, [ensNameQuery.isLoading, ensAddressQuery.isLoading]);
 
   useEffect(() => {
-    if (!onError) return;
-
     const isEnsInput = inputValue?.toLowerCase().endsWith(".eth");
     if (isEnsInput && ensAddressQuery.isError) {
-      onError(true);
+      onErrorEvent(true);
     } else {
-      onError(false);
+      onErrorEvent(false);
     }
-  }, [inputValue, ensAddressQuery.isError, onError]);
+  }, [inputValue, ensAddressQuery.isError]);
 
   return (
     <Form.Control

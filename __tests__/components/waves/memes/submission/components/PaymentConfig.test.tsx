@@ -11,7 +11,7 @@ describe("PaymentConfig", () => {
   it("renders payment address field with label", () => {
     render(<PaymentConfig {...defaultProps} />);
     expect(screen.getByText(/Payment Address/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("0x...")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/0x.*or ENS/i)).toBeInTheDocument();
   });
 
   it("displays helper text about minting proceeds", () => {
@@ -31,7 +31,7 @@ describe("PaymentConfig", () => {
       />
     );
 
-    const input = screen.getByPlaceholderText("0x...");
+    const input = screen.getByPlaceholderText(/0x.*or ENS/i);
     await user.type(input, "0x1234567890123456789012345678901234567890");
 
     expect(onPaymentInfoChange).toHaveBeenCalled();
@@ -46,7 +46,7 @@ describe("PaymentConfig", () => {
       />
     );
 
-    const input = screen.getByPlaceholderText("0x...");
+    const input = screen.getByPlaceholderText(/0x.*or ENS/i);
     expect(input).toHaveValue(address);
   });
 });
