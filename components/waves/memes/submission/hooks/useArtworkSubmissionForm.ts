@@ -5,6 +5,9 @@ import type { TraitsData } from "../types/TraitsData";
 import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
+import type { CicStatement } from "@/entities/IProfile";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import type {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
@@ -62,10 +65,11 @@ type FormAction =
     }
   | { type: "RESET_UPLOAD_MEDIA" }
   | { type: "SET_AIRDROP_CONFIG"; payload: AirdropEntry[] }
-  | { type: "SET_PAYMENT_INFO"; payload: Partial<PaymentInfo> }
+  | { type: "SET_PAYMENT_INFO"; payload: PaymentInfo }
   | { type: "SET_ALLOWLIST_BATCHES"; payload: AllowlistBatchRaw[] }
   | { type: "SET_ADDITIONAL_MEDIA"; payload: Partial<AdditionalMedia> }
-  | { type: "SET_COMMENTARY"; payload: string };
+  | { type: "SET_COMMENTARY"; payload: string }
+  | { type: "SET_ABOUT_ARTIST"; payload: string };
 
 interface FormState {
   currentStep: SubmissionStep;
@@ -336,10 +340,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
         ...state,
         operationalData: {
           ...state.operationalData,
-          payment_info: {
-            ...state.operationalData.payment_info,
-            ...action.payload,
-          },
+          payment_info: action.payload,
         },
       };
 
@@ -370,6 +371,15 @@ function formReducer(state: FormState, action: FormAction): FormState {
         operationalData: {
           ...state.operationalData,
           commentary: action.payload,
+        },
+      };
+
+    case "SET_ABOUT_ARTIST":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          about_artist: action.payload,
         },
       };
 
@@ -411,8 +421,10 @@ export function useArtworkSubmissionForm() {
       additional_media: {
         artist_profile_media: [],
         artwork_commentary_media: [],
+        preview_image: "",
       },
       commentary: "",
+      about_artist: "",
     },
   };
 
@@ -593,7 +605,45 @@ export function useArtworkSubmissionForm() {
         },
       });
     }
+
+    const primaryWallet = connectedProfile?.primary_wallet ?? "";
+    if (primaryWallet) {
+      dispatch({
+        type: "SET_PAYMENT_INFO",
+        payload: { payment_address: primaryWallet },
+      });
+
+      dispatch({
+        type: "SET_AIRDROP_CONFIG",
+        payload: [{ id: "initial", address: primaryWallet, count: AIRDROP_TOTAL }],
+      });
+    }
   }, [connectedProfile]);
+
+  useEffect(() => {
+    const handle = connectedProfile?.handle;
+    if (!handle) return;
+
+    commonApiFetch<CicStatement[]>({
+      endpoint: `profiles/${handle}/cic/statements`,
+    })
+      .then((statements) => {
+        const bioStatement = statements?.find(
+          (s) =>
+            s.statement_type === STATEMENT_TYPE.BIO &&
+            s.statement_group === STATEMENT_GROUP.GENERAL
+        );
+        if (bioStatement?.statement_value) {
+          dispatch({
+            type: "SET_ABOUT_ARTIST",
+            payload: bioStatement.statement_value,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("[useArtworkSubmissionForm] Failed to fetch bio", error);
+      });
+  }, [connectedProfile?.handle]);
 
   const getSubmissionData = useCallback(() => {
     const { traits, artworkUrl, operationalData } = state;
@@ -662,7 +712,7 @@ export function useArtworkSubmissionForm() {
   );
 
   const setPaymentInfo = useCallback(
-    (paymentInfo: Partial<PaymentInfo>) => {
+    (paymentInfo: PaymentInfo) => {
       dispatch({ type: "SET_PAYMENT_INFO", payload: paymentInfo });
     },
     [dispatch]
@@ -685,6 +735,13 @@ export function useArtworkSubmissionForm() {
   const setCommentary = useCallback(
     (commentary: string) => {
       dispatch({ type: "SET_COMMENTARY", payload: commentary });
+    },
+    [dispatch]
+  );
+
+  const setAboutArtist = useCallback(
+    (aboutArtist: string) => {
+      dispatch({ type: "SET_ABOUT_ARTIST", payload: aboutArtist });
     },
     [dispatch]
   );
@@ -728,6 +785,7 @@ export function useArtworkSubmissionForm() {
     setAllowlistBatches,
     setAdditionalMedia,
     setCommentary,
+    setAboutArtist,
 
     getSubmissionData,
     getMediaSelection,

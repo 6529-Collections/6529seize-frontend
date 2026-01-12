@@ -25,6 +25,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
       artwork_commentary_media: ["https://example.com/commentary.jpg"],
     },
     commentary: "Test Commentary",
+    about_artist: "Test About Artist",
   };
 
   it("should include operational data in metadata when provided", () => {
@@ -53,6 +54,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     ]));
     expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA)).toBe(JSON.stringify(mockOperationalData.additional_media));
     expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.COMMENTARY)).toBe("Test Commentary");
+    expect(metadataMap.get(MemesSubmissionAdditionalInfoKey.ABOUT_ARTIST)).toBe("Test About Artist");
   });
 
   it("should not include operational fields if not provided", () => {
@@ -74,5 +76,6 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.ALLOWLIST_BATCHES)).toBe(false);
     expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA)).toBe(false);
     expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.COMMENTARY)).toBe(false);
+    expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.ABOUT_ARTIST)).toBe(false);
   });
 });

@@ -1,25 +1,40 @@
 "use client";
 
-import type { FC } from "react";
-import { motion } from "framer-motion";
-import AirdropConfig from "../components/AirdropConfig";
-import AllowlistBatchManager, { AllowlistBatchRaw } from "../components/AllowlistBatchManager";
-import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
-import { validateStrictAddress } from "../utils/addressValidation";
-import { validateTokenIdFormat } from "../utils/tokenParsing";
-import { AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import { motion } from "framer-motion";
+import type { FC } from "react";
+import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
+import AirdropConfig from "../components/AirdropConfig";
+import AllowlistBatchManager, {
+  AllowlistBatchRaw,
+} from "../components/AllowlistBatchManager";
+import PaymentConfig from "../components/PaymentConfig";
+import {
+  AIRDROP_TOTAL,
+  AirdropEntry,
+  PaymentInfo,
+} from "../types/OperationalData";
+import { validateStrictAddress } from "../utils/addressValidation";
+import { validateTokenIdFormat } from "../utils/tokenParsing";
 
 interface AdditionalInfoStepProps {
   readonly airdropEntries: AirdropEntry[];
   readonly onAirdropEntriesChange: (entries: AirdropEntry[]) => void;
+  readonly paymentInfo: PaymentInfo;
+  readonly onPaymentInfoChange: (paymentInfo: PaymentInfo) => void;
   readonly allowlistBatches: AllowlistBatchRaw[];
-  readonly artworkCommentaryMedia: string[];
+  readonly supportingMedia: string[];
   readonly artworkCommentary: string;
+  readonly aboutArtist: string;
+  readonly previewImage: string;
+  readonly requiresPreviewImage: boolean;
+  readonly previewRequiredMediaType: string | null;
   readonly onBatchesChange: (batches: AllowlistBatchRaw[]) => void;
-  readonly onArtworkCommentaryMediaChange: (media: string[]) => void;
+  readonly onSupportingMediaChange: (media: string[]) => void;
+  readonly onPreviewImageChange: (url: string) => void;
   readonly onArtworkCommentaryChange: (commentary: string) => void;
+  readonly onAboutArtistChange: (aboutArtist: string) => void;
   readonly onBack: () => void;
   readonly onSubmit: () => void;
   readonly isSubmitting: boolean;
@@ -28,12 +43,20 @@ interface AdditionalInfoStepProps {
 const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   airdropEntries,
   onAirdropEntriesChange,
+  paymentInfo,
+  onPaymentInfoChange,
   allowlistBatches,
-  artworkCommentaryMedia,
+  supportingMedia,
   artworkCommentary,
+  aboutArtist,
+  previewImage,
+  requiresPreviewImage,
+  previewRequiredMediaType,
   onBatchesChange,
-  onArtworkCommentaryMediaChange,
+  onSupportingMediaChange,
+  onPreviewImageChange,
   onArtworkCommentaryChange,
+  onAboutArtistChange,
   onBack,
   onSubmit,
   isSubmitting,
@@ -53,11 +76,15 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   const isFormValid = () => {
     // Validate airdrop entries
     const hasInvalidCount = airdropEntries.some(
-      (e) => !Number.isFinite(e.count) || e.count < 0 || !Number.isInteger(e.count)
+      (e) =>
+        !Number.isFinite(e.count) || e.count < 0 || !Number.isInteger(e.count)
     );
     if (hasInvalidCount) return false;
 
-    const totalAllocated = airdropEntries.reduce((sum, e) => sum + (e.count ?? 0), 0);
+    const totalAllocated = airdropEntries.reduce(
+      (sum, e) => sum + (e.count ?? 0),
+      0
+    );
     if (totalAllocated !== AIRDROP_TOTAL) return false;
 
     // Every entry with count > 0 must have a valid address
@@ -68,7 +95,10 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
 
     // Every entry with a valid address must have count > 0
     const hasEntryWithAddressButNoCount = airdropEntries.some(
-      (e) => e.address && validateStrictAddress(e.address) && (!e.count || e.count <= 0)
+      (e) =>
+        e.address &&
+        validateStrictAddress(e.address) &&
+        (!e.count || e.count <= 0)
     );
     if (hasEntryWithAddressButNoCount) return false;
 
@@ -77,6 +107,14 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       (e) => e.address && !validateStrictAddress(e.address)
     );
     if (hasInvalidAddress) return false;
+
+    // Payment address is required
+    if (
+      !paymentInfo.payment_address ||
+      !validateStrictAddress(paymentInfo.payment_address)
+    ) {
+      return false;
+    }
 
     // Check allowlist batches - contract is required if batch exists
     const hasInvalidBatch = allowlistBatches.some(
@@ -90,6 +128,15 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     );
     if (hasInvalidTokenIds) return false;
 
+    // Commentary is required
+    if (!artworkCommentary.trim()) return false;
+
+    // About Artist is required
+    if (!aboutArtist.trim()) return false;
+
+    // If video/HTML submission, require a preview image
+    if (requiresPreviewImage && !previewImage) return false;
+
     return true;
   };
 
@@ -98,16 +145,22 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="tw-flex tw-flex-col tw-h-full tw-max-w-4xl tw-mx-auto tw-pb-8"
+      className="tw-mx-auto tw-flex tw-h-full tw-max-w-4xl tw-flex-col tw-pb-8"
     >
-      <div className="tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-2 tw-space-y-8 tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
+      <div className="tw-flex-1 tw-space-y-12 tw-overflow-y-auto tw-px-4 tw-py-2 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
         <p className="tw-text-sm tw-text-iron-400">
-          Complete the following details for distribution and storytelling purposes.
+          Complete the following details for distribution and storytelling
+          purposes.
         </p>
 
         <AirdropConfig
           entries={airdropEntries}
           onEntriesChange={onAirdropEntriesChange}
+        />
+
+        <PaymentConfig
+          paymentInfo={paymentInfo}
+          onPaymentInfoChange={onPaymentInfoChange}
         />
 
         <AllowlistBatchManager
@@ -124,18 +177,21 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
         />
 
         <AdditionalMediaUpload
-          artworkCommentaryMedia={artworkCommentaryMedia}
+          supportingMedia={supportingMedia}
           artworkCommentary={artworkCommentary}
-          onArtworkCommentaryMediaChange={onArtworkCommentaryMediaChange}
+          aboutArtist={aboutArtist}
+          previewImage={previewImage}
+          requiresPreviewImage={requiresPreviewImage}
+          previewRequiredMediaType={previewRequiredMediaType}
+          onSupportingMediaChange={onSupportingMediaChange}
+          onPreviewImageChange={onPreviewImageChange}
           onArtworkCommentaryChange={onArtworkCommentaryChange}
+          onAboutArtistChange={onAboutArtistChange}
         />
       </div>
 
-      <div className="tw-flex tw-items-center tw-justify-between tw-pt-6 tw-px-4 tw-border-t tw-border-iron-800 tw-mt-auto">
-        <SecondaryButton
-          onClicked={onBack}
-          disabled={isSubmitting}
-        >
+      <div className="tw-mt-auto tw-flex tw-items-center tw-justify-between tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6">
+        <SecondaryButton onClicked={onBack} disabled={isSubmitting}>
           Back
         </SecondaryButton>
         <PrimaryButton
