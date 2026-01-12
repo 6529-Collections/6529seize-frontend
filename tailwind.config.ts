@@ -1,5 +1,10 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
+import forms from "@tailwindcss/forms";
+import scrollbar from "tailwind-scrollbar";
+import containerQueries from "@tailwindcss/container-queries";
+
+export default {
   darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
@@ -158,19 +163,14 @@ module.exports = {
       },
     },
   },
-  variants: {
-    extend: {
-      fontSize: ["placeholder"],
-    },
-  },
   plugins: [
-    require("@tailwindcss/forms")({
+    forms({
       strategy: "class",
     }),
-    require("tailwind-scrollbar")({ nocompatible: true }),
-    require("@tailwindcss/container-queries"),
-    function ({ addVariant }) {
+    scrollbar({ nocompatible: true }),
+    containerQueries,
+    plugin(({ addVariant }) => {
       addVariant("desktop-hover", "@media (hover: hover) and (pointer: fine)");
-    },
+    }),
   ],
-};
+} satisfies Config;
