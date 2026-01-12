@@ -46,13 +46,7 @@ jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () =>
-    ({
-      children,
-      isOpen,
-    }: {
-      children: React.ReactNode;
-      isOpen: boolean;
-    }) =>
+    ({ children, isOpen }: { children: React.ReactNode; isOpen: boolean }) =>
       isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
 );
 

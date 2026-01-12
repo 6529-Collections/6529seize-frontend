@@ -55,7 +55,6 @@ export enum MemeLabSort {
   HIGHEST_OFFER = "Highest Offer",
 }
 
-
 export enum AboutSection {
   MEMES = "the-memes",
   MEME_LAB = "meme-lab",
