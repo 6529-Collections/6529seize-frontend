@@ -43,7 +43,7 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
                 drop={drop}
                 wave={wave}
                 key={drop.id}
-                onDropClick={onDropClick}
+                onDropClick={() => onDropClick(drop)}
               />
             ))}
           </ul>
