@@ -85,12 +85,11 @@ const extractMediaFromMarkdown = (text: string): ProcessedContent => {
   // Break text into segments of text and media
   let lastIndex = 0;
   let match;
-  const workingText = text;
 
-  while ((match = mediaPattern.exec(workingText)) !== null) {
+  while ((match = mediaPattern.exec(text)) !== null) {
     // Add text segment before this match if there is any
     if (match.index > lastIndex) {
-      const textSegment = workingText.substring(lastIndex, match.index);
+      const textSegment = text.substring(lastIndex, match.index);
       if (textSegment.trim()) {
         segments.push({ type: "text", content: textSegment.trim() });
       }
@@ -109,8 +108,8 @@ const extractMediaFromMarkdown = (text: string): ProcessedContent => {
   }
 
   // Add remaining text after last match
-  if (lastIndex < workingText.length) {
-    const textSegment = workingText.substring(lastIndex);
+  if (lastIndex < text.length) {
+    const textSegment = text.substring(lastIndex);
     if (textSegment.trim()) {
       segments.push({ type: "text", content: textSegment.trim() });
     }
