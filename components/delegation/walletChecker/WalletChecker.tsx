@@ -1,6 +1,7 @@
 "use client";
 
 import Address from "@/components/address/Address";
+import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { publicEnv } from "@/config/env";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -10,7 +11,6 @@ import {
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
-import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { fetchUrl } from "@/services/6529api";
 import {
   faCheck,
@@ -64,13 +64,9 @@ export default function WalletCheckerComponent(
   const { address_query, setAddressQuery } = props;
 
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
-  const {
-    inputValue: walletInput,
-    address: walletAddress,
-    handleInputChange: handleWalletInputChange,
-    ensNameQuery: walletAddressEns,
-    ensAddressQuery: walletAddressFromEns,
-  } = useEnsResolution({ initialValue: address_query ?? "", chainId: 1 });
+  const [walletInputValue, setWalletInputValue] = useState(address_query ?? "");
+  const [walletAddress, setWalletAddress] = useState("");
+  const [ensLoading, setEnsLoading] = useState(false);
 
   const [checking, setChecking] = useState(!!address_query);
   const [addressError, setAddressError] = useState(false);
@@ -387,30 +383,11 @@ export default function WalletCheckerComponent(
       return;
     }
 
-    const ensCandidate =
-      walletInput?.split(" - ")[0]?.trim().toLowerCase() ?? "";
-    const isEnsInput = ensCandidate.endsWith(".eth");
+    if (ensLoading) {
+      return;
+    }
 
     if (!walletAddress || !isValidEthAddress(walletAddress)) {
-      if (isEnsInput) {
-        if (walletAddressFromEns.isLoading) {
-          return;
-        }
-
-        if (!walletAddressFromEns.data || walletAddressFromEns.isError) {
-          setFetchedAddress("");
-          setDelegations([]);
-          setDelegationsLoaded(false);
-          setConsolidations([]);
-          setConsolidationsLoaded(false);
-          setConsolidatedWallets([]);
-          setAddressError(true);
-          setChecking(false);
-        }
-
-        return;
-      }
-
       setFetchedAddress("");
       setDelegations([]);
       setDelegationsLoaded(false);
@@ -430,15 +407,7 @@ export default function WalletCheckerComponent(
     setConsolidationsLoaded(false);
     setConsolidations([]);
     setConsolidatedWallets([]);
-  }, [
-    checking,
-    walletAddress,
-    walletInput,
-    walletAddressFromEns.isLoading,
-    walletAddressFromEns.data,
-    walletAddressFromEns.isError,
-    setAddressQuery,
-  ]);
+  }, [checking, walletAddress, ensLoading, setAddressQuery]);
 
   useEffect(() => {
     if (delegationsLoaded && consolidationsLoaded) {
@@ -450,8 +419,7 @@ export default function WalletCheckerComponent(
     checking ||
     !walletAddress ||
     (!isValidEthAddress(walletAddress) && !walletAddress.endsWith(".eth")) ||
-    walletAddressFromEns.isLoading ||
-    walletAddressEns.isLoading;
+    ensLoading;
 
   return (
     <Container className="pt-3 pb-3">
@@ -475,17 +443,18 @@ export default function WalletCheckerComponent(
                 Wallet Address
               </Form.Label>
               <Col sm={12}>
-                <Form.Control
+                <EnsAddressInput
                   disabled={delegationsLoaded || consolidationsLoaded}
                   autoFocus
-                  placeholder={"0x... or ENS"}
-                  className={`${styles["formInput"]}`}
-                  type="text"
-                  value={walletInput}
-                  onChange={(e) => {
-                    handleWalletInputChange(e.target.value);
+                  placeholder="0x... or ENS"
+                  className={styles["formInput"] ?? ""}
+                  value={walletInputValue}
+                  onAddressChange={(addr) => {
+                    setWalletAddress(addr);
                     setAddressError(false);
                   }}
+                  onLoadingChange={setEnsLoading}
+                  onError={setAddressError}
                 />
               </Col>
             </Form.Group>
@@ -503,7 +472,8 @@ export default function WalletCheckerComponent(
               >
                 <Button
                   onClick={() => {
-                    handleWalletInputChange("");
+                    setWalletInputValue("");
+                    setWalletAddress("");
                     setDelegationsLoaded(false);
                     setDelegations([]);
                     setConsolidationsLoaded(false);

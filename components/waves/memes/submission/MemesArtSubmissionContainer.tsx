@@ -1,19 +1,19 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import type { FC } from "react";
-import { motion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { SubmissionStep } from "./types/Steps";
-import AgreementStep from "./steps/AgreementStep";
-import ArtworkStep from "./steps/ArtworkStep";
-import AdditionalInfoStep from "./steps/AdditionalInfoStep";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
+import type { FC } from "react";
+import { useCallback, useEffect } from "react";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
+import AdditionalInfoStep from "./steps/AdditionalInfoStep";
+import AgreementStep from "./steps/AgreementStep";
+import ArtworkStep from "./steps/ArtworkStep";
+import { SubmissionStep } from "./types/Steps";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;
@@ -66,6 +66,13 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   const handleArtworkCommentaryMediaChange = useCallback(
     (media: string[]) => {
       form.setAdditionalMedia({ artwork_commentary_media: media });
+    },
+    [form.setAdditionalMedia]
+  );
+
+  const handlePreviewImageChange = useCallback(
+    (url: string) => {
+      form.setAdditionalMedia({ preview_image: url });
     },
     [form.setAdditionalMedia]
   );
@@ -133,6 +140,25 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       }
     : null;
 
+  const previewRequiredMediaType = (() => {
+    const getMediaTypeLabel = (mimeType: string): string | null => {
+      if (mimeType.startsWith("video/")) return "Video";
+      if (mimeType === "text/html") return "HTML";
+      if (mimeType === "model/gltf-binary") return "GLB";
+      return null;
+    };
+
+    if (form.mediaSource === "upload" && form.selectedFile) {
+      return getMediaTypeLabel(form.selectedFile.type);
+    }
+    if (form.mediaSource === "url" && form.isExternalMediaValid) {
+      return getMediaTypeLabel(form.externalMediaMimeType);
+    }
+    return null;
+  })();
+
+  const requiresPreviewImage = previewRequiredMediaType !== null;
+
   // Map of steps to their corresponding components
   const stepComponents = {
     [SubmissionStep.AGREEMENT]: (
@@ -179,12 +205,22 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       <AdditionalInfoStep
         airdropEntries={form.operationalData.airdrop_config}
         onAirdropEntriesChange={form.setAirdropConfig}
+        paymentInfo={form.operationalData.payment_info}
+        onPaymentInfoChange={form.setPaymentInfo}
         allowlistBatches={form.operationalData.allowlist_batches}
-        artworkCommentaryMedia={form.operationalData.additional_media.artwork_commentary_media}
+        supportingMedia={
+          form.operationalData.additional_media.artwork_commentary_media
+        }
         artworkCommentary={form.operationalData.commentary}
+        aboutArtist={form.operationalData.about_artist}
+        previewImage={form.operationalData.additional_media.preview_image}
+        requiresPreviewImage={requiresPreviewImage}
+        previewRequiredMediaType={previewRequiredMediaType}
         onBatchesChange={form.setAllowlistBatches}
-        onArtworkCommentaryMediaChange={handleArtworkCommentaryMediaChange}
+        onSupportingMediaChange={handleArtworkCommentaryMediaChange}
+        onPreviewImageChange={handlePreviewImageChange}
         onArtworkCommentaryChange={form.setCommentary}
+        onAboutArtistChange={form.setAboutArtist}
         onBack={form.handleBackToArtwork}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
