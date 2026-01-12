@@ -6,6 +6,8 @@ import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
+import ContentDisplay from "@/components/waves/drops/ContentDisplay";
+import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
@@ -32,10 +34,10 @@ const BoostedDropCard = memo(
       ? resolveIpfsUrlSync(drop.author.pfp)
       : null;
 
-    const contentPreview =
-      drop.parts[0]?.content?.slice(0, 100) ?? "View drop...";
-    const truncatedContent =
-      contentPreview.length >= 100 ? `${contentPreview}...` : contentPreview;
+    const previewContent = useMemo(() => {
+      const part = drop.parts[0];
+      return buildProcessedContent(part?.content, part?.media, "View drop...");
+    }, [drop.parts]);
 
     const isBoosted = drop.context_profile_context?.boosted ?? false;
     const canBoost = !!connectedProfile && !drop.id.startsWith("temp-");
@@ -101,9 +103,10 @@ const BoostedDropCard = memo(
                 {drop.author.handle}
               </span>
             </div>
-            <p className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-400">
-              {truncatedContent}
-            </p>
+            <ContentDisplay
+              content={previewContent}
+              className="tw-mt-0.5 tw-text-xs tw-text-iron-400"
+            />
           </div>
 
           {/* Boost count - clickable toggle */}
