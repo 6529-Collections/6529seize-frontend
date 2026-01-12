@@ -144,10 +144,10 @@ export const buildProcessedContent = (
   media: DropMediaInput[] | null | undefined,
   fallbackText: string = "Media"
 ): ProcessedContent => {
-  const apiMedia = (media ?? []).map((item) => ({
+  const apiMedia: MediaItem[] = (media ?? []).map((item) => ({
     alt: "Media",
     url: item.url,
-    type: isVideoMimeType(item.mime_type) ? "video" : "image",
+    type: isVideoMimeType(item.mime_type) ? "video" : ("image" as const),
   }));
 
   if (!content) {
