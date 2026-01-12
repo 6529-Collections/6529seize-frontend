@@ -69,7 +69,6 @@ describe('MemesArtSubmissionContainer', () => {
       setAdditionalMedia: jest.fn(),
       setCommentary: jest.fn(),
       setAboutArtist: jest.fn(),
-      setPaymentInfo: jest.fn(),
       handleBackToArtwork: jest.fn(),
     };
 

@@ -70,27 +70,36 @@ export const transformToApiRequest = (data: {
 
   // Append operational data if provided
   if (operationalData) {
+    const operationalMetadata: ApiDropMetadata[] = [
+      {
+        data_key: "payment_info",
+        data_value: JSON.stringify(operationalData.payment_info),
+      },
+      {
+        data_key: "commentary",
+        data_value: operationalData.commentary,
+      },
+      {
+        data_key: "about_artist",
+        data_value: operationalData.about_artist,
+      },
+    ];
+
     if (
       operationalData.airdrop_config &&
       operationalData.airdrop_config.length > 0
     ) {
-      // Filter out entries with empty addresses before saving
       const validEntries = operationalData.airdrop_config.filter((e) => {
         const trimmedAddress = e.address?.trim() ?? "";
         return validateStrictAddress(trimmedAddress) && e.count > 0;
       });
       if (validEntries.length > 0) {
-        metadata.push({
+        operationalMetadata.push({
           data_key: "airdrop_config",
           data_value: JSON.stringify(validEntries),
         });
       }
     }
-
-    metadata.push({
-      data_key: "payment_info",
-      data_value: JSON.stringify(operationalData.payment_info),
-    });
 
     if (
       operationalData.allowlist_batches &&
@@ -102,28 +111,20 @@ export const transformToApiRequest = (data: {
           token_ids: batch.token_ids_raw || "",
         })
       );
-      metadata.push({
+      operationalMetadata.push({
         data_key: "allowlist_batches",
         data_value: JSON.stringify(processedBatches),
       });
     }
 
     if (operationalData.additional_media) {
-      metadata.push({
+      operationalMetadata.push({
         data_key: "additional_media",
         data_value: JSON.stringify(operationalData.additional_media),
       });
     }
 
-    metadata.push({
-      data_key: "commentary",
-      data_value: operationalData.commentary,
-    });
-
-    metadata.push({
-      data_key: "about_artist",
-      data_value: operationalData.about_artist,
-    });
+    metadata.push(...operationalMetadata);
   }
 
   // Create the request object
