@@ -2,11 +2,9 @@
 module.exports = {
   darkMode: "class",
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
-
-    // Or if using `src` directory:
-    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   prefix: "tw-",
   corePlugins: {
@@ -28,7 +26,6 @@ module.exports = {
         md: ["0.9375rem", "24px"],
       },
       colors: {
-        "primary-200": "#84ADFF",
         "primary-300": "#84ADFF",
         "primary-400": "#528BFF",
         "primary-500": "#406AFE",
@@ -81,83 +78,84 @@ module.exports = {
           "50%": {
             "background-position": "100% 50%",
           },
-          '100%': { 
-            'background-position': '0% 50%'
-          }
-        },
-        'gradient-x': {
-          '0%, 100%': {
-            'background-position': '0% 50%'
+          "100%": {
+            "background-position": "0% 50%",
           },
-          '50%': {
-            'background-position': '100% 50%'
-          }
         },
-        'fadeIn': {
-          '0%': { 
-            opacity: '0'
+        "gradient-x": {
+          "0%, 100%": {
+            "background-position": "0% 50%",
           },
-          '100%': { 
-            opacity: '1'
-          }
-        },
-        'slideUp': {
-          '0%': { 
-            opacity: '0',
-            transform: 'translateY(20px)'
+          "50%": {
+            "background-position": "100% 50%",
           },
-          '100%': { 
-            opacity: '1',
-            transform: 'translateY(0)'
-          }
         },
-        'slideDown': {
-          '0%': { 
-            opacity: '1',
-            transform: 'translateY(0)'
+        fadeIn: {
+          "0%": {
+            opacity: "0",
           },
-          '100%': { 
-            opacity: '0',
-            transform: 'translateY(20px)'
-          }
-        },
-        'shake': {
-          '0%, 100%': { transform: 'translateX(0)' },
-          '20%, 60%': { transform: 'translateX(-4px)' },
-          '40%, 80%': { transform: 'translateX(4px)' }
-        },
-        'gallery-reveal': {
-          '0%': { 
-            opacity: '0.7',
-            transform: 'translateY(4px) perspective(1000px) rotateX(2deg)'
+          "100%": {
+            opacity: "1",
           },
-          '100%': { 
-            opacity: '1',
-            transform: 'translateY(0) perspective(1000px) rotateX(0)'
-          }
         },
-        'fade-in-out': {
-          '0%': { opacity: '0.8' },
-          '100%': { opacity: '0.4' }
+        slideUp: {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        slideDown: {
+          "0%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+          "100%": {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+        },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%, 60%": { transform: "translateX(-4px)" },
+          "40%, 80%": { transform: "translateX(4px)" },
+        },
+        "gallery-reveal": {
+          "0%": {
+            opacity: "0.7",
+            transform: "translateY(4px) perspective(1000px) rotateX(2deg)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0) perspective(1000px) rotateX(0)",
+          },
+        },
+        "fade-in-out": {
+          "0%": { opacity: "0.8" },
+          "100%": { opacity: "0.4" },
         },
       },
       animation: {
-        'loading-bar': 'loading-bar 1.5s infinite',
-        'trophy-appear': 'trophy-appear 0.3s ease-out forwards',
-        'gradient-shift': 'gradient-shift 8s ease infinite',
-        'gradient-x': 'gradient-x 3s ease infinite',
-        'spin-slow': 'spin 15s linear infinite',
-        'fadeIn': 'fadeIn 0.3s ease-out forwards',
-        'slideUp': 'slideUp 0.3s ease-out forwards',
-        'slideDown': 'slideDown 0.3s ease-out forwards',
-        'shake': 'shake 0.3s ease-in-out',
-        'gallery-reveal': 'gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
-        'fade-in-out': 'fade-in-out 2s ease-in-out infinite alternate'
+        "loading-bar": "loading-bar 1.5s infinite",
+        "trophy-appear": "trophy-appear 0.3s ease-out forwards",
+        "gradient-shift": "gradient-shift 8s ease infinite",
+        "gradient-x": "gradient-x 3s ease infinite",
+        "spin-slow": "spin 15s linear infinite",
+        fadeIn: "fadeIn 0.3s ease-out forwards",
+        slideUp: "slideUp 0.3s ease-out forwards",
+        slideDown: "slideDown 0.3s ease-out forwards",
+        shake: "shake 0.3s ease-in-out",
+        "gallery-reveal":
+          "gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+        "fade-in-out": "fade-in-out 2s ease-in-out infinite alternate",
       },
       backgroundSize: {
-        'gradient-pos': '200% 200%',
-        '200': '200% 200%'
-      }
+        "gradient-pos": "200% 200%",
+        200: "200% 200%",
+      },
     },
   },
   variants: {
