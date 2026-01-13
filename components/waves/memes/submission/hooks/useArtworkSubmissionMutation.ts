@@ -160,7 +160,6 @@ export const transformToApiRequest = (data: {
 interface PhaseChangeCallbacks {
   onPhaseChange?:
     | ((phase: SubmissionPhase, error?: string) => void)
-    | undefined
     | undefined;
 }
 
@@ -286,7 +285,6 @@ export function useArtworkSubmissionMutation() {
       onError?: ((error: Error) => void) | undefined;
       onPhaseChange?:
         | ((phase: SubmissionPhase, error?: string) => void)
-        | undefined
         | undefined;
     }
   ) => {

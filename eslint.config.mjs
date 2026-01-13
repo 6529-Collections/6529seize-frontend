@@ -383,10 +383,7 @@ const rules = {
 
   // Complexity limits
   "max-depth": ["off", 4],
-  "max-lines": [
-    "off",
-    { max: 750, skipBlankLines: true, skipComments: true },
-  ],
+  "max-lines": ["off", { max: 750, skipBlankLines: true, skipComments: true }],
   "max-lines-per-function": [
     "off",
     { max: 150, skipBlankLines: true, skipComments: true },
@@ -428,7 +425,8 @@ export default defineConfig([
     "*.tsx",
     "scripts/**",
     "stubs/**",
-    ".claude/**"
+    ".claude/**",
+    ".codex/**",
   ]),
 
   // Base config with Next.js rules

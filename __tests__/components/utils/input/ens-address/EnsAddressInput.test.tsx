@@ -170,18 +170,24 @@ describe("EnsAddressInput", () => {
     );
   });
 
-  it("calls setInputValue when value prop changes", () => {
+  it("passes value prop as initialValue to useEnsResolution", () => {
     const { rerender } = render(
       <EnsAddressInput onAddressChange={mockOnAddressChange} value="initial" />
     );
 
-    expect(mockSetInputValue).toHaveBeenCalledWith("initial");
+    expect(mockUseEnsResolution).toHaveBeenCalledWith({
+      initialValue: "initial",
+      chainId: 1,
+    });
 
     rerender(
-      <EnsAddressInput onAddressChange={mockOnAddressChange} value="" />
+      <EnsAddressInput onAddressChange={mockOnAddressChange} value="updated" />
     );
 
-    expect(mockSetInputValue).toHaveBeenCalledWith("");
+    expect(mockUseEnsResolution).toHaveBeenCalledWith({
+      initialValue: "updated",
+      chainId: 1,
+    });
   });
 
   it("displays resolved ENS with address format", () => {

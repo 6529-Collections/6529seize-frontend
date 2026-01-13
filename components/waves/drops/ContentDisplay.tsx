@@ -4,8 +4,9 @@ import MediaThumbnail from "./MediaThumbnail";
 
 interface ContentDisplayProps {
   readonly content: ProcessedContent;
-  readonly onReplyClick: (serialNo: number) => void;
-  readonly serialNo?: number | undefined;
+  readonly onClick?: () => void;
+  readonly className?: string | undefined;
+  readonly textClassName?: string | undefined;
 }
 
 /**
@@ -13,21 +14,23 @@ interface ContentDisplayProps {
  */
 export default function ContentDisplay({
   content,
-  onReplyClick,
-  serialNo,
+  onClick,
+  className,
+  textClassName,
 }: ContentDisplayProps) {
-  const handleClick = () => {
-    if (serialNo) {
-      onReplyClick(serialNo);
-    }
-  };
+  const containerClasses = [
+    "tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5 tw-line-clamp-1",
+    onClick
+      ? "tw-cursor-pointer hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+      : "",
+    className ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <span
-      className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-gap-1.5 tw-line-clamp-1"
-      onClick={handleClick}
-    >
-      <span className="tw-line-clamp-1">
+    <span className={containerClasses} onClick={onClick}>
+      <span className={`tw-line-clamp-1 ${textClassName ?? ""}`}>
         {/* Render segments in their original order */}
         {content.segments.map((segment, i) => (
           <ContentSegmentComponent
