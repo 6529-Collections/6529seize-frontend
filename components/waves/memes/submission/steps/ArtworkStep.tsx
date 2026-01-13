@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import type { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "@/components/waves/memes/MemesArtSubmissionFile";
-import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
-import type { SubmissionPhase } from "../ui/SubmissionProgress";
-import SubmissionProgress from "../ui/SubmissionProgress";
-import { useTraitsValidation } from "../validation";
+import React, { useCallback, useMemo } from "react";
 import type {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
 } from "../constants/media";
+import ArtworkDetails from "../details/ArtworkDetails";
+import type { TraitsData } from "../types/TraitsData";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
+import SubmissionProgress from "../ui/SubmissionProgress";
+import { useTraitsValidation } from "../validation";
 
 /**
  * Required fields for submission
@@ -300,36 +300,36 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col tw-h-full">
-      {/* Scrollable form content */}
-      <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-relative">
-        <div className="tw-relative tw-flex tw-gap-x-8 tw-gap-y-6 tw-flex-col lg:tw-flex-row tw-w-full">
-          <div className="tw-px-4 md:tw-px-8 lg:tw-pr-0 tw-w-full lg:tw-w-1/2">
-            {/* File Selection Component - Sticky within scrollable area */}
-            <div className="tw-sticky tw-top-0 tw-h-[calc(100vh-14rem)]">
-              <MemesArtSubmissionFile
-                artworkUploaded={artworkUploaded}
-                artworkUrl={artworkUrl}
-                setArtworkUploaded={setArtworkUploaded}
-                handleFileSelect={handleFileSelect}
-                mediaSource={mediaSource}
-                setMediaSource={setMediaSource}
-                externalHash={externalHash}
-                externalProvider={externalProvider}
-                externalConstructedUrl={externalConstructedUrl}
-                externalPreviewUrl={externalPreviewUrl}
-                externalMimeType={externalMimeType}
-                externalError={externalError}
-                externalValidationStatus={externalValidationStatus}
-                isExternalMediaValid={isExternalMediaValid}
-                onExternalHashChange={onExternalHashChange}
-                onExternalProviderChange={onExternalProviderChange}
-                onExternalMimeTypeChange={onExternalMimeTypeChange}
-                onClearExternalMedia={onClearExternalMedia}
-              />
-            </div>
+      {/* Two-column layout */}
+      <div className="tw-flex-1 tw-flex tw-flex-col lg:tw-flex-row tw-w-full tw-overflow-hidden">
+        {/* Left column - scrollable independently */}
+        <div className="tw-pl-4 tw-pr-2 md:tw-pl-8 md:tw-pr-4 tw-w-full lg:tw-w-1/2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+          <div className="tw-h-[calc(100vh-14rem)]">
+            <MemesArtSubmissionFile
+              artworkUploaded={artworkUploaded}
+              artworkUrl={artworkUrl}
+              setArtworkUploaded={setArtworkUploaded}
+              handleFileSelect={handleFileSelect}
+              mediaSource={mediaSource}
+              setMediaSource={setMediaSource}
+              externalHash={externalHash}
+              externalProvider={externalProvider}
+              externalConstructedUrl={externalConstructedUrl}
+              externalPreviewUrl={externalPreviewUrl}
+              externalMimeType={externalMimeType}
+              externalError={externalError}
+              externalValidationStatus={externalValidationStatus}
+              isExternalMediaValid={isExternalMediaValid}
+              onExternalHashChange={onExternalHashChange}
+              onExternalProviderChange={onExternalProviderChange}
+              onExternalMimeTypeChange={onExternalMimeTypeChange}
+              onClearExternalMedia={onClearExternalMedia}
+            />
           </div>
+        </div>
 
-          <div className="tw-px-4 md:tw-px-8 lg:tw-pl-0 tw-full lg:tw-w-1/2 tw-flex tw-flex-col tw-gap-y-6 tw-pb-6">
+        {/* Right column - scrollable independently */}
+        <div className="tw-pl-2 tw-pr-4 md:tw-pl-4 md:tw-pr-8 tw-w-full lg:tw-w-1/2 tw-flex tw-flex-col tw-gap-y-6 tw-pb-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
             {/* Artwork Title and Description */}
             <ArtworkDetails
               title={traits.title}
@@ -350,7 +350,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
               onFieldBlur={handleFieldBlur}
             />
           </div>
-        </div>
       </div>
 
       {/* Action Buttons - Fixed at bottom */}
