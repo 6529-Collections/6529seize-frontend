@@ -11,7 +11,7 @@ import type {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject } from "react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import BoostedDropCard from "./BoostedDropCard";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
@@ -127,28 +127,58 @@ const DropsList = memo(
       scrollContainerRef,
     ]);
 
-    // Pre-compute boost card positions from BOTTOM (newest) of the list
-    // orderedDrops[0] = oldest (top), orderedDrops[last] = newest (bottom)
-    // User scrolls UP from bottom, so positions count from bottom
-    const boostCardAtIndex = useMemo(() => {
-      const map = new Map<number, number>();
-      if (!boostedDrops || boostedDrops.length === 0 || !onBoostedDropClick) {
-        return map;
-      }
+    // Store the serial_no of drops that boosted cards should appear BEFORE
+    // Set once when boosted drops first arrive, then stays fixed
+    // This makes boosted cards scroll away with new drops, but stay anchored when loading history
+    const [boostAnchors, setBoostAnchors] = useState<number[] | null>(null);
+
+    // Adjust state during render (React-recommended pattern for derived state)
+    // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+    if (
+      boostAnchors === null &&
+      boostedDrops &&
+      boostedDrops.length > 0 &&
+      orderedDrops.length > 0
+    ) {
+      // Calculate anchor serial_nos based on current positions from bottom
+      const anchors: number[] = [];
       for (
         let b = 0;
         b < boostedDrops.length && b < BOOST_CARD_POSITIONS.length;
         b++
       ) {
         const posFromBottom = BOOST_CARD_POSITIONS[b] ?? 0;
-        // Position 5 from bottom = orderedDrops.length - 5
         const index = orderedDrops.length - posFromBottom;
         if (index >= 0 && index < orderedDrops.length) {
+          anchors.push(orderedDrops[index]!.serial_no);
+        }
+      }
+      setBoostAnchors(anchors);
+    }
+
+    // Pre-compute boost card positions by finding anchor drops
+    // orderedDrops[0] = oldest (top), orderedDrops[last] = newest (bottom)
+    const boostCardAtIndex = useMemo(() => {
+      const map = new Map<number, number>();
+      if (!boostedDrops || boostedDrops.length === 0 || !onBoostedDropClick) {
+        return map;
+      }
+      if (!boostAnchors) {
+        return map; // Not initialized yet
+      }
+
+      // Find each anchor's current index and map it
+      for (let b = 0; b < boostAnchors.length; b++) {
+        const anchorSerialNo = boostAnchors[b];
+        const index = orderedDrops.findIndex(
+          (d) => d.serial_no === anchorSerialNo
+        );
+        if (index >= 0) {
           map.set(index, b);
         }
       }
       return map;
-    }, [boostedDrops, onBoostedDropClick, orderedDrops.length]);
+    }, [boostedDrops, onBoostedDropClick, boostAnchors, orderedDrops]);
 
     const renderBoostCard = useCallback(
       (index: number): React.ReactNode => {
