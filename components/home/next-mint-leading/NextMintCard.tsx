@@ -5,10 +5,30 @@ import ProfileAvatar, {
 } from "@/components/common/profile/ProfileAvatar";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ImageScale } from "@/helpers/image.helpers";
 
 interface NextMintCardProps {
   readonly drop: ApiDrop;
 }
+
+const formatDropTimestamp = (timestamp: number): string | null => {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const dateLabel = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+  const timeLabel = new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+
+  return `${dateLabel} · ${timeLabel}`;
+};
 
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
   const media = drop.parts[0]?.media[0];
@@ -17,44 +37,54 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Untitled";
   const author = drop.author;
+  const timestamp = formatDropTimestamp(drop.created_at);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-900 tw-transition-transform tw-duration-200 hover:tw-scale-[1.01]">
-      {/* Badge */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-bg-iron-800/50 tw-px-3 tw-py-2">
-        <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-          Next mint
-        </span>
-      </div>
-
-      {/* Image */}
-      <div className="tw-aspect-square tw-w-full tw-overflow-hidden">
-        {media ? (
-          <DropListItemContentMedia
-            media_mime_type={media.mime_type}
-            media_url={media.url}
-          />
-        ) : (
-          <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-800">
-            <span className="tw-text-iron-500">No image</span>
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="tw-p-3">
-        <h3 className="tw-m-0 tw-truncate tw-text-base tw-font-semibold tw-text-iron-50">
-          {title}
-        </h3>
-        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-          <ProfileAvatar
-            pfpUrl={author.pfp}
-            alt={author.handle ?? "Artist"}
-            size={ProfileBadgeSize.SMALL}
-          />
-          <span className="tw-truncate tw-text-sm tw-text-iron-400">
-            {author.handle ?? "Anonymous"}
+    <div className="tw-group tw-flex tw-flex-col tw-gap-4 tw-text-left tw-transition-all tw-duration-300">
+      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-[#0c0c0c] tw-transition-colors group-hover:tw-border-white/10">
+        <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/5 tw-bg-[#111111] tw-px-3 tw-py-2">
+          <span className="tw-text-xs tw-font-normal tw-tracking-wide tw-text-white/60">
+            Next mint
           </span>
+          {timestamp && (
+            <span className="tw-font-mono tw-text-xs tw-text-white/50">
+              {timestamp}
+            </span>
+          )}
+        </div>
+        <div className="tw-relative tw-flex tw-w-full tw-aspect-[3/4] tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-3">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
+            {media ? (
+              <DropListItemContentMedia
+                media_mime_type={media.mime_type}
+                media_url={media.url}
+                imageObjectPosition="center"
+                imageScale={ImageScale.AUTOx600}
+              />
+            ) : (
+              <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">
+                <span className="tw-text-sm tw-text-white/40">No image</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="tw-flex tw-flex-col tw-gap-3">
+        <div>
+          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80">
+            {title}
+          </h3>
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
+            <ProfileAvatar
+              pfpUrl={author.pfp}
+              alt={author.handle ?? "Artist"}
+              size={ProfileBadgeSize.SMALL}
+            />
+            <span className="tw-truncate tw-text-xs tw-text-white/50">
+              {author.handle ?? "Anonymous"}
+            </span>
+          </div>
         </div>
       </div>
     </div>

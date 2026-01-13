@@ -24,7 +24,8 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
         <NowMintingHeader
           cardNumber={nft.id}
           title={nft.name}
-          artistHandle={nft.artist_seize_handle || nft.artist}
+          artistHandle={nft.artist_seize_handle}
+          artistName={nft.artist}
         />
         <NowMintingStatsGrid
           nftId={nft.id}

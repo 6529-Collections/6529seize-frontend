@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
 import { ExploreWaveCard } from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 
@@ -39,32 +38,27 @@ export function ExploreWavesSection() {
   }
 
   return (
-    <section className="tw-py-8">
-      {/* Header */}
-      <div className="tw-mb-6 tw-flex tw-items-start tw-justify-between tw-gap-4">
-        <div>
-          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+    <section className="tw-py-16 tw-border-t tw-border-iron-900 tw-border-solid tw-border-x-0 tw-border-b-0 -tw-mx-8">
+      <div className="tw-px-8">
+        <div className="tw-mb-10 tw-flex tw-flex-col tw-items-center tw-gap-2">
+          <span className="tw-text-3xl tw-text-center tw-font-bold tw-text-white/95">
             Explore waves
-          </h2>
-          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+          </span>
+          <p className="tw-text-sm tw-text-center tw-text-iron-600">
             Browse channels—jump into the conversation.
           </p>
         </div>
-        <Link
-          href="/discover"
-          className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-50"
-        >
-          View all
-        </Link>
-      </div>
 
-      {/* Grid */}
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-5">
-        {isLoading
-          ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
-              <ExploreWaveCardSkeleton key={`skeleton-${index}`} />
-            ))
-          : waves?.map((wave) => <ExploreWaveCard key={wave.id} wave={wave} />)}
+        {/* Grid */}
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-5">
+          {isLoading
+            ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
+                <ExploreWaveCardSkeleton key={`skeleton-${index}`} />
+              ))
+            : waves?.map((wave) => (
+                <ExploreWaveCard key={wave.id} wave={wave} />
+              ))}
+        </div>
       </div>
     </section>
   );

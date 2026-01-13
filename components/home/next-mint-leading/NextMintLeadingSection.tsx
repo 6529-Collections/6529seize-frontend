@@ -6,6 +6,8 @@ import {
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { LeadingCard } from "./LeadingCard";
 import { NextMintCard } from "./NextMintCard";
 
@@ -37,13 +39,32 @@ export function NextMintLeadingSection() {
     return null;
   }
 
+  const sectionClassName = "tw-relative tw-z-10 tw-pb-8 tw-pt-16";
+  const header = (
+    <div className="tw-mb-8 tw-flex tw-items-end tw-justify-between">
+      <span className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
+        Next mint and what&apos;s leading
+      </span>
+      <Link
+        href="/waves"
+        className="tw-inline-flex tw-items-center tw-gap-1 tw-no-underline tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50"
+      >
+        <span>View all</span>
+        <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />
+      </Link>
+    </div>
+  );
+
   if (isFetching && !nextMint && leading.length === 0) {
     return (
-      <div className="tw-py-8">
-        <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
-          <div className="tw-text-sm tw-text-iron-500">Loading...</div>
+      <section className={sectionClassName}>
+        <div>
+          {header}
+          <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
+            <div className="tw-text-sm tw-text-white/40">Loading...</div>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -52,29 +73,15 @@ export function NextMintLeadingSection() {
   }
 
   return (
-    <section className="tw-py-8">
-      {/* Header */}
-      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
-        <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
-          Next mint and what&apos;s leading
-        </h2>
-        <a
-          href="/waves"
-          className="tw-text-sm tw-text-iron-400 tw-transition-colors hover:tw-text-iron-200"
-        >
-          View all →
-        </a>
-      </div>
-
-      {/* Grid - 3 equal columns */}
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
-        {/* Next Mint */}
-        {nextMint && <NextMintCard drop={nextMint} />}
-
-        {/* Leading cards */}
-        {leading.map((drop, index) => (
-          <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
-        ))}
+    <section className={sectionClassName}>
+      <div>
+        {header}
+        <div className="tw-grid tw-grid-cols-1 tw-gap-8 md:tw-grid-cols-3">
+          {nextMint && <NextMintCard drop={nextMint} />}
+          {leading.map((drop, index) => (
+            <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
+          ))}
+        </div>
       </div>
     </section>
   );

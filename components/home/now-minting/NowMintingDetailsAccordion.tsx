@@ -24,8 +24,8 @@ export default function NowMintingDetailsAccordion({
   ];
 
   return (
-    <details className="tw-group">
-      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-start tw-gap-2 tw-py-2 tw-text-sm tw-text-iron-300">
+    <details className="tw-group tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4">
+      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-start tw-gap-2 tw-py-2 tw-font-medium tw-text-sm tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-300">
         <span>Technical Details</span>
         <svg
           className="tw-size-4 tw-transition-transform group-open:tw-rotate-180"
@@ -41,7 +41,7 @@ export default function NowMintingDetailsAccordion({
           />
         </svg>
       </summary>
-      <div className="tw-mt-2 tw-border-t tw-border-iron-700 tw-pt-4">
+      <div className="tw-mt-4">
         <div className="tw-space-y-3 tw-text-sm">
           {details.map(({ label, value }) => (
             <div key={label} className="tw-flex tw-justify-between">

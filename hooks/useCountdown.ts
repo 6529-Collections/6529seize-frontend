@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef } from "react";
 import {
   formatCountdown,
   formatCountdownAdaptive,
+  formatCountdownVerbose,
 } from "@/utils/timeFormatters";
 
 /**
@@ -123,4 +124,47 @@ export function useCountdownAdaptive(targetTimestampSeconds: number): string {
 
   // ✅ Calculate display during rendering (not in effect)
   return formatCountdownAdaptive(targetTimestampSeconds);
+}
+
+/**
+ * Hook that provides verbose countdown text with labels (days/hours/minutes/seconds).
+ * @param targetTimestampSeconds Future timestamp in SECONDS (Unix timestamp)
+ * @returns Formatted string that updates every second
+ */
+export function useCountdownVerbose(targetTimestampSeconds: number): string {
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const targetMs = targetTimestampSeconds * 1000;
+
+    const scheduleNextTick = () => {
+      const now = Date.now();
+      const msUntilNextSecond = 1000 - (now % 1000);
+      timerRef.current = setTimeout(tick, msUntilNextSecond);
+    };
+
+    const tick = () => {
+      forceUpdate();
+
+      if (Date.now() >= targetMs) {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = null;
+        return;
+      }
+
+      scheduleNextTick();
+    };
+
+    if (Date.now() < targetMs) {
+      scheduleNextTick();
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+  }, [targetTimestampSeconds]);
+
+  return formatCountdownVerbose(targetTimestampSeconds);
 }
