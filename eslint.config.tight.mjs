@@ -432,6 +432,8 @@ export default defineConfig([
     "*.tsx",
     "scripts/**",
     "stubs/**",
+    ".claude/**",
+    ".codex/**",
   ]),
 
   // Base config with Next.js rules
