@@ -19,6 +19,8 @@ import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton
 import { ImageScale } from "@/helpers/image.helpers";
 import Download from "@/components/download/Download";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import { parseIpfsUrl } from "@/helpers/Helpers";
+import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import { VotingModal, MobileVotingModal } from "@/components/voting";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
@@ -70,6 +72,28 @@ export const MemesSingleWaveDropInfoPanel = ({
     () => (artworkMedia?.url ? getFileInfoFromUrl(artworkMedia.url) : null),
     [artworkMedia?.url]
   );
+
+  const previewImageData = useMemo(() => {
+    const additionalMediaEntry = drop.metadata?.find(
+      (m) => m.data_key === MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA
+    );
+    if (!additionalMediaEntry?.data_value) return null;
+
+    try {
+      const parsed = JSON.parse(additionalMediaEntry.data_value) as {
+        preview_image?: string;
+      };
+      if (!parsed?.preview_image) return null;
+
+      const url = parseIpfsUrl(parsed.preview_image);
+      const info = getFileInfoFromUrl(url);
+      if (!info) return null;
+
+      return { url, fileInfo: info };
+    } catch {
+      return null;
+    }
+  }, [drop.metadata]);
 
   const fileName = useMemo(() => {
     let name = title;
@@ -182,23 +206,46 @@ export const MemesSingleWaveDropInfoPanel = ({
             <SingleWaveDropInfoDetails drop={drop} />
             <WaveDropAdditionalInfo drop={drop} />
 
-            {artworkMedia && fileInfo && (
-              <div className="tw-flex tw-items-center tw-gap-x-3 tw-border-t tw-border-iron-800 tw-pt-8 tw-border-x-0 tw-border-solid tw-border-b-0 tw-mt-8">
-                <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                  Media Type:{" "}
-                  <span className="tw-text-iron-400">
-                    {fileInfo.extension.toUpperCase()}
-                  </span>
-                </span>
-                <Download
-                  href={artworkMedia.url}
-                  name={fileName ?? fileInfo.name}
-                  extension={fileInfo.extension}
-                  variant="text"
-                  alwaysShowText
-                />
+            {(artworkMedia && fileInfo) || previewImageData ? (
+              <div className="tw-mt-8 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-800 tw-pt-8">
+                <div className="tw-inline-grid tw-grid-cols-[auto_auto_auto] tw-items-center tw-gap-x-3 tw-gap-y-2">
+                  {artworkMedia && fileInfo && (
+                    <>
+                      <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                        Media Type:
+                      </span>
+                      <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                        {fileInfo.extension.toUpperCase()}
+                      </span>
+                      <Download
+                        href={artworkMedia.url}
+                        name={fileName ?? fileInfo.name}
+                        extension={fileInfo.extension}
+                        variant="text"
+                        alwaysShowText
+                      />
+                    </>
+                  )}
+                  {previewImageData && (
+                    <>
+                      <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                        Preview:
+                      </span>
+                      <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                        {previewImageData.fileInfo.extension.toUpperCase()}
+                      </span>
+                      <Download
+                        href={previewImageData.url}
+                        name={`${fileName ?? "preview"}-preview`}
+                        extension={previewImageData.fileInfo.extension}
+                        variant="text"
+                        alwaysShowText
+                      />
+                    </>
+                  )}
+                </div>
               </div>
-            )}
+            ) : null}
 
             {canDelete && drop.drop_type !== ApiDropType.Winner && (
               <WaveDropDeleteButton drop={drop} />
