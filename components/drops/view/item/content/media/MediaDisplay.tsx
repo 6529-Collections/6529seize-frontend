@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
-// Import the media display components
 import MediaDisplayImage from "./MediaDisplayImage";
 import { ImageScale } from "@/helpers/image.helpers";
 import MediaDisplayVideo from "./MediaDisplayVideo";
@@ -25,17 +24,23 @@ const MediaDisplayGLB = dynamic(() => import("./MediaDisplayGLB"), {
  * A component to display media content without interactive modal functionality.
  * Identical to DropListItemContentMedia but without art viewing modal functionality.
  * Use this when you want to simply display media in a container that has its own click behavior.
+ *
+ * When previewImageUrl is provided, it will be shown instead of the original media
+ * for non-image media types (video, audio, HTML, GLB). This is useful for showing
+ * static preview images in gallery/thumbnail contexts.
  */
 export default function MediaDisplay({
   media_mime_type,
   media_url,
   disableMediaInteraction = false,
   imageScale = ImageScale.AUTOx600,
+  previewImageUrl,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
-  readonly disableMediaInteraction?: boolean | undefined; // Set to true in gallery context to disable all media interaction (controls and click handlers)
+  readonly disableMediaInteraction?: boolean | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly previewImageUrl?: string | null | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -62,6 +67,10 @@ export default function MediaDisplay({
   };
 
   const mediaType = getMediaType();
+
+  if (previewImageUrl && mediaType !== MediaType.IMAGE) {
+    return <MediaDisplayImage src={previewImageUrl} imageScale={imageScale} />;
+  }
 
   switch (mediaType) {
     case MediaType.IMAGE:
