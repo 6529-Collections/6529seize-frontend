@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -42,7 +42,7 @@ export default function WaveDropReply({
 
     return (
       <div className="tw-flex tw-gap-x-1.5">
-        <div className="tw-relative tw-z-10 tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800 tw-overflow-hidden">
+        <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
           {drop.author.pfp ? (
             <Image
               src={resolveIpfsUrlSync(drop.author.pfp)}
@@ -59,14 +59,13 @@ export default function WaveDropReply({
           <p className="tw-mb-0 tw-flex xl:tw-pr-24">
             <Link
               href={`/${drop.author.handle}`}
-              className="tw-no-underline tw-mr-1 tw-text-sm tw-font-medium tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-mr-1 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
             >
               {drop.author.handle}
             </Link>
             <ContentDisplay
               content={content}
-              onReplyClick={onReplyClick}
-              serialNo={drop?.serial_no}
+              onClick={() => onReplyClick(drop.serial_no)}
             />
           </p>
         </div>
@@ -75,9 +74,9 @@ export default function WaveDropReply({
   };
 
   return (
-    <div className="tw-mb-3 tw-relative" data-text-selection-exclude="true">
+    <div className="tw-relative tw-mb-3" data-text-selection-exclude="true">
       <div
-        className="tw-absolute tw-top-2.5 tw-left-5 tw-border-iron-700 tw-border-0 tw-border-solid tw-border-t-[1.5px] tw-border-l-[1.5px] tw-cursor-pointer tw-w-6 tw-rounded-tl-[12px]"
+        className="tw-absolute tw-left-5 tw-top-2.5 tw-w-6 tw-cursor-pointer tw-rounded-tl-[12px] tw-border-0 tw-border-l-[1.5px] tw-border-t-[1.5px] tw-border-solid tw-border-iron-700"
         style={{ height: "calc(100% - 3px)" }}
       ></div>
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">

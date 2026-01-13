@@ -1,6 +1,31 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, fireEvent } from "@testing-library/react";
 import PaymentConfig from "@/components/waves/memes/submission/components/PaymentConfig";
+
+let mockOnAddressChange: ((address: string) => void) | undefined;
+let mockValue: string | undefined;
+
+jest.mock(
+  "@/components/utils/input/ens-address/EnsAddressInput",
+  () =>
+    function MockEnsAddressInput(props: {
+      value?: string;
+      placeholder?: string;
+      onAddressChange: (address: string) => void;
+      className?: string;
+    }) {
+      mockOnAddressChange = props.onAddressChange;
+      mockValue = props.value;
+      return (
+        <input
+          data-testid="ens-address-input"
+          placeholder={props.placeholder}
+          value={props.value ?? ""}
+          onChange={(e) => props.onAddressChange(e.target.value)}
+          className={props.className}
+        />
+      );
+    }
+);
 
 describe("PaymentConfig", () => {
   const defaultProps = {
@@ -21,8 +46,7 @@ describe("PaymentConfig", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onPaymentInfoChange when address is updated", async () => {
-    const user = userEvent.setup();
+  it("calls onPaymentInfoChange when address is updated", () => {
     const onPaymentInfoChange = jest.fn();
     render(
       <PaymentConfig
@@ -32,9 +56,13 @@ describe("PaymentConfig", () => {
     );
 
     const input = screen.getByPlaceholderText(/0x.*or ENS/i);
-    await user.type(input, "0x1234567890123456789012345678901234567890");
+    fireEvent.change(input, {
+      target: { value: "0x1234567890123456789012345678901234567890" },
+    });
 
-    expect(onPaymentInfoChange).toHaveBeenCalled();
+    expect(onPaymentInfoChange).toHaveBeenCalledWith({
+      payment_address: "0x1234567890123456789012345678901234567890",
+    });
   });
 
   it("shows pre-populated value", () => {

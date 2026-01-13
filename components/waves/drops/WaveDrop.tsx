@@ -394,7 +394,7 @@ const WaveDrop = ({
             <div
               className={`tw-w-full ${
                 shouldGroupWithPreviousDrop && !isProfileView
-                  ? "tw-ml-[3.25rem]"
+                  ? "tw-pl-[3.25rem]"
                   : ""
               }`}
             >

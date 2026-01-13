@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiFetch } from "@/services/api/common-api";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
-import type {
-  ProcessedContent} from "./media-utils";
-import {
-  isVideoMimeType,
-  processContent,
-} from "./media-utils";
+import type { ProcessedContent } from "./media-utils";
+import { buildProcessedContent } from "./media-utils";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 interface UseDropContentResult {
   drop: ApiDrop | null;
@@ -43,9 +39,8 @@ export const useDropContent = (
     enabled: !maybeDrop,
   });
 
-  // Process content from drop
-  const getContent = (): ProcessedContent => {
-    if (isFetching && !maybeDrop) {
+  const content = useMemo<ProcessedContent>(() => {
+    if (isFetching && !drop) {
       return {
         segments: [{ type: "text", content: "Loading..." }],
         apiMedia: [],
@@ -68,36 +63,12 @@ export const useDropContent = (
       return { segments: [], apiMedia: [] };
     }
 
-    const part = drop.parts.find((part) => part.part_id === dropPartId);
+    const part = drop.parts.find((p) => p.part_id === dropPartId);
     if (!part) {
       return { segments: [], apiMedia: [] };
     }
 
-    // Process any API media
-    const apiMedia = (part.media || []).map((media) => ({
-      alt: "Media",
-      url: media.url,
-      type: (isVideoMimeType(media.mime_type) ? "video" : "image") as
-        | "video"
-        | "image",
-    }));
-
-    // Handle media-only case (no text content)
-    if (!part.content) {
-      return {
-        segments: apiMedia.length ? [] : [{ type: "text", content: "Media" }],
-        apiMedia,
-      };
-    }
-
-    // Handle case with both text and possibly embedded media
-    return processContent(part.content, apiMedia);
-  };
-
-  const [content, setContent] = useState<ProcessedContent>(getContent());
-
-  useEffect(() => {
-    setContent(getContent());
+    return buildProcessedContent(part.content, part.media);
   }, [drop, dropPartId, isFetching, error]);
 
   return {

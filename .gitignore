@@ -75,7 +75,7 @@ node_modules/
 # OS specific
 # Task files
 tasks.json
-tasks/ 
+tasks/
 .coverage-progress.json
 
 # Jest
@@ -87,6 +87,7 @@ claude.md
 .claude/commands/
 test.html
 .claude/
+.codex/
 
 # generated env schema for Node runtime
 /config/env.schema.runtime.cjs
