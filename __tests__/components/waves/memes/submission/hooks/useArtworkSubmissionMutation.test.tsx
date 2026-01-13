@@ -16,6 +16,8 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     ],
     payment_info: {
       payment_address: "0x789",
+      has_designated_payee: false,
+      designated_payee_name: "",
     },
     allowlist_batches: [
       { id: "test-batch-1", contract: "0xabc", token_ids_raw: "1-5" },
@@ -23,6 +25,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     additional_media: {
       artist_profile_media: ["https://example.com/profile.jpg"],
       artwork_commentary_media: ["https://example.com/commentary.jpg"],
+      preview_image: "",
     },
     commentary: "Test Commentary",
     about_artist: "Test About Artist",

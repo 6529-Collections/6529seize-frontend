@@ -61,14 +61,31 @@ const parseAirdropConfig = (raw: string | undefined): AirdropEntry[] => {
     .filter(isPresent);
 };
 
-const parsePaymentAddress = (raw: string | undefined): string => {
+interface PaymentDetails {
+  readonly address: string;
+  readonly designatedPayeeName: string;
+}
+
+const parsePaymentDetails = (raw: string | undefined): PaymentDetails => {
   const parsed = parseJson<unknown>(raw, null);
   if (!parsed || typeof parsed !== "object") {
-    return "";
+    return { address: "", designatedPayeeName: "" };
   }
-  const paymentAddress = (parsed as { payment_address?: unknown })
-    .payment_address;
-  return typeof paymentAddress === "string" ? paymentAddress.trim() : "";
+  const record = parsed as {
+    payment_address?: unknown;
+    has_designated_payee?: unknown;
+    designated_payee_name?: unknown;
+  };
+  const address =
+    typeof record.payment_address === "string"
+      ? record.payment_address.trim()
+      : "";
+  const hasDesignatedPayee = record.has_designated_payee === true;
+  const designatedPayeeName =
+    hasDesignatedPayee && typeof record.designated_payee_name === "string"
+      ? record.designated_payee_name.trim()
+      : "";
+  return { address, designatedPayeeName };
 };
 
 const parseAllowlistBatches = (raw: string | undefined): AllowlistBatch[] => {
@@ -145,13 +162,13 @@ export const SingleWaveDropTechnicalDetails = ({
     [setToast]
   );
 
-  const { paymentAddress, airdropEntries, allowlistBatches } = useMemo(() => {
+  const { paymentDetails, airdropEntries, allowlistBatches } = useMemo(() => {
     const metadata = drop.metadata ?? [];
     const getEntryValue = (key: MemesSubmissionAdditionalInfoKey) =>
       metadata.find((item) => item.data_key === key)?.data_value;
 
     return {
-      paymentAddress: parsePaymentAddress(
+      paymentDetails: parsePaymentDetails(
         getEntryValue(MemesSubmissionAdditionalInfoKey.PAYMENT_INFO)
       ),
       airdropEntries: parseAirdropConfig(
@@ -164,7 +181,7 @@ export const SingleWaveDropTechnicalDetails = ({
   }, [drop.metadata]);
 
   const hasDetails =
-    Boolean(paymentAddress) ||
+    Boolean(paymentDetails.address) ||
     airdropEntries.length > 0 ||
     allowlistBatches.length > 0;
 
@@ -218,17 +235,22 @@ export const SingleWaveDropTechnicalDetails = ({
             className="tw-overflow-hidden"
           >
             <div className="tw-space-y-6 tw-bg-iron-950 tw-px-4 tw-py-4 tw-text-xs">
-              {paymentAddress && (
+              {paymentDetails.address && (
                 <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40 tw-p-4">
                   <div className="tw-mb-3 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-iron-500">
                     Payment Address
+                    {paymentDetails.designatedPayeeName && (
+                      <span className="tw-ml-1 tw-text-white">
+                        &ndash; Designated Payee: <span className="tw-normal-case">{paymentDetails.designatedPayeeName}</span>
+                      </span>
+                    )}
                   </div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2 tw-font-mono tw-text-xs tw-font-medium tw-text-iron-200">
                     <div className="tw-min-w-0 tw-flex-1 tw-break-all">
-                      <EnsAddressDisplay address={paymentAddress} />
+                      <EnsAddressDisplay address={paymentDetails.address} />
                     </div>
                     <button
-                      onClick={() => copyToClipboard(paymentAddress)}
+                      onClick={() => copyToClipboard(paymentDetails.address)}
                       className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800/60 hover:tw-text-iron-200"
                       title="Copy address"
                       data-tooltip-id={tooltipId}
