@@ -26,10 +26,30 @@ jest.mock("react-bootstrap", () => ({
   Table: (p: any) => <table>{p.children}</table>,
 }));
 
-jest.mock("wagmi", () => ({
-  useEnsName: () => ({ data: undefined, isLoading: false }),
-  useEnsAddress: () => ({ data: undefined, isLoading: false }),
-}));
+jest.mock(
+  "@/components/utils/input/ens-address/EnsAddressInput",
+  () =>
+    function MockEnsAddressInput(props: {
+      value?: string;
+      placeholder?: string;
+      onAddressChange: (address: string) => void;
+      disabled?: boolean;
+      autoFocus?: boolean;
+      className?: string;
+    }) {
+      return (
+        <input
+          data-testid="ens-address-input"
+          placeholder={props.placeholder}
+          value={props.value ?? ""}
+          disabled={props.disabled}
+          autoFocus={props.autoFocus}
+          className={props.className}
+          onChange={(e) => props.onAddressChange(e.target.value)}
+        />
+      );
+    }
+);
 
 jest.mock("@/services/6529api");
 
