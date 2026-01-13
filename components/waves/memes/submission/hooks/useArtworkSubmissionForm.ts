@@ -1,13 +1,12 @@
 "use client";
 
-import { useReducer, useEffect, useCallback, useRef } from "react";
-import type { TraitsData } from "../types/TraitsData";
-import { SubmissionStep } from "../types/Steps";
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+import { useCallback, useEffect, useReducer, useRef } from "react";
+import { validateInteractivePreview } from "../actions/validateInteractivePreview";
 import type {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
@@ -17,15 +16,16 @@ import {
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
   isInteractiveMediaContentIdentifier,
 } from "../constants/security";
-import { validateInteractivePreview } from "../actions/validateInteractivePreview";
 import type {
-  AirdropEntry,
-  PaymentInfo,
-  AllowlistBatchRaw,
   AdditionalMedia,
+  AirdropEntry,
+  AllowlistBatchRaw,
   OperationalData,
+  PaymentInfo,
 } from "../types/OperationalData";
 import { AIRDROP_TOTAL } from "../types/OperationalData";
+import { SubmissionStep } from "../types/Steps";
+import type { TraitsData } from "../types/TraitsData";
 
 type MediaSource = "upload" | "url";
 
@@ -621,7 +621,9 @@ export function useArtworkSubmissionForm() {
 
       dispatch({
         type: "SET_AIRDROP_CONFIG",
-        payload: [{ id: "initial", address: primaryWallet, count: AIRDROP_TOTAL }],
+        payload: [
+          { id: "initial", address: primaryWallet, count: AIRDROP_TOTAL },
+        ],
       });
     }
   }, [connectedProfile]);
