@@ -81,6 +81,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
             type="checkbox"
             checked={hasDesignatedPayee}
             onChange={handleDesignatedPayeeToggle}
+            aria-label="Designated Payee"
             className="tw-h-4 tw-w-4 tw-cursor-pointer tw-rounded tw-border-iron-700 tw-bg-iron-900 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
           />
           <span className="tw-text-sm">
