@@ -37,31 +37,17 @@ export default function AppSidebarUserInfo() {
     return profile?.pfp ?? null;
   })();
 
-  const resolvedPfp =
-    pfp &&
-    resolveIpfsUrlSync("ipfs://QmZKBLgVQynSY5NG9tsTk1G8uhEx2vazhdwS791oYz7PUC");
+  const resolvedPfp = pfp && resolveIpfsUrlSync(pfp);
 
-  const level = activeProfileProxy
-    ? activeProfileProxy.created_by.level
-    : (profile?.level ?? 0);
-  const tdh = activeProfileProxy
-    ? activeProfileProxy.created_by.tdh
-    : (profile?.tdh ?? 0);
-  const tdh_rate = activeProfileProxy
-    ? activeProfileProxy.created_by.tdh_rate
-    : (profile?.tdh_rate ?? 0);
-  const rep = activeProfileProxy
-    ? activeProfileProxy.created_by.rep
-    : (profile?.rep ?? 0);
-  const xtdh = activeProfileProxy
-    ? activeProfileProxy.created_by.xtdh
-    : (profile?.xtdh ?? 0);
-  const xtdh_rate = activeProfileProxy
-    ? activeProfileProxy.created_by.xtdh_rate
-    : (profile?.xtdh_rate ?? 0);
-  const cic = activeProfileProxy
-    ? activeProfileProxy.created_by.cic
-    : (profile?.cic ?? 0);
+  const soure = activeProfileProxy?.created_by ?? profile;
+
+  const level = soure?.level ?? 0;
+  const tdh = soure?.tdh ?? 0;
+  const tdh_rate = soure?.tdh_rate ?? 0;
+  const rep = soure?.rep ?? 0;
+  const xtdh = soure?.xtdh ?? 0;
+  const xtdh_rate = soure?.xtdh_rate ?? 0;
+  const cic = soure?.cic ?? 0;
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-3 tw-py-2">
