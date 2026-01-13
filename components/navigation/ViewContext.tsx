@@ -151,22 +151,24 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         } else {
           router.push(getWavesBaseRoute(isApp));
         }
-      }
-      const currentWaveId = searchParams.get("wave");
-
-      if (currentWaveId) {
-        setLastVisitedDm(null);
-        router.push(getMessagesBaseRoute(isApp));
-      } else if (lastVisitedDm) {
-        router.push(
-          getWaveRoute({
-            waveId: lastVisitedDm,
-            isDirectMessage: true,
-            isApp,
-          })
-        );
       } else {
-        router.push(getMessagesBaseRoute(isApp));
+        // item.viewKey === "messages" (only remaining case)
+        const currentWaveId = searchParams.get("wave");
+
+        if (currentWaveId) {
+          setLastVisitedDm(null);
+          router.push(getMessagesBaseRoute(isApp));
+        } else if (lastVisitedDm) {
+          router.push(
+            getWaveRoute({
+              waveId: lastVisitedDm,
+              isDirectMessage: true,
+              isApp,
+            })
+          );
+        } else {
+          router.push(getMessagesBaseRoute(isApp));
+        }
       }
     },
     [router, lastVisitedWave, lastVisitedDm, isApp, searchParams]
@@ -177,9 +179,11 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
       if (v === "messages") {
         setLastVisitedDm(null);
         router.push(getMessagesBaseRoute(isApp));
+      } else {
+        // v === "waves" (only remaining case)
+        setLastVisitedWave(null);
+        router.push(getWavesBaseRoute(isApp));
       }
-      setLastVisitedWave(null);
-      router.push(getWavesBaseRoute(isApp));
     },
     [router, setLastVisitedDm, setLastVisitedWave, isApp]
   );
