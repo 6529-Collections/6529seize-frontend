@@ -81,11 +81,12 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
             type="checkbox"
             checked={hasDesignatedPayee}
             onChange={handleDesignatedPayeeToggle}
+            aria-label="Designated Payee"
             className="tw-h-4 tw-w-4 tw-cursor-pointer tw-rounded tw-border-iron-700 tw-bg-iron-900 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
           />
           <span className="tw-text-sm">
             <span className="tw-text-iron-300">Designated Payee</span>
-            <span className="tw-text-iron-500 tw-ml-1">
+            <span className="tw-ml-1 tw-text-iron-500">
               — proceeds will be paid to a third party
             </span>
           </span>
@@ -114,7 +115,11 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
       )}
 
       <TraitWrapper
-        label={hasDesignatedPayee ? "Designated Payee Address *" : "Payment Address *"}
+        label={
+          hasDesignatedPayee
+            ? "Designated Payee Address *"
+            : "Payment Address *"
+        }
         id="payment-address"
         error={addressError}
         isFieldFilled={isAddressValid}
