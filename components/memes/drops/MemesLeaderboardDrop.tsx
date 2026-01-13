@@ -1,31 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
-import { createPortal } from "react-dom";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { DropLocation } from "@/components/waves/drops/Drop";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";
-import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
-import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
-import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
-import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
-import MemeDropTraits from "./MemeDropTraits";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import { VotingModal, MobileVotingModal } from "@/components/voting";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import { DropLocation } from "@/components/waves/drops/Drop";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ImageScale } from "@/helpers/image.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
-import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import Link from "next/link";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ImageScale } from "@/helpers/image.helpers";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Link from "next/link";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import MemeDropTraits from "./MemeDropTraits";
+import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
+import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";
+import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
+import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
+import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -59,17 +59,17 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
+    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
   const artworkMedia = drop.parts.at(0)?.media.at(0);
 
   // Get top voters for votes display
-  const firstThreeVoters = drop.top_raters?.slice(0, 3) ?? [];
+  const firstThreeVoters = drop.top_raters.slice(0, 3);
 
   return (
     <div
@@ -143,8 +143,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                       <div className="tw-flex tw-items-center -tw-space-x-2">
                         {firstThreeVoters.map((voter) => (
                           <Link
-                            key={voter.profile.handle}
-                            href={`/${voter.profile.handle}`}
+                            key={
+                              voter.profile.handle ??
+                              voter.profile.primary_address
+                            }
+                            href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             {voter.profile.pfp ? (

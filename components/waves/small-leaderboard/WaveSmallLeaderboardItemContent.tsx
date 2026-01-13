@@ -1,11 +1,14 @@
 "use client";
 
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useEffect, useRef, useState } from "react";
+import {
+  ExtendedDrop,
+  getDropPreviewImageUrl,
+} from "@/helpers/waves/drop.helpers";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
-import { ImageScale } from "@/helpers/image.helpers";
+import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
@@ -24,6 +27,11 @@ export const WaveSmallLeaderboardItemContent: React.FC<
     }
   }, [drop]);
 
+  const previewImageUrl = useMemo(
+    () => getDropPreviewImageUrl(drop.metadata),
+    [drop.metadata]
+  );
+
   const isStorm = drop.parts.length > 1;
   const haveMetadata = !!drop.metadata.length;
   const haveMedia = !!drop.parts.filter((part) => !!part.media.length).length;
@@ -35,12 +43,22 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         onClick={onDropClick}
         className="tw-relative tw-max-h-52 tw-cursor-pointer tw-space-y-3 tw-overflow-hidden"
       >
-        {!!drop.parts[0]?.media.length && (
-          <WaveDropPartContentMedias
-            activePart={drop.parts[0]}
-            disableMediaInteraction={true}
-            imageScale={ImageScale.AUTOx450}
-          />
+        {previewImageUrl ? (
+          <div className="tw-w-full tw-flex tw-justify-center">
+            <img
+              src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
+              alt="Preview"
+              className="tw-max-w-full tw-max-h-48 tw-object-contain tw-rounded-lg"
+            />
+          </div>
+        ) : (
+          !!drop.parts[0]?.media.length && (
+            <WaveDropPartContentMedias
+              activePart={drop.parts[0]}
+              disableMediaInteraction={true}
+              imageScale={ImageScale.AUTOx450}
+            />
+          )
         )}
         <WaveDropPartContentMarkdown
           mentionedUsers={drop.mentioned_users}

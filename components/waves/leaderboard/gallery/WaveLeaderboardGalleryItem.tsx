@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, memo } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
+import {
+  ExtendedDrop,
+  getDropPreviewImageUrl,
+} from "@/helpers/waves/drop.helpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -41,6 +44,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
       : ImageScale.AUTOx600;
+
+    const previewImageUrl = useMemo(
+      () => getDropPreviewImageUrl(drop.metadata),
+      [drop.metadata]
+    );
 
     const isFirstRenderRef = useRef(true);
     const previousSortRef = useRef(activeSort);
@@ -147,6 +155,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               media_url={drop.parts[0]?.media[0]!.url!}
               disableMediaInteraction={true}
               imageScale={mediaImageScale}
+              previewImageUrl={previewImageUrl}
             />
           </div>
         </button>

@@ -99,3 +99,4 @@ scripts/lint-to-json.js
 eslint-rule-summary.csv
 
 .hooks
+.coderabbit.yml

@@ -416,6 +416,8 @@ export function useArtworkSubmissionForm() {
       airdrop_config: [{ id: "initial", address: "", count: AIRDROP_TOTAL }],
       payment_info: {
         payment_address: "",
+        has_designated_payee: false,
+        designated_payee_name: "",
       },
       allowlist_batches: [],
       additional_media: {

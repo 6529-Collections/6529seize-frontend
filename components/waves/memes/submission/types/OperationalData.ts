@@ -20,6 +20,8 @@ export const AIRDROP_TOTAL = 20;
 
 export interface PaymentInfo {
   payment_address: string;
+  has_designated_payee: boolean;
+  designated_payee_name: string;
 }
 
 export interface AllowlistBatch {
