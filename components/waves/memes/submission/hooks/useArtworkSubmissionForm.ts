@@ -612,7 +612,11 @@ export function useArtworkSubmissionForm() {
     if (primaryWallet) {
       dispatch({
         type: "SET_PAYMENT_INFO",
-        payload: { payment_address: primaryWallet },
+        payload: {
+          payment_address: primaryWallet,
+          has_designated_payee: false,
+          designated_payee_name: "",
+        },
       });
 
       dispatch({
