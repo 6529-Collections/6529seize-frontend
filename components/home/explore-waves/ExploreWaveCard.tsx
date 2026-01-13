@@ -1,12 +1,12 @@
 "use client";
 
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import Link from "next/link";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getTimeAgoShort, getRandomColorWithSeed } from "@/helpers/Helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { useWaveLatestDrop, extractDropPreview } from "./useWaveLatestDrop";
+import { extractDropPreview, useWaveLatestDrop } from "./useWaveLatestDrop";
 
 interface ExploreWaveCardProps {
   readonly wave: ApiWave;
