@@ -39,15 +39,15 @@ export default function AppSidebarUserInfo() {
 
   const resolvedPfp = pfp && resolveIpfsUrlSync(pfp);
 
-  const soure = activeProfileProxy?.created_by ?? profile;
+  const source = activeProfileProxy?.created_by ?? profile;
 
-  const level = soure?.level ?? 0;
-  const tdh = soure?.tdh ?? 0;
-  const tdh_rate = soure?.tdh_rate ?? 0;
-  const rep = soure?.rep ?? 0;
-  const xtdh = soure?.xtdh ?? 0;
-  const xtdh_rate = soure?.xtdh_rate ?? 0;
-  const cic = soure?.cic ?? 0;
+  const level = source?.level ?? 0;
+  const tdh = source?.tdh ?? 0;
+  const tdh_rate = source?.tdh_rate ?? 0;
+  const rep = source?.rep ?? 0;
+  const xtdh = source?.xtdh ?? 0;
+  const xtdh_rate = source?.xtdh_rate ?? 0;
+  const cic = source?.cic ?? 0;
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-gap-3 tw-py-2">
