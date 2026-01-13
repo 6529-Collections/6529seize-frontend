@@ -1,13 +1,24 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import {
+  NEXTGEN_CHAIN_ID,
+  NEXTGEN_MINTER,
+} from "@/components/nextGen/nextgen_contracts";
+import type {
+  ProofResponse,
+  TokensPerAddress,
+} from "@/components/nextGen/nextgen_entities";
+import { Status } from "@/components/nextGen/nextgen_entities";
+import {
+  getStatusFromDates,
+  useMintSharedState,
+} from "@/components/nextGen/nextgen_helpers";
 import { publicEnv } from "@/config/env";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
-import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
-import { NULL_ADDRESS } from "@/constants";
+import { NULL_ADDRESS } from "@/constants/constants";
 import type { NextGenCollection } from "@/entities/INextgen";
 import {
   areEqualAddresses,
@@ -17,24 +28,12 @@ import {
   isValidEthAddress,
 } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
-import {
-  NEXTGEN_CHAIN_ID,
-  NEXTGEN_MINTER,
-} from "@/components/nextGen/nextgen_contracts";
-import type {
-  ProofResponse,
-  TokensPerAddress} from "@/components/nextGen/nextgen_entities";
-import {
-  Status
-} from "@/components/nextGen/nextgen_entities";
-import {
-  getStatusFromDates,
-  useMintSharedState,
-} from "@/components/nextGen/nextgen_helpers";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
 import { NextGenMintingFor } from "./NextGenMintShared";
 
@@ -517,7 +516,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                           (currentProof && index != currentProof.index) ||
                           disableMint()
                         }
-                        className={`pt-1 pb-1 `}
+                        className={`pt-1 pb-1`}
                       ></Form.Check>
                     </Col>
                   </Form.Group>
@@ -561,7 +560,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
                   }}
                 >
                   {props.mint_counts ? (
-                    renderAllowlistOptions() ?? renderPublicOptions()
+                    (renderAllowlistOptions() ?? renderPublicOptions())
                   ) : (
                     <option value={0}>n/a</option>
                   )}

@@ -2,10 +2,10 @@ import type { ActivityLogParamsConverted } from "@/components/profile-activity/P
 import type { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import type { RateMatter } from "@/enums";
-import { ProfileRatersParamsOrderBy } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
+import type { RateMatter } from "@/types/enums";
+import { ProfileRatersParamsOrderBy } from "@/types/enums";
 import type { Page } from "./Types";
 
 export const getUserProfile = async ({
@@ -61,29 +61,33 @@ export const userPageNeedsRedirect = ({
       }
       return null;
     };
-    const queryEntries: Array<[string, string]> = Object.entries(currentQuery).flatMap(
-      ([key, value]): Array<[string, string]> => {
-        if (Array.isArray(value)) {
-          const normalizedEntries = value
-            .map(toQueryStringValue)
-            .filter((entry): entry is string => entry !== null);
-          if (normalizedEntries.length === 0) {
-            return [];
-          }
-          // Preserve legacy comma-separated encoding so downstream consumers receive strings.
-          return [[key, normalizedEntries.join(",")]];
-        }
-        const normalizedValue = toQueryStringValue(value);
-        if (normalizedValue === null) {
+    const queryEntries: Array<[string, string]> = Object.entries(
+      currentQuery
+    ).flatMap(([key, value]): Array<[string, string]> => {
+      if (Array.isArray(value)) {
+        const normalizedEntries = value
+          .map(toQueryStringValue)
+          .filter((entry): entry is string => entry !== null);
+        if (normalizedEntries.length === 0) {
           return [];
         }
-        return [[key, normalizedValue]];
+        // Preserve legacy comma-separated encoding so downstream consumers receive strings.
+        return [[key, normalizedEntries.join(",")]];
       }
-    );
+      const normalizedValue = toQueryStringValue(value);
+      if (normalizedValue === null) {
+        return [];
+      }
+      return [[key, normalizedValue]];
+    });
     const queryParamsString = new URLSearchParams(queryEntries).toString();
     const encodedHandle = encodeURIComponent(profile.handle);
-    const basePath = subroute ? `/${encodedHandle}/${subroute}` : `/${encodedHandle}`;
-    const destination = queryParamsString ? `${basePath}?${queryParamsString}` : basePath;
+    const basePath = subroute
+      ? `/${encodedHandle}/${subroute}`
+      : `/${encodedHandle}`;
+    const destination = queryParamsString
+      ? `${basePath}?${queryParamsString}`
+      : basePath;
     return {
       redirect: {
         permanent: false,

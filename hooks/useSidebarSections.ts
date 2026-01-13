@@ -1,6 +1,6 @@
 import Squares2X2Icon from "@/components/common/icons/Squares2X2Icon";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import { AboutSection } from "@/enums";
+import { AboutSection } from "@/types/enums";
 import {
   DocumentTextIcon,
   UsersIcon,
@@ -32,6 +32,7 @@ export function useSidebarSections(
           {
             name: "Metrics",
             items: [
+              { name: "Metrics", href: "/metrics" },
               { name: "Definitions", href: "/network/definitions" },
               { name: "Network Stats", href: "/network/stats" },
               { name: "Levels", href: "/network/levels" },
@@ -84,7 +85,7 @@ export function useSidebarSections(
               ...(!isIos || country?.toUpperCase() === "US"
                 ? [
                     {
-                      name: "Memes Subscriptions",
+                      name: "Subscriptions Report",
                       href: "/tools/subscriptions-report",
                     },
                   ]

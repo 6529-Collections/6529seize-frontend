@@ -5,7 +5,7 @@ import {
   SUPPORTED_COLLECTIONS,
 } from "@/components/delegation/delegation-constants";
 import { publicEnv } from "@/config/env";
-import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants";
+import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
@@ -170,7 +170,8 @@ export default function DelegationMappingTool() {
             onDrop={handleDrop}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
-            onDragOver={handleDrag}>
+            onDragOver={handleDrag}
+          >
             <div>
               <FontAwesomeIcon
                 icon={faFileUpload}
@@ -195,7 +196,8 @@ export default function DelegationMappingTool() {
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
-            }}>
+            }}
+          >
             <option value="0" disabled>
               ...
             </option>
@@ -203,7 +205,8 @@ export default function DelegationMappingTool() {
               return (
                 <option
                   key={`delegation-tool-select-collection-${sc.contract}`}
-                  value={sc.contract}>
+                  value={sc.contract}
+                >
                   {sc.display}
                 </option>
               );
@@ -222,7 +225,8 @@ export default function DelegationMappingTool() {
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);
               setUseCase(newCase);
-            }}>
+            }}
+          >
             <option value={0} disabled>
               ...
             </option>
@@ -230,7 +234,8 @@ export default function DelegationMappingTool() {
               return (
                 <option
                   key={`delegation-tool-select-use-case-${uc.use_case}`}
-                  value={uc.use_case}>
+                  value={uc.use_case}
+                >
                   #{uc.use_case} - {uc.display}
                 </option>
               );
@@ -253,13 +258,15 @@ export default function DelegationMappingTool() {
                 ? styles["submitBtnDisabled"]
                 : ""
             }`}
-            onClick={() => submit()}>
+            onClick={() => submit()}
+          >
             {processing ? "Processing" : "Submit"}
             {processing && (
               <div className="d-inline">
                 <div
                   className={`spinner-border ${styles["loader"]}`}
-                  role="status">
+                  role="status"
+                >
                   <span className="sr-only"></span>
                 </div>
               </div>

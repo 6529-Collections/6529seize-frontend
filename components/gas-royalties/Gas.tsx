@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./GasRoyalties.module.scss";
+import { useTitle } from "@/contexts/TitleContext";
 import type { Gas } from "@/entities/IGas";
-import { fetchUrl } from "@/services/6529api";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { GasRoyaltiesCollectionFocus } from "@/types/enums";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTitle } from "@/contexts/TitleContext";
-import { GasRoyaltiesCollectionFocus } from "@/enums";
+import styles from "./GasRoyalties.module.scss";
 
 export default function GasComponent() {
   const router = useRouter();
@@ -154,9 +154,7 @@ export default function GasComponent() {
                         />
                       </td>
                       <td>{g.artist}</td>
-                      <td className="text-center">
-                        {displayDecimal(g.gas)}
-                      </td>
+                      <td className="text-center">{displayDecimal(g.gas)}</td>
                     </tr>
                   ))}
                   <tr key={`gas-total`}>

@@ -1,5 +1,5 @@
 import ProfileRatersTableItem from "@/components/user/utils/raters-table/ProfileRatersTableItem";
-import { ProfileRatersTableType } from "@/enums";
+import { ProfileRatersTableType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 let cicProps: any;

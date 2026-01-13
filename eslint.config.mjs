@@ -420,6 +420,7 @@ export default defineConfig([
     "**/tests/**",
     "**/__mocks__/**",
     "**/e2e/**",
+    "**/test-results/**",
     "config/**",
     "*.js",
     "*.mjs",
@@ -427,6 +428,7 @@ export default defineConfig([
     "*.tsx",
     "scripts/**",
     "stubs/**",
+    ".claude/**"
   ]),
 
   // Base config with Next.js rules

@@ -1,10 +1,10 @@
-import Cookies from "js-cookie";
+import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "@/constants/constants";
 import { ProfileProxyActionStatus, ProfileProxySide } from "@/entities/IProxy";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+import Cookies from "js-cookie";
 import { assertUnreachable } from "./AllowlistToolHelpers";
 import { Time } from "./time";
-import { PROFILE_PROXY_ACCEPTANCE_COOKIE } from "@/constants";
 
 export const getProfileProxyActionStatus = ({
   action,

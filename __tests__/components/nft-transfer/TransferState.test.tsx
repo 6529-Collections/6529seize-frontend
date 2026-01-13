@@ -5,7 +5,7 @@ import {
   TransferProvider,
   useTransfer,
 } from "@/components/nft-transfer/TransferState";
-import { ContractType } from "@/enums";
+import { ContractType } from "@/types/enums";
 
 function renderTransfer() {
   return renderHook(() => useTransfer(), { wrapper: TransferProvider });

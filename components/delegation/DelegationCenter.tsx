@@ -10,9 +10,9 @@ import {
   GRADIENT_CONTRACT,
   MEMELAB_CONTRACT,
   MEMES_CONTRACT,
-} from "@/constants";
-import { DelegationCenterSection } from "@/enums";
+} from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { DelegationCenterSection } from "@/types/enums";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
@@ -23,7 +23,8 @@ interface Props {
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
-  const { isConnected, seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+  const { isConnected, seizeConnect, seizeConnectOpen } =
+    useSeizeConnectContext();
   const [openConnect, setOpenConnect] = useState(false);
   const { setSection } = props;
 
@@ -86,12 +87,12 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   )
                     ? DelegationCenterSection.ANY_COLLECTION
                     : areEqualAddresses(c.contract, MEMES_CONTRACT)
-                    ? DelegationCenterSection.MEMES_COLLECTION
-                    : areEqualAddresses(c.contract, MEMELAB_CONTRACT)
-                    ? DelegationCenterSection.MEME_LAB_COLLECTION
-                    : areEqualAddresses(c.contract, GRADIENT_CONTRACT)
-                    ? DelegationCenterSection.GRADIENTS_COLLECTION
-                    : null;
+                      ? DelegationCenterSection.MEMES_COLLECTION
+                      : areEqualAddresses(c.contract, MEMELAB_CONTRACT)
+                        ? DelegationCenterSection.MEME_LAB_COLLECTION
+                        : areEqualAddresses(c.contract, GRADIENT_CONTRACT)
+                          ? DelegationCenterSection.GRADIENTS_COLLECTION
+                          : null;
                   if (newSection) {
                     setRedirect(newSection);
                   }
@@ -122,14 +123,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
     <Container>
       <Row className="pb-2">
         <Col>
-          <h1>
-            Delegation Center
-          </h1>
+          <h1>Delegation Center</h1>
         </Col>
       </Row>
       <Row>
         <Col>
-          <Container className={`${styles["delegationCenterSection"]} pt-4 pb-4`}>
+          <Container
+            className={`${styles["delegationCenterSection"]} pt-4 pb-4`}
+          >
             <Row>
               <Col
                 sm={12}
@@ -181,7 +182,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       </Row>
       <Row className="pt-2">
         <Col>
-          <Container className={`${styles["delegationCenterSection"]} pt-4 pb-4`}>
+          <Container
+            className={`${styles["delegationCenterSection"]} pt-4 pb-4`}
+          >
             <Row>
               <Col
                 sm={12}
@@ -233,7 +236,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       </Row>
       <Row className="pt-2">
         <Col>
-          <Container className={`${styles["delegationCenterSection"]} pt-4 pb-4`}>
+          <Container
+            className={`${styles["delegationCenterSection"]} pt-4 pb-4`}
+          >
             <Row>
               <Col
                 sm={12}

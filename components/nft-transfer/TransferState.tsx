@@ -1,6 +1,6 @@
 "use client";
 
-import type { ContractType } from "@/enums";
+import type { ContractType } from "@/types/enums";
 import React, {
   createContext,
   useCallback,
@@ -213,6 +213,6 @@ export function buildTransferKey(args: {
   const id =
     args.tokenId !== undefined && args.tokenId !== null
       ? String(args.tokenId)
-      : args.fallback ?? "unknown";
+      : (args.fallback ?? "unknown");
   return `${col}:${id}`;
 }

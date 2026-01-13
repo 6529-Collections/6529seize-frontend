@@ -1,11 +1,11 @@
-import { renderHook, waitFor } from "@testing-library/react";
-import { useReadContract } from "wagmi";
-import { NULL_MERKLE } from "@/constants";
+import { NULL_MERKLE } from "@/constants/constants";
 import {
   ManifoldClaimStatus,
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { renderHook, waitFor } from "@testing-library/react";
+import { useReadContract } from "wagmi";
 
 jest.mock("wagmi", () => ({ useReadContract: jest.fn() }));
 

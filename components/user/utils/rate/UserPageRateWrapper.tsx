@@ -3,11 +3,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import CommonInfoBox from "@/components/utils/CommonInfoBox";
-import { RateMatter } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { amIUser } from "@/helpers/Helpers";
+import { RateMatter } from "@/types/enums";
 import { useContext, useEffect, useState } from "react";
 
 const SUB_TITLE: Record<RateMatter, string> = {
@@ -97,9 +97,8 @@ export default function UserPageRateWrapper({
     }
   };
 
-  const [raterContext, setRaterContext] = useState<RaterContext>(
-    getRaterContext()
-  );
+  const [raterContext, setRaterContext] =
+    useState<RaterContext>(getRaterContext());
 
   const [raterContextMessage, setRaterContextMessage] = useState<string | null>(
     getRaterContextMessage(raterContext)

@@ -1,5 +1,5 @@
 import ProfileActivityLogBanner from "@/components/profile-activity/list/items/ProfileActivityLogBanner";
-import { ProfileActivityLogType } from "@/enums";
+import { ProfileActivityLogType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 describe("ProfileActivityLogBanner", () => {

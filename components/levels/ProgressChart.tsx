@@ -11,7 +11,7 @@ import {
   Tooltip,
   LogarithmicScale,
 } from "chart.js";
-import levels from "@/levels.json";
+import levels from "@/constants/levels.json";
 import { useEffect, useState } from "react";
 
 ChartJS.register(
@@ -92,7 +92,7 @@ export default function ProgressChart() {
   };
 
   return (
-    <div className="tw-w-full tw-h-[180px] md:tw-h-[280px]">
+    <div className="tw-h-[180px] tw-w-full md:tw-h-[280px]">
       <Line data={data} options={options} />
     </div>
   );

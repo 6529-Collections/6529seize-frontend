@@ -3,9 +3,9 @@ import {
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import {
+  DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
   getUserPageTabById,
-  DEFAULT_USER_PAGE_TAB,
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
@@ -15,15 +15,15 @@ import {
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
   ROYALTIES_PERCENTAGE,
-} from "@/constants";
-import type { BaseNFT} from "@/entities/INFT";
+} from "@/constants/constants";
+import type { BaseNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
-import { DateIntervalsSelection } from "@/enums";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DateIntervalsSelection } from "@/types/enums";
 import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
-import type { PageSSRMetadata} from "./Types";
+import type { PageSSRMetadata } from "./Types";
 import { Period } from "./Types";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
@@ -355,7 +355,7 @@ export function printMintDate(date?: Date) {
         day: "numeric",
         month: "short",
         year: "numeric",
-      })} 
+      })}
       (${getDateDisplay(mintDate)})
     `;
 }
@@ -605,7 +605,8 @@ export const getTimeAgo = (milliseconds: number): string => {
 
 export const getTimeAgoShort = (
   milliseconds: number,
-  referenceTime: number = Date.now()
+  referenceTime: number = Date.now(),
+  alwaysRelative: boolean = false
 ): string => {
   const timeDifference = referenceTime - milliseconds;
 
@@ -613,6 +614,13 @@ export const getTimeAgoShort = (
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
+
+  if (alwaysRelative) {
+    if (days > 0) return `${days}d`;
+    if (hours > 0) return `${hours}h`;
+    if (minutes > 0) return `${minutes}m`;
+    return "<1m";
+  }
 
   if (days > 1) {
     const date = new Date(milliseconds);
@@ -726,10 +734,11 @@ export const formatLargeNumber = (num: number): string => {
   const absNum = Math.abs(num);
 
   const format = (value: number, suffix: string) => {
-    if (value % 1 === 0) {
-      return `${value.toLocaleString()}${suffix}`;
+    const rounded = Math.round(value * 10) / 10;
+    if (rounded % 1 === 0) {
+      return `${rounded.toLocaleString()}${suffix}`;
     } else {
-      return `${value.toLocaleString(undefined, {
+      return `${rounded.toLocaleString(undefined, {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,
       })}${suffix}`;

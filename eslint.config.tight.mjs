@@ -11,6 +11,7 @@ import promise from "eslint-plugin-promise";
 import tailwindcss from "eslint-plugin-tailwindcss";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 
 // React Compiler plugin is optional; keep linting resilient if dependency is missing.
 let reactCompilerPlugin;
@@ -44,6 +45,7 @@ const plugins = {
   security: security,
   promise: promise,
   tailwindcss: tailwindcss,
+  "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
 };
 
 if (reactCompilerPlugin) {
@@ -492,7 +494,8 @@ export default defineConfig([
       "max-lines-per-function": "off",
     },
   },
-
+  // React You Might Not Need An Effect
+  reactYouMightNotNeedAnEffect.configs.strict,
   // Prettier - MUST be last to override formatting rules
   eslintConfigPrettier,
 ]);

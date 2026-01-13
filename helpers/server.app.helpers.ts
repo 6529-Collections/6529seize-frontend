@@ -1,4 +1,4 @@
-import { API_AUTH_COOKIE } from "@/constants";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import { WALLET_AUTH_COOKIE } from "@/services/auth/auth.utils";
 import { cookies } from "next/headers";
 

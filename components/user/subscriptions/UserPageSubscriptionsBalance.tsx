@@ -1,11 +1,11 @@
 import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
-import EthereumIcon from "../utils/icons/EthereumIcon";
-import { numberWithCommas } from "@/helpers/Helpers";
+import { MEMES_MINT_PRICE } from "@/constants/constants";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Row, Col } from "react-bootstrap";
-import { MEMES_MINT_PRICE } from "@/constants";
+import { numberWithCommas } from "@/helpers/Helpers";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Col, Container, Row } from "react-bootstrap";
+import EthereumIcon from "../utils/icons/EthereumIcon";
 
 export default function UserPageSubscriptionsBalance(
   props: Readonly<{
@@ -58,7 +58,7 @@ export default function UserPageSubscriptionsBalance(
                         )
                       : 0}
                   </b>
-                  <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                  <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                     <EthereumIcon />
                   </div>
                 </div>

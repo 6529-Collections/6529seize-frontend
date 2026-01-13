@@ -1,17 +1,14 @@
-import { Col, Container, Row } from "react-bootstrap";
+import { AboutSection } from "@/types/enums";
 import Image from "next/image";
-import { AboutSection } from "@/enums";
 import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutMemes() {
   return (
     <Container>
       <Row>
         <Col>
-          <h1>
-            Memes Are The Most Important
-            Thing In The World
-          </h1>
+          <h1>Memes Are The Most Important Thing In The World</h1>
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
