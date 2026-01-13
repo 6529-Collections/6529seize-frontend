@@ -150,7 +150,7 @@ const DropsList = memo(
         const posFromBottom = BOOST_CARD_POSITIONS[b] ?? 0;
         const index = orderedDrops.length - posFromBottom;
         if (index >= 0 && index < orderedDrops.length) {
-          anchors.push(orderedDrops[index].serial_no);
+          anchors.push(orderedDrops[index]!.serial_no);
         }
       }
       setBoostAnchors(anchors);
