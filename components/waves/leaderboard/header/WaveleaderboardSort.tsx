@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { debounce } from "lodash";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,14 +18,16 @@ interface WaveleaderboardSortProps {
   readonly waveId?: string | undefined;
 }
 
-const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> =
-  {
-    [WaveDropsLeaderboardSort.RANK]: undefined,
-    [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
-    [WaveDropsLeaderboardSort.TREND]: "DESC",
-    [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
-    [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
-  };
+const SORT_DIRECTION_MAP: Record<
+  WaveDropsLeaderboardSort,
+  "ASC" | "DESC" | undefined
+> = {
+  [WaveDropsLeaderboardSort.RANK]: undefined,
+  [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
+  [WaveDropsLeaderboardSort.TREND]: "DESC",
+  [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
+  [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
+};
 
 export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   sort,
@@ -83,7 +85,6 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
             }
             return lastPage.next ? lastPage.page + 1 : null;
           },
-          pages: 1,
           staleTime: 60000,
           ...getDefaultQueryRetry(),
         })
@@ -104,6 +105,11 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
     () => debounce(prefetchSortImmediate, 300),
     [prefetchSortImmediate]
   );
+
+  // Cancel pending debounced calls on unmount to avoid late network requests
+  useEffect(() => {
+    return () => prefetchSort.cancel();
+  }, [prefetchSort]);
 
   const getButtonClassName = (buttonSort: WaveDropsLeaderboardSort) => {
     const baseClass =

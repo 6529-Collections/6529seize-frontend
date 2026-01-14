@@ -35,14 +35,16 @@ interface UseWaveDropsLeaderboardProps {
   readonly pausePolling?: boolean | undefined;
 }
 
-const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> =
-  {
-    [WaveDropsLeaderboardSort.RANK]: undefined,
-    [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
-    [WaveDropsLeaderboardSort.TREND]: "DESC",
-    [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
-    [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
-  };
+const SORT_DIRECTION_MAP: Record<
+  WaveDropsLeaderboardSort,
+  "ASC" | "DESC" | undefined
+> = {
+  [WaveDropsLeaderboardSort.RANK]: undefined,
+  [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
+  [WaveDropsLeaderboardSort.TREND]: "DESC",
+  [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
+  [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
+};
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
@@ -206,14 +208,12 @@ export function useWaveDropsLeaderboard({
       if (pollingData.drops.length === 0) return false;
 
       const latestPolledDrop = pollingData.drops[0];
+      const newestExistingDrop = drops[0];
 
-      if (drops.length > 0) {
-        const latestExistingDrop = drops.at(-1);
-        const polledCreatedAt = new Date(
-          latestPolledDrop?.created_at!
-        ).getTime();
+      if (latestPolledDrop && newestExistingDrop) {
+        const polledCreatedAt = new Date(latestPolledDrop.created_at).getTime();
         const existingCreatedAt = new Date(
-          latestExistingDrop?.created_at ?? 0
+          newestExistingDrop.created_at
         ).getTime();
         return polledCreatedAt > existingCreatedAt;
       }
