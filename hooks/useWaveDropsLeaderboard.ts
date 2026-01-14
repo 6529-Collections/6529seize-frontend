@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import {
   useInfiniteQuery,
   useQuery,
@@ -74,6 +74,7 @@ export function useWaveDropsLeaderboard({
 
   const [canPoll, setCanPoll] = useState(false);
   const isTabVisible = useTabVisibility();
+  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sortDirection = SORT_DIRECTION_MAP[sort];
 
@@ -246,8 +247,12 @@ export function useWaveDropsLeaderboard({
       // Trigger refetch directly in the query callback when conditions are met
       // This replaces the effect-based approach
       if (canAutoRefetch && checkForNewDrops(result)) {
+        // Clear any existing timeout to prevent accumulation
+        if (pollingTimeoutRef.current) {
+          clearTimeout(pollingTimeoutRef.current);
+        }
         // Use setTimeout to defer the refetch slightly and avoid React Query batching issues
-        setTimeout(() => {
+        pollingTimeoutRef.current = setTimeout(() => {
           refetch();
         }, POLLING_DELAY);
       }
@@ -268,6 +273,10 @@ export function useWaveDropsLeaderboard({
 
   useEffect(() => {
     return () => {
+      // Clear polling timeout on unmount to prevent stale refetch calls
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+      }
       queryClient.removeQueries({
         queryKey: [QueryKey.DROPS, { waveId }],
       });
