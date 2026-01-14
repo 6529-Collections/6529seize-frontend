@@ -65,6 +65,7 @@ export class ApiDrop {
     'is_signed': boolean;
     'reactions': Array<ApiDropReaction>;
     'boosts': number;
+    'hide_link_preview': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -226,6 +227,12 @@ export class ApiDrop {
             "baseName": "boosts",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "hide_link_preview",
+            "baseName": "hide_link_preview",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

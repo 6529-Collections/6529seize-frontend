@@ -19,6 +19,7 @@ import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
+import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview";
 
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -147,6 +148,13 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           longPressTriggered && "tw-select-none"
         }`}
       >
+        {showOptions && (
+          <WaveDropActionsToggleLinkPreview
+            drop={extendedDrop}
+            isMobile={true}
+            onToggle={closeMenu}
+          />
+        )}
         <WaveDropActionsAddReaction
           drop={extendedDrop}
           isMobile={true}

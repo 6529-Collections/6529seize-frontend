@@ -67,6 +67,7 @@ const WaveDropPartContentMarkdown: React.FC<
           partContent={part.content}
           onQuoteClick={onQuoteClick}
           currentDropId={drop?.id}
+          hideLinkPreviews={drop?.hide_link_preview}
         />
         {drop?.updated_at && drop.updated_at !== drop.created_at && (
           <div className="tw-text-[10px] tw-leading-none tw-text-iron-500 tw-font-normal tw-mt-0.5">

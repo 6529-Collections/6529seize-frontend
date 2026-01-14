@@ -34,6 +34,12 @@ jest.mock(
   )
 );
 jest.mock(
+  "@/components/waves/drops/WaveDropActionsToggleLinkPreview",
+  () => () => (
+    <div data-testid="toggle-link-preview" />
+  )
+);
+jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => (props: any) =>
     props.isOpen ? <div data-testid="wrapper">{props.children}</div> : null

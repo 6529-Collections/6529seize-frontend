@@ -26,6 +26,7 @@ import {
 interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string | undefined;
+  readonly hideLinkPreviews?: boolean | undefined;
 }
 
 interface LinkRenderer {
@@ -58,6 +59,7 @@ const findMatch = (
 export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
+  hideLinkPreviews = false,
 }: LinkRendererConfig): LinkRenderer => {
   const seizeHandlers = createSeizeHandlers({ onQuoteClick, currentDropId });
   const handlers = createLinkHandlers();
@@ -87,6 +89,10 @@ export const createLinkRenderer = ({
       renderExternalOrInternalLink(stableHref, anchorProps);
     const matchSeize = findMatch(seizeHandlers, stableHref);
     const renderOpenGraph = () => {
+      if (hideLinkPreviews) {
+        return renderFallbackAnchor();
+      }
+
       if (!shouldUseOpenGraphPreview(stableHref, parsedUrl)) {
         return renderFallbackAnchor();
       }
@@ -168,6 +174,10 @@ export const createLinkRenderer = ({
 
   const isSmartLink = (href: string): boolean => {
     if (!href) {
+      return false;
+    }
+
+    if (hideLinkPreviews) {
       return false;
     }
 
