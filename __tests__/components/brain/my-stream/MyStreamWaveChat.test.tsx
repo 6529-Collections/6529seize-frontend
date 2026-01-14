@@ -74,7 +74,7 @@ describe('MyStreamWaveChat', () => {
   };
 
   it('handles serialNo param and shows memes button', async () => {
-    searchParamsMock.get.mockReturnValue('5');
+    searchParamsMock.get.mockReturnValueOnce('5').mockReturnValue(null);
     mockIsMemesWave = true;
     await act(async () => {
       renderWithProvider(<MyStreamWaveChat wave={wave} />);
