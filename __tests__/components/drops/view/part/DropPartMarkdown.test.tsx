@@ -521,4 +521,21 @@ describe("DropPartMarkdown", () => {
       setDynamicMode("eager");
     }
   });
+
+  it("renders plain links when link previews are hidden for the drop", () => {
+    const content = "[link](https://google.com)";
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+        currentDropId="drop1"
+        hideLinkPreviews={true}
+      />
+    );
+    expect(mockLinkPreviewCard).not.toHaveBeenCalled();
+    const a = screen.getByRole("link", { name: "link" });
+    expect(a).toHaveAttribute("href", "https://google.com");
+  });
 });
