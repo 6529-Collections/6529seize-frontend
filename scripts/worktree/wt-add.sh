@@ -43,7 +43,6 @@ cat > "$VSCODE_PATH/settings.json" <<EOF
     "titleBar.activeBackground": "$RAND_COLOR",
     "titleBar.inactiveBackground": "$RAND_COLOR"
   },
-  / --- Formatting ---
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
