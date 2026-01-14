@@ -436,4 +436,41 @@ describe("createLinkRenderer", () => {
     const { renderAnchor } = baseRenderer();
     expect(renderAnchor({ children: "missing" } as any)).toBeNull();
   });
+
+  describe("hideLinkPreviews option", () => {
+    it("renders fallback anchor instead of OpenGraph when hideLinkPreviews is true", () => {
+      const { renderAnchor } = createLinkRenderer({
+        onQuoteClick,
+        hideLinkPreviews: true,
+      });
+      const element = renderAnchor({
+        href: "https://example.org/post",
+        children: "link text",
+      } as any);
+      const { container } = render(<>{element}</>);
+      expect(screen.queryByTestId("opengraph")).toBeNull();
+      expect(container.querySelector('a[href="https://example.org/post"]')).not.toBeNull();
+    });
+
+    it("isSmartLink returns false when hideLinkPreviews is true", () => {
+      const { isSmartLink } = createLinkRenderer({
+        onQuoteClick,
+        hideLinkPreviews: true,
+      });
+      expect(isSmartLink("https://youtu.be/video123")).toBe(false);
+      expect(isSmartLink("https://example.org/post")).toBe(false);
+    });
+
+    it("renders normal preview when hideLinkPreviews is false", () => {
+      const { renderAnchor } = createLinkRenderer({
+        onQuoteClick,
+        hideLinkPreviews: false,
+      });
+      const element = renderAnchor({
+        href: "https://example.org/post",
+      } as any);
+      render(<>{element}</>);
+      expect(screen.getByTestId("opengraph")).toBeInTheDocument();
+    });
+  });
 });

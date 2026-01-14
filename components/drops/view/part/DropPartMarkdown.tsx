@@ -225,6 +225,7 @@ export interface DropPartMarkdownProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md" | undefined;
   readonly currentDropId?: string | undefined;
+  readonly hideLinkPreviews?: boolean | undefined;
 }
 
 function DropPartMarkdown({
@@ -234,6 +235,7 @@ function DropPartMarkdown({
   onQuoteClick,
   textSize,
   currentDropId,
+  hideLinkPreviews = false,
 }: DropPartMarkdownProps) {
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
@@ -252,8 +254,9 @@ function DropPartMarkdown({
       createLinkRenderer({
         onQuoteClick,
         currentDropId,
+        hideLinkPreviews,
       }),
-    [onQuoteClick, currentDropId]
+    [onQuoteClick, currentDropId, hideLinkPreviews]
   );
 
   const { customRenderer, renderParagraph, processContent } = useMemo(

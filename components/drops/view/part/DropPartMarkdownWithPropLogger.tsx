@@ -24,6 +24,7 @@ function areEqual(
     "partContent",
     "textSize",
     "currentDropId",
+    "hideLinkPreviews",
   ];
 
   for (const key of propsToCheck) {

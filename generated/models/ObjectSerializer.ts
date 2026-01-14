@@ -106,6 +106,8 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMintMetrics';
+export * from '../models/ApiMintMetricsPage';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftMedia';
 export * from '../models/ApiNftOwner';
@@ -307,7 +309,7 @@ import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
-import { ApiDrop                           } from '../models/ApiDrop';
+import { ApiDrop                            } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
@@ -327,7 +329,7 @@ import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import { ApiDropWithoutWave                          } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                           } from '../models/ApiDropWithoutWave';
 import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWavesPageWithoutCount';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
@@ -354,6 +356,8 @@ import { ApiLightDrop         } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMintMetrics } from '../models/ApiMintMetrics';
+import { ApiMintMetricsPage } from '../models/ApiMintMetricsPage';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftMedia } from '../models/ApiNftMedia';
 import { ApiNftOwner } from '../models/ApiNftOwner';
@@ -639,6 +643,8 @@ let typeMap: {[index: string]: any} = {
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
+    "ApiMintMetrics": ApiMintMetrics,
+    "ApiMintMetricsPage": ApiMintMetricsPage,
     "ApiNft": ApiNft,
     "ApiNftMedia": ApiNftMedia,
     "ApiNftOwner": ApiNftOwner,

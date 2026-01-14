@@ -15,6 +15,7 @@ jest.mock('@/components/waves/drops/WaveDropActionsOpen', () => () => <div data-
 jest.mock('@/components/waves/drops/WaveDropFollowAuthor', () => () => <div data-testid="follow" />);
 jest.mock('@/components/waves/drops/WaveDropActionsAddReaction', () => () => <div data-testid="add-reaction" />);
 jest.mock('@/components/waves/drops/WaveDropActionsMarkUnread', () => () => <div data-testid="mark-unread" />);
+jest.mock('@/components/waves/drops/WaveDropActionsToggleLinkPreview', () => () => <div data-testid="toggle-link-preview" />);
 
 jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
 jest.mock('@/contexts/SeizeSettingsContext', () => ({ useSeizeSettings: jest.fn() }));

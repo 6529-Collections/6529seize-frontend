@@ -1,8 +1,8 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -19,6 +19,7 @@ import WaveDropActionsOptions from "./WaveDropActionsOptions";
 import WaveDropActionsQuote from "./WaveDropActionsQuote";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
+import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview";
 import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
 
 interface WaveDropActionsProps {
@@ -58,6 +59,7 @@ export default function WaveDropActions({
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-8 tw-items-center tw-rounded-lg tw-bg-iron-950 tw-shadow tw-ring-1 tw-ring-inset tw-ring-iron-800">
+          <WaveDropActionsToggleLinkPreview drop={drop} />
           {connectedProfile?.handle !== drop.author.handle &&
             !activePartIndex && <WaveDropFollowAuthor drop={drop} />}
           <WaveDropActionsMarkUnread drop={drop} />
