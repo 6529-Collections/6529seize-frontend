@@ -3,7 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useLayoutEffect, useRef } from "react";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];
@@ -39,18 +39,9 @@ export default function NotificationsCauseFilter({
   readonly activeFilter: NotificationFilter | null;
   readonly setActiveFilter: (filter: NotificationFilter | null) => void;
 }) {
-  const [activeFilterIndex, setActiveFilterIndex] = useState<number>(0);
-
-  const [highlightStyle, setHighlightStyle] = useState<{
-    left: number;
-    width: number;
-  }>({
-    left: 0,
-    width: 0,
-  });
-
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
+  const highlightRef = useRef<HTMLDivElement>(null);
 
   const { connectedProfile } = useContext(AuthContext);
   const prefetchNotifications = usePrefetchNotifications();
@@ -64,30 +55,35 @@ export default function NotificationsCauseFilter({
     });
   };
 
-  useEffect(() => {
-    const button = buttonRefs.current[activeFilterIndex];
-    if (button) {
+  const updateHighlightPosition = (filterIndex: number) => {
+    const button = buttonRefs.current[filterIndex];
+    const highlight = highlightRef.current;
+    if (button && highlight) {
       let l = button.offsetLeft;
       let w = button.offsetWidth;
 
-      if (activeFilterIndex === 0) {
+      if (filterIndex === 0) {
         l += 2;
         w -= 2;
       }
-      if (activeFilterIndex === NotificationFilters.length - 1) {
+      if (filterIndex === NotificationFilters.length - 1) {
         w -= 2;
       }
 
-      setHighlightStyle({
-        left: l,
-        width: w,
-      });
+      // Direct DOM manipulation - no React state needed
+      highlight.style.left = `${l}px`;
+      highlight.style.width = `${w}px`;
     }
-  }, [activeFilterIndex]);
+  };
+
+  // Sync DOM position on initial mount - valid effect use (external system)
+  useLayoutEffect(() => {
+    updateHighlightPosition(0);
+  }, []);
 
   const handleChange = (filter: NotificationFilter, filterIndex: number) => {
     setActiveFilter(filter);
-    setActiveFilterIndex(filterIndex);
+    updateHighlightPosition(filterIndex);
 
     const button = buttonRefs.current[filterIndex];
     const container = containerRef.current;
@@ -121,15 +117,12 @@ export default function NotificationsCauseFilter({
         className="tw-nowrap tw-relative tw-flex tw-h-10 tw-items-center tw-gap-1 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
       >
         <div
+          ref={highlightRef}
           className="tw-absolute tw-h-8 tw-rounded-lg tw-bg-iron-800 tw-transition-all tw-duration-300 tw-ease-in-out"
-          style={{
-            left: highlightStyle.left,
-            width: highlightStyle.width,
-          }}
         />
         {NotificationFilters.map((filter, index) => (
           <NotificationCauseFilterButton
-            key={`notification-cause-filter-${filter.cause ?? "ALL"}`}
+            key={`notification-cause-filter-${filter.title}`}
             title={filter.title}
             isActive={isActive(filter)}
             onClick={() => handleChange(filter, index)}
