@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState, useMemo } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   useInfiniteQuery,
   useQuery,
@@ -24,6 +23,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
   RATING_PREDICTION = "RATING_PREDICTION",
+  TREND = "TREND",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
   CREATED_AT = "CREATED_AT",
 }
@@ -39,6 +39,7 @@ const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> =
   {
     [WaveDropsLeaderboardSort.RANK]: undefined,
     [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
+    [WaveDropsLeaderboardSort.TREND]: "DESC",
     [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
     [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
   };
@@ -69,26 +70,8 @@ export function useWaveDropsLeaderboard({
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
 
-  const [drops, setDrops] = useState<ExtendedDrop[]>([]);
-  const [hasInitialized, setHasInitialized] = useState(false);
-  const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
-  const [delayedPollingResult, setDelayedPollingResult] = useState<
-    ApiDropsLeaderboardPage | undefined
-  >(undefined);
   const isTabVisible = useTabVisibility();
-  const [currentSort, setCurrentSort] = useState(sort);
-
-  // Detect sort changes
-  const isSortChanging = currentSort !== sort;
-
-  useEffect(() => {
-    if (currentSort !== sort) {
-      setCurrentSort(sort);
-      setDrops([]);
-      setHasInitialized(false);
-    }
-  }, [sort, currentSort]);
 
   const sortDirection = SORT_DIRECTION_MAP[sort];
 
@@ -130,7 +113,7 @@ export function useWaveDropsLeaderboard({
           params["sort_direction"] = sortDirection;
         }
 
-        if (pageParam) {
+        if (typeof pageParam === "number") {
           params["page"] = `${pageParam}`;
         }
 
@@ -166,16 +149,14 @@ export function useWaveDropsLeaderboard({
         params["sort_direction"] = sortDirection;
       }
 
-      if (pageParam) {
+      if (typeof pageParam === "number") {
         params["page"] = `${pageParam}`;
       }
 
-      const results = await commonApiFetch<ApiDropsLeaderboardPage>({
+      return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
         params,
       });
-
-      return results;
     },
     initialPageParam: null,
     getNextPageParam,
@@ -184,7 +165,8 @@ export function useWaveDropsLeaderboard({
     ...getDefaultQueryRetry(),
   });
 
-  const processedDrops = useMemo(() => {
+  // Derive drops directly during render - no need for state
+  const drops = useMemo(() => {
     if (!data?.pages) return [];
 
     const mappedDrops = mapToExtendedDrops(
@@ -206,18 +188,44 @@ export function useWaveDropsLeaderboard({
     return uniqueDrops;
   }, [data, sort]);
 
-  useEffect(() => {
-    if (!data?.pages) {
-      return;
-    }
-
-    setDrops(processedDrops);
-    setHasInitialized(true);
-  }, [processedDrops, data]);
+  // Derive hasInitialized from whether we have data
+  const hasInitialized = !!data?.pages;
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
-  const { data: pollingResult } = useQuery({
+  // Check if we can auto-refetch (derived during render)
+  const hasTempDrop = useMemo(
+    () => drops.some((drop) => drop.id.startsWith("temp-")),
+    [drops]
+  );
+  const canAutoRefetch = isTabVisible && !hasTempDrop;
+
+  // Helper to check if polling result has newer data than current drops
+  const checkForNewDrops = useCallback(
+    (pollingData: ApiDropsLeaderboardPage): boolean => {
+      if (pollingData.drops.length === 0) return false;
+
+      const latestPolledDrop = pollingData.drops[0];
+
+      if (drops.length > 0) {
+        const latestExistingDrop = drops.at(-1);
+        const polledCreatedAt = new Date(
+          latestPolledDrop?.created_at!
+        ).getTime();
+        const existingCreatedAt = new Date(
+          latestExistingDrop?.created_at ?? 0
+        ).getTime();
+        return polledCreatedAt > existingCreatedAt;
+      }
+
+      return true;
+    },
+    [drops]
+  );
+
+  // Polling query with select to determine if there are new drops
+  // Uses select to derive haveNewDrops directly from query data
+  const { data: haveNewDrops = false } = useQuery({
     queryKey: [...queryKey, "polling"],
     queryFn: async () => {
       const params: Record<string, string> = {
@@ -229,12 +237,24 @@ export function useWaveDropsLeaderboard({
         params["sort_direction"] = sortDirection;
       }
 
-      return await commonApiFetch<ApiDropsLeaderboardPage>({
+      const result = await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
         params,
       });
+
+      // Trigger refetch directly in the query callback when conditions are met
+      // This replaces the effect-based approach
+      if (canAutoRefetch && checkForNewDrops(result)) {
+        // Use setTimeout to defer the refetch slightly and avoid React Query batching issues
+        setTimeout(() => {
+          refetch();
+        }, POLLING_DELAY);
+      }
+
+      return result;
     },
-    enabled: !haveNewDrops && canPoll && !pausePolling,
+    select: checkForNewDrops,
+    enabled: canPoll && !pausePolling,
     refetchInterval: isTabVisible
       ? ACTIVE_POLLING_INTERVAL
       : INACTIVE_POLLING_INTERVAL,
@@ -244,51 +264,6 @@ export function useWaveDropsLeaderboard({
     refetchIntervalInBackground: !isCapacitor,
     ...getDefaultQueryRetry(),
   });
-
-  useEffect(() => {
-    if (pollingResult && !pausePolling) {
-      const timer = setTimeout(() => {
-        setDelayedPollingResult(pollingResult);
-      }, POLLING_DELAY);
-
-      return () => clearTimeout(timer);
-    }
-    return;
-  }, [pollingResult, pausePolling]);
-
-  useEffect(() => {
-    if (delayedPollingResult !== undefined) {
-      if (delayedPollingResult.drops.length > 0) {
-        const latestPolledDrop = delayedPollingResult.drops[0];
-
-        if (drops.length > 0) {
-          const latestExistingDrop = drops.at(-1);
-
-          const polledCreatedAt = new Date(
-            latestPolledDrop?.created_at!
-          ).getTime();
-          const existingCreatedAt = new Date(
-            latestExistingDrop?.created_at ?? 0
-          ).getTime();
-
-          setHaveNewDrops(polledCreatedAt > existingCreatedAt);
-        } else {
-          setHaveNewDrops(true);
-        }
-      } else {
-        setHaveNewDrops(false);
-      }
-    }
-  }, [delayedPollingResult, drops]);
-
-  useEffect(() => {
-    if (!haveNewDrops) return;
-    if (!isTabVisible) return;
-    const hasTempDrop = drops.some((drop) => drop.id.startsWith("temp-"));
-    if (hasTempDrop) return;
-    refetch();
-    setHaveNewDrops(false);
-  }, [haveNewDrops, isTabVisible, drops]);
 
   useEffect(() => {
     return () => {
@@ -308,7 +283,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching || !hasInitialized || isSortChanging,
+    isFetching: isFetching || !hasInitialized,
     isFetchingNextPage,
     refetch,
     haveNewDrops,
