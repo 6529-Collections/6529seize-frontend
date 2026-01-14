@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { MetricData } from "@/hooks/useCommunityMetrics";
+import type { ReactNode } from "react";
 import {
   formatCompactNumber,
   formatNumberWithCommas,
@@ -15,7 +15,7 @@ interface MetricCardProps {
   readonly iconBgColor: string;
   readonly accentColor: string;
   readonly useValueCount?: boolean;
-  readonly suffix?: string;
+  readonly suffix?: string | undefined;
 }
 
 function StatBlock({
@@ -35,7 +35,7 @@ function StatBlock({
   readonly changePercent: number | null;
   readonly accentColor: string;
   readonly isPrimary?: boolean;
-  readonly suffix?: string;
+  readonly suffix?: string | undefined;
 }) {
   const isPositive = changePercent !== null && changePercent >= 0;
   const colorClasses = isPositive
@@ -120,7 +120,7 @@ export default function MetricCard({
           changePercent={getChangePercent(dailyData)}
           accentColor={accentColor}
           isPrimary
-          {...(suffix !== undefined && { suffix })}
+          suffix={suffix}
         />
         <div className="tw-w-px tw-bg-iron-700/50" />
         <StatBlock
@@ -130,7 +130,7 @@ export default function MetricCard({
           previousLabel="prev week"
           changePercent={getChangePercent(weeklyData)}
           accentColor={accentColor}
-          {...(suffix !== undefined && { suffix })}
+          suffix={suffix}
         />
       </div>
     </div>
