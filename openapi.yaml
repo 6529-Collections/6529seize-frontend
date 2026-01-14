@@ -1221,6 +1221,32 @@ paths:
                 $ref: "#/components/schemas/ApiMarkDropUnreadResponse"
         "404":
           description: Drop not found
+  /drops/{dropId}/toggle-hide-link-preview:
+    post:
+      tags:
+        - Drops
+      summary: Toggle hide link preview for a drop
+      description: >-
+        Toggles (flips) hide_link_preview for a drop. Only the author can call
+        this endpoint.
+      operationId: toggleHideLinkPreview
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDrop"
+        "403":
+          description: Only the author can toggle hide link preview
+        "404":
+          description: Drop not found
   /drop-media/prep:
     post:
       tags:
@@ -6493,6 +6519,7 @@ components:
         - is_signed
         - reactions
         - boosts
+        - hide_link_preview
       properties:
         id:
           type: string
@@ -6584,6 +6611,8 @@ components:
         boosts:
           type: number
           format: int64
+        hide_link_preview:
+          type: boolean
     ApiDropAndDropVote:
       type: object
       required:
@@ -6874,6 +6903,7 @@ components:
         - is_signed
         - reactions
         - boosts
+        - hide_link_preview
       properties:
         id:
           type: string
@@ -6963,6 +6993,8 @@ components:
         boosts:
           type: number
           format: int64
+        hide_link_preview:
+          type: boolean
     ApiDropWithoutWavesPageWithoutCount:
       type: object
       required:

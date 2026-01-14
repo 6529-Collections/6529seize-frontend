@@ -427,6 +427,7 @@ const getOptimisticDrop = (
     rating_prediction: 0,
     reactions: [],
     boosts: 0,
+    hide_link_preview: false,
   };
 };
 

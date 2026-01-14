@@ -80,6 +80,7 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.5, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
+            className="tw-flex tw-items-center"
           >
             <BoostIcon
               className={`tw-size-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${
