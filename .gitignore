@@ -94,12 +94,11 @@ eslint-rule-summary.csv
 .hooks
 .coderabbit.yml
 .cursorrules
-.cursor/
+.cursor
 .cursorignore
 CLAUDE.md
-.claude/
+.claude
 AGENTS.md
-.codex/
-.gemini/
+.codex
+.gemini
 .windsurfrules
-
