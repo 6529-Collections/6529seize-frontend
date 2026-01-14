@@ -31,6 +31,9 @@ export interface CommunityMetrics {
   readonly networkTdh: MetricData;
   readonly tdhOnMainStagePercentage: MetricData;
   readonly consolidationsFormed: MetricData;
+  readonly xtdhGranted: MetricData;
+  readonly activeIdentities: MetricData;
+  readonly profileCount: MetricData;
 }
 
 function sanitizeNumber(value: unknown): number {
@@ -144,6 +147,9 @@ async function fetchCommunityMetrics(
       networkTdh
     ),
     consolidationsFormed: transformMetric(response.consolidations_formed),
+    xtdhGranted: transformMetric(response.xtdh_granted),
+    activeIdentities: transformMetric(response.active_identities),
+    profileCount: transformMetric(response.profile_count),
   };
 }
 
