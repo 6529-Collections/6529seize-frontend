@@ -6,15 +6,18 @@ import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
 import MetricsSkeleton from "./components/MetricsSkeleton";
 import {
+  ActiveIdentitiesIcon,
   ConsolidationsIcon,
   DropsIcon,
   DroppersIcon,
   NetworkTdhIcon,
   PercentageIcon,
+  ProfileIcon,
   SubmissionsIcon,
   TdhIcon,
   VotersIcon,
   VotesIcon,
+  XtdhIcon,
 } from "./components/MetricsIcons";
 
 export default function MetricsPageClient() {
@@ -122,6 +125,31 @@ export default function MetricsPageClient() {
               icon={<ConsolidationsIcon />}
               iconBgColor="tw-bg-indigo-500"
               accentColor="tw-text-indigo-400"
+            />
+            <MetricCard
+              title="xTDH Granted"
+              dailyData={dailyQuery.data.xtdhGranted}
+              weeklyData={weeklyQuery.data.xtdhGranted}
+              icon={<XtdhIcon />}
+              iconBgColor="tw-bg-lime-500"
+              accentColor="tw-text-lime-400"
+              useValueCount
+            />
+            <MetricCard
+              title="Active Identities"
+              dailyData={dailyQuery.data.activeIdentities}
+              weeklyData={weeklyQuery.data.activeIdentities}
+              icon={<ActiveIdentitiesIcon />}
+              iconBgColor="tw-bg-pink-500"
+              accentColor="tw-text-pink-400"
+            />
+            <MetricCard
+              title="Profile Count"
+              dailyData={dailyQuery.data.profileCount}
+              weeklyData={weeklyQuery.data.profileCount}
+              icon={<ProfileIcon />}
+              iconBgColor="tw-bg-violet-500"
+              accentColor="tw-text-violet-400"
             />
           </div>
         )}
