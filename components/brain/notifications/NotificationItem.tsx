@@ -52,6 +52,7 @@ function NotificationItemComponent({
         );
       case ApiNotificationCause.DropVoted:
       case ApiNotificationCause.DropReacted:
+      case ApiNotificationCause.DropBoosted:
         return (
           <NotificationDropReacted
             notification={notification}

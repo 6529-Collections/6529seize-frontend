@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect, useContext } from "react";
+import { AuthContext } from "@/components/auth/Auth";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
-import { AuthContext } from "@/components/auth/Auth";
+import { useContext, useLayoutEffect, useRef } from "react";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];
@@ -22,7 +22,11 @@ const NotificationFilters: NotificationFilter[] = [
   { cause: [ApiNotificationCause.DropReplied], title: "Replies" },
   { cause: [ApiNotificationCause.IdentitySubscribed], title: "Follows" },
   {
-    cause: [ApiNotificationCause.DropVoted, ApiNotificationCause.DropReacted],
+    cause: [
+      ApiNotificationCause.DropVoted,
+      ApiNotificationCause.DropReacted,
+      ApiNotificationCause.DropBoosted,
+    ],
     title: "Reactions",
   },
   { cause: [ApiNotificationCause.WaveCreated], title: "Invites" },
@@ -35,18 +39,10 @@ export default function NotificationsCauseFilter({
   readonly activeFilter: NotificationFilter | null;
   readonly setActiveFilter: (filter: NotificationFilter | null) => void;
 }) {
-  const [activeFilterIndex, setActiveFilterIndex] = useState<number>(0);
-
-  const [highlightStyle, setHighlightStyle] = useState<{
-    left: number;
-    width: number;
-  }>({
-    left: 0,
-    width: 0,
-  });
-
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef<number>(0);
 
   const { connectedProfile } = useContext(AuthContext);
   const prefetchNotifications = usePrefetchNotifications();
@@ -60,30 +56,53 @@ export default function NotificationsCauseFilter({
     });
   };
 
-  useEffect(() => {
-    const button = buttonRefs.current[activeFilterIndex];
-    if (button) {
+  const updateHighlightPosition = (filterIndex: number) => {
+    const button = buttonRefs.current[filterIndex];
+    const highlight = highlightRef.current;
+    if (button && highlight) {
       let l = button.offsetLeft;
       let w = button.offsetWidth;
 
-      if (activeFilterIndex === 0) {
+      if (filterIndex === 0) {
         l += 2;
         w -= 2;
       }
-      if (activeFilterIndex === NotificationFilters.length - 1) {
+      if (filterIndex === NotificationFilters.length - 1) {
         w -= 2;
       }
 
-      setHighlightStyle({
-        left: l,
-        width: w,
-      });
+      // Direct DOM manipulation - no React state needed
+      highlight.style.left = `${l}px`;
+      highlight.style.width = `${w}px`;
     }
-  }, [activeFilterIndex]);
+  };
+
+  // Sync highlight position with activeFilter prop + handle layout shifts
+  useLayoutEffect(() => {
+    const idx =
+      activeFilter == null
+        ? 0
+        : Math.max(
+            0,
+            NotificationFilters.findIndex((f) => f.title === activeFilter.title)
+          );
+    activeIndexRef.current = idx;
+    updateHighlightPosition(idx);
+
+    // Handle layout shifts (resize, font load, etc.)
+    const container = containerRef.current;
+    if (!container) return;
+    const ro = new ResizeObserver(() =>
+      updateHighlightPosition(activeIndexRef.current)
+    );
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [activeFilter]);
 
   const handleChange = (filter: NotificationFilter, filterIndex: number) => {
     setActiveFilter(filter);
-    setActiveFilterIndex(filterIndex);
+    activeIndexRef.current = filterIndex;
+    updateHighlightPosition(filterIndex);
 
     const button = buttonRefs.current[filterIndex];
     const container = containerRef.current;
@@ -111,20 +130,18 @@ export default function NotificationsCauseFilter({
   const isActive = (filter: NotificationFilter) => activeFilter === filter;
 
   return (
-    <div className="tw-w-full tw-pt-2 tw-pb-2 lg:tw-pt-4">
+    <div className="tw-w-full tw-pb-2 tw-pt-2 lg:tw-pt-4">
       <div
         ref={containerRef}
-        className="tw-relative tw-flex tw-nowrap tw-items-center tw-gap-1 tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-overflow-x-auto">
+        className="tw-nowrap tw-relative tw-flex tw-h-10 tw-items-center tw-gap-1 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      >
         <div
-          className="tw-absolute tw-h-8 tw-bg-iron-800 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-in-out"
-          style={{
-            left: highlightStyle.left,
-            width: highlightStyle.width,
-          }}
+          ref={highlightRef}
+          className="tw-absolute tw-h-8 tw-rounded-lg tw-bg-iron-800 tw-transition-all tw-duration-300 tw-ease-in-out"
         />
         {NotificationFilters.map((filter, index) => (
           <NotificationCauseFilterButton
-            key={`notification-cause-filter-${filter.cause ?? "ALL"}`}
+            key={`notification-cause-filter-${filter.title}`}
             title={filter.title}
             isActive={isActive(filter)}
             onClick={() => handleChange(filter, index)}
@@ -164,8 +181,9 @@ function NotificationCauseFilterButton({
       className={getLinkClasses()}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={buttonRef}>
-      <span className="tw-font-semibold tw-text-sm">{title}</span>
+      ref={buttonRef}
+    >
+      <span className="tw-text-sm tw-font-semibold">{title}</span>
     </button>
   );
 }
