@@ -5814,6 +5814,37 @@ components:
           type: number
         value_count:
           type: number
+    ApiMintMetrics:
+      type: object
+      required:
+        - card
+        - mint_time
+        - subscriptions
+        - mints
+      properties:
+        card:
+          type: number
+          format: int64
+        mint_time:
+          type: number
+          format: int64
+        subscriptions:
+          type: number
+          format: int64
+        mints:
+          type: number
+          format: int64
+    ApiMintMetricsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMintMetrics"
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id
