@@ -74,6 +74,16 @@ export type INotificationDropReacted = {
   };
 };
 
+export type INotificationDropBoosted = {
+  readonly id: number;
+  readonly cause: ApiNotificationCause.DropBoosted;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
+  readonly additional_context: {};
+};
+
 export type INotificationDropQuoted = {
   readonly id: number;
   readonly cause: ApiNotificationCause.DropQuoted;
@@ -141,13 +151,16 @@ export type TypedNotification =
   | INotificationIdentityMentioned
   | INotificationDropVoted
   | INotificationDropReacted
+  | INotificationDropBoosted
   | INotificationDropQuoted
   | INotificationDropReplied
   | INotificationWaveCreated
   | INotificationAllDrops
   | INotificationPriorityAlert;
 
-export interface TypedNotificationsResponse
-  extends Omit<ApiNotificationsResponse, "notifications"> {
+export interface TypedNotificationsResponse extends Omit<
+  ApiNotificationsResponse,
+  "notifications"
+> {
   readonly notifications: TypedNotification[];
 }

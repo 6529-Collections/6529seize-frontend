@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect, useContext } from "react";
+import { AuthContext } from "@/components/auth/Auth";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
-import { AuthContext } from "@/components/auth/Auth";
+import { useContext, useEffect, useRef, useState } from "react";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];
@@ -22,7 +22,11 @@ const NotificationFilters: NotificationFilter[] = [
   { cause: [ApiNotificationCause.DropReplied], title: "Replies" },
   { cause: [ApiNotificationCause.IdentitySubscribed], title: "Follows" },
   {
-    cause: [ApiNotificationCause.DropVoted, ApiNotificationCause.DropReacted],
+    cause: [
+      ApiNotificationCause.DropVoted,
+      ApiNotificationCause.DropReacted,
+      ApiNotificationCause.DropBoosted,
+    ],
     title: "Reactions",
   },
   { cause: [ApiNotificationCause.WaveCreated], title: "Invites" },
@@ -111,12 +115,13 @@ export default function NotificationsCauseFilter({
   const isActive = (filter: NotificationFilter) => activeFilter === filter;
 
   return (
-    <div className="tw-w-full tw-pt-2 tw-pb-2 lg:tw-pt-4">
+    <div className="tw-w-full tw-pb-2 tw-pt-2 lg:tw-pt-4">
       <div
         ref={containerRef}
-        className="tw-relative tw-flex tw-nowrap tw-items-center tw-gap-1 tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-overflow-x-auto">
+        className="tw-nowrap tw-relative tw-flex tw-h-10 tw-items-center tw-gap-1 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      >
         <div
-          className="tw-absolute tw-h-8 tw-bg-iron-800 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-in-out"
+          className="tw-absolute tw-h-8 tw-rounded-lg tw-bg-iron-800 tw-transition-all tw-duration-300 tw-ease-in-out"
           style={{
             left: highlightStyle.left,
             width: highlightStyle.width,
@@ -164,8 +169,9 @@ function NotificationCauseFilterButton({
       className={getLinkClasses()}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      ref={buttonRef}>
-      <span className="tw-font-semibold tw-text-sm">{title}</span>
+      ref={buttonRef}
+    >
+      <span className="tw-text-sm tw-font-semibold">{title}</span>
     </button>
   );
 }
