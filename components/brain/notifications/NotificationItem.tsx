@@ -1,6 +1,5 @@
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { TypedNotification } from "@/types/feed.types";
@@ -97,7 +96,6 @@ function NotificationItemComponent({
           />
         );
       default:
-        assertUnreachable(notification);
         return <div />;
     }
   };
@@ -105,7 +103,7 @@ function NotificationItemComponent({
   return (
     <div className="tw-flex">
       <div className="tw-relative lg:tw-hidden">
-        <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
+        <div className="tw-h-full tw-w-[1px] -tw-translate-x-8 tw-bg-iron-800"></div>
       </div>
       <div className="tw-w-full">{getComponent()}</div>
     </div>
