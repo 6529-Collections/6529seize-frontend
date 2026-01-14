@@ -42,6 +42,7 @@ export default function NotificationsCauseFilter({
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
   const highlightRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef<number>(0);
 
   const { connectedProfile } = useContext(AuthContext);
   const prefetchNotifications = usePrefetchNotifications();
@@ -76,13 +77,31 @@ export default function NotificationsCauseFilter({
     }
   };
 
-  // Sync DOM position on initial mount - valid effect use (external system)
+  // Sync highlight position with activeFilter prop + handle layout shifts
   useLayoutEffect(() => {
-    updateHighlightPosition(0);
-  }, []);
+    const idx =
+      activeFilter == null
+        ? 0
+        : Math.max(
+            0,
+            NotificationFilters.findIndex((f) => f.title === activeFilter.title)
+          );
+    activeIndexRef.current = idx;
+    updateHighlightPosition(idx);
+
+    // Handle layout shifts (resize, font load, etc.)
+    const container = containerRef.current;
+    if (!container) return;
+    const ro = new ResizeObserver(() =>
+      updateHighlightPosition(activeIndexRef.current)
+    );
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [activeFilter]);
 
   const handleChange = (filter: NotificationFilter, filterIndex: number) => {
     setActiveFilter(filter);
+    activeIndexRef.current = filterIndex;
     updateHighlightPosition(filterIndex);
 
     const button = buttonRefs.current[filterIndex];

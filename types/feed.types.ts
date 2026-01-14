@@ -81,7 +81,7 @@ export type INotificationDropBoosted = {
   readonly read_at: number | null;
   readonly related_identity: ApiProfileMin;
   readonly related_drops: Array<ApiDrop>;
-  readonly additional_context: {};
+  readonly additional_context: Record<string, any>;
 };
 
 export type INotificationDropQuoted = {
