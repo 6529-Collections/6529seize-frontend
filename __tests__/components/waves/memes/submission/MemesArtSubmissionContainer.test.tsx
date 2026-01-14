@@ -53,19 +53,24 @@ describe('MemesArtSubmissionContainer', () => {
         airdrop_config: [{ id: "test-initial", address: "", count: 20 }],
         payment_info: {
           payment_address: "",
+          has_designated_payee: false,
+          designated_payee_name: "",
         },
         allowlist_batches: [],
         additional_media: {
           artist_profile_media: [],
           artwork_commentary_media: [],
+          preview_image: "",
         },
         commentary: "",
+        about_artist: "",
       },
       setAirdropConfig: jest.fn(),
       setPaymentInfo: jest.fn(),
       setAllowlistBatches: jest.fn(),
       setAdditionalMedia: jest.fn(),
       setCommentary: jest.fn(),
+      setAboutArtist: jest.fn(),
       handleBackToArtwork: jest.fn(),
     };
 

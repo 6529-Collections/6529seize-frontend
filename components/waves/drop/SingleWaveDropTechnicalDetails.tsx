@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useId, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { Tooltip } from "react-tooltip";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
-import CopyIcon from "@/components/utils/icons/CopyIcon";
 import { useAuth } from "@/components/auth/Auth";
+import CopyIcon from "@/components/utils/icons/CopyIcon";
+import EnsAddressDisplay from "@/components/utils/input/ens-address/EnsAddressDisplay";
+import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useId, useMemo, useState } from "react";
+import { Tooltip } from "react-tooltip";
 
 interface AirdropEntry {
   readonly address: string;
@@ -60,14 +61,31 @@ const parseAirdropConfig = (raw: string | undefined): AirdropEntry[] => {
     .filter(isPresent);
 };
 
-const parsePaymentAddress = (raw: string | undefined): string => {
+interface PaymentDetails {
+  readonly address: string;
+  readonly designatedPayeeName: string;
+}
+
+const parsePaymentDetails = (raw: string | undefined): PaymentDetails => {
   const parsed = parseJson<unknown>(raw, null);
   if (!parsed || typeof parsed !== "object") {
-    return "";
+    return { address: "", designatedPayeeName: "" };
   }
-  const paymentAddress = (parsed as { payment_address?: unknown })
-    .payment_address;
-  return typeof paymentAddress === "string" ? paymentAddress.trim() : "";
+  const record = parsed as {
+    payment_address?: unknown;
+    has_designated_payee?: unknown;
+    designated_payee_name?: unknown;
+  };
+  const address =
+    typeof record.payment_address === "string"
+      ? record.payment_address.trim()
+      : "";
+  const hasDesignatedPayee = record.has_designated_payee === true;
+  const designatedPayeeName =
+    hasDesignatedPayee && typeof record.designated_payee_name === "string"
+      ? record.designated_payee_name.trim()
+      : "";
+  return { address, designatedPayeeName };
 };
 
 const parseAllowlistBatches = (raw: string | undefined): AllowlistBatch[] => {
@@ -144,13 +162,13 @@ export const SingleWaveDropTechnicalDetails = ({
     [setToast]
   );
 
-  const { paymentAddress, airdropEntries, allowlistBatches } = useMemo(() => {
+  const { paymentDetails, airdropEntries, allowlistBatches } = useMemo(() => {
     const metadata = drop.metadata ?? [];
     const getEntryValue = (key: MemesSubmissionAdditionalInfoKey) =>
       metadata.find((item) => item.data_key === key)?.data_value;
 
     return {
-      paymentAddress: parsePaymentAddress(
+      paymentDetails: parsePaymentDetails(
         getEntryValue(MemesSubmissionAdditionalInfoKey.PAYMENT_INFO)
       ),
       airdropEntries: parseAirdropConfig(
@@ -163,7 +181,7 @@ export const SingleWaveDropTechnicalDetails = ({
   }, [drop.metadata]);
 
   const hasDetails =
-    Boolean(paymentAddress) ||
+    Boolean(paymentDetails.address) ||
     airdropEntries.length > 0 ||
     allowlistBatches.length > 0;
 
@@ -181,7 +199,7 @@ export const SingleWaveDropTechnicalDetails = ({
         id={buttonId}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className={`tw-w-full tw-px-4 tw-py-4 tw-flex tw-items-center tw-justify-between tw-text-left desktop-hover:hover:tw-bg-iron-900 tw-transition-colors tw-duration-300 tw-ease-out tw-border-0 ${
+        className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-border-0 tw-px-4 tw-py-4 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 ${
           isOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
         }`}
       >
@@ -197,7 +215,7 @@ export const SingleWaveDropTechnicalDetails = ({
           transition={{ duration: 0.3 }}
         >
           <ChevronDownIcon
-            className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${
+            className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${
               isOpen ? "tw-text-iron-400" : "tw-text-iron-600"
             }`}
           />
@@ -216,22 +234,29 @@ export const SingleWaveDropTechnicalDetails = ({
             transition={{ duration: 0.3 }}
             className="tw-overflow-hidden"
           >
-            <div className="tw-space-y-6 tw-text-xs tw-px-4 tw-py-4 tw-bg-iron-950">
-              {paymentAddress && (
-                <div className="tw-p-4 tw-bg-iron-900/40 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800">
-                  <div className="tw-text-[10px] tw-text-iron-500 tw-uppercase tw-tracking-wide tw-mb-3">
+            <div className="tw-space-y-6 tw-bg-iron-950 tw-px-4 tw-py-4 tw-text-xs">
+              {paymentDetails.address && (
+                <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40 tw-p-4">
+                  <div className="tw-mb-3 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-iron-500">
                     Payment Address
+                    {paymentDetails.designatedPayeeName && (
+                      <span className="tw-ml-1 tw-text-white">
+                        &ndash; Designated Payee: <span className="tw-normal-case">{paymentDetails.designatedPayeeName}</span>
+                      </span>
+                    )}
                   </div>
-                  <div className="tw-py-2 tw-px-3 tw-bg-iron-900 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-font-mono tw-text-iron-200 tw-font-medium tw-flex tw-items-center tw-justify-between tw-gap-2">
-                    <div className="tw-break-all">{paymentAddress}</div>
+                  <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2 tw-font-mono tw-text-xs tw-font-medium tw-text-iron-200">
+                    <div className="tw-min-w-0 tw-flex-1 tw-break-all">
+                      <EnsAddressDisplay address={paymentDetails.address} />
+                    </div>
                     <button
-                      onClick={() => copyToClipboard(paymentAddress)}
-                      className="tw-shrink-0 tw-p-1.5 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded tw-text-iron-400 hover:tw-text-iron-200 hover:tw-bg-iron-800/60 tw-transition-colors"
+                      onClick={() => copyToClipboard(paymentDetails.address)}
+                      className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800/60 hover:tw-text-iron-200"
                       title="Copy address"
                       data-tooltip-id={tooltipId}
                       data-tooltip-content="Copy"
                     >
-                      <span className="tw-scale-75 tw-inline-flex">
+                      <span className="tw-inline-flex tw-scale-75">
                         <CopyIcon />
                       </span>
                     </button>
@@ -240,31 +265,31 @@ export const SingleWaveDropTechnicalDetails = ({
               )}
 
               {airdropEntries.length > 0 && (
-                <div className="tw-p-4 tw-bg-iron-900/40 tw-rounded-lg tw-border tw-border-solid tw-border-iron-900">
-                  <div className="tw-text-[10px] tw-text-iron-500 tw-uppercase tw-tracking-wide tw-mb-3">
+                <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-900/40 tw-p-4">
+                  <div className="tw-mb-3 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-iron-500">
                     Airdrop
                   </div>
-                  <div className="tw-bg-iron-900 tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0">
+                  <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-rounded-lg tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-900">
                     {airdropEntries.map((entry, index) => (
                       <div
                         key={`${entry.address}-${index}`}
-                        className="tw-py-3 tw-px-3 tw-flex tw-items-center tw-justify-between tw-gap-3"
+                        className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-py-3"
                       >
-                        <div className="tw-flex-1 tw-min-w-0 tw-font-mono tw-line-clamp-1 tw-text-iron-200 tw-font-medium tw-text-xs tw-break-all">
-                          {entry.address}
+                        <div className="tw-min-w-0 tw-flex-1 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-text-iron-200">
+                          <EnsAddressDisplay address={entry.address} />
                         </div>
-                        <div className="tw-flex tw-items-center tw-gap-2 tw-shrink-0">
-                          <div className="tw-text-iron-400 tw-font-medium">
+                        <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
+                          <div className="tw-font-medium tw-text-iron-400">
                             ×{entry.count}
                           </div>
                           <button
                             onClick={() => copyToClipboard(entry.address)}
-                            className="tw-shrink-0 tw-p-1.5 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded tw-text-iron-400 hover:tw-text-iron-200 hover:tw-bg-iron-800/60 tw-transition-colors"
+                            className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800/60 hover:tw-text-iron-200"
                             title="Copy address"
                             data-tooltip-id={tooltipId}
                             data-tooltip-content="Copy"
                           >
-                            <span className="tw-scale-75 tw-inline-flex">
+                            <span className="tw-inline-flex tw-scale-75">
                               <CopyIcon />
                             </span>
                           </button>
@@ -276,43 +301,43 @@ export const SingleWaveDropTechnicalDetails = ({
               )}
 
               {allowlistBatches.length > 0 && (
-                <div className="tw-p-4 tw-bg-iron-900/40 tw-border tw-border-solid tw-border-iron-900">
-                  <div className="tw-text-[10px] tw-text-iron-500 tw-uppercase tw-tracking-wide tw-mb-3">
+                <div className="tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-900/40 tw-p-4">
+                  <div className="tw-mb-3 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-iron-500">
                     Allowlist
                   </div>
                   <div className="tw-space-y-3">
                     {allowlistBatches.map((batch, index) => (
                       <div
                         key={`${batch.contract}-${index}`}
-                        className="tw-p-3 tw-bg-iron-900 tw-rounded-lg tw-space-y-2"
+                        className="tw-space-y-2 tw-rounded-lg tw-bg-iron-900 tw-p-3"
                       >
                         <div>
                           <div className="tw-text-[10px] tw-text-iron-500">
                             Contract Address
                           </div>
                           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-                            <div className="tw-font-mono tw-line-clamp-1 tw-text-iron-200 tw-font-medium tw-text-xs tw-break-all">
+                            <div className="tw-line-clamp-1 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-text-iron-200">
                               {batch.contract}
                             </div>
                             <button
                               onClick={() => copyToClipboard(batch.contract)}
-                              className="tw-shrink-0 tw-p-1.5 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded tw-text-iron-400 hover:tw-text-iron-200 hover:tw-bg-iron-800/60 tw-transition-colors"
+                              className="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800/60 hover:tw-text-iron-200"
                               title="Copy address"
                               data-tooltip-id={tooltipId}
                               data-tooltip-content="Copy"
                             >
-                              <span className="tw-scale-75 tw-inline-flex">
+                              <span className="tw-inline-flex tw-scale-75">
                                 <CopyIcon />
                               </span>
                             </button>
                           </div>
                         </div>
                         {batch.tokenIds && (
-                          <div className="tw-pt-2 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
-                            <div className="tw-text-[10px] tw-text-iron-500 tw-mb-2">
+                          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2">
+                            <div className="tw-mb-2 tw-text-[10px] tw-text-iron-500">
                               Token IDs
                             </div>
-                            <div className="tw-font-mono tw-text-iron-200 tw-font-medium tw-text-xs">
+                            <div className="tw-font-mono tw-text-xs tw-font-medium tw-text-iron-200">
                               {batch.tokenIds}
                             </div>
                           </div>

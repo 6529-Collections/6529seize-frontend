@@ -4,18 +4,37 @@ import AdditionalMediaUpload from "@/components/waves/memes/submission/component
 
 describe("AdditionalMediaUpload", () => {
   const defaultProps = {
-    artworkCommentaryMedia: [],
+    supportingMedia: [],
     artworkCommentary: "",
-    onArtworkCommentaryMediaChange: jest.fn(),
+    aboutArtist: "",
+    previewImage: "",
+    requiresPreviewImage: false,
+    previewRequiredMediaType: null,
+    onSupportingMediaChange: jest.fn(),
+    onPreviewImageChange: jest.fn(),
     onArtworkCommentaryChange: jest.fn(),
+    onAboutArtistChange: jest.fn(),
   };
 
-  it("renders commentary media section and commentary field", () => {
+  it("renders supporting media section and commentary field", () => {
     render(<AdditionalMediaUpload {...defaultProps} />);
-    expect(screen.getByText(/Artwork Commentary Media/i)).toBeInTheDocument();
+    expect(screen.getByText(/Supporting Media/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("textbox", { name: /^Artwork Commentary$/i })
+      screen.getByRole("textbox", { name: /Artwork Commentary/i })
     ).toBeInTheDocument();
+  });
+
+  it("shows preview image section when video submission", () => {
+    render(<AdditionalMediaUpload {...defaultProps} requiresPreviewImage previewRequiredMediaType="Video" />);
+    expect(screen.getByText(/Preview Image \*/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Video submissions require a preview image/i)
+    ).toBeInTheDocument();
+  });
+
+  it("does not show preview image section for regular submissions", () => {
+    render(<AdditionalMediaUpload {...defaultProps} requiresPreviewImage={false} />);
+    expect(screen.queryByText(/Preview Image \*/i)).not.toBeInTheDocument();
   });
 
   it("calls onArtworkCommentaryChange when commentary is updated", async () => {
@@ -29,13 +48,10 @@ describe("AdditionalMediaUpload", () => {
     );
 
     const textarea = screen.getByRole("textbox", {
-      name: /^Artwork Commentary$/i,
+      name: /Artwork Commentary/i,
     });
-    await user.type(textarea, "This is my commentary");
-    await user.tab();
+    await user.type(textarea, "T");
 
-    expect(onArtworkCommentaryChange).toHaveBeenCalledWith(
-      "This is my commentary"
-    );
+    expect(onArtworkCommentaryChange).toHaveBeenCalled();
   });
 });

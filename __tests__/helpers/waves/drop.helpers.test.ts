@@ -1,5 +1,6 @@
-import { getStableDropKey, DropSize, convertApiDropToExtendedDrop, getFeedItemKey } from '@/helpers/waves/drop.helpers';
+import { getStableDropKey, DropSize, convertApiDropToExtendedDrop, getFeedItemKey, getDropPreviewImageUrl } from '@/helpers/waves/drop.helpers';
 import { ApiFeedItemType } from '@/generated/models/ApiFeedItemType';
+import { MemesSubmissionAdditionalInfoKey } from '@/components/waves/memes/submission/types/OperationalData';
 
 const baseDrop: any = {
   id: 'd1',
@@ -29,5 +30,46 @@ describe('drop.helpers', () => {
     const item = { serial_no: 5, item: baseDrop, type: ApiFeedItemType.DropCreated } as any;
     expect(getFeedItemKey({ item, index: 0 })).toBe(baseDrop.id);
     expect(getFeedItemKey({ item, index: 2 })).toBe('feed-item-5');
+  });
+
+  describe('getDropPreviewImageUrl', () => {
+    it('returns null when metadata is undefined', () => {
+      expect(getDropPreviewImageUrl(undefined)).toBeNull();
+    });
+
+    it('returns null when metadata is empty', () => {
+      expect(getDropPreviewImageUrl([])).toBeNull();
+    });
+
+    it('returns null when additional_media entry is missing', () => {
+      const metadata = [{ data_key: 'other_key', data_value: 'value' }];
+      expect(getDropPreviewImageUrl(metadata as any)).toBeNull();
+    });
+
+    it('returns null when preview_image is not in additional_media', () => {
+      const metadata = [{
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_value: JSON.stringify({ artist_profile_media: [] })
+      }];
+      expect(getDropPreviewImageUrl(metadata as any)).toBeNull();
+    });
+
+    it('returns parsed IPFS URL when preview_image exists', () => {
+      const ipfsHash = 'QmTest123';
+      const metadata = [{
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_value: JSON.stringify({ preview_image: `ipfs://${ipfsHash}` })
+      }];
+      const result = getDropPreviewImageUrl(metadata as any);
+      expect(result).toContain(ipfsHash);
+    });
+
+    it('returns null when JSON parsing fails', () => {
+      const metadata = [{
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_value: 'invalid json'
+      }];
+      expect(getDropPreviewImageUrl(metadata as any)).toBeNull();
+    });
   });
 });
