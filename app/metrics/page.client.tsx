@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
@@ -27,9 +28,11 @@ import {
 export default function MetricsPageClient() {
   useSetTitle("Metrics");
 
+  const [mintPageSize, setMintPageSize] = useState(10);
+
   const dailyQuery = useCommunityMetrics("DAY");
   const weeklyQuery = useCommunityMetrics("WEEK");
-  const mintQuery = useMintMetrics(10);
+  const mintQuery = useMintMetrics(mintPageSize);
 
   const isLoading =
     dailyQuery.isLoading || weeklyQuery.isLoading || mintQuery.isLoading;
@@ -62,6 +65,8 @@ export default function MetricsPageClient() {
               <MintMetricsCard
                 data={mintQuery.data.items}
                 icon={<MintIcon />}
+                pageSize={mintPageSize}
+                onPageSizeChange={setMintPageSize}
               />
               <MetricCard
                 title="Distinct Droppers"
@@ -113,32 +118,23 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-amber-400"
                 unit="TDH"
               />
-              <MetricCard
+              <CumulativeMetricCard
                 title="Network TDH"
                 dailyData={dailyQuery.data.networkTdh}
                 weeklyData={weeklyQuery.data.networkTdh}
                 icon={<NetworkTdhIcon />}
                 iconBgColor="tw-bg-teal-500"
                 accentColor="tw-text-teal-400"
-                useValueCount
+                unit="TDH"
               />
-              <MetricCard
-                title="TDH Utilization"
+              <CumulativeMetricCard
+                title="TDH Utilization %"
                 dailyData={dailyQuery.data.tdhOnMainStagePercentage}
                 weeklyData={weeklyQuery.data.tdhOnMainStagePercentage}
                 icon={<PercentageIcon />}
                 iconBgColor="tw-bg-rose-500"
                 accentColor="tw-text-rose-400"
-                useValueCount
-                suffix="%"
-              />
-              <MetricCard
-                title="Consolidations Formed"
-                dailyData={dailyQuery.data.consolidationsFormed}
-                weeklyData={weeklyQuery.data.consolidationsFormed}
-                icon={<ConsolidationsIcon />}
-                iconBgColor="tw-bg-indigo-500"
-                accentColor="tw-text-indigo-400"
+                unit="%"
               />
               <CumulativeMetricCard
                 title="xTDH Granted"
@@ -149,6 +145,14 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-lime-400"
                 unit="xTDH"
               />
+              <CumulativeMetricCard
+                title="Profile Count"
+                dailyData={dailyQuery.data.profileCount}
+                weeklyData={weeklyQuery.data.profileCount}
+                icon={<ProfileIcon />}
+                iconBgColor="tw-bg-violet-500"
+                accentColor="tw-text-violet-400"
+              />
               <MetricCard
                 title="Active Identities"
                 dailyData={dailyQuery.data.activeIdentities}
@@ -157,13 +161,13 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-pink-500"
                 accentColor="tw-text-pink-400"
               />
-              <CumulativeMetricCard
-                title="Profile Count"
-                dailyData={dailyQuery.data.profileCount}
-                weeklyData={weeklyQuery.data.profileCount}
-                icon={<ProfileIcon />}
-                iconBgColor="tw-bg-violet-500"
-                accentColor="tw-text-violet-400"
+              <MetricCard
+                title="Consolidations Formed"
+                dailyData={dailyQuery.data.consolidationsFormed}
+                weeklyData={weeklyQuery.data.consolidationsFormed}
+                icon={<ConsolidationsIcon />}
+                iconBgColor="tw-bg-indigo-500"
+                accentColor="tw-text-indigo-400"
               />
             </div>
           )}

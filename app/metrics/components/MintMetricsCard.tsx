@@ -1,9 +1,13 @@
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiMintMetrics } from "@/generated/models/ApiMintMetrics";
 
+const PAGE_SIZE_OPTIONS = [10, 50] as const;
+
 interface MintMetricsCardProps {
   readonly data: ApiMintMetrics[];
   readonly icon: React.ReactNode;
+  readonly pageSize: number;
+  readonly onPageSizeChange: (size: number) => void;
 }
 
 function formatNumberWithCommas(value: number): string {
@@ -72,17 +76,19 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
           );
         })}
       </div>
-      {/* Card ID labels */}
-      <div className="tw-flex tw-gap-3">
-        {data.map((item) => (
-          <div
-            key={item.card}
-            className="tw-flex-1 tw-text-center tw-text-[10px] tw-text-neutral-500"
-          >
-            #{item.card}
-          </div>
-        ))}
-      </div>
+      {/* Card ID labels - hide when too many items */}
+      {data.length <= 10 && (
+        <div className="tw-flex tw-gap-3">
+          {data.map((item) => (
+            <div
+              key={item.card}
+              className="tw-flex-1 tw-text-center tw-text-[10px] tw-text-neutral-500"
+            >
+              #{item.card}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="tw-flex tw-items-center tw-justify-center tw-gap-4 tw-text-xs tw-text-neutral-400">
         <div className="tw-flex tw-items-center tw-gap-1.5">
           <span className="tw-size-2 tw-rounded-full tw-bg-emerald-500" />
@@ -97,15 +103,44 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
   );
 }
 
-export default function MintMetricsCard({ data, icon }: MintMetricsCardProps) {
+export default function MintMetricsCard({
+  data,
+  icon,
+  pageSize,
+  onPageSizeChange,
+}: MintMetricsCardProps) {
   const latestMint = data[0];
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5 lg:tw-col-span-2">
+    <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
       <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between">
-        <h3 className="tw-text-base tw-font-semibold tw-text-white">
-          Mint Stats
-        </h3>
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <h3 className="tw-text-base tw-font-semibold tw-text-white">
+            Mint Stats
+          </h3>
+          <div className="tw-flex tw-gap-1">
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <span
+                key={size}
+                role="button"
+                tabIndex={0}
+                onClick={() => onPageSizeChange(size)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    onPageSizeChange(size);
+                  }
+                }}
+                className={`tw-cursor-pointer tw-select-none tw-rounded tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-transition-colors ${
+                  pageSize === size
+                    ? "tw-bg-emerald-500 tw-text-white"
+                    : "tw-text-neutral-400 hover:tw-bg-neutral-800 hover:tw-text-white"
+                }`}
+              >
+                {size}
+              </span>
+            ))}
+          </div>
+        </div>
         <div className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-emerald-500">
           {icon}
         </div>
