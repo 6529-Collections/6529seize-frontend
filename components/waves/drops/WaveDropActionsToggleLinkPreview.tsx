@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useContext, useMemo, useState } from "react";
-import { Tooltip } from "react-tooltip";
 import { AuthContext, useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -9,6 +7,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPost } from "@/services/api/common-api";
+import { useCallback, useContext, useMemo, useState } from "react";
+import { Tooltip } from "react-tooltip";
 
 function HideLinkPreviewIcon({ className }: { readonly className?: string }) {
   return (
@@ -97,6 +97,30 @@ function dropHasLinks(drop: ExtendedDrop): boolean {
   return false;
 }
 
+function ToggleIcon({
+  loading,
+  previewsHidden,
+  isMobile,
+}: {
+  readonly loading: boolean;
+  readonly previewsHidden: boolean;
+  readonly isMobile: boolean;
+}) {
+  if (loading) {
+    return <Spinner dimension={20} />;
+  }
+
+  const mobileClassName = "tw-size-5 tw-flex-shrink-0 tw-text-iron-300";
+  const desktopClassName =
+    "tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300";
+  const className = isMobile ? mobileClassName : desktopClassName;
+
+  if (previewsHidden) {
+    return <ShowLinkPreviewIcon className={className} />;
+  }
+  return <HideLinkPreviewIcon className={className} />;
+}
+
 interface WaveDropActionsToggleLinkPreviewProps {
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
@@ -120,6 +144,10 @@ export default function WaveDropActionsToggleLinkPreview({
     connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
 
   const previewsHidden = drop.hide_link_preview;
+
+  const labelText = previewsHidden
+    ? "Show Link Previews"
+    : "Hide Link Previews";
 
   const handleToggle = useCallback(async () => {
     if (loading) return;
@@ -174,24 +202,24 @@ export default function WaveDropActionsToggleLinkPreview({
     handleToggle();
   };
 
+  const buttonClassName = loading
+    ? "tw-opacity-50 tw-cursor-default"
+    : "active:tw-bg-iron-800";
+
   if (isMobile) {
     return (
       <button
         onClick={handleClick}
         disabled={loading}
-        className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
-          loading ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
-        } tw-transition-colors tw-duration-200`}
+        className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${buttonClassName} tw-transition-colors tw-duration-200`}
       >
-        {loading ? (
-          <Spinner dimension={20} />
-        ) : previewsHidden ? (
-          <ShowLinkPreviewIcon className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300" />
-        ) : (
-          <HideLinkPreviewIcon className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300" />
-        )}
+        <ToggleIcon
+          loading={loading}
+          previewsHidden={previewsHidden}
+          isMobile={true}
+        />
         <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-          {previewsHidden ? "Show Link Previews" : "Hide Link Previews"}
+          {labelText}
         </span>
       </button>
     );
@@ -203,17 +231,17 @@ export default function WaveDropActionsToggleLinkPreview({
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 hover:tw-text-iron-300"
-        aria-label={previewsHidden ? "Show link previews" : "Hide link previews"}
+        className="icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+        aria-label={
+          previewsHidden ? "Show link previews" : "Hide link previews"
+        }
         data-tooltip-id={`toggle-link-preview-${drop.id}`}
       >
-        {loading ? (
-          <Spinner dimension={20} />
-        ) : previewsHidden ? (
-          <ShowLinkPreviewIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300" />
-        ) : (
-          <HideLinkPreviewIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300" />
-        )}
+        <ToggleIcon
+          loading={loading}
+          previewsHidden={previewsHidden}
+          isMobile={false}
+        />
       </button>
       <Tooltip
         id={`toggle-link-preview-${drop.id}`}
@@ -234,9 +262,7 @@ export default function WaveDropActionsToggleLinkPreview({
           pointerEvents: "none",
         }}
       >
-        <span className="tw-text-xs">
-          {previewsHidden ? "Show Link Previews" : "Hide Link Previews"}
-        </span>
+        <span className="tw-text-xs">{labelText}</span>
       </Tooltip>
     </>
   );
