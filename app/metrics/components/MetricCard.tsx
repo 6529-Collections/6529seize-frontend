@@ -1,39 +1,21 @@
+import type { ReactNode } from "react";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { MetricData } from "@/hooks/useCommunityMetrics";
+import {
+  formatCompactNumber,
+  formatNumberWithCommas,
+  formatPercent,
+} from "../utils/formatNumbers";
 
 interface MetricCardProps {
   readonly title: string;
   readonly dailyData: MetricData;
   readonly weeklyData: MetricData;
-  readonly icon: React.ReactNode;
+  readonly icon: ReactNode;
   readonly iconBgColor: string;
   readonly accentColor: string;
   readonly useValueCount?: boolean;
   readonly suffix?: string;
-}
-
-function formatNumberWithCommas(value: number): string {
-  return new Intl.NumberFormat("en-US").format(value);
-}
-
-function formatCompactNumber(value: number): string {
-  const absValue = Math.abs(value);
-  if (absValue >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(2).replace(/\.?0+$/, "")}B`;
-  }
-  if (absValue >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
-  }
-  if (absValue >= 1_000) {
-    return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
-  }
-  return formatNumberWithCommas(value);
-}
-
-function formatPercent(value: number | null): string {
-  if (value === null) return "N/A";
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}%`;
 }
 
 function StatBlock({

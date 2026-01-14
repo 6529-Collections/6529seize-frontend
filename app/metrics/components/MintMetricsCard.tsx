@@ -1,17 +1,15 @@
+import type { ReactNode } from "react";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiMintMetrics } from "@/generated/models/ApiMintMetrics";
+import { formatNumberWithCommas } from "../utils/formatNumbers";
 
 const PAGE_SIZE_OPTIONS = [10, 50] as const;
 
 interface MintMetricsCardProps {
   readonly data: ApiMintMetrics[];
-  readonly icon: React.ReactNode;
+  readonly icon: ReactNode;
   readonly pageSize: number;
   readonly onPageSizeChange: (size: number) => void;
-}
-
-function formatNumberWithCommas(value: number): string {
-  return new Intl.NumberFormat("en-US").format(value);
 }
 
 function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
@@ -61,12 +59,10 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
                 className="tw-flex tw-flex-1 tw-cursor-default tw-flex-col tw-overflow-hidden tw-rounded-t tw-transition-all hover:tw-opacity-80"
                 style={{ height: `${Math.max(totalHeight, 3)}%` }}
               >
-                {/* Mints on top */}
                 <div
                   className="tw-w-full tw-bg-emerald-500"
                   style={{ height: `${mintProportion}%` }}
                 />
-                {/* Subscriptions on bottom */}
                 <div
                   className="tw-w-full tw-bg-blue-500"
                   style={{ height: `${subProportion}%` }}
@@ -110,6 +106,14 @@ export default function MintMetricsCard({
   onPageSizeChange,
 }: MintMetricsCardProps) {
   const latestMint = data[0];
+
+  if (data.length === 0) {
+    return (
+      <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
+        <p className="tw-text-sm tw-text-neutral-400">No mint data available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
