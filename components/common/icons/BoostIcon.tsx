@@ -14,7 +14,7 @@ const BoostIcon = ({ className, variant = "filled" }: BoostIconProps) => {
   return (
     <svg
       className={className}
-      viewBox="0 0 24 24"
+      viewBox="0 2 24 24"
       fill={isFilled ? "currentColor" : "none"}
       stroke="currentColor"
       strokeWidth={isFilled ? 0 : 1.5}
