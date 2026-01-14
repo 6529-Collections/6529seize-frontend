@@ -13,20 +13,19 @@ function formatNumberWithCommas(value: number): string {
 function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
   if (data.length === 0) return null;
 
-  const maxMints = Math.max(...data.map((d) => d.mints));
-  const maxSubs = Math.max(...data.map((d) => d.subscriptions));
-  const maxValue = Math.max(maxMints, maxSubs);
-
-  // Reverse to show oldest on left, newest on right
-  const chartData = [...data].reverse();
+  // Max total (subs + mints) for scaling
+  const maxTotal = Math.max(...data.map((d) => d.subscriptions + d.mints));
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
-      <div className="tw-flex tw-h-16 tw-items-end tw-gap-1">
-        {chartData.map((item) => {
-          const mintHeight = maxValue > 0 ? (item.mints / maxValue) * 100 : 0;
-          const subHeight =
-            maxValue > 0 ? (item.subscriptions / maxValue) * 100 : 0;
+      <div className="tw-flex tw-h-16 tw-items-end tw-gap-3">
+        {data.map((item) => {
+          const total = item.subscriptions + item.mints;
+          const totalHeight = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+          // Proportions within the bar
+          const mintProportion = total > 0 ? (item.mints / total) * 100 : 0;
+          const subProportion =
+            total > 0 ? (item.subscriptions / total) * 100 : 0;
 
           return (
             <CustomTooltip
@@ -47,23 +46,42 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
                       {formatNumberWithCommas(item.subscriptions)}
                     </span>
                   </div>
+                  <div className="tw-mt-1 tw-border-t tw-border-neutral-600 tw-pt-1">
+                    Total: {formatNumberWithCommas(total)}
+                  </div>
                 </div>
               }
               placement="top"
             >
-              <div className="tw-flex tw-h-full tw-flex-1 tw-cursor-default tw-items-end tw-gap-0.5">
+              <div
+                className="tw-flex tw-flex-1 tw-cursor-default tw-flex-col tw-overflow-hidden tw-rounded-t tw-transition-all hover:tw-opacity-80"
+                style={{ height: `${Math.max(totalHeight, 3)}%` }}
+              >
+                {/* Mints on top */}
                 <div
-                  className="tw-min-h-[2px] tw-w-1/2 tw-rounded-t tw-bg-emerald-500 tw-transition-all hover:tw-opacity-80"
-                  style={{ height: `${Math.max(mintHeight, 2)}%` }}
+                  className="tw-w-full tw-bg-emerald-500"
+                  style={{ height: `${mintProportion}%` }}
                 />
+                {/* Subscriptions on bottom */}
                 <div
-                  className="tw-min-h-[2px] tw-w-1/2 tw-rounded-t tw-bg-blue-500 tw-transition-all hover:tw-opacity-80"
-                  style={{ height: `${Math.max(subHeight, 2)}%` }}
+                  className="tw-w-full tw-bg-blue-500"
+                  style={{ height: `${subProportion}%` }}
                 />
               </div>
             </CustomTooltip>
           );
         })}
+      </div>
+      {/* Card ID labels */}
+      <div className="tw-flex tw-gap-3">
+        {data.map((item) => (
+          <div
+            key={item.card}
+            className="tw-flex-1 tw-text-center tw-text-[10px] tw-text-neutral-500"
+          >
+            #{item.card}
+          </div>
+        ))}
       </div>
       <div className="tw-flex tw-items-center tw-justify-center tw-gap-4 tw-text-xs tw-text-neutral-400">
         <div className="tw-flex tw-items-center tw-gap-1.5">

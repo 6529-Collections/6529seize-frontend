@@ -7,6 +7,7 @@ import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
 import MintMetricsCard from "./components/MintMetricsCard";
 import MetricsSkeleton from "./components/MetricsSkeleton";
+import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import {
   ActiveIdentitiesIcon,
   ConsolidationsIcon,
@@ -63,20 +64,20 @@ export default function MetricsPageClient() {
                 icon={<MintIcon />}
               />
               <MetricCard
-                title="Drops Created"
-                dailyData={dailyQuery.data.dropsCreated}
-                weeklyData={weeklyQuery.data.dropsCreated}
-                icon={<DropsIcon />}
-                iconBgColor="tw-bg-blue-500"
-                accentColor="tw-text-blue-400"
-              />
-              <MetricCard
                 title="Distinct Droppers"
                 dailyData={dailyQuery.data.distinctDroppers}
                 weeklyData={weeklyQuery.data.distinctDroppers}
                 icon={<DroppersIcon />}
                 iconBgColor="tw-bg-purple-500"
                 accentColor="tw-text-purple-400"
+              />
+              <MetricCard
+                title="Drops Created"
+                dailyData={dailyQuery.data.dropsCreated}
+                weeklyData={weeklyQuery.data.dropsCreated}
+                icon={<DropsIcon />}
+                iconBgColor="tw-bg-blue-500"
+                accentColor="tw-text-blue-400"
               />
               <MetricCard
                 title="Submissions"
@@ -95,7 +96,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-emerald-400"
               />
               <MetricCard
-                title="Votes"
+                title="Vote Volume"
                 dailyData={dailyQuery.data.mainStageVotes}
                 weeklyData={weeklyQuery.data.mainStageVotes}
                 icon={<VotesIcon />}
@@ -103,14 +104,14 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-cyan-400"
                 useValueCount
               />
-              <MetricCard
-                title="Main Stage TDH"
+              <CumulativeMetricCard
+                title="Voting Power"
                 dailyData={dailyQuery.data.tdhOnMainStageSubmissions}
                 weeklyData={weeklyQuery.data.tdhOnMainStageSubmissions}
                 icon={<TdhIcon />}
                 iconBgColor="tw-bg-amber-500"
                 accentColor="tw-text-amber-400"
-                useValueCount
+                unit="TDH"
               />
               <MetricCard
                 title="Network TDH"
@@ -122,7 +123,7 @@ export default function MetricsPageClient() {
                 useValueCount
               />
               <MetricCard
-                title="Main Stage TDH %"
+                title="TDH Utilization"
                 dailyData={dailyQuery.data.tdhOnMainStagePercentage}
                 weeklyData={weeklyQuery.data.tdhOnMainStagePercentage}
                 icon={<PercentageIcon />}
@@ -139,14 +140,14 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-indigo-500"
                 accentColor="tw-text-indigo-400"
               />
-              <MetricCard
+              <CumulativeMetricCard
                 title="xTDH Granted"
                 dailyData={dailyQuery.data.xtdhGranted}
                 weeklyData={weeklyQuery.data.xtdhGranted}
                 icon={<XtdhIcon />}
                 iconBgColor="tw-bg-lime-500"
                 accentColor="tw-text-lime-400"
-                useValueCount
+                unit="xTDH"
               />
               <MetricCard
                 title="Active Identities"
@@ -156,7 +157,7 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-pink-500"
                 accentColor="tw-text-pink-400"
               />
-              <MetricCard
+              <CumulativeMetricCard
                 title="Profile Count"
                 dailyData={dailyQuery.data.profileCount}
                 weeklyData={weeklyQuery.data.profileCount}
