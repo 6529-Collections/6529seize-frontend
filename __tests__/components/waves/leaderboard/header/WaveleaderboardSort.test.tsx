@@ -28,7 +28,7 @@ describe("WaveleaderboardSort", () => {
       WaveDropsLeaderboardSort.RATING_PREDICTION
     );
 
-    await user.click(screen.getByText("Hot"));
+    await user.click(screen.getByText("🔥 Hot"));
     expect(onSortChange).toHaveBeenCalledWith(WaveDropsLeaderboardSort.TREND);
 
     await user.click(screen.getByText("Newest"));

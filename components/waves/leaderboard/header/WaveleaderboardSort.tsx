@@ -73,6 +73,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
               params,
             });
           },
+          pages: 1,
           initialPageParam: null,
           getNextPageParam: (lastPage: ApiDropsLeaderboardPage) => {
             if (targetSort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
@@ -128,6 +129,13 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       className="tw-flex tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
     >
       <button
+        className={getButtonClassName(WaveDropsLeaderboardSort.TREND)}
+        onClick={() => onSortChange(WaveDropsLeaderboardSort.TREND)}
+        onMouseEnter={() => prefetchSort(WaveDropsLeaderboardSort.TREND)}
+      >
+        🔥 Hot
+      </button>
+      <button
         className={getButtonClassName(WaveDropsLeaderboardSort.RANK)}
         onClick={() => onSortChange(WaveDropsLeaderboardSort.RANK)}
         onMouseEnter={() => prefetchSort(WaveDropsLeaderboardSort.RANK)}
@@ -144,13 +152,6 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         }
       >
         Projected Vote
-      </button>
-      <button
-        className={getButtonClassName(WaveDropsLeaderboardSort.TREND)}
-        onClick={() => onSortChange(WaveDropsLeaderboardSort.TREND)}
-        onMouseEnter={() => prefetchSort(WaveDropsLeaderboardSort.TREND)}
-      >
-        Hot
       </button>
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.CREATED_AT)}
