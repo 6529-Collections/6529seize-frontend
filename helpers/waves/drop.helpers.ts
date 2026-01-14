@@ -1,10 +1,13 @@
-import { sha256 } from "ethereum-cryptography/sha256.js";
-import { utf8ToBytes } from "ethereum-cryptography/utils.js";
+import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { getRandomObjectId } from "../AllowlistToolHelpers";
-import type { TypedFeedItem } from "@/types/feed.types";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
 import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { TypedFeedItem } from "@/types/feed.types";
+import { sha256 } from "ethereum-cryptography/sha256.js";
+import { utf8ToBytes } from "ethereum-cryptography/utils.js";
+import { getRandomObjectId } from "../AllowlistToolHelpers";
+import { parseIpfsUrl } from "../Helpers";
 
 export enum DropSize {
   LIGHT = "LIGHT",
@@ -67,39 +70,42 @@ const findClosestMatch = (
 ): Drop | null => {
   const MAX_TIME_DIFFERENCE = maxDiff ?? 10000;
 
-  return existingDrops.reduce((closest, current) => {
-    if (current.type === DropSize.LIGHT) {
-      return closest;
-    }
-    if (
-      current.author.handle === newDrop.author.handle &&
-      current.parts.map((p) => p.content).join("") ===
-        newDrop.parts.map((p) => p.content).join("") &&
-      Math.abs(
-        new Date(current.created_at).getTime() -
-          new Date(newDrop.created_at).getTime()
-      ) < MAX_TIME_DIFFERENCE
-    ) {
-      if (closest?.type === DropSize.LIGHT) {
-        return current;
+  return existingDrops.reduce(
+    (closest, current) => {
+      if (current.type === DropSize.LIGHT) {
+        return closest;
       }
-
       if (
-        !closest ||
+        current.author.handle === newDrop.author.handle &&
+        current.parts.map((p) => p.content).join("") ===
+          newDrop.parts.map((p) => p.content).join("") &&
         Math.abs(
           new Date(current.created_at).getTime() -
             new Date(newDrop.created_at).getTime()
-        ) <
-          Math.abs(
-            new Date(closest.created_at).getTime() -
-              new Date(newDrop.created_at).getTime()
-          )
+        ) < MAX_TIME_DIFFERENCE
       ) {
-        return current;
+        if (closest?.type === DropSize.LIGHT) {
+          return current;
+        }
+
+        if (
+          !closest ||
+          Math.abs(
+            new Date(current.created_at).getTime() -
+              new Date(newDrop.created_at).getTime()
+          ) <
+            Math.abs(
+              new Date(closest.created_at).getTime() -
+                new Date(newDrop.created_at).getTime()
+            )
+        ) {
+          return current;
+        }
       }
-    }
-    return closest;
-  }, null as Drop | null);
+      return closest;
+    },
+    null as Drop | null
+  );
 };
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
@@ -158,3 +164,22 @@ export const getFeedItemKey = ({
   index === 0 && item.type === ApiFeedItemType.DropCreated
     ? getDropKey({ drop: item.item, returnOriginal: true })
     : `feed-item-${item.serial_no}`;
+
+export const getDropPreviewImageUrl = (
+  metadata: ApiDropMetadata[] | undefined
+): string | null => {
+  const additionalMediaEntry = metadata?.find(
+    (m) => m.data_key === MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA
+  );
+  if (!additionalMediaEntry?.data_value) return null;
+
+  try {
+    const parsed = JSON.parse(additionalMediaEntry.data_value) as {
+      preview_image?: string;
+    };
+    if (!parsed?.preview_image) return null;
+    return parseIpfsUrl(parsed.preview_image);
+  } catch {
+    return null;
+  }
+};

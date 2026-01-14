@@ -82,13 +82,6 @@ tasks/
 jest-failed-tests.txt
 jest-results.json
 
-# Claude folder
-claude.md
-.claude/commands/
-test.html
-.claude/
-.codex/
-
 # generated env schema for Node runtime
 /config/env.schema.runtime.cjs
 .githooks/
@@ -100,3 +93,12 @@ eslint-rule-summary.csv
 
 .hooks
 .coderabbit.yml
+.cursorrules
+.cursor
+.cursorignore
+CLAUDE.md
+.claude
+AGENTS.md
+.codex
+.gemini
+.windsurfrules

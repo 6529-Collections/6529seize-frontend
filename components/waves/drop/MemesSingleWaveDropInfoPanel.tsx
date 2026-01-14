@@ -1,31 +1,32 @@
 "use client";
 
-import { useCallback, useMemo, useState, type MouseEvent } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import Download from "@/components/download/Download";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
+import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
+import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  ExtendedDrop,
+  getDropPreviewImageUrl,
+} from "@/helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
+import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
+import { faCompress } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
-import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
-import { faCompress } from "@fortawesome/free-solid-svg-icons";
-import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
-import { WaveDropAdditionalInfo } from "./WaveDropAdditionalInfo";
+import { useCallback, useMemo, useState, type MouseEvent } from "react";
+import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
-import { ImageScale } from "@/helpers/image.helpers";
-import Download from "@/components/download/Download";
-import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { parseIpfsUrl } from "@/helpers/Helpers";
-import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
-import { VotingModal, MobileVotingModal } from "@/components/voting";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
+import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
+import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
+import { WaveDropAdditionalInfo } from "./WaveDropAdditionalInfo";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
-import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
+import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -74,25 +75,13 @@ export const MemesSingleWaveDropInfoPanel = ({
   );
 
   const previewImageData = useMemo(() => {
-    const additionalMediaEntry = drop.metadata?.find(
-      (m) => m.data_key === MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA
-    );
-    if (!additionalMediaEntry?.data_value) return null;
+    const url = getDropPreviewImageUrl(drop.metadata);
+    if (!url) return null;
 
-    try {
-      const parsed = JSON.parse(additionalMediaEntry.data_value) as {
-        preview_image?: string;
-      };
-      if (!parsed?.preview_image) return null;
+    const info = getFileInfoFromUrl(url);
+    if (!info) return null;
 
-      const url = parseIpfsUrl(parsed.preview_image);
-      const info = getFileInfoFromUrl(url);
-      if (!info) return null;
-
-      return { url, fileInfo: info };
-    } catch {
-      return null;
-    }
+    return { url, fileInfo: info };
   }, [drop.metadata]);
 
   const fileName = useMemo(() => {
@@ -207,7 +196,7 @@ export const MemesSingleWaveDropInfoPanel = ({
             <WaveDropAdditionalInfo drop={drop} />
 
             {(artworkMedia && fileInfo) || previewImageData ? (
-              <div className="tw-mt-8 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-800 tw-pt-8">
+              <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
                 <div className="tw-inline-grid tw-grid-cols-[auto_auto_auto] tw-items-center tw-gap-x-3 tw-gap-y-2">
                   {artworkMedia && fileInfo && (
                     <>
