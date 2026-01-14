@@ -16,6 +16,7 @@ interface WaveDropVoteSummaryProps {
   readonly canShowVote: boolean;
   readonly onVoteClick: () => void;
   readonly compact?: boolean;
+  readonly variant?: "default" | "memes";
 }
 
 const PRIMARY_BUTTON_CLASSES =
@@ -28,6 +29,7 @@ export const WaveDropVoteSummary = ({
   canShowVote,
   onVoteClick,
   compact = false,
+  variant = "default",
 }: WaveDropVoteSummaryProps) => {
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
@@ -36,7 +38,7 @@ export const WaveDropVoteSummary = ({
   const isUserVoteNegative = userVote < 0;
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
-  const ratingTextSize = compact ? "tw-text-sm" : "tw-text-base";
+  const ratingTextSize = compact || variant === "memes" ? "tw-text-sm" : "tw-text-base";
   const headerPadding = compact ? "tw-px-2 sm:tw-px-4" : "tw-px-4";
 
   return (
