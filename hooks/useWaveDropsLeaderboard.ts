@@ -203,19 +203,22 @@ export function useWaveDropsLeaderboard({
   const canAutoRefetch = isTabVisible && !hasTempDrop;
 
   // Helper to check if polling result has newer data than current drops
+  // Note: We compare against the max created_at across ALL loaded drops,
+  // not just drops[0], because drops may be sorted by RANK/TREND (not time)
   const checkForNewDrops = useCallback(
     (pollingData: ApiDropsLeaderboardPage): boolean => {
-      if (pollingData.drops.length === 0) return false;
+      if (pollingData.drops.length === 0 || drops.length === 0) return false;
 
       const latestPolledDrop = pollingData.drops[0];
-      const newestExistingDrop = drops[0];
 
-      if (latestPolledDrop && newestExistingDrop) {
+      // Find the actual newest drop by created_at across all loaded drops
+      const newestExistingTimestamp = Math.max(
+        ...drops.map((drop) => new Date(drop.created_at).getTime())
+      );
+
+      if (latestPolledDrop) {
         const polledCreatedAt = new Date(latestPolledDrop.created_at).getTime();
-        const existingCreatedAt = new Date(
-          newestExistingDrop.created_at
-        ).getTime();
-        return polledCreatedAt > existingCreatedAt;
+        return polledCreatedAt > newestExistingTimestamp;
       }
 
       return true;
@@ -225,17 +228,15 @@ export function useWaveDropsLeaderboard({
 
   // Polling query with select to determine if there are new drops
   // Uses select to derive haveNewDrops directly from query data
+  // Always uses CREATED_AT sort to detect genuinely new drops regardless of main query's sort
   const { data: haveNewDrops = false } = useQuery({
     queryKey: [...queryKey, "polling"],
     queryFn: async () => {
       const params: Record<string, string> = {
         page_size: "1",
-        sort: sort,
+        sort: WaveDropsLeaderboardSort.CREATED_AT,
+        sort_direction: "DESC",
       };
-
-      if (sortDirection) {
-        params["sort_direction"] = sortDirection;
-      }
 
       const result = await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
