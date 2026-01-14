@@ -11,16 +11,19 @@ export default function NowMintingStatsItem({
   status,
   isLoading,
 }: NowMintingStatsItemProps) {
+  const getValueColor = () => {
+    if (status === "active") return "tw-text-emerald-400";
+    if (status === "ended") return "tw-text-iron-400";
+    return "tw-text-white";
+  };
+
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-      <span className="tw-text-sm tw-text-iron-400">{label}</span>
+    <div className="tw-flex tw-flex-col tw-gap-1">
+      <span className="tw-text-xs tw-font-medium tw-text-iron-500">{label}</span>
       {isLoading ? (
-        <span className="tw-h-5 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-700" />
+        <span className="tw-h-6 tw-w-20 tw-animate-pulse tw-rounded tw-bg-iron-800" />
       ) : (
-        <span className="tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-50">
-          {status === "active" && (
-            <span className="tw-mr-2 tw-inline-block tw-size-2 tw-rounded-full tw-bg-green" />
-          )}
+        <span className={`tw-font-mono tw-text-lg tw-font-medium ${getValueColor()}`}>
           {value}
         </span>
       )}

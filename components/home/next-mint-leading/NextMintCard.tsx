@@ -41,18 +41,21 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
 
   return (
     <div className="tw-group tw-flex tw-flex-col tw-gap-4 tw-text-left tw-transition-all tw-duration-300">
-      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-[#0c0c0c] tw-transition-colors group-hover:tw-border-white/10">
+      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-[#0c0c0c] tw-transition-colors group-hover:tw-border-white/10">
         <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/5 tw-bg-[#111111] tw-px-3 tw-py-2">
-          <span className="tw-text-xs tw-font-normal tw-tracking-wide tw-text-white/60">
-            Next mint
-          </span>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
+            <span className="tw-text-xs tw-font-medium tw-tracking-wide tw-text-white/70">
+              Next mint
+            </span>
+          </div>
           {timestamp && (
-            <span className="tw-font-mono tw-text-xs tw-text-white/50">
+            <span className="tw-font-mono tw-text-xs tw-text-white/40">
               {timestamp}
             </span>
           )}
         </div>
-        <div className="tw-relative tw-flex tw-w-full tw-aspect-[3/4] tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-3">
+        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
               <DropListItemContentMedia
@@ -72,9 +75,9 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
 
       <div className="tw-flex tw-flex-col tw-gap-3">
         <div>
-          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80">
+          <span className="tw-m-0 tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80">
             {title}
-          </h3>
+          </span>
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
             <ProfileAvatar
               pfpUrl={author.pfp}

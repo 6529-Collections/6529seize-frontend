@@ -4,6 +4,7 @@ import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
@@ -21,14 +22,17 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   const author = drop.author;
 
   return (
-    <div className="tw-group tw-flex tw-flex-col tw-gap-4 tw-text-left tw-opacity-60 tw-grayscale tw-transition-all tw-duration-500 hover:tw-opacity-100 hover:tw-grayscale-0">
-      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-[#0c0c0c] tw-transition-colors group-hover:tw-border-white/10">
+    <div className="tw-group tw-flex tw-flex-col tw-gap-4 tw-text-left tw-opacity-70 tw-grayscale tw-transition-all tw-duration-500 hover:tw-opacity-100 hover:tw-grayscale-0">
+      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-[#0c0c0c] tw-transition-colors group-hover:tw-border-white/10">
         <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/5 tw-bg-[#111111] tw-px-3 tw-py-2">
-          <span className="tw-text-xs tw-font-normal tw-tracking-wide tw-text-white/50">
-            Rank {rank}
+          <span className="tw-text-xs tw-font-medium tw-tracking-wide tw-text-white/50">
+            {rank === 1 ? "Leading" : `#${rank} in votes`}
+          </span>
+          <span className="tw-font-mono tw-text-xs tw-text-white/40">
+            {formatNumberWithCommas(drop.rating)} TDH
           </span>
         </div>
-        <div className="tw-relative tw-flex tw-w-full tw-aspect-[3/4] tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-3">
+        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
               <DropListItemContentMedia
@@ -48,9 +52,9 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
 
       <div className="tw-flex tw-flex-col tw-gap-3">
         <div>
-          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
+          <span className="tw-m-0 tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white/90 tw-transition-colors group-hover:tw-text-white">
             {title}
-          </h3>
+          </span>
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
             <ProfileAvatar
               pfpUrl={author.pfp}

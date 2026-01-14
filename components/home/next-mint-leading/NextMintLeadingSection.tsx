@@ -39,15 +39,20 @@ export function NextMintLeadingSection() {
     return null;
   }
 
-  const sectionClassName = "tw-relative tw-z-10 tw-pb-8 tw-pt-16";
+  const sectionClassName = "tw-relative tw-z-10 tw-pb-8 tw-pt-20";
   const header = (
     <div className="tw-mb-8 tw-flex tw-items-end tw-justify-between">
-      <span className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
-        Next mint and what&apos;s leading
-      </span>
+      <div>
+        <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
+          Coming up 
+        </span>
+        <p className="tw-mt-1 tw-text-base tw-text-iron-500">
+          Next in queue and current vote leaders
+        </p>
+      </div>
       <Link
         href="/waves"
-        className="tw-inline-flex tw-items-center tw-gap-1 tw-no-underline tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50"
+        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
       >
         <span>View all</span>
         <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />

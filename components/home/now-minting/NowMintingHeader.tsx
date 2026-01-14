@@ -28,18 +28,18 @@ export default function NowMintingHeader({
   const hasHandle = Boolean(artistHandle?.trim());
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
-      <span className="tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-400">
+    <div className="tw-flex tw-flex-col tw-gap-3">
+      <span className="tw-text-[11px] tw-uppercase tw-tracking-[0.2em] tw-text-iron-500">
         Card #{cardNumber}
       </span>
-      <h3 className="tw-text-xl tw-font-semibold tw-text-iron-50">
+      <span className="tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl">
         <Link
           href={`/the-memes/${cardNumber}`}
-          className="tw-mb-4 tw-text-lg tw-font-bold tw-tracking-tight tw-text-white sm:tw-text-2xl"
+          className="tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200"
         >
           {title}
         </Link>
-      </h3>
+      </span>
       <div className="tw-flex tw-items-center tw-gap-2">
         {profile?.pfp ? (
           <Image

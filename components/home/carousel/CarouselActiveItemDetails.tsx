@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { WaveDropMetaRow } from "@/components/waves/drop/WaveDropMetaRow";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 interface CarouselActiveItemDetailsProps {
@@ -19,49 +18,77 @@ export default function CarouselActiveItemDetails({
     return null;
   }
 
-  const { isWinner } = useDropInteractionRules(drop);
   const title =
     drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
     drop.title ??
-    "Artwork Title";
+    "Untitled";
   const description =
     drop.metadata?.find((m) => m.data_key === "description")?.data_value ?? "";
   const detailsId = `carousel-details-${drop.id}`;
+  const author = drop.author;
 
   return (
-    <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col">
-      <div className="tw-flex tw-justify-center">
-        <button
-          type="button"
-          onClick={() => setIsExpanded((prev) => !prev)}
-          aria-expanded={isExpanded}
-          aria-controls={detailsId}
-          className="tw-group tw-bg-transparent tw-border-0 tw-inline-flex tw-items-center tw-gap-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 tw-transition hover:tw-text-iron-200"
-        >
-          <span>{isExpanded ? "Hide details" : "More details"}</span>
-          <ChevronDownIcon
-            className={`tw-size-4 tw-text-iron-500 tw-transition-transform group-hover:tw-text-iron-300 ${
-              isExpanded ? "tw-rotate-180" : ""
-            }`}
-            aria-hidden
-          />
-        </button>
-      </div>
+    <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
+      <span className="tw-mb-2 tw-block tw-text-center tw-text-lg md:tw-text-xl tw-font-semibold tw-text-white">
+        {title}
+      </span>
 
-      {isExpanded && (
-        <div id={detailsId} className="tw-mt-6 tw-text-center tw-flex tw-flex-col tw-items-center">
-          <div className="tw-mb-4">
-            <h1 className="tw-mb-3 tw-text-lg tw-font-bold tw-tracking-tight tw-text-white sm:tw-text-2xl">
-              {title}
-            </h1>
-            {description && (
-              <p className="tw-mb-0 tw-text-sm tw-text-white/60 lg:tw-text-md tw-text-balance">
+      {author && (
+        <Link
+          href={`/${author.handle}`}
+          className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
+        >
+          <span className="tw-text-sm tw-text-iron-400">by</span>
+          {author.pfp ? (
+            <div className="tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
+              <img
+                className="tw-size-full tw-object-cover"
+                src={author.pfp}
+                alt=""
+              />
+            </div>
+          ) : (
+            <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
+          )}
+          <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-transition desktop-hover:hover:tw-text-white">
+            {author.handle}
+          </span>
+        </Link>
+      )}
+
+      {description && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsExpanded((prev) => !prev)}
+            aria-expanded={isExpanded}
+            aria-controls={detailsId}
+            className="tw-group tw-mt-3 tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-text-xs tw-font-medium tw-text-iron-500 tw-transition hover:tw-text-iron-300"
+          >
+            <span>{isExpanded ? "Less" : "More"}</span>
+            <ChevronDownIcon
+              className={`tw-size-3 tw-transition-transform ${
+                isExpanded ? "tw-rotate-180" : ""
+              }`}
+              aria-hidden
+            />
+          </button>
+
+          <div
+            id={detailsId}
+            className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
+              isExpanded
+                ? "tw-mt-3 tw-grid-rows-[1fr] tw-opacity-100"
+                : "tw-grid-rows-[0fr] tw-opacity-0"
+            }`}
+          >
+            <div className="tw-overflow-hidden">
+              <p className="tw-max-w-prose tw-text-balance tw-text-center tw-text-base tw-font-normal tw-leading-relaxed tw-text-iron-300">
                 {description}
               </p>
-            )}
+            </div>
           </div>
-          <WaveDropMetaRow drop={drop} isWinner={isWinner} />
-        </div>
+        </>
       )}
     </div>
   );

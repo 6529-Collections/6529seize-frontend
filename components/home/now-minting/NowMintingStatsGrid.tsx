@@ -23,15 +23,15 @@ export default function NowMintingStatsGrid({
     : undefined;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4">
+    <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-5">
       <NowMintingStatsItem label="Edition" value={edition} />
-      <NowMintingStatsItem label="Mint price" value={mintPrice} />
       <NowMintingStatsItem
         label="Status"
         value={statusLabel}
         status={status}
         isLoading={isStatusLoading}
       />
+      <NowMintingStatsItem label="Mint price" value={mintPrice} />
       <NowMintingStatsItem label="Floor" value={floorPrice} />
     </div>
   );

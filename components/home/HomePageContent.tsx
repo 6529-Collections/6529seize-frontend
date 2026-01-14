@@ -15,10 +15,10 @@ export default function HomePageContent() {
   const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
 
   return (
-    <div className="tw-px-8 tw-border-r tw-border-solid tw-border-l-0 tw-border-y-0 tw-border-iron-900">
-      <section className="tw-grid tw-h-screen tw-grid-rows-[auto_1fr_auto] tw-pt-8 tw-pb-4 tw-box-border">
+    <div className="tw-px-4 md:tw-px-6 lg:tw-px-8 tw-border-r tw-border-solid tw-border-l-0 tw-border-y-0 tw-border-iron-900">
+      <section className="tw-grid tw-h-screen tw-grid-rows-[auto_1fr_auto] tw-pt-8 tw-pb-4 [@media(min-height:1200px)]:tw-h-auto [@media(min-height:1200px)]:tw-grid-rows-[auto_auto_auto]">
         <HeroHeader />
-        <div className="tw-min-h-0">
+        <div className="tw-min-h-0 [@media(min-height:1200px)]:tw-max-h-[800px]">
           <SubmissionCarousel onActiveDropChange={setActiveDrop} />
         </div>
         <CarouselActiveItemVote drop={activeDrop} />
@@ -26,7 +26,7 @@ export default function HomePageContent() {
       <section className="tw-py-4">
         <CarouselActiveItemDetails drop={activeDrop} />
       </section>
-      <div className="tw-py-16">
+      <div className="tw-pt-20 tw-pb-16">
         <NowMintingSection />
         <NextMintLeadingSection />
         <BoostedSection />

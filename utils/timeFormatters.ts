@@ -73,7 +73,7 @@ export function formatCountdownAdaptive(timestampSeconds: number): string {
 /**
  * Format timestamp into verbose countdown display with labels.
  * @param timestampSeconds Future timestamp in SECONDS (Unix timestamp)
- * @returns Formatted string like "2 days, 3 hours, 4 minutes and 5 seconds"
+ * @returns Formatted string like "2d 3h 4m 5s"
  */
 export function formatCountdownVerbose(timestampSeconds: number): string {
   const now = Date.now();
@@ -86,12 +86,11 @@ export function formatCountdownVerbose(timestampSeconds: number): string {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  const plural = (value: number, word: string) =>
-    `${value.toLocaleString()} ${word}${value === 1 ? "" : "s"}`;
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  parts.push(`${seconds}s`);
 
-  const daysLabel = days > 0 ? `${plural(days, "day")}, ` : "";
-  const hoursLabel = hours > 0 ? `${plural(hours, "hour")}, ` : "";
-  const minutesLabel = minutes > 0 ? `${plural(minutes, "minute")} and ` : "";
-
-  return `${daysLabel}${hoursLabel}${minutesLabel}${plural(seconds, "second")}`;
+  return parts.join(" : ");
 }

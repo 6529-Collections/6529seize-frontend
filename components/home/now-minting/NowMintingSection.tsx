@@ -9,13 +9,11 @@ export default function NowMintingSection() {
 
   if (isFetching && !nft) {
     return (
-      <section className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-6 md:tw-p-10">
-        <div className="tw-relative">
-          <h2 className="tw-mb-4 tw-text-xl tw-font-semibold tw-text-iron-50">
-            Now minting
-          </h2>
-          <div className="tw-text-iron-400">Loading...</div>
-        </div>
+      <section className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-8 md:tw-p-12">
+        <span className="tw-block tw-text-xl md:tw-text-2xl tw-font-semibold tw-text-white tw-mb-8">
+          Now minting
+        </span>
+        <div className="tw-text-iron-500">Loading...</div>
       </section>
     );
   }
@@ -25,18 +23,24 @@ export default function NowMintingSection() {
   }
 
   return (
-    <section className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-6 md:tw-p-10">
-      <div className="tw-relative">
-        <span className="tw-mb-5 tw-text-2xl tw-font-semibold tw-text-iron-50">
-          Now minting
-        </span>
-        <div className="tw-flex tw-flex-col tw-gap-14 md:tw-flex-row tw-mt-6">
-          <NowMintingArtwork
-            imageUrl={nft.scaled}
-            animationUrl={nft.animation}
-            title={nft.name}
-          />
-          <NowMintingDetails nft={nft} />
+    <section>
+      <span className="tw-block tw-text-xl md:tw-text-2xl tw-font-semibold tw-text-white tw-mb-6">
+        Now minting
+      </span>
+
+      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-8">
+        <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-10 lg:tw-gap-14">
+          <div className="lg:tw-col-span-7">
+            <NowMintingArtwork
+              imageUrl={nft.scaled}
+              animationUrl={nft.animation}
+              title={nft.name}
+            />
+          </div>
+
+          <div className="lg:tw-col-span-5">
+            <NowMintingDetails nft={nft} />
+          </div>
         </div>
       </div>
     </section>

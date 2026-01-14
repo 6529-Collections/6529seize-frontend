@@ -14,8 +14,8 @@ export default function NowMintingArtwork({
   const hasVideo = !!animationUrl && animationUrl.length > 0;
 
   return (
-    <div className="tw-w-full md:tw-w-1/2">
-      <div className="tw-relative tw-w-full">
+    <div className="tw-group tw-relative">
+      <div className="tw-relative tw-aspect-square tw-w-full">
         {hasVideo ? (
           <video
             src={animationUrl}
@@ -24,10 +24,16 @@ export default function NowMintingArtwork({
             loop
             muted
             playsInline
-            className="tw-size-full tw-object-contain"
+            className="tw-absolute tw-inset-0 tw-size-full tw-object-contain"
           />
         ) : (
-          <Image src={imageUrl} alt={title} fill className="tw-object-contain tw-h-full tw-w-full" />
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            sizes="(min-width: 1024px) 58vw, (min-width: 768px) 70vw, 100vw"
+            className="tw-object-contain"
+          />
         )}
       </div>
     </div>

@@ -27,8 +27,8 @@ export default function NowMintingCountdownActive({
           </span>
         </div>
       </div>
-      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-rounded tw-border tw-border-white/5 tw-bg-black/40 tw-p-4 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
-        <div className="tw-text-2xl tw-font-bold tw-text-iron-50">
+      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/5 tw-bg-black/40 tw-p-4 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
+        <div className="tw-text-2xl tw-font-bold tw-text-iron-50 tw-tabular-nums">
           {display}
         </div>
       </div>

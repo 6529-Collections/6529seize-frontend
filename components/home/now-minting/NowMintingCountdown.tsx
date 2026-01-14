@@ -18,8 +18,7 @@ export default function NowMintingCountdown({
   const state = useMintCountdownState(nftId);
 
   return (
-    <div className="tw-mt-auto tw-group tw-relative tw-rounded-lg tw-bg-iron-900 tw-border tw-border-solid tw-border-white/5 tw-p-4">
-       <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-white/5 tw-to-transparent tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-500 tw-pointer-events-none" />
+    <div className="tw-mt-auto tw-group tw-relative tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-white/5 tw-p-4">
       <NowMintingCountdownContent state={state} />
     </div>
   );

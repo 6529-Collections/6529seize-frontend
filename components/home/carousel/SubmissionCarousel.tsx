@@ -37,18 +37,25 @@ export default function SubmissionCarousel({
   const cardGap = 4;
   const arrowOffset =
     baseCardWidth / 2 + cardGap + (baseCardWidth * inactiveScale) / 2;
+  const slideTransition =
+    "transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1)";
+  const inactiveFilter = "grayscale(100%) blur(6px)";
+  const slideWidth = `${baseCardWidth}px`;
 
   const shuffledDrops = useMemo(() => {
     const filtered = drops.filter(
       (drop) => (drop.parts[0]?.media.length ?? 0) > 0
     );
-    // Fisher-Yates shuffle
-    const shuffled = [...filtered];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
-    }
-    return shuffled;
+    // Deterministic shuffle using hash of drop ID for stable ordering
+    const hashCode = (str: string): number => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return hash;
+    };
+    return [...filtered].sort((a, b) => hashCode(a.id) - hashCode(b.id));
   }, [drops]);
 
   const activeDrop = useMemo(
@@ -56,14 +63,11 @@ export default function SubmissionCarousel({
     [activeIndex, shuffledDrops]
   );
 
-  const handleSlideChange = useCallback(
-    (swiper: SwiperInstance) => {
-      setActiveIndex(swiper.activeIndex);
-      setCanScrollLeft(!swiper.isBeginning);
-      setCanScrollRight(!swiper.isEnd);
-    },
-    [setActiveIndex]
-  );
+  const handleSlideChange = useCallback((swiper: SwiperInstance) => {
+    setActiveIndex(swiper.activeIndex);
+    setCanScrollLeft(!swiper.isBeginning);
+    setCanScrollRight(!swiper.isEnd);
+  }, []);
 
   useEffect(() => {
     onActiveDropChange?.(activeDrop);
@@ -76,18 +80,15 @@ export default function SubmissionCarousel({
     }
   }, [activeIndex, shuffledDrops.length]);
 
-  const scroll = useCallback(
-    (direction: "left" | "right") => {
-      const swiper = swiperRef.current;
-      if (!swiper) return;
-      if (direction === "left") {
-        swiper.slidePrev();
-      } else {
-        swiper.slideNext();
-      }
-    },
-    []
-  );
+  const scroll = useCallback((direction: "left" | "right") => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+    if (direction === "left") {
+      swiper.slidePrev();
+    } else {
+      swiper.slideNext();
+    }
+  }, []);
 
   if (!isLoaded || !waveId) {
     return null;
@@ -106,8 +107,8 @@ export default function SubmissionCarousel({
   }
 
   return (
-    <div className="tw-relative tw-@container tw-h-full tw-min-h-0">
-      <div className="tw-relative tw-mx-auto tw-h-full tw-w-full tw-max-w-4xl tw-overflow-hidden">
+    <div className="tw-relative tw-h-full tw-min-h-0 tw-@container">
+      <div className="tw-relative tw-mx-auto tw-h-full tw-w-full lg:tw-max-w-4xl tw-overflow-hidden">
         <CarouselArrow
           direction="left"
           onClick={() => scroll("left")}
@@ -121,7 +122,7 @@ export default function SubmissionCarousel({
           centeredSlides
           spaceBetween={cardGap}
           speed={450}
-          initialSlide={shuffledDrops.length > 1 ? 1 : 0}
+          initialSlide={0}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
             handleSlideChange(swiper);
@@ -131,31 +132,27 @@ export default function SubmissionCarousel({
           {shuffledDrops.map((drop, index) => {
             const isActive = index === activeIndex;
             const distance = Math.abs(index - activeIndex);
-            const scale = isActive ? 1 : inactiveScale;
-            const opacity = isActive ? 1 : 0.22;
-            const filter = isActive ? "none" : "grayscale(100%) blur(6px)";
-            const transitionEasing = "cubic-bezier(0.25, 1, 0.5, 1)";
-            const transition = `transform 0.45s ${transitionEasing}, opacity 0.45s ${transitionEasing}`;
-            const shouldHint = distance <= 1;
 
             return (
               <SwiperSlide
                 key={drop.id}
                 className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-visible"
-                style={{ width: `${baseCardWidth}px` }}
+                style={{ width: slideWidth }}
               >
                 <button
                   type="button"
                   onClick={() => swiperRef.current?.slideTo(index)}
                   className="tw-h-full tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   style={{
-                    opacity,
-                    filter,
+                    opacity: isActive ? 1 : 0.22,
+                    filter: isActive ? "none" : inactiveFilter,
                     zIndex: isActive ? 10 : 10 - distance,
-                    transition,
-                    transform: `translate3d(0, 0, 0) scale(${scale})`,
+                    transition: slideTransition,
+                    transform: isActive
+                      ? "translate3d(0, -8px, 0) scale(1)"
+                      : `translate3d(0, 0, 0) scale(${inactiveScale})`,
                     transformOrigin: "center",
-                    willChange: shouldHint ? "transform, opacity" : "auto",
+                    willChange: distance <= 1 ? "transform, opacity" : "auto",
                   }}
                 >
                   <SubmissionArtworkCard drop={drop} isActive={isActive} />
@@ -172,7 +169,6 @@ export default function SubmissionCarousel({
           style={{ left: `calc(50% + ${arrowOffset}px)` }}
         />
       </div>
-
     </div>
   );
 }

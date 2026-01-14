@@ -1,13 +1,14 @@
 "use client";
 
-import { memo } from "react";
 import BoostIcon from "@/components/common/icons/BoostIcon";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ImageScale } from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { LinkIcon } from "@heroicons/react/24/outline";
+import { memo } from "react";
 
 interface BoostedDropCardHomeProps {
   readonly drop: ApiDrop;
@@ -16,80 +17,103 @@ interface BoostedDropCardHomeProps {
 
 const BoostedDropCardHome = memo(
   ({ drop, onClick }: BoostedDropCardHomeProps) => {
-    const textLimit = 180;
-    const media = drop.parts[0]?.media[0];
-    const textContent = drop.parts[0]?.content ?? "";
-    const isLongText = textContent.length > textLimit;
-    const truncatedContent =
-      textContent.length > textLimit
-        ? `${textContent.slice(0, textLimit)}...`
-        : textContent;
+    const part = drop.parts?.[0];
+    const media = part?.media?.[0];
+    const textContent = part?.content ?? "";
 
-    const author = drop.author;
-    const waveName = drop.wave.name;
+    const textLimit = 180;
+    const shouldTruncate = textContent.length > textLimit;
+    const truncatedContent = shouldTruncate
+      ? `${textContent.slice(0, textLimit)}…`
+      : textContent;
+
+    // Check if content is primarily a link
+    const urlRegex = /^https?:\/\/[^\s]+$/i;
+    const isLink = urlRegex.test(textContent.trim());
+
+    const { author, wave, boosts } = drop;
+    const waveName = wave.name;
 
     return (
       <button
         type="button"
         onClick={onClick}
-        className="tw-group tw-relative tw-flex tw-w-60 tw-flex-shrink-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-0 tw-text-left tw-transition-all tw-duration-300 hover:tw-border-white/10"
+        className="tw-group tw-relative tw-flex tw-w-60 tw-flex-shrink-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-black tw-p-0 tw-text-left tw-border tw-border-solid tw-border-iron-50/[0.02] tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:tw-border-50/10"
       >
-        {/* Boost badge */}
-        <div className="tw-absolute tw-right-2.5 tw-top-2.5 tw-z-10 tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-bg-black/35 tw-px-2 tw-py-1 tw-shadow-sm tw-backdrop-blur">
+         {/* Inner Highlight (Glass Edge) */}
+        <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-50/[0.05] tw-pointer-events-none tw-z-20" />
+
+        <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-bg-iron-950/60 tw-px-2.5 tw-py-1 tw-backdrop-blur-md tw-shadow-lg tw-border tw-border-solid tw-border-iron-50/5">
           <BoostIcon
-            className="tw-size-4 tw-flex-shrink-0 tw-text-orange-400"
+            className="tw-size-3 tw-flex-shrink-0 tw-text-orange-400"
             variant="filled"
           />
-          <span className="tw-text-[10px] tw-font-semibold tw-tabular-nums tw-text-orange-300">
-            {drop.boosts}
+          <span className="tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-50">
+            {boosts}
           </span>
         </div>
 
-        {/* Content area */}
-        <div className="tw-aspect-[3/4] tw-w-full tw-overflow-hidden">
+        <div className="tw-aspect-[3/4] tw-w-full tw-overflow-hidden tw-relative">
           {media ? (
-            <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-p-1">
-              <DropListItemContentMedia
-                media_mime_type={media.mime_type}
-                media_url={media.url}
-                imageScale={ImageScale.AUTOx450}
-                imageObjectPosition="center"
+            <div className="tw-relative tw-h-full tw-w-full">
+              {/* Glow effect */}
+              <div
+                className="tw-pointer-events-none tw-absolute tw-inset-0 tw-opacity-40 tw-blur-3xl tw-transition-opacity tw-duration-700 group-hover:tw-opacity-60"
+                style={{
+                  backgroundImage: `url(${getScaledImageUri(media.url, ImageScale.AUTOx450)})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
               />
+              <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-p-5 tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
+                <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-shadow-2xl tw-ring-1 tw-ring-iron-950/20">
+                  <DropListItemContentMedia
+                    media_mime_type={media.mime_type}
+                    media_url={media.url}
+                    imageScale={ImageScale.AUTOx450}
+                    imageObjectPosition="center"
+                  />
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="tw-relative tw-flex tw-size-full tw-items-center tw-justify-center tw-p-4">
-              <div className="tw-relative">
+            <div className="tw-relative tw-flex tw-size-full tw-items-center tw-justify-center tw-p-6">
+              {isLink ? (
+                <LinkIcon className="tw-absolute tw-left-6 tw-top-8 tw-size-6 tw-text-iron-700 tw-opacity-50" />
+              ) : (
+                <span className="tw-absolute tw-left-6 tw-top-8 tw-select-none tw-font-serif tw-text-6xl tw-leading-none tw-text-iron-800 tw-opacity-50">
+                  {"\u201C"}
+                </span>
+              )}
+              <div className="tw-relative tw-z-10">
                 <p
-                  style={{
-                    wordBreak: "break-word",
-                  }}
-                  className="tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-text-sm tw-leading-relaxed tw-text-iron-300"
+                  style={{ wordBreak: "break-word" }}
+                  className={`tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-text-md tw-leading-relaxed tw-font-normal ${isLink ? "tw-text-blue-400" : "tw-text-iron-500"}`}
                 >
                   {truncatedContent || "View drop..."}
                 </p>
-              {isLongText && (
-                <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-10 tw-bg-gradient-to-b tw-from-iron-950/0 tw-via-iron-950/40 tw-to-iron-950/90" />
-              )}
+                {shouldTruncate && (
+                  <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-16 tw-bg-gradient-to-b tw-from-transparent tw-to-iron-950" />
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="tw-flex tw-flex-col tw-gap-0.5 tw-border-t tw-border-iron-800 tw-bg-black tw-px-3 tw-py-2.5">
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <ProfileAvatar
-              pfpUrl={author.pfp}
-              alt={author.handle ?? "User"}
-              size={ProfileBadgeSize.SMALL}
-            />
-            <span className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
+        <div className="tw-relative tw-z-10 tw-flex tw-items-center tw-gap-3 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-iron-900 tw-bg-black tw-px-4 tw-py-4">
+          <ProfileAvatar
+            pfpUrl={author.pfp}
+            alt={author.handle ?? "User"}
+            size={ProfileBadgeSize.SMALL}
+          />
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+            <span className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-colors group-hover:tw-text-white">
               {author.handle ?? "Anonymous"}
             </span>
+            <span className="tw-truncate tw-text-xs tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-400">
+              {waveName}
+            </span>
           </div>
-          <span className="tw-truncate tw-pl-9 tw-text-xs tw-text-iron-500">
-            {waveName}
-          </span>
         </div>
       </button>
     );
