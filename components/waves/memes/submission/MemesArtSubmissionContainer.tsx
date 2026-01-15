@@ -77,6 +77,13 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     [form.setAdditionalMedia]
   );
 
+  const handlePromoVideoChange = useCallback(
+    (url: string) => {
+      form.setAdditionalMedia({ promo_video: url });
+    },
+    [form.setAdditionalMedia]
+  );
+
   // Phase change handler
   const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
     // Any additional phase-specific handling can be done here
@@ -140,7 +147,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       }
     : null;
 
-  const previewRequiredMediaType = (() => {
+  const mediaTypeInfo = (() => {
     const getMediaTypeLabel = (mimeType: string): string | null => {
       if (mimeType.startsWith("video/")) return "Video";
       if (mimeType === "text/html") return "HTML";
@@ -148,16 +155,26 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       return null;
     };
 
+    const isInteractiveMedia = (mimeType: string): boolean => {
+      return mimeType === "text/html" || mimeType === "model/gltf-binary";
+    };
+
     if (form.mediaSource === "upload" && form.selectedFile) {
-      return getMediaTypeLabel(form.selectedFile.type);
+      const label = getMediaTypeLabel(form.selectedFile.type);
+      const isInteractive = isInteractiveMedia(form.selectedFile.type);
+      return { label, isInteractive };
     }
     if (form.mediaSource === "url" && form.isExternalMediaValid) {
-      return getMediaTypeLabel(form.externalMediaMimeType);
+      const label = getMediaTypeLabel(form.externalMediaMimeType);
+      const isInteractive = isInteractiveMedia(form.externalMediaMimeType);
+      return { label, isInteractive };
     }
-    return null;
+    return { label: null, isInteractive: false };
   })();
 
+  const previewRequiredMediaType = mediaTypeInfo.label;
   const requiresPreviewImage = previewRequiredMediaType !== null;
+  const requiresPromoVideoOption = mediaTypeInfo.isInteractive;
 
   // Map of steps to their corresponding components
   const stepComponents = {
@@ -214,11 +231,14 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         artworkCommentary={form.operationalData.commentary}
         aboutArtist={form.operationalData.about_artist}
         previewImage={form.operationalData.additional_media.preview_image}
+        promoVideo={form.operationalData.additional_media.promo_video}
         requiresPreviewImage={requiresPreviewImage}
+        requiresPromoVideoOption={requiresPromoVideoOption}
         previewRequiredMediaType={previewRequiredMediaType}
         onBatchesChange={form.setAllowlistBatches}
         onSupportingMediaChange={handleArtworkCommentaryMediaChange}
         onPreviewImageChange={handlePreviewImageChange}
+        onPromoVideoChange={handlePromoVideoChange}
         onArtworkCommentaryChange={form.setCommentary}
         onAboutArtistChange={form.setAboutArtist}
         onBack={form.handleBackToArtwork}

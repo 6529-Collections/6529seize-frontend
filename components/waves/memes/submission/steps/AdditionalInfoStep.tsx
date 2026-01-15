@@ -28,11 +28,14 @@ interface AdditionalInfoStepProps {
   readonly artworkCommentary: string;
   readonly aboutArtist: string;
   readonly previewImage: string;
+  readonly promoVideo: string;
   readonly requiresPreviewImage: boolean;
+  readonly requiresPromoVideoOption: boolean;
   readonly previewRequiredMediaType: string | null;
   readonly onBatchesChange: (batches: AllowlistBatchRaw[]) => void;
   readonly onSupportingMediaChange: (media: string[]) => void;
   readonly onPreviewImageChange: (url: string) => void;
+  readonly onPromoVideoChange: (url: string) => void;
   readonly onArtworkCommentaryChange: (commentary: string) => void;
   readonly onAboutArtistChange: (aboutArtist: string) => void;
   readonly onBack: () => void;
@@ -50,11 +53,14 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   artworkCommentary,
   aboutArtist,
   previewImage,
+  promoVideo,
   requiresPreviewImage,
+  requiresPromoVideoOption,
   previewRequiredMediaType,
   onBatchesChange,
   onSupportingMediaChange,
   onPreviewImageChange,
+  onPromoVideoChange,
   onArtworkCommentaryChange,
   onAboutArtistChange,
   onBack,
@@ -181,10 +187,13 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
           artworkCommentary={artworkCommentary}
           aboutArtist={aboutArtist}
           previewImage={previewImage}
+          promoVideo={promoVideo}
           requiresPreviewImage={requiresPreviewImage}
+          requiresPromoVideoOption={requiresPromoVideoOption}
           previewRequiredMediaType={previewRequiredMediaType}
           onSupportingMediaChange={onSupportingMediaChange}
           onPreviewImageChange={onPreviewImageChange}
+          onPromoVideoChange={onPromoVideoChange}
           onArtworkCommentaryChange={onArtworkCommentaryChange}
           onAboutArtistChange={onAboutArtistChange}
         />

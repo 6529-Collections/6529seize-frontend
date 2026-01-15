@@ -39,6 +39,7 @@ export interface AdditionalMedia {
   artist_profile_media: string[];
   artwork_commentary_media: string[];
   preview_image: string;
+  promo_video: string;
 }
 
 export interface OperationalData {

@@ -1,6 +1,7 @@
 "use client";
 
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import Image from "next/image";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -127,7 +128,7 @@ export default function AppHeader() {
             {address ? (
               pfp ? (
                 <Image
-                  src={pfp}
+                  src={resolveIpfsUrlSync(pfp)}
                   alt="pfp"
                   width={40}
                   height={40}
