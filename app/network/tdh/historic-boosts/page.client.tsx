@@ -23,7 +23,7 @@ function CategoryAList(
     completeSetMultiplier: string; // "1.55x" | "1.25x" | "1.20x"
   }>
 ) {
-  const Heading = (props.headingVariant === "h3" ? "h3" : "p") as any;
+  const Heading = props.headingVariant === "h3" ? "h3" : "p";
   const headingClass =
     props.headingVariant === "h3"
       ? "tw-mt-3 tw-font-medium"

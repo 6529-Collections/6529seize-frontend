@@ -3,7 +3,6 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
-import { useState } from "react";
 import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
@@ -28,11 +27,9 @@ import MintMetricsCard from "./components/MintMetricsCard";
 export default function MetricsPageClient() {
   useSetTitle("Metrics");
 
-  const [mintPageSize, setMintPageSize] = useState(10);
-
   const dailyQuery = useCommunityMetrics("DAY");
   const weeklyQuery = useCommunityMetrics("WEEK");
-  const mintQuery = useMintMetrics(mintPageSize);
+  const mintQuery = useMintMetrics(50);
 
   const isLoading =
     dailyQuery.isLoading || weeklyQuery.isLoading || mintQuery.isLoading;
@@ -65,8 +62,6 @@ export default function MetricsPageClient() {
               <MintMetricsCard
                 data={mintQuery.data.items}
                 icon={<MintIcon />}
-                pageSize={mintPageSize}
-                onPageSizeChange={setMintPageSize}
               />
               <MetricCard
                 title="Distinct Droppers"
