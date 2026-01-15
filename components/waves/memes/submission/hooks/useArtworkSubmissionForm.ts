@@ -424,6 +424,7 @@ export function useArtworkSubmissionForm() {
         artist_profile_media: [],
         artwork_commentary_media: [],
         preview_image: "",
+        promo_video: "",
       },
       commentary: "",
       about_artist: "",
