@@ -15,7 +15,7 @@ export default function NowMintingArtwork({
 
   return (
     <div className="tw-group tw-relative">
-      <div className="tw-relative tw-aspect-square tw-w-full">
+      <div className="tw-relative tw-w-full tw-h-[clamp(360px,65vw,640px)]">
         {hasVideo ? (
           <video
             src={animationUrl}

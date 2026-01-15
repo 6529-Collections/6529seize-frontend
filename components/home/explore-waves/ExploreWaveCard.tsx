@@ -6,7 +6,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import Link from "next/link";
-import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import { extractDropPreview, useWaveLatestDrop } from "./useWaveLatestDrop";
 
 interface ExploreWaveCardProps {
@@ -48,7 +48,6 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
       className="tw-group tw-block tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30 desktop-hover:hover:tw-border-white/10"
       aria-label={`View wave ${wave.name}`}
     >
-      {/* Image Area */}
       <div
         className="tw-relative tw-aspect-[3/2] tw-overflow-hidden"
         style={imageAreaStyle}
@@ -64,18 +63,17 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         )}
       </div>
 
-      {/* Content Area */}
       <div className="tw-p-5">
-        <span className="tw-m-0 tw-line-clamp-2 md:tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80">
+        <span className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 md:tw-line-clamp-1">
           {wave.name}
         </span>
 
-        {/* Metadata */}
         {hasDrops && (
           <div className="tw-mb-3 tw-mt-2 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-500">
             <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
             <span className="tw-text-iron-300">
-              {getTimeAgoShort(lastMessageTime)} · {wave.metrics.drops_count.toLocaleString()}
+              {getTimeAgoShort(lastMessageTime)} ·{" "}
+              {wave.metrics.drops_count.toLocaleString()}
             </span>{" "}
             drops
           </div>
@@ -87,13 +85,14 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
           </div>
         )}
 
-        {/* Message Preview */}
         {hasDrops && (
-          <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-black tw-p-2">
-            <ChatBubbleLeftIcon
-              className="tw-size-3.5 tw-shrink-0 tw-text-white/30"
-              aria-hidden="true"
-            />
+          <div className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-black tw-p-2 tw-shadow-inner">
+            <div className="tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-shadow-sm">
+              <ChatBubbleLeftIcon
+                className="tw-size-3.5 tw-shrink-0 tw-text-iron-400"
+                aria-hidden="true"
+              />
+            </div>
             <MessagePreviewContent
               isLoading={isLoadingDrop}
               preview={latestMessagePreview}
@@ -114,7 +113,7 @@ function MessagePreviewContent({
 }) {
   if (isLoading) {
     return (
-      <div className="tw-h-8 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+      <div className="tw-h-7 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
     );
   }
 
@@ -123,7 +122,7 @@ function MessagePreviewContent({
   }
 
   return (
-    <p className="tw-m-0 tw-line-clamp-1 tw-text-xs tw-leading-relaxed tw-text-iron-500 tw-font-medium">
+    <p className="tw-m-0 tw-line-clamp-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400">
       {preview}
     </p>
   );

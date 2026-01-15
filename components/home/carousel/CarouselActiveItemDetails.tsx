@@ -63,7 +63,7 @@ export default function CarouselActiveItemDetails({
             onClick={() => setIsExpanded((prev) => !prev)}
             aria-expanded={isExpanded}
             aria-controls={detailsId}
-            className="tw-group tw-mt-3 tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-text-xs tw-font-medium tw-text-iron-500 tw-transition hover:tw-text-iron-300"
+            className="tw-group tw-mt-3 tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-text-base tw-font-medium tw-text-iron-500 tw-transition hover:tw-text-iron-300"
           >
             <span>{isExpanded ? "Less" : "More"}</span>
             <ChevronDownIcon

@@ -16,7 +16,6 @@ interface WaveDropVoteSummaryProps {
   readonly canShowVote: boolean;
   readonly onVoteClick: () => void;
   readonly compact?: boolean;
-  readonly variant?: "default" | "memes";
 }
 
 const PRIMARY_BUTTON_CLASSES =
@@ -29,7 +28,6 @@ export const WaveDropVoteSummary = ({
   canShowVote,
   onVoteClick,
   compact = false,
-  variant = "default",
 }: WaveDropVoteSummaryProps) => {
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
@@ -38,11 +36,11 @@ export const WaveDropVoteSummary = ({
   const isUserVoteNegative = userVote < 0;
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
-  const ratingTextSize = compact || variant === "memes" ? "tw-text-sm" : "tw-text-base";
+  const ratingTextSize = compact ? "tw-text-sm" : "tw-text-base";
   const headerPadding = compact ? "tw-px-2 sm:tw-px-4" : "tw-px-4";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-2 sm:tw-gap-3 tw-p-1 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-xl tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
+    <div className="tw-flex tw-items-center tw-gap-2 sm:tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-xl tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
       <div className={`${headerPadding} tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-cursor-default`}>
         <span className={`${ratingTextSize} tw-font-semibold tw-text-white tw-tabular-nums`}>
           {formatNumberWithCommas(drop.rating)}

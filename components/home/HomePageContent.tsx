@@ -16,7 +16,7 @@ export default function HomePageContent() {
 
   return (
     <div className="tw-border-r tw-border-solid tw-border-l-0 tw-border-y-0 tw-border-iron-900 tw-overflow-x-hidden">
-      <section className="tw-grid tw-h-[100svh] tw-grid-rows-[auto_1fr_auto] tw-pt-8 tw-pb-4 [@media(min-height:1200px)]:tw-h-auto [@media(min-height:1200px)]:tw-grid-rows-[auto_auto_auto]">
+      <section className="tw-grid tw-h-auto tw-grid-rows-[auto_1fr_auto] tw-pt-8 tw-pb-4 sm:tw-h-[100svh] [@media(min-height:1200px)]:tw-h-auto [@media(min-height:1200px)]:tw-grid-rows-[auto_auto_auto]">
         <HeroHeader />
         <div className="tw-min-h-0 [@media(min-height:1200px)]:tw-max-h-[800px]">
           <SubmissionCarousel onActiveDropChange={setActiveDrop} />

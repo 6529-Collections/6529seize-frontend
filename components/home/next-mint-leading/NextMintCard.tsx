@@ -6,6 +6,7 @@ import ProfileAvatar, {
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface NextMintCardProps {
   readonly drop: ApiDrop;
@@ -31,6 +32,7 @@ const formatDropTimestamp = (timestamp: number): string | null => {
 };
 
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
+  const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
   const title =
     drop.title ??
@@ -45,8 +47,8 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
         <div className="tw-flex tw-flex-col tw-items-start tw-gap-1 @sm:tw-flex-row @sm:tw-items-center @sm:tw-justify-between tw-border-b tw-border-white/5 tw-bg-[#111111] tw-px-2.5 tw-py-1.5 sm:tw-px-3 sm:tw-py-2">
           <div className="tw-flex tw-items-center tw-gap-2">
             <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
-            <span className="tw-text-xs tw-font-medium tw-tracking-wide tw-text-white/70">
-              Next mint
+            <span className="tw-text-[11px] tw-leading-5 tw-font-semibold tw-uppercase tw-tracking-wide tw-text-emerald-400">
+              NEXT MINT
             </span>
           </div>
           {timestamp && (
@@ -55,14 +57,16 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
             </span>
           )}
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[4/5] sm:tw-aspect-[3/4] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-2 sm:tw-p-3">
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105 [@media(max-width:750px)]:tw-pointer-events-none">
+        <div className="tw-relative tw-flex tw-aspect-[1/1] sm:tw-aspect-[3/4] md:tw-aspect-[16/9] lg:tw-aspect-[3/4] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-2 sm:tw-p-3">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
               <DropListItemContentMedia
                 media_mime_type={media.mime_type}
                 media_url={media.url}
                 imageObjectPosition="center"
                 imageScale={ImageScale.AUTOx600}
+                disableAutoPlay={hasTouchScreen}
+                disableModal={hasTouchScreen}
               />
             ) : (
               <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">

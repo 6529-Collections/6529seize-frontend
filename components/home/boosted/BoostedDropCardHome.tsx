@@ -89,7 +89,7 @@ const BoostedDropCardHome = memo(
               <div className="tw-relative tw-z-10">
                 <p
                   style={{ wordBreak: "break-word" }}
-                  className={`tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-text-md tw-leading-relaxed tw-font-normal ${isLink ? "tw-text-blue-400" : "tw-text-iron-300"}`}
+                  className={`tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-text-md tw-font-serif tw-leading-relaxed tw-font-normal ${isLink ? "tw-text-blue-400" : "tw-text-iron-300"}`}
                 >
                   {truncatedContent || "View drop..."}
                 </p>

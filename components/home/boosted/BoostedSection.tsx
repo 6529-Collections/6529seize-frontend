@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -12,9 +12,33 @@ const BOOSTED_DROPS_LIMIT = 10;
 export function BoostedSection() {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const { data: drops, isLoading } = useBoostedDrops({
     limit: BOOSTED_DROPS_LIMIT,
   });
+
+  const updateScrollState = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    const epsilon = 1;
+    setCanScrollLeft(container.scrollLeft > epsilon);
+    setCanScrollRight(container.scrollLeft < maxScrollLeft - epsilon);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    updateScrollState();
+    const handleScroll = () => updateScrollState();
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState, drops?.length]);
 
   const handleDropClick = useCallback(
     (drop: ApiDrop) => {
@@ -64,7 +88,8 @@ export function BoostedSection() {
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95"
+              disabled={!canScrollLeft}
+              className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 disabled:hover:tw-scale-100 disabled:hover:tw-bg-iron-900 disabled:hover:tw-text-iron-500"
               aria-label="Scroll left"
             >
               <ChevronLeftIcon className="tw-size-4 tw-flex-shrink-0" />
@@ -72,7 +97,8 @@ export function BoostedSection() {
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95"
+              disabled={!canScrollRight}
+              className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 disabled:hover:tw-scale-100 disabled:hover:tw-bg-iron-900 disabled:hover:tw-text-iron-500"
               aria-label="Scroll right"
             >
               <ChevronRightIcon className="tw-size-4" />

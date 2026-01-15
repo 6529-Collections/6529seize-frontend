@@ -1,4 +1,7 @@
+"use client";
+
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -42,6 +45,12 @@ export default function DropListItemContentMedia({
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
 }) {
+  const [htmlActivated, setHtmlActivated] = useState(!disableAutoPlay);
+
+  useEffect(() => {
+    setHtmlActivated(!disableAutoPlay);
+  }, [disableAutoPlay, media_url]);
+
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
@@ -92,6 +101,20 @@ export default function DropListItemContentMedia({
     case MediaType.GLB:
       return <DropListItemContentMediaGLB src={media_url} />;
     case MediaType.HTML:
+      if (disableAutoPlay && !htmlActivated) {
+        return (
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
+            <button
+              type="button"
+              onClick={() => setHtmlActivated(true)}
+              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800"
+            >
+              Tap to load
+            </button>
+          </div>
+        );
+      }
+
       return (
         <SandboxedExternalIframe
           title=""

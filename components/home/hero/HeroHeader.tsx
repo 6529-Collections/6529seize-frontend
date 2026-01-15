@@ -7,7 +7,7 @@ export default function HeroHeader() {
         6529
       </p>
 
-      <h1 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-leading-snug tw-tracking-tight tw-text-white md:tw-text-3xl">
+      <h1 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-leading-snug tw-tracking-tight tw-text-transparent tw-bg-clip-text tw-bg-gradient-to-b tw-from-white tw-to-white/50 tw-drop-shadow-2xl md:tw-text-3xl">
         Where art meets community
       </h1>
 

@@ -28,9 +28,9 @@ export default function NowMintingSection() {
         Now minting
       </span>
 
-      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-6 md:tw-p-8">
-        <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-10 lg:tw-gap-14">
-          <div className="lg:tw-col-span-7">
+      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50">
+        <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 xl:tw-grid-cols-9 tw-h-full tw-gap-10 lg:tw-gap-14 tw-divide-y lg:tw-divide-x lg:tw-divide-y-0 tw-divide-solid tw-divide-white/5">
+          <div className="lg:tw-col-span-6 xl:tw-col-span-5 tw-p-6 md:tw-p-8 tw-self-center">
             <NowMintingArtwork
               imageUrl={nft.scaled}
               animationUrl={nft.animation}
@@ -38,7 +38,7 @@ export default function NowMintingSection() {
             />
           </div>
 
-          <div className="lg:tw-col-span-5">
+          <div className="lg:tw-col-span-6 xl:tw-col-span-4 tw-p-6 md:tw-p-8">
             <NowMintingDetails nft={nft} />
           </div>
         </div>

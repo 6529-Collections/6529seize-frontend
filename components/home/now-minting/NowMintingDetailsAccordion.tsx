@@ -24,8 +24,8 @@ export default function NowMintingDetailsAccordion({
   ];
 
   return (
-    <details className="tw-group tw-border-b tw-border-solid tw-border-x-0 tw-border-t tw-border-iron-800 tw-pb-5 tw-pt-5">
-      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-start tw-gap-2 tw-font-medium tw-text-sm tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-300">
+    <details className="tw-group tw-border-b tw-border-solid tw-border-x-0 tw-border-t tw-border-iron-800 tw-pb-6 tw-pt-6">
+      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-font-medium tw-text-sm tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-300">
         <span>Technical Details</span>
         <svg
           className="tw-size-4 tw-transition-transform group-open:tw-rotate-180"

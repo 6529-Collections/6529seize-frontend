@@ -20,7 +20,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
 
   return (
     <div className="tw-w-full">
-      <div className="tw-flex tw-flex-col tw-gap-5 lg:tw-sticky lg:tw-top-8">
+      <div className="tw-flex tw-flex-col tw-gap-6">
         <NowMintingHeader
           cardNumber={nft.id}
           title={nft.name}

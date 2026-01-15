@@ -124,7 +124,7 @@ export default function SubmissionCarousel({
     >
       <div className="tw-mx-auto tw-flex tw-h-full tw-w-full tw-flex-col">
         {showArrows && (
-          <div className="tw-mb-3 lg:tw-mb-2 tw-flex tw-items-center tw-gap-x-4 tw-justify-end md:tw-justify-between tw-px-2 md:tw-hidden">
+          <div className="tw-mb-3 lg:tw-mb-2 tw-flex tw-items-center tw-gap-x-4 tw-justify-end md:tw-justify-between tw-px-6 md:tw-hidden">
             <CarouselArrow
               direction="left"
               onClick={() => scroll("left")}
@@ -179,7 +179,7 @@ export default function SubmissionCarousel({
                 <button
                   type="button"
                   onClick={() => swiperRef.current?.slideTo(index)}
-                  className="tw-h-full tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  className="tw-h-auto tw-w-full tw-aspect-[4/5] tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-aspect-auto md:tw-h-full"
                   style={{
                     opacity: isActive ? 1 : 0.22,
                     filter: isActive ? "none" : inactiveFilter,
