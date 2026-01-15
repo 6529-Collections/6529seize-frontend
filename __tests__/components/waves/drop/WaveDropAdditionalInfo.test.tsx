@@ -31,7 +31,7 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
 
-    expect(screen.getByText("Process")).toBeInTheDocument();
+    expect(screen.getByText("Artwork Commentary")).toBeInTheDocument();
     expect(screen.getByText("Process notes here.")).toBeInTheDocument();
   });
 
@@ -58,7 +58,50 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
 
-    expect(screen.getByText("Process")).toBeInTheDocument();
+    expect(screen.getByText("Additional Media")).toBeInTheDocument();
     expect(screen.getAllByRole("img")).toHaveLength(4);
+  });
+
+  it("renders promo video when provided", () => {
+    const additionalMedia = JSON.stringify({
+      artist_profile_media: [],
+      artwork_commentary_media: [],
+      preview_image: "",
+      promo_video: "https://example.com/promo.mp4",
+    });
+
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: additionalMedia,
+          },
+        ])}
+      />
+    );
+
+    expect(screen.getByText("Promo Video")).toBeInTheDocument();
+  });
+
+  it("does not render promo video section when not provided", () => {
+    const additionalMedia = JSON.stringify({
+      artist_profile_media: [],
+      artwork_commentary_media: [],
+      preview_image: "https://example.com/preview.jpg",
+    });
+
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: additionalMedia,
+          },
+        ])}
+      />
+    );
+
+    expect(screen.queryByText("Promo Video")).not.toBeInTheDocument();
   });
 });

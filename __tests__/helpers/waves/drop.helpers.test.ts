@@ -1,4 +1,4 @@
-import { getStableDropKey, DropSize, convertApiDropToExtendedDrop, getFeedItemKey, getDropPreviewImageUrl } from '@/helpers/waves/drop.helpers';
+import { getStableDropKey, DropSize, convertApiDropToExtendedDrop, getFeedItemKey, getDropPreviewImageUrl, getDropPromoVideoUrl } from '@/helpers/waves/drop.helpers';
 import { ApiFeedItemType } from '@/generated/models/ApiFeedItemType';
 import { MemesSubmissionAdditionalInfoKey } from '@/components/waves/memes/submission/types/OperationalData';
 
@@ -70,6 +70,47 @@ describe('drop.helpers', () => {
         data_value: 'invalid json'
       }];
       expect(getDropPreviewImageUrl(metadata as any)).toBeNull();
+    });
+  });
+
+  describe('getDropPromoVideoUrl', () => {
+    it('returns null when metadata is undefined', () => {
+      expect(getDropPromoVideoUrl(undefined)).toBeNull();
+    });
+
+    it('returns null when metadata is empty', () => {
+      expect(getDropPromoVideoUrl([])).toBeNull();
+    });
+
+    it('returns null when additional_media entry is missing', () => {
+      const metadata = [{ data_key: 'other_key', data_value: 'value' }];
+      expect(getDropPromoVideoUrl(metadata as any)).toBeNull();
+    });
+
+    it('returns null when promo_video is not in additional_media', () => {
+      const metadata = [{
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_value: JSON.stringify({ artist_profile_media: [] })
+      }];
+      expect(getDropPromoVideoUrl(metadata as any)).toBeNull();
+    });
+
+    it('returns parsed IPFS URL when promo_video exists', () => {
+      const ipfsHash = 'QmPromoVideo123';
+      const metadata = [{
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_value: JSON.stringify({ promo_video: `ipfs://${ipfsHash}` })
+      }];
+      const result = getDropPromoVideoUrl(metadata as any);
+      expect(result).toContain(ipfsHash);
+    });
+
+    it('returns null when JSON parsing fails', () => {
+      const metadata = [{
+        data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+        data_value: 'invalid json'
+      }];
+      expect(getDropPromoVideoUrl(metadata as any)).toBeNull();
     });
   });
 });

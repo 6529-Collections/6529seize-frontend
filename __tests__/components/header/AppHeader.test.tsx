@@ -40,6 +40,9 @@ jest.mock("@/components/header/HeaderActionButtons", () => ({
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: jest.fn(),
 }));
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) => url,
+}));
 
 const {
   useSeizeConnectContext,
