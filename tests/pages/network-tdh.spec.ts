@@ -1,10 +1,10 @@
-import { test, expect } from '../testHelpers';
+import { expect, test } from "../testHelpers";
 
 test.describe("Network Stats Page", () => {
   test.beforeEach(async ({ page }, testInfo) => {
-    await page.goto("/network/stats");
+    await page.goto("/network/metrics/network-tdh");
   });
-  
+
   test("should load with correct title and heading", async ({ page }) => {
     await expect(page).toHaveTitle("Stats | Network");
 

@@ -1,5 +1,7 @@
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { MetricData } from "@/hooks/useCommunityMetrics";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   formatCompactNumber,
@@ -16,6 +18,7 @@ interface MetricCardProps {
   readonly accentColor: string;
   readonly useValueCount?: boolean;
   readonly suffix?: string | undefined;
+  readonly href?: string;
 }
 
 function StatBlock({
@@ -93,6 +96,7 @@ export default function MetricCard({
   accentColor,
   useValueCount = false,
   suffix,
+  href,
 }: MetricCardProps) {
   const getCount = (data: MetricData, period: "current" | "previous") =>
     useValueCount ? data[period].valueCount : data[period].eventCount;
@@ -100,10 +104,17 @@ export default function MetricCard({
   const getChangePercent = (data: MetricData) =>
     useValueCount ? data.valueCountChangePercent : data.eventCountChangePercent;
 
-  return (
-    <div className="tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
+  const content = (
+    <div
+      className={`tw-block tw-h-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5 tw-transition-all tw-duration-300 ${href ? "hover:-tw-translate-y-1 hover:tw-border-neutral-700 hover:tw-shadow-xl hover:tw-shadow-neutral-900/50" : ""}`}
+    >
       <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between">
-        <h3 className="tw-text-base tw-font-semibold tw-text-white">{title}</h3>
+        <h3 className="tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-white">
+          {title}
+          {href && (
+            <ArrowTopRightOnSquareIcon className="tw-size-4 tw-text-neutral-500" />
+          )}
+        </h3>
         <div
           className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg ${iconBgColor}`}
         >
@@ -135,4 +146,17 @@ export default function MetricCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="tw-block tw-no-underline hover:tw-no-underline"
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
