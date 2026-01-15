@@ -3,11 +3,8 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type {
-  MinimalWaveNewDropsCount} from "./useNewDropCounter";
-import useNewDropCounter, {
-  getNewestTimestamp,
-} from "./useNewDropCounter";
+import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
+import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
 
 const UNREAD_CLEAR_DELAY_MS = 1000;
 
@@ -25,8 +22,13 @@ export interface MinimalWave {
   firstUnreadDropSerialNo: number | null;
 }
 
+// Wave type that includes the computed isPinned field from useWavesList
+export interface EnhancedApiWave extends ApiWave {
+  isPinned?: boolean;
+}
+
 export interface WavesDataSource {
-  waves: ApiWave[];
+  waves: EnhancedApiWave[];
   isFetching: boolean;
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
@@ -109,7 +111,7 @@ function useEnhancedWavesListCore(
   }, [activeWaveId, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
-    (wave: ApiWave & { pinned?: boolean | undefined }): MinimalWave => {
+    (wave: EnhancedApiWave): MinimalWave => {
       const wsData = newDropsCounts[wave.id];
       const hasNewWsDrops = (wsData?.count ?? 0) > 0;
       const newDrops = {
@@ -159,7 +161,10 @@ function useEnhancedWavesListCore(
           pfp: c.contributor_pfp,
         })),
         newDropsCount: newDrops,
-        isPinned: options.supportsPinning ? wave.pinned ?? false : false,
+        // Prefer isPinned (computed optimistic value from useWavesList) over pinned (raw server field)
+        isPinned: options.supportsPinning
+          ? (wave.isPinned ?? wave.pinned ?? false)
+          : false,
         isMuted: wave.metrics.muted,
         unreadDropsCount,
         latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
