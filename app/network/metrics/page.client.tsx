@@ -1,19 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
+import { useState } from "react";
+import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
-import MintMetricsCard from "./components/MintMetricsCard";
-import MetricsSkeleton from "./components/MetricsSkeleton";
-import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import {
   ActiveIdentitiesIcon,
   ConsolidationsIcon,
-  DropsIcon,
   DroppersIcon,
+  DropsIcon,
   MintIcon,
   NetworkTdhIcon,
   PercentageIcon,
@@ -24,6 +22,8 @@ import {
   VotesIcon,
   XtdhIcon,
 } from "./components/MetricsIcons";
+import MetricsSkeleton from "./components/MetricsSkeleton";
+import MintMetricsCard from "./components/MintMetricsCard";
 
 export default function MetricsPageClient() {
   useSetTitle("Metrics");
@@ -126,6 +126,7 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-teal-500"
                 accentColor="tw-text-teal-400"
                 unit="TDH"
+                href="/network/metrics/network-tdh"
               />
               <CumulativeMetricCard
                 title="TDH Utilization %"

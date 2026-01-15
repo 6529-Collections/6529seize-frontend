@@ -7,7 +7,7 @@ import { Col, Container, Row } from "react-bootstrap";
 
 function DetailsCard(props: Readonly<{ title: string; children: ReactNode }>) {
   return (
-    <details className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222]">
+    <details className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d]">
       <summary className="tw-cursor-pointer tw-select-none tw-list-none tw-px-5 tw-py-3 tw-font-medium">
         <h5 className="tw-m-0">{props.title}</h5>
       </summary>
@@ -32,7 +32,7 @@ function CategoryAList(
   return (
     <>
       <Heading className={headingClass}>Category A</Heading>
-      <ul className="tw-list-disc tw-ml-6 tw-space-y-1">
+      <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
         <li>
           A complete set of all Meme Cards:{" "}
           <span className="tw-font-mono tw-font-medium">
@@ -77,7 +77,7 @@ function CategoryBList(
 
   return (
     <>
-      <p className="tw-font-medium tw-text-lg tw-mb-2">Category B</p>
+      <p className="tw-mb-2 tw-text-lg tw-font-medium">Category B</p>
       {props.includeAppliedNote ? (
         <p className="tw-mb-2">
           Applied to total TDH (not just that SZN&apos;s TDH)
@@ -103,8 +103,8 @@ function CategoryBList(
 function CategoryCList() {
   return (
     <>
-      <p className="tw-font-medium tw-text-lg tw-mb-2">Category C</p>
-      <ul className="tw-list-disc tw-ml-6">
+      <p className="tw-mb-2 tw-text-lg tw-font-medium">Category C</p>
+      <ul className="tw-ml-6 tw-list-disc">
         <li>
           Gradient: <span className="tw-font-mono tw-font-medium">1.02x</span>{" "}
           per Gradient (up to a maximum of <b>3</b>)
@@ -121,7 +121,7 @@ function IntroLine(props: PropsWithChildren) {
 const NAV_LINKS = [
   { href: "/network/tdh", label: "TDH" },
   { href: "/network/definitions", label: "Definitions" },
-  { href: "/network/stats", label: "Network Stats" },
+  { href: "/network/metrics/network-tdh", label: "Network Stats" },
   { href: "/network/levels", label: "Levels" },
 ] as const;
 
@@ -129,11 +129,11 @@ export default function TDHHistoricBoostsPage() {
   useSetTitle("TDH Historic Boosts | Network");
 
   return (
-    <Container className="tw-min-h-screen tw-pt-12 tw-pb-12">
+    <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
       <Row>
         <Col>
           <h1>TDH — Historic Boosts</h1>
-          <p className="tw-mt-4 tw-mb-8">
+          <p className="tw-mb-8 tw-mt-4">
             Previous TDH versions are archived here for reference.
           </p>
 
@@ -183,7 +183,8 @@ export default function TDHHistoricBoostsPage() {
               <Link
                 key={href}
                 href={href}
-                className="tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline tw-w-full sm:tw-w-auto sm:tw-whitespace-nowrap">
+                className="tw-inline-block tw-w-full tw-min-w-[150px] tw-flex-1 tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-4 tw-py-2 tw-text-center tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black sm:tw-w-auto sm:tw-whitespace-nowrap"
+              >
                 {label}
               </Link>
             ))}

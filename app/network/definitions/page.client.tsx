@@ -7,7 +7,7 @@ import { Col, Container, Row } from "react-bootstrap";
 const NAV_LINKS = [
   { href: "/network/tdh", label: "TDH" },
   { href: "/network/tdh/historic-boosts", label: "TDH Historic Boosts" },
-  { href: "/network/stats", label: "Network Stats" },
+  { href: "/network/metrics/network-tdh", label: "Network Stats" },
   { href: "/network/levels", label: "Levels" },
 ] as const;
 
@@ -18,7 +18,7 @@ export default function DefinitionsClient() {
   useSetTitle("Definitions | Network");
 
   return (
-    <Container className="tw-min-h-screen tw-pt-12 tw-pb-12">
+    <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
       <Row>
         <Col>
           <h1>Definitions</h1>
@@ -92,7 +92,8 @@ export default function DefinitionsClient() {
               TDH (unboosted) &times; boosters. For the current rules, see{" "}
               <Link
                 href="/network/tdh"
-                className="tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-1 tw-py-0.5 tw-no-underline tw-text-md tw-font-medium">
+                className="tw-inline-block tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-1 tw-py-0.5 tw-text-md tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black"
+              >
                 TDH
               </Link>
               .

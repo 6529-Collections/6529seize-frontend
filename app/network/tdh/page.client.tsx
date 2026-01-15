@@ -11,7 +11,7 @@ export default function TDHMainPage() {
   useSetTitle("TDH | Network");
 
   return (
-    <Container className="tw-min-h-screen tw-pt-12 tw-pb-12">
+    <Container className="tw-min-h-screen tw-pb-12 tw-pt-12">
       <Row>
         <Col>
           <h1>TDH</h1>
@@ -24,7 +24,7 @@ export default function TDHMainPage() {
 
           <div className="tw-mt-8 tw-space-y-2">
             <h2>How TDH is computed</h2>
-            <ol className="tw-list-decimal tw-ml-6 tw-space-y-2">
+            <ol className="tw-ml-6 tw-list-decimal tw-space-y-2">
               <li>
                 <span className="tw-font-medium">Unweighted days:</span> each
                 NFT contributes 1 per day it's held.
@@ -34,7 +34,7 @@ export default function TDHMainPage() {
                 scale by edition size with FirstGM (3,941) as 1.
                 <br />
                 Examples:
-                <ul className="tw-list-disc tw-ml-6 tw-space-y-1">
+                <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
                   <li>SeizingJPG (Edition Size 1,000) = 3.941</li>
                   <li>Nakamoto Freedom (Edition Size 300) = 13.136</li>
                   <li>Gradients (Edition Size 101) = 39.020</li>
@@ -52,7 +52,8 @@ export default function TDHMainPage() {
           {/* TDH 1.4 */}
           <div
             id="tdh-1-4"
-            className="tw-mt-10 tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222] tw-p-6">
+            className="tw-mt-10 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6"
+          >
             <h3>TDH 1.4 (October 10, 2025 — present)</h3>
             <p className="tw-mt-4">
               Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
@@ -61,7 +62,7 @@ export default function TDHMainPage() {
 
             <div className="tw-mt-6">
               <h4>Category A</h4>
-              <ul className="tw-list-disc tw-ml-6 tw-space-y-1">
+              <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
                 <li>
                   A complete set of all Meme Cards:{" "}
                   <span className="tw-font-mono tw-font-medium">1.60x</span>
@@ -205,7 +206,8 @@ export default function TDHMainPage() {
             <div className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3">
               <Link
                 href="/network/tdh/historic-boosts"
-                className={BUTTON_LINK_CLASSES}>
+                className={BUTTON_LINK_CLASSES}
+              >
                 View Historic Boosts
               </Link>
               <Link href="/network/definitions" className={BUTTON_LINK_CLASSES}>
@@ -215,18 +217,21 @@ export default function TDHMainPage() {
           </div>
 
           {/* Cross-links */}
-          <div className="tw-mt-10 tw-grid md:tw-grid-cols-2 tw-gap-6">
-            <div className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222] tw-p-6">
+          <div className="tw-mt-10 tw-grid tw-gap-6 md:tw-grid-cols-2">
+            <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
               <h3>Network Stats</h3>
               <p className="tw-mt-1">
                 Aggregate community activity, holdings, trading, and time-based
                 metrics across the network.
               </p>
-              <Link href="/network/stats" className={BUTTON_LINK_CLASSES}>
+              <Link
+                href="/network/metrics/network-tdh"
+                className={BUTTON_LINK_CLASSES}
+              >
                 View Network Stats
               </Link>
             </div>
-            <div className="tw-rounded-lg tw-bg-[#0c0c0d] tw-border-2 tw-border-solid tw-border-[#222] tw-p-6">
+            <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
               <h3>Levels</h3>
               <p className="tw-mt-1">
                 Our integrated progression that combines <b>TDH</b> with{" "}
