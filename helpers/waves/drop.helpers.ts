@@ -183,3 +183,22 @@ export const getDropPreviewImageUrl = (
     return null;
   }
 };
+
+export const getDropPromoVideoUrl = (
+  metadata: ApiDropMetadata[] | undefined
+): string | null => {
+  const additionalMediaEntry = metadata?.find(
+    (m) => m.data_key === MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA
+  );
+  if (!additionalMediaEntry?.data_value) return null;
+
+  try {
+    const parsed = JSON.parse(additionalMediaEntry.data_value) as {
+      promo_video?: string;
+    };
+    if (!parsed?.promo_video) return null;
+    return parseIpfsUrl(parsed.promo_video);
+  } catch {
+    return null;
+  }
+};
