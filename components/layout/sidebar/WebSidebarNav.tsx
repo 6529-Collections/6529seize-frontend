@@ -58,7 +58,9 @@ const WebSidebarNav = React.forwardRef<
     top: number;
     height: number;
   } | null>(null);
-  const [submenuTrigger, setSubmenuTrigger] = useState<HTMLElement | null>(null);
+  const [submenuTrigger, setSubmenuTrigger] = useState<HTMLElement | null>(
+    null
+  );
 
   useKey(
     (event) => event.metaKey && event.key === "k",
@@ -208,16 +210,24 @@ const WebSidebarNav = React.forwardRef<
 
       return null;
     },
-    [isCollapsed, openSubmenuKey, sections, pathname, closeSubmenu, submenuAnchor]
+    [
+      isCollapsed,
+      openSubmenuKey,
+      sections,
+      pathname,
+      closeSubmenu,
+      submenuAnchor,
+      submenuTrigger,
+    ]
   );
 
   return (
     <>
       <nav
-        className="tw-flex tw-flex-col tw-mt-4 tw-h-full tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-px-3"
+        className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
         aria-label="Desktop navigation"
       >
-        <ul className="tw-list-none tw-m-0 tw-p-0">
+        <ul className="tw-m-0 tw-list-none tw-p-0">
           <li>
             <WebSidebarNavItem
               href="/"
@@ -278,9 +288,7 @@ const WebSidebarNav = React.forwardRef<
               <WebSidebarExpandable
                 section={collectionsSection}
                 expanded={expandedKeys.includes("collections")}
-                onToggle={(event) =>
-                  handleSectionToggle("collections", event)
-                }
+                onToggle={(event) => handleSectionToggle("collections", event)}
                 collapsed={isCollapsed}
                 pathname={pathname}
                 data-section="collections"
@@ -326,9 +334,7 @@ const WebSidebarNav = React.forwardRef<
                 <WebSidebarExpandable
                   section={section}
                   expanded={expandedKeys.includes(section.key)}
-                  onToggle={(event) =>
-                    handleSectionToggle(section.key, event)
-                  }
+                  onToggle={(event) => handleSectionToggle(section.key, event)}
                   collapsed={isCollapsed}
                   pathname={pathname}
                   data-section={section.key}
@@ -336,7 +342,6 @@ const WebSidebarNav = React.forwardRef<
                 {renderCollapsedSubmenu(section.key)}
               </li>
             ))}
-
         </ul>
       </nav>
 
@@ -348,11 +353,13 @@ const WebSidebarNav = React.forwardRef<
             elementRole="dialog"
             onClicked={(event) => event.stopPropagation()}
           >
-            <HeaderSearchModal onClose={() => setIsSearchOpen(false)} />
+            <HeaderSearchModal
+              onClose={() => setIsSearchOpen(false)}
+              wave={null}
+            />
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
-
     </>
   );
 });
