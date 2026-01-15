@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useEffect, type JSX } from "react";
+import React, { useMemo, useEffect, useCallback, type JSX } from "react";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ObjectSerializer";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
@@ -15,6 +16,7 @@ import { WaveSmallLeaderboard } from "@/components/waves/small-leaderboard/WaveS
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -36,8 +38,21 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   activeTab,
   setActiveTab,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
+
+  const onDropClick = useCallback(
+    (drop: ExtendedDrop) => {
+      const params = new URLSearchParams(searchParams.toString() || "");
+      params.set("drop", drop.id);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
   const {
@@ -101,12 +116,12 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.LEADERBOARD]: (
       <div>
-        <WaveSmallLeaderboard wave={wave} />
+        <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
       </div>
     ),
     [SidebarTab.WINNERS]: (
       <div>
-        <WaveWinnersSmall wave={wave} />
+        <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
       </div>
     ),
     [SidebarTab.TOP_VOTERS]: (

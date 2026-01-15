@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo } from "react";
-import { debounce } from "lodash";
-import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { useQueryClient } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   WAVE_DROPS_PARAMS,
   getDefaultQueryRetry,
 } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQueryClient } from "@tanstack/react-query";
+import { debounce } from "lodash";
+import React, { useCallback, useEffect, useMemo } from "react";
 
 interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;
@@ -89,12 +89,12 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
           staleTime: 60000,
           ...getDefaultQueryRetry(),
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           // Log prefetch errors for debugging while not blocking the UI
           console.warn("Failed to prefetch leaderboard data:", {
             waveId,
             targetSort,
-            error: error?.message ?? error,
+            error: error instanceof Error ? error.message : error,
           });
         });
     },
@@ -129,13 +129,6 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       className="tw-flex tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
     >
       <button
-        className={getButtonClassName(WaveDropsLeaderboardSort.TREND)}
-        onClick={() => onSortChange(WaveDropsLeaderboardSort.TREND)}
-        onMouseEnter={() => prefetchSort(WaveDropsLeaderboardSort.TREND)}
-      >
-        🔥 Hot
-      </button>
-      <button
         className={getButtonClassName(WaveDropsLeaderboardSort.RANK)}
         onClick={() => onSortChange(WaveDropsLeaderboardSort.RANK)}
         onMouseEnter={() => prefetchSort(WaveDropsLeaderboardSort.RANK)}
@@ -152,6 +145,13 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         }
       >
         Projected Vote
+      </button>
+      <button
+        className={getButtonClassName(WaveDropsLeaderboardSort.TREND)}
+        onClick={() => onSortChange(WaveDropsLeaderboardSort.TREND)}
+        onMouseEnter={() => prefetchSort(WaveDropsLeaderboardSort.TREND)}
+      >
+        Hot
       </button>
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.CREATED_AT)}

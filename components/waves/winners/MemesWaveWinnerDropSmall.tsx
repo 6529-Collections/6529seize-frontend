@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback } from "react";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -25,7 +25,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
 
     const hasUserVoted =
       drop.context_profile_context?.rating !== undefined &&
-      drop.context_profile_context?.rating !== 0;
+      drop.context_profile_context.rating !== 0;
 
     const userVote = drop.context_profile_context?.rating ?? 0;
     const isNegativeVote = userVote < 0;
@@ -50,10 +50,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
 
     const userVoteStyle = getUserVoteStyle();
 
-    const votingLabel =
-      WAVE_VOTING_LABELS[drop.wave.voting_credit_type] ??
-      drop.wave.voting_credit_type ??
-      "";
+    const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
 
     const handleDropClick = useCallback(() => {
       onDropClick();
@@ -68,7 +65,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
           <div className="tw-relative tw-flex tw-flex-col">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
               <div className="tw-flex tw-items-center tw-gap-x-3">
-                {effectiveRank && (
+                {typeof effectiveRank === "number" && (
                   <div>
                     <WinnerDropBadge
                       rank={effectiveRank}
@@ -115,7 +112,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
 
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-3">
             <Link
-              href={`/${drop.author.handle}`}
+              href={`/${drop.author.handle ?? drop.author.primary_address}`}
               onClick={(e) => e.stopPropagation()}
               className="tw-block tw-flex-shrink-0 tw-transition-opacity desktop-hover:group-hover:tw-opacity-90"
             >
@@ -125,7 +122,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                     drop.author.pfp,
                     ImageScale.W_AUTO_H_50
                   )}
-                  alt={`${drop.author.handle}'s profile`}
+                  alt={`${drop.author.handle ?? drop.author.primary_address}'s profile`}
                   className="tw-size-7 tw-rounded-lg tw-object-cover tw-ring-1 tw-ring-white/10"
                 />
               ) : (
@@ -138,7 +135,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                 user={drop.author.handle ?? drop.author.id}
               >
                 <Link
-                  href={`/${drop.author.handle}`}
+                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
                   onClick={(e) => e.stopPropagation()}
                   className="tw-truncate tw-no-underline desktop-hover:hover:tw-underline"
                 >

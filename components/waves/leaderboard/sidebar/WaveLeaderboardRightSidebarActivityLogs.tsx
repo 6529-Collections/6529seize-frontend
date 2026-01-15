@@ -83,12 +83,12 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
           key={log.id}
           log={log}
           creditType={wave.voting.credit_type}
-          onDropClick={() => handleDropClick(log.contents["drop"].serial_no)}
+          onDropClick={() => handleDropClick(log.contents["drop"]?.serial_no)}
         />
       ))}
       {isFetchingNextPage && (
         <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
-          <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400"></div>
+          <div className="tw-size-full tw-animate-loading-bar tw-bg-indigo-400"></div>
         </div>
       )}
       <div ref={intersectionElementRef}></div>

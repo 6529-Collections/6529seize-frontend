@@ -31,6 +31,14 @@ describe('DropListItemContentMediaImage', () => {
     fireEvent.click(screen.getByLabelText('View drop details'));
     expect(onContainerClick).toHaveBeenCalled();
   });
+
+  it('does not open modal when disableModal is true', () => {
+    render(<DropListItemContentMediaImage src="img" disableModal />);
+    const img = screen.getByAltText('Drop media');
+    fireEvent.load(img);
+    fireEvent.click(img);
+    expect(screen.queryByLabelText('View drop details')).not.toBeInTheDocument();
+  });
 });
 
 describe('DropListItemContentMediaImage retry', () => {

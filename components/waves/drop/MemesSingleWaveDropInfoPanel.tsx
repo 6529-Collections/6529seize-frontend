@@ -140,7 +140,6 @@ export const MemesSingleWaveDropInfoPanel = ({
                   isVotingEnded={isVotingEnded}
                   canShowVote={canShowVote}
                   onVoteClick={() => setIsVotingOpen(true)}
-                  variant="memes"
                 />
               </div>
 

@@ -5,7 +5,10 @@ import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/Api
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { generateUniqueKeys, mapToExtendedDrops } from "@/helpers/waves/wave-drops.helpers";
+import {
+  generateUniqueKeys,
+  mapToExtendedDrops,
+} from "@/helpers/waves/wave-drops.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -15,8 +18,9 @@ const toWaveMin = (wave: ApiWave): ApiWaveMin => {
     id: wave.id,
     name: wave.name,
     picture: wave.picture,
-    description_drop_id: wave.description_drop?.id ?? "",
-    authenticated_user_eligible_to_vote: wave.voting.authenticated_user_eligible,
+    description_drop_id: wave.description_drop.id,
+    authenticated_user_eligible_to_vote:
+      wave.voting.authenticated_user_eligible,
     authenticated_user_eligible_to_participate:
       wave.participation.authenticated_user_eligible,
     authenticated_user_eligible_to_chat: wave.chat.authenticated_user_eligible,
@@ -41,24 +45,29 @@ export function useWaveDropsSearch({
   enabled,
   size = 50,
 }: {
-  readonly wave: ApiWave;
+  readonly wave: ApiWave | null;
   readonly term: string;
   readonly enabled: boolean;
   readonly size?: number | undefined;
 }) {
   const trimmedTerm = term.trim();
-  const waveMin = useMemo(() => toWaveMin(wave), [wave]);
+  const waveMin = useMemo(() => (wave ? toWaveMin(wave) : null), [wave]);
 
   const query = useInfiniteQuery({
     queryKey: [
       QueryKey.DROPS,
-      { waveId: wave.id, term: trimmedTerm, size, context: "wave-search" },
+      {
+        waveId: wave?.id ?? null,
+        term: trimmedTerm,
+        size,
+        context: "wave-search",
+      },
     ],
-    enabled: enabled && trimmedTerm.length > 0,
+    enabled: enabled && wave !== null && trimmedTerm.length > 0,
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       return await commonApiFetch<ApiDropWithoutWavesPageWithoutCount>({
-        endpoint: `waves/${wave.id}/search`,
+        endpoint: `waves/${wave!.id}/search`,
         params: {
           term: trimmedTerm,
           page: String(pageParam),
@@ -72,9 +81,14 @@ export function useWaveDropsSearch({
   });
 
   const drops = useMemo<ExtendedDrop[]>(() => {
+    if (!waveMin) return [];
     const all = query.data?.pages.flatMap((page) => page.data) ?? [];
     if (all.length === 0) return [];
-    const mapped = mapToExtendedDrops([{ wave: waveMin, drops: all }], [], false);
+    const mapped = mapToExtendedDrops(
+      [{ wave: waveMin, drops: all }],
+      [],
+      false
+    );
     return generateUniqueKeys(mapped, []);
   }, [query.data?.pages, waveMin]);
 

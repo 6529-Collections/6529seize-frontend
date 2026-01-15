@@ -1,9 +1,8 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 describe("WaveleaderboardSort", () => {
   it("highlights active sort and triggers changes", async () => {
@@ -28,7 +27,7 @@ describe("WaveleaderboardSort", () => {
       WaveDropsLeaderboardSort.RATING_PREDICTION
     );
 
-    await user.click(screen.getByText("🔥 Hot"));
+    await user.click(screen.getByText("Hot"));
     expect(onSortChange).toHaveBeenCalledWith(WaveDropsLeaderboardSort.TREND);
 
     await user.click(screen.getByText("Newest"));

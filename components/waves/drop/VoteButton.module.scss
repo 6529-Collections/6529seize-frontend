@@ -95,22 +95,21 @@ $btn-dimension: 72px;
 
 .voteButton {
   position: relative;
-  font-size:14px;
+  font-size: 14px;
   border-radius: 8px;
   width: $btn-dimension;
   height: 40px;
-  background: #406AFE;
-  border: 1px solid #406AFE;
+  background: #E5E5E5;
+  border: 1px solid white;
   outline: none;
-  color: white;
-  font-weight: 500;
+  color: #0A0A0A;
+  font-weight: 600;
   cursor: pointer;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.3s ease-out;
 
   &:not(:disabled):hover {
-    background: #395FE4;
-    border-color: #395FE4;
+    background: #D4D4D4;
+    border-color: #D4D4D4;
   }
 
   &:disabled {
@@ -173,10 +172,10 @@ $btn-dimension: 72px;
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(10, 10, 10, 0.2);
   border-radius: 50%;
-  border-top-color: white;
-  border-right-color: white;
+  border-top-color: #0A0A0A;
+  border-right-color: #0A0A0A;
   animation: spinnerEnter 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards,
              funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
 

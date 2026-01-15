@@ -41,4 +41,19 @@ describe('DropListItemContentMediaVideo', () => {
     render(<DropListItemContentMediaVideo src="foo.mp4" />);
     expect(document.querySelector('video')).toBeTruthy(); // Video is still rendered, just paused
   });
+
+  it('does not autoplay when disableAutoPlay is true', () => {
+    const ref = { current: document.createElement('div') } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({ playableUrl: 'foo.mp4', isHls: false });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, 'play', {
+      writable: true,
+      value: playSpy,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mp4" disableAutoPlay />);
+    expect(playSpy).not.toHaveBeenCalled();
+  });
 });

@@ -20,7 +20,7 @@ export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
       className="tw-flex tw-items-center tw-gap-1.5 tw-border-none tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-300"
     >
       <svg
-        className="tw-h-4 tw-w-4"
+        className="tw-size-4"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

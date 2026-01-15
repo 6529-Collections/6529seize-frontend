@@ -28,7 +28,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           <div className="tw-flex tw-items-center tw-gap-1.5">
             <FontAwesomeIcon
               icon={faClock}
-              className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+              className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
             />
             <span className="tw-text-xs tw-font-medium tw-text-iron-400">
               {getTimeAgoShort(new Date(log.created_at).getTime())}
@@ -42,9 +42,9 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
 
         <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <Link
-            href={`/${log.invoker.handle}`}
+            href={`/${log.invoker.handle ?? log.invoker.primary_address}`}
             className="tw-group tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 desktop-hover:hover:tw-opacity-80"
-            title={`Voter: ${log.invoker.handle}`}
+            title={`Voter: ${log.invoker.handle ?? log.invoker.primary_address}`}
           >
             {log.invoker.pfp ? (
               <Image
@@ -82,15 +82,15 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
               {formatNumberWithCommas(log.contents["newVote"])}{" "}
               {WAVE_VOTING_LABELS[creditType]}
             </span>
-            {log.contents?.["reason"] === "CREDIT_OVERSPENT" && (
+            {log.contents["reason"] === "CREDIT_OVERSPENT" && (
               <SystemAdjustmentPill />
             )}
           </div>
 
           <Link
-            href={`/${log.drop_author?.handle}`}
+            href={`/${log.drop_author?.handle ?? log.drop_author?.primary_address}`}
             className="tw-group tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 desktop-hover:hover:tw-opacity-80"
-            title={`Drop creator: ${log.drop_author?.handle}`}
+            title={`Drop creator: ${log.drop_author?.handle ?? log.drop_author?.primary_address}`}
           >
             {log.drop_author?.pfp ? (
               <Image
@@ -104,9 +104,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
               <div className="tw-size-5 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
             )}
             {log.drop_author?.handle ? (
-              <UserProfileTooltipWrapper
-                user={log.drop_author.handle ?? log.drop_author.id}
-              >
+              <UserProfileTooltipWrapper user={log.drop_author.handle}>
                 <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
                   {log.drop_author.handle}
                 </span>

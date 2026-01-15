@@ -34,7 +34,12 @@ const readIpfsConfig = () => {
     : trimmed;
   const mfsPath = publicEnv.IPFS_MFS_PATH;
 
-  return { apiEndpoint, gatewayEndpoint: trimmed, gatewayBase, mfsPath } as const;
+  return {
+    apiEndpoint,
+    gatewayEndpoint: trimmed,
+    gatewayBase,
+    mfsPath,
+  } as const;
 };
 
 const getEnv = async () => readIpfsConfig();
@@ -56,10 +61,10 @@ export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
         service.init();
         setIpfsService(service);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error("Error initializing IPFS service", error);
       });
-  }, []);
+  }, [ipfsService]);
 
   const value = useMemo(() => ({ ipfsService }), [ipfsService]);
 
@@ -88,6 +93,6 @@ export const resolveIpfsUrlSync = (url: string) => {
   }
 };
 
-export const resolveIpfsUrl = async (url: string) => {
+export const resolveIpfsUrl = (url: string) => {
   return resolveIpfsUrlSync(url);
 };

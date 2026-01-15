@@ -13,7 +13,7 @@ export const DefaultWaveSmallLeaderboardDrop: React.FC<
 > = ({ drop, onDropClick }) => {
   return (
     <div className="tw-cursor-pointer" onClick={onDropClick}>
-      {drop.rank && drop.rank <= 3 ? (
+      {typeof drop.rank === "number" && drop.rank <= 3 ? (
         <WaveSmallLeaderboardTopThreeDrop
           drop={drop}
           onDropClick={onDropClick}

@@ -45,7 +45,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   };
 
   const trophyIcon = (rank: number | null, decisionTime?: number) => {
-    if (rank) {
+    if (typeof drop.rank === "number") {
       return (
         <WinnerDropBadge rank={rank} decisionTime={decisionTime ?? null} />
       );
@@ -62,26 +62,26 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
             style={{
               border: "1px solid transparent",
               boxShadow: `inset 2px 0 0 ${
-                drop.rank && drop.rank <= 3
+                typeof drop.rank === "number" && drop.rank <= 3
                   ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
                   : "#60606C"
-              }, 
+              },
                          inset 0 1px 0 ${
-                           drop.rank && drop.rank <= 3
+                           typeof drop.rank === "number" && drop.rank <= 3
                              ? getRankTextColor(drop.rank)
                                  ?.replace("tw-text-", "")
                                  .trim()
                              : "#60606C"
-                         }20, 
+                         }20,
                          inset -1px 0 0 ${
-                           drop.rank && drop.rank <= 3
+                           typeof drop.rank === "number" && drop.rank <= 3
                              ? getRankTextColor(drop.rank)
                                  ?.replace("tw-text-", "")
                                  .trim()
                              : "#60606C"
-                         }20, 
+                         }20,
                          inset 0 -1px 0 ${
-                           drop.rank && drop.rank <= 3
+                           typeof drop.rank === "number" && drop.rank <= 3
                              ? getRankTextColor(drop.rank)
                                  ?.replace("tw-text-", "")
                                  .trim()
@@ -103,13 +103,13 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                 />
                 <div className="tw-flex tw-items-center tw-justify-between">
                   <Link
-                    href={`/${drop.author.handle}`}
+                    href={`/${drop.author.handle ?? drop.author.primary_address}`}
                     onClick={(e) => e.stopPropagation()}
                     className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
                   >
                     {drop.author.pfp ? (
                       <img
-                        className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-object-contain tw-p-[1px] tw-ring-1 tw-ring-inset tw-ring-iron-700"
+                        className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-object-contain tw-p-px tw-ring-1 tw-ring-inset tw-ring-iron-700"
                         src={drop.author.pfp}
                         alt={drop.author.handle ?? ""}
                       />
@@ -138,9 +138,9 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   </Link>
                 </div>
                 <div
-                  className={`tw-mt-3 tw-flex tw-items-center tw-gap-x-1.5 ${getRankTextColor(
-                    drop.rank
-                  )}`}
+                  className={`tw-mt-3 tw-flex tw-items-center tw-gap-x-1.5 ${
+                    getRankTextColor(drop.rank) ?? ""
+                  }`}
                 >
                   <svg
                     className="-tw-mt-0.5 tw-size-3.5 tw-flex-shrink-0"

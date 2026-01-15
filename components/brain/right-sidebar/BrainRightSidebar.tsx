@@ -112,12 +112,12 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           <button
             type="button"
             onClick={close}
-            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-r-0 tw-border-solid tw-border-iron-650 tw-bg-iron-700 tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)]"
+            className="tw-group tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-r-0 tw-border-solid tw-border-iron-650 tw-bg-iron-700 tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)]"
             aria-label="Close sidebar"
           >
             <ChevronDoubleRightIcon
               strokeWidth={2}
-              className="tw-h-4 tw-w-4 tw-text-iron-200 tw-transition-all tw-duration-200"
+              className="tw-size-4 tw-text-iron-200 tw-transition-all tw-duration-200"
             />
           </button>
         </div>
@@ -135,7 +135,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
     </div>
   );
 
-  if (isOverlay && typeof document !== "undefined" && document.body) {
+  if (isOverlay && typeof document !== "undefined") {
     return createPortal(
       <>
         <button

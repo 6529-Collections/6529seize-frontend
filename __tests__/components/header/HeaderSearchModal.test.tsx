@@ -207,7 +207,7 @@ function setup(options: SetupOptions = {}) {
       };
     });
   }
-  render(<HeaderSearchModal onClose={onClose} />);
+  render(<HeaderSearchModal onClose={onClose} wave={null} />);
   return { onClose, push, profilesRefetch, nftsRefetch, wavesRefetch };
 }
 
