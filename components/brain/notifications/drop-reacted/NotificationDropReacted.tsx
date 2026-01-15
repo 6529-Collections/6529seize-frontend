@@ -3,10 +3,12 @@
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { useEmoji } from "@/contexts/EmojiContext";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { numberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type {
+  INotificationDropBoosted,
   INotificationDropReacted,
   INotificationDropVoted,
 } from "@/types/feed.types";
@@ -25,7 +27,10 @@ export const getNotificationVoteColor = (vote: number) => {
   return "tw-text-iron-500";
 };
 
-type NotificationUnion = INotificationDropVoted | INotificationDropReacted;
+type NotificationUnion =
+  | INotificationDropVoted
+  | INotificationDropReacted
+  | INotificationDropBoosted;
 
 interface Props {
   readonly notification: NotificationUnion;
@@ -46,28 +51,24 @@ export default function NotificationDropReacted({
     useWaveNavigation();
   const { findCustomEmoji, findNativeEmoji } = useEmoji();
 
-  const isVoted =
-    (notification as INotificationDropVoted).additional_context.vote !==
-    undefined;
-  const isReacted =
-    (notification as INotificationDropReacted).additional_context.reaction !==
-    undefined;
+  const isVoted = notification.cause === ApiNotificationCause.DropVoted;
+  const isReacted = notification.cause === ApiNotificationCause.DropReacted;
+  const isBoosted = notification.cause === ApiNotificationCause.DropBoosted;
 
   let actionElement: React.ReactNode = null;
 
   if (isVoted) {
-    const voteValue = (notification as INotificationDropVoted)
-      .additional_context.vote;
+    const voteValue = notification.additional_context.vote;
 
     actionElement = (
       <>
-        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           rated
         </span>
         <span
           className={`${getNotificationVoteColor(
             voteValue
-          )} tw-font-medium tw-text-sm`}
+          )} tw-text-sm tw-font-medium`}
         >
           {voteValue > 0 && "+"}
           {numberWithCommas(voteValue)}
@@ -75,10 +76,17 @@ export default function NotificationDropReacted({
         <NotificationTimestamp createdAt={notification.created_at} />
       </>
     );
+  } else if (isBoosted) {
+    actionElement = (
+      <>
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+          🔥 boosted 🔥
+        </span>
+        <NotificationTimestamp createdAt={notification.created_at} />
+      </>
+    );
   } else if (isReacted) {
-    const rawId = (
-      notification as INotificationDropReacted
-    ).additional_context.reaction.replaceAll(":", "");
+    const rawId = notification.additional_context.reaction.replaceAll(":", "");
     let emojiNode: React.ReactNode = null;
 
     const custom = findCustomEmoji(rawId);
@@ -87,14 +95,14 @@ export default function NotificationDropReacted({
         <img
           src={custom.skins[0]?.src}
           alt={rawId}
-          className="tw-max-w-5 tw-max-h-5 tw-object-contain"
+          className="tw-max-h-5 tw-max-w-5 tw-object-contain"
         />
       );
     } else {
       const native = findNativeEmoji(rawId);
       if (native) {
         emojiNode = (
-          <span className="tw-text-[1.2rem] tw-flex tw-items-center tw-justify-center">
+          <span className="tw-flex tw-items-center tw-justify-center tw-text-[1.2rem]">
             {native.skins[0]?.native}
           </span>
         );
@@ -107,7 +115,7 @@ export default function NotificationDropReacted({
 
     actionElement = (
       <>
-        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           reacted
         </span>
         {emojiNode}
@@ -125,7 +133,7 @@ export default function NotificationDropReacted({
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
       <NotificationHeader
         author={notification.related_identity}
         actions={

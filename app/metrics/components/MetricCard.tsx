@@ -1,35 +1,21 @@
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { MetricData } from "@/hooks/useCommunityMetrics";
+import type { ReactNode } from "react";
+import {
+  formatCompactNumber,
+  formatNumberWithCommas,
+  formatPercent,
+} from "../utils/formatNumbers";
 
 interface MetricCardProps {
   readonly title: string;
   readonly dailyData: MetricData;
   readonly weeklyData: MetricData;
-  readonly icon: React.ReactNode;
+  readonly icon: ReactNode;
   readonly iconBgColor: string;
   readonly accentColor: string;
   readonly useValueCount?: boolean;
-  readonly suffix?: string;
-}
-
-function formatNumberWithCommas(value: number): string {
-  return new Intl.NumberFormat("en-US").format(value);
-}
-
-function formatCompactNumber(value: number): string {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
-  }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
-  }
-  return formatNumberWithCommas(value);
-}
-
-function formatPercent(value: number | null): string {
-  if (value === null) return "N/A";
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}%`;
+  readonly suffix?: string | undefined;
 }
 
 function StatBlock({
@@ -49,7 +35,7 @@ function StatBlock({
   readonly changePercent: number | null;
   readonly accentColor: string;
   readonly isPrimary?: boolean;
-  readonly suffix?: string;
+  readonly suffix?: string | undefined;
 }) {
   const isPositive = changePercent !== null && changePercent >= 0;
   const colorClasses = isPositive
@@ -134,7 +120,7 @@ export default function MetricCard({
           changePercent={getChangePercent(dailyData)}
           accentColor={accentColor}
           isPrimary
-          {...(suffix !== undefined && { suffix })}
+          suffix={suffix}
         />
         <div className="tw-w-px tw-bg-iron-700/50" />
         <StatBlock
@@ -144,7 +130,7 @@ export default function MetricCard({
           previousLabel="prev week"
           changePercent={getChangePercent(weeklyData)}
           accentColor={accentColor}
-          {...(suffix !== undefined && { suffix })}
+          suffix={suffix}
         />
       </div>
     </div>
