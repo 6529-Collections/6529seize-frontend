@@ -23,7 +23,7 @@ export default function CommunityStatsPage() {
   );
 }
 
-export const generateMetadata = async () => {
+export const generateMetadata = () => {
   return getAppMetadata({
     title: "Stats",
     description: "Network",

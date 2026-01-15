@@ -1,10 +1,13 @@
 "use client";
 
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
-import Image from "next/image";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useWaveById } from "@/hooks/useWaveById";
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/Auth";
@@ -14,16 +17,12 @@ import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
-
-
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
   "6529-gradient": "6529 Gradient",
   "meme-lab": "Meme Lab",
-  "nextgen": "NextGen",
+  nextgen: "NextGen",
 };
 
 const sliceString = (str: string, length: number): string => {
@@ -32,7 +31,10 @@ const sliceString = (str: string, length: number): string => {
   return `${str.slice(0, half)}...${str.slice(-half)}`;
 };
 
-const getCollectionTitle = (basePath: string, pageTitle: string): string | null => {
+const getCollectionTitle = (
+  basePath: string,
+  pageTitle: string
+): string | null => {
   const prefix = COLLECTION_TITLES[basePath];
   if (prefix && !Number.isNaN(Number(pageTitle))) {
     return `${prefix} #${pageTitle}`;
@@ -68,7 +70,7 @@ export default function AppHeader() {
     return profile?.pfp ?? null;
   })();
 
-  const pathSegments = (pathname ?? "").split("/").filter(Boolean);
+  const pathSegments = pathname.split("/").filter(Boolean);
   const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
     ? pathSegments[pathSegments.length - 1]
@@ -86,7 +88,7 @@ export default function AppHeader() {
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
 
-  const isProfilePage = typeof params?.["user"] === "string";
+  const isProfilePage = typeof params["user"] === "string";
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
@@ -98,7 +100,7 @@ export default function AppHeader() {
     if (isMessagesRoute && !waveId) return "Messages";
     if (waveId) {
       if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
-      return wave?.name ?? "Wave";
+      return wave.name;
     }
 
     const collectionTitle = getCollectionTitle(basePath!, pageTitle!);
@@ -111,42 +113,49 @@ export default function AppHeader() {
   })();
 
   return (
-    <div className="tw-w-full tw-bg-black tw-text-iron-50 tw-pt-[env(safe-area-inset-top,0px)]">
-      <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-h-16">
+    <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
+      <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-px-4">
         {showBackButton && <BackButton />}
         {!showBackButton && (
           <button
             type="button"
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
-            className={`tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-h-10 tw-w-10 tw-rounded-full tw-border tw-border-solid ${
+            className={`tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid ${
               address
-                ? "tw-bg-iron-900 tw-border-white/20"
-                : "tw-bg-transparent tw-border-transparent"
-            }`}>
+                ? "tw-border-white/20 tw-bg-iron-900"
+                : "tw-border-transparent tw-bg-transparent"
+            }`}
+          >
             {address ? (
               pfp ? (
                 <Image
-                  src={pfp}
+                  src={resolveIpfsUrlSync(pfp)}
                   alt="pfp"
                   width={40}
                   height={40}
-                  className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
+                  className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-object-contain"
                 />
               ) : (
-                <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-flex-shrink-0" />
+                <div className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
               )
             ) : (
               <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
             )}
           </button>
         )}
-        <div className="tw-flex-1 tw-text-center tw-font-semibold tw-text-sm">
+        <div className="tw-flex-1 tw-text-center tw-text-sm tw-font-semibold">
           {finalTitle}
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <HeaderActionButtons />
-          <HeaderSearchButton />
+          <HeaderSearchButton
+            wave={
+              isInsideWave && (isWavesRoute || isMessagesRoute)
+                ? (wave ?? null)
+                : null
+            }
+          />
         </div>
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />

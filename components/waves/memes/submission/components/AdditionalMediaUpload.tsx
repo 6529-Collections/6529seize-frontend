@@ -14,10 +14,13 @@ interface AdditionalMediaUploadProps {
   readonly artworkCommentary: string;
   readonly aboutArtist: string;
   readonly previewImage: string;
+  readonly promoVideo: string;
   readonly requiresPreviewImage: boolean;
+  readonly requiresPromoVideoOption: boolean;
   readonly previewRequiredMediaType: string | null;
   readonly onSupportingMediaChange: (media: string[]) => void;
   readonly onPreviewImageChange: (url: string) => void;
+  readonly onPromoVideoChange: (url: string) => void;
   readonly onArtworkCommentaryChange: (commentary: string) => void;
   readonly onAboutArtistChange: (aboutArtist: string) => void;
   readonly errors?: {
@@ -34,19 +37,24 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
   artworkCommentary,
   aboutArtist,
   previewImage: _previewImage,
+  promoVideo: _promoVideo,
   requiresPreviewImage,
+  requiresPromoVideoOption,
   previewRequiredMediaType,
   onSupportingMediaChange,
   onPreviewImageChange,
+  onPromoVideoChange,
   onArtworkCommentaryChange,
   onAboutArtistChange,
   errors,
 }) => {
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const previewInputRef = useRef<HTMLInputElement>(null);
+  const promoVideoInputRef = useRef<HTMLInputElement>(null);
 
   const mediaUpload = useMediaUpload(MAX_FILES);
   const previewUpload = useMediaUpload(1);
+  const promoVideoUpload = useMediaUpload(1);
 
   const prevMediaUrlsRef = useRef<string>("");
   const prevPreviewUrlRef = useRef<string>("");
@@ -60,6 +68,11 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
     const urls = previewUpload.getServerUrls();
     return urls[0] || "";
   }, [previewUpload.items]);
+
+  const promoVideoServerUrl = useMemo(() => {
+    const urls = promoVideoUpload.getServerUrls();
+    return urls[0] || "";
+  }, [promoVideoUpload.items]);
 
   useEffect(() => {
     const urlsKey = mediaServerUrls.join(",");
@@ -75,6 +88,15 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
       onPreviewImageChange(previewServerUrl);
     }
   }, [previewServerUrl, onPreviewImageChange]);
+
+  const prevPromoVideoUrlRef = useRef<string>("");
+
+  useEffect(() => {
+    if (promoVideoServerUrl !== prevPromoVideoUrlRef.current) {
+      prevPromoVideoUrlRef.current = promoVideoServerUrl;
+      onPromoVideoChange(promoVideoServerUrl);
+    }
+  }, [promoVideoServerUrl, onPromoVideoChange]);
 
   const handleFileChange = useCallback(
     (upload: ReturnType<typeof useMediaUpload>) =>
@@ -217,7 +239,7 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
       </div>
 
       {description && (
-        <p className="tw-mb-0 tw-text-xs tw-text-amber-400">{description}</p>
+        <p className="tw-mb-0 tw-whitespace-pre-line tw-text-xs tw-text-amber-400">{description}</p>
       )}
 
       {upload.items.length > 0 && (
@@ -236,13 +258,26 @@ const AdditionalMediaUpload: FC<AdditionalMediaUploadProps> = ({
         {requiresPreviewImage && (
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             {renderMediaSection(
-              "Preview Image *",
+              "Preview *",
               previewUpload,
               previewInputRef,
               1,
               errors?.previewImage,
               "image/*",
-              `${previewRequiredMediaType} submissions require a preview image or GIF. This will be used as the NFT's image field, while your main media is served via animation_url.`
+              `${previewRequiredMediaType} submissions require a preview image or GIF. This will be displayed as the thumbnail for your artwork.`
+            )}
+          </div>
+        )}
+        {requiresPromoVideoOption && (
+          <div className="tw-flex tw-flex-col tw-gap-y-2">
+            {renderMediaSection(
+              "Promo Video",
+              promoVideoUpload,
+              promoVideoInputRef,
+              1,
+              undefined,
+              "video/*",
+              `For ${previewRequiredMediaType} submissions, we recommend providing a promo video for social media sharing. If no promo video is provided, the preview image will be used instead.`
             )}
           </div>
         )}

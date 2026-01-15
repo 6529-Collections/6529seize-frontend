@@ -1,19 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
+import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
-import MintMetricsCard from "./components/MintMetricsCard";
-import MetricsSkeleton from "./components/MetricsSkeleton";
-import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import {
   ActiveIdentitiesIcon,
   ConsolidationsIcon,
-  DropsIcon,
   DroppersIcon,
+  DropsIcon,
   MintIcon,
   NetworkTdhIcon,
   PercentageIcon,
@@ -24,15 +21,15 @@ import {
   VotesIcon,
   XtdhIcon,
 } from "./components/MetricsIcons";
+import MetricsSkeleton from "./components/MetricsSkeleton";
+import MintMetricsCard from "./components/MintMetricsCard";
 
 export default function MetricsPageClient() {
   useSetTitle("Metrics");
 
-  const [mintPageSize, setMintPageSize] = useState(10);
-
   const dailyQuery = useCommunityMetrics("DAY");
   const weeklyQuery = useCommunityMetrics("WEEK");
-  const mintQuery = useMintMetrics(mintPageSize);
+  const mintQuery = useMintMetrics(50);
 
   const isLoading =
     dailyQuery.isLoading || weeklyQuery.isLoading || mintQuery.isLoading;
@@ -42,9 +39,7 @@ export default function MetricsPageClient() {
     <div className="tailwind-scope tw-min-h-screen tw-bg-black">
       <div className="tw-mx-auto tw-max-w-6xl tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-8">
         <header className="tw-mb-8">
-          <h1 className="tw-text-2xl tw-font-bold tw-text-white">
-            Community Metrics
-          </h1>
+          <h1 className="tw-text-2xl tw-font-bold tw-text-white">Metrics</h1>
           <p className="tw-mt-1 tw-text-sm tw-text-neutral-400">
             Activity overview across different time periods
           </p>
@@ -65,8 +60,6 @@ export default function MetricsPageClient() {
               <MintMetricsCard
                 data={mintQuery.data.items}
                 icon={<MintIcon />}
-                pageSize={mintPageSize}
-                onPageSizeChange={setMintPageSize}
               />
               <MetricCard
                 title="Distinct Droppers"
@@ -126,6 +119,7 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-teal-500"
                 accentColor="tw-text-teal-400"
                 unit="TDH"
+                href="/network/metrics/network-tdh"
               />
               <CumulativeMetricCard
                 title="TDH Utilization %"
