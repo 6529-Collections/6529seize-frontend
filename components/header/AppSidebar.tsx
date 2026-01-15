@@ -32,10 +32,10 @@ const MENU = [
       { label: "Memes Calendar", path: "/meme-calendar" },
       { label: "TDH", path: "/network/tdh" },
       { label: "Metrics", section: true },
-      { label: "Metrics", path: "/metrics" },
+      { label: "Metrics", path: "/network/metrics" },
       { label: "Definitions", path: "/network/definitions" },
-      { label: "Network Stats", path: "/network/stats" },
       { label: "Levels", path: "/network/levels" },
+      { label: "Network Stats", path: "/network/metrics/network-tdh" },
     ],
   },
   {
