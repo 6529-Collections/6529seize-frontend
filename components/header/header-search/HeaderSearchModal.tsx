@@ -22,6 +22,8 @@ import {
   type SidebarPageEntry,
 } from "@/hooks/useSidebarSections";
 import { useWaves } from "@/hooks/useWaves";
+import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
@@ -33,11 +35,13 @@ import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import type {
   HeaderSearchModalItemType,
   NFTSearchResult,
-  PageSearchResult} from "./HeaderSearchModalItem";
+  PageSearchResult,
+} from "./HeaderSearchModalItem";
 import HeaderSearchModalItem, {
-  getNftCollectionMap
+  getNftCollectionMap,
 } from "./HeaderSearchModalItem";
 import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
+import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -45,6 +49,11 @@ enum STATE {
   ERROR = "ERROR",
   NO_RESULTS = "NO_RESULTS",
   SUCCESS = "SUCCESS",
+}
+
+enum SEARCH_MODE {
+  WAVE = "WAVE",
+  SITE = "SITE",
 }
 
 enum CATEGORY {
@@ -148,8 +157,10 @@ const pageMatchesQuery = (
 
 export default function HeaderSearchModal({
   onClose,
+  wave,
 }: {
   readonly onClose: () => void;
+  readonly wave: ApiWave | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -158,6 +169,11 @@ export default function HeaderSearchModal({
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
+
+  const waveChatScroll = useWaveChatScrollOptional();
+  const [searchMode, setSearchMode] = useState<SEARCH_MODE>(
+    wave ? SEARCH_MODE.WAVE : SEARCH_MODE.SITE
+  );
 
   const [searchValue, setSearchValue] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useLocalPreference<CATEGORY>(
@@ -188,6 +204,37 @@ export default function HeaderSearchModal({
     (trimmedDebouncedValue.length > 0 &&
       !Number.isNaN(Number(trimmedDebouncedValue)));
   const hasActiveDebouncedSearch = shouldSearchNfts;
+
+  // Wave search (shorter debounce, lower min length)
+  const WAVE_SEARCH_MIN_LENGTH = 2;
+  const [waveSearchDebouncedValue, setWaveSearchDebouncedValue] =
+    useState<string>("");
+  useDebounce(
+    () => {
+      setWaveSearchDebouncedValue(searchValue);
+    },
+    250,
+    [searchValue]
+  );
+  const trimmedWaveSearchValue = waveSearchDebouncedValue.trim();
+  const shouldSearchWave =
+    wave !== null &&
+    searchMode === SEARCH_MODE.WAVE &&
+    trimmedWaveSearchValue.length >= WAVE_SEARCH_MIN_LENGTH;
+
+  const {
+    drops: waveDropResults,
+    isLoading: isLoadingWaveDrops,
+    isError: isWaveDropsError,
+    hasNextPage: waveDropsHasNextPage,
+    fetchNextPage: fetchNextWaveDropsPage,
+    isFetchingNextPage: isFetchingNextWaveDropsPage,
+  } = useWaveDropsSearch({
+    wave,
+    term: trimmedWaveSearchValue,
+    enabled: shouldSearchWave,
+    size: 50,
+  });
 
   const { appWalletsSupported } = useAppWallets();
   const { country } = useCookieConsent();
@@ -402,13 +449,13 @@ export default function HeaderSearchModal({
     () =>
       shouldSearchDefault &&
       (selectedCategory === CATEGORY.PROFILES || allowProfileFetch)
-        ? profiles ?? []
+        ? (profiles ?? [])
         : [],
     [shouldSearchDefault, selectedCategory, allowProfileFetch, profiles]
   );
 
   const nftResults: NFTSearchResult[] = useMemo(
-    () => (shouldSearchNfts ? nfts ?? [] : []),
+    () => (shouldSearchNfts ? (nfts ?? []) : []),
     [shouldSearchNfts, nfts]
   );
 
@@ -416,7 +463,7 @@ export default function HeaderSearchModal({
     () =>
       shouldSearchDefault &&
       (selectedCategory === CATEGORY.WAVES || allowWaveFetch)
-        ? waves ?? []
+        ? (waves ?? [])
         : [],
     [shouldSearchDefault, selectedCategory, allowWaveFetch, waves]
   );
@@ -582,6 +629,7 @@ export default function HeaderSearchModal({
   const handleClearSearch = () => {
     setSearchValue("");
     setDebouncedValue("");
+    setWaveSearchDebouncedValue("");
     setSelectedCategory(CATEGORY.ALL);
     setSelectedItemIndex(0);
     setAllowProfileFetch(false);
@@ -590,6 +638,18 @@ export default function HeaderSearchModal({
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
+  };
+
+  const handleWaveDropSelect = (serialNo: number) => {
+    if (!wave) return;
+    if (waveChatScroll) {
+      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
+    } else {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.set("serialNo", String(serialNo));
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+    onClose();
   };
 
   const onHover = (index: number, state: boolean) => {
@@ -797,7 +857,7 @@ export default function HeaderSearchModal({
       return `nft:${item.contract}:${item.id}`;
     }
     if (isProfileResult(item)) {
-      const base = (item.profile_id ?? item.wallet ?? "profile").toLowerCase();
+      const base = (item.profile_id ?? item.wallet).toLowerCase();
       return `profile:${base}`;
     }
     if (isWaveResult(item)) {
@@ -809,7 +869,8 @@ export default function HeaderSearchModal({
   const renderItem = (item: HeaderSearchModalItemType, index: number) => (
     <div
       ref={index === selectedItemIndex ? activeElementRef : null}
-      key={getItemKey(item)}>
+      key={getItemKey(item)}
+    >
       <HeaderSearchModalItem
         content={item}
         searchValue={debouncedValue}
@@ -832,7 +893,7 @@ export default function HeaderSearchModal({
     if (selectedCategory === CATEGORY.ALL) {
       return previewGroups.map((group) => (
         <section key={group.category} className="tw-mb-4 last:tw-mb-0">
-          <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
+          <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between">
             <h3 className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
               {CATEGORY_LABELS[group.category]}
             </h3>
@@ -840,7 +901,8 @@ export default function HeaderSearchModal({
               <button
                 type="button"
                 onClick={() => handleViewAll(group.category)}
-                className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white tw-transition tw-duration-150">
+                className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+              >
                 View all {CATEGORY_LABELS[group.category]}
               </button>
             )}
@@ -871,22 +933,25 @@ export default function HeaderSearchModal({
           (inputRef.current as HTMLElement | null) ??
           (modalRef.current as HTMLElement | null) ??
           document.body,
-      }}>
-      <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
+      }}
+    >
+      <div className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default">
         <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]"></div>
         <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-y-auto">
-          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center lg:tw-items-center sm:tw-p-6">
+          <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-4 tw-text-center sm:tw-p-6 lg:tw-items-center">
             <div
               ref={modalRef}
               aria-modal="true"
               aria-labelledby="header-search-input"
-              className="tw-w-full tw-max-w-[min(100vw-3rem,900px)] sm:tw-max-w-3xl tw-relative tw-h-[520px] tw-max-h-[70vh] tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-overflow-hidden inset-safe-area tw-flex tw-flex-col tw-min-h-0">
-              <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
+              className="inset-safe-area tw-relative tw-flex tw-h-[520px] tw-max-h-[70vh] tw-min-h-0 tw-w-full tw-max-w-[min(100vw-3rem,900px)] tw-transform tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl"
+            >
+              <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-4">
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Go back"
-                  className="tw-flex sm:tw-hidden tw-size-6 tw-bg-transparent -tw-ml-1 tw-mr-1 tw-border-none tw-rounded-full tw-items-center tw-justify-center tw-text-iron-300 hover:tw-text-white tw-transition tw-duration-150">
+                  className="-tw-ml-1 tw-mr-1 tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-text-white sm:tw-hidden"
+                >
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
                 </button>
 
@@ -895,7 +960,8 @@ export default function HeaderSearchModal({
                     className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
                     viewBox="0 0 20 20"
                     fill="currentColor"
-                    aria-hidden="true">
+                    aria-hidden="true"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
@@ -913,15 +979,20 @@ export default function HeaderSearchModal({
                     autoComplete="off"
                     value={searchValue}
                     onChange={handleInputChange}
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-11 tw-pr-16 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset  focus:tw-ring-primary-300 tw-text-base sm:text-sm tw-transition tw-duration-300 tw-ease-out"
-                    placeholder="Search 6529.io"
+                    className="sm:text-sm tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300"
+                    placeholder={
+                      searchMode === SEARCH_MODE.WAVE
+                        ? "Search messages"
+                        : "Search 6529.io"
+                    }
                   />
                   {searchValue.length > 0 && (
                     <button
                       type="button"
                       onClick={handleClearSearch}
                       aria-label="Clear search"
-                      className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 hover:tw-text-white">
+                      className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 hover:tw-text-white"
+                    >
                       Clear
                     </button>
                   )}
@@ -931,82 +1002,224 @@ export default function HeaderSearchModal({
                   type="button"
                   onClick={onClose}
                   aria-label="Close search"
-                  className="tw-hidden sm:tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 tw-border-solid hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white tw-transition tw-duration-150">
+                  className="tw-hidden tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white sm:tw-inline-flex"
+                >
                   <XMarkIcon className="tw-size-5" />
                 </button>
               </div>
-              {shouldRenderCategoryToggle && (
-                <div className="tw-py-3 tw-px-4 md:tw-hidden">
-                  <HeaderSearchTabToggle
-                    options={tabOptions}
-                    activeKey={selectedCategory}
-                    onSelect={(k) => setSelectedCategory(k as CATEGORY)}
-                    fullWidth
-                  />
+              {wave && (
+                <div className="tw-px-4 tw-pb-3 tw-pt-1">
+                  <div className="tw-inline-flex tw-gap-0.5 tw-rounded-lg tw-bg-iron-900 tw-p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setSearchMode(SEARCH_MODE.WAVE)}
+                      className={`tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-transition tw-duration-150 ${
+                        searchMode === SEARCH_MODE.WAVE
+                          ? "tw-bg-primary-500 tw-text-white"
+                          : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
+                      }`}
+                    >
+                      In this Wave
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSearchMode(SEARCH_MODE.SITE)}
+                      className={`tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-transition tw-duration-150 ${
+                        searchMode === SEARCH_MODE.SITE
+                          ? "tw-bg-primary-500 tw-text-white"
+                          : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
+                      }`}
+                    >
+                      Site-wide
+                    </button>
+                  </div>
                 </div>
               )}
+              {searchMode === SEARCH_MODE.SITE &&
+                shouldRenderCategoryToggle && (
+                  <div className="tw-px-4 tw-py-3 md:tw-hidden">
+                    <HeaderSearchTabToggle
+                      options={tabOptions}
+                      activeKey={selectedCategory}
+                      onSelect={(k) => setSelectedCategory(k as CATEGORY)}
+                      fullWidth
+                    />
+                  </div>
+                )}
 
               <div
-                className={`tw-flex tw-flex-1 tw-min-h-0 tw-flex-col md:tw-gap-4 md:tw-px-5 md:tw-pb-5 ${
-                  shouldRenderCategoryToggle
+                className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col md:tw-gap-4 md:tw-px-5 md:tw-pb-5 ${
+                  searchMode === SEARCH_MODE.SITE && shouldRenderCategoryToggle
                     ? "md:tw-grid md:tw-grid-cols-[12rem_minmax(0,1fr)]"
                     : "md:tw-flex-row"
-                }`}>
-                {shouldRenderCategoryToggle && (
-                  <aside className="tw-hidden md:tw-flex md:tw-flex-col md:tw-gap-2 md:tw-pt-5">
-                    <div className="tw-rounded-2xl tw-border tw-border-iron-900/60 tw-bg-iron-950/80 tw-flex tw-flex-col tw-gap-2">
-                      <HeaderSearchTabToggle
-                        options={tabOptions}
-                        activeKey={selectedCategory}
-                        onSelect={(k) => setSelectedCategory(k as CATEGORY)}
-                        fullWidth
-                        orientation="vertical"
-                      />
-                    </div>
-                  </aside>
-                )}
-                <div className="tw-flex-1 tw-min-h-0 tw-flex tw-flex-col md:tw-min-w-0">
-                  {state === STATE.SUCCESS && (
+                }`}
+              >
+                {searchMode === SEARCH_MODE.SITE &&
+                  shouldRenderCategoryToggle && (
+                    <aside className="tw-hidden md:tw-flex md:tw-flex-col md:tw-gap-2 md:tw-pt-5">
+                      <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-2xl tw-border tw-border-iron-900/60 tw-bg-iron-950/80">
+                        <HeaderSearchTabToggle
+                          options={tabOptions}
+                          activeKey={selectedCategory}
+                          onSelect={(k) => setSelectedCategory(k as CATEGORY)}
+                          fullWidth
+                          orientation="vertical"
+                        />
+                      </div>
+                    </aside>
+                  )}
+                <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col md:tw-min-w-0">
+                  {/* Wave search results */}
+                  {searchMode === SEARCH_MODE.WAVE && wave && (
                     <div
                       ref={resultsPanelRef}
-                      id={HEADER_SEARCH_RESULTS_PANEL_ID}
-                      role="tabpanel"
-                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-scroll-py-2 tw-px-4 md:tw-pl-0 md:tw-pr-4 tw-pt-5 tw-pb-3 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-text-sm tw-text-iron-200">
-                      {renderSuccessContent()}
+                      className="tw-h-0 tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-6 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+                    >
+                      {isLoadingWaveDrops && (
+                        <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-iron-300">
+                          Loading…
+                        </div>
+                      )}
+
+                      {!isLoadingWaveDrops && isWaveDropsError && (
+                        <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-iron-300">
+                          Couldn't load search results.
+                        </div>
+                      )}
+
+                      {!isLoadingWaveDrops &&
+                        !isWaveDropsError &&
+                        !shouldSearchWave && (
+                          <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-sm tw-text-iron-400">
+                            Type at least 2 characters to search in {wave.name}.
+                          </div>
+                        )}
+
+                      {!isLoadingWaveDrops &&
+                        !isWaveDropsError &&
+                        shouldSearchWave &&
+                        waveDropResults.length === 0 && (
+                          <div className="tw-flex tw-items-center tw-justify-center tw-py-10 tw-text-sm tw-text-iron-400">
+                            No matches found.
+                          </div>
+                        )}
+
+                      {!isLoadingWaveDrops &&
+                        !isWaveDropsError &&
+                        shouldSearchWave &&
+                        waveDropResults.length > 0 && (
+                          <div className="tw-space-y-2">
+                            <div className="tw-text-xs tw-text-iron-400">
+                              {waveDropResults.length} result
+                              {waveDropResults.length === 1 ? "" : "s"}
+                            </div>
+                            <div className="tw-space-y-2">
+                              {waveDropResults.map((drop, index) => {
+                                const previousDrop =
+                                  waveDropResults[index - 1] ?? null;
+                                const nextDrop =
+                                  waveDropResults[index + 1] ?? null;
+                                const serialNo = drop.serial_no;
+                                const canSelect = typeof serialNo === "number";
+                                return (
+                                  <button
+                                    type="button"
+                                    key={drop.stableKey}
+                                    disabled={!canSelect}
+                                    onClick={() => {
+                                      if (!canSelect) return;
+                                      handleWaveDropSelect(serialNo);
+                                    }}
+                                    className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-text-left tw-transition tw-duration-150 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/40"
+                                  >
+                                    <div className="tw-pointer-events-none">
+                                      <Drop
+                                        drop={drop}
+                                        previousDrop={previousDrop}
+                                        nextDrop={nextDrop}
+                                        showWaveInfo={false}
+                                        activeDrop={null}
+                                        showReplyAndQuote={false}
+                                        location={DropLocation.WAVE}
+                                        dropViewDropId={null}
+                                        onReply={() => {}}
+                                        onQuote={() => {}}
+                                        onReplyClick={() => {}}
+                                        onQuoteClick={() => {}}
+                                      />
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {waveDropsHasNextPage && (
+                              <div className="tw-flex tw-justify-center tw-pt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => fetchNextWaveDropsPage()}
+                                  disabled={isFetchingNextWaveDropsPage}
+                                  className="tw-inline-flex tw-items-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                                >
+                                  {isFetchingNextWaveDropsPage
+                                    ? "Loading…"
+                                    : "Load more"}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                     </div>
                   )}
-                  {(state === STATE.LOADING ||
-                    (state === STATE.INITIAL && isSearching)) && (
+                  {/* Site-wide search results */}
+                  {searchMode === SEARCH_MODE.SITE &&
+                    state === STATE.SUCCESS && (
+                      <div
+                        ref={resultsPanelRef}
+                        id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                        role="tabpanel"
+                        className="tw-h-0 tw-min-h-0 tw-flex-1 tw-scroll-py-2 tw-overflow-y-auto tw-px-4 tw-pb-3 tw-pt-5 tw-text-sm tw-text-iron-200 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 md:tw-pl-0 md:tw-pr-4"
+                      >
+                        {renderSuccessContent()}
+                      </div>
+                    )}
+                  {searchMode === SEARCH_MODE.SITE &&
+                    (state === STATE.LOADING ||
+                      (state === STATE.INITIAL && isSearching)) && (
+                      <div
+                        ref={resultsPanelRef}
+                        id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                        role="tabpanel"
+                        className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
+                      >
+                        <p className="tw-text-sm tw-font-normal tw-text-iron-300">
+                          Loading...
+                        </p>
+                      </div>
+                    )}
+                  {searchMode === SEARCH_MODE.SITE &&
+                    state === STATE.NO_RESULTS && (
+                      <div
+                        ref={resultsPanelRef}
+                        id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                        role="tabpanel"
+                        className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
+                      >
+                        <p className="tw-text-sm tw-text-iron-300">
+                          No results found
+                        </p>
+                      </div>
+                    )}
+                  {searchMode === SEARCH_MODE.SITE && state === STATE.ERROR && (
                     <div
                       ref={resultsPanelRef}
                       id={HEADER_SEARCH_RESULTS_PANEL_ID}
                       role="tabpanel"
-                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-flex tw-items-center tw-justify-center tw-px-4 md:tw-px-0">
-                      <p className="tw-text-iron-300 tw-font-normal tw-text-sm">
-                        Loading...
-                      </p>
-                    </div>
-                  )}
-                  {state === STATE.NO_RESULTS && (
-                    <div
-                      ref={resultsPanelRef}
-                      id={HEADER_SEARCH_RESULTS_PANEL_ID}
-                      role="tabpanel"
-                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-flex tw-items-center tw-justify-center tw-px-4 md:tw-px-0">
-                      <p className="tw-text-iron-300 tw-text-sm">
-                        No results found
-                      </p>
-                    </div>
-                  )}
-                  {state === STATE.ERROR && (
-                    <div
-                      ref={resultsPanelRef}
-                      id={HEADER_SEARCH_RESULTS_PANEL_ID}
-                      role="tabpanel"
-                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 md:tw-px-0 tw-text-center">
+                      className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center md:tw-px-0"
+                    >
                       <p
-                        className="tw-text-iron-300 tw-font-normal tw-text-sm"
-                        aria-live="polite">
+                        className="tw-text-sm tw-font-normal tw-text-iron-300"
+                        aria-live="polite"
+                      >
                         Something went wrong while searching. Please try again.
                       </p>
                       <button
@@ -1030,26 +1243,30 @@ export default function HeaderSearchModal({
                             ? true
                             : undefined
                         }
-                        className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 hover:tw-border-iron-500 hover:tw-bg-iron-200 tw-transition tw-duration-150">
+                        className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-200"
+                      >
                         Try Again
                       </button>
                     </div>
                   )}
-                  {state === STATE.INITIAL && !isSearching && (
-                    <div
-                      ref={resultsPanelRef}
-                      id={HEADER_SEARCH_RESULTS_PANEL_ID}
-                      role="tabpanel"
-                      className="tw-flex-1 tw-h-0 tw-min-h-0 tw-flex tw-items-center tw-justify-center tw-px-4 md:tw-px-0">
-                      <p className="tw-text-iron-300 tw-font-normal tw-text-sm tw-text-center">
-                        Start typing to search 6529.io
-                        {shouldShowCountdown &&
-                          ` (${charactersRemaining} more character${
-                            charactersRemaining === 1 ? "" : "s"
-                          })`}
-                      </p>
-                    </div>
-                  )}
+                  {searchMode === SEARCH_MODE.SITE &&
+                    state === STATE.INITIAL &&
+                    !isSearching && (
+                      <div
+                        ref={resultsPanelRef}
+                        id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                        role="tabpanel"
+                        className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 md:tw-px-0"
+                      >
+                        <p className="tw-text-center tw-text-sm tw-font-normal tw-text-iron-300">
+                          Start typing to search 6529.io
+                          {shouldShowCountdown &&
+                            ` (${charactersRemaining} more character${
+                              charactersRemaining === 1 ? "" : "s"
+                            })`}
+                        </p>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
