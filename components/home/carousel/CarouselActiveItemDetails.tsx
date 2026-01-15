@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useState } from "react";
 
 interface CarouselActiveItemDetailsProps {
   readonly drop: ExtendedDrop | null;
@@ -40,9 +40,9 @@ export default function CarouselActiveItemDetails({
         >
           <span className="tw-text-sm tw-text-iron-400">by</span>
           {author.pfp ? (
-            <div className="tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
+            <div className="tw-size-7 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
               <img
-                className="tw-size-full tw-object-cover"
+                className="tw-max-h-full tw-max-w-full tw-object-cover"
                 src={author.pfp}
                 alt=""
               />

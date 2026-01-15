@@ -1,6 +1,13 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  type CSSProperties,
+} from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -32,15 +39,18 @@ export default function SubmissionCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const baseCardWidth = 440;
-  const inactiveScale = 0.68;
   const cardGap = 4;
-  const arrowOffset =
-    baseCardWidth / 2 + cardGap + (baseCardWidth * inactiveScale) / 2;
+  const inactiveScale = 0.68;
   const slideTransition =
     "transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1)";
   const inactiveFilter = "grayscale(100%) blur(6px)";
-  const slideWidth = `${baseCardWidth}px`;
+  const slideWidth = "var(--carousel-card-width)";
+  const carouselVars = {
+    "--carousel-inactive-scale": `${inactiveScale}`,
+    "--carousel-gap": `${cardGap}px`,
+    "--carousel-arrow-offset":
+      "calc((var(--carousel-card-width) / 2) + var(--carousel-gap) + (var(--carousel-card-width) * var(--carousel-inactive-scale) / 2))",
+  } as CSSProperties;
 
   const shuffledDrops = useMemo(() => {
     const filtered = drops.filter(
@@ -89,6 +99,7 @@ export default function SubmissionCarousel({
       swiper.slideNext();
     }
   }, []);
+  const showArrows = true;
 
   if (!isLoaded || !waveId) {
     return null;
@@ -107,28 +118,54 @@ export default function SubmissionCarousel({
   }
 
   return (
-    <div className="tw-relative tw-h-full tw-min-h-0 tw-@container">
-      <div className="tw-relative tw-mx-auto tw-h-full tw-w-full lg:tw-max-w-4xl tw-overflow-hidden">
-        <CarouselArrow
-          direction="left"
-          onClick={() => scroll("left")}
-          disabled={!canScrollLeft}
-          style={{ left: `calc(50% - ${arrowOffset}px)` }}
-        />
+    <div
+      className="tw-relative tw-h-full tw-min-h-0 tw-@container [--carousel-card-width:clamp(220px,80%,440px)] md:[--carousel-card-width:clamp(160px,50%,440px)]"
+      style={carouselVars}
+    >
+      <div className="tw-mx-auto tw-flex tw-h-full tw-w-full tw-flex-col">
+        {showArrows && (
+          <div className="tw-mb-3 lg:tw-mb-2 tw-flex tw-items-center tw-gap-x-4 tw-justify-end md:tw-justify-between tw-px-2 md:tw-hidden">
+            <CarouselArrow
+              direction="left"
+              onClick={() => scroll("left")}
+              disabled={!canScrollLeft}
+              placement="inline"
+              className="tw-p-2"
+            />
+            <CarouselArrow
+              direction="right"
+              onClick={() => scroll("right")}
+              disabled={!canScrollRight}
+              placement="inline"
+              className="tw-p-2"
+            />
+          </div>
+        )}
 
-        <Swiper
-          className="submission-carousel-swiper tw-h-full tw-overflow-hidden"
-          slidesPerView="auto"
-          centeredSlides
-          spaceBetween={cardGap}
-          speed={450}
-          initialSlide={0}
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-            handleSlideChange(swiper);
-          }}
-          onSlideChange={handleSlideChange}
-        >
+        <div className="tw-relative tw-min-h-0 tw-flex-1 tw-overflow-hidden">
+          {showArrows && (
+            <CarouselArrow
+              direction="left"
+              onClick={() => scroll("left")}
+              disabled={!canScrollLeft}
+              className="tw-hidden md:tw-flex"
+              style={{ left: "calc(50% - var(--carousel-arrow-offset))" }}
+            />
+          )}
+
+          <Swiper
+            className="submission-carousel-swiper tw-h-full tw-overflow-hidden"
+            slidesPerView="auto"
+            centeredSlides
+            spaceBetween={cardGap}
+            speed={450}
+            initialSlide={0}
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+              handleSlideChange(swiper);
+            }}
+            onSlideChange={handleSlideChange}
+          >
           {shuffledDrops.map((drop, index) => {
             const isActive = index === activeIndex;
             const distance = Math.abs(index - activeIndex);
@@ -160,14 +197,18 @@ export default function SubmissionCarousel({
               </SwiperSlide>
             );
           })}
-        </Swiper>
+          </Swiper>
 
-        <CarouselArrow
-          direction="right"
-          onClick={() => scroll("right")}
-          disabled={!canScrollRight}
-          style={{ left: `calc(50% + ${arrowOffset}px)` }}
-        />
+          {showArrows && (
+            <CarouselArrow
+              direction="right"
+              onClick={() => scroll("right")}
+              disabled={!canScrollRight}
+              className="tw-hidden md:tw-flex"
+              style={{ left: "calc(50% + var(--carousel-arrow-offset))" }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

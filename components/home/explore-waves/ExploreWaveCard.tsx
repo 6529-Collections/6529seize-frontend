@@ -66,7 +66,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
 
       {/* Content Area */}
       <div className="tw-p-5">
-        <span className="tw-m-0 tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80">
+        <span className="tw-m-0 tw-line-clamp-2 md:tw-line-clamp-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80">
           {wave.name}
         </span>
 

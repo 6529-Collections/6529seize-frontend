@@ -9,7 +9,7 @@ export default function NowMintingSection() {
 
   if (isFetching && !nft) {
     return (
-      <section className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-8 md:tw-p-12">
+      <section className="tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-8 md:tw-p-12">
         <span className="tw-block tw-text-xl md:tw-text-2xl tw-font-semibold tw-text-white tw-mb-8">
           Now minting
         </span>
@@ -23,12 +23,12 @@ export default function NowMintingSection() {
   }
 
   return (
-    <section>
-      <span className="tw-block tw-text-xl md:tw-text-2xl tw-font-semibold tw-text-white tw-mb-6">
+    <section className="tw-px-4 md:tw-px-6 lg:tw-px-8">
+      <span className="tw-block tw-text-xl md:tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white tw-mb-4 md:tw-mb-6">
         Now minting
       </span>
 
-      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-8">
+      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800/50 tw-p-6 md:tw-p-8">
         <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-10 lg:tw-gap-14">
           <div className="lg:tw-col-span-7">
             <NowMintingArtwork

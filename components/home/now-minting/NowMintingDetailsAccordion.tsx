@@ -24,7 +24,7 @@ export default function NowMintingDetailsAccordion({
   ];
 
   return (
-    <details className="tw-group tw-border-b tw-border-solid tw-border-x-0 tw-border-t tw-border-iron-800 tw-mb-4 tw-pb-4 tw-pt-5">
+    <details className="tw-group tw-border-b tw-border-solid tw-border-x-0 tw-border-t tw-border-iron-800 tw-pb-5 tw-pt-5">
       <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-start tw-gap-2 tw-font-medium tw-text-sm tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-300">
         <span>Technical Details</span>
         <svg
@@ -46,7 +46,7 @@ export default function NowMintingDetailsAccordion({
           {details.map(({ label, value }) => (
             <div key={label} className="tw-flex tw-justify-between">
               <span className="tw-text-iron-500">{label}</span>
-              <span className="tw-text-iron-300">{value}</span>
+              <span className="tw-text-iron-100">{value}</span>
             </div>
           ))}
         </div>

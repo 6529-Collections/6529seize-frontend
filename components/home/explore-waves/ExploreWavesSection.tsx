@@ -40,9 +40,9 @@ export function ExploreWavesSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-py-16">
+    <section className="-tw-mx-8 tw-py-16 tw-pl-4 tw-pr-0 md:tw-px-6 lg:tw-px-8">
       <div className="tw-px-8">
-        <div className="tw-mb-8 tw-flex tw-items-end tw-justify-between">
+        <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
               Explore waves
@@ -63,14 +63,24 @@ export function ExploreWavesSection() {
           </Link>
         </div>
 
-        {/* Grid */}
-        <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-5">
+        {/* Grid / Scroll */}
+        <div className="tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-pb-2 tw-scrollbar-none tw-snap-x tw-snap-mandatory md:tw-grid md:tw-grid-cols-2 md:tw-overflow-visible md:tw-pb-0 md:tw-snap-none lg:tw-grid-cols-3 lg:tw-gap-5">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
-                <ExploreWaveCardSkeleton key={`skeleton-${index}`} />
+                <div
+                  key={`skeleton-${index}`}
+                  className="tw-w-[80%] tw-shrink-0 tw-snap-start sm:tw-w-80 md:tw-w-full"
+                >
+                  <ExploreWaveCardSkeleton />
+                </div>
               ))
             : waves?.map((wave) => (
-                <ExploreWaveCard key={wave.id} wave={wave} />
+                <div
+                  key={wave.id}
+                  className="tw-w-[80%] tw-shrink-0 tw-snap-start sm:tw-w-80 md:tw-w-full"
+                >
+                  <ExploreWaveCard wave={wave} />
+                </div>
               ))}
         </div>
       </div>

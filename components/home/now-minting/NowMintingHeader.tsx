@@ -29,10 +29,10 @@ export default function NowMintingHeader({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
-      <span className="tw-text-[11px] tw-uppercase tw-tracking-[0.2em] tw-text-iron-500">
+      <span className="tw-text-[11px] tw-leading-4 tw-uppercase tw-tracking-[0.2em] tw-text-iron-500">
         Card #{cardNumber}
       </span>
-      <span className="tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl">
+      <span className="tw-text-xl md:tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl">
         <Link
           href={`/the-memes/${cardNumber}`}
           className="tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200"

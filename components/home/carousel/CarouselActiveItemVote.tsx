@@ -24,7 +24,7 @@ export default function CarouselActiveItemVote({
     useDropInteractionRules(drop);
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-mt-4">
+    <div className="tw-flex tw-items-center tw-justify-center tw-mt-4 tw-px-4 md:tw-px-6 lg:tw-px-8">
       <WaveDropVoteSummary
         drop={drop}
         isWinner={isWinner}

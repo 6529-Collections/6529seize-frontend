@@ -1,4 +1,5 @@
 import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
+import { formatClaimStatus } from "@/helpers/manifoldDisplayHelpers";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface NowMintingStatsGridProps {
@@ -18,9 +19,12 @@ export default function NowMintingStatsGrid({
   const status = manifoldClaim?.status;
   const isStatusLoading = !manifoldClaim;
 
-  const statusLabel = status
-    ? status.charAt(0).toUpperCase() + status.slice(1)
+  const statusLabel = manifoldClaim
+    ? formatClaimStatus(manifoldClaim)
     : undefined;
+  const statusTone = manifoldClaim?.isFinalized
+    ? "ended"
+    : status;
 
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-5">
@@ -28,7 +32,7 @@ export default function NowMintingStatsGrid({
       <NowMintingStatsItem
         label="Status"
         value={statusLabel}
-        status={status}
+        status={statusTone}
         isLoading={isStatusLoading}
       />
       <NowMintingStatsItem label="Mint price" value={mintPrice} />

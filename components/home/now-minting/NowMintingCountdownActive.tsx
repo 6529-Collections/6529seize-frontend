@@ -12,23 +12,24 @@ export default function NowMintingCountdownActive({
   const display = useCountdownVerbose(countdown.targetDate);
 
   return (
-    <>
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-800/40 tw-p-4 md:tw-p-5 tw-text-left">
+      <div className="tw-pointer-events-none tw-absolute tw-inset-x-6 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-white/0 tw-via-white/12 tw-to-white/0" />
       <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between">
-        <span className="tw-text-[11px] tw-font-bold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-400">
+        <span className="tw-text-sm tw-font-semibold tw-text-iron-300">
           {countdown.title}
         </span>
-        <div className="tw-flex tw-items-center tw-gap-2">
-          <span className="tw-relative tw-flex tw-h-2 tw-w-2">
-            <span className="tw-animate-ping tw-absolute tw-inline-flex tw-h-full tw-w-full tw-rounded-full tw-bg-emerald-400 tw-opacity-75"></span>
-            <span className="tw-relative tw-inline-flex tw-rounded-full tw-h-2 tw-w-2 tw-bg-emerald-500"></span>
+        <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-success/20 tw-bg-success/10 tw-px-2.5 tw-py-1">
+          <span className="tw-relative tw-flex tw-h-1.5 tw-w-1.5">
+            <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/40" />
+            <span className="tw-relative tw-inline-flex tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-success/80" />
           </span>
-          <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-emerald-500">
+          <span className="tw-text-[11px] tw-font-semibold tw-text-success/80">
             Live
           </span>
         </div>
       </div>
-      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/5 tw-bg-black/40 tw-p-4 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
-        <div className="tw-text-2xl tw-font-bold tw-text-iron-50 tw-tabular-nums">
+      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/5 tw-bg-iron-950 tw-p-4 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
+        <div className="tw-text-2xl tw-font-bold tw-tabular-nums tw-text-iron-50">
           {display}
         </div>
       </div>
@@ -43,6 +44,6 @@ export default function NowMintingCountdownActive({
       ) : (
         <div className="tw-h-12" />
       )}
-    </>
+    </div>
   );
 }

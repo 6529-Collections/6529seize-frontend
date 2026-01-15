@@ -34,7 +34,7 @@ export function BoostedSection() {
 
   if (isLoading) {
     return (
-      <section className="-tw-mx-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-16">
+      <section className="-tw-mx-8 tw-px-4 md:tw-px-6 lg:tw-px-8  tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-16">
         <div className="tw-px-8">
           <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
             <div className="tw-text-sm tw-text-iron-500">Loading...</div>
@@ -49,9 +49,9 @@ export function BoostedSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-mt-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-16">
+    <section className="-tw-mx-8 tw-px-4 md:tw-px-6 lg:tw-px-8  tw-mt-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-16">
       <div className="tw-px-8">
-        <div className="tw-mb-8 tw-flex tw-items-end tw-justify-between">
+        <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
               Boosted Drops
@@ -64,7 +64,7 @@ export function BoostedSection() {
             <button
               type="button"
               onClick={() => scroll("left")}
-              className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95"
+              className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95"
               aria-label="Scroll left"
             >
               <ChevronLeftIcon className="tw-size-4 tw-flex-shrink-0" />
@@ -72,7 +72,7 @@ export function BoostedSection() {
             <button
               type="button"
               onClick={() => scroll("right")}
-              className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95"
+              className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-text-iron-500 tw-shadow-lg tw-ring-1 tw-ring-iron-50/5 tw-transition-all hover:tw-scale-105 hover:tw-bg-iron-800 hover:tw-text-iron-50 active:tw-scale-95"
               aria-label="Scroll right"
             >
               <ChevronRightIcon className="tw-size-4" />
@@ -83,7 +83,7 @@ export function BoostedSection() {
         {/* Horizontal scroll container */}
         <div
           ref={scrollRef}
-          className="-tw-mx-6 tw-flex tw-gap-5 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pt-4 tw-pb-8 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8"
+          className="-tw-mx-6  tw-flex tw-gap-5 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pt-4 tw-pb-8 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8"
         >
           {drops.map((drop) => (
             <BoostedDropCardHome

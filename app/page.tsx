@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export default function Page() {
   return (
-    <main className="tw-min-h-screen tw-bg-black">
+    <main className="tw-min-h-svh tw-bg-black">
       <HomePageContent />
     </main>
   );
