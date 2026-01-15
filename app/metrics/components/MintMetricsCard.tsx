@@ -3,13 +3,9 @@ import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiMintMetrics } from "@/generated/models/ApiMintMetrics";
 import { formatNumberWithCommas } from "../utils/formatNumbers";
 
-const PAGE_SIZE_OPTIONS = [10, 50] as const;
-
 interface MintMetricsCardProps {
   readonly data: ApiMintMetrics[];
   readonly icon: ReactNode;
-  readonly pageSize: number;
-  readonly onPageSizeChange: (size: number) => void;
 }
 
 function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
@@ -99,12 +95,7 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
   );
 }
 
-export default function MintMetricsCard({
-  data,
-  icon,
-  pageSize,
-  onPageSizeChange,
-}: MintMetricsCardProps) {
+export default function MintMetricsCard({ data, icon }: MintMetricsCardProps) {
   const latestMint = data[0];
 
   if (data.length === 0) {
@@ -122,28 +113,7 @@ export default function MintMetricsCard({
           <h3 className="tw-text-base tw-font-semibold tw-text-white">
             Mint Stats
           </h3>
-          <div className="tw-flex tw-gap-1">
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <span
-                key={size}
-                role="button"
-                tabIndex={0}
-                onClick={() => onPageSizeChange(size)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    onPageSizeChange(size);
-                  }
-                }}
-                className={`tw-cursor-pointer tw-select-none tw-rounded tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-transition-colors ${
-                  pageSize === size
-                    ? "tw-bg-emerald-500 tw-text-white"
-                    : "tw-text-neutral-400 hover:tw-bg-neutral-800 hover:tw-text-white"
-                }`}
-              >
-                {size}
-              </span>
-            ))}
-          </div>
+          <div className="tw-flex tw-gap-1"></div>
         </div>
         <div className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-emerald-500">
           {icon}
