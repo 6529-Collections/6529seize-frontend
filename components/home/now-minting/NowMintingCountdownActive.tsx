@@ -1,5 +1,6 @@
 import { useCountdownVerbose } from "@/hooks/useCountdown";
 import type { CountdownData } from "@/hooks/useMintCountdownState";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 interface NowMintingCountdownActiveProps {
@@ -19,9 +20,9 @@ export default function NowMintingCountdownActive({
           {countdown.title}
         </span>
         <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-success/20 tw-bg-success/10 tw-px-2.5 tw-py-1">
-          <span className="tw-relative tw-flex tw-h-1.5 tw-w-1.5">
-            <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/40" />
-            <span className="tw-relative tw-inline-flex tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-success/80" />
+          <span className="tw-relative tw-flex tw-h-2 tw-w-2">
+            <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
+            <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
           </span>
           <span className="tw-text-[11px] tw-font-semibold tw-text-success/80">
             Live
@@ -40,6 +41,7 @@ export default function NowMintingCountdownActive({
           className="tw-flex tw-h-12 tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3.5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-iron-950 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 desktop-hover:hover:tw-ring-iron-300"
         >
           Mint
+          <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" strokeWidth={2} />
         </Link>
       ) : (
         <div className="tw-h-12" />

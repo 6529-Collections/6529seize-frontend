@@ -52,12 +52,12 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
             </span>
           </div>
           {timestamp && (
-            <span className="tw-font-mono tw-text-xs tw-text-white/40">
+            <span className="tw-font-mono tw-text-xs tw-text-white/50">
               {timestamp}
             </span>
           )}
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[1/1] sm:tw-aspect-[3/4] md:tw-aspect-[16/9] lg:tw-aspect-[3/4] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-2 sm:tw-p-3">
+        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-max-h-[clamp(220px,55vw,500px)] tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50 tw-p-2 sm:tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
               <DropListItemContentMedia

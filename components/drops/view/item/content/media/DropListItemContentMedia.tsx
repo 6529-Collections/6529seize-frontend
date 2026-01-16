@@ -104,13 +104,20 @@ export default function DropListItemContentMedia({
       if (disableAutoPlay && !htmlActivated) {
         return (
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => setHtmlActivated(true)}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800"
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setHtmlActivated(true);
+                }
+              }}
+              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800"
             >
               Tap to load
-            </button>
+            </div>
           </div>
         );
       }

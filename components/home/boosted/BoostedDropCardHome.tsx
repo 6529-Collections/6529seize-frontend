@@ -41,7 +41,7 @@ const BoostedDropCardHome = memo(
         className="tw-group tw-relative tw-flex tw-w-60 tw-flex-shrink-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-black tw-p-0 tw-text-left tw-border tw-border-solid tw-border-white/5 tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] hover:tw-border-50/10"
       >
          {/* Inner Highlight (Glass Edge) */}
-        <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-pointer-events-none tw-z-20" />
+        <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-pointer-events-none tw-z-20" />
 
         <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-bg-iron-950/60 tw-px-2.5 tw-py-1 tw-backdrop-blur-md tw-shadow-lg tw-border tw-border-solid tw-border-iron-50/5">
           <BoostIcon
@@ -53,12 +53,12 @@ const BoostedDropCardHome = memo(
           </span>
         </div>
 
-        <div className="tw-aspect-[3/4] tw-w-full tw-relative tw-overflow-hidden tw-rounded-xl">
+        <div className="tw-aspect-[4/5] sm:tw-aspect-[3/4] tw-w-full tw-relative tw-overflow-hidden tw-rounded-xl">
           {media ? (
             <div className="tw-relative tw-h-full tw-w-full">
               {/* Glow effect */}
               <div
-                className="tw-pointer-events-none tw-absolute tw-inset-0 tw-opacity-70 tw-blur-3xl tw-transition-opacity tw-duration-700 group-hover:tw-opacity-85"
+                className="tw-pointer-events-none tw-absolute tw-inset-0 tw-opacity-40 tw-blur-3xl tw-transition-opacity tw-duration-700 group-hover:tw-opacity-60"
                 style={{
                   backgroundImage: `url(${getScaledImageUri(media.url, ImageScale.AUTOx450)})`,
                   backgroundSize: "cover",
@@ -89,7 +89,7 @@ const BoostedDropCardHome = memo(
               <div className="tw-relative tw-z-10">
                 <p
                   style={{ wordBreak: "break-word" }}
-                  className={`tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-text-md tw-font-serif tw-leading-relaxed tw-font-normal ${isLink ? "tw-text-blue-400" : "tw-text-iron-300"}`}
+                  className={`tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-text-md tw-font-serif tw-leading-relaxed tw-font-normal ${isLink ? "tw-text-primary-300" : "tw-text-iron-300"}`}
                 >
                   {truncatedContent || "View drop..."}
                 </p>

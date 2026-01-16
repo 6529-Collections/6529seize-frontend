@@ -31,7 +31,6 @@ export default function CarouselActiveItemVote({
         isVotingEnded={isVotingEnded}
         canShowVote={canShowVote}
         onVoteClick={() => setIsVotingOpen(true)}
-        compact
       />
 
       {isMobileScreen ? (

@@ -15,7 +15,6 @@ interface WaveDropVoteSummaryProps {
   readonly isVotingEnded: boolean;
   readonly canShowVote: boolean;
   readonly onVoteClick: () => void;
-  readonly compact?: boolean;
 }
 
 const PRIMARY_BUTTON_CLASSES =
@@ -27,7 +26,6 @@ export const WaveDropVoteSummary = ({
   isVotingEnded,
   canShowVote,
   onVoteClick,
-  compact = false,
 }: WaveDropVoteSummaryProps) => {
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
@@ -36,13 +34,10 @@ export const WaveDropVoteSummary = ({
   const isUserVoteNegative = userVote < 0;
   const shouldShowUserVote = (isVotingEnded || isWinner) && hasUserVoted;
 
-  const ratingTextSize = compact ? "tw-text-sm" : "tw-text-base";
-  const headerPadding = compact ? "tw-px-2 sm:tw-px-4" : "tw-px-4";
-
   return (
     <div className="tw-flex tw-items-center tw-gap-2 sm:tw-gap-3 tw-p-1.5 tw-bg-iron-950 tw-border tw-border-solid tw-border-white/10 tw-rounded-xl tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01]">
-      <div className={`${headerPadding} tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-cursor-default`}>
-        <span className={`${ratingTextSize} tw-font-semibold tw-text-white tw-tabular-nums`}>
+      <div className="tw-px-4 tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-cursor-default">
+        <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white tw-tabular-nums">
           {formatNumberWithCommas(drop.rating)}
         </span>
         {drop.rating !== drop.rating_prediction && (
@@ -52,7 +47,7 @@ export const WaveDropVoteSummary = ({
               className="tw-flex-shrink-0 tw-size-2.5 tw-text-iron-600"
             />
             <span
-              className={`${ratingTextSize} tw-font-semibold tw-tabular-nums tw-cursor-help ${
+              className={`tw-text-sm sm:tw-text-base tw-font-semibold tw-tabular-nums tw-cursor-help ${
                 drop.rating < drop.rating_prediction
                   ? "tw-text-emerald-400"
                   : "tw-text-rose-400"
@@ -72,25 +67,25 @@ export const WaveDropVoteSummary = ({
             </Tooltip>
           </>
         )}
-        <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+        <span className="tw-text-sm sm:tw-text-base tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
           {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]} Total
         </span>
       </div>
 
       {shouldShowUserVote && (
         <div className="tw-px-4 tw-flex tw-items-baseline tw-gap-1 tw-border-l tw-border-solid tw-border-white/5 tw-border-y-0 tw-border-r-0">
-          <span className="tw-text-sm tw-font-normal tw-text-iron-500">
+          <span className="tw-text-sm sm:tw-text-base tw-font-normal tw-text-iron-500">
             {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
           </span>
           <span
-            className={`tw-text-sm tw-font-semibold ${
+            className={`tw-text-sm sm:tw-text-base tw-font-semibold ${
               isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
             }`}
           >
             {isUserVoteNegative && "-"}
             {formatNumberWithCommas(Math.abs(userVote))}
           </span>
-          <span className="tw-text-iron-500 tw-text-sm tw-font-normal">
+          <span className="tw-text-iron-500 tw-text-sm sm:tw-text-base tw-font-normal">
             {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
           </span>
         </div>

@@ -28,7 +28,7 @@ export default function CarouselActiveItemDetails({
   const author = drop.author;
 
   return (
-    <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
+    <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center tw-px-4 tw-py-4 md:tw-px-6 lg:tw-px-8">
       <span className="tw-mb-2 tw-block tw-text-center tw-text-lg md:tw-text-xl tw-font-semibold tw-text-white">
         {title}
       </span>

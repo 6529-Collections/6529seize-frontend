@@ -47,7 +47,7 @@ export function ExploreWavesSection() {
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
               Explore waves
             </span>
-            <p className="tw-mt-1 tw-text-sm tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
               Browse channels—jump into the conversation.
             </p>
           </div>
@@ -64,12 +64,12 @@ export function ExploreWavesSection() {
         </div>
 
         {/* Grid / Scroll */}
-        <div className="-tw-mx-6 tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pb-2 tw-scrollbar-none md:-tw-mx-8 md:tw-grid md:tw-grid-cols-2 md:tw-overflow-visible md:tw-px-8 md:tw-pb-0 lg:tw-grid-cols-3 lg:tw-gap-5">
+        <div className="-tw-mx-6 tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pb-2 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-5 lg:tw-overflow-visible lg:tw-pb-0">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
                 <div
                   key={`skeleton-${index}`}
-                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 md:tw-w-full"
+                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 lg:tw-w-full"
                 >
                   <ExploreWaveCardSkeleton />
                 </div>
@@ -77,7 +77,7 @@ export function ExploreWavesSection() {
             : waves?.map((wave) => (
                 <div
                   key={wave.id}
-                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 md:tw-w-full"
+                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 lg:tw-w-full"
                 >
                   <ExploreWaveCard wave={wave} />
                 </div>
