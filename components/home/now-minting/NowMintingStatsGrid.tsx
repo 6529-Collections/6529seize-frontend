@@ -1,16 +1,17 @@
-import { formatClaimStatus } from "@/helpers/manifoldDisplayHelpers";
+import {
+  formatClaimStatus,
+  formatEditionSize,
+} from "@/helpers/manifoldDisplayHelpers";
 import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface NowMintingStatsGridProps {
   readonly nftId: number;
-  readonly edition: string;
   readonly floorPrice: string;
 }
 
 export default function NowMintingStatsGrid({
   nftId,
-  edition,
   floorPrice,
 }: NowMintingStatsGridProps) {
   const manifoldClaim = useMemesManifoldClaim(nftId);
@@ -22,9 +23,13 @@ export default function NowMintingStatsGrid({
     : undefined;
   const statusTone = manifoldClaim?.isFinalized ? "ended" : status;
 
+  const editionSize = manifoldClaim
+    ? formatEditionSize(manifoldClaim)
+    : undefined;
+
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
-      <NowMintingStatsItem label="Edition" value={edition} />
+      <NowMintingStatsItem label="Edition" value={editionSize} />
       <NowMintingStatsItem
         label="Status"
         value={statusLabel}

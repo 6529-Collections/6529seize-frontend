@@ -29,7 +29,6 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
         />
         <NowMintingStatsGrid
           nftId={nft.id}
-          edition={`${nft.supply} / ${nft.edition_size}`}
           floorPrice={formatEth(nft.floor_price)}
         />
         <NowMintingDetailsAccordion
