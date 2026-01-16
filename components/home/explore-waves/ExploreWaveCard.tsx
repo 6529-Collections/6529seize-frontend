@@ -2,6 +2,8 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
+import ContentDisplay from "@/components/waves/drops/ContentDisplay";
+import type { ProcessedContent } from "@/components/waves/drops/media-utils";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
@@ -95,7 +97,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
             </div>
             <MessagePreviewContent
               isLoading={isLoadingDrop}
-              preview={latestMessagePreview}
+              previewContent={latestMessagePreview}
             />
           </div>
         )}
@@ -106,10 +108,10 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
 
 function MessagePreviewContent({
   isLoading,
-  preview,
+  previewContent,
 }: {
   readonly isLoading: boolean;
-  readonly preview: string | null;
+  readonly previewContent: ProcessedContent | null;
 }) {
   if (isLoading) {
     return (
@@ -117,13 +119,15 @@ function MessagePreviewContent({
     );
   }
 
-  if (!preview) {
+  if (!previewContent) {
     return null;
   }
 
   return (
-    <p className="tw-m-0 tw-line-clamp-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400">
-      {preview}
-    </p>
+    <ContentDisplay
+      content={previewContent}
+      className="tw-line-clamp-2 tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400"
+      textClassName="tw-line-clamp-2 tw-break-words"
+    />
   );
 }

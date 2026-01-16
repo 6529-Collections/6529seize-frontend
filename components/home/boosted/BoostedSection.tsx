@@ -1,13 +1,13 @@
 "use client";
 
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { useBoostedDrops } from "@/hooks/useBoostedDrops";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useBoostedDrops } from "@/hooks/useBoostedDrops";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import BoostedDropCardHome from "./BoostedDropCardHome";
 
-const BOOSTED_DROPS_LIMIT = 10;
+const BOOSTED_DROPS_LIMIT = 50;
 
 export function BoostedSection() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export function BoostedSection() {
 
   if (isLoading) {
     return (
-      <section className="-tw-mx-8 tw-px-4 md:tw-px-6 lg:tw-px-8  tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-16">
+      <section className="-tw-mx-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-4 tw-py-16 md:tw-px-6 lg:tw-px-8">
         <div className="tw-px-8">
           <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
             <div className="tw-text-sm tw-text-iron-500">Loading...</div>
@@ -73,7 +73,7 @@ export function BoostedSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-px-4 md:tw-px-6 lg:tw-px-8  tw-mt-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-py-16">
+    <section className="-tw-mx-8 tw-mt-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-4 tw-py-16 md:tw-px-6 lg:tw-px-8">
       <div className="tw-px-8">
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
@@ -109,7 +109,7 @@ export function BoostedSection() {
         {/* Horizontal scroll container */}
         <div
           ref={scrollRef}
-          className="-tw-mx-6  tw-flex tw-gap-5 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pt-4 tw-pb-8 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8"
+          className="-tw-mx-6 tw-flex tw-gap-5 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pb-8 tw-pt-4 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8"
         >
           {drops.map((drop) => (
             <BoostedDropCardHome

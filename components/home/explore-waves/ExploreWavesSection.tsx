@@ -2,11 +2,11 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { ExploreWaveCard } from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
-import Link from "next/link";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 const WAVES_LIMIT = 6;
 
@@ -21,7 +21,7 @@ export function ExploreWavesSection() {
       return await commonApiFetch<ApiWave[]>({
         endpoint: "waves-overview",
         params: {
-          type: "LATEST",
+          type: "RECENTLY_DROPPED_TO",
           limit: String(WAVES_LIMIT),
           offset: "0",
         },
