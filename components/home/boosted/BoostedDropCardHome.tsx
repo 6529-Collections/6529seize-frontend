@@ -5,11 +5,13 @@ import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import ContentDisplay from "@/components/waves/drops/ContentDisplay";
+import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { LinkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 
 interface BoostedDropCardHomeProps {
   readonly drop: ApiDrop;
@@ -20,17 +22,17 @@ const BoostedDropCardHome = memo(
   ({ drop, onClick }: BoostedDropCardHomeProps) => {
     const part = drop.parts[0];
     const media = part?.media[0];
-    const textContent = part?.content ?? "";
 
-    const textLimit = 180;
-    const shouldTruncate = textContent.length > textLimit;
-    const truncatedContent = shouldTruncate
-      ? `${textContent.slice(0, textLimit)}…`
-      : textContent;
+    const previewContent = useMemo(
+      () => buildProcessedContent(part?.content, part?.media, "View drop..."),
+      [part?.content, part?.media]
+    );
 
     // Check if content is primarily a link
     const urlRegex = /^https?:\/\/[^\s]+$/i;
+    const textContent = part?.content ?? "";
     const isLink = urlRegex.test(textContent.trim());
+    const textColorClass = isLink ? "tw-text-primary-300" : "tw-text-iron-300";
 
     const { author, wave, boosts } = drop;
     const waveName = wave.name;
@@ -99,16 +101,12 @@ const BoostedDropCardHome = memo(
                   {"\u201C"}
                 </span>
               )}
-              <div className="tw-relative tw-z-10">
-                <p
-                  style={{ wordBreak: "break-word" }}
-                  className={`tw-m-0 tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-md tw-font-normal tw-leading-relaxed ${isLink ? "tw-text-primary-300" : "tw-text-iron-300"}`}
-                >
-                  {truncatedContent || "View drop..."}
-                </p>
-                {shouldTruncate && (
-                  <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-16 tw-bg-gradient-to-b tw-from-transparent tw-to-black" />
-                )}
+              <div className="tw-relative tw-z-10 tw-w-full">
+                <ContentDisplay
+                  content={previewContent}
+                  className={`tw-line-clamp-6 tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-md tw-font-normal tw-leading-relaxed ${textColorClass}`}
+                  textClassName="tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
+                />
               </div>
             </div>
           )}
