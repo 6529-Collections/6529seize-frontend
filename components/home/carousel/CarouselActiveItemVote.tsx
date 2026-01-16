@@ -8,23 +8,19 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 interface CarouselActiveItemVoteProps {
-  readonly drop: ExtendedDrop | null;
+  readonly drop: ExtendedDrop;
 }
 
 export default function CarouselActiveItemVote({
   drop,
 }: CarouselActiveItemVoteProps) {
-  if (!drop) {
-    return null;
-  }
-
   const [isVotingOpen, setIsVotingOpen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
   const { canShowVote, isVotingEnded, isWinner } =
     useDropInteractionRules(drop);
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-mt-4 tw-px-4 md:tw-px-6 lg:tw-px-8">
+    <div className="tw-mt-4 tw-flex tw-items-center tw-justify-center tw-px-4 md:tw-px-6 lg:tw-px-8">
       <WaveDropVoteSummary
         drop={drop}
         isWinner={isWinner}

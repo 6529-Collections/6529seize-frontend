@@ -33,12 +33,12 @@ export default function CarouselArrow({
       onClick={onClick}
       disabled={disabled}
       aria-label={isLeft ? "Previous" : "Next"}
-      className={`${placementClasses} tw-z-20 tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/20 tw-text-white tw-backdrop-blur-md tw-transition-all hover:tw-border-white/20 hover:tw-bg-white/[0.15] tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 disabled:hover:tw-border-white/10 disabled:hover:tw-bg-white/10 ${className}`}
+      className={`${placementClasses} tw-z-20 tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/20 tw-text-white tw-backdrop-blur-md tw-transition-all tw-duration-300 hover:tw-border-white/20 hover:tw-bg-white/[0.15] disabled:tw-cursor-not-allowed disabled:tw-opacity-40 disabled:hover:tw-border-white/10 disabled:hover:tw-bg-white/10 ${className}`}
       style={style}
     >
       <FontAwesomeIcon
         icon={faChevronLeft}
-        className={`tw-size-4 shrink-0 ${isLeft ? "" : "tw-rotate-180"}`}
+        className={`tw-size-4 tw-shrink-0 ${isLeft ? "" : "tw-rotate-180"}`}
       />
     </button>
   );

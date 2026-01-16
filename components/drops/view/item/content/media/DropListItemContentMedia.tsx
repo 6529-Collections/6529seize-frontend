@@ -49,7 +49,7 @@ export default function DropListItemContentMedia({
 
   useEffect(() => {
     setHtmlActivated(!disableAutoPlay);
-  }, [disableAutoPlay, media_url]);
+  }, [disableAutoPlay, media_url, media_mime_type]);
 
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {

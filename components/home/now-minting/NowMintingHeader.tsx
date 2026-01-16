@@ -10,7 +10,7 @@ import Link from "next/link";
 interface NowMintingHeaderProps {
   readonly cardNumber: number;
   readonly title: string;
-  readonly artistHandle: string | undefined;
+  readonly artistHandle: string;
   readonly artistName: string;
 }
 
@@ -20,9 +20,8 @@ export default function NowMintingHeader({
   artistHandle,
   artistName,
 }: NowMintingHeaderProps) {
-  const identityHandle = artistHandle || artistName;
   const { profile } = useIdentity({
-    handleOrWallet: identityHandle,
+    handleOrWallet: artistHandle,
     initialProfile: null,
   });
   const hasHandle = Boolean(artistHandle?.trim());

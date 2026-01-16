@@ -15,11 +15,10 @@ interface NowMintingCountdownProps {
 export default function NowMintingCountdown({
   nftId,
 }: NowMintingCountdownProps) {
-  const forcedState: MintCountdownState | null = null;
-  const state = forcedState ?? useMintCountdownState(nftId);
+  const state = useMintCountdownState(nftId);
 
   return (
-    <div className="tw-mt-auto tw-group tw-relative">
+    <div className="tw-group tw-relative tw-mt-auto">
       <NowMintingCountdownContent state={state} />
     </div>
   );
