@@ -29,18 +29,23 @@ export default function MobileWrapperDialog({
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
 }) {
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isIos } = useCapacitor();
 
   const bottomPadding = noPadding
     ? "env(safe-area-inset-bottom,0px)"
     : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
 
+  const viewportHeight = "min(100vh, 100svh)";
   const getHeight = () => {
     if (tall && !isCapacitor) {
-      return "calc(100dvh - 4rem)";
+      return `calc(${viewportHeight} - 4rem)`;
     }
-    return "calc(100dvh - 10rem)";
+    return `calc(${viewportHeight} - 10rem)`;
   };
+
+  const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md${
+    isIos ? "" : " tw-transform-gpu tw-will-change-transform"
+  }`;
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -85,7 +90,8 @@ export default function MobileWrapperDialog({
                 leaveTo="tw-translate-y-full"
               >
                 <DialogPanel
-                  className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu tw-will-change-transform md:tw-max-w-screen-md"
+                  className={panelClassNames}
+                  style={{ touchAction: "manipulation" }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <TransitionChild
