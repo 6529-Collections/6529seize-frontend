@@ -1,3 +1,4 @@
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { printMintDate } from "@/helpers/Helpers";
 
 interface NowMintingDetailsAccordionProps {
@@ -20,26 +21,14 @@ export default function NowMintingDetailsAccordion({
     { label: "File type", value: fileType },
     { label: "Dimensions", value: dimensions },
     { label: "Collection", value: collection },
-    { label: "Season", value: `Season ${season}` },
+    { label: "Season", value: `SZN${season}` },
   ];
 
   return (
     <details className="tw-group tw-border-b tw-border-solid tw-border-x-0 tw-border-t tw-border-iron-800 tw-pb-6 tw-pt-6">
       <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-font-medium tw-text-sm tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-300">
         <span>Edition Details</span>
-        <svg
-          className="tw-size-4 tw-transition-transform group-open:tw-rotate-180"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 15l7-7 7 7"
-          />
-        </svg>
+        <ChevronRightIcon className="tw-size-4 tw-transition-transform group-open:tw-rotate-90" />
       </summary>
       <div className="tw-mt-4 tw-pb-4">
         <div className="tw-space-y-3 tw-text-sm">

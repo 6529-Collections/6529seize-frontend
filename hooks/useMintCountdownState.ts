@@ -14,6 +14,7 @@ export interface CountdownData {
   readonly targetDate: number;
   readonly showAllowlistInfo: boolean;
   readonly showMintBtn: boolean;
+  readonly isActive: boolean;
 }
 
 export type MintCountdownState =
@@ -86,6 +87,7 @@ export function useMintCountdownState(
           : manifoldClaim.endDate,
         showAllowlistInfo: manifoldClaim.phase === ManifoldPhase.ALLOWLIST,
         showMintBtn,
+        isActive: !isUpcoming,
       },
     };
   }, [manifoldClaim, isError, showMintBtn]);

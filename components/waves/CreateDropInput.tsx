@@ -1,10 +1,7 @@
 "use client";
 
-import type {
-  InitialConfigType} from "@lexical/react/LexicalComposer";
-import {
-  LexicalComposer,
-} from "@lexical/react/LexicalComposer";
+import type { InitialConfigType } from "@lexical/react/LexicalComposer";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import {
   forwardRef,
   useImperativeHandle,
@@ -12,13 +9,8 @@ import {
   useEffect,
   useRef,
 } from "react";
-import type {
-  EditorState} from "lexical";
-import {
-  RootNode,
-  COMMAND_PRIORITY_CRITICAL,
-  createCommand,
-} from "lexical";
+import type { EditorState } from "lexical";
+import { RootNode, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -43,17 +35,11 @@ import { HashtagNode } from "../drops/create/lexical/nodes/HashtagNode";
 import { ImageNode } from "../drops/create/lexical/nodes/ImageNode";
 import ExampleTheme from "../drops/create/lexical/ExampleTheme";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import type {
-  ClearEditorPluginHandles,
-} from "../drops/create/lexical/plugins/ClearEditorPlugin";
+import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
-import type {
-  NewMentionsPluginHandles,
-} from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
-import type {
-  NewHastagsPluginHandles,
-} from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
@@ -170,7 +156,7 @@ const CreateDropInput = forwardRef<
 
     const getPlaceHolderText = () => {
       if (isStormMode) return "Add to the storm";
-      if (!type) return isDropMode ? "Create a drop" : "Create a post";
+      if (type === null) return isDropMode ? "Create a drop" : "Create a post";
       switch (type) {
         case ActiveDropAction.REPLY:
           return isDropMode ? "Drop a reply" : "Post a reply";
@@ -202,7 +188,7 @@ const CreateDropInput = forwardRef<
           editorRef.current?.querySelector(
             '[contenteditable="true"]'
           ) as HTMLElement
-        )?.focus();
+        ).focus();
       },
     }));
 
@@ -243,16 +229,17 @@ const CreateDropInput = forwardRef<
                     <ContentEditable
                       spellCheck={true}
                       autoCorrect="on"
+                      style={{ touchAction: "manipulation" }}
                       onClick={(e) => {
                         // Ensure the contenteditable is properly focused and ready for paste
                         const target = e.currentTarget;
-                        if (target && !submitting) {
+                        if (!submitting) {
                           // Use a microtask to ensure focus happens after any other handlers
                           Promise.resolve().then(() => {
                             target.focus();
                             // If there's no selection, place cursor at end
                             const selection = window.getSelection();
-                            if (selection && selection.rangeCount === 0) {
+                            if (selection?.rangeCount === 0) {
                               const range = document.createRange();
                               range.selectNodeContents(target);
                               range.collapse(false);
@@ -261,10 +248,9 @@ const CreateDropInput = forwardRef<
                           });
                         }
                       }}
-                      className={`tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-white tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-        tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ${
-          submitting ? "tw-opacity-50 tw-cursor-default" : ""
-        } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
+                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm ${
+                        submitting ? "tw-cursor-default tw-opacity-50" : ""
+                      } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
                     />
                     <CreateDropEmojiPicker />
                   </div>

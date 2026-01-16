@@ -3,6 +3,7 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { ImageScale } from "@/helpers/image.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface SubmissionArtworkCardProps {
   readonly drop: ExtendedDrop;
@@ -13,6 +14,7 @@ export default function SubmissionArtworkCard({
   drop,
   isActive = true,
 }: SubmissionArtworkCardProps) {
+  const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
 
   if (!media) {
@@ -38,7 +40,7 @@ export default function SubmissionArtworkCard({
           imageObjectPosition="center"
           imageScale={ImageScale.AUTOx600}
           disableModal={!isActive}
-          disableAutoPlay={!isActive}
+          disableAutoPlay={!isActive || hasTouchScreen}
         />
       </div>
     </div>

@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import { buildProcessedContent } from "@/components/waves/drops/media-utils";
+import type { ProcessedContent } from "@/components/waves/drops/media-utils";
 
 export function useWaveLatestDrop(waveId: string, enabled: boolean = true) {
   return useQuery({
@@ -25,21 +27,20 @@ export function useWaveLatestDrop(waveId: string, enabled: boolean = true) {
  * Concatenates text content from all parts and truncates to maxLength.
  */
 export function extractDropPreview(
-  drop: ApiDropWithoutWave | null,
-  maxLength: number = 100
-): string | null {
+  drop: ApiDropWithoutWave | null
+): ProcessedContent | null {
   if (!drop) return null;
 
   const textParts = drop.parts
-    .map((part) => part.content)
+    .map((part) => part.content?.trim())
     .filter((content): content is string => !!content);
 
-  if (textParts.length === 0) return null;
+  const combinedText = textParts.join("\n\n");
+  const media = drop.parts.flatMap((part) => part.media);
 
-  const fullText = textParts.join(" ").trim();
-  if (fullText.length === 0) return null;
+  if (!combinedText && media.length === 0) {
+    return null;
+  }
 
-  return fullText.length > maxLength
-    ? `${fullText.slice(0, maxLength)}…`
-    : fullText;
+  return buildProcessedContent(combinedText || null, media, "View drop...");
 }
