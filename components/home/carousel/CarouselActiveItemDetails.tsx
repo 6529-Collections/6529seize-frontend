@@ -29,9 +29,12 @@ export default function CarouselActiveItemDetails({
 
   return (
     <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center tw-px-4 tw-py-4 md:tw-px-6 lg:tw-px-8">
-      <span className="tw-mb-2 tw-block tw-text-center tw-text-lg md:tw-text-xl tw-font-semibold tw-text-white">
+      <Link
+        href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
+        className="tw-mb-2 tw-block tw-text-center tw-text-lg tw-font-semibold tw-text-white tw-no-underline desktop-hover:hover:tw-text-white md:tw-text-xl"
+      >
         {title}
-      </span>
+      </Link>
 
       {author && (
         <Link
@@ -40,7 +43,7 @@ export default function CarouselActiveItemDetails({
         >
           <span className="tw-text-sm tw-text-iron-400">by</span>
           {author.pfp ? (
-            <div className="tw-size-7 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
+            <div className="tw-flex tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
               <img
                 className="tw-max-h-full tw-max-w-full tw-object-cover"
                 src={author.pfp}
