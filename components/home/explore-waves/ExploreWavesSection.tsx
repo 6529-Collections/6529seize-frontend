@@ -40,7 +40,7 @@ export function ExploreWavesSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-py-16 tw-pl-4 tw-pr-0 md:tw-px-6 lg:tw-px-8">
+    <section className="-tw-mx-8 tw-py-10 md:tw-py-16 tw-pl-4 tw-pr-0 md:tw-px-6 lg:tw-px-8">
       <div className="tw-px-8">
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
@@ -63,7 +63,6 @@ export function ExploreWavesSection() {
           </Link>
         </div>
 
-        {/* Grid / Scroll */}
         <div className="-tw-mx-6 tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pb-2 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-5 lg:tw-overflow-visible lg:tw-pb-0">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (

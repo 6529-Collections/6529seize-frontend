@@ -29,6 +29,7 @@ export default function CarouselArrow({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       aria-label={isLeft ? "Previous" : "Next"}

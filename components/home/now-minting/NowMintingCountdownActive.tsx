@@ -18,15 +18,17 @@ export default function NowMintingCountdownActive({
         <span className="tw-text-sm tw-font-semibold tw-text-iron-300">
           {countdown.title}
         </span>
-        <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-success/20 tw-bg-success/10 tw-px-2.5 tw-py-1">
-          <span className="tw-relative tw-flex tw-h-2 tw-w-2">
-            <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
-            <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
-          </span>
-          <span className="tw-text-[11px] tw-font-semibold tw-text-success/80">
-            Live
-          </span>
-        </div>
+        {countdown.isActive && (
+          <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-success/20 tw-bg-success/10 tw-px-2.5 tw-py-1">
+            <span className="tw-relative tw-flex tw-h-2 tw-w-2">
+              <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
+              <span className="tw-relative tw-inline-flex tw-h-2 tw-w-2 tw-rounded-full tw-bg-success" />
+            </span>
+            <span className="tw-text-[11px] tw-font-semibold tw-text-success/80">
+              Live
+            </span>
+          </div>
+        )}
       </div>
       <div className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/5 tw-bg-iron-950 tw-p-4 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
         <div className="tw-text-2xl tw-font-bold tw-tabular-nums tw-text-iron-50">

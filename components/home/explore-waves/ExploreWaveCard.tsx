@@ -126,8 +126,8 @@ function MessagePreviewContent({
   return (
     <ContentDisplay
       content={previewContent}
-      className="tw-line-clamp-2 tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400"
-      textClassName="tw-line-clamp-2 tw-break-words"
+      className="tw-line-clamp-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400"
+      textClassName="tw-line-clamp-1 tw-break-words"
     />
   );
 }

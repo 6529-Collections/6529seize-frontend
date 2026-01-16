@@ -55,9 +55,9 @@ export default function NowMintingSection() {
         Latest Drop
       </span>
 
-      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-950">
+      <div className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-950">
         <div className="tw-grid tw-h-full tw-grid-cols-1 tw-gap-y-10 tw-divide-y tw-divide-x-0 tw-divide-solid tw-divide-white/5 lg:tw-grid-cols-12 lg:tw-divide-x lg:tw-divide-y-0 xl:tw-grid-cols-9">
-          <div className="tw-p-6 md:tw-p-8 lg:tw-col-span-6 xl:tw-col-span-5">
+          <div className="tw-p-6 tw-pb-10 md:tw-p-8 md:tw-pb-12 lg:tw-col-span-6 xl:tw-col-span-5">
             <NowMintingArtwork nft={nft} />
           </div>
 

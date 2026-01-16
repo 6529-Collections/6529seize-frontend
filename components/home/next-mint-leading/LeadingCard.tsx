@@ -48,7 +48,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
             <span className="tw-text-white/50"> TDH</span>
           </span>
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(220px,55vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
+        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
               <DropListItemContentMedia

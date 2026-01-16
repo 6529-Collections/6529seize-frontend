@@ -1,33 +1,41 @@
 "use client";
 
-import {
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  type CSSProperties,
-} from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
-import type { Swiper as SwiperInstance } from "swiper";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import SubmissionArtworkCard from "./SubmissionArtworkCard";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import type { Swiper as SwiperInstance } from "swiper";
+import { Autoplay } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import CarouselArrow from "./CarouselArrow";
+import SubmissionArtworkCard from "./SubmissionArtworkCard";
+
+export interface SubmissionCarouselHandle {
+  pauseAutoplay: () => void;
+  resumeAutoplay: () => void;
+}
 
 interface SubmissionCarouselProps {
   readonly onActiveDropChange?: (drop: ExtendedDrop | null) => void;
 }
 
-export default function SubmissionCarousel({
-  onActiveDropChange,
-}: SubmissionCarouselProps) {
+const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarouselProps>(
+  function SubmissionCarousel({ onActiveDropChange }, ref) {
   const { seizeSettings, isLoaded } = useSeizeSettings();
+  const { hasTouchScreen } = useDeviceInfo();
   const waveId = seizeSettings.memes_wave_id;
 
   const { drops, isFetching } = useWaveDropsLeaderboard({
@@ -37,6 +45,12 @@ export default function SubmissionCarousel({
   });
 
   const swiperRef = useRef<SwiperInstance | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    pauseAutoplay: () => swiperRef.current?.autoplay.pause(),
+    resumeAutoplay: () => swiperRef.current?.autoplay.resume(),
+  }));
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -124,45 +138,29 @@ export default function SubmissionCarousel({
       style={carouselVars}
     >
       <div className="tw-mx-auto tw-flex tw-h-full tw-w-full tw-flex-col">
-        {showArrows && (
-          <div className="tw-mb-3 lg:tw-mb-2 tw-flex tw-items-center tw-gap-x-4 tw-justify-end md:tw-justify-between tw-px-6 md:tw-hidden">
-            <CarouselArrow
-              direction="left"
-              onClick={() => scroll("left")}
-              disabled={!canScrollLeft}
-              placement="inline"
-              className="tw-p-2"
-            />
-            <CarouselArrow
-              direction="right"
-              onClick={() => scroll("right")}
-              disabled={!canScrollRight}
-              placement="inline"
-              className="tw-p-2"
-            />
-          </div>
-        )}
-
         <div className="tw-relative tw-min-h-0 tw-flex-1 tw-overflow-hidden">
           {showArrows && (
             <CarouselArrow
               direction="left"
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
-              className="tw-hidden md:tw-flex"
-              style={{ left: "calc(50% - var(--carousel-arrow-offset))" }}
+              style={{ left: "var(--arrow-left-pos)" }}
+              className="[--arrow-left-pos:2rem] md:[--arrow-left-pos:calc(50%-var(--carousel-arrow-offset))]"
             />
           )}
 
           <Swiper
-            className="submission-carousel-swiper tw-h-full tw-overflow-hidden"
+            className="submission-carousel-swiper tw-h-full tw-overflow-hidden tw-overscroll-contain tw-touch-pan-y"
             modules={[Autoplay]}
             slidesPerView="auto"
             centeredSlides
             spaceBetween={cardGap}
             speed={450}
             initialSlide={0}
-            autoplay={{ delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true }}
+            autoplay={hasTouchScreen ? false : { delay: 4000, disableOnInteraction: false }}
+            touchEventsTarget="container"
+            touchStartPreventDefault={false}
+            preventInteractionOnTransition={true}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
               handleSlideChange(swiper);
@@ -214,8 +212,8 @@ export default function SubmissionCarousel({
               direction="right"
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
-              className="tw-hidden md:tw-flex"
-              style={{ left: "calc(50% + var(--carousel-arrow-offset))" }}
+              style={{ left: "var(--arrow-right-pos)", right: "var(--arrow-right-r)" }}
+              className="[--arrow-right-pos:auto] [--arrow-right-r:-0.5rem] md:[--arrow-right-pos:calc(50%+var(--carousel-arrow-offset))] md:[--arrow-right-r:auto]"
             />
           )}
         </div>
@@ -223,4 +221,6 @@ export default function SubmissionCarousel({
       </div>
     </div>
   );
-}
+});
+
+export default SubmissionCarousel;
