@@ -24,7 +24,7 @@ export default function NowMintingHeader({
     handleOrWallet: artistHandle,
     initialProfile: null,
   });
-  const hasHandle = Boolean(artistHandle?.trim());
+  const hasHandle = Boolean(artistHandle.trim());
 
   return (
     <div className="tw-flex tw-flex-col">
