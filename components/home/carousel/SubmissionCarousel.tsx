@@ -9,6 +9,7 @@ import {
   type CSSProperties,
 } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperInstance } from "swiper";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import {
@@ -155,11 +156,13 @@ export default function SubmissionCarousel({
 
           <Swiper
             className="submission-carousel-swiper tw-h-full tw-overflow-hidden"
+            modules={[Autoplay]}
             slidesPerView="auto"
             centeredSlides
             spaceBetween={cardGap}
             speed={450}
             initialSlide={0}
+            autoplay={{ delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true }}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
               handleSlideChange(swiper);
@@ -216,6 +219,7 @@ export default function SubmissionCarousel({
             />
           )}
         </div>
+
       </div>
     </div>
   );
