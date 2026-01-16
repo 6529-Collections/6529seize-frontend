@@ -52,40 +52,40 @@ export default function NowMintingCountdownActive({
   );
 }
 
-const LiveCountdown = memo(function LiveCountdown({
-  targetTimestampSeconds,
-}: {
-  readonly targetTimestampSeconds: number;
-}) {
-  const [display, setDisplay] = useState(() =>
-    formatCountdownVerbose(targetTimestampSeconds)
-  );
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+const LiveCountdown = memo(
+  ({ targetTimestampSeconds }: { readonly targetTimestampSeconds: number }) => {
+    const [display, setDisplay] = useState(() =>
+      formatCountdownVerbose(targetTimestampSeconds)
+    );
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    const targetMs = targetTimestampSeconds * 1000;
+    useEffect(() => {
+      const targetMs = targetTimestampSeconds * 1000;
 
-    const tick = () => {
-      setDisplay(formatCountdownVerbose(targetTimestampSeconds));
+      const tick = () => {
+        setDisplay(formatCountdownVerbose(targetTimestampSeconds));
 
-      if (Date.now() >= targetMs) {
-        return;
-      }
+        if (Date.now() >= targetMs) {
+          return;
+        }
 
-      const now = Date.now();
-      const msUntilNextSecond = 1000 - (now % 1000);
-      timerRef.current = setTimeout(tick, msUntilNextSecond);
-    };
+        const now = Date.now();
+        const msUntilNextSecond = 1000 - (now % 1000);
+        timerRef.current = setTimeout(tick, msUntilNextSecond);
+      };
 
-    tick();
+      tick();
 
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-      timerRef.current = null;
-    };
-  }, [targetTimestampSeconds]);
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+        timerRef.current = null;
+      };
+    }, [targetTimestampSeconds]);
 
-  return <span>{display}</span>;
-});
+    return <span>{display}</span>;
+  }
+);
+
+LiveCountdown.displayName = "LiveCountdown";
