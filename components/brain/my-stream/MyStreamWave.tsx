@@ -35,7 +35,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams?.toString() || "");
+      const params = new URLSearchParams(searchParams.toString() || "");
       params.delete("wave");
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
@@ -72,7 +72,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
+    const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };

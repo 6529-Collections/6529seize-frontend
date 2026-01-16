@@ -49,8 +49,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
-  const rawDropId = searchParams?.get("drop") ?? undefined;
-  const waveId = searchParams?.get("wave") ?? undefined;
+  const rawDropId = searchParams.get("drop") ?? undefined;
+  const waveId = searchParams.get("wave") ?? undefined;
 
   // Validate drop ID format (assuming alphanumeric + hyphens)
   const dropId =
@@ -78,7 +78,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   });
 
   const onDropClose = useCallback(() => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
+    const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");
     const newUrl = params.toString()
       ? `${pathname}?${params.toString()}`
@@ -87,14 +87,15 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   }, [searchParams, pathname, defaultPath, router]);
 
   const isDropOpen = useMemo(
-    () => Boolean(dropId && drop?.id?.toLowerCase() === dropId?.toLowerCase()),
+    () => Boolean(dropId && drop?.id.toLowerCase() === dropId.toLowerCase()),
     [dropId, drop?.id]
   );
 
   // Clear logic for when to show each part
   const shouldShowLeftSidebar = showLeftSidebar && (!isMobile || !waveId);
-  const shouldShowMainContent = !isMobile || waveId;
-  const shouldShowDropOverlay = isDropOpen && drop && shouldShowMainContent;
+  const shouldShowMainContent = !isMobile || waveId !== undefined;
+  const shouldShowDropOverlay =
+    isDropOpen && drop !== undefined && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
     isRightSidebarOpen && waveId && !isDropOpen
   );

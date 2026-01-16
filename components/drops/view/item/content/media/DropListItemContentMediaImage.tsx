@@ -32,12 +32,16 @@ function DropListItemContentMediaImage({
   maxRetries = 0,
   onContainerClick,
   isCompetitionDrop = false,
+  disableModal = false,
+  imageObjectPosition,
   imageScale = ImageScale.AUTOx450,
 }: {
   readonly src: string;
   readonly maxRetries?: number | undefined;
   readonly onContainerClick?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly disableModal?: boolean | undefined;
+  readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
@@ -72,10 +76,13 @@ function DropListItemContentMediaImage({
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLImageElement>) => {
+      if (disableModal) {
+        return;
+      }
       event.stopPropagation();
       setIsModalOpen(true);
     },
-    []
+    [disableModal]
   );
 
   const handleCloseModal = useCallback(
@@ -113,7 +120,11 @@ function DropListItemContentMediaImage({
     transform: "translate(-50%, -50%)",
   };
 
-  useKeyPressEvent("Escape", () => handleCloseModal());
+  useKeyPressEvent("Escape", () => {
+    if (!disableModal) {
+      handleCloseModal();
+    }
+  });
 
   const modalContent = (
     <div
@@ -267,7 +278,8 @@ function DropListItemContentMediaImage({
     </div>
   );
 
-  const imageObjectPosition = isCompetitionDrop ? "center" : "left top";
+  const resolvedObjectPosition =
+    imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
 
   return (
     <>
@@ -295,10 +307,10 @@ function DropListItemContentMediaImage({
             sizes="(max-width: 768px) 100vw, 768px"
             className={`tw-max-w-full tw-max-h-full ${
               !loaded ? "tw-opacity-0" : "tw-opacity-100"
-            } tw-cursor-pointer`}
+            } ${disableModal ? "" : "tw-cursor-pointer"}`}
             style={{
               objectFit: "contain",
-              objectPosition: imageObjectPosition,
+              objectPosition: resolvedObjectPosition,
             }}
             onLoad={handleImageLoad}
             onClick={handleImageClick}
@@ -319,7 +331,7 @@ function DropListItemContentMediaImage({
           </div>
         )}
       </div>
-      {isModalOpen && createPortal(modalContent, document.body)}
+      {!disableModal && isModalOpen && createPortal(modalContent, document.body)}
     </>
   );
 }

@@ -44,7 +44,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
         <div className="tw-group tw-rounded-xl tw-p-4 tw-transition tw-duration-300 tw-ease-out tw-@container desktop-hover:hover:tw-bg-iron-800/80">
           <div>
             <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
-              {drop.rank ? (
+              {typeof drop.rank === "number" ? (
                 <WinnerDropBadge
                   rank={drop.rank}
                   decisionTime={drop.winning_context?.decision_time ?? null}
@@ -78,7 +78,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
               />
               <div className="tw-flex tw-items-center tw-justify-between">
                 <Link
-                  href={`/${drop.author.handle}`}
+                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
                   className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline desktop-hover:hover:tw-underline"
                 >
                   {drop.author.pfp ? (

@@ -68,14 +68,14 @@ export const WaveSmallLeaderboardItemContent: React.FC<
           onQuoteClick={() => {}}
         />
         {showGradient && (
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-[1] tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900 tw-to-transparent" />
+          <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-[1] tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900 tw-to-transparent" />
         )}
       </div>
-      <div className="tw-mb-3 tw-mt-3 tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-2">
         {isStorm && (
           <>
             <svg
-              className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+              className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -106,7 +106,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {!!haveMetadata && (
           <>
             <svg
-              className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+              className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -137,7 +137,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {!!haveMedia && (
           <>
             <svg
-              className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+              className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
