@@ -176,10 +176,17 @@ export default function SubmissionCarousel({
                 className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-visible"
                 style={{ width: slideWidth }}
               >
-                <button
-                  type="button"
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => swiperRef.current?.slideTo(index)}
-                  className="tw-h-auto tw-w-full tw-aspect-[4/5] tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-aspect-auto md:tw-h-full"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      swiperRef.current?.slideTo(index);
+                    }
+                  }}
+                  className="tw-h-auto tw-w-full tw-aspect-[4/5] tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-aspect-auto md:tw-h-full"
                   style={{
                     opacity: isActive ? 1 : 0.22,
                     filter: isActive ? "none" : inactiveFilter,
@@ -193,7 +200,7 @@ export default function SubmissionCarousel({
                   }}
                 >
                   <SubmissionArtworkCard drop={drop} isActive={isActive} />
-                </button>
+                </div>
               </SwiperSlide>
             );
           })}

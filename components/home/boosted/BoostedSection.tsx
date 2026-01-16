@@ -80,7 +80,7 @@ export function BoostedSection() {
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
               Boosted Drops
             </span>
-            <p className="tw-m-0 tw-mt-1.5 tw-text-base tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
               Community-boosted right now
             </p>
           </div>
