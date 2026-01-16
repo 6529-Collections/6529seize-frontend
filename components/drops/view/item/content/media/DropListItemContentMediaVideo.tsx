@@ -56,17 +56,17 @@ function DropListItemContentMediaVideo({ src }: Props) {
   return (
     <div
       ref={wrapperRef}
-      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-group">
+      className="tw-group tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+    >
       <video
         ref={videoRef}
         playsInline
         controls
-        autoPlay={false} /* we control play via the hook+effect */
+        autoPlay={false}
         muted
         loop
-        className={`
-          tw-w-full tw-h-full tw-rounded-xl tw-object-contain
-        `}>
+        className={`tw-h-full tw-w-full tw-rounded-xl tw-object-contain`}
+      >
         Your browser does not support the video tag.
       </video>
     </div>
