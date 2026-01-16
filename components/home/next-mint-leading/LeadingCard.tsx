@@ -3,12 +3,16 @@
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import {
+  getDropPreviewImageUrl,
+  type ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
+import { useMemo } from "react";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
@@ -23,8 +27,17 @@ const getRankLabelClass = (rank: number) => {
 };
 
 export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
-  const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
+  const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
+  const mediaImageScale = isTabletOrSmaller
+    ? ImageScale.AUTOx450
+    : ImageScale.AUTOx600;
+
+  const previewImageUrl = useMemo(
+    () => getDropPreviewImageUrl(drop.metadata),
+    [drop.metadata]
+  );
+
   const title =
     drop.title ??
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
@@ -51,13 +64,14 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
         <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
-              <DropListItemContentMedia
-                media_mime_type={media.mime_type}
-                media_url={media.url}
-                imageObjectPosition="center"
-                imageScale={ImageScale.AUTOx600}
-                disableAutoPlay={hasTouchScreen}
-                disableModal={hasTouchScreen}
+              <MediaDisplay
+                media_mime_type={
+                  drop.parts[0]?.media[0]!.mime_type ?? "image/jpeg"
+                }
+                media_url={drop.parts[0]?.media[0]!.url!}
+                disableMediaInteraction={true}
+                imageScale={mediaImageScale}
+                previewImageUrl={previewImageUrl}
               />
             ) : (
               <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950">

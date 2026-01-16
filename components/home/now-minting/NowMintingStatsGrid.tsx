@@ -31,7 +31,7 @@ export default function NowMintingStatsGrid({
         status={statusTone}
         isLoading={isStatusLoading}
       />
-      <NowMintingStatsItem label="Mint price" value={0.06529} />
+      <NowMintingStatsItem label="Mint price" value={"0.06529"} />
       <NowMintingStatsItem label="Floor" value={floorPrice} />
     </div>
   );
