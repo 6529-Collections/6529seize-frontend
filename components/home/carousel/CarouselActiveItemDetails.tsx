@@ -6,7 +6,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface CarouselActiveItemDetailsProps {
   readonly drop: ExtendedDrop | null;
@@ -16,6 +16,11 @@ export default function CarouselActiveItemDetails({
   drop,
 }: CarouselActiveItemDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const dropId = drop?.id;
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [dropId]);
 
   if (!drop) {
     return null;
@@ -33,6 +38,7 @@ export default function CarouselActiveItemDetails({
   return (
     <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center tw-px-4 tw-py-4 md:tw-px-6 lg:tw-px-8">
       <Link
+        prefetch={false}
         href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
         className="tw-mb-2 tw-block tw-text-center tw-text-lg tw-font-semibold tw-text-white tw-no-underline desktop-hover:hover:tw-text-white md:tw-text-xl"
       >
@@ -40,6 +46,7 @@ export default function CarouselActiveItemDetails({
       </Link>
 
       <Link
+        prefetch={false}
         href={`/${author.handle ?? author.primary_address}`}
         className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
       >
