@@ -48,7 +48,7 @@ function StatBlock({
     changePercent === null ? "tw-bg-iron-800 tw-text-iron-400" : colorClasses;
 
   return (
-    <div className="tw-flex-1">
+    <div className="tw-flex tw-min-h-[150px] tw-flex-col tw-gap-1">
       <p
         className={`tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider ${accentColor}`}
       >
@@ -59,13 +59,13 @@ function StatBlock({
         placement="top"
       >
         <p
-          className={`tw-cursor-default tw-font-bold tw-text-white ${isPrimary ? "tw-text-4xl" : "tw-text-2xl"}`}
+          className={`tw-cursor-default tw-font-bold tw-leading-none tw-text-white ${isPrimary ? "tw-text-4xl" : "tw-text-3xl"}`}
         >
           {formatCompactNumber(currentValue)}
           {suffix}
         </p>
       </CustomTooltip>
-      <p className="tw-mt-1 tw-text-xs tw-text-neutral-500">
+      <p className="tw-text-xs tw-leading-snug tw-text-neutral-500">
         vs{" "}
         <CustomTooltip
           content={`${formatNumberWithCommas(previousValue)}${suffix ?? ""}`}
@@ -79,7 +79,7 @@ function StatBlock({
         {previousLabel}
       </p>
       <span
-        className={`tw-mt-2 tw-inline-block tw-rounded tw-px-2 tw-py-0.5 tw-text-sm tw-font-semibold ${badgeClasses}`}
+        className={`tw-mt-auto tw-inline-flex tw-min-w-[72px] tw-justify-center tw-rounded tw-px-2 tw-py-0.5 tw-text-sm tw-font-semibold ${badgeClasses}`}
       >
         {formatPercent(changePercent)}
       </span>
@@ -122,7 +122,7 @@ export default function MetricCard({
         </div>
       </div>
 
-      <div className="tw-flex tw-gap-6">
+      <div className="tw-grid tw-grid-cols-[1fr_auto_1fr] tw-items-start tw-gap-6">
         <StatBlock
           label="Last 24h"
           currentValue={getCount(dailyData, "current")}
@@ -133,7 +133,7 @@ export default function MetricCard({
           isPrimary
           suffix={suffix}
         />
-        <div className="tw-w-px tw-bg-iron-700/50" />
+        <div className="tw-h-full tw-w-px tw-bg-iron-700/50" />
         <StatBlock
           label="Last 7 Days"
           currentValue={getCount(weeklyData, "current")}
