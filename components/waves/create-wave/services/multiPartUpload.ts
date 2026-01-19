@@ -26,7 +26,7 @@ export async function multiPartUpload({
   let overallUploaded = 0;
 
   const handleProgress = (bytesUploaded: number) => {
-    overallUploaded += bytesUploaded;
+    overallUploaded = Math.max(overallUploaded + bytesUploaded, 0);
     if (onProgress) {
       if (file.size === 0) {
         onProgress(100);
