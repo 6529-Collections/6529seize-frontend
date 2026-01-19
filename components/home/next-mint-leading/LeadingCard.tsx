@@ -10,9 +10,10 @@ import {
   getDropPreviewImageUrl,
   type ExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
@@ -27,16 +28,29 @@ const getRankLabelClass = (rank: number) => {
 };
 
 export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
+  const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
   const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
   const mediaImageScale = isTabletOrSmaller
     ? ImageScale.AUTOx450
     : ImageScale.AUTOx600;
+  const isHtml = media?.mime_type === "text/html";
+  const shouldGate = hasTouchScreen && isHtml;
+  const [interactiveEnabled, setInteractiveEnabled] = useState(!shouldGate);
 
   const previewImageUrl = useMemo(
     () => getDropPreviewImageUrl(drop.metadata),
     [drop.metadata]
   );
+  const previewImageUrlFallback = previewImageUrl ?? undefined;
+
+  useEffect(() => {
+    if (shouldGate) {
+      setInteractiveEnabled(false);
+      return;
+    }
+    setInteractiveEnabled(true);
+  }, [drop.id, shouldGate]);
 
   const title =
     drop.title ??
@@ -64,15 +78,39 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
         <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
-              <MediaDisplay
-                media_mime_type={
-                  drop.parts[0]?.media[0]!.mime_type ?? "image/jpeg"
-                }
-                media_url={drop.parts[0]?.media[0]!.url!}
-                disableMediaInteraction={true}
-                imageScale={mediaImageScale}
-                previewImageUrl={previewImageUrl}
-              />
+              shouldGate && !interactiveEnabled ? (
+                <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
+                  {previewImageUrlFallback ? (
+                    <MediaDisplay
+                      media_mime_type={media.mime_type ?? "image/jpeg"}
+                      media_url={media.url!}
+                      disableMediaInteraction={true}
+                      imageScale={mediaImageScale}
+                      previewImageUrl={previewImageUrlFallback}
+                    />
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setInteractiveEnabled(true)}
+                    className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/50"
+                    aria-label="Load interactive media"
+                  >
+                    <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800">
+                      Tap to load
+                    </span>
+                  </button>
+                </div>
+              ) : (
+                <MediaDisplay
+                  media_mime_type={media.mime_type ?? "image/jpeg"}
+                  media_url={media.url!}
+                  disableMediaInteraction={true}
+                  imageScale={mediaImageScale}
+                  previewImageUrl={
+                    shouldGate ? undefined : previewImageUrlFallback
+                  }
+                />
+              )
             ) : (
               <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950">
                 <span className="tw-text-sm tw-text-white/40">No image</span>

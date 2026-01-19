@@ -35,6 +35,7 @@ export default function DropListItemContentMedia({
   disableAutoPlay = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
+  previewImageUrl,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -44,6 +45,7 @@ export default function DropListItemContentMedia({
   readonly disableAutoPlay?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly previewImageUrl?: string | undefined;
 }) {
   const [htmlActivated, setHtmlActivated] = useState(!disableAutoPlay);
 
@@ -103,21 +105,25 @@ export default function DropListItemContentMedia({
     case MediaType.HTML:
       if (disableAutoPlay && !htmlActivated) {
         return (
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
-            <div
-              role="button"
-              tabIndex={0}
+          <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
+            {previewImageUrl ? (
+              <DropListItemContentMediaImage
+                src={previewImageUrl}
+                disableModal={true}
+                imageObjectPosition={imageObjectPosition}
+                imageScale={imageScale}
+              />
+            ) : null}
+            <button
+              type="button"
               onClick={() => setHtmlActivated(true)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setHtmlActivated(true);
-                }
-              }}
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800"
+              className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/50"
+              aria-label="Load interactive media"
             >
-              Tap to load
-            </div>
+              <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800">
+                Tap to load
+              </span>
+            </button>
           </div>
         );
       }
