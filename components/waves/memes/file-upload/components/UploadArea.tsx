@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import type { UploadAreaProps } from '../reducers/types';
 import ErrorMessage from './ErrorMessage';
 import FileTypeIndicator from './FileTypeIndicator';
-import { UI_FORMAT_CATEGORIES } from '../utils/constants';
+import { SUBMISSION_UI_FORMAT_CATEGORIES } from '@/constants/submission-media.constants';
 
 /**
  * Upload Area Component
@@ -79,7 +79,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
     {/* File type indicators */}
     <div className="tw-absolute tw-bottom-6 tw-left-6 tw-right-6">
       <div className="tw-flex tw-justify-center tw-gap-3 tw-text-xs tw-text-iron-500">
-        {UI_FORMAT_CATEGORIES.map((format) => (
+        {SUBMISSION_UI_FORMAT_CATEGORIES.map((format) => (
           <FileTypeIndicator key={format} format={format} />
         ))}
       </div>

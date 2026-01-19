@@ -1,3 +1,9 @@
+export {
+  getSubmissionMediaTypeInfo as getMediaTypeInfo,
+  type SubmissionMediaCategory as MediaCategory,
+  type SubmissionMediaTypeInfo as MediaTypeInfo,
+} from "@/constants/submission-media.constants";
+
 export const getFileInfoFromUrl = (
   url: string | undefined
 ): { name: string; extension: string } | null => {
