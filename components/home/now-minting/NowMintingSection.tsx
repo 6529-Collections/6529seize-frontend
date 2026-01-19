@@ -9,7 +9,7 @@ export default function NowMintingSection() {
 
   if (isFetching && !nft) {
     return (
-      <section className="tw-px-4 tw-pb-32 tw-pt-16 md:tw-px-6 lg:tw-px-8">
+      <section className="tw-px-4 tw-pb-32 tw-pt-10 md:tw-pt-16 md:tw-px-6 lg:tw-px-8">
         <span className="tw-mb-4 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-zinc-200 md:tw-mb-6 md:tw-text-2xl">
           Latest Drop
         </span>
@@ -50,7 +50,7 @@ export default function NowMintingSection() {
   }
 
   return (
-    <section className="tw-px-4 tw-pb-16 tw-pt-16 md:tw-px-6 md:tw-pb-32 lg:tw-px-8">
+    <section className="tw-px-4 tw-pb-16 tw-pt-10 md:tw-pt-16 md:tw-px-6 md:tw-pb-32 lg:tw-px-8">
       <span className="tw-mb-4 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-zinc-200 md:tw-mb-6 md:tw-text-2xl">
         Latest Drop
       </span>
