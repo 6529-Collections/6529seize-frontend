@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo, useRef } from "react";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   useInfiniteQuery,
   useQuery,
@@ -18,7 +19,6 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
@@ -30,7 +30,6 @@ export enum WaveDropsLeaderboardSort {
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
-  readonly connectedProfileHandle: string | null;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly pausePolling?: boolean | undefined;
 }
@@ -65,7 +64,6 @@ function useTabVisibility() {
 
 export function useWaveDropsLeaderboard({
   waveId,
-  connectedProfileHandle,
   sort = WaveDropsLeaderboardSort.RANK,
   pausePolling = false,
 }: UseWaveDropsLeaderboardProps) {
@@ -104,6 +102,7 @@ export function useWaveDropsLeaderboard({
   );
 
   useEffect(() => {
+    if (!waveId) return;
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -163,7 +162,7 @@ export function useWaveDropsLeaderboard({
     },
     initialPageParam: null,
     getNextPageParam,
-    enabled: !!connectedProfileHandle && !pausePolling,
+    enabled: !pausePolling && !!waveId,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
   });

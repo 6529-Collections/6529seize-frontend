@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useContext, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { AuthContext } from "@/components/auth/Auth";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
@@ -23,12 +22,10 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   wave,
   onDropClick,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
   const [pausePolling, setPausePolling] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.handle ?? null,
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       pausePolling,
     });
@@ -71,24 +68,25 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
     });
   };
 
-  const intersectionElementRef = useIntersectionObserver(() => {
+  const intersectionElementRef = useIntersectionObserver(async () => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      fetchNextPage();
+      await fetchNextPage();
     }
   });
 
   return (
     <div
-      className="tw-space-y-4 lg:tw-space-y-6 tw-px-2 sm:tw-px-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
-      style={myVotesViewStyle}>
+      className="tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 lg:tw-space-y-6"
+      style={myVotesViewStyle}
+    >
       {drops.length === 0 && !isFetching ? (
         <div className="tw-mt-10">
-          <p className="tw-text-iron-500 tw-text-sm tw-text-center">
-            You haven't voted on any submissions in this wave yet.
+          <p className="tw-text-center tw-text-sm tw-text-iron-500">
+            You haven&apos;t voted on any submissions in this wave yet.
           </p>
         </div>
       ) : (
-        <div className="tw-space-y-4 tw-mt-4">
+        <div className="tw-mt-4 tw-space-y-4">
           <MyStreamWaveMyVotesReset
             haveDrops={!!drops.length}
             selected={checkedDrops}

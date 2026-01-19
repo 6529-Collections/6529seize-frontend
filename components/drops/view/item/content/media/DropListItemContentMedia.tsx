@@ -1,4 +1,7 @@
+"use client";
+
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -28,14 +31,26 @@ export default function DropListItemContentMedia({
   media_url,
   onContainerClick,
   isCompetitionDrop = false,
+  disableModal = false,
+  disableAutoPlay = false,
+  imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
   readonly onContainerClick?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly disableModal?: boolean | undefined;
+  readonly disableAutoPlay?: boolean | undefined;
+  readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
 }) {
+  const [htmlActivated, setHtmlActivated] = useState(!disableAutoPlay);
+
+  useEffect(() => {
+    setHtmlActivated(!disableAutoPlay);
+  }, [disableAutoPlay, media_url, media_mime_type]);
+
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
       return MediaType.IMAGE;
@@ -69,16 +84,44 @@ export default function DropListItemContentMedia({
           src={media_url}
           onContainerClick={onContainerClick}
           isCompetitionDrop={isCompetitionDrop}
+          disableModal={disableModal}
+          imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
         />
       );
     case MediaType.VIDEO:
-      return <DropListItemContentMediaVideo src={media_url} />;
+      return (
+        <DropListItemContentMediaVideo
+          src={media_url}
+          disableAutoPlay={disableAutoPlay}
+        />
+      );
     case MediaType.AUDIO:
       return <DropListItemContentMediaAudio src={media_url} />;
     case MediaType.GLB:
       return <DropListItemContentMediaGLB src={media_url} />;
     case MediaType.HTML:
+      if (disableAutoPlay && !htmlActivated) {
+        return (
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setHtmlActivated(true)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setHtmlActivated(true);
+                }
+              }}
+              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800"
+            >
+              Tap to load
+            </div>
+          </div>
+        );
+      }
+
       return (
         <SandboxedExternalIframe
           title=""

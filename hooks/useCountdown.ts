@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { formatCountdown } from "@/utils/timeFormatters";
+import { useEffect, useReducer, useRef } from "react";
+import {
+  formatCountdown,
+  formatCountdownAdaptive,
+  formatCountdownVerbose,
+} from "@/utils/timeFormatters";
 
 /**
  * Hook that provides auto-updating countdown text
@@ -9,53 +13,158 @@ import { formatCountdown } from "@/utils/timeFormatters";
  * @returns Formatted string that updates periodically
  */
 export function useCountdown(targetTime: number | null): string {
-  // Initialize with current formatted time
-  const [display, setDisplay] = useState(() => formatCountdown(targetTime));
+  // Use reducer to trigger re-renders; display value is calculated during render
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
-    // Skip if no target time
-    if (!targetTime) {
-      setDisplay("");
+    // Skip if no target time or already passed
+    if (targetTime === null || Date.now() >= targetTime) {
       return;
-    }
-
-    // Update the displayed time
-    function updateDisplay(): boolean {
-      const formatted = formatCountdown(targetTime);
-      setDisplay(formatted);
-
-      // Return true if we should continue updating (target not reached)
-      return targetTime !== null && Date.now() < targetTime;
     }
 
     // Determine update frequency based on time remaining
     function getUpdateInterval(): number {
-      const timeRemaining = targetTime !== null ? targetTime - Date.now() : 0;
+      if (targetTime === null) return 0;
+      const timeRemaining = targetTime - Date.now();
 
       if (timeRemaining < 60 * 60 * 1000) {
         return 60 * 1000; // 1 minute updates when < 1 hour away
-      } else if (timeRemaining < 24 * 60 * 60 * 1000) {
-        return 5 * 60 * 1000; // 5 minute updates when < 1 day away
-      } else {
-        return 60 * 60 * 1000; // 1 hour updates otherwise
       }
-    }
 
-    // Initial update
-    updateDisplay();
+      if (timeRemaining < 24 * 60 * 60 * 1000) {
+        return 5 * 60 * 1000; // 5 minute updates when < 1 day away
+      }
+      return 60 * 60 * 1000; // 1 hour updates otherwise
+    }
 
     // Set interval for updates
     const intervalTime = getUpdateInterval();
     const interval = setInterval(() => {
-      const shouldContinue = updateDisplay();
-      if (!shouldContinue) {
+      // Stop updating if target reached
+      if (Date.now() >= targetTime) {
         clearInterval(interval);
       }
+      forceUpdate();
     }, intervalTime);
 
     // Clean up interval on unmount or when targetTime changes
     return () => clearInterval(interval);
   }, [targetTime]);
 
-  return display;
+  // ✅ Calculate display during rendering (not in effect)
+  return formatCountdown(targetTime);
+}
+
+/**
+ * Hook that provides adaptive countdown display
+ * - > 1 day: "2d 14h" (updates every minute)
+ * - < 1 day: "05:30:45" (updates every second)
+ * @param targetTimestampSeconds Future timestamp in SECONDS (Unix timestamp)
+ * @returns Formatted string that updates appropriately
+ */
+export function useCountdownAdaptive(targetTimestampSeconds: number): string {
+  // Use reducer to trigger re-renders; display value is calculated during render
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalMsRef = useRef<number | null>(null);
+  const pendingIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const targetMs = targetTimestampSeconds * 1000;
+
+    // Determine if we need per-second updates
+    const getInterval = () => {
+      const diff = targetMs - Date.now();
+      if (diff <= 0) return null; // Stop updating
+      if (diff < 24 * 60 * 60 * 1000) return 1000; // < 1 day: every second
+      return 60 * 1000; // > 1 day: every minute
+    };
+
+    const createInterval = (intervalMs: number) => {
+      intervalMsRef.current = intervalMs;
+      pendingIntervalRef.current = null;
+      intervalRef.current = setInterval(() => {
+        forceUpdate();
+        // Check if we need to switch to per-second updates
+        const newInterval = getInterval();
+        if (newInterval === null) {
+          // Target reached, stop updating
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        } else if (newInterval !== intervalMsRef.current) {
+          // Signal that interval needs to change, then clear current
+          pendingIntervalRef.current = newInterval;
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      }, intervalMs);
+    };
+
+    // Check if there's a pending interval change from a previous callback
+    const checkPendingInterval = () => {
+      if (pendingIntervalRef.current !== null && intervalRef.current === null) {
+        createInterval(pendingIntervalRef.current);
+      }
+    };
+
+    const intervalMs = getInterval();
+    if (intervalMs === null) return;
+
+    createInterval(intervalMs);
+
+    // Use a monitoring interval to handle pending interval changes
+    const monitorInterval = setInterval(checkPendingInterval, 50);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearInterval(monitorInterval);
+      pendingIntervalRef.current = null;
+    };
+  }, [targetTimestampSeconds]);
+
+  // ✅ Calculate display during rendering (not in effect)
+  return formatCountdownAdaptive(targetTimestampSeconds);
+}
+
+/**
+ * Hook that provides verbose countdown text with labels (days/hours/minutes/seconds).
+ * @param targetTimestampSeconds Future timestamp in SECONDS (Unix timestamp)
+ * @returns Formatted string that updates every second
+ */
+export function useCountdownVerbose(targetTimestampSeconds: number): string {
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const targetMs = targetTimestampSeconds * 1000;
+
+    const scheduleNextTick = () => {
+      const now = Date.now();
+      const msUntilNextSecond = 1000 - (now % 1000);
+      timerRef.current = setTimeout(tick, msUntilNextSecond);
+    };
+
+    const tick = () => {
+      forceUpdate();
+
+      if (Date.now() >= targetMs) {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = null;
+        return;
+      }
+
+      scheduleNextTick();
+    };
+
+    if (Date.now() < targetMs) {
+      scheduleNextTick();
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+  }, [targetTimestampSeconds]);
+
+  return formatCountdownVerbose(targetTimestampSeconds);
 }

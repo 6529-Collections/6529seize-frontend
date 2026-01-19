@@ -1,0 +1,47 @@
+"use client";
+
+import { useState } from "react";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { WaveDropVoteSummary } from "@/components/waves/drop/WaveDropVoteSummary";
+import { VotingModal, MobileVotingModal } from "@/components/voting";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+
+interface CarouselActiveItemVoteProps {
+  readonly drop: ExtendedDrop;
+}
+
+export default function CarouselActiveItemVote({
+  drop,
+}: CarouselActiveItemVoteProps) {
+  const [isVotingOpen, setIsVotingOpen] = useState(false);
+  const isMobileScreen = useIsMobileScreen();
+  const { canShowVote, isVotingEnded, isWinner } =
+    useDropInteractionRules(drop);
+
+  return (
+    <div className="tw-mt-4 tw-flex tw-items-center tw-justify-center tw-px-4 md:tw-px-6 lg:tw-px-8">
+      <WaveDropVoteSummary
+        drop={drop}
+        isWinner={isWinner}
+        isVotingEnded={isVotingEnded}
+        canShowVote={canShowVote}
+        onVoteClick={() => setIsVotingOpen(true)}
+      />
+
+      {isMobileScreen ? (
+        <MobileVotingModal
+          drop={drop}
+          isOpen={isVotingOpen}
+          onClose={() => setIsVotingOpen(false)}
+        />
+      ) : (
+        <VotingModal
+          drop={drop}
+          isOpen={isVotingOpen}
+          onClose={() => setIsVotingOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
