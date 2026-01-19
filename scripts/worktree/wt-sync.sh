@@ -24,6 +24,7 @@ MAIN_REPO_NAME="$(basename "$MAIN_REPO")"
 MAIN_REPO_REALPATH="$(cd "$MAIN_REPO" && pwd -P)"
 SYNC_CONF="$SCRIPT_DIR/sync.conf"
 COPY_CONF="$SCRIPT_DIR/copy.conf"
+COMMON_SH="$SCRIPT_DIR/wt-common.sh"
 
 # --- Flags ---
 DRY_RUN=0
@@ -42,6 +43,13 @@ log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
 log_warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 log_verbose() { [[ $VERBOSE -eq 1 ]] && echo -e "       $1" || true; }
+
+if [[ ! -f "$COMMON_SH" ]]; then
+    log_error "Missing helper script: $COMMON_SH"
+    exit 1
+fi
+# shellcheck source=./wt-common.sh
+source "$COMMON_SH"
 
 show_help() {
     cat << EOF
@@ -311,6 +319,23 @@ sync_worktree() {
         fi
     else
         log_verbose "  No copy.conf found"
+    fi
+
+    # VS Code settings
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[DRY RUN] Would ensure VS Code settings"
+    else
+        local color
+        color=$(setup_vscode_settings "$worktree_path")
+        log_success "VS Code settings ensured (title bar color: $color)"
+    fi
+
+    # Git hooks
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[DRY RUN] Would install pre-commit hook"
+    else
+        setup_precommit_hook "$worktree_path"
+        log_success "Pre-commit hook installed"
     fi
 }
 
