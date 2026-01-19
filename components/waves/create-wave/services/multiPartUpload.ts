@@ -23,16 +23,21 @@ export async function multiPartUpload({
 
   const contentType = getContentType(file);
 
+  if (file.size === 0) {
+    if (onProgress) {
+      onProgress(100);
+    }
+    return {
+      url: "",
+      mime_type: contentType,
+    };
+  }
+
   let overallUploaded = 0;
 
   const handleProgress = (bytesUploaded: number) => {
     overallUploaded = Math.max(overallUploaded + bytesUploaded, 0);
     if (onProgress) {
-      if (file.size === 0) {
-        onProgress(100);
-        return;
-      }
-
       const percent = Math.floor((overallUploaded / file.size) * 100);
       onProgress(Math.min(Math.max(percent, 0), 100));
     }
