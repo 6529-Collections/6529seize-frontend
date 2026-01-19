@@ -13,23 +13,28 @@ interface NowMintingArtworkProps {
 export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
   const { hasTouchScreen } = useDeviceInfo();
   const isHtml = useMemo(() => getMediaType(nft, true) === "html", [nft]);
+  const [hasMounted, setHasMounted] = useState(false);
   const shouldGate = hasTouchScreen && isHtml;
-  const [interactiveEnabled, setInteractiveEnabled] = useState(!shouldGate);
+  const [interactiveEnabled, setInteractiveEnabled] = useState(false);
 
   useEffect(() => {
-    if (shouldGate) {
-      setInteractiveEnabled(false);
-      return;
-    }
-    setInteractiveEnabled(true);
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    setInteractiveEnabled(false);
   }, [nft.id, shouldGate]);
+
+  const shouldAnimate = !isHtml
+    ? true
+    : hasMounted && (!shouldGate || interactiveEnabled);
 
   return (
     <div className="tw-flex tw-w-full tw-items-start tw-justify-center">
       <div className="tw-relative tw-w-full">
         <NFTImage
           nft={nft}
-          animation={!shouldGate || interactiveEnabled}
+          animation={shouldAnimate}
           height={650}
           showBalance={true}
         />
