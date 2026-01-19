@@ -20,7 +20,7 @@ export const WaveDropMetaRow = ({
   mimeType,
   children,
 }: WaveDropMetaRowProps) => (
-  <div className="tw-flex tw-items-center tw-gap-3 tw-flex-wrap">
+  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
     <SingleWaveDropInfoAuthorSection drop={drop} />
     <span className="tw-text-white/40">{"\u00b7"}</span>
     <WaveDropTime timestamp={drop.created_at} size="sm" />
@@ -39,7 +39,12 @@ export const WaveDropMetaRow = ({
     {!isWinner && drop?.drop_type === ApiDropType.Participatory && (
       <>
         <span className="tw-text-white/40">{"\u00b7"}</span>
-        <SingleWaveDropPosition rank={drop.rank} drop={drop} variant="simple" size="md" />
+        <SingleWaveDropPosition
+          rank={drop.rank}
+          drop={drop}
+          variant="simple"
+          size="md"
+        />
       </>
     )}
     {children}
