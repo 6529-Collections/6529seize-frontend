@@ -1,14 +1,19 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type QueryObserverResult,
+} from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
-export const MAX_PINNED_WAVES = 10;
+export const MAX_PINNED_WAVES = 20;
 
 // Cache time constants for React Query
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
@@ -29,7 +34,7 @@ interface UsePinnedWavesServerReturn {
   error: Error | null;
   pinWave: (waveId: string) => Promise<void>;
   unpinWave: (waveId: string) => Promise<void>;
-  refetch: () => void;
+  refetch: () => Promise<QueryObserverResult<ApiWave[], Error>>;
   isOperationInProgress: (waveId: string) => boolean;
 }
 
@@ -44,7 +49,10 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
 
   // Define the specific query key as a constant
-  const PINNED_WAVES_QUERY_KEY = [QueryKey.WAVES_OVERVIEW, { pinned: ApiWavesPinFilter.Pinned }];
+  const PINNED_WAVES_QUERY_KEY = [
+    QueryKey.WAVES_OVERVIEW,
+    { pinned: ApiWavesPinFilter.Pinned },
+  ];
 
   // Fetch pinned waves
   const {
@@ -52,7 +60,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     isLoading,
     isError,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: PINNED_WAVES_QUERY_KEY,
     queryFn: pinnedWavesApi.fetchPinnedWaves,
@@ -68,16 +76,16 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
       // Clear pinned waves data immediately when user logs out
       queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, []);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, PINNED_WAVES_QUERY_KEY, queryClient]);
 
   // Derive pinned IDs from pinned waves
-  const pinnedIds = pinnedWaves.map(wave => wave.id);
+  const pinnedIds = pinnedWaves.map((wave) => wave.id);
 
   // Shared invalidation logic for both pin and unpin operations
   const invalidateWavesQueries = useCallback(() => {
     // Invalidate specific queries only
     queryClient.invalidateQueries({
-      queryKey: PINNED_WAVES_QUERY_KEY
+      queryKey: PINNED_WAVES_QUERY_KEY,
     });
     // Also invalidate main waves to update isPinned status
     queryClient.invalidateQueries({
@@ -86,7 +94,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
         // Only invalidate main waves queries, not pinned waves
         const [key, params] = query.queryKey;
         return key === QueryKey.WAVES_OVERVIEW && !(params as any)?.pinned;
-      }
+      },
     });
   }, [queryClient, PINNED_WAVES_QUERY_KEY]);
 
@@ -96,49 +104,54 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     onMutate: async (waveId: string) => {
       // Cancel only the specific pinned waves query
       await queryClient.cancelQueries({
-        queryKey: PINNED_WAVES_QUERY_KEY
+        queryKey: PINNED_WAVES_QUERY_KEY,
       });
 
-      const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(PINNED_WAVES_QUERY_KEY);
+      const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(
+        PINNED_WAVES_QUERY_KEY
+      );
 
       // Try to find the wave object in other queries for optimistic update
       let waveToPin: ApiWave | undefined;
 
       // Search through all waves overview queries to find the wave
-      queryClient.getQueriesData<ApiWave[] | InfiniteQueryData<ApiWave>>({
-        queryKey: [QueryKey.WAVES_OVERVIEW]
-      }).forEach(([_, data]) => {
-        if (data && !waveToPin) {
-          // Type guard for array data
-          if (Array.isArray(data)) {
-            const waves = data as ApiWave[];
-            waveToPin = waves.find((wave): wave is ApiWave =>
-              wave && typeof wave.id === 'string' && wave.id === waveId
-            );
-          } else if (typeof data === 'object' && 'pages' in data) {
-            // Type guard for infinite query structure
-            const infiniteData = data as InfiniteQueryData<ApiWave>;
-            if (Array.isArray(infiniteData.pages)) {
-              for (const page of infiniteData.pages) {
-                if (Array.isArray(page)) {
-                  waveToPin = page.find((wave): wave is ApiWave =>
-                    wave && typeof wave.id === 'string' && wave.id === waveId
-                  );
-                  if (waveToPin) break;
-                }
+      queryClient
+        .getQueriesData<ApiWave[] | InfiniteQueryData<ApiWave>>({
+          queryKey: [QueryKey.WAVES_OVERVIEW],
+        })
+        .forEach(([_, data]) => {
+          if (data && !waveToPin) {
+            // Type guard for array data
+            if (Array.isArray(data)) {
+              const waves = data;
+              waveToPin = waves.find(
+                (wave): wave is ApiWave => wave.id === waveId
+              );
+            } else if (typeof data === "object" && "pages" in data) {
+              // Type guard for infinite query structure
+
+              for (const page of data.pages) {
+                waveToPin = page.find(
+                  (wave): wave is ApiWave => wave.id === waveId
+                );
+                if (waveToPin) break;
               }
             }
           }
-        }
-      });
+        });
 
       // If we found the wave, optimistically add it to pinned waves
       if (waveToPin && previousPinnedWaves) {
         // Check if wave is already pinned to avoid duplicates
-        const isAlreadyPinned = previousPinnedWaves.some(wave => wave.id === waveId);
+        const isAlreadyPinned = previousPinnedWaves.some(
+          (wave) => wave.id === waveId
+        );
         if (!isAlreadyPinned) {
           const optimisticWave: ApiWave = { ...waveToPin, pinned: true };
-          queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, [optimisticWave, ...previousPinnedWaves]);
+          queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, [
+            optimisticWave,
+            ...previousPinnedWaves,
+          ]);
         }
       }
 
@@ -147,9 +160,12 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     onError: (err, _, context) => {
       // Revert on error if we had previous data
       if (context?.previousPinnedWaves) {
-        queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, context.previousPinnedWaves);
+        queryClient.setQueryData(
+          PINNED_WAVES_QUERY_KEY,
+          context.previousPinnedWaves
+        );
       }
-      console.error('Error pinning wave:', err);
+      console.error("Error pinning wave:", err);
     },
     onSuccess: invalidateWavesQueries,
   });
@@ -160,16 +176,18 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     onMutate: async (waveId: string) => {
       // Cancel only the specific pinned waves query
       await queryClient.cancelQueries({
-        queryKey: PINNED_WAVES_QUERY_KEY
+        queryKey: PINNED_WAVES_QUERY_KEY,
       });
 
-      const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(PINNED_WAVES_QUERY_KEY);
+      const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(
+        PINNED_WAVES_QUERY_KEY
+      );
 
       // Optimistic update - remove from pinned waves immediately
       if (previousPinnedWaves) {
         queryClient.setQueryData(
           PINNED_WAVES_QUERY_KEY,
-          previousPinnedWaves.filter(wave => wave.id !== waveId)
+          previousPinnedWaves.filter((wave) => wave.id !== waveId)
         );
       }
 
@@ -178,68 +196,78 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     onError: (err, _, context) => {
       // Revert optimistic update
       if (context?.previousPinnedWaves) {
-        queryClient.setQueryData(PINNED_WAVES_QUERY_KEY, context.previousPinnedWaves);
+        queryClient.setQueryData(
+          PINNED_WAVES_QUERY_KEY,
+          context.previousPinnedWaves
+        );
       }
-      console.error('Error unpinning wave:', err);
+      console.error("Error unpinning wave:", err);
     },
     onSuccess: invalidateWavesQueries,
   });
 
-  const pinWave = useCallback(async (waveId: string) => {
-    // Prevent concurrent operations on same wave
-    if (ongoingOperations.current.has(waveId)) {
-      throw new Error('Operation already in progress for this wave');
-    }
-
-    // Check limit including ongoing pin operations
-    let ongoingPinCount = 0;
-    ongoingOperations.current.forEach(id => {
-      if (!pinnedIds.includes(id)) {
-        ongoingPinCount++;
+  const pinWave = useCallback(
+    async (waveId: string) => {
+      // Prevent concurrent operations on same wave
+      if (ongoingOperations.current.has(waveId)) {
+        throw new Error("Operation already in progress for this wave");
       }
-    });
-    const totalPinnedCount = pinnedIds.length + ongoingPinCount;
 
-    if (totalPinnedCount >= MAX_PINNED_WAVES) {
-      throw new Error(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
-    }
+      // Check limit including ongoing pin operations
+      let ongoingPinCount = 0;
+      ongoingOperations.current.forEach((id) => {
+        if (!pinnedIds.includes(id)) {
+          ongoingPinCount++;
+        }
+      });
+      const totalPinnedCount = pinnedIds.length + ongoingPinCount;
 
-    // Mark operation as ongoing (synchronous)
-    ongoingOperations.current.add(waveId);
+      if (totalPinnedCount >= MAX_PINNED_WAVES) {
+        throw new Error(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
+      }
 
-    try {
-      await pinMutation.mutateAsync(waveId);
-    } finally {
-      // Always clean up the operation tracking
-      ongoingOperations.current.delete(waveId);
-    }
-  }, [pinnedIds, pinMutation]);
+      // Mark operation as ongoing (synchronous)
+      ongoingOperations.current.add(waveId);
 
-  const unpinWave = useCallback(async (waveId: string) => {
-    // Prevent concurrent operations on same wave
-    if (ongoingOperations.current.has(waveId)) {
-      throw new Error('Operation already in progress for this wave');
-    }
+      try {
+        await pinMutation.mutateAsync(waveId);
+      } finally {
+        // Always clean up the operation tracking
+        ongoingOperations.current.delete(waveId);
+      }
+    },
+    [pinnedIds, pinMutation]
+  );
 
-    // Mark operation as ongoing (synchronous)
-    ongoingOperations.current.add(waveId);
+  const unpinWave = useCallback(
+    async (waveId: string) => {
+      // Prevent concurrent operations on same wave
+      if (ongoingOperations.current.has(waveId)) {
+        throw new Error("Operation already in progress for this wave");
+      }
 
-    try {
-      await unpinMutation.mutateAsync(waveId);
-    } finally {
-      ongoingOperations.current.delete(waveId);
-    }
-  }, [unpinMutation]);
+      // Mark operation as ongoing (synchronous)
+      ongoingOperations.current.add(waveId);
+
+      try {
+        await unpinMutation.mutateAsync(waveId);
+      } finally {
+        ongoingOperations.current.delete(waveId);
+      }
+    },
+    [unpinMutation]
+  );
 
   return {
     pinnedWaves,
     pinnedIds,
     isLoading,
-    isError: isError || pinMutation.isError || unpinMutation.isError,
-    error: error || pinMutation.error || unpinMutation.error,
+    isError: isError,
+    error: error ?? pinMutation.error ?? unpinMutation.error,
     pinWave,
     unpinWave,
     refetch,
-    isOperationInProgress: (waveId: string) => ongoingOperations.current.has(waveId),
+    isOperationInProgress: (waveId: string) =>
+      ongoingOperations.current.has(waveId),
   };
 }
