@@ -47,8 +47,8 @@ export default function WaveHeaderPictureEditModal({
         message = error.message;
       } else if (typeof error === "string") {
         message = error;
-      } else if (typeof (error as any)?.message === "string") {
-        message = (error as any).message;
+      } else if (typeof error.message === "string") {
+        message = error.message;
       } else {
         try {
           message = JSON.stringify(error);
@@ -149,7 +149,7 @@ export default function WaveHeaderPictureEditModal({
                     <>
                       <span className="tw-sr-only">Uploading…</span>
                       <svg
-                        role="status"
+                        role="output"
                         aria-label="Uploading"
                         className="tw-absolute tw-inline tw-h-5 tw-w-5 tw-animate-spin tw-text-primary-400"
                         viewBox="0 0 100 101"
