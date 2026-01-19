@@ -58,9 +58,8 @@ export default function GroupCardConfigs({
     if (!identity) {
       return null;
     }
-    return `${
-      direction ? directionLabels[direction] : ""
-    } identity: ${identity}`;
+    const directionPrefix = direction ? `${directionLabels[direction]} ` : "";
+    return `${directionPrefix}identity: ${identity}`;
   };
 
   const getTdhConfig = (
