@@ -27,7 +27,7 @@ export const WaveDropMetaRow = ({
     {mimeType && (
       <>
         <span className="tw-text-white/40">{"\u00b7"}</span>
-        <MediaTypeBadge mimeType={mimeType} dropId={drop.id} size="md" />
+        <MediaTypeBadge mimeType={mimeType} dropId={drop.id} />
       </>
     )}
     {isWinner && (
@@ -39,12 +39,7 @@ export const WaveDropMetaRow = ({
     {!isWinner && drop?.drop_type === ApiDropType.Participatory && (
       <>
         <span className="tw-text-white/40">{"\u00b7"}</span>
-        <SingleWaveDropPosition
-          rank={drop.rank}
-          drop={drop}
-          variant="simple"
-          size="md"
-        />
+        <SingleWaveDropPosition rank={drop.rank} drop={drop} variant="simple" />
       </>
     )}
     {children}

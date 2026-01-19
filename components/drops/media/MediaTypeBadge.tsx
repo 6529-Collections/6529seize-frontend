@@ -53,7 +53,7 @@ export default function MediaTypeBadge({
         data-tooltip-content={mediaInfo.label}
         aria-label={mediaInfo.label}
         {...triggerProps}
-        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid ${SIZE_CLASSES[size]}`}
+        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-grayscale tw-transition-all tw-duration-300 desktop-hover:hover:tw-grayscale-0 ${SIZE_CLASSES[size]}`}
         style={{
           color: mediaInfo.styles.text,
           backgroundColor: mediaInfo.styles.bg,
