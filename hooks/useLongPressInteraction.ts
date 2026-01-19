@@ -7,6 +7,12 @@ interface UseLongPressInteractionOptions {
   moveThreshold?: number | undefined;
   onInteractionStart?: (() => void) | undefined;
   hasTouchScreen?: boolean | undefined;
+  /**
+   * Whether to call preventDefault on touch events. Defaults to true to
+   * suppress selection/scroll, but can be disabled when downstream logic
+   * relies on the synthetic click event (e.g. tap-to-toggle buttons).
+   */
+  preventDefault?: boolean | undefined;
 }
 
 /**
@@ -25,6 +31,7 @@ export default function useLongPressInteraction(
     moveThreshold = 10,
     onInteractionStart,
     hasTouchScreen = false, // default to false, should be provided by component
+    preventDefault = true,
   } = options;
 
   const [isActive, setIsActive] = useState(false);
@@ -45,7 +52,7 @@ export default function useLongPressInteraction(
       if (!hasTouchScreen) return;
 
       // Prevent text selection highlighting during long press
-      if (e.cancelable) {
+      if (preventDefault && e.cancelable) {
         e.preventDefault();
       }
 
@@ -56,7 +63,7 @@ export default function useLongPressInteraction(
         startInteraction();
       }, longPressDuration);
     },
-    [hasTouchScreen, longPressDuration, startInteraction]
+    [hasTouchScreen, longPressDuration, startInteraction, preventDefault]
   );
 
   const handleTouchMove = useCallback(
@@ -64,7 +71,7 @@ export default function useLongPressInteraction(
       if (!longPressTimeout.current) return;
 
       // Prevent scrolling/selection during long press detection
-      if (e.cancelable) {
+      if (preventDefault && e.cancelable) {
         e.preventDefault();
       }
 
@@ -75,13 +82,11 @@ export default function useLongPressInteraction(
       const deltaY = Math.abs(touchY! - touchStartY.current);
 
       if (deltaX > moveThreshold || deltaY > moveThreshold) {
-        if (longPressTimeout.current) {
-          clearTimeout(longPressTimeout.current);
-          longPressTimeout.current = null;
-        }
+        clearTimeout(longPressTimeout.current);
+        longPressTimeout.current = null;
       }
     },
-    [moveThreshold]
+    [moveThreshold, preventDefault]
   );
 
   const handleTouchEnd = useCallback(() => {
