@@ -28,10 +28,21 @@ export function getUploadErrorMessage(error: unknown): string {
     if (status === 403) return BLOCKED_HINT;
     if (status === 413) return TOO_LARGE_HINT;
 
-    const serverMsg =
-      (typeof error.response?.data === "object" &&
-        (error.response?.data as any)?.error) ||
-      messageFromUnknown(error);
+    let serverMsg: string | null = null;
+    const dataError = (error.response?.data as any)?.error;
+    if (typeof dataError === "string") {
+      serverMsg = dataError;
+    } else if (dataError && typeof dataError === "object") {
+      try {
+        serverMsg = JSON.stringify(dataError);
+      } catch {
+        // ignore JSON stringify failures
+      }
+    }
+
+    if (!serverMsg) {
+      serverMsg = messageFromUnknown(error);
+    }
 
     return serverMsg ?? FALLBACK_HINT;
   }
