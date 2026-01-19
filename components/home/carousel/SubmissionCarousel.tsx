@@ -1,14 +1,17 @@
 "use client";
 
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import {
   forwardRef,
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -32,11 +35,14 @@ interface SubmissionCarouselProps {
   readonly onActiveDropChange?: (drop: ExtendedDrop | null) => void;
 }
 
-const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarouselProps>(
-  function SubmissionCarousel({ onActiveDropChange }, ref) {
+const SubmissionCarousel = forwardRef<
+  SubmissionCarouselHandle,
+  SubmissionCarouselProps
+>(function SubmissionCarousel({ onActiveDropChange }, ref) {
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const { hasTouchScreen } = useDeviceInfo();
   const waveId = seizeSettings.memes_wave_id;
+  const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
 
   const { drops, isFetching } = useWaveDropsLeaderboard({
     waveId: waveId ?? "",
@@ -46,10 +52,20 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
 
   const swiperRef = useRef<SwiperInstance | null>(null);
 
-  useImperativeHandle(ref, () => ({
-    pauseAutoplay: () => swiperRef.current?.autoplay.pause(),
-    resumeAutoplay: () => swiperRef.current?.autoplay.resume(),
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      pauseAutoplay: () => {
+        if (hasTouchScreen) return;
+        swiperRef.current?.autoplay?.stop?.();
+      },
+      resumeAutoplay: () => {
+        if (hasTouchScreen) return;
+        swiperRef.current?.autoplay?.start?.();
+      },
+    }),
+    [hasTouchScreen]
+  );
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -58,7 +74,6 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
   const inactiveScale = 0.68;
   const slideTransition =
     "transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1)";
-  const inactiveFilter = "grayscale(100%) blur(6px)";
   const slideWidth = "var(--carousel-card-width)";
   const carouselVars = {
     "--carousel-inactive-scale": `${inactiveScale}`,
@@ -66,6 +81,13 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
     "--carousel-arrow-offset":
       "calc((var(--carousel-card-width) / 2) + var(--carousel-gap) + (var(--carousel-card-width) * var(--carousel-inactive-scale) / 2))",
   } as CSSProperties;
+  const autoplayConfig = useMemo(
+    () =>
+      hasTouchScreen
+        ? false
+        : { delay: 4000, disableOnInteraction: true },
+    [hasTouchScreen]
+  );
 
   const shuffledDrops = useMemo(() => {
     const filtered = drops.filter(
@@ -87,6 +109,9 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
     () => shuffledDrops[activeIndex] ?? shuffledDrops[0] ?? null,
     [activeIndex, shuffledDrops]
   );
+  const mediaImageScale = isTabletOrSmaller
+    ? ImageScale.AUTOx450
+    : ImageScale.AUTOx600;
 
   const handleSlideChange = useCallback((swiper: SwiperInstance) => {
     setActiveIndex(swiper.activeIndex);
@@ -104,6 +129,12 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
       swiperRef.current?.slideTo(0, 0);
     }
   }, [activeIndex, shuffledDrops.length]);
+
+  useEffect(() => {
+    if (hasTouchScreen) {
+      swiperRef.current?.autoplay?.stop?.();
+    }
+  }, [hasTouchScreen]);
 
   const scroll = useCallback((direction: "left" | "right") => {
     const swiper = swiperRef.current;
@@ -150,26 +181,39 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
           )}
 
           <Swiper
-            className="submission-carousel-swiper tw-h-full tw-overflow-hidden tw-overscroll-contain tw-touch-pan-y"
+            className="submission-carousel-swiper tw-h-full tw-overflow-hidden tw-touch-pan-y"
             modules={[Autoplay]}
             slidesPerView="auto"
             centeredSlides
             spaceBetween={cardGap}
             speed={450}
             initialSlide={0}
-            autoplay={hasTouchScreen ? false : { delay: 4000, disableOnInteraction: false }}
+            autoplay={autoplayConfig}
             touchEventsTarget="container"
             touchStartPreventDefault={false}
+            touchMoveStopPropagation={false}
+            touchReleaseOnEdges={true}
             preventInteractionOnTransition={true}
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
               handleSlideChange(swiper);
+              if (hasTouchScreen) {
+                swiper.autoplay?.stop?.();
+              }
             }}
             onSlideChange={handleSlideChange}
           >
           {shuffledDrops.map((drop, index) => {
             const isActive = index === activeIndex;
             const distance = Math.abs(index - activeIndex);
+            let renderMode: "full" | "preview" | "placeholder" = "placeholder";
+            if (distance === 0) {
+              renderMode = "full";
+            } else if (distance === 1) {
+              renderMode = "preview";
+            }
+            const previewFilter =
+              renderMode === "preview" ? "grayscale(100%) blur(3px)" : "none";
 
             return (
               <SwiperSlide
@@ -190,7 +234,7 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
                   className="tw-h-auto tw-w-full tw-aspect-[4/5] tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-aspect-auto md:tw-h-full"
                   style={{
                     opacity: isActive ? 1 : 0.22,
-                    filter: isActive ? "none" : inactiveFilter,
+                    filter: isActive ? "none" : previewFilter,
                     zIndex: isActive ? 10 : 10 - distance,
                     transition: slideTransition,
                     transform: isActive
@@ -200,7 +244,12 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
                     willChange: distance <= 1 ? "transform, opacity" : "auto",
                   }}
                 >
-                  <SubmissionArtworkCard drop={drop} isActive={isActive} />
+                  <SubmissionArtworkCard
+                    drop={drop}
+                    isActive={isActive}
+                    imageScale={mediaImageScale}
+                    renderMode={renderMode}
+                  />
                 </div>
               </SwiperSlide>
             );
@@ -223,4 +272,4 @@ const SubmissionCarousel = forwardRef<SubmissionCarouselHandle, SubmissionCarous
   );
 });
 
-export default SubmissionCarousel;
+export default memo(SubmissionCarousel);

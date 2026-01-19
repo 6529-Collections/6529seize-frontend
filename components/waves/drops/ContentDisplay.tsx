@@ -19,7 +19,7 @@ export default function ContentDisplay({
   textClassName,
 }: ContentDisplayProps) {
   const containerClasses = [
-    "tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5 tw-line-clamp-1",
+    "tw-text-iron-300 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5 tw-line-clamp-1",
     onClick
       ? "tw-cursor-pointer hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
       : "",

@@ -11,6 +11,7 @@ import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { memo, useCallback, useContext, useMemo } from "react";
 
@@ -70,14 +71,12 @@ const BoostedDropCard = memo(
         tabIndex={0}
       >
         <div className="tw-flex tw-items-center tw-gap-x-3">
-          {/* Rank badge */}
           <div className="tw-flex tw-size-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-amber-600/20 tw-ring-1 tw-ring-amber-500/40">
             <span className="tw-text-xs tw-font-bold tw-text-amber-400">
               {rank}
             </span>
           </div>
 
-          {/* Author avatar */}
           <div className="tw-relative tw-size-8 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900">
             {resolvedPfp ? (
               <Image
@@ -92,7 +91,6 @@ const BoostedDropCard = memo(
             )}
           </div>
 
-          {/* Content */}
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <UserCICAndLevel
@@ -109,7 +107,6 @@ const BoostedDropCard = memo(
             />
           </div>
 
-          {/* Boost count - clickable toggle */}
           <button
             onClick={handleBoostClick}
             disabled={!canBoost || isPending}
@@ -129,20 +126,7 @@ const BoostedDropCard = memo(
             </span>
           </button>
 
-          {/* Arrow indicator */}
-          <svg
-            className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-amber-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
+          <ChevronRightIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-amber-400" />
         </div>
       </div>
     );
