@@ -1,4 +1,4 @@
-import { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import {
   multipartUploadCore,
   getContentType,
@@ -23,13 +23,20 @@ export async function multiPartUpload({
 
   const contentType = getContentType(file);
 
+  if (file.size === 0) {
+    if (onProgress) {
+      onProgress(100);
+    }
+    throw new Error("Empty file uploads are not allowed");
+  }
+
   let overallUploaded = 0;
 
   const handleProgress = (bytesUploaded: number) => {
-    overallUploaded += bytesUploaded;
+    overallUploaded = Math.max(overallUploaded + bytesUploaded, 0);
     if (onProgress) {
       const percent = Math.floor((overallUploaded / file.size) * 100);
-      onProgress(percent);
+      onProgress(Math.min(Math.max(percent, 0), 100));
     }
   };
 

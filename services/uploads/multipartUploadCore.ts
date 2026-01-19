@@ -2,12 +2,12 @@ import axios from "axios";
 import pLimit from "p-limit";
 import pRetry from "p-retry";
 import { commonApiPost } from "@/services/api/common-api";
-import { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
-import { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
-import { ApiUploadPartOfMultipartUploadRequest } from "@/generated/models/ApiUploadPartOfMultipartUploadRequest";
-import { ApiUploadPartOfMultipartUploadResponse } from "@/generated/models/ApiUploadPartOfMultipartUploadResponse";
-import { ApiCompleteMultipartUploadRequest } from "@/generated/models/ApiCompleteMultipartUploadRequest";
-import { ApiCompleteMultipartUploadResponse } from "@/generated/models/ApiCompleteMultipartUploadResponse";
+import type { ApiCreateMediaUploadUrlRequest } from "@/generated/models/ApiCreateMediaUploadUrlRequest";
+import type { ApiStartMultipartMediaUploadResponse } from "@/generated/models/ApiStartMultipartMediaUploadResponse";
+import type { ApiUploadPartOfMultipartUploadRequest } from "@/generated/models/ApiUploadPartOfMultipartUploadRequest";
+import type { ApiUploadPartOfMultipartUploadResponse } from "@/generated/models/ApiUploadPartOfMultipartUploadResponse";
+import type { ApiCompleteMultipartUploadRequest } from "@/generated/models/ApiCompleteMultipartUploadRequest";
+import type { ApiCompleteMultipartUploadResponse } from "@/generated/models/ApiCompleteMultipartUploadResponse";
 
 const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
@@ -87,6 +87,7 @@ export async function multipartUploadCore({
   const limit = pLimit(CONCURRENCY);
 
   const partPromises: Array<Promise<{ eTag: string; partNumber: number }>> = [];
+  const partProgress = new Map<number, number>();
 
   for (let partNumber = 1; partNumber <= totalParts; partNumber++) {
     const startByte = (partNumber - 1) * PART_SIZE;
@@ -94,7 +95,14 @@ export async function multipartUploadCore({
     const blobPart = file.slice(startByte, endByte);
 
     const uploadChunk = async () => {
+      const previousProgress = partProgress.get(partNumber) ?? 0;
+      if (previousProgress > 0 && onProgress) {
+        // Remove any bytes counted from a failed prior attempt for this part
+        onProgress(-previousProgress);
+      }
+
       let lastChunkLoaded = 0;
+      partProgress.set(partNumber, 0);
 
       const partResp = await commonApiPost<
         ApiUploadPartOfMultipartUploadRequest,
@@ -118,9 +126,10 @@ export async function multipartUploadCore({
           "Content-Type": contentType,
         },
         onUploadProgress: (event) => {
-          if (event.loaded && onProgress) {
-            const chunkDelta = event.loaded - lastChunkLoaded;
+          if (event.loaded !== undefined && onProgress) {
+            const chunkDelta = Math.max(event.loaded - lastChunkLoaded, 0);
             lastChunkLoaded = event.loaded;
+            partProgress.set(partNumber, event.loaded);
             onProgress(chunkDelta);
           }
         },
@@ -169,4 +178,3 @@ export async function multipartUploadCore({
 
   return media_url;
 }
-
