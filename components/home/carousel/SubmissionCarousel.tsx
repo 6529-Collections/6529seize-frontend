@@ -52,10 +52,20 @@ const SubmissionCarousel = forwardRef<
 
   const swiperRef = useRef<SwiperInstance | null>(null);
 
-  useImperativeHandle(ref, () => ({
-    pauseAutoplay: () => swiperRef.current?.autoplay?.stop?.(),
-    resumeAutoplay: () => swiperRef.current?.autoplay?.start?.(),
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      pauseAutoplay: () => {
+        if (hasTouchScreen) return;
+        swiperRef.current?.autoplay?.stop?.();
+      },
+      resumeAutoplay: () => {
+        if (hasTouchScreen) return;
+        swiperRef.current?.autoplay?.start?.();
+      },
+    }),
+    [hasTouchScreen]
+  );
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -120,6 +130,12 @@ const SubmissionCarousel = forwardRef<
     }
   }, [activeIndex, shuffledDrops.length]);
 
+  useEffect(() => {
+    if (hasTouchScreen) {
+      swiperRef.current?.autoplay?.stop?.();
+    }
+  }, [hasTouchScreen]);
+
   const scroll = useCallback((direction: "left" | "right") => {
     const swiper = swiperRef.current;
     if (!swiper) return;
@@ -181,14 +197,21 @@ const SubmissionCarousel = forwardRef<
             onSwiper={(swiper) => {
               swiperRef.current = swiper;
               handleSlideChange(swiper);
+              if (hasTouchScreen) {
+                swiper.autoplay?.stop?.();
+              }
             }}
             onSlideChange={handleSlideChange}
           >
           {shuffledDrops.map((drop, index) => {
             const isActive = index === activeIndex;
             const distance = Math.abs(index - activeIndex);
-            const renderMode =
-              distance === 0 ? "full" : distance === 1 ? "preview" : "placeholder";
+            let renderMode: "full" | "preview" | "placeholder" = "placeholder";
+            if (distance === 0) {
+              renderMode = "full";
+            } else if (distance === 1) {
+              renderMode = "preview";
+            }
             const previewFilter =
               renderMode === "preview" ? "grayscale(100%) blur(3px)" : "none";
 

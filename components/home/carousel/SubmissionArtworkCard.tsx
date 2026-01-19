@@ -11,7 +11,7 @@ import { useMemo } from "react";
 interface SubmissionArtworkCardProps {
   readonly drop: ExtendedDrop;
   readonly isActive?: boolean;
-  readonly imageScale?: ImageScale | undefined;
+  readonly imageScale?: ImageScale;
   readonly renderMode?: "full" | "preview" | "placeholder";
 }
 
