@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-const MAX_PINNED_WAVES = 10;
+const MAX_PINNED_WAVES = 20;
 const STORAGE_KEY = "pinnedWave";
 
 export function usePinnedWaves() {
