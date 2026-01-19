@@ -40,11 +40,7 @@ export default function CarouselActiveItemDetails({
   return (
     <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center tw-px-4 tw-py-4 md:tw-px-6 lg:tw-px-8">
       <div className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2">
-        <MediaTypeBadge
-          mimeType={media?.mime_type}
-          dropId={drop.id}
-          size="md"
-        />
+        <MediaTypeBadge mimeType={media?.mime_type} dropId={drop.id} />
         <Link
           prefetch={false}
           href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
