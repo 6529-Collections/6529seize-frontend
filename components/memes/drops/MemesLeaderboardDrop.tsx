@@ -1,5 +1,6 @@
 "use client";
 
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
@@ -98,7 +99,14 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               {/* Title and Description */}
               <div className="tw-px-4 tw-pb-4 tw-pt-4">
                 <div className="tw-space-y-1">
-                  <MemesLeaderboardDropHeader title={title} />
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <MediaTypeBadge
+                      mimeType={artworkMedia?.mime_type}
+                      dropId={drop.id}
+                      size="sm"
+                    />
+                    <MemesLeaderboardDropHeader title={title} />
+                  </div>
                   <MemesLeaderboardDropDescription description={description} />
                 </div>
               </div>
