@@ -1,5 +1,6 @@
 "use client";
 
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import {
   ExtendedDrop,
   getDropPreviewImageUrl,
@@ -72,6 +73,13 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         )}
       </div>
       <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-2">
+        {haveMedia && (
+          <MediaTypeBadge
+            mimeType={drop.parts[0]?.media[0]?.mime_type}
+            dropId={drop.id}
+            size="sm"
+          />
+        )}
         {isStorm && (
           <>
             <svg

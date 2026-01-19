@@ -23,7 +23,7 @@ import useAccessibility from "./file-upload/hooks/useAccessibility";
 
 import type { MemesArtSubmissionFileProps } from "./file-upload/reducers/types";
 import { isBrowserSupported } from "./file-upload/utils/browserDetection";
-import { FILE_INPUT_ACCEPT } from "./file-upload/utils/constants";
+import { SUBMISSION_FILE_INPUT_ACCEPT } from "@/constants/submission-media.constants";
 import {
   ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES,
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
@@ -303,7 +303,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           <input
             ref={fileInputRef}
             type="file"
-            accept={FILE_INPUT_ACCEPT}
+            accept={SUBMISSION_FILE_INPUT_ACCEPT}
             className="tw-hidden"
             onChange={handleFileInputChange}
             data-testid="artwork-file-input"

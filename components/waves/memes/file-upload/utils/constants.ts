@@ -1,28 +1,8 @@
 /**
  * Constants for the file upload system
- *
- * Central location for all configuration values and constants.
  */
 
-import {
-  SUBMISSION_FILE_INPUT_ACCEPT,
-  SUBMISSION_UI_FORMAT_CATEGORIES,
-} from "@/constants/submission-media.constants";
-
-/**
- * Simplified format categories for UI display
- */
-export const UI_FORMAT_CATEGORIES = SUBMISSION_UI_FORMAT_CATEGORIES;
-
-/**
- * Maximum file size allowed (100MB)
- */
 export const FILE_SIZE_LIMIT: number = 200 * 1024 * 1024;
-
-/**
- * Accept string for file input element
- */
-export const FILE_INPUT_ACCEPT: string = SUBMISSION_FILE_INPUT_ACCEPT;
 
 /**
  * Maximum number of processing attempts before giving up
