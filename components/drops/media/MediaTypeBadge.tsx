@@ -1,7 +1,7 @@
 "use client";
 
 import { getMediaTypeInfo, type MediaCategory } from "@/helpers/file.helpers";
-import { useTooltipCloseOnScroll } from "@/hooks/useTooltipCloseOnScroll";
+import { useControlledTooltip } from "@/hooks/useControlledTooltip";
 import { Tooltip } from "react-tooltip";
 
 const FORMAT_ICONS: Record<MediaCategory, { viewBox: string; path: string }> = {
@@ -44,13 +44,15 @@ export default function MediaTypeBadge({
 }: MediaTypeBadgeProps) {
   const mediaInfo = getMediaTypeInfo(mimeType);
   const tooltipId = `format-badge-${dropId}`;
-  const { isOpen, setIsOpen } = useTooltipCloseOnScroll();
+  const { isOpen, setIsOpen, triggerProps } = useControlledTooltip();
 
   return (
     <div className="tw-flex tw-flex-shrink-0">
       <div
         data-tooltip-id={tooltipId}
         data-tooltip-content={mediaInfo.label}
+        aria-label={mediaInfo.label}
+        {...triggerProps}
         className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid ${SIZE_CLASSES[size]}`}
         style={{
           color: mediaInfo.styles.text,
@@ -70,7 +72,6 @@ export default function MediaTypeBadge({
         id={tooltipId}
         place="top"
         opacity={1}
-        positionStrategy="fixed"
         delayShow={300}
         isOpen={isOpen}
         setIsOpen={setIsOpen}
