@@ -7,7 +7,9 @@ export default function MemeWinnerDescription({
 }: MemeWinnerDescriptionProps) {
   return (
     <div>
-      <p className="tw-text-iron-400 tw-mb-0 tw-text-md">{description}</p>
+      <p className="tw-mb-0 tw-whitespace-pre-line tw-text-md tw-text-iron-400">
+        {description}
+      </p>
     </div>
   );
 }
