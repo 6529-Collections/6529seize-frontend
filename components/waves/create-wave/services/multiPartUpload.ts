@@ -27,10 +27,7 @@ export async function multiPartUpload({
     if (onProgress) {
       onProgress(100);
     }
-    return {
-      url: "",
-      mime_type: contentType,
-    };
+    throw new Error("Empty file uploads are not allowed");
   }
 
   let overallUploaded = 0;
