@@ -3,7 +3,7 @@ import { fireEvent, render } from "@testing-library/react";
 
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: jest.fn(() => "scaled-url"),
-  ImageScale: { AUTOx600: "AUTOx600" },
+  ImageScale: { AUTOx1080: "AUTOx1080" },
 }));
 
 jest.mock("@/hooks/useInView", () => ({
@@ -51,7 +51,7 @@ describe("MediaDisplayImage", () => {
     }
 
     expect(img).toBeInTheDocument();
-    expect(getScaledImageUri).toHaveBeenCalledWith("test.jpg", "AUTOx600");
+    expect(getScaledImageUri).toHaveBeenCalledWith("test.jpg", "AUTOx1080");
     expect(img.src).toContain("scaled-url");
 
     fireEvent.load(img);

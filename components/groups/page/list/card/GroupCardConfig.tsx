@@ -12,13 +12,22 @@ export default function GroupCardConfig({
     [GroupDescriptionType.NIC]: "NIC",
     [GroupDescriptionType.LEVEL]: "Level",
     [GroupDescriptionType.OWNS_NFTS]: "Owns NFTs",
-    [GroupDescriptionType.WALLETS]: "Identities",
+    [GroupDescriptionType.WALLETS]: "Manual list",
   };
 
   return (
-    <div className="tw-inline-flex tw-cursor-default tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-200 sm:tw-text-sm">
-      <span className="tw-text-iron-400">{config.label ?? configLabel[config.key]}:</span>
-      <span className="tw-font-semibold tw-text-iron-50 tw-whitespace-nowrap">{config.value}</span>
+    <div
+      className="tw-inline-flex tw-cursor-default tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-200 sm:tw-text-sm"
+      title={config.tooltip}
+    >
+      <span className="tw-text-iron-400">
+        {config.label ?? configLabel[config.key]}:
+      </span>
+      <span
+        className={`tw-whitespace-nowrap ${config.muted ? "tw-text-iron-500" : "tw-font-semibold tw-text-iron-50"}`}
+      >
+        {config.value}
+      </span>
     </div>
   );
 }

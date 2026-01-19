@@ -154,7 +154,7 @@ export const MemesSingleWaveDropInfoPanel = ({
                 )}
               </div>
 
-              <WaveDropMetaRow drop={drop} isWinner={isWinner}>
+              <WaveDropMetaRow drop={drop} isWinner={isWinner} mimeType={artworkMedia?.mime_type}>
                 {manualOutcomes.length > 0 && (
                   <>
                     <span className="tw-text-white/40">·</span>

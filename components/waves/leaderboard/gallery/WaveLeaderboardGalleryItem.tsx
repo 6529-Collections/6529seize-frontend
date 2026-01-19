@@ -1,29 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef, memo, useMemo } from "react";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { MobileVotingModal, VotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 import {
   ExtendedDrop,
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
-import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import { VotingModal, MobileVotingModal } from "@/components/voting";
-import VotingModalButton from "@/components/voting/VotingModalButton";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import {
-  WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
+  WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { ImageScale } from "@/helpers/image.helpers";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import Link from "next/link";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -43,7 +44,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const { canShowVote } = useDropInteractionRules(drop);
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
-      : ImageScale.AUTOx600;
+      : ImageScale.AUTOx1080;
 
     const previewImageUrl = useMemo(
       () => getDropPreviewImageUrl(drop.metadata),
@@ -141,12 +142,12 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     return (
       <div className={containerClass}>
         <button
-          className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-overflow-hidden tw-rounded-lg tw-w-full tw-text-left tw-bg-transparent`}
+          className={`${imageContainerClass} tw-m-0 tw-w-full tw-overflow-hidden tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
           onClick={handleImageClick}
           type="button"
         >
           <div
-            className={`tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center ${imageScaleClasses}`}
+            className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
           >
             <MediaDisplay
               media_mime_type={
@@ -159,14 +160,21 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             />
           </div>
         </button>
-        <div className="tw-p-3 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-bg-iron-950/50 tw-rounded-b-lg">
-          <div className="tw-flex tw-justify-between tw-items-start tw-mb-3">
-            <div className="tw-min-w-0 tw-flex-1 tw-mr-2">
-              {drop.title && (
-                <h3 className="tw-mb-0 tw-text-sm tw-font-bold tw-text-iron-200 tw-truncate tw-leading-tight">
-                  {drop.title}
-                </h3>
-              )}
+        <div className="tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
+          <div className="tw-mb-3 tw-flex tw-items-start tw-justify-between">
+            <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
+              <div className="tw-flex tw-items-center tw-gap-1.5">
+                <MediaTypeBadge
+                  mimeType={drop.parts[0]?.media[0]?.mime_type}
+                  dropId={drop.id}
+                  size="sm"
+                />
+                {drop.title && (
+                  <h3 className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+                    {drop.title}
+                  </h3>
+                )}
+              </div>
               {drop.author?.handle && (
                 <UserProfileTooltipWrapper
                   user={drop.author.handle ?? drop.author.id}
@@ -174,7 +182,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                   <Link
                     onClick={(e) => e.stopPropagation()}
                     href={`/${drop.author?.handle}`}
-                    className="tw-text-xs tw-text-iron-400 tw-mt-0.5 tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-duration-150"
+                    className="tw-mt-0.5 tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
                   >
                     {drop.author?.handle}
                   </Link>
@@ -188,12 +196,12 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               />
             )}
           </div>
-          <div className="tw-flex tw-items-center tw-justify-between tw-text-xs tw-mb-3">
+          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
             <WaveLeaderboardGalleryItemVotes
               drop={drop}
               variant={artFocused ? "subtle" : "default"}
             />
-            <div className="tw-flex tw-items-center tw-text-iron-500 tw-gap-1 tw-ml-4">
+            <div className="tw-ml-4 tw-flex tw-items-center tw-gap-1 tw-text-iron-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -214,9 +222,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               </span>
             </div>
           </div>
-          <div className="tw-flex tw-gap-3 tw-items-center tw-pt-2 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800/50">
+          <div className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
             {hasUserVoted && (
-              <span className="tw-text-[11px] tw-text-iron-500 tw-font-mono">
+              <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
                 {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
                 <span className={voteStyle}>
                   {isNegativeVote && "-"}
@@ -226,7 +234,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               </span>
             )}
             {canShowVote && (
-              <div className="tw-flex-1 tw-flex tw-justify-end">
+              <div className="tw-flex tw-flex-1 tw-justify-end">
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
