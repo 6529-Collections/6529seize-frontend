@@ -4,12 +4,14 @@ interface MemesLeaderboardDropDescriptionProps {
   readonly description: string;
 }
 
-const MemesLeaderboardDropDescription: React.FC<MemesLeaderboardDropDescriptionProps> = ({
-  description,
-}) => {
+const MemesLeaderboardDropDescription: React.FC<
+  MemesLeaderboardDropDescriptionProps
+> = ({ description }) => {
   return (
     <div>
-      <p className="tw-text-sm tw-text-iron-500 tw-mb-0 tw-leading-relaxed">{description}</p>
+      <p className="tw-mb-0 tw-whitespace-pre-line tw-text-sm tw-leading-relaxed tw-text-iron-500">
+        {description}
+      </p>
     </div>
   );
 };
