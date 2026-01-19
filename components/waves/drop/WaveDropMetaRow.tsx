@@ -10,7 +10,7 @@ import { WinnerBadge } from "./WinnerBadge";
 interface WaveDropMetaRowProps {
   readonly drop: ExtendedDrop;
   readonly isWinner: boolean;
-  readonly mimeType?: string;
+  readonly mimeType?: string | undefined;
   readonly children?: ReactNode | undefined;
 }
 
