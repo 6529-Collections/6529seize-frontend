@@ -38,7 +38,8 @@
     "deadcode:knip": "knip",
     "deadcode:exports": "ts-prune -p tsconfig.ts-prune.json --error",
     "deadcode:deps": "depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp\"",
-    "deadcode": "npm run deadcode:knip && npm run deadcode:exports && npm run deadcode:deps"
+    "deadcode": "npm run deadcode:knip && npm run deadcode:exports && npm run deadcode:deps",
+    "cr": "coderabbit --prompt-only --type uncommitted --base main"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "^1.11.1",
