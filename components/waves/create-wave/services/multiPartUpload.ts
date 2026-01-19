@@ -1,4 +1,4 @@
-import { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import {
   multipartUploadCore,
   getContentType,
@@ -28,8 +28,13 @@ export async function multiPartUpload({
   const handleProgress = (bytesUploaded: number) => {
     overallUploaded += bytesUploaded;
     if (onProgress) {
+      if (file.size === 0) {
+        onProgress(100);
+        return;
+      }
+
       const percent = Math.floor((overallUploaded / file.size) * 100);
-      onProgress(percent);
+      onProgress(Math.min(Math.max(percent, 0), 100));
     }
   };
 
