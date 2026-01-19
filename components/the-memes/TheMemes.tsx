@@ -72,7 +72,12 @@ export default function TheMemesComponent() {
   const { connectedProfile } = useContext(AuthContext);
 
   const [selectedSeason, setSelectedSeason] = useState<MemeSeason | null>(null);
-  const [initialSeasonId, setInitialSeasonId] = useState<number | null>(null);
+  const [seasonId, setSeasonId] = useState<number | null>(null);
+
+  const handleSeasonChange = (season: MemeSeason | null) => {
+    setSelectedSeason(season);
+    setSeasonId(season?.id ?? null);
+  };
 
   const [routerLoaded, setRouterLoaded] = useState(false);
 
@@ -127,7 +132,7 @@ export default function TheMemesComponent() {
 
     setSort(initialSort);
     setSortDir(initialSortDir);
-    setInitialSeasonId(initialSznId);
+    setSeasonId(initialSznId);
     setVolumeType(initialVolume);
     setRouterLoaded(true);
   }, [searchParams]);
@@ -135,8 +140,8 @@ export default function TheMemesComponent() {
   const getNftsNextPage = () => {
     const mySort = getApiSort(sort, volumeType);
     let seasonFilter = "";
-    if (selectedSeason) {
-      seasonFilter = `&season=${selectedSeason.id}`;
+    if (seasonId) {
+      seasonFilter = `&season=${seasonId}`;
     }
     return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=48&sort_direction=${sortDir}&sort=${mySort}${seasonFilter}`;
   };
@@ -156,6 +161,8 @@ export default function TheMemesComponent() {
   >(new Map());
 
   useEffect(() => {
+    if (!routerLoaded) return;
+
     let sortParam: string;
 
     if (sort === MemesSort.VOLUME) {
@@ -176,11 +183,11 @@ export default function TheMemesComponent() {
     }
 
     let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
-    if (selectedSeason) {
-      queryString += `&szn=${selectedSeason.id}`;
+    if (seasonId) {
+      queryString += `&szn=${seasonId}`;
     }
     router.push(`the-memes?${queryString}`);
-  }, [sort, sortDir, selectedSeason, volumeType, router]);
+  }, [sort, sortDir, seasonId, volumeType, router, routerLoaded]);
 
   useEffect(() => {
     const memesMap = new Map<
@@ -246,7 +253,7 @@ export default function TheMemesComponent() {
       setNftsNextPage(getNftsNextPage());
       setFetching(true);
     }
-  }, [sort, sortDir, volumeType, selectedSeason, routerLoaded]);
+  }, [sort, sortDir, volumeType, seasonId, routerLoaded]);
 
   useEffect(() => {
     if (fetching && routerLoaded && nftsNextPage) {
@@ -429,8 +436,8 @@ export default function TheMemesComponent() {
                   <div className="d-none d-sm-block tw-w-40">
                     <SeasonsGridDropdown
                       selected={selectedSeason}
-                      setSelected={setSelectedSeason}
-                      initialSeasonId={initialSeasonId}
+                      setSelected={handleSeasonChange}
+                      initialSeasonId={seasonId}
                     />
                   </div>
                 </Col>
@@ -449,8 +456,8 @@ export default function TheMemesComponent() {
                   <div className="text-start tw-w-40">
                     <SeasonsGridDropdown
                       selected={selectedSeason}
-                      setSelected={setSelectedSeason}
-                      initialSeasonId={initialSeasonId}
+                      setSelected={handleSeasonChange}
+                      initialSeasonId={seasonId}
                     />
                   </div>
                 </Col>

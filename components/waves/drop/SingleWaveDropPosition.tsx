@@ -9,6 +9,7 @@ interface SingleWaveDropPositionProps {
   readonly drop?: ExtendedDrop | undefined;
   readonly isFinalWinner?: boolean | undefined;
   readonly variant?: "default" | "simple" | undefined;
+  readonly size?: "sm" | "md" | undefined;
 }
 
 const TrophyOnlyBadge: FC<{ rank: number }> = ({ rank }) => {
@@ -52,7 +53,7 @@ const TrophyOnlyBadge: FC<{ rank: number }> = ({ rank }) => {
   );
 };
 
-const SimpleRankDisplay: FC<{ rank: number }> = ({ rank }) => {
+const SimpleRankDisplay: FC<{ rank: number; size?: "sm" | "md" }> = ({ rank, size = "sm" }) => {
   let color = "";
   switch (rank) {
     case 1:
@@ -81,10 +82,13 @@ const SimpleRankDisplay: FC<{ rank: number }> = ({ rank }) => {
     }
   };
 
+  const iconSize = size === "md" ? "tw-w-4 tw-h-4" : "tw-w-3.5 tw-h-3.5";
+  const textSize = size === "md" ? "tw-text-md" : "tw-text-sm";
+
   return (
     <div className={`tw-flex tw-items-center tw-gap-1.5 ${color}`}>
-      <FontAwesomeIcon icon={faTrophy} className="tw-w-3.5 tw-h-3.5" />
-      <span className="tw-text-sm tw-font-semibold">{formatRank(rank)}</span>
+      <FontAwesomeIcon icon={faTrophy} className={iconSize} />
+      <span className={`${textSize} tw-font-semibold`}>{formatRank(rank)}</span>
     </div>
   );
 };
@@ -94,11 +98,12 @@ export const SingleWaveDropPosition: FC<SingleWaveDropPositionProps> = ({
   drop,
   isFinalWinner = false,
   variant = "default",
+  size = "sm",
 }) => {
   if (!rank) return null;
 
   if (variant === "simple") {
-    return <SimpleRankDisplay rank={rank} />;
+    return <SimpleRankDisplay rank={rank} size={size} />;
   }
 
   const isWinner = isFinalWinner || drop?.winning_context;

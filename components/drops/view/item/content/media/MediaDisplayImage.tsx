@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useInView } from "@/hooks/useInView";
+import React, { useCallback, useState } from "react";
 
 interface Props {
   readonly src: string;
   readonly imageScale?: ImageScale | undefined;
 }
 
-function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {
+function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx1080 }: Props) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,10 +32,11 @@ function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {
   return (
     <div
       ref={ref}
-      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]">
+      className="tw-relative tw-mx-[1px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+    >
       {isLoading && (
         <div
-          className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
+          className="tw-animate-pulse tw-rounded-xl tw-bg-iron-800"
           style={loadingPlaceholderStyle}
         />
       )}
@@ -44,9 +45,10 @@ function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx600 }: Props) {
           primarySrc={getScaledImageUri(src, imageScale)}
           fallbackSrc={src}
           alt="Media content"
+          optimize={false}
           fill
           sizes="(max-width: 768px) 100vw, 600px"
-          className={`tw-object-contain tw-max-w-full ${
+          className={`tw-max-w-full tw-object-contain ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           }`}
           onLoad={handleImageLoad}

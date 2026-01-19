@@ -1,11 +1,11 @@
-import dynamic from "next/dynamic";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import dynamic from "next/dynamic";
 
-import MediaDisplayImage from "./MediaDisplayImage";
-import { ImageScale } from "@/helpers/image.helpers";
-import MediaDisplayVideo from "./MediaDisplayVideo";
-import MediaDisplayAudio from "./MediaDisplayAudio";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { ImageScale } from "@/helpers/image.helpers";
+import MediaDisplayAudio from "./MediaDisplayAudio";
+import MediaDisplayImage from "./MediaDisplayImage";
+import MediaDisplayVideo from "./MediaDisplayVideo";
 
 enum MediaType {
   IMAGE = "IMAGE",
@@ -33,7 +33,7 @@ export default function MediaDisplay({
   media_mime_type,
   media_url,
   disableMediaInteraction = false,
-  imageScale = ImageScale.AUTOx600,
+  imageScale = ImageScale.AUTOx1080,
   previewImageUrl,
 }: {
   readonly media_mime_type: string;
