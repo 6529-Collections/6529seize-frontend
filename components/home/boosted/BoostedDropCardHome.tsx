@@ -9,7 +9,7 @@ import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { LinkIcon, Square2StackIcon } from "@heroicons/react/24/outline";
+import { LinkIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { memo, useCallback, useMemo } from "react";
 
@@ -71,7 +71,7 @@ const BoostedDropCardHome = memo(
         <div className="tw-relative tw-aspect-[4/5] tw-w-full tw-overflow-hidden tw-rounded-xl sm:tw-aspect-[3/4]">
           {media ? (
             <div className="tw-relative tw-h-full tw-w-full">
-              <Square2StackIcon
+              <PhotoIcon
                 className="tw-pointer-events-none tw-absolute tw-left-6 tw-top-8 tw-z-10 tw-size-6 tw-text-iron-700 tw-opacity-50"
                 aria-hidden="true"
               />
