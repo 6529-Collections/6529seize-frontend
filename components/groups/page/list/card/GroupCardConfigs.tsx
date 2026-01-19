@@ -240,7 +240,7 @@ export default function GroupCardConfigs({
               scrollContainer("left");
             }}
             aria-label="Scroll left"
-            className="tw-border-white/ tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 -tw-translate-x-3 tw-translate-y-[-50%] tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+            className="tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 -tw-translate-x-3 tw-translate-y-[-50%] tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
           >
             <svg
               className="tw-h-4 tw-w-4 tw-rotate-90 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white"
