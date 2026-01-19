@@ -61,6 +61,9 @@ export default function GroupCardContent({
               {groupName}
             </span>
           )}
+          <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
+            Source: filters + optional manual list
+          </p>
         </div>
         {!!connectedProfile?.handle && setState && (
           <div className="tw-flex tw-flex-shrink-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
