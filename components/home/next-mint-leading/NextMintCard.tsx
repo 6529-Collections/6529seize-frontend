@@ -6,10 +6,8 @@ import ProfileAvatar, {
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
-import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
-import { useMemo } from "react";
 
 interface NextMintCardProps {
   readonly drop: ApiDrop;
@@ -37,10 +35,6 @@ const formatDropTimestamp = (timestamp: number): string | null => {
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
   const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
-  const previewImageUrl = useMemo(
-    () => getDropPreviewImageUrl(drop.metadata) ?? undefined,
-    [drop.metadata]
-  );
   const title =
     drop.title ??
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
@@ -74,7 +68,6 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
                 imageScale={ImageScale.AUTOx600}
                 disableAutoPlay={hasTouchScreen}
                 disableModal={hasTouchScreen}
-                previewImageUrl={previewImageUrl}
               />
             ) : (
               <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">

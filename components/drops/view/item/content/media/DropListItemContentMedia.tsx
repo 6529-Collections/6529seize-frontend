@@ -35,7 +35,6 @@ export default function DropListItemContentMedia({
   disableAutoPlay = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
-  previewImageUrl,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -45,7 +44,6 @@ export default function DropListItemContentMedia({
   readonly disableAutoPlay?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
-  readonly previewImageUrl?: string | undefined;
 }) {
   const [htmlActivated, setHtmlActivated] = useState(!disableAutoPlay);
 
@@ -106,14 +104,6 @@ export default function DropListItemContentMedia({
       if (disableAutoPlay && !htmlActivated) {
         return (
           <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
-            {previewImageUrl ? (
-              <DropListItemContentMediaImage
-                src={previewImageUrl}
-                disableModal={true}
-                imageObjectPosition={imageObjectPosition}
-                imageScale={imageScale}
-              />
-            ) : null}
             <button
               type="button"
               onClick={() => setHtmlActivated(true)}

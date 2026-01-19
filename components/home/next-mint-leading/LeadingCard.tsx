@@ -6,14 +6,11 @@ import ProfileAvatar, {
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
-import {
-  getDropPreviewImageUrl,
-  type ExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
+import { type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
@@ -38,12 +35,6 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   const shouldGate = hasTouchScreen && isHtml;
   const [interactiveEnabled, setInteractiveEnabled] = useState(!shouldGate);
 
-  const previewImageUrl = useMemo(
-    () => getDropPreviewImageUrl(drop.metadata),
-    [drop.metadata]
-  );
-  const previewImageUrlFallback = previewImageUrl ?? undefined;
-
   useEffect(() => {
     if (shouldGate) {
       setInteractiveEnabled(false);
@@ -58,6 +49,41 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
     "Untitled";
   const author = drop.author;
   const rankLabelClass = getRankLabelClass(rank);
+  const mediaContent = (() => {
+    if (!media) {
+      return (
+        <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950">
+          <span className="tw-text-sm tw-text-white/40">No image</span>
+        </div>
+      );
+    }
+
+    if (shouldGate && !interactiveEnabled) {
+      return (
+        <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
+          <button
+            type="button"
+            onClick={() => setInteractiveEnabled(true)}
+            className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/50"
+            aria-label="Load interactive media"
+          >
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800">
+              Tap to load
+            </span>
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <MediaDisplay
+        media_mime_type={media.mime_type}
+        media_url={media.url}
+        disableMediaInteraction={true}
+        imageScale={mediaImageScale}
+      />
+    );
+  })();
 
   return (
     <div className="tw-group tw-flex tw-flex-col tw-gap-3 tw-text-left tw-transition-all tw-duration-500 desktop-hover:tw-opacity-70 desktop-hover:tw-grayscale desktop-hover:hover:tw-opacity-100 desktop-hover:hover:tw-grayscale-0 sm:tw-gap-4">
@@ -77,45 +103,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
         </div>
         <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
-            {media ? (
-              shouldGate && !interactiveEnabled ? (
-                <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
-                  {previewImageUrlFallback ? (
-                    <MediaDisplay
-                      media_mime_type={media.mime_type ?? "image/jpeg"}
-                      media_url={media.url!}
-                      disableMediaInteraction={true}
-                      imageScale={mediaImageScale}
-                      previewImageUrl={previewImageUrlFallback}
-                    />
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => setInteractiveEnabled(true)}
-                    className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/50"
-                    aria-label="Load interactive media"
-                  >
-                    <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-iron-800">
-                      Tap to load
-                    </span>
-                  </button>
-                </div>
-              ) : (
-                <MediaDisplay
-                  media_mime_type={media.mime_type ?? "image/jpeg"}
-                  media_url={media.url!}
-                  disableMediaInteraction={true}
-                  imageScale={mediaImageScale}
-                  previewImageUrl={
-                    shouldGate ? undefined : previewImageUrlFallback
-                  }
-                />
-              )
-            ) : (
-              <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950">
-                <span className="tw-text-sm tw-text-white/40">No image</span>
-              </div>
-            )}
+            {mediaContent}
           </div>
         </div>
       </div>
