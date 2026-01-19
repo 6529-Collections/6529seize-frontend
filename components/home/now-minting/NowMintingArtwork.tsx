@@ -25,9 +25,10 @@ export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
     setInteractiveEnabled(false);
   }, [nft.id, shouldGate]);
 
-  const shouldAnimate = !isHtml
-    ? true
-    : hasMounted && (!shouldGate || interactiveEnabled);
+  let shouldAnimate = true;
+  if (isHtml) {
+    shouldAnimate = hasMounted && (interactiveEnabled || !shouldGate);
+  }
 
   return (
     <div className="tw-flex tw-w-full tw-items-start tw-justify-center">
