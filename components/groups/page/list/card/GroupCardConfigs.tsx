@@ -12,7 +12,12 @@ export interface GroupCardConfigProps {
   readonly key: GroupDescriptionType;
   readonly value: string;
   readonly label?: string | undefined;
+  readonly tooltip?: string | undefined;
+  readonly muted?: boolean | undefined;
 }
+
+const MANUAL_LIST_TOOLTIP =
+  "Wallets explicitly listed in this group. Filter-matching wallets are not counted here.";
 
 export default function GroupCardConfigs({
   group,
@@ -53,8 +58,9 @@ export default function GroupCardConfigs({
     if (!identity) {
       return null;
     }
-    return `${direction ? directionLabels[direction] : ""
-      } identity: ${identity}`;
+    return `${
+      direction ? directionLabels[direction] : ""
+    } identity: ${identity}`;
   };
 
   const getTdhConfig = (
@@ -82,7 +88,10 @@ export default function GroupCardConfigs({
     rep: ApiGroupDescription["rep"]
   ): GroupCardConfigProps | null => {
     const value = getMinMaxValue({ min: rep.min, max: rep.max });
-    const category = rep.category?.length ? `category: ${rep.category}` : null;
+    const category =
+      typeof rep.category?.length === "number" && rep.category.length > 0
+        ? `category: ${rep.category}`
+        : null;
     const identity = getIdentityValue({
       identity: rep.user_identity,
       direction: rep.direction,
@@ -131,19 +140,29 @@ export default function GroupCardConfigs({
 
   const getWalletsConfig = (
     wallet_group_wallets_count: ApiGroupDescription["identity_group_identities_count"]
-  ): GroupCardConfigProps | null => {
-    if (!wallet_group_wallets_count) {
-      return null;
-    }
+  ): GroupCardConfigProps => {
+    const hasManualList = wallet_group_wallets_count > 0;
+
     return {
       key: GroupDescriptionType.WALLETS,
-      value: `${wallet_group_wallets_count}`,
+      value: hasManualList ? `${wallet_group_wallets_count}` : "No manual list",
+      label: "Manual list",
+      tooltip: MANUAL_LIST_TOOLTIP,
+      muted: !hasManualList,
     };
   };
 
   const getConfigs = (): GroupCardConfigProps[] => {
     if (!group) {
-      return [{ key: GroupDescriptionType.WALLETS, value: "0" }];
+      return [
+        {
+          key: GroupDescriptionType.WALLETS,
+          value: "No manual list",
+          label: "Manual list",
+          tooltip: MANUAL_LIST_TOOLTIP,
+          muted: true,
+        },
+      ];
     }
     const configs: GroupCardConfigProps[] = [];
     const { tdh, rep, cic, level, identity_group_identities_count } =
@@ -153,21 +172,11 @@ export default function GroupCardConfigs({
     const cicConfig = getCicConfig(cic);
     const levelConfig = getLevelConfig(level);
     const walletsConfig = getWalletsConfig(identity_group_identities_count);
-    if (tdhConfig) {
-      configs.push(tdhConfig);
-    }
-    if (repConfig) {
-      configs.push(repConfig);
-    }
-    if (cicConfig) {
-      configs.push(cicConfig);
-    }
-    if (levelConfig) {
-      configs.push(levelConfig);
-    }
-    if (walletsConfig) {
-      configs.push(walletsConfig);
-    }
+    if (tdhConfig) configs.push(tdhConfig);
+    if (repConfig) configs.push(repConfig);
+    if (cicConfig) configs.push(cicConfig);
+    if (levelConfig) configs.push(levelConfig);
+    configs.push(walletsConfig);
 
     return configs;
   };
@@ -197,14 +206,34 @@ export default function GroupCardConfigs({
 
   useEffect(() => {
     checkForHiddenContent();
-    // Optionally, add an event listener for resize to handle dynamic resizing
-    window.addEventListener("resize", checkForHiddenContent);
-    return () => window.removeEventListener("resize", checkForHiddenContent);
-  }, [configs]);
+
+    const container = containerRef.current;
+    const canObserve =
+      typeof ResizeObserver !== "undefined" && !!containerRef.current;
+
+    const observer = canObserve
+      ? new ResizeObserver(() => checkForHiddenContent())
+      : null;
+
+    if (observer && container) {
+      observer.observe(container);
+    } else {
+      // Fallback: still respond to window resizes
+      window.addEventListener("resize", checkForHiddenContent);
+    }
+
+    return () => {
+      if (observer && container) {
+        observer.unobserve(container);
+        observer.disconnect();
+      }
+      window.removeEventListener("resize", checkForHiddenContent);
+    };
+  }, []);
 
   return (
-    <div className="tw-relative tw-flex tw-items-start tw-text-xs sm:tw-text-sm tw-text-iron-200">
-      <div className="tw-overflow-x-hidden tw-w-full">
+    <div className="tw-relative tw-flex tw-items-start tw-text-xs tw-text-iron-200 sm:tw-text-sm">
+      <div className="tw-w-full tw-overflow-x-hidden">
         {isLeftHidden && (
           <button
             onClick={(e) => {
@@ -212,10 +241,10 @@ export default function GroupCardConfigs({
               scrollContainer("left");
             }}
             aria-label="Scroll left"
-            className="tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-border tw-border-solid tw-border-white/ tw-h-7 tw-w-7 tw-translate-y-[-50%] -tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+            className="tw-border-white/ tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 -tw-translate-x-3 tw-translate-y-[-50%] tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
           >
             <svg
-              className="tw-h-4 tw-w-4 tw-text-iron-200 desktop-hover:hover:tw-text-white tw-rotate-90 tw-transition tw-duration-200 tw-ease-out"
+              className="tw-h-4 tw-w-4 tw-rotate-90 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -232,7 +261,7 @@ export default function GroupCardConfigs({
           </button>
         )}
         <div
-          className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5 horizontal-menu-hide-scrollbar"
+          className="horizontal-menu-hide-scrollbar tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5"
           ref={containerRef}
           onScroll={checkForHiddenContent}
         >
@@ -247,10 +276,10 @@ export default function GroupCardConfigs({
               scrollContainer("right");
             }}
             aria-label="Scroll right"
-            className="tw-absolute tw-right-0 tw-border tw-border-solid tw-border-white/5 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-y-[-50%] tw-translate-x-3 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
+            className="tw-absolute tw-right-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-x-3 tw-translate-y-[-50%] tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
           >
             <svg
-              className="tw-h-4 tw-w-4 tw-text-iron-200 desktop-hover:hover:tw-text-white -tw-rotate-90 tw-transition tw-duration-200 tw-ease-out"
+              className="tw-h-4 tw-w-4 -tw-rotate-90 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
