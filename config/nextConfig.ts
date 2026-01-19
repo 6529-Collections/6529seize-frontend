@@ -1,7 +1,6 @@
 import { createSecurityHeaders } from "./securityHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
-import path from "node:path";
 
 export function sharedConfig(
   publicEnv: PublicEnv,
@@ -14,10 +13,6 @@ export function sharedConfig(
     compress: true,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
-    experimental: {
-      webpackMemoryOptimizations: true,
-      webpackBuildWorker: true,
-    },
     images: {
       loader: "default",
       remotePatterns: [
@@ -47,22 +42,6 @@ export function sharedConfig(
           headers: createSecurityHeaders(publicEnv["API_ENDPOINT"]),
         },
       ];
-    },
-    webpack: (
-      config: any,
-      { dev, isServer }: { dev: boolean; isServer: boolean }
-    ) => {
-      config.resolve.alias.canvas = false;
-      config.resolve.alias.encoding = false;
-      config.resolve.alias["@react-native-async-storage/async-storage"] = false;
-      config.resolve.alias["react-native"] = false;
-      config.resolve.alias["idb-keyval"] = path.resolve(
-        process.cwd(),
-        "lib/storage/idb-keyval.ts"
-      );
-      if (!dev && !isServer) config.devtool = "source-map";
-      config.optimization.minimize = false;
-      return config;
     },
     turbopack: {
       resolveAlias: {
