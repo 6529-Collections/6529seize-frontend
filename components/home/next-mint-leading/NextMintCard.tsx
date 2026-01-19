@@ -81,7 +81,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
 
       <div className="tw-flex tw-flex-col tw-gap-3">
         <div>
-          <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <MediaTypeBadge
               mimeType={media?.mime_type}
               dropId={drop.id}
@@ -89,7 +89,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
             />
             <Link
               href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-              className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
+              className="tw-m-0 tw-min-w-0 tw-flex-1 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
             >
               {title}
             </Link>
