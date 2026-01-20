@@ -6,7 +6,7 @@ function formatCause(cause: string): string {
   return cause
     .replaceAll("_", " ")
     .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatContextValue(value: unknown): string | null {
