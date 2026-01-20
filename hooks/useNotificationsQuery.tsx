@@ -1,13 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type {
-  TypedNotificationsResponse,
-} from "@/types/feed.types";
-import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { commonApiFetch } from "@/services/api/common-api";
+import type { TypedNotificationsResponse } from "@/types/feed.types";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo } from "react";
 
 interface UseNotificationsQueryProps {
   /**
@@ -33,7 +31,7 @@ interface UseNotificationsQueryProps {
   readonly limit?: string | undefined;
 
   /**
-   * The cause of the notifications to fetch.
+   * The cause of the notifications to fetch (include filter).
    */
   readonly cause?: ApiNotificationCause[] | null | undefined;
 }
@@ -49,7 +47,17 @@ const getIdentityNotificationsQueryKey = (
   identity: string | null | undefined,
   limit: string,
   cause: ApiNotificationCause[] | null
-) => [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }] as const;
+) =>
+  [
+    QueryKey.IDENTITY_NOTIFICATIONS,
+    {
+      identity,
+      limit,
+      cause: cause?.length
+        ? [...cause].sort((a, b) => a.localeCompare(b)).join(",")
+        : null,
+    },
+  ] as const;
 
 const fetchNotifications = async ({
   limit,
@@ -117,7 +125,8 @@ export function useNotificationsQuery({
         (error as any)?.response?.status ??
         (error as any)?.cause?.status;
       if (status === 401) return false;
-      if (typeof error === "string" && /unauthorized/i.test(error)) return false;
+      if (typeof error === "string" && /unauthorized/i.test(error))
+        return false;
       if (error instanceof Error && /unauthorized/i.test(error.message)) {
         return false;
       }
@@ -130,9 +139,9 @@ export function useNotificationsQuery({
       return [];
     }
 
-    const data = (
-      query.data.pages as TypedNotificationsResponse[]
-    ).flatMap((page) => page.notifications);
+    const data = (query.data.pages as TypedNotificationsResponse[]).flatMap(
+      (page) => page.notifications
+    );
 
     return reverse ? [...data].reverse() : data;
   }, [query.data, reverse]);
@@ -166,7 +175,11 @@ export function usePrefetchNotifications() {
         return;
       }
       queryClient.prefetchInfiniteQuery({
-        queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+        queryKey: getIdentityNotificationsQueryKey(
+          identity,
+          limit,
+          cause?.length ? cause : null
+        ),
         queryFn: ({
           pageParam,
           signal,

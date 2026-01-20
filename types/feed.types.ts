@@ -33,122 +33,115 @@ export type TypedFeedItem =
   | IFeedItemDropCreated
   | IFeedItemDropReplied;
 
-export type INotificationIdentitySubscribed = {
+/**
+ * Base notification fields shared by all notification types.
+ */
+type NotificationBase = {
   readonly id: number;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ApiProfileMin;
+};
+
+type WithDrops = {
+  readonly related_drops: Array<ApiDrop>;
+};
+
+export type INotificationIdentitySubscribed = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentitySubscribed;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
 };
 
-export type INotificationIdentityMentioned = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.IdentityMentioned;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
-};
-
-export type INotificationDropVoted = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.DropVoted;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
+export type INotificationIdentityRep = NotificationBase & {
+  readonly cause: ApiNotificationCause.IdentityRep;
   readonly additional_context: {
-    readonly vote: number;
+    readonly amount: number;
+    readonly total: number;
+    readonly category: string;
   };
 };
 
-export type INotificationDropReacted = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.DropReacted;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
+export type INotificationIdentityNic = NotificationBase & {
+  readonly cause: ApiNotificationCause.IdentityNic;
   readonly additional_context: {
-    readonly reaction: string;
+    readonly amount: number;
+    readonly total: number;
   };
 };
 
-export type INotificationDropBoosted = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.DropBoosted;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
-  readonly additional_context: Record<string, any>;
-};
-
-export type INotificationDropQuoted = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.DropQuoted;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
-  readonly additional_context: {
-    readonly quote_drop_id: string;
-    readonly quote_drop_part: string;
-    readonly quoted_drop_id: string;
-    readonly quoted_drop_part: string;
+export type INotificationIdentityMentioned = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.IdentityMentioned;
   };
-};
 
-export type INotificationDropReplied = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.DropReplied;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
-  readonly additional_context: {
-    readonly reply_drop_id: string;
-    readonly replied_drop_id: string;
-    readonly replied_drop_part: string;
+export type INotificationDropVoted = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.DropVoted;
+    readonly additional_context: {
+      readonly vote: number;
+    };
   };
-};
 
-export type INotificationWaveCreated = {
-  readonly id: number;
+export type INotificationDropReacted = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.DropReacted;
+    readonly additional_context: {
+      readonly reaction: string;
+    };
+  };
+
+export type INotificationDropBoosted = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.DropBoosted;
+    readonly additional_context: Record<string, unknown>;
+  };
+
+export type INotificationDropQuoted = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.DropQuoted;
+    readonly additional_context: {
+      readonly quote_drop_id: string;
+      readonly quote_drop_part: string;
+      readonly quoted_drop_id: string;
+      readonly quoted_drop_part: string;
+    };
+  };
+
+export type INotificationDropReplied = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.DropReplied;
+    readonly additional_context: {
+      readonly reply_drop_id: string;
+      readonly replied_drop_id: string;
+      readonly replied_drop_part: string;
+    };
+  };
+
+export type INotificationWaveCreated = NotificationBase & {
   readonly cause: ApiNotificationCause.WaveCreated;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
   readonly additional_context: {
     readonly wave_id: string;
   };
 };
 
-export type INotificationAllDrops = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.AllDrops;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
-  readonly additional_context: {
-    readonly vote: number;
+export type INotificationAllDrops = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.AllDrops;
+    readonly additional_context: {
+      readonly vote: number;
+    };
   };
-};
 
-export type INotificationPriorityAlert = {
-  readonly id: number;
-  readonly cause: ApiNotificationCause.PriorityAlert;
-  readonly created_at: number;
-  readonly read_at: number | null;
-  readonly related_identity: ApiProfileMin;
-  readonly related_drops: Array<ApiDrop>;
-  readonly additional_context: any;
-};
+export type INotificationPriorityAlert = NotificationBase &
+  WithDrops & {
+    readonly cause: ApiNotificationCause.PriorityAlert;
+    readonly additional_context: Record<string, unknown>;
+  };
 
 export type TypedNotification =
   | INotificationIdentitySubscribed
   | INotificationIdentityMentioned
+  | INotificationIdentityRep
+  | INotificationIdentityNic
   | INotificationDropVoted
   | INotificationDropReacted
   | INotificationDropBoosted
@@ -157,6 +150,20 @@ export type TypedNotification =
   | INotificationWaveCreated
   | INotificationAllDrops
   | INotificationPriorityAlert;
+
+/**
+ * Fallback type for unknown/unsupported notification causes.
+ * Used to render generic notifications that don't match known causes.
+ */
+export type INotificationGeneric = {
+  readonly id: number;
+  readonly cause: string;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity?: ApiProfileMin;
+  readonly related_drops?: Array<ApiDrop>;
+  readonly additional_context?: Record<string, unknown>;
+};
 
 export interface TypedNotificationsResponse extends Omit<
   ApiNotificationsResponse,

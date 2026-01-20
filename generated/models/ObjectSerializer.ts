@@ -130,6 +130,9 @@ export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
 export * from '../models/ApiProfileProxyActionType';
+export * from '../models/ApiPushNotificationDevice';
+export * from '../models/ApiPushNotificationSettings';
+export * from '../models/ApiPushNotificationSettingsUpdate';
 export * from '../models/ApiQuotedDrop';
 export * from '../models/ApiQuotedDropResponse';
 export * from '../models/ApiRateMatter';
@@ -180,7 +183,6 @@ export * from '../models/ApiWaveOutcome';
 export * from '../models/ApiWaveOutcomeCredit';
 export * from '../models/ApiWaveOutcomeDistributionItem';
 export * from '../models/ApiWaveOutcomeDistributionItemsPage';
-export * from '../models/ApiWaveOutcomeOld';
 export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
 export * from '../models/ApiWaveOutcomesPage';
@@ -380,6 +382,9 @@ import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import { ApiPushNotificationDevice } from '../models/ApiPushNotificationDevice';
+import { ApiPushNotificationSettings } from '../models/ApiPushNotificationSettings';
+import { ApiPushNotificationSettingsUpdate } from '../models/ApiPushNotificationSettingsUpdate';
 import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
 import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
 import { ApiRateMatter } from '../models/ApiRateMatter';
@@ -430,7 +435,6 @@ import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
 import { ApiWaveOutcomeDistributionItemsPage } from '../models/ApiWaveOutcomeDistributionItemsPage';
-import { ApiWaveOutcomeOld         } from '../models/ApiWaveOutcomeOld';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
@@ -663,6 +667,9 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileMin": ApiProfileMin,
     "ApiProfileProxy": ApiProfileProxy,
     "ApiProfileProxyAction": ApiProfileProxyAction,
+    "ApiPushNotificationDevice": ApiPushNotificationDevice,
+    "ApiPushNotificationSettings": ApiPushNotificationSettings,
+    "ApiPushNotificationSettingsUpdate": ApiPushNotificationSettingsUpdate,
     "ApiQuotedDrop": ApiQuotedDrop,
     "ApiQuotedDropResponse": ApiQuotedDropResponse,
     "ApiRatingWithProfileInfoAndLevel": ApiRatingWithProfileInfoAndLevel,
@@ -708,7 +715,6 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveOutcome": ApiWaveOutcome,
     "ApiWaveOutcomeDistributionItem": ApiWaveOutcomeDistributionItem,
     "ApiWaveOutcomeDistributionItemsPage": ApiWaveOutcomeDistributionItemsPage,
-    "ApiWaveOutcomeOld": ApiWaveOutcomeOld,
     "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
