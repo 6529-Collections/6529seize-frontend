@@ -95,7 +95,6 @@ export default function OngoingParticipationDrop({
             onQuoteClick={onQuoteClick}
             setLongPressTriggered={setLongPressTriggered}
             isCompetitionDrop={true}
-            hasTouch={hasTouch}
           />
         </div>
       </div>
