@@ -14,6 +14,7 @@ import ParticipationDropHeader from "./ParticipationDropHeader";
 import ParticipationDropContent from "./ParticipationDropContent";
 import ParticipationDropMetadata from "./ParticipationDropMetadata";
 import ParticipationDropFooter from "./ParticipationDropFooter";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -40,16 +41,17 @@ export default function OngoingParticipationDrop({
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
+  const hasTouch = useIsTouchDevice() || isMobile;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
 
   const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
+    if (!hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [isMobile]);
+  }, [hasTouch]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -80,9 +82,9 @@ export default function OngoingParticipationDrop({
           onQuote={handleOnQuote}
         />
       )}
-      <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-px-4 tw-pt-4">
+      <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left">
         <WaveDropAuthorPfp drop={drop} />
-        <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1.5">
+        <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-1.5">
           <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
           <ParticipationDropContent
             drop={drop}
@@ -93,6 +95,7 @@ export default function OngoingParticipationDrop({
             onQuoteClick={onQuoteClick}
             setLongPressTriggered={setLongPressTriggered}
             isCompetitionDrop={true}
+            hasTouch={hasTouch}
           />
         </div>
       </div>
