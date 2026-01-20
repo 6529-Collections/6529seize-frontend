@@ -1914,6 +1914,24 @@ paths:
           schema:
             type: number
             format: int64
+        - name: cause
+          in: query
+          description: Comma-separated list of notification causes to include
+          required: false
+          schema:
+            type: string
+        - name: cause_exclude
+          in: query
+          description: Comma-separated list of notification causes to exclude
+          required: false
+          schema:
+            type: string
+        - name: unread_only
+          in: query
+          description: Only return unread notifications
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -2744,6 +2762,100 @@ paths:
           description: Invalid request
         "401":
           description: Unauthorized
+  /push-notifications/devices:
+    get:
+      tags:
+        - Push Notifications
+      summary: Get all registered devices for the authenticated user
+      operationId: getDevices
+      responses:
+        "200":
+          description: List of registered devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiPushNotificationDevice"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+  /push-notifications/devices/{device_id}:
+    delete:
+      tags:
+        - Push Notifications
+      summary: Delete a registered device
+      operationId: deleteDevice
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The device ID to delete
+      responses:
+        "204":
+          description: Device deleted successfully
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+  /push-notifications/settings/{device_id}:
+    get:
+      tags:
+        - Push Notifications
+      summary: Get push notification settings for a device
+      operationId: getPushNotificationSettings
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The device ID to get settings for
+      responses:
+        "200":
+          description: Push notification settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPushNotificationSettings"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+    put:
+      tags:
+        - Push Notifications
+      summary: Update push notification settings for a device
+      operationId: updatePushNotificationSettings
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The device ID to update settings for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiPushNotificationSettingsUpdate"
+      responses:
+        "200":
+          description: Updated push notification settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPushNotificationSettings"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
   /bulk-rep:
     post:
       tags:
@@ -7717,6 +7829,8 @@ components:
       enum:
         - IDENTITY_SUBSCRIBED
         - IDENTITY_MENTIONED
+        - IDENTITY_REP
+        - IDENTITY_NIC
         - DROP_QUOTED
         - DROP_REPLIED
         - DROP_VOTED
@@ -8162,6 +8276,91 @@ components:
         - READ_WAVE
         - CREATE_DROP_TO_WAVE
         - RATE_WAVE_DROP
+    ApiPushNotificationDevice:
+      type: object
+      required:
+        - device_id
+        - created_at
+        - updated_at
+      properties:
+        device_id:
+          type: string
+        platform:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ApiPushNotificationSettings:
+      type: object
+      required:
+        - identity_subscribed
+        - identity_mentioned
+        - identity_rep
+        - identity_nic
+        - drop_quoted
+        - drop_replied
+        - drop_voted
+        - drop_reacted
+        - drop_boosted
+        - wave_created
+      properties:
+        identity_subscribed:
+          type: boolean
+          description: Notify when someone follows you
+        identity_mentioned:
+          type: boolean
+          description: Notify when someone mentions you
+        identity_rep:
+          type: boolean
+          description: Notify when someone gives you REP
+        identity_nic:
+          type: boolean
+          description: Notify when someone gives you NIC
+        drop_quoted:
+          type: boolean
+          description: Notify when someone quotes your drop
+        drop_replied:
+          type: boolean
+          description: Notify when someone replies to your drop
+        drop_voted:
+          type: boolean
+          description: Notify when someone votes on your drop
+        drop_reacted:
+          type: boolean
+          description: Notify when someone reacts to your drop
+        drop_boosted:
+          type: boolean
+          description: Notify when someone boosts your drop
+        wave_created:
+          type: boolean
+          description: Notify when you are invited to a wave
+    ApiPushNotificationSettingsUpdate:
+      type: object
+      properties:
+        identity_subscribed:
+          type: boolean
+        identity_mentioned:
+          type: boolean
+        identity_rep:
+          type: boolean
+        identity_nic:
+          type: boolean
+        drop_quoted:
+          type: boolean
+        drop_replied:
+          type: boolean
+        drop_voted:
+          type: boolean
+        drop_reacted:
+          type: boolean
+        drop_boosted:
+          type: boolean
+        wave_created:
+          type: boolean
     ApiQuotedDrop:
       type: object
       required:
