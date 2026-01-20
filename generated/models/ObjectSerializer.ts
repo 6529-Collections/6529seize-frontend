@@ -31,6 +31,7 @@ export * from '../models/ApiCommunityMembersSortOption';
 export * from '../models/ApiCommunityMetric';
 export * from '../models/ApiCommunityMetricSample';
 export * from '../models/ApiCommunityMetrics';
+export * from '../models/ApiCommunityMetricsSeries';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
 export * from '../models/ApiCompleteMultipartUploadResponse';
@@ -283,6 +284,7 @@ import { ApiCommunityMembersSortOption } from '../models/ApiCommunityMembersSort
 import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
+import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
@@ -580,6 +582,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCommunityMetric": ApiCommunityMetric,
     "ApiCommunityMetricSample": ApiCommunityMetricSample,
     "ApiCommunityMetrics": ApiCommunityMetrics,
+    "ApiCommunityMetricsSeries": ApiCommunityMetricsSeries,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
     "ApiCompleteMultipartUploadResponse": ApiCompleteMultipartUploadResponse,
