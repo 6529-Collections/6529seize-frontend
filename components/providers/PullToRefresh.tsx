@@ -1,7 +1,7 @@
 "use client";
 
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
-import { Capacitor } from "@capacitor/core";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
@@ -10,7 +10,7 @@ const PULL_MAX = 140;
 const INDICATOR_SIZE = 36;
 
 export default function PullToRefresh() {
-  const isNativeApp = Capacitor.isNativePlatform();
+  const { isCapacitor } = useCapacitor();
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { globalRefresh } = useGlobalRefresh();
   const [pullDistance, setPullDistance] = useState(0);
@@ -49,6 +49,8 @@ export default function PullToRefresh() {
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
+      if (isRefreshingRef.current) return;
+
       const target = e.target as HTMLElement;
       const scrollableParent = getScrollableParent(target);
 
@@ -151,19 +153,42 @@ export default function PullToRefresh() {
     }
   }, [invalidateAll, globalRefresh]);
 
+  const handleTouchCancel = useCallback(() => {
+    isPulling.current = false;
+
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
+    }
+
+    isRefreshingRef.current = false;
+    setIsRefreshing(false);
+    pullDistanceRef.current = 0;
+    setPullDistance(0);
+
+    if (contentRef.current) {
+      contentRef.current.style.transform = "";
+      contentRef.current.style.transition = "";
+    }
+  }, []);
+
   useEffect(() => {
-    if (!isNativeApp) return;
+    if (!isCapacitor) return;
 
     document.addEventListener("touchstart", handleTouchStart, {
       passive: true,
     });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
     document.addEventListener("touchend", handleTouchEnd, { passive: true });
+    document.addEventListener("touchcancel", handleTouchCancel, {
+      passive: true,
+    });
 
     return () => {
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchcancel", handleTouchCancel);
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current);
         refreshTimeoutRef.current = null;
@@ -173,9 +198,15 @@ export default function PullToRefresh() {
         contentRef.current.style.transition = "";
       }
     };
-  }, [isNativeApp, handleTouchStart, handleTouchMove, handleTouchEnd]);
+  }, [
+    isCapacitor,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleTouchCancel,
+  ]);
 
-  if (!isNativeApp || pullDistance === 0) return null;
+  if (!isCapacitor || pullDistance === 0) return null;
 
   const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
   const shouldTrigger = pullDistance >= PULL_THRESHOLD;
