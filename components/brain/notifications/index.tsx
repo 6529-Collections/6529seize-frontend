@@ -16,14 +16,16 @@ interface NotificationsProps {
 const NOTIFICATION_CAUSE_PRIORITY: Record<ApiNotificationCause, number> = {
   [ApiNotificationCause.IdentitySubscribed]: 0,
   [ApiNotificationCause.IdentityMentioned]: 1,
-  [ApiNotificationCause.DropQuoted]: 2,
-  [ApiNotificationCause.DropReplied]: 3,
-  [ApiNotificationCause.DropVoted]: 4,
-  [ApiNotificationCause.DropBoosted]: 5,
-  [ApiNotificationCause.DropReacted]: 6,
-  [ApiNotificationCause.WaveCreated]: 7,
-  [ApiNotificationCause.AllDrops]: 8,
-  [ApiNotificationCause.PriorityAlert]: 9,
+  [ApiNotificationCause.IdentityRep]: 2,
+  [ApiNotificationCause.IdentityNic]: 3,
+  [ApiNotificationCause.DropQuoted]: 4,
+  [ApiNotificationCause.DropReplied]: 5,
+  [ApiNotificationCause.DropVoted]: 6,
+  [ApiNotificationCause.DropBoosted]: 7,
+  [ApiNotificationCause.DropReacted]: 8,
+  [ApiNotificationCause.WaveCreated]: 9,
+  [ApiNotificationCause.AllDrops]: 10,
+  [ApiNotificationCause.PriorityAlert]: 11,
 };
 
 const compareNotificationCause = (
