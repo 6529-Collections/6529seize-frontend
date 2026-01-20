@@ -9,8 +9,10 @@ import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { usePathname } from "next/navigation";
+import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import PullToRefresh from "./PullToRefresh";
 
 export default function LayoutWrapper({
   children,
@@ -18,6 +20,7 @@ export default function LayoutWrapper({
   readonly children: ReactNode;
 }) {
   const { isApp, hasTouchScreen } = useDeviceInfo();
+  const { refreshKey } = useGlobalRefresh();
   const isSmallScreen = useIsMobileScreen();
   const [isTouchTabletViewport, setIsTouchTabletViewport] = useState(() => {
     if (globalThis.window === undefined) {
@@ -85,9 +88,11 @@ export default function LayoutWrapper({
 
   return (
     <LayoutComponent>
+      {isApp && <PullToRefresh />}
       <ErrorBoundary
+        key={refreshKey}
         FallbackComponent={LayoutErrorFallback}
-        resetKeys={[pathname]}
+        resetKeys={[pathname, refreshKey]}
       >
         {children}
         <FooterWrapper />

@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiPost } from "@/services/api/common-api";
@@ -79,7 +80,12 @@ const NotificationsContext = createContext<
 
 const redirectConfig = {
   path: ({ path }: { path: string }) => `/${path}`,
-  profile: ({ handle }: { handle: string }) => `/${handle}`,
+  profile: ({ handle, subroute }: { handle: string; subroute?: string }) => {
+    if (!subroute) return `/${handle}`;
+    const validTab = getUserPageTabByRoute(subroute);
+    if (!validTab) return `/${handle}`;
+    return `/${handle}/${validTab.route}`;
+  },
   "the-memes": ({ id }: { id: string }) => `/the-memes/${id}`,
   "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
   "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
@@ -94,6 +100,7 @@ interface NotificationData {
   profile_id?: string | undefined;
   path?: string | undefined;
   handle?: string | undefined;
+  subroute?: string | undefined;
   id?: string | undefined;
   wave_id?: string | undefined;
   drop_id?: string | undefined;

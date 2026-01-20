@@ -32,10 +32,7 @@ export default function NotificationIdentityRating({
 }: NotificationIdentityRatingProps) {
   const { connectedProfile } = useContext(AuthContext);
   const isRep = notification.cause === ApiNotificationCause.IdentityRep;
-  const rating =
-    "rep_amount" in notification.additional_context
-      ? notification.additional_context.rep_amount
-      : notification.additional_context.nic_amount;
+  const { amount, total } = notification.additional_context;
   const category =
     "category" in notification.additional_context
       ? notification.additional_context.category
@@ -61,16 +58,16 @@ export default function NotificationIdentityRating({
           />
         }
       >
-        <span className="tw-text-xs tw-font-bold tw-text-iron-400">
-          &#8226;
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+          updated your{" "}
         </span>
         {linkHref ? (
           <Link
             href={linkHref}
             className="tw-text-sm tw-no-underline hover:tw-underline"
           >
-            <span className={`tw-font-medium ${getRatingColor(rating)}`}>
-              {formatRating(rating)} {ratingLabel}
+            <span className="tw-font-medium tw-text-iron-300">
+              {ratingLabel}
             </span>
             {category && (
               <span className="tw-font-normal tw-text-iron-400">
@@ -78,11 +75,15 @@ export default function NotificationIdentityRating({
                 for category &apos;{category}&apos;
               </span>
             )}
+            <span className="tw-font-normal tw-text-iron-400"> by </span>
+            <span className={`tw-font-medium ${getRatingColor(amount)}`}>
+              {formatRating(amount)}
+            </span>
           </Link>
         ) : (
           <span className="tw-text-sm">
-            <span className={`tw-font-medium ${getRatingColor(rating)}`}>
-              {formatRating(rating)} {ratingLabel}
+            <span className="tw-font-medium tw-text-iron-300">
+              {ratingLabel}
             </span>
             {category && (
               <span className="tw-font-normal tw-text-iron-400">
@@ -90,8 +91,21 @@ export default function NotificationIdentityRating({
                 for category &apos;{category}&apos;
               </span>
             )}
+            <span className="tw-font-normal tw-text-iron-400"> by </span>
+            <span className={`tw-font-medium ${getRatingColor(amount)}`}>
+              {formatRating(amount)}
+            </span>
           </span>
         )}
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-400">
+          <span className="tw-mr-1 tw-text-xs tw-font-bold tw-text-iron-400">
+            &#8226;
+          </span>
+          New Total:{" "}
+          <span className={`tw-font-medium ${getRatingColor(total)}`}>
+            {formatNumberWithCommas(total)}
+          </span>
+        </span>
         <NotificationTimestamp createdAt={notification.created_at} />
       </NotificationHeader>
     </div>

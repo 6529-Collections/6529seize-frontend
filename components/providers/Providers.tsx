@@ -10,6 +10,7 @@ import NewVersionToast from "@/components/utils/NewVersionToast";
 import { EmojiProvider } from "@/contexts/EmojiContext";
 import { HeaderProvider } from "@/contexts/HeaderContext";
 import { NavigationHistoryProvider } from "@/contexts/NavigationHistoryContext";
+import { RefreshProvider } from "@/contexts/RefreshContext";
 import { ScrollPositionProvider } from "@/contexts/ScrollPositionContext";
 import { SeizeSettingsProvider } from "@/contexts/SeizeSettingsContext";
 import { TitleProvider } from "@/contexts/TitleContext";
@@ -35,42 +36,44 @@ export default function Providers({
           <CapacitorSetup />
           <IpfsImageSetup />
           <ReactQueryWrapper>
-            <SeizeSettingsProvider>
-              <EmojiProvider>
-                <IpfsProvider>
-                  <SeizeConnectProvider>
-                    <Auth>
-                      <WaveEligibilityProvider>
-                        <NotificationsProvider>
-                          <CookieConsentProvider>
-                            <EULAConsentProvider>
-                              <AppWebSocketProvider>
-                                <LayoutProvider>
-                                  <MyStreamProvider>
-                                    <TitleProvider>
-                                      <HeaderProvider>
-                                        <ScrollPositionProvider>
-                                          <ViewProvider>
-                                            <NavigationHistoryProvider>
-                                              {children}
-                                            </NavigationHistoryProvider>
-                                          </ViewProvider>
-                                        </ScrollPositionProvider>
-                                      </HeaderProvider>
-                                    </TitleProvider>
-                                  </MyStreamProvider>
-                                </LayoutProvider>
-                                <NewVersionToast />
-                              </AppWebSocketProvider>
-                            </EULAConsentProvider>
-                          </CookieConsentProvider>
-                        </NotificationsProvider>
-                      </WaveEligibilityProvider>
-                    </Auth>
-                  </SeizeConnectProvider>
-                </IpfsProvider>
-              </EmojiProvider>
-            </SeizeSettingsProvider>
+            <RefreshProvider>
+              <SeizeSettingsProvider>
+                <EmojiProvider>
+                  <IpfsProvider>
+                    <SeizeConnectProvider>
+                      <Auth>
+                        <WaveEligibilityProvider>
+                          <NotificationsProvider>
+                            <CookieConsentProvider>
+                              <EULAConsentProvider>
+                                <AppWebSocketProvider>
+                                  <LayoutProvider>
+                                    <MyStreamProvider>
+                                      <TitleProvider>
+                                        <HeaderProvider>
+                                          <ScrollPositionProvider>
+                                            <ViewProvider>
+                                              <NavigationHistoryProvider>
+                                                {children}
+                                              </NavigationHistoryProvider>
+                                            </ViewProvider>
+                                          </ScrollPositionProvider>
+                                        </HeaderProvider>
+                                      </TitleProvider>
+                                    </MyStreamProvider>
+                                  </LayoutProvider>
+                                  <NewVersionToast />
+                                </AppWebSocketProvider>
+                              </EULAConsentProvider>
+                            </CookieConsentProvider>
+                          </NotificationsProvider>
+                        </WaveEligibilityProvider>
+                      </Auth>
+                    </SeizeConnectProvider>
+                  </IpfsProvider>
+                </EmojiProvider>
+              </SeizeSettingsProvider>
+            </RefreshProvider>
           </ReactQueryWrapper>
         </WagmiSetup>
       </AppWalletsProvider>

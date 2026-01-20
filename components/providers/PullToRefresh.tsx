@@ -1,8 +1,9 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useGlobalRefresh } from "@/contexts/RefreshContext";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
 const PULL_THRESHOLD = 80;
 const PULL_MAX = 140;
@@ -10,7 +11,8 @@ const INDICATOR_SIZE = 36;
 
 export default function PullToRefresh() {
   const isNativeApp = Capacitor.isNativePlatform();
-  const router = useRouter();
+  const { invalidateAll } = useContext(ReactQueryWrapperContext);
+  const { globalRefresh } = useGlobalRefresh();
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
@@ -123,7 +125,8 @@ export default function PullToRefresh() {
       }
       setPullDistance(INDICATOR_SIZE + 20);
 
-      router.refresh();
+      invalidateAll();
+      globalRefresh();
 
       refreshTimeoutRef.current = setTimeout(() => {
         setIsRefreshing(false);
@@ -141,7 +144,7 @@ export default function PullToRefresh() {
         contentRef.current.style.transition = "transform 0.3s ease-out";
       }
     }
-  }, [pullDistance, isRefreshing, router]);
+  }, [pullDistance, isRefreshing, invalidateAll, globalRefresh]);
 
   useEffect(() => {
     if (!isNativeApp) return;

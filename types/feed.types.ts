@@ -54,7 +54,8 @@ export type INotificationIdentitySubscribed = NotificationBase & {
 export type INotificationIdentityRep = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentityRep;
   readonly additional_context: {
-    readonly rep_amount: number;
+    readonly amount: number;
+    readonly total: number;
     readonly category: string;
   };
 };
@@ -62,7 +63,8 @@ export type INotificationIdentityRep = NotificationBase & {
 export type INotificationIdentityNic = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentityNic;
   readonly additional_context: {
-    readonly nic_amount: number;
+    readonly amount: number;
+    readonly total: number;
   };
 };
 
