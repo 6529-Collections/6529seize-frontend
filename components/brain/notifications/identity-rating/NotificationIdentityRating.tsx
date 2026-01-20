@@ -12,13 +12,9 @@ import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 
-type NotificationIdentityRatingProps =
-  | {
-      readonly notification: INotificationIdentityRep;
-    }
-  | {
-      readonly notification: INotificationIdentityNic;
-    };
+interface NotificationIdentityRatingProps {
+  readonly notification: INotificationIdentityRep | INotificationIdentityNic;
+}
 
 function getRatingColor(rating: number): string {
   if (rating > 0) return "tw-text-green";
