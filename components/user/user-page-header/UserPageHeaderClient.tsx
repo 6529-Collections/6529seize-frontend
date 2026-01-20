@@ -50,7 +50,8 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const routeHandleOrWallet = params?.["user"]?.toString().toLowerCase() ?? null;
+  const routeHandleOrWallet =
+    params?.["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
@@ -162,10 +163,10 @@ export default function UserPageHeaderClient({
           defaultBanner2={defaultBanner2}
           canEdit={canEdit}
         />
-        <div className="tw-relative tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
+        <div className="tw-relative tw-mx-auto tw-px-2 lg:tw-px-6 xl:tw-px-8">
           <div className="tw-flex tw-flex-col">
             <div className="tw-flex tw-justify-between">
-              <div className="-tw-mt-16 sm:-tw-mt-24 tw-w-min">
+              <div className="-tw-mt-16 tw-w-min sm:-tw-mt-24">
                 <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
                   <UserPageHeaderPfp
                     profile={profile}

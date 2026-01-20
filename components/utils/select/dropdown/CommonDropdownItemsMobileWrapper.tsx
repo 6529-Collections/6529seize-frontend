@@ -1,4 +1,10 @@
-import { Dialog, Transition } from "@headlessui/react";
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
 import type { ReactNode } from "react";
 import { Fragment } from "react";
 
@@ -14,56 +20,56 @@ export default function CommonDropdownItemsMobileWrapper({
   readonly children: ReactNode;
 }) {
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-z-[1000] tw-absolute lg:tw-hidden"
+        className="tailwind-scope tw-absolute tw-z-[1000] lg:desktop-hover:tw-hidden"
         onClose={setOpen}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
-          enter="tw-ease-in-out tw-duration-300"
+          enter="tw-duration-300 tw-ease-in-out"
           enterFrom="tw-opacity-0"
           enterTo="tw-opacity-100"
-          leave="tw-ease-in-out tw-duration-300"
+          leave="tw-duration-300 tw-ease-in-out"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
           <div className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="tw-fixed tw-inset-0 tw-overflow-hidden">
           <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
             <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
-                enter="tw-transform tw-transition tw-ease-out tw-duration-300"
+                enter="tw-transform tw-transition tw-duration-300 tw-ease-out"
                 enterFrom="tw-translate-y-full"
                 enterTo="tw-translate-y-0"
-                leave="tw-transform tw-transition tw-ease-in tw-duration-300"
+                leave="tw-transform tw-transition tw-duration-300 tw-ease-in"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <Dialog.Panel className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu">
-                  <Transition.Child
+                <DialogPanel className="tw-pointer-events-auto tw-relative tw-w-screen tw-transform-gpu">
+                  <TransitionChild
                     as={Fragment}
-                    enter="tw-ease-in-out tw-duration-300"
+                    enter="tw-duration-300 tw-ease-in-out"
                     enterFrom="tw-opacity-0"
                     enterTo="tw-opacity-100"
-                    leave="tw-ease-in-out tw-duration-300"
+                    leave="tw-duration-300 tw-ease-in-out"
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >
-                    <div className="tw-absolute tw-right-0 -tw-top-16 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
+                    <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
                       <button
                         type="button"
                         title="Close panel"
                         aria-label="Close panel"
-                        className="tw-p-2.5 tw-relative tw-bg-transparent tw-rounded-md focus:tw-outline-none tw-border-none focus:tw-ring-2 focus:tw-ring-white"
+                        className="tw-relative tw-rounded-md tw-border-none tw-bg-transparent tw-p-2.5 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white"
                         onClick={() => setOpen(false)}
                       >
                         <svg
-                          className="tw-w-6 tw-h-6 tw-flex-shrink-0 tw-text-white"
+                          className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-white"
                           viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"
@@ -79,10 +85,9 @@ export default function CommonDropdownItemsMobileWrapper({
                         </svg>
                       </button>
                     </div>
-                  </Transition.Child>
+                  </TransitionChild>
                   <div
-                    className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-pt-6 
-                    "
+                    className="tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 tw-pt-6"
                     style={{
                       maxHeight: "calc(100vh - 8rem)",
                       paddingBottom: "env(safe-area-inset-bottom,0px)",
@@ -90,23 +95,23 @@ export default function CommonDropdownItemsMobileWrapper({
                   >
                     {label && (
                       <div className="tw-px-6">
-                        <Dialog.Title className="tw-text-base tw-font-semibold tw-text-iron-50">
+                        <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
                           {label}
-                        </Dialog.Title>
+                        </DialogTitle>
                       </div>
                     )}
-                    <div className="tw-relative tw-mt-3 tw-flex-1 tw-px-4 sm:tw-px-6 tw-gap-y-6 tw-flex tw-flex-col">
-                      <ul className="tw-flex tw-flex-col tw-mx-0 tw-pl-0 tw-space-y-3 tw-mb-0 tw-list-none">
+                    <div className="tw-relative tw-mt-3 tw-flex tw-flex-1 tw-flex-col tw-gap-y-6 tw-px-4 sm:tw-px-6">
+                      <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-space-y-3 tw-pl-0">
                         {children}
                       </ul>
                     </div>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

@@ -2,12 +2,17 @@ import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { TypedNotification } from "@/types/feed.types";
+import type {
+  INotificationGeneric,
+  TypedNotification,
+} from "@/types/feed.types";
 import { memo } from "react";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
+import NotificationGeneric from "./generic/NotificationGeneric";
 import NotificationIdentityMentioned from "./identity-mentioned/NotificationIdentityMentioned";
+import NotificationIdentityRating from "./identity-rating/NotificationIdentityRating";
 import NotificationIdentitySubscribed from "./identity-subscribed/NotificationIdentitySubscribed";
 import NotificationPriorityAlert from "./priority-alert/NotificationPriorityAlert";
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
@@ -74,6 +79,9 @@ function NotificationItemComponent({
         );
       case ApiNotificationCause.IdentitySubscribed:
         return <NotificationIdentitySubscribed notification={notification} />;
+      case ApiNotificationCause.IdentityRep:
+      case ApiNotificationCause.IdentityNic:
+        return <NotificationIdentityRating notification={notification} />;
       case ApiNotificationCause.WaveCreated:
         return <NotificationWaveCreated notification={notification} />;
       case ApiNotificationCause.AllDrops:
@@ -97,7 +105,11 @@ function NotificationItemComponent({
           />
         );
       default:
-        return <div />;
+        return (
+          <NotificationGeneric
+            notification={notification as unknown as INotificationGeneric}
+          />
+        );
     }
   };
 
