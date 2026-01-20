@@ -173,9 +173,6 @@ export default function PullToRefresh() {
   }, []);
 
   useEffect(() => {
-    // Temporarily disabled - users report pull-to-refresh is too aggressive
-    return;
-
     if (!isCapacitor) return;
 
     document.addEventListener("touchstart", handleTouchStart, {
@@ -208,9 +205,6 @@ export default function PullToRefresh() {
     handleTouchEnd,
     handleTouchCancel,
   ]);
-
-  // Temporarily disabled - users report pull-to-refresh is too aggressive
-  return null;
 
   if (!isCapacitor || pullDistance === 0) return null;
 
