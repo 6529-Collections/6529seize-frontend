@@ -12,7 +12,12 @@
     //    (Next.js entries are auto-added by the Next plugin)
     "entry": [
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
-      "app/**/route.{ts,tsx}"          // Next App Router route handlers (if used)
+      "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
+      "eslint.config.tight.mjs",
+      "jest.config.js",
+      "jest.setup.js",
+      "next-sitemap.config.ts",
+      "playwright.config.ts"
     ],
   
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,

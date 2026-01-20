@@ -40,7 +40,8 @@
     "deadcode:deps": "depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp\"",
     "deadcode": "npm run deadcode:knip && npm run deadcode:exports && npm run deadcode:deps",
     "cr": "coderabbit --type uncommitted --base main --prompt-only",
-    "sync": "bash scripts/worktree/wt-sync.sh"
+    "sync": "bash scripts/worktree/wt-sync.sh",
+    "quality": "node scripts/quality.js"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "^1.11.1",
