@@ -4,7 +4,7 @@ import { formatCompactNumber } from "../utils/formatNumbers";
 interface MetricSparklineProps {
   readonly data: number[];
   readonly color: string;
-  readonly dates?: number[];
+  readonly dates?: number[] | undefined;
 }
 
 function formatDate(timestamp: number): string {
