@@ -9,6 +9,7 @@ import {
   formatNumberWithCommas,
   formatPercent,
 } from "../utils/formatNumbers";
+import MetricSparkline from "./MetricSparkline";
 
 interface CumulativeMetricCardProps {
   readonly title: string;
@@ -19,6 +20,8 @@ interface CumulativeMetricCardProps {
   readonly accentColor: string;
   readonly unit?: string;
   readonly href?: string;
+  readonly sparklineData?: number[] | undefined;
+  readonly sparklineColor?: string | undefined;
 }
 
 function ChangeRow({
@@ -69,6 +72,8 @@ export default function CumulativeMetricCard({
   accentColor,
   unit = "",
   href,
+  sparklineData,
+  sparklineColor,
 }: CumulativeMetricCardProps) {
   const total = dailyData.current.valueCount;
   const daily24hChange =
@@ -78,7 +83,7 @@ export default function CumulativeMetricCard({
 
   const content = (
     <div
-      className={`tw-block tw-h-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5 tw-transition-all tw-duration-300 ${href ? "hover:-tw-translate-y-1 hover:tw-border-neutral-700 hover:tw-shadow-xl hover:tw-shadow-neutral-900/50" : ""}`}
+      className={`tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5 tw-transition-all tw-duration-300 ${sparklineData && sparklineColor ? "tw-pb-0" : ""} ${href ? "hover:-tw-translate-y-1 hover:tw-border-neutral-700 hover:tw-shadow-xl hover:tw-shadow-neutral-900/50" : ""}`}
     >
       <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between">
         <h3 className="tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-white">
@@ -143,6 +148,9 @@ export default function CumulativeMetricCard({
           />
         </div>
       </div>
+      {sparklineData && sparklineColor && (
+        <MetricSparkline data={sparklineData} color={sparklineColor} />
+      )}
     </div>
   );
 

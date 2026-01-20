@@ -2,6 +2,7 @@
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
+import { useCommunityMetricsSeries } from "@/hooks/useCommunityMetricsSeries";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
 import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import MetricCard from "./components/MetricCard";
@@ -30,10 +31,12 @@ export default function MetricsPageClient() {
   const dailyQuery = useCommunityMetrics("DAY");
   const weeklyQuery = useCommunityMetrics("WEEK");
   const mintQuery = useMintMetrics(50);
+  const seriesQuery = useCommunityMetricsSeries();
 
   const isLoading =
     dailyQuery.isLoading || weeklyQuery.isLoading || mintQuery.isLoading;
   const error = dailyQuery.error ?? weeklyQuery.error ?? mintQuery.error;
+  const series = seriesQuery.data;
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-black">
@@ -68,6 +71,8 @@ export default function MetricsPageClient() {
                 icon={<DroppersIcon />}
                 iconBgColor="tw-bg-purple-500"
                 accentColor="tw-text-purple-400"
+                sparklineData={series?.distinctDroppers}
+                sparklineColor="tw-bg-purple-500"
               />
               <MetricCard
                 title="Drops Created"
@@ -76,6 +81,8 @@ export default function MetricsPageClient() {
                 icon={<DropsIcon />}
                 iconBgColor="tw-bg-blue-500"
                 accentColor="tw-text-blue-400"
+                sparklineData={series?.dropsCreated}
+                sparklineColor="tw-bg-blue-500"
               />
               <MetricCard
                 title="Submissions"
@@ -84,6 +91,8 @@ export default function MetricsPageClient() {
                 icon={<SubmissionsIcon />}
                 iconBgColor="tw-bg-orange-500"
                 accentColor="tw-text-orange-400"
+                sparklineData={series?.mainStageSubmissions}
+                sparklineColor="tw-bg-orange-500"
               />
               <MetricCard
                 title="Distinct Voters"
@@ -92,6 +101,8 @@ export default function MetricsPageClient() {
                 icon={<VotersIcon />}
                 iconBgColor="tw-bg-emerald-500"
                 accentColor="tw-text-emerald-400"
+                sparklineData={series?.mainStageDistinctVoters}
+                sparklineColor="tw-bg-emerald-500"
               />
               <MetricCard
                 title="Vote Volume"
@@ -101,6 +112,8 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-cyan-500"
                 accentColor="tw-text-cyan-400"
                 useValueCount
+                sparklineData={series?.mainStageVotes}
+                sparklineColor="tw-bg-cyan-500"
               />
               <CumulativeMetricCard
                 title="Voting Power"
@@ -110,6 +123,8 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-amber-500"
                 accentColor="tw-text-amber-400"
                 unit="TDH"
+                sparklineData={series?.tdhOnMainStageSubmissions}
+                sparklineColor="tw-bg-amber-500"
               />
               <CumulativeMetricCard
                 title="Network TDH"
@@ -120,6 +135,8 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-teal-400"
                 unit="TDH"
                 href="/network/metrics/network-tdh"
+                sparklineData={series?.networkTdh}
+                sparklineColor="tw-bg-teal-500"
               />
               <CumulativeMetricCard
                 title="TDH Utilization %"
@@ -129,6 +146,8 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-rose-500"
                 accentColor="tw-text-rose-400"
                 unit="%"
+                sparklineData={series?.tdhUtilizationPercentage}
+                sparklineColor="tw-bg-rose-500"
               />
               <CumulativeMetricCard
                 title="xTDH Granted"
@@ -138,6 +157,8 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-lime-500"
                 accentColor="tw-text-lime-400"
                 unit="xTDH"
+                sparklineData={series?.xtdhGranted}
+                sparklineColor="tw-bg-lime-500"
               />
               <CumulativeMetricCard
                 title="Profile Count"
@@ -146,6 +167,8 @@ export default function MetricsPageClient() {
                 icon={<ProfileIcon />}
                 iconBgColor="tw-bg-violet-500"
                 accentColor="tw-text-violet-400"
+                sparklineData={series?.profileCount}
+                sparklineColor="tw-bg-violet-500"
               />
               <MetricCard
                 title="Active Identities"
@@ -154,6 +177,8 @@ export default function MetricsPageClient() {
                 icon={<ActiveIdentitiesIcon />}
                 iconBgColor="tw-bg-pink-500"
                 accentColor="tw-text-pink-400"
+                sparklineData={series?.activeIdentities}
+                sparklineColor="tw-bg-pink-500"
               />
               <MetricCard
                 title="Consolidations Formed"
@@ -162,6 +187,8 @@ export default function MetricsPageClient() {
                 icon={<ConsolidationsIcon />}
                 iconBgColor="tw-bg-indigo-500"
                 accentColor="tw-text-indigo-400"
+                sparklineData={series?.consolidationsFormed}
+                sparklineColor="tw-bg-indigo-500"
               />
             </div>
           )}
