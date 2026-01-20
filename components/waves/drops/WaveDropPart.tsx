@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useState, useEffect, useRef } from "react";
+import React, { memo, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPartDrop from "./WaveDropPartDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -20,6 +20,7 @@ interface WaveDropPartProps {
   readonly onCancel?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
+  readonly hasTouch?: boolean | undefined;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -40,12 +41,9 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     onCancel,
     isCompetitionDrop = false,
     mediaImageScale = ImageScale.AUTOx450,
+    hasTouch = false,
   }) => {
-    const [activePart, setActivePart] = useState(drop.parts[activePartIndex]);
-
-    useEffect(() => {
-      setActivePart(drop.parts[activePartIndex]);
-    }, [activePartIndex, drop.parts]);
+    const activePart = drop.parts[activePartIndex];
 
     const isStorm = drop.parts.length > 1;
     const havePreviousPart = activePartIndex > 0;
@@ -58,7 +56,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const touchStartY = useRef(0);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-      if (isTemporaryDrop) return;
+      if (isTemporaryDrop || !hasTouch) return;
 
       touchStartX.current = e.touches[0]!.clientX;
       touchStartY.current = e.touches[0]!.clientY;
@@ -70,17 +68,19 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!hasTouch) return;
       const touchX = e.touches[0]!.clientX;
       const touchY = e.touches[0]!.clientY;
 
       const deltaX = Math.abs(touchX - touchStartX.current);
       const deltaY = Math.abs(touchY - touchStartY.current);
 
-      if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
-        if (longPressTimeout.current) {
-          clearTimeout(longPressTimeout.current);
-          longPressTimeout.current = null;
-        }
+      if (
+        (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) &&
+        longPressTimeout.current
+      ) {
+        clearTimeout(longPressTimeout.current);
+        longPressTimeout.current = null;
       }
     };
 
@@ -111,7 +111,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
-        className={`tw-no-underline touch-select-none ${
+        className={`touch-select-none tw-no-underline ${
           isTemporaryDrop || !onDropContentClick
             ? "tw-cursor-default"
             : "tw-cursor-pointer"
@@ -122,7 +122,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
           !isTemporaryDrop && e.key === "Enter" && handleClick()
         }
       >
-        <div className="tw-relative tw-overflow-hidden  tw-transition-all tw-duration-300 tw-ease-out">
+        <div className="tw-relative tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDropPartDrop
             drop={drop}
             activePart={activePart}

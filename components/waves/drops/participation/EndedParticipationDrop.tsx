@@ -1,24 +1,25 @@
 "use client";
 
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams} from "../Drop";
-import { DropLocation } from "../Drop";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useState, useCallback } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import WaveDropActions from "../WaveDropActions";
-import WaveDropMobileMenu from "../WaveDropMobileMenu";
-import WaveDropContent from "../WaveDropContent";
-import WaveDropMetadata from "../WaveDropMetadata";
-import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import type { DropInteractionParams } from "../Drop";
+import { DropLocation } from "../Drop";
+import WaveDropActions from "../WaveDropActions";
+import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
+import WaveDropContent from "../WaveDropContent";
+import WaveDropMetadata from "../WaveDropMetadata";
+import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropReactions from "../WaveDropReactions";
 
 interface EndedParticipationDropProps {
@@ -51,6 +52,7 @@ export default function EndedParticipationDrop({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
+  const hasTouch = useIsTouchDevice() || isMobile;
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -59,10 +61,10 @@ export default function EndedParticipationDrop({
   };
 
   const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
+    if (!hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [isMobile]);
+  }, [hasTouch]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -78,6 +80,17 @@ export default function EndedParticipationDrop({
     setIsSlideUp(false);
   }, []);
 
+  const getDropLocationBackground = () => {
+    if (location === DropLocation.WAVE) {
+      return "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+    }
+    return "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  };
+
+  const dropBackgroundClass = isActiveDrop
+    ? "tw-bg-[#3CCB7F]/10"
+    : getDropLocationBackground();
+
   return (
     <div
       className={`${
@@ -85,14 +98,7 @@ export default function EndedParticipationDrop({
       } tw-w-full`}
     >
       <div
-        className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group tw-transition-colors tw-duration-200 tw-ease-linear
-          ${
-            isActiveDrop
-              ? "tw-bg-[#3CCB7F]/10"
-              : location === DropLocation.WAVE
-              ? "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-iron-800"
-              : "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800"
-          }`}
+        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
       >
         {!isMobile && showReplyAndQuote && (
           <WaveDropActions
@@ -104,10 +110,10 @@ export default function EndedParticipationDrop({
           />
         )}
 
-        <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
+        <div className="tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           <WaveDropAuthorPfp drop={drop} />
 
-          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
             <div className="tw-flex tw-flex-col tw-gap-y-2">
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <UserCICAndLevel
@@ -115,25 +121,28 @@ export default function EndedParticipationDrop({
                   size={UserCICAndLevelSize.SMALL}
                 />
 
-                <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
                   <Link
                     onClick={(e) =>
-                      handleNavigation(e, `/${drop.author.handle}`)
+                      handleNavigation(
+                        e,
+                        `/${drop.author.handle ?? drop.author.primary_address}`
+                      )
                     }
-                    href={`/${drop.author.handle}`}
-                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
+                    href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
                   >
-                    {drop.author.handle}
+                    {drop.author.handle ?? drop.author.primary_address}
                   </Link>
                 </p>
 
-                <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+                <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
 
-                <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+                <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
                   {getTimeAgoShort(drop.created_at)}
                 </p>
               </div>
-              <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-px-2 tw-py-0.5 tw-bg-iron-600/10 tw-text-iron-500 tw-border tw-border-solid tw-border-iron-500/25 tw-w-fit">
+              <div className="tw-flex tw-w-fit tw-items-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-border-iron-500/25 tw-bg-iron-600/10 tw-px-2 tw-py-0.5 tw-font-medium tw-text-iron-500">
                 <span className="tw-text-xs">Participant</span>
               </div>
             </div>
@@ -154,7 +163,7 @@ export default function EndedParticipationDrop({
                         }
                       | undefined;
                   }
-                )?.chat;
+                ).chat;
                 const isDirectMessage =
                   waveMeta?.scope?.group?.is_direct_message ?? false;
                 const waveHref = getWaveRoute({
@@ -166,7 +175,7 @@ export default function EndedParticipationDrop({
                   <Link
                     href={waveHref}
                     onClick={(e) => handleNavigation(e, waveHref)}
-                    className="tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                    className="tw-leading-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
                   >
                     {drop.wave.name}
                   </Link>
@@ -182,16 +191,17 @@ export default function EndedParticipationDrop({
               onQuoteClick={onQuoteClick}
               setLongPressTriggered={setLongPressTriggered}
               isCompetitionDrop={true}
+              hasTouch={hasTouch}
             />
           </div>
         </div>
 
         {drop.metadata.length > 0 && (
-          <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             <WaveDropMetadata metadata={drop.metadata} />
           </div>
         )}
-        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <WaveDropReactions drop={drop} />
         </div>
 
