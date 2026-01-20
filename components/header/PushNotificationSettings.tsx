@@ -91,10 +91,20 @@ export default function PushNotificationSettings({
           });
           setOriginalSettings(settings);
           setCurrentSettings(settings);
-        } catch {
-          // If not found, use defaults (all true)
-          setOriginalSettings(DEFAULT_SETTINGS);
-          setCurrentSettings(DEFAULT_SETTINGS);
+        } catch (error: unknown) {
+          const status =
+            (error as { status?: number })?.status ??
+            (error as { response?: { status?: number } })?.response?.status;
+          if (status === 404) {
+            setOriginalSettings(DEFAULT_SETTINGS);
+            setCurrentSettings(DEFAULT_SETTINGS);
+          } else {
+            console.error("Error fetching push notification settings:", error);
+            setToast({
+              message: "Failed to load notification settings",
+              type: "error",
+            });
+          }
         }
       } catch (error) {
         console.error("Error loading push notification settings:", error);
@@ -140,6 +150,13 @@ export default function PushNotificationSettings({
         type: "success",
       });
       onClose();
+    },
+    onError: (error: unknown) => {
+      console.error("Error saving push notification settings:", error);
+      setToast({
+        message: "Failed to save notification settings",
+        type: "error",
+      });
     },
   });
 

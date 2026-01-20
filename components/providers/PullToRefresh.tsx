@@ -16,6 +16,7 @@ export default function PullToRefresh() {
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
   const contentRef = useRef<HTMLElement | null>(null);
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAtTop = useCallback(() => {
     return window.scrollY <= 0;
@@ -98,6 +99,12 @@ export default function PullToRefresh() {
         if (distance > 10) {
           e.preventDefault();
         }
+      } else {
+        setPullDistance(0);
+        if (contentRef.current) {
+          contentRef.current.style.transform = "";
+          contentRef.current.style.transition = "";
+        }
       }
     },
     [isAtTop, isRefreshing, getScrollableParent]
@@ -118,13 +125,14 @@ export default function PullToRefresh() {
 
       router.refresh();
 
-      setTimeout(() => {
+      refreshTimeoutRef.current = setTimeout(() => {
         setIsRefreshing(false);
         setPullDistance(0);
         if (contentRef.current) {
           contentRef.current.style.transform = "";
           contentRef.current.style.transition = "transform 0.3s ease-out";
         }
+        refreshTimeoutRef.current = null;
       }, 1000);
     } else {
       setPullDistance(0);
@@ -148,6 +156,10 @@ export default function PullToRefresh() {
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        refreshTimeoutRef.current = null;
+      }
       if (contentRef.current) {
         contentRef.current.style.transform = "";
         contentRef.current.style.transition = "";
