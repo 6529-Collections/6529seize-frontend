@@ -4,10 +4,11 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
-import type { DropInteractionParams} from "../Drop";
+import type { DropInteractionParams } from "../Drop";
 import { DropLocation } from "../Drop";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -34,22 +35,23 @@ const getRankColorsByRank = (
       borderColor: "#fbbf24",
       textColor: "#E8D48A",
     };
-  } else if (rankNumber === 2) {
+  }
+  if (rankNumber === 2) {
     return {
       borderColor: "#C0C0C0",
       textColor: "#E8E8E8",
     };
-  } else if (rankNumber === 3) {
+  }
+  if (rankNumber === 3) {
     return {
       borderColor: "#CD7F32",
       textColor: "#CD7F32",
     };
-  } else {
-    return {
-      borderColor: "#60606C",
-      textColor: "#7F8A93",
-    };
   }
+  return {
+    borderColor: "#60606C",
+    textColor: "#7F8A93",
+  };
 };
 
 const getDropStyles = (
@@ -104,18 +106,25 @@ const DefaultWinnerDrop = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
+  const hasTouch = useIsTouchDevice() || isMobile;
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
   const decisionTime = drop.winning_context?.decision_time;
 
   const colors = getRankColorsByRank(effectiveRank);
+  const getBackgroundColorClass = (loc: DropLocation): string =>
+    loc === DropLocation.WAVE ? "tw-bg-iron-900/60" : "tw-bg-iron-950";
+
+  const bgColorClass = isActiveDrop
+    ? "tw-bg-[#3CCB7F]/10"
+    : getBackgroundColorClass(location);
 
   const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
+    if (!hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [isMobile]);
+  }, [hasTouch]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -138,14 +147,7 @@ const DefaultWinnerDrop = ({
       }`}
     >
       <div
-        className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
-          ${
-            isActiveDrop
-              ? "tw-bg-[#3CCB7F]/10"
-              : location === DropLocation.WAVE
-              ? "tw-bg-iron-900/60"
-              : "tw-bg-iron-950"
-          }`}
+        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-px-4 tw-py-3 ${bgColorClass}`}
         style={{
           border: "1px solid transparent",
           borderLeft: "1.5px solid transparent",
@@ -166,9 +168,9 @@ const DefaultWinnerDrop = ({
           />
         )}
 
-        <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-relative tw-z-10">
+        <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
           <WaveDropAuthorPfp drop={drop} />
-          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
             <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-1">
               <WaveDropHeader
                 drop={drop}
@@ -183,24 +185,23 @@ const DefaultWinnerDrop = ({
               />
               {showWaveInfo &&
                 (() => {
-                  const waveDetails =
-                    (drop.wave as unknown as {
-                      chat?:
-                        | {
-                            scope?:
-                              | {
-                                  group?:
-                                    | {
-                                        is_direct_message?: boolean | undefined;
-                                      }
-                                    | undefined;
-                                }
-                              | undefined;
-                          }
-                        | undefined;
-                    }) ?? undefined;
+                  const waveDetails = drop.wave as unknown as {
+                    chat?:
+                      | {
+                          scope?:
+                            | {
+                                group?:
+                                  | {
+                                      is_direct_message?: boolean | undefined;
+                                    }
+                                  | undefined;
+                              }
+                            | undefined;
+                        }
+                      | undefined;
+                  };
                   const isDirectMessage =
-                    waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+                    waveDetails.chat?.scope?.group?.is_direct_message ?? false;
                   const waveHref = getWaveRoute({
                     waveId: drop.wave.id,
                     isDirectMessage,
@@ -210,7 +211,7 @@ const DefaultWinnerDrop = ({
                     <Link
                       href={waveHref}
                       onClick={(e) => e.stopPropagation()}
-                      className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                      className="tw-mt-0.5 tw-text-xs tw-leading-none tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
                     >
                       {drop.wave.name}
                     </Link>
@@ -227,6 +228,7 @@ const DefaultWinnerDrop = ({
                 onLongPress={handleLongPress}
                 setLongPressTriggered={setLongPressTriggered}
                 isCompetitionDrop={true}
+                hasTouch={hasTouch}
               />
             </div>
           </div>
@@ -241,11 +243,11 @@ const DefaultWinnerDrop = ({
             />
           </div>
         )}
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-ml-[3.25rem] tw-mt-1.5">
+        <div className="tw-ml-[3.25rem] tw-mt-1.5 tw-flex tw-flex-col tw-gap-2">
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}
-          <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             {!!drop.raters_count && <WaveDropRatings drop={drop} />}
             <WaveDropReactions drop={drop} />
           </div>

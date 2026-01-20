@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;
@@ -27,22 +28,23 @@ export default function DropMobileMenuHandler({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
+  const hasTouch = useIsTouchDevice() || isMobile;
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
 
   const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
+    if (!hasTouch) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [isMobile]);
+  }, [hasTouch]);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (isTemporaryDrop) return;
 
     // Prevent text selection highlighting during long press
-    if (isMobile) {
+    if (hasTouch) {
       e.preventDefault();
     }
 
@@ -57,7 +59,7 @@ export default function DropMobileMenuHandler({
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     // Prevent scrolling/selection during long press detection
-    if (isMobile && longPressTimeout.current) {
+    if (hasTouch && longPressTimeout.current) {
       e.preventDefault();
     }
 
@@ -67,11 +69,12 @@ export default function DropMobileMenuHandler({
     const deltaX = Math.abs(touchX! - touchStartX.current);
     const deltaY = Math.abs(touchY! - touchStartY.current);
 
-    if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
-      if (longPressTimeout.current) {
-        clearTimeout(longPressTimeout.current);
-        longPressTimeout.current = null;
-      }
+    if (
+      (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) &&
+      longPressTimeout.current
+    ) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
     }
   };
 
@@ -102,7 +105,8 @@ export default function DropMobileMenuHandler({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}>
+      onTouchCancel={handleTouchEnd}
+    >
       {children} {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
