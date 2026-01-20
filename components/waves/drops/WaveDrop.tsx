@@ -8,6 +8,7 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -171,6 +172,7 @@ const WaveDrop = ({
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
+  const hasTouch = useIsTouchDevice() || isMobile;
   const compact = useCompactMode();
 
   const isProfileView = location === DropLocation.PROFILE;
@@ -186,25 +188,25 @@ const WaveDrop = ({
   const groupingClass = getGroupingClass();
 
   const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
+    if (!hasTouch) return;
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [isMobile, editingDropId, dispatch]);
+  }, [hasTouch, editingDropId, dispatch]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      if (!isMobile) return;
+      if (!hasTouch) return;
       // Don't allow mobile menu when in edit mode
       if (isEditing) return;
       const touch = e.touches[0];
       touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
       longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
     },
-    [isMobile, handleLongPress, isEditing]
+    [hasTouch, handleLongPress, isEditing]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -410,6 +412,7 @@ const WaveDrop = ({
                 isSaving={dropUpdateMutation.isPending}
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}
+                hasTouch={hasTouch}
               />
             </div>
           </div>

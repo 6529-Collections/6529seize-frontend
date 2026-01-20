@@ -3,6 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPart from "./WaveDropPart";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface WaveDropContentProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +19,7 @@ interface WaveDropContentProps {
   readonly onCancel?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
+  readonly hasTouch?: boolean | undefined;
 }
 
 const WaveDropContent: React.FC<WaveDropContentProps> = ({
@@ -34,7 +36,11 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   onCancel,
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
+  hasTouch,
 }) => {
+  const isTouchDevice = useIsTouchDevice();
+  const effectiveHasTouch = hasTouch ?? isTouchDevice;
+
   return (
     <WaveDropPart
       drop={drop}
@@ -50,6 +56,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       onCancel={onCancel}
       isCompetitionDrop={isCompetitionDrop}
       mediaImageScale={mediaImageScale}
+      hasTouch={effectiveHasTouch}
     />
   );
 };

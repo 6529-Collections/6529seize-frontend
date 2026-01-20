@@ -17,17 +17,11 @@ export default function WaveRating({ wave }: WaveRatingProps) {
   const creditType = wave.voting.credit_type;
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-1.5">
-      <div className="tw-flex tw-items-center">
-        <span className="tw-font-medium tw-text-iron-200 tw-text-sm">
-          {CREDIT_TYPE_LABELS[creditType]}
-        </span>
-        {creditType === ApiWaveCreditType.Rep && (
-          <div className="tw-ml-1.5">
-            <WaveRatingRep wave={wave} />
-          </div>
-        )}
-      </div>
+    <div className="tw-flex tw-w-full tw-max-w-[18rem] tw-flex-col tw-items-end tw-gap-2 tw-text-sm">
+      <span className="tw-self-end tw-font-medium tw-text-iron-200">
+        {CREDIT_TYPE_LABELS[creditType]}
+      </span>
+      {creditType === ApiWaveCreditType.Rep && <WaveRatingRep wave={wave} />}
     </div>
   );
 }

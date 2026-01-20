@@ -32,6 +32,7 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           floorPrice={formatEth(nft.floor_price)}
         />
         <NowMintingDetailsAccordion
+          nftId={nft.id}
           mintDate={nft.mint_date}
           fileType={getFileTypeFromMetadata(nft.metadata)}
           dimensions={getDimensionsFromMetadata(nft.metadata)}

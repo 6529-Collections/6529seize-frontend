@@ -15,31 +15,31 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
 
   return (
     <div
-      className={`tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
+      className={`tw-relative tw-overflow-auto tw-bg-iron-950 ${ringClasses}`}
     >
       <div className="tw-pb-4">
-        <div className="tw-px-4 tw-pt-3 tw-flex tw-justify-between tw-items-center">
-          <p className="tw-mb-0 tw-text-base tw-text-iron-200 tw-font-semibold tw-tracking-tight">
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-3">
+          <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
             General
           </p>
         </div>
 
-        <div className="tw-px-4 tw-mt-2.5 tw-flex tw-flex-col tw-gap-2">
-          <div className="tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-1.5 tw-h-6">
+        <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-2 tw-px-4">
+          <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
             <span className="tw-font-medium tw-text-iron-400">Type</span>
             <div className="tw-flex tw-items-center tw-gap-x-1">
               <WaveTypeIcon waveType={wave.wave.type} />
             </div>
           </div>
 
-          <div className="tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-1.5 tw-h-6">
+          <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-text-sm">
             <span className="tw-font-medium tw-text-iron-400">Voting</span>
-            <div className="tw-flex tw-items-center tw-gap-x-1">
+            <div className="tw-flex tw-flex-1 tw-justify-end">
               <WaveRating wave={wave} />
             </div>
           </div>
 
-          <div className="tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-1.5 tw-h-6">
+          <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
             <span className="tw-font-medium tw-text-iron-400">Creator</span>
             <div className="tw-flex tw-items-center tw-gap-x-1">
               <WaveAuthor wave={wave} />
