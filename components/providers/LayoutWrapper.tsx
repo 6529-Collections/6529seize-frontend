@@ -6,13 +6,13 @@ import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
 import WebLayout from "@/components/layout/WebLayout";
 import LayoutErrorFallback from "@/components/providers/LayoutErrorFallback";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
+import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { usePathname } from "next/navigation";
-import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import PullToRefresh from "./PullToRefresh";
+// import PullToRefresh from "./PullToRefresh";
 
 export default function LayoutWrapper({
   children,
@@ -88,7 +88,8 @@ export default function LayoutWrapper({
 
   return (
     <LayoutComponent>
-      {isApp && <PullToRefresh />}
+      {/* Temporarily disabled - users report pull-to-refresh is too aggressive */}
+      {/* {isApp && <PullToRefresh />} */}
       <ErrorBoundary
         key={refreshKey}
         FallbackComponent={LayoutErrorFallback}
