@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useEffect, useRef } from "react";
+import PullToRefresh from "./PullToRefresh";
 
 export default function CapacitorSetup() {
   const { isCapacitor } = useCapacitor();
@@ -44,5 +45,6 @@ export default function CapacitorSetup() {
       }
     };
   }, [isCapacitor]);
-  return null;
+
+  return <PullToRefresh />;
 }

@@ -1,0 +1,210 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { useRouter } from "next/navigation";
+
+const PULL_THRESHOLD = 80;
+const PULL_MAX = 140;
+const INDICATOR_SIZE = 36;
+
+export default function PullToRefresh() {
+  const isNativeApp = Capacitor.isNativePlatform();
+  const router = useRouter();
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const touchStartY = useRef(0);
+  const isPulling = useRef(false);
+  const contentRef = useRef<HTMLElement | null>(null);
+
+  const isAtTop = useCallback(() => {
+    return window.scrollY <= 0;
+  }, []);
+
+  const getScrollableParent = useCallback((element: HTMLElement | null): HTMLElement | null => {
+    if (!element) return null;
+    const style = window.getComputedStyle(element);
+    const overflowY = style.overflowY;
+    if (overflowY === "scroll" || overflowY === "auto") {
+      if (element.scrollHeight > element.clientHeight) {
+        return element;
+      }
+    }
+    return getScrollableParent(element.parentElement);
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollableParent = getScrollableParent(target);
+      
+      if (scrollableParent && scrollableParent.scrollTop > 0) {
+        return;
+      }
+      
+      if (!isAtTop()) return;
+      
+      touchStartY.current = e.touches[0].clientY;
+      isPulling.current = true;
+      contentRef.current = document.body;
+    },
+    [isAtTop, getScrollableParent]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!isPulling.current || isRefreshing) return;
+      
+      const target = e.target as HTMLElement;
+      const scrollableParent = getScrollableParent(target);
+      if (scrollableParent && scrollableParent.scrollTop > 0) {
+        setPullDistance(0);
+        if (contentRef.current) {
+          contentRef.current.style.transform = "";
+          contentRef.current.style.transition = "";
+        }
+        return;
+      }
+      
+      if (!isAtTop()) {
+        setPullDistance(0);
+        if (contentRef.current) {
+          contentRef.current.style.transform = "";
+          contentRef.current.style.transition = "";
+        }
+        return;
+      }
+
+      const touchY = e.touches[0].clientY;
+      const diff = touchY - touchStartY.current;
+
+      if (diff > 0) {
+        const resistance = 0.5;
+        const distance = Math.min(diff * resistance, PULL_MAX);
+        setPullDistance(distance);
+        
+        if (contentRef.current) {
+          contentRef.current.style.transform = `translateY(${distance}px)`;
+          contentRef.current.style.transition = "none";
+        }
+        
+        if (distance > 10) {
+          e.preventDefault();
+        }
+      }
+    },
+    [isAtTop, isRefreshing, getScrollableParent]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isPulling.current) return;
+    isPulling.current = false;
+
+    if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
+      setIsRefreshing(true);
+      
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translateY(${INDICATOR_SIZE + 20}px)`;
+        contentRef.current.style.transition = "transform 0.3s ease-out";
+      }
+      setPullDistance(INDICATOR_SIZE + 20);
+      
+      router.refresh();
+      
+      setTimeout(() => {
+        setIsRefreshing(false);
+        setPullDistance(0);
+        if (contentRef.current) {
+          contentRef.current.style.transform = "";
+          contentRef.current.style.transition = "transform 0.3s ease-out";
+        }
+      }, 1000);
+    } else {
+      setPullDistance(0);
+      if (contentRef.current) {
+        contentRef.current.style.transform = "";
+        contentRef.current.style.transition = "transform 0.3s ease-out";
+      }
+    }
+  }, [pullDistance, isRefreshing, router]);
+
+  useEffect(() => {
+    if (!isNativeApp) return;
+
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+      if (contentRef.current) {
+        contentRef.current.style.transform = "";
+        contentRef.current.style.transition = "";
+      }
+    };
+  }, [isNativeApp, handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+  if (!isNativeApp || pullDistance === 0) return null;
+
+  const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+  const shouldTrigger = pullDistance >= PULL_THRESHOLD;
+  const rotation = progress * 180;
+
+  return (
+    <div
+      className="tw-fixed tw-left-0 tw-right-0 tw-flex tw-items-center tw-justify-center tw-z-[9999]"
+      style={{
+        top: `calc(env(safe-area-inset-top, 0px) + ${Math.max(pullDistance - INDICATOR_SIZE - 8, 0)}px)`,
+        opacity: Math.min(progress * 1.5, 1),
+        transition: isPulling.current ? "none" : "all 0.3s ease-out",
+      }}
+    >
+      <div
+        className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-xl tw-border tw-border-iron-800"
+        style={{
+          width: INDICATOR_SIZE,
+          height: INDICATOR_SIZE,
+          transform: isRefreshing ? undefined : `rotate(${rotation}deg)`,
+        }}
+      >
+        {isRefreshing ? (
+          <svg
+            className="tw-animate-spin"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="#3b82f6"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="31.4 31.4"
+              strokeDashoffset="10"
+            />
+          </svg>
+        ) : (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={shouldTrigger ? "#3b82f6" : "#6b7280"}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 5v14M19 12l-7 7-7-7" />
+          </svg>
+        )}
+      </div>
+    </div>
+  );
+}

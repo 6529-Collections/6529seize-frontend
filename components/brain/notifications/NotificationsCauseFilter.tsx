@@ -20,7 +20,14 @@ const NotificationFilters: NotificationFilter[] = [
     title: "Mentions",
   },
   { cause: [ApiNotificationCause.DropReplied], title: "Replies" },
-  { cause: [ApiNotificationCause.IdentitySubscribed], title: "Follows" },
+  {
+    cause: [
+      ApiNotificationCause.IdentitySubscribed,
+      ApiNotificationCause.IdentityRep,
+      ApiNotificationCause.IdentityNic,
+    ],
+    title: "Identity",
+  },
   {
     cause: [
       ApiNotificationCause.DropVoted,
@@ -51,7 +58,7 @@ export default function NotificationsCauseFilter({
     if (!connectedProfile) return;
     prefetchNotifications({
       identity: connectedProfile.handle,
-      cause: filter.cause,
+      cause: filter.cause.length > 0 ? filter.cause : null,
       pages: 1,
     });
   };

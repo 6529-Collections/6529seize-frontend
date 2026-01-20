@@ -18,6 +18,8 @@ export class ApiMintMetrics {
     'mint_time': number;
     'subscriptions': number;
     'mints': number;
+    'edition_size': number | null;
+    'unminted': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -45,6 +47,18 @@ export class ApiMintMetrics {
         {
             "name": "mints",
             "baseName": "mints",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size",
+            "baseName": "edition_size",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "unminted",
+            "baseName": "unminted",
             "type": "number",
             "format": "int64"
         }    ];

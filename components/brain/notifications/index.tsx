@@ -51,7 +51,7 @@ export default function Notifications({
 
   const activeFilterKey = useMemo(
     () =>
-      activeFilter?.cause
+      activeFilter?.cause?.length
         ? [...activeFilter.cause].sort(compareNotificationCause).join("|")
         : "notifications-filter-all",
     [activeFilter]

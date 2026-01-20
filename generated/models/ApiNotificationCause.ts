@@ -16,6 +16,8 @@ import { HttpFile } from '../http/http';
 export enum ApiNotificationCause {
     IdentitySubscribed = 'IDENTITY_SUBSCRIBED',
     IdentityMentioned = 'IDENTITY_MENTIONED',
+    IdentityRep = 'IDENTITY_REP',
+    IdentityNic = 'IDENTITY_NIC',
     DropQuoted = 'DROP_QUOTED',
     DropReplied = 'DROP_REPLIED',
     DropVoted = 'DROP_VOTED',
