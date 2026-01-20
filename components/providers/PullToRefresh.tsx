@@ -1,8 +1,8 @@
 "use client";
 
+import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
 const PULL_THRESHOLD = 80;
@@ -39,6 +39,12 @@ export default function PullToRefresh() {
     []
   );
 
+  const resetContentStyles = useCallback(() => {
+    if (!contentRef.current) return;
+    contentRef.current.style.transform = "";
+    contentRef.current.style.transition = "";
+  }, []);
+
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       const target = e.target as HTMLElement;
@@ -65,51 +71,40 @@ export default function PullToRefresh() {
 
       const target = e.target as HTMLElement;
       const scrollableParent = getScrollableParent(target);
-      if (scrollableParent && scrollableParent.scrollTop > 0) {
-        setPullDistance(0);
-        if (contentRef.current) {
-          contentRef.current.style.transform = "";
-          contentRef.current.style.transition = "";
-        }
-        return;
-      }
+      const isScrolledInParent =
+        scrollableParent && scrollableParent.scrollTop > 0;
 
-      if (!isAtTop()) {
+      if (isScrolledInParent || !isAtTop()) {
         setPullDistance(0);
-        if (contentRef.current) {
-          contentRef.current.style.transform = "";
-          contentRef.current.style.transition = "";
-        }
+        resetContentStyles();
         return;
       }
 
       const touch = e.touches[0];
       if (!touch) return;
-      const touchY = touch.clientY;
-      const diff = touchY - touchStartY.current;
 
-      if (diff > 0) {
-        const resistance = 0.5;
-        const distance = Math.min(diff * resistance, PULL_MAX);
-        setPullDistance(distance);
+      const diff = touch.clientY - touchStartY.current;
 
-        if (contentRef.current) {
-          contentRef.current.style.transform = `translateY(${distance}px)`;
-          contentRef.current.style.transition = "none";
-        }
-
-        if (distance > 10) {
-          e.preventDefault();
-        }
-      } else {
+      if (diff <= 0) {
         setPullDistance(0);
-        if (contentRef.current) {
-          contentRef.current.style.transform = "";
-          contentRef.current.style.transition = "";
-        }
+        resetContentStyles();
+        return;
+      }
+
+      const resistance = 0.5;
+      const distance = Math.min(diff * resistance, PULL_MAX);
+      setPullDistance(distance);
+
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translateY(${distance}px)`;
+        contentRef.current.style.transition = "none";
+      }
+
+      if (distance > 10) {
+        e.preventDefault();
       }
     },
-    [isAtTop, isRefreshing, getScrollableParent]
+    [isAtTop, isRefreshing, getScrollableParent, resetContentStyles]
   );
 
   const handleTouchEnd = useCallback(() => {

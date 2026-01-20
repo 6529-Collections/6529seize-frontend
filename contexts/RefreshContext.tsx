@@ -15,7 +15,11 @@ type RefreshCtx = {
 
 const Ctx = createContext<RefreshCtx | null>(null);
 
-export function RefreshProvider({ children }: { children: React.ReactNode }) {
+export function RefreshProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const globalRefresh = useCallback(() => {
