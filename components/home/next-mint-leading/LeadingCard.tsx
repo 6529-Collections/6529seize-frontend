@@ -4,16 +4,15 @@ import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
-import {
-  getDropPreviewImageUrl,
-  type ExtendedDrop,
-} from "@/helpers/waves/drop.helpers";
+import { type ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
@@ -28,16 +27,23 @@ const getRankLabelClass = (rank: number) => {
 };
 
 export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
+  const { hasTouchScreen } = useDeviceInfo();
   const media = drop.parts[0]?.media[0];
   const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
   const mediaImageScale = isTabletOrSmaller
     ? ImageScale.AUTOx450
     : ImageScale.AUTOx600;
+  const isHtml = media?.mime_type === "text/html";
+  const shouldGate = hasTouchScreen && isHtml;
+  const [interactiveEnabled, setInteractiveEnabled] = useState(!shouldGate);
 
-  const previewImageUrl = useMemo(
-    () => getDropPreviewImageUrl(drop.metadata),
-    [drop.metadata]
-  );
+  useEffect(() => {
+    if (shouldGate) {
+      setInteractiveEnabled(false);
+      return;
+    }
+    setInteractiveEnabled(true);
+  }, [drop.id, shouldGate]);
 
   const title =
     drop.title ??
@@ -45,6 +51,42 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
     "Untitled";
   const author = drop.author;
   const rankLabelClass = getRankLabelClass(rank);
+  const mediaContent = (() => {
+    if (!media) {
+      return (
+        <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950">
+          <span className="tw-text-sm tw-text-white/40">No image</span>
+        </div>
+      );
+    }
+
+    if (shouldGate && !interactiveEnabled) {
+      return (
+        <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
+          <button
+            type="button"
+            onClick={() => setInteractiveEnabled(true)}
+            className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-transparent"
+            aria-label="Load interactive media"
+          >
+            <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-white/20 tw-bg-iron-950/90 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_16px_40px_rgba(0,0,0,0.65)] tw-ring-1 tw-ring-white/10 tw-transition hover:tw-bg-iron-900">
+              <InteractiveIcon className="tw-size-4 tw-flex-shrink-0" />
+              Tap to load
+            </span>
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <MediaDisplay
+        media_mime_type={media.mime_type}
+        media_url={media.url}
+        disableMediaInteraction={true}
+        imageScale={mediaImageScale}
+      />
+    );
+  })();
 
   return (
     <div className="tw-group tw-flex tw-flex-col tw-gap-3 tw-text-left tw-transition-all tw-duration-500 desktop-hover:tw-opacity-70 desktop-hover:tw-grayscale desktop-hover:hover:tw-opacity-100 desktop-hover:hover:tw-grayscale-0 sm:tw-gap-4">
@@ -64,21 +106,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
         </div>
         <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
-            {media ? (
-              <MediaDisplay
-                media_mime_type={
-                  drop.parts[0]?.media[0]!.mime_type ?? "image/jpeg"
-                }
-                media_url={drop.parts[0]?.media[0]!.url!}
-                disableMediaInteraction={true}
-                imageScale={mediaImageScale}
-                previewImageUrl={previewImageUrl}
-              />
-            ) : (
-              <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950">
-                <span className="tw-text-sm tw-text-white/40">No image</span>
-              </div>
-            )}
+            {mediaContent}
           </div>
         </div>
       </div>

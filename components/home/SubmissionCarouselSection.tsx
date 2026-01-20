@@ -72,7 +72,7 @@ export default function SubmissionCarouselSection() {
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
-      <section className="tw-grid tw-h-auto tw-grid-rows-[auto_1fr_auto] sm:tw-h-[100svh] [@media(min-height:1200px)]:tw-h-auto [@media(min-height:1200px)]:tw-grid-rows-[auto_auto_auto] [@media(min-width:768px)_and_(orientation:portrait)_and_(max-height:1199px)]:tw-h-auto [@media(min-width:768px)_and_(orientation:portrait)_and_(max-height:1199px)]:tw-grid-rows-[auto_auto_auto]">
+      <section className="tw-grid tw-h-auto tw-grid-rows-[auto_1fr_auto] sm:tw-h-[100svh] [@media(min-height:1200px)]:tw-h-[min(100svh,900px)] [@media(min-width:768px)_and_(orientation:portrait)_and_(max-height:1199px)]:tw-h-auto [@media(min-width:768px)_and_(orientation:portrait)_and_(max-height:1199px)]:tw-grid-rows-[auto_auto_auto]">
         <CarouselHeader />
         <div className="tw-min-h-0 [@media(min-height:1200px)]:tw-max-h-[800px] [@media(min-width:768px)_and_(orientation:portrait)_and_(max-height:1199px)]:tw-h-[min(70svh,600px)]">
           <SubmissionCarousel
