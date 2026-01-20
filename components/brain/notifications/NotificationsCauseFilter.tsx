@@ -219,6 +219,7 @@ export default function NotificationsCauseFilter({
         <>
           <div className="tw-pointer-events-none tw-absolute tw-bottom-2 tw-left-0 tw-top-2 tw-z-10 tw-w-16 tw-rounded-l-lg tw-bg-gradient-to-r tw-from-iron-950 tw-via-iron-950/40 tw-to-iron-950/0 lg:tw-top-4" />
           <button
+            type="button"
             onClick={scrollLeft}
             aria-label="Scroll filters left"
             className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
@@ -234,6 +235,7 @@ export default function NotificationsCauseFilter({
         <>
           <div className="tw-pointer-events-none tw-absolute tw-bottom-2 tw-right-0 tw-top-2 tw-z-10 tw-w-16 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-iron-950 tw-via-iron-950/40 tw-to-iron-950/0 lg:tw-top-4" />
           <button
+            type="button"
             onClick={scrollRight}
             aria-label="Scroll filters right"
             className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
