@@ -15,16 +15,16 @@ interface PushNotificationSettingsProps {
 }
 
 const SETTINGS_LABELS: Record<keyof ApiPushNotificationSettings, string> = {
-  identity_subscribed: "New followers",
+  identity_rep: "Identity - REP",
+  identity_nic: "Identity - NIC",
+  identity_subscribed: "New Follows",
   identity_mentioned: "Mentions",
-  identity_rep: "REP changes",
-  identity_nic: "Identity (NIC)",
-  drop_quoted: "Drop quoted",
-  drop_replied: "Drop replies",
-  drop_voted: "Drop votes",
-  drop_reacted: "Drop reactions",
-  drop_boosted: "Drop boosts",
-  wave_created: "Wave invites",
+  drop_quoted: "Drops - Quoted",
+  drop_replied: "Drops - Replied",
+  drop_voted: "Drops - Voted",
+  drop_reacted: "Drops - Reacted",
+  drop_boosted: "Drops - Boosted",
+  wave_created: "Wave Invites",
 };
 
 const DEFAULT_SETTINGS: ApiPushNotificationSettings = {

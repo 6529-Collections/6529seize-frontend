@@ -19,6 +19,8 @@ export default function PullToRefresh() {
   const isPulling = useRef(false);
   const contentRef = useRef<HTMLElement | null>(null);
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pullDistanceRef = useRef(0);
+  const isRefreshingRef = useRef(false);
 
   const isAtTop = useCallback(() => {
     return window.scrollY <= 0;
@@ -67,7 +69,7 @@ export default function PullToRefresh() {
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (!isPulling.current || isRefreshing) return;
+      if (!isPulling.current || isRefreshingRef.current) return;
 
       const target = e.target as HTMLElement;
       const scrollableParent = getScrollableParent(target);
@@ -75,6 +77,7 @@ export default function PullToRefresh() {
         scrollableParent && scrollableParent.scrollTop > 0;
 
       if (isScrolledInParent || !isAtTop()) {
+        pullDistanceRef.current = 0;
         setPullDistance(0);
         resetContentStyles();
         return;
@@ -86,6 +89,7 @@ export default function PullToRefresh() {
       const diff = touch.clientY - touchStartY.current;
 
       if (diff <= 0) {
+        pullDistanceRef.current = 0;
         setPullDistance(0);
         resetContentStyles();
         return;
@@ -93,6 +97,7 @@ export default function PullToRefresh() {
 
       const resistance = 0.5;
       const distance = Math.min(diff * resistance, PULL_MAX);
+      pullDistanceRef.current = distance;
       setPullDistance(distance);
 
       if (contentRef.current) {
@@ -104,27 +109,31 @@ export default function PullToRefresh() {
         e.preventDefault();
       }
     },
-    [isAtTop, isRefreshing, getScrollableParent, resetContentStyles]
+    [isAtTop, getScrollableParent, resetContentStyles]
   );
 
   const handleTouchEnd = useCallback(() => {
     if (!isPulling.current) return;
     isPulling.current = false;
 
-    if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
+    if (pullDistanceRef.current >= PULL_THRESHOLD && !isRefreshingRef.current) {
+      isRefreshingRef.current = true;
       setIsRefreshing(true);
 
       if (contentRef.current) {
         contentRef.current.style.transform = `translateY(${INDICATOR_SIZE + 20}px)`;
         contentRef.current.style.transition = "transform 0.3s ease-out";
       }
+      pullDistanceRef.current = INDICATOR_SIZE + 20;
       setPullDistance(INDICATOR_SIZE + 20);
 
       invalidateAll();
       globalRefresh();
 
       refreshTimeoutRef.current = setTimeout(() => {
+        isRefreshingRef.current = false;
         setIsRefreshing(false);
+        pullDistanceRef.current = 0;
         setPullDistance(0);
         if (contentRef.current) {
           contentRef.current.style.transform = "";
@@ -133,13 +142,14 @@ export default function PullToRefresh() {
         refreshTimeoutRef.current = null;
       }, 1000);
     } else {
+      pullDistanceRef.current = 0;
       setPullDistance(0);
       if (contentRef.current) {
         contentRef.current.style.transform = "";
         contentRef.current.style.transition = "transform 0.3s ease-out";
       }
     }
-  }, [pullDistance, isRefreshing, invalidateAll, globalRefresh]);
+  }, [invalidateAll, globalRefresh]);
 
   useEffect(() => {
     if (!isNativeApp) return;
