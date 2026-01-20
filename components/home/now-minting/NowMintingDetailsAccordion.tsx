@@ -1,7 +1,9 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { printMintDate } from "@/helpers/Helpers";
+import Link from "next/link";
 
 interface NowMintingDetailsAccordionProps {
+  readonly nftId: number;
   readonly mintDate: Date | undefined;
   readonly fileType: string;
   readonly dimensions: string;
@@ -10,6 +12,7 @@ interface NowMintingDetailsAccordionProps {
 }
 
 export default function NowMintingDetailsAccordion({
+  nftId,
   mintDate,
   fileType,
   dimensions,
@@ -25,8 +28,8 @@ export default function NowMintingDetailsAccordion({
   ];
 
   return (
-    <details className="tw-group tw-border-b tw-border-solid tw-border-x-0 tw-border-t tw-border-iron-800 tw-pb-6 tw-pt-6">
-      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-font-medium tw-text-sm tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-300">
+    <details className="tw-group tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-6">
+      <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-50">
         <span>Edition Details</span>
         <ChevronRightIcon className="tw-size-4 tw-transition-transform group-open:tw-rotate-90" />
       </summary>
@@ -38,6 +41,15 @@ export default function NowMintingDetailsAccordion({
               <span className="tw-text-iron-100">{value}</span>
             </div>
           ))}
+          <div className="tw-flex tw-justify-between">
+            <span className="tw-text-iron-500">Distribution Plan</span>
+            <Link
+              href={`/the-memes/${nftId}/distribution`}
+              className="tw-text-iron-100 tw-transition-colors tw-duration-300 hover:tw-text-primary-400"
+            >
+              View
+            </Link>
+          </div>
         </div>
       </div>
     </details>
