@@ -35,7 +35,7 @@ function NotificationItemsComponent({
   );
 
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3 lg:tw-pr-2">
+    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3">
       {keyedNotifications.map(({ notification, key, domId }) => (
         <div key={key} id={domId}>
           <NotificationItem

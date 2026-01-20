@@ -153,7 +153,7 @@ export const useNotificationsController =
       activeProfileProxy: !!activeProfileProxy,
       limit: "30",
       reverse: true,
-      cause: activeFilter?.cause,
+      cause: activeFilter?.cause?.length ? activeFilter.cause : null,
     });
 
     useEffect(() => {
