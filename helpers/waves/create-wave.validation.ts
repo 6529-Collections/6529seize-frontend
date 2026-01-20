@@ -35,8 +35,6 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   CHAT_WAVE_CANNOT_HAVE_VOTING = "CHAT_WAVE_CANNOT_HAVE_VOTING",
   TDH_VOTING_CANNOT_HAVE_CATEGORY = "TDH_VOTING_CANNOT_HAVE_CATEGORY",
   TDH_VOTING_CANNOT_HAVE_PROFILE_ID = "TDH_VOTING_CANNOT_HAVE_PROFILE_ID",
-  REP_VOTING_REQUIRES_CATEGORY = "REP_VOTING_REQUIRES_CATEGORY",
-  REP_VOTING_REQUIRES_PROFILE_ID = "REP_VOTING_REQUIRES_PROFILE_ID",
   VOTING_CATEGORY_CANNOT_BE_EMPTY = "VOTING_CATEGORY_CANNOT_BE_EMPTY",
   VOTING_PROFILE_ID_CANNOT_BE_EMPTY = "VOTING_PROFILE_ID_CANNOT_BE_EMPTY",
   APPROVAL_THRESHOLD_MUST_BE_NULL = "APPROVAL_THRESHOLD_MUST_BE_NULL",
@@ -81,28 +79,30 @@ const getDatesValidationErrors = ({
   }
 
   if (waveType === ApiWaveType.Rank) {
-    if (dates.submissionStartDate && dates.votingStartDate) {
-      if (dates.submissionStartDate > dates.votingStartDate) {
-        errors.push(
-          CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
-        );
-      }
+    if (
+      dates.submissionStartDate &&
+      dates.votingStartDate &&
+      dates.submissionStartDate > dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
+      );
     }
-    if (!dates.endDate) {
+    if (dates.endDate === null || dates.endDate <= 0) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
     } else if (dates.votingStartDate && dates.endDate < dates.votingStartDate) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
       );
     }
-  } else if (waveType === ApiWaveType.Approve) {
-    if (dates.submissionStartDate && dates.votingStartDate) {
-      if (dates.submissionStartDate !== dates.votingStartDate) {
-        errors.push(
-          CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
-        );
-      }
-    }
+  } else if (
+    dates.submissionStartDate &&
+    dates.votingStartDate &&
+    dates.submissionStartDate !== dates.votingStartDate
+  ) {
+    errors.push(
+      CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
+    );
   }
 
   return errors;
@@ -197,13 +197,16 @@ const getVotingValidationErrors = ({
   }
 
   if (voting.type === ApiWaveCreditType.Rep) {
-    // REP voting requires non-empty category and profileId
-    if (!voting.category) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_CATEGORY);
-    }
-
-    if (!voting.profileId || voting.profileId.trim() === "") {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
+    // REP voting requires at least one of category or profileId
+    const categoryEmpty =
+      !voting.category || voting.category.trim().length === 0;
+    const profileIdEmpty =
+      !voting.profileId || voting.profileId.trim().length === 0;
+    if (categoryEmpty && profileIdEmpty) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_CATEGORY_CANNOT_BE_EMPTY);
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_CANNOT_BE_EMPTY
+      );
     }
   } else {
     // TDH voting cannot have category or profileId
@@ -268,15 +271,20 @@ const getApprovalValidationErrors = ({
   }
 
   // For Approve waves
-  if (!approval.threshold || approval.threshold <= 0) {
+  if (approval.threshold === null || approval.threshold <= 0) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
   }
 
-  if (!approval.thresholdTimeMs || approval.thresholdTimeMs <= 0) {
+  if (approval.thresholdTimeMs === null || approval.thresholdTimeMs <= 0) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED);
   }
 
-  if (approval.thresholdTimeMs && dates.endDate) {
+  if (
+    typeof approval.thresholdTimeMs === "number" &&
+    approval.thresholdTimeMs > 0 &&
+    typeof dates.endDate === "number" &&
+    dates.endDate > 0
+  ) {
     const waveDuration = dates.endDate - dates.submissionStartDate;
     if (approval.thresholdTimeMs >= waveDuration) {
       errors.push(
