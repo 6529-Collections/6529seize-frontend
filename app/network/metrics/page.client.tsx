@@ -73,6 +73,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-purple-400"
                 sparklineData={series?.distinctDroppers}
                 sparklineColor="tw-bg-purple-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
                 title="Drops Created"
@@ -83,6 +84,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-blue-400"
                 sparklineData={series?.dropsCreated}
                 sparklineColor="tw-bg-blue-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
                 title="Submissions"
@@ -93,6 +95,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-orange-400"
                 sparklineData={series?.mainStageSubmissions}
                 sparklineColor="tw-bg-orange-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
                 title="Distinct Voters"
@@ -103,6 +106,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-emerald-400"
                 sparklineData={series?.mainStageDistinctVoters}
                 sparklineColor="tw-bg-emerald-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
                 title="Vote Volume"
@@ -114,6 +118,7 @@ export default function MetricsPageClient() {
                 useValueCount
                 sparklineData={series?.mainStageVotes}
                 sparklineColor="tw-bg-cyan-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
                 title="Voting Power"
@@ -125,6 +130,7 @@ export default function MetricsPageClient() {
                 unit="TDH"
                 sparklineData={series?.tdhOnMainStageSubmissions}
                 sparklineColor="tw-bg-amber-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
                 title="Network TDH"
@@ -137,6 +143,7 @@ export default function MetricsPageClient() {
                 href="/network/metrics/network-tdh"
                 sparklineData={series?.networkTdh}
                 sparklineColor="tw-bg-teal-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
                 title="TDH Utilization %"
@@ -148,6 +155,7 @@ export default function MetricsPageClient() {
                 unit="%"
                 sparklineData={series?.tdhUtilizationPercentage}
                 sparklineColor="tw-bg-rose-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
                 title="xTDH Granted"
@@ -159,6 +167,7 @@ export default function MetricsPageClient() {
                 unit="xTDH"
                 sparklineData={series?.xtdhGranted}
                 sparklineColor="tw-bg-lime-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
                 title="Profile Count"
@@ -169,6 +178,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-violet-400"
                 sparklineData={series?.profileCount}
                 sparklineColor="tw-bg-violet-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
                 title="Active Identities"
@@ -179,6 +189,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-pink-400"
                 sparklineData={series?.activeIdentities}
                 sparklineColor="tw-bg-pink-500"
+                sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
                 title="Consolidations Formed"
@@ -189,6 +200,7 @@ export default function MetricsPageClient() {
                 accentColor="tw-text-indigo-400"
                 sparklineData={series?.consolidationsFormed}
                 sparklineColor="tw-bg-indigo-500"
+                sparklineDates={series?.stepsStartTimes}
               />
             </div>
           )}
