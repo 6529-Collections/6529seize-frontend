@@ -10,6 +10,10 @@ import type {
   FileValidationResult,
   VideoCompatibilityResult,
 } from "../reducers/types";
+import {
+  SUBMISSION_IMAGE_MIME_TYPES,
+  SUBMISSION_INTERACTIVE_MIME_TYPES,
+} from "@/constants/submission-media.constants";
 
 /**
  * Comprehensive file validation with proper typing
@@ -17,7 +21,6 @@ import type {
  * @returns Validation result with validity and optional error
  */
 export const validateFile = (file: File): FileValidationResult => {
-  // Check if file exists
   if (!file) {
     return {
       valid: false,
@@ -25,19 +28,10 @@ export const validateFile = (file: File): FileValidationResult => {
     };
   }
 
-  // Check file type with support for generic video types
-  const isImageType =
-    file.type.startsWith("image/") &&
-    (file.type === "image/png" ||
-      file.type === "image/jpeg" ||
-      file.type === "image/jpg" ||
-      file.type === "image/gif");
-
+  const isImageType = SUBMISSION_IMAGE_MIME_TYPES.includes(file.type);
   const isVideoType = file.type.startsWith("video/");
-
   const isModelType =
-    file.type === "model/gltf-binary" ||
-    file.type === "model/gltf+json" ||
+    SUBMISSION_INTERACTIVE_MIME_TYPES.includes(file.type) ||
     (file.type === "application/octet-stream" &&
       (file.name.toLowerCase().endsWith(".glb") ||
         file.name.toLowerCase().endsWith(".gltf"))) ||
@@ -47,11 +41,10 @@ export const validateFile = (file: File): FileValidationResult => {
   if (!isImageType && !isVideoType && !isModelType) {
     return {
       valid: false,
-      error: `File type not supported. Please upload PNG, JPG, video, or GLB files.`,
+      error: `File type not supported. Please upload PNG, JPG, GIF, video, or GLB files.`,
     };
   }
 
-  // Check file size
   if (file.size > FILE_SIZE_LIMIT) {
     const sizeMB = Math.round(FILE_SIZE_LIMIT / (1024 * 1024));
     return {

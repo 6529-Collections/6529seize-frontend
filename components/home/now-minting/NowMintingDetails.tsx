@@ -14,7 +14,7 @@ interface NowMintingDetailsProps {
 
 export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
   const formatEth = (value: number) => {
-    if (value === 0) return "0 ETH";
+    if (value <= 0) return "N/A";
     return `${value.toFixed(5)} ETH`;
   };
 

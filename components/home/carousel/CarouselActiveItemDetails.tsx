@@ -1,12 +1,13 @@
 "use client";
 
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { parseIpfsUrl } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface CarouselActiveItemDetailsProps {
   readonly drop: ExtendedDrop | null;
@@ -16,6 +17,11 @@ export default function CarouselActiveItemDetails({
   drop,
 }: CarouselActiveItemDetailsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const dropId = drop?.id;
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [dropId]);
 
   if (!drop) {
     return null;
@@ -29,17 +35,23 @@ export default function CarouselActiveItemDetails({
     drop.metadata.find((m) => m.data_key === "description")?.data_value ?? "";
   const detailsId = `carousel-details-${drop.id}`;
   const author = drop.author;
+  const media = drop.parts[0]?.media[0];
 
   return (
     <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center tw-px-4 tw-py-4 md:tw-px-6 lg:tw-px-8">
-      <Link
-        href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-        className="tw-mb-2 tw-block tw-text-center tw-text-lg tw-font-semibold tw-text-white tw-no-underline desktop-hover:hover:tw-text-white md:tw-text-xl"
-      >
-        {title}
-      </Link>
+      <div className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2">
+        <MediaTypeBadge mimeType={media?.mime_type} dropId={drop.id} />
+        <Link
+          prefetch={false}
+          href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
+          className="tw-block tw-text-center tw-text-lg tw-font-semibold tw-text-white tw-no-underline desktop-hover:hover:tw-text-white md:tw-text-xl"
+        >
+          {title}
+        </Link>
+      </div>
 
       <Link
+        prefetch={false}
         href={`/${author.handle ?? author.primary_address}`}
         className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
       >

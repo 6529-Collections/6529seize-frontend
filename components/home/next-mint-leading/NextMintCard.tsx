@@ -3,6 +3,7 @@
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -80,12 +81,19 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
 
       <div className="tw-flex tw-flex-col tw-gap-3">
         <div>
-          <Link
-            href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-            className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
-          >
-            {title}
-          </Link>
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+            <MediaTypeBadge
+              mimeType={media?.mime_type}
+              dropId={drop.id}
+              size="sm"
+            />
+            <Link
+              href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
+              className="tw-m-0 tw-min-w-0 tw-flex-1 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
+            >
+              {title}
+            </Link>
+          </div>
           <Link
             href={`/${author.handle ?? author.primary_address}`}
             className="tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
