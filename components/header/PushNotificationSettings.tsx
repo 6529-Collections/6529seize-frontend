@@ -159,17 +159,19 @@ export default function PushNotificationSettings({
       fixedHeight
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
-        {isLoading ? (
+        {isLoading && (
           <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-py-12">
             <div className="tw-size-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
           </div>
-        ) : !currentSettings ? (
+        )}
+        {!isLoading && !currentSettings && (
           <div className="tw-flex-1 tw-py-8 tw-text-center">
             <p className="tw-text-sm tw-text-iron-400">
               Unable to load notification settings.
             </p>
           </div>
-        ) : (
+        )}
+        {!isLoading && currentSettings && (
           <>
             <p className="tw-flex-shrink-0 tw-px-4 tw-pt-4 tw-text-sm tw-text-iron-400 sm:tw-px-6">
               Choose which notifications you want to receive on this device.
@@ -226,16 +228,14 @@ export default function PushNotificationSettings({
                     : "tw-cursor-not-allowed tw-bg-iron-800 tw-text-iron-500"
                 }`}
               >
-                {isSaving ? (
+                {isSaving && (
                   <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
                     <span className="tw-size-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-400 tw-border-t-white" />
-                    Saving...
+                    <span>Saving...</span>
                   </span>
-                ) : hasChanges ? (
-                  "Save Changes"
-                ) : (
-                  "No Changes"
                 )}
+                {!isSaving && hasChanges && "Save Changes"}
+                {!isSaving && !hasChanges && "No Changes"}
               </button>
             </div>
           </>

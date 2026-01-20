@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const PULL_THRESHOLD = 80;
 const PULL_MAX = 140;
@@ -21,30 +21,35 @@ export default function PullToRefresh() {
     return window.scrollY <= 0;
   }, []);
 
-  const getScrollableParent = useCallback((element: HTMLElement | null): HTMLElement | null => {
-    if (!element) return null;
-    const style = window.getComputedStyle(element);
-    const overflowY = style.overflowY;
-    if (overflowY === "scroll" || overflowY === "auto") {
-      if (element.scrollHeight > element.clientHeight) {
-        return element;
+  const getScrollableParent = useCallback(
+    (element: HTMLElement | null): HTMLElement | null => {
+      if (!element) return null;
+      const style = globalThis.getComputedStyle(element);
+      const overflowY = style.overflowY;
+      if (overflowY === "scroll" || overflowY === "auto") {
+        if (element.scrollHeight > element.clientHeight) {
+          return element;
+        }
       }
-    }
-    return getScrollableParent(element.parentElement);
-  }, []);
+      return getScrollableParent(element.parentElement);
+    },
+    []
+  );
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       const target = e.target as HTMLElement;
       const scrollableParent = getScrollableParent(target);
-      
+
       if (scrollableParent && scrollableParent.scrollTop > 0) {
         return;
       }
-      
+
       if (!isAtTop()) return;
-      
-      touchStartY.current = e.touches[0].clientY;
+      const touch = e.touches[0];
+      if (!touch) return;
+      touchStartY.current = touch.clientY;
+
       isPulling.current = true;
       contentRef.current = document.body;
     },
@@ -54,7 +59,7 @@ export default function PullToRefresh() {
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
       if (!isPulling.current || isRefreshing) return;
-      
+
       const target = e.target as HTMLElement;
       const scrollableParent = getScrollableParent(target);
       if (scrollableParent && scrollableParent.scrollTop > 0) {
@@ -65,7 +70,7 @@ export default function PullToRefresh() {
         }
         return;
       }
-      
+
       if (!isAtTop()) {
         setPullDistance(0);
         if (contentRef.current) {
@@ -75,19 +80,21 @@ export default function PullToRefresh() {
         return;
       }
 
-      const touchY = e.touches[0].clientY;
+      const touch = e.touches[0];
+      if (!touch) return;
+      const touchY = touch.clientY;
       const diff = touchY - touchStartY.current;
 
       if (diff > 0) {
         const resistance = 0.5;
         const distance = Math.min(diff * resistance, PULL_MAX);
         setPullDistance(distance);
-        
+
         if (contentRef.current) {
           contentRef.current.style.transform = `translateY(${distance}px)`;
           contentRef.current.style.transition = "none";
         }
-        
+
         if (distance > 10) {
           e.preventDefault();
         }
@@ -102,15 +109,15 @@ export default function PullToRefresh() {
 
     if (pullDistance >= PULL_THRESHOLD && !isRefreshing) {
       setIsRefreshing(true);
-      
+
       if (contentRef.current) {
         contentRef.current.style.transform = `translateY(${INDICATOR_SIZE + 20}px)`;
         contentRef.current.style.transition = "transform 0.3s ease-out";
       }
       setPullDistance(INDICATOR_SIZE + 20);
-      
+
       router.refresh();
-      
+
       setTimeout(() => {
         setIsRefreshing(false);
         setPullDistance(0);
@@ -156,7 +163,7 @@ export default function PullToRefresh() {
 
   return (
     <div
-      className="tw-fixed tw-left-0 tw-right-0 tw-flex tw-items-center tw-justify-center tw-z-[9999]"
+      className="tw-fixed tw-left-0 tw-right-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center"
       style={{
         top: `calc(env(safe-area-inset-top, 0px) + ${Math.max(pullDistance - INDICATOR_SIZE - 8, 0)}px)`,
         opacity: Math.min(progress * 1.5, 1),
@@ -164,7 +171,7 @@ export default function PullToRefresh() {
       }}
     >
       <div
-        className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-xl tw-border tw-border-iron-800"
+        className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-800 tw-bg-iron-950 tw-shadow-xl"
         style={{
           width: INDICATOR_SIZE,
           height: INDICATOR_SIZE,

@@ -4,7 +4,7 @@ import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 
 function formatCause(cause: string): string {
   return cause
-    .replace(/_/g, " ")
+    .replaceAll("_", " ")
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }

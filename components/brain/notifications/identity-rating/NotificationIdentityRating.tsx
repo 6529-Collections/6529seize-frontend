@@ -46,11 +46,11 @@ export default function NotificationIdentityRating({
       : null;
 
   const myHandle = connectedProfile?.handle;
-  const linkHref = myHandle
-    ? isRep
-      ? `/${myHandle}/rep`
-      : `/${myHandle}/identity`
-    : null;
+  const getProfileLink = (): string | null => {
+    if (!myHandle) return null;
+    return isRep ? `/${myHandle}/rep` : `/${myHandle}/identity`;
+  };
+  const linkHref = getProfileLink();
 
   const ratingLabel = isRep ? "REP" : "NIC";
 

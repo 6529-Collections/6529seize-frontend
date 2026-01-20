@@ -53,8 +53,9 @@ const getIdentityNotificationsQueryKey = (
     {
       identity,
       limit,
-      // Serialize arrays to ensure stable query key comparison
-      cause: cause?.length ? [...cause].sort().join(",") : null,
+      cause: cause?.length
+        ? [...cause].sort((a, b) => a.localeCompare(b)).join(",")
+        : null,
     },
   ] as const;
 
