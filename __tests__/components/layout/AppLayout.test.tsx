@@ -52,6 +52,10 @@ jest.mock("next/navigation", () => ({
   usePathname: () => usePathname(),
   useSearchParams: () => useSearchParams(),
 }));
+jest.mock("@/components/providers/PullToRefresh", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 const AppLayout = require("@/components/layout/AppLayout").default;
 

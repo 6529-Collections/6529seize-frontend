@@ -1,5 +1,32 @@
 "use client";
 
+import { $convertFromMarkdownString } from "@lexical/markdown";
+import type {
+  InitialConfigType
+} from "@lexical/react/LexicalComposer";
+import {
+  LexicalComposer,
+} from "@lexical/react/LexicalComposer";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import {
+  $createParagraphNode,
+  $createTextNode,
+  $getRoot,
+  $isElementNode,
+  COMMAND_PRIORITY_HIGH,
+  KEY_ENTER_COMMAND,
+  KEY_ESCAPE_COMMAND,
+  type EditorState,
+  type LexicalNode,
+  type RootNode,
+  type TextNode,
+} from "lexical";
 import React, {
   useCallback,
   useEffect,
@@ -7,70 +34,43 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type {
-  InitialConfigType} from "@lexical/react/LexicalComposer";
-import {
-  LexicalComposer,
-} from "@lexical/react/LexicalComposer";
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertFromMarkdownString } from "@lexical/markdown";
-import type {
-  EditorState,
-  TextNode} from "lexical";
-import {
-  $getRoot,
-  COMMAND_PRIORITY_HIGH,
-  KEY_ENTER_COMMAND,
-  KEY_ESCAPE_COMMAND,
-  $createParagraphNode,
-  $createTextNode,
-  $isElementNode,
-  type LexicalNode,
-  type RootNode,
-} from "lexical";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-import { ListNode, ListItemNode } from "@lexical/list";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
-import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { CodeHighlightNode, CodeNode, $isCodeNode } from "@lexical/code";
+import { $isCodeNode, CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 
-import {
-  MentionNode,
-  $createMentionNode,
-} from "@/components/drops/create/lexical/nodes/MentionNode";
-import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
-import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
+import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
+import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
+import {
+  $createMentionNode,
+  MentionNode,
+} from "@/components/drops/create/lexical/nodes/MentionNode";
+import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
 import type {
   NewMentionsPluginHandles,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
+import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
+import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
 import type { MentionedUser } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
-import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
-import {
-  normalizeDropMarkdown,
-  exportDropMarkdown,
-} from "./normalizeDropMarkdown";
+import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import {
   addBlankLinePlaceholders,
   removeBlankLinePlaceholders,
 } from "./blankLinePlaceholders";
+import {
+  exportDropMarkdown,
+  normalizeDropMarkdown,
+} from "./normalizeDropMarkdown";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;

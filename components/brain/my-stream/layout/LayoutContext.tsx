@@ -371,7 +371,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     if (isAndroid) {
       capSpace = isKeyboardVisible ? 0 : 128;
-    } else if (isIos || isCapacitor) {
+    } else if (isIos) {
       capSpace = 20;
     }
 
