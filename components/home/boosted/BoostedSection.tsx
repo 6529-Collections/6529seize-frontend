@@ -5,19 +5,10 @@ import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import Masonry from "react-masonry-css";
 import BoostedDropCardHome from "./BoostedDropCardHome";
 
 const BOOSTED_DROPS_LIMIT = 50;
 const MAX_ROWS = 3;
-
-const MASONRY_BREAKPOINTS = {
-  default: 3,
-  1280: 3,
-  1024: 2,
-  768: 2,
-  640: 1,
-};
 
 export function BoostedSection() {
   const router = useRouter();
@@ -25,8 +16,8 @@ export function BoostedSection() {
     limit: BOOSTED_DROPS_LIMIT,
   });
 
-  // Detect breakpoints to determine column count
-  const isLg = useMediaQuery("(min-width: 1025px)");
+  // Detect breakpoints to determine column count (matches Tailwind lg breakpoint)
+  const isLg = useMediaQuery("(min-width: 1024px)");
   const isSm = useMediaQuery("(min-width: 640px)");
 
   // Calculate max items based on columns * MAX_ROWS (mobile: 1x6)
@@ -73,20 +64,16 @@ export function BoostedSection() {
           </p>
         </div>
 
-        <Masonry
-          breakpointCols={MASONRY_BREAKPOINTS}
-          className="tw--ml-5 tw-flex tw-w-auto"
-          columnClassName="tw-pl-5 tw-bg-clip-padding"
-        >
+        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {visibleDrops.map((drop) => (
-            <div key={drop.id} className="tw-mb-5">
+            <div key={drop.id}>
               <BoostedDropCardHome
                 drop={drop}
                 onClick={() => handleDropClick(drop)}
               />
             </div>
           ))}
-        </Masonry>
+        </div>
       </div>
     </section>
   );
