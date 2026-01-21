@@ -1,5 +1,34 @@
 "use client";
 
+import { $convertFromMarkdownString } from "@lexical/markdown";
+import type {
+  InitialConfigType
+} from "@lexical/react/LexicalComposer";
+import {
+  LexicalComposer,
+} from "@lexical/react/LexicalComposer";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import type {
+  EditorState,
+  TextNode
+} from "lexical";
+import {
+  $createParagraphNode,
+  $createTextNode,
+  $getRoot,
+  $isElementNode,
+  COMMAND_PRIORITY_HIGH,
+  KEY_ENTER_COMMAND,
+  KEY_ESCAPE_COMMAND,
+  type LexicalNode,
+  type RootNode,
+} from "lexical";
 import React, {
   useCallback,
   useEffect,
@@ -7,70 +36,43 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type {
-  InitialConfigType} from "@lexical/react/LexicalComposer";
-import {
-  LexicalComposer,
-} from "@lexical/react/LexicalComposer";
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { $convertFromMarkdownString } from "@lexical/markdown";
-import type {
-  EditorState,
-  TextNode} from "lexical";
-import {
-  $getRoot,
-  COMMAND_PRIORITY_HIGH,
-  KEY_ENTER_COMMAND,
-  KEY_ESCAPE_COMMAND,
-  $createParagraphNode,
-  $createTextNode,
-  $isElementNode,
-  type LexicalNode,
-  type RootNode,
-} from "lexical";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-import { ListNode, ListItemNode } from "@lexical/list";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
-import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { CodeHighlightNode, CodeNode, $isCodeNode } from "@lexical/code";
+import { $isCodeNode, CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 
-import {
-  MentionNode,
-  $createMentionNode,
-} from "@/components/drops/create/lexical/nodes/MentionNode";
-import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
-import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
+import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
+import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
+import {
+  $createMentionNode,
+  MentionNode,
+} from "@/components/drops/create/lexical/nodes/MentionNode";
+import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
 import type {
   NewMentionsPluginHandles,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
+import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
+import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
 import type { MentionedUser } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
-import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
-import {
-  normalizeDropMarkdown,
-  exportDropMarkdown,
-} from "./normalizeDropMarkdown";
+import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import {
   addBlankLinePlaceholders,
   removeBlankLinePlaceholders,
 } from "./blankLinePlaceholders";
+import {
+  exportDropMarkdown,
+  normalizeDropMarkdown,
+} from "./normalizeDropMarkdown";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -419,44 +421,6 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     []
   );
 
-  const resetIOSViewport = useCallback(() => {
-    const meta = document.querySelector('meta[name="viewport"]');
-    if (meta) {
-      const content = meta.getAttribute("content") || "";
-      meta.setAttribute("content", content + ",");
-      requestAnimationFrame(() => {
-        meta.setAttribute("content", content);
-      });
-    }
-
-    window.scrollTo(0, window.scrollY);
-    
-    document.body.style.opacity = "0.99";
-    requestAnimationFrame(() => {
-      document.body.style.opacity = "1";
-    });
-  }, []);
-
-  const blurActiveElement = useCallback(() => {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    if (isApp) {
-      import("@capacitor/keyboard").then(({ Keyboard }) => {
-        Keyboard.hide().catch(() => {});
-      });
-
-      setTimeout(() => {
-        resetIOSViewport();
-      }, 150);
-    }
-  }, [isApp, resetIOSViewport]);
-
-  const handleCancel = useCallback(() => {
-    blurActiveElement();
-    onCancel();
-  }, [blurActiveElement, onCancel]);
-
   const handleSave = useCallback(() => {
     if (!editorState) return;
 
@@ -468,13 +432,12 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     const sanitizedMarkdown = removeBlankLinePlaceholders(markdown);
 
     if (sanitizedMarkdown.trim() === normalizedInitialContent.trim()) {
-      handleCancel();
+      onCancel();
       return;
     }
 
-    blurActiveElement();
     onSave(sanitizedMarkdown, mentionedUsers);
-  }, [editorState, mentionedUsers, onSave, normalizedInitialContent, handleCancel, blurActiveElement]);
+  }, [editorState, mentionedUsers, onSave, normalizedInitialContent, onCancel]);
 
   return (
     <div className="tw-w-full" data-editor-mode="true">
@@ -484,7 +447,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             contentEditable={
               <div className="tw-relative">
                 <ContentEditable
-                  className={`tw-min-h-[40px] tw-w-full tw-resize-none tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-py-2.5 tw-pl-3 tw-pr-10 tw-text-iron-100 tw-outline-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 focus:tw-border-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${isApp ? "tw-text-base" : "tw-text-sm"}`}
+                  className="tw-min-h-[40px] tw-w-full tw-resize-none tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-py-2.5 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 focus:tw-border-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
                   style={{
                     fontFamily: "inherit",
                     lineHeight: "1.4",
@@ -518,7 +481,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
             onSave={handleSave}
-            onCancel={handleCancel}
+            onCancel={onCancel}
             isSaving={isSaving}
             initialContent={normalizedInitialContent}
             mentionsRef={mentionsRef}
@@ -530,7 +493,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         <div className="tw-mt-1 tw-flex tw-items-center tw-text-xs tw-text-iron-400">
           escape to{" "}
           <button
-            onClick={handleCancel}
+            onClick={onCancel}
             className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
           >
             cancel
@@ -549,7 +512,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         <div className="tw-mb-2 tw-mt-3">
           <div className="tw-flex tw-gap-x-2">
             <button
-              onClick={handleCancel}
+              onClick={onCancel}
               disabled={isSaving}
               className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-150 active:tw-bg-iron-700 disabled:tw-opacity-50"
             >
