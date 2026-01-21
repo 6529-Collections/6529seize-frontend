@@ -35,7 +35,7 @@ export function BoostedSection() {
   const visibleDrops = useMemo(() => {
     if (!drops) return [];
     if (!isSm) return drops.slice(0, 6); // Mobile: 1 col × 6 items
-    const columns = isXl ? 4 : isLg ? 3 : isMd ? 2 : 2;
+    const columns = isXl ? 4 : isLg ? 3 : 2;
     const maxItems = columns * MAX_ROWS;
     return drops.slice(0, maxItems);
   }, [drops, isXl, isLg, isMd, isSm]);
