@@ -419,6 +419,24 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     []
   );
 
+  const resetIOSViewport = useCallback(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (meta) {
+      const content = meta.getAttribute("content") || "";
+      meta.setAttribute("content", content + ",");
+      requestAnimationFrame(() => {
+        meta.setAttribute("content", content);
+      });
+    }
+
+    window.scrollTo(0, window.scrollY);
+    
+    document.body.style.opacity = "0.99";
+    requestAnimationFrame(() => {
+      document.body.style.opacity = "1";
+    });
+  }, []);
+
   const blurActiveElement = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
@@ -427,8 +445,12 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       import("@capacitor/keyboard").then(({ Keyboard }) => {
         Keyboard.hide().catch(() => {});
       });
+
+      setTimeout(() => {
+        resetIOSViewport();
+      }, 150);
     }
-  }, [isApp]);
+  }, [isApp, resetIOSViewport]);
 
   const handleCancel = useCallback(() => {
     blurActiveElement();
@@ -462,7 +484,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             contentEditable={
               <div className="tw-relative">
                 <ContentEditable
-                  className="tw-min-h-[40px] tw-w-full tw-resize-none tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-py-2.5 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 focus:tw-border-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+                  className={`tw-min-h-[40px] tw-w-full tw-resize-none tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-py-2.5 tw-pl-3 tw-pr-10 tw-text-iron-100 tw-outline-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 focus:tw-border-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${isApp ? "tw-text-base" : "tw-text-sm"}`}
                   style={{
                     fontFamily: "inherit",
                     lineHeight: "1.4",
