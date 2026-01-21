@@ -330,6 +330,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCommunityMetrics"
+  /community-metrics/series:
+    get:
+      tags:
+        - CommunityMetrics
+      summary: Get community metrics series.
+      operationId: getCommunityMetricsSeries
+      parameters:
+        - name: since
+          in: query
+          description: Unix millis timestamp for start of series.
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: to
+          in: query
+          description: Unix millis timestamp for end of series.
+          required: true
+          schema:
+            type: number
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCommunityMetricsSeries"
   /community-metrics/mints:
     get:
       tags:
@@ -5932,6 +5960,82 @@ components:
           type: number
         value_count:
           type: number
+    ApiCommunityMetricsSeries:
+      type: object
+      required:
+        - steps_start_times
+        - drops_created
+        - distinct_droppers
+        - main_stage_submissions
+        - main_stage_distinct_voters
+        - main_stage_votes
+        - network_tdh
+        - tdh_on_main_stage_submissions
+        - consolidations_formed
+        - xtdh_granted
+        - active_identities
+        - profile_count
+      properties:
+        steps_start_times:
+          type: array
+          items:
+            type: number
+            format: int64
+        drops_created:
+          type: array
+          items:
+            type: number
+            format: int64
+        distinct_droppers:
+          type: array
+          items:
+            type: number
+            format: int64
+        main_stage_submissions:
+          type: array
+          items:
+            type: number
+            format: int64
+        main_stage_distinct_voters:
+          type: array
+          items:
+            type: number
+            format: int64
+        main_stage_votes:
+          type: array
+          items:
+            type: number
+            format: int64
+        network_tdh:
+          type: array
+          items:
+            type: number
+            format: int64
+        tdh_on_main_stage_submissions:
+          type: array
+          items:
+            type: number
+            format: int64
+        consolidations_formed:
+          type: array
+          items:
+            type: number
+            format: int64
+        xtdh_granted:
+          type: array
+          items:
+            type: number
+            format: int64
+        active_identities:
+          type: array
+          items:
+            type: number
+            format: int64
+        profile_count:
+          type: array
+          items:
+            type: number
+            format: int64
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id
