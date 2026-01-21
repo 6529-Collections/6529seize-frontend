@@ -23,7 +23,9 @@ export default function NowMintingStatsItem({
       {isLoading ? (
         <span className="tw-h-6 tw-w-20 tw-animate-pulse tw-rounded tw-bg-iron-800" />
       ) : (
-        <span className={`tw-font-mono tw-text-base md:tw-text-lg tw-font-medium ${getValueColor()}`}>
+        <span
+          className={`tw-font-mono tw-text-sm md:tw-text-base tw-font-medium tw-whitespace-nowrap ${getValueColor()}`}
+        >
           {value}
         </span>
       )}
