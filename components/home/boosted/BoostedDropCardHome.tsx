@@ -104,8 +104,8 @@ const BoostedDropCardHome = memo(
               <div className="tw-relative tw-z-10 tw-w-full">
                 <ContentDisplay
                   content={previewContent}
-                  className={`tw-line-clamp-6 tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-md tw-font-normal tw-leading-relaxed ${textColorClass}`}
-                  textClassName="tw-line-clamp-6 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
+                  className={`tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-md tw-font-normal tw-leading-relaxed ${textColorClass}`}
+                  textClassName="tw-line-clamp-6 tw-w-full tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
                 />
               </div>
             </div>
