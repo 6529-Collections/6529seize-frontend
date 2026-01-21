@@ -40,12 +40,12 @@ export function ExploreWavesSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-py-10 md:tw-py-16 tw-pl-4 tw-pr-0 md:tw-px-6 lg:tw-px-8">
+    <section className="-tw-mx-8 tw-py-10 tw-pl-4 tw-pr-0 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div className="tw-px-8">
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
-              Explore waves
+              Most active waves
             </span>
             <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
               Browse channels—jump into the conversation.
