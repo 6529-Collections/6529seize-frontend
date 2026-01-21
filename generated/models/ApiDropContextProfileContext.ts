@@ -19,6 +19,7 @@ export class ApiDropContextProfileContext {
     'max_rating': number;
     'reaction': string | null;
     'boosted': boolean;
+    'bookmarked': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -52,6 +53,12 @@ export class ApiDropContextProfileContext {
         {
             "name": "boosted",
             "baseName": "boosted",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "bookmarked",
+            "baseName": "bookmarked",
             "type": "boolean",
             "format": ""
         }    ];

@@ -28,12 +28,12 @@ export default function NowMintingDetailsAccordion({
   ];
 
   return (
-    <details className="tw-group tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-6">
+    <details className="tw-group tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
       <summary className="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-50">
         <span>Edition Details</span>
         <ChevronRightIcon className="tw-size-4 tw-transition-transform group-open:tw-rotate-90" />
       </summary>
-      <div className="tw-mt-4 tw-pb-4">
+      <div className="tw-mt-4">
         <div className="tw-space-y-3 tw-text-sm">
           {details.map(({ label, value }) => (
             <div key={label} className="tw-flex tw-justify-between">
@@ -45,7 +45,7 @@ export default function NowMintingDetailsAccordion({
             <span className="tw-text-iron-500">Distribution Plan</span>
             <Link
               href={`/the-memes/${nftId}/distribution`}
-              className="tw-text-iron-100 tw-transition-colors tw-duration-300 hover:tw-text-primary-400"
+              className="tw-text-iron-100 tw-transition-colors tw-duration-300 hover:tw-text-iron-50"
             >
               View
             </Link>
