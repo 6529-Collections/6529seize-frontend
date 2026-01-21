@@ -59,21 +59,15 @@ export function ExploreWavesSection() {
           </Link>
         </div>
 
-        <div className="-tw-mx-6 tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pb-2 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-5 lg:tw-overflow-visible lg:tw-pb-0">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
-                <div
-                  key={`skeleton-${index}`}
-                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 lg:tw-w-full"
-                >
+                <div key={`skeleton-${index}`} className="tw-w-full">
                   <ExploreWaveCardSkeleton />
                 </div>
               ))
             : waves?.map((wave) => (
-                <div
-                  key={wave.id}
-                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 lg:tw-w-full"
-                >
+                <div key={wave.id} className="tw-w-full">
                   <ExploreWaveCard wave={wave} />
                 </div>
               ))}

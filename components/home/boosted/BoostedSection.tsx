@@ -5,19 +5,10 @@ import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import Masonry from "react-masonry-css";
 import BoostedDropCardHome from "./BoostedDropCardHome";
 
 const BOOSTED_DROPS_LIMIT = 50;
 const MAX_ROWS = 3;
-
-const MASONRY_BREAKPOINTS = {
-  default: 4,
-  1280: 3,
-  1024: 3,
-  768: 2,
-  640: 1,
-};
 
 export function BoostedSection() {
   const router = useRouter();
@@ -25,20 +16,18 @@ export function BoostedSection() {
     limit: BOOSTED_DROPS_LIMIT,
   });
 
-  // Detect breakpoints to determine column count
-  const isXl = useMediaQuery("(min-width: 1281px)");
+  // Detect breakpoints to determine column count (matches Tailwind lg breakpoint)
   const isLg = useMediaQuery("(min-width: 1024px)");
-  const isMd = useMediaQuery("(min-width: 768px)");
   const isSm = useMediaQuery("(min-width: 640px)");
 
   // Calculate max items based on columns * MAX_ROWS (mobile: 1x6)
   const visibleDrops = useMemo(() => {
     if (!drops) return [];
     if (!isSm) return drops.slice(0, 6); // Mobile: 1 col × 6 items
-    const columns = isXl ? 4 : isLg ? 3 : 2;
+    const columns = isLg ? 3 : 2;
     const maxItems = columns * MAX_ROWS;
     return drops.slice(0, maxItems);
-  }, [drops, isXl, isLg, isMd, isSm]);
+  }, [drops, isLg, isSm]);
 
   const handleDropClick = useCallback(
     (drop: ApiDrop) => {
@@ -75,20 +64,16 @@ export function BoostedSection() {
           </p>
         </div>
 
-        <Masonry
-          breakpointCols={MASONRY_BREAKPOINTS}
-          className="tw--ml-5 tw-flex tw-w-auto"
-          columnClassName="tw-pl-5 tw-bg-clip-padding"
-        >
+        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {visibleDrops.map((drop) => (
-            <div key={drop.id} className="tw-mb-5">
+            <div key={drop.id}>
               <BoostedDropCardHome
                 drop={drop}
                 onClick={() => handleDropClick(drop)}
               />
             </div>
           ))}
-        </Masonry>
+        </div>
       </div>
     </section>
   );
