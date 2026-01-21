@@ -212,6 +212,16 @@ body {
   }
 }
 
+body.capacitor-native {
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    font-size: max(1rem, 16px) !important;
+    touch-action: manipulation;
+  }
+}
+
 textarea,
 select,
 input,
