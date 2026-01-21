@@ -26,6 +26,8 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
       ? ImageScale.AUTOx450
       : ImageScale.AUTOx1080;
 
+    const media = drop.parts[0]?.media[0];
+
     const previewImageUrl = useMemo(
       () => getDropPreviewImageUrl(drop.metadata),
       [drop.metadata]
@@ -55,15 +57,19 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
           <div
             className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
           >
-            <MediaDisplay
-              media_mime_type={
-                drop.parts[0]?.media[0]?.mime_type ?? "image/jpeg"
-              }
-              media_url={drop.parts[0]?.media[0]?.url ?? ""}
-              disableMediaInteraction={true}
-              imageScale={mediaImageScale}
-              previewImageUrl={previewImageUrl}
-            />
+            {media?.url ? (
+              <MediaDisplay
+                media_mime_type={media.mime_type}
+                media_url={media.url}
+                disableMediaInteraction={true}
+                imageScale={mediaImageScale}
+                previewImageUrl={previewImageUrl}
+              />
+            ) : (
+              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900">
+                <span className="tw-text-sm tw-text-iron-500">No media</span>
+              </div>
+            )}
           </div>
           <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-transparent tw-to-transparent tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100" />
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-translate-y-2 tw-p-3 tw-opacity-0 tw-transition-all tw-duration-300 group-hover:tw-translate-y-0 group-hover:tw-opacity-100">
@@ -81,7 +87,7 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
         </button>
         <div className="tw-absolute tw-left-2 tw-top-2">
           <MediaTypeBadge
-            mimeType={drop.parts[0]?.media[0]?.mime_type}
+            mimeType={media?.mime_type}
             dropId={drop.id}
             size="sm"
           />
