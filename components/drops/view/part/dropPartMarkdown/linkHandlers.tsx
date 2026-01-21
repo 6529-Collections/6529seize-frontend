@@ -1,10 +1,8 @@
 import type {
   AnchorHTMLAttributes,
   ClassAttributes,
-  ImgHTMLAttributes
-} from "react";
-import {
-  type ReactElement,
+  ImgHTMLAttributes,
+  ReactElement,
 } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { ExtraProps } from "react-markdown";
