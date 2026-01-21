@@ -330,6 +330,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCommunityMetrics"
+  /community-metrics/series:
+    get:
+      tags:
+        - CommunityMetrics
+      summary: Get community metrics series.
+      operationId: getCommunityMetricsSeries
+      parameters:
+        - name: since
+          in: query
+          description: Unix millis timestamp for start of series.
+          required: true
+          schema:
+            type: number
+            format: int64
+        - name: to
+          in: query
+          description: Unix millis timestamp for end of series.
+          required: true
+          schema:
+            type: number
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCommunityMetricsSeries"
   /community-metrics/mints:
     get:
       tags:
@@ -814,6 +842,20 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/ApiDropType"
+        - name: ids
+          in: query
+          description: Comma-separated list of drop IDs to fetch
+          required: false
+          schema:
+            type: string
+        - name: contains_media
+          in: query
+          description: >-
+            If true then only drops that have at least one media attachment will
+            be returned (false by default)
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -5814,6 +5856,82 @@ components:
           type: number
         value_count:
           type: number
+    ApiCommunityMetricsSeries:
+      type: object
+      required:
+        - steps_start_times
+        - drops_created
+        - distinct_droppers
+        - main_stage_submissions
+        - main_stage_distinct_voters
+        - main_stage_votes
+        - network_tdh
+        - tdh_on_main_stage_submissions
+        - consolidations_formed
+        - xtdh_granted
+        - active_identities
+        - profile_count
+      properties:
+        steps_start_times:
+          type: array
+          items:
+            type: number
+            format: int64
+        drops_created:
+          type: array
+          items:
+            type: number
+            format: int64
+        distinct_droppers:
+          type: array
+          items:
+            type: number
+            format: int64
+        main_stage_submissions:
+          type: array
+          items:
+            type: number
+            format: int64
+        main_stage_distinct_voters:
+          type: array
+          items:
+            type: number
+            format: int64
+        main_stage_votes:
+          type: array
+          items:
+            type: number
+            format: int64
+        network_tdh:
+          type: array
+          items:
+            type: number
+            format: int64
+        tdh_on_main_stage_submissions:
+          type: array
+          items:
+            type: number
+            format: int64
+        consolidations_formed:
+          type: array
+          items:
+            type: number
+            format: int64
+        xtdh_granted:
+          type: array
+          items:
+            type: number
+            format: int64
+        active_identities:
+          type: array
+          items:
+            type: number
+            format: int64
+        profile_count:
+          type: array
+          items:
+            type: number
+            format: int64
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id
@@ -7429,6 +7547,8 @@ components:
         - mint_time
         - subscriptions
         - mints
+        - edition_size
+        - unminted
       properties:
         card:
           type: number
@@ -7440,6 +7560,13 @@ components:
           type: number
           format: int64
         mints:
+          type: number
+          format: int64
+        edition_size:
+          type: number
+          format: int64
+          nullable: true
+        unminted:
           type: number
           format: int64
     ApiMintMetricsPage:
@@ -8655,7 +8782,6 @@ components:
         - participation
         - chat
         - wave
-        - outcomes
         - created_at
         - contributors_overview
         - subscribed_actions
@@ -8695,10 +8821,6 @@ components:
           $ref: "#/components/schemas/ApiWaveChatConfig"
         wave:
           $ref: "#/components/schemas/ApiWaveConfig"
-        outcomes:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveOutcomeOld"
         contributors_overview:
           type: array
           items:
@@ -9133,33 +9255,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
-    ApiWaveOutcomeOld:
-      type: object
-      required:
-        - type
-        - description
-        - index
-      properties:
-        type:
-          $ref: "#/components/schemas/ApiWaveOutcomeType"
-        subtype:
-          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
-        description:
-          type: string
-        credit:
-          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
-        rep_category:
-          type: string
-        amount:
-          type: number
-          format: int64
-        distribution:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
-        index:
-          type: number
-          format: int64
     ApiWaveOutcomesPage:
       type: object
       required:
