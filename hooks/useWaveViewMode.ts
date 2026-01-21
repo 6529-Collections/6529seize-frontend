@@ -14,9 +14,13 @@ const EMPTY_MODES: WaveViewModes = {};
 let memoryModes: WaveViewModes = {};
 let useMemoryStore = false;
 
+// Cache for useSyncExternalStore - must return same reference when data unchanged
+let cachedModes: WaveViewModes = EMPTY_MODES;
+let cachedRaw: string | null = null;
+
 const readStoredModes = (): WaveViewModes => {
   if (typeof window === "undefined") {
-    return {};
+    return EMPTY_MODES;
   }
 
   if (useMemoryStore) {
@@ -25,13 +29,26 @@ const readStoredModes = (): WaveViewModes => {
 
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return {};
+
+    // Return cached if raw string unchanged
+    if (stored === cachedRaw) {
+      return cachedModes;
     }
+
+    if (!stored) {
+      cachedRaw = null;
+      cachedModes = EMPTY_MODES;
+      return EMPTY_MODES;
+    }
+
     try {
-      return JSON.parse(stored) as WaveViewModes;
+      cachedRaw = stored;
+      cachedModes = JSON.parse(stored) as WaveViewModes;
+      return cachedModes;
     } catch {
-      return {};
+      cachedRaw = null;
+      cachedModes = EMPTY_MODES;
+      return EMPTY_MODES;
     }
   } catch {
     useMemoryStore = true;
@@ -48,7 +65,11 @@ const writeStoredModes = (next: WaveViewModes) => {
 
   if (!useMemoryStore) {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      const serialized = JSON.stringify(next);
+      window.localStorage.setItem(STORAGE_KEY, serialized);
+      // Sync cache
+      cachedRaw = serialized;
+      cachedModes = next;
     } catch (e) {
       useMemoryStore = true;
       console.warn("Error saving wave view modes to localStorage:", e);
