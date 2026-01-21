@@ -47,7 +47,10 @@ export const removeUserFromReactions = (
   const sanitizedEntries: ReactionEntry[] = [];
 
   for (const entry of entries) {
-    const filteredProfiles = duplicateProfilesWithoutUser(entry.profiles, userId);
+    const filteredProfiles = duplicateProfilesWithoutUser(
+      entry.profiles,
+      userId
+    );
 
     if (filteredProfiles.length > 0) {
       sanitizedEntries.push({
@@ -80,26 +83,24 @@ export const toProfileMin = (
     return null;
   }
 
-  const fallbackId = profile.primary_wallet ?? "";
-
   return {
-    id: profile.id ?? fallbackId,
+    id: profile.id ?? profile.primary_wallet,
     handle: profile.handle ?? null,
     pfp: profile.pfp ?? null,
     banner1_color: profile.banner1 ?? null,
     banner2_color: profile.banner2 ?? null,
-    cic: profile.cic ?? 0,
-    rep: profile.rep ?? 0,
-    tdh: profile.tdh ?? 0,
-    tdh_rate: profile.tdh_rate ?? 0,
-    xtdh: profile.xtdh ?? 0,
-    xtdh_rate: profile.xtdh_rate ?? 0,
-    level: profile.level ?? 0,
-    primary_address: profile.primary_wallet ?? "",
+    cic: profile.cic,
+    rep: profile.rep,
+    tdh: profile.tdh,
+    tdh_rate: profile.tdh_rate,
+    xtdh: profile.xtdh,
+    xtdh_rate: profile.xtdh_rate,
+    level: profile.level,
+    primary_address: profile.primary_wallet,
     subscribed_actions: [],
     archived: false,
-    active_main_stage_submission_ids:
-      profile.active_main_stage_submission_ids ?? [],
-    winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids ?? [],
+    active_main_stage_submission_ids: profile.active_main_stage_submission_ids,
+    winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
+    is_wave_creator: profile.is_wave_creator,
   };
 };
