@@ -9,9 +9,6 @@ export default function HeroHeader() {
       <h1 className="tw-mb-3 tw-text-3xl tw-font-bold tw-leading-tight tw-tracking-tight tw-text-iron-200 md:tw-text-4xl">
         Building a decentralized network state
       </h1>
-      <p className="tw-mx-auto tw-mb-0 tw-max-w-xl tw-text-sm tw-leading-relaxed tw-text-iron-400 md:tw-text-base">
-        Join the most interesting chats in crypto
-      </p>
     </section>
   );
 }

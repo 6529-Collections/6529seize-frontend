@@ -12,7 +12,7 @@ export default function HomePageContent() {
       <HeroHeader />
       <NowMintingSection />
 
-      <div className="tw-mt-10 tw-border tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 md:tw-mt-16 md:tw-pt-16">
+      <div className="tw-pt-10 md:tw-pt-16">
         <NextMintLeadingSection />
         <BoostedSection />
         <ExploreWavesSection />
