@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { ReactNode} from "react";
-import { useCallback } from "react";
+import type { ReactNode } from "react";
+import { useCallback, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import PullToRefresh from "../providers/PullToRefresh";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -30,6 +31,7 @@ export default function AppLayout({ children }: Props) {
   useDeepLinkNavigation();
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
+  const headerRef = useRef<HTMLDivElement | null>(null);
   const { activeView, homeActiveTab } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -53,6 +55,7 @@ export default function AppLayout({ children }: Props) {
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
+      headerRef.current = node;
       registerRef("header", node);
       setHeaderRef(node);
     },
@@ -69,6 +72,7 @@ export default function AppLayout({ children }: Props) {
         isHomeFeedView ? "tw-overflow-hidden" : "tw-overflow-auto"
       }`}
     >
+      <PullToRefresh triggerZoneRef={headerRef} />
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />
       </div>
