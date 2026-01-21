@@ -43,6 +43,7 @@ export function ExploreWavesSection() {
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
               Tired of bot replies?
             </span>
+            <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">Most active waves</p>
           </div>
           <Link
             href="/waves"
