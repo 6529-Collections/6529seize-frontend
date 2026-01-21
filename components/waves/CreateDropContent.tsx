@@ -391,6 +391,7 @@ const getOptimisticDrop = (
       subscribed_actions: [],
       archived: false,
       primary_address: connectedProfile.primary_wallet,
+      is_wave_creator: connectedProfile.is_wave_creator,
     },
     created_at: Date.now(),
     updated_at: null,

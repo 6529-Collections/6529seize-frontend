@@ -1,3 +1,5 @@
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+
 export enum ImageScale {
   W_AUTO_H_50 = "AUTOx50",
   W_200_H_200 = "200x200",
@@ -15,22 +17,23 @@ const SCALABLE_PREFIXES = [
 ];
 
 export function getScaledImageUri(url: string, scale: ImageScale): string {
+  const resolvedUrl = resolveIpfsUrlSync(url);
   const scalableUrl = SCALABLE_PREFIXES.find((prefix) =>
-    url.startsWith(prefix)
+    resolvedUrl.startsWith(prefix)
   );
   if (!scalableUrl) {
-    return url;
+    return resolvedUrl;
   }
-  const path = url.slice(scalableUrl.length);
+  const path = resolvedUrl.slice(scalableUrl.length);
   const pathParts = path.split("/");
   const fileName = pathParts.pop();
   const folder = pathParts.join("/");
   if (!fileName) {
-    return url;
+    return resolvedUrl;
   }
   const fileNameParts = fileName.split(".");
   if (fileNameParts.length <= 1) {
-    return url;
+    return resolvedUrl;
   }
   let extension = fileNameParts.pop()!;
   if (extension.includes("?")) {
@@ -41,5 +44,5 @@ export function getScaledImageUri(url: string, scale: ImageScale): string {
       folder.length ? folder + "/" : ""
     }${scale}/${fileName}`;
   }
-  return url;
+  return resolvedUrl;
 }

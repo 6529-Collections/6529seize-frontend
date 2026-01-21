@@ -102,6 +102,7 @@ export enum QueryKey {
   WAVE_OUTCOME_DISTRIBUTION = "WAVE_OUTCOME_DISTRIBUTION",
   WAVE_OUTCOME_DISTRIBUTION_PAGE = "WAVE_OUTCOME_DISTRIBUTION_PAGE",
   COMMUNITY_METRICS = "COMMUNITY_METRICS",
+  COMMUNITY_METRICS_SERIES = "COMMUNITY_METRICS_SERIES",
   MINT_METRICS = "MINT_METRICS",
 }
 
@@ -301,13 +302,11 @@ const createReactQueryContextValue = (
     const existingData = queryClient.getQueryData(queryKey);
     if (existingData) {
       return;
-    } else {
-      // If there's no existing data, set the initial data
-      queryClient.setQueryData<InfiniteData<ApiWave[]>>(queryKey, {
+    }
+    queryClient.setQueryData<InfiniteData<ApiWave[]>>(queryKey, {
         pages: [wavesOverview],
         pageParams: [undefined],
       });
-    }
   };
 
   const setWaveDrops = ({
@@ -330,13 +329,11 @@ const createReactQueryContextValue = (
     const existingData = queryClient.getQueryData(queryKey);
     if (existingData) {
       return;
-    } else {
-      // If there's no existing data, set the initial data
-      queryClient.setQueryData<InfiniteData<ApiWaveDropsFeed>>(queryKey, {
-        pages: [waveDrops],
-        pageParams: [undefined],
-      });
     }
+    queryClient.setQueryData<InfiniteData<ApiWaveDropsFeed>>(queryKey, {
+      pages: [waveDrops],
+      pageParams: [undefined],
+    });
   };
 
   const setProfileProxy = (profileProxy: ApiProfileProxy) => {
@@ -559,7 +556,7 @@ const createReactQueryContextValue = (
         rater: rater.toLowerCase(),
       });
     }
-    if (profileProxy?.created_by?.handle && profileProxy.granted_to?.handle) {
+    if (profileProxy?.created_by.handle && profileProxy.granted_to.handle) {
       invalidateQueries({
         key: QueryKey.PROFILE,
         values: [
@@ -571,12 +568,12 @@ const createReactQueryContextValue = (
         key: QueryKey.PROFILE_RATERS,
         values: [
           {
-            handleOrWallet: profileProxy.created_by?.handle,
+            handleOrWallet: profileProxy.created_by.handle,
             matter: RateMatter.NIC,
             given: false,
           },
           {
-            handleOrWallet: profileProxy.granted_to?.handle,
+            handleOrWallet: profileProxy.granted_to.handle,
             matter: RateMatter.NIC,
             given: false,
           },
@@ -643,7 +640,7 @@ const createReactQueryContextValue = (
       });
     }
 
-    if (profileProxy?.created_by?.handle && profileProxy.granted_to?.handle) {
+    if (profileProxy?.created_by.handle && profileProxy.granted_to.handle) {
       invalidateQueries({
         key: QueryKey.PROFILE,
         values: [

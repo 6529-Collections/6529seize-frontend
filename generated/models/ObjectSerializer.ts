@@ -131,6 +131,9 @@ export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
 export * from '../models/ApiProfileProxyActionType';
+export * from '../models/ApiPushNotificationDevice';
+export * from '../models/ApiPushNotificationSettings';
+export * from '../models/ApiPushNotificationSettingsUpdate';
 export * from '../models/ApiQuotedDrop';
 export * from '../models/ApiQuotedDropResponse';
 export * from '../models/ApiRateMatter';
@@ -346,7 +349,7 @@ import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupO
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter    } from '../models/ApiGroupTdhFilter';
 import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
-import { ApiIdentity                       } from '../models/ApiIdentity';
+import { ApiIdentity                        } from '../models/ApiIdentity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
@@ -381,6 +384,9 @@ import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
+import { ApiPushNotificationDevice } from '../models/ApiPushNotificationDevice';
+import { ApiPushNotificationSettings } from '../models/ApiPushNotificationSettings';
+import { ApiPushNotificationSettingsUpdate } from '../models/ApiPushNotificationSettingsUpdate';
 import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
 import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
 import { ApiRateMatter } from '../models/ApiRateMatter';
@@ -664,6 +670,9 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileMin": ApiProfileMin,
     "ApiProfileProxy": ApiProfileProxy,
     "ApiProfileProxyAction": ApiProfileProxyAction,
+    "ApiPushNotificationDevice": ApiPushNotificationDevice,
+    "ApiPushNotificationSettings": ApiPushNotificationSettings,
+    "ApiPushNotificationSettingsUpdate": ApiPushNotificationSettingsUpdate,
     "ApiQuotedDrop": ApiQuotedDrop,
     "ApiQuotedDropResponse": ApiQuotedDropResponse,
     "ApiRatingWithProfileInfoAndLevel": ApiRatingWithProfileInfoAndLevel,

@@ -26,7 +26,7 @@ import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -183,8 +183,6 @@ export default function HeaderSearchModal({
   );
 
   const [debouncedValue, setDebouncedValue] = useState<string>("");
-  const [allowProfileFetch, setAllowProfileFetch] = useState<boolean>(false);
-  const [allowWaveFetch, setAllowWaveFetch] = useState<boolean>(false);
   useDebounce(
     () => {
       setDebouncedValue(searchValue);
@@ -321,7 +319,7 @@ export default function HeaderSearchModal({
   }, []);
 
   const sharedQueryDefaults = {
-    keepPreviousData: false,
+    placeholderData: keepPreviousData,
   } as const;
 
   const {
@@ -338,9 +336,7 @@ export default function HeaderSearchModal({
           param: trimmedDebouncedValue,
         },
       }),
-    enabled:
-      shouldSearchDefault &&
-      (selectedCategory === CATEGORY.PROFILES || allowProfileFetch),
+    enabled: shouldSearchDefault,
     ...sharedQueryDefaults,
   });
 
@@ -370,15 +366,9 @@ export default function HeaderSearchModal({
     refetch: refetchWaves,
   } = useWaves({
     identity: null,
-    waveName:
-      shouldSearchDefault &&
-      (selectedCategory === CATEGORY.WAVES || allowWaveFetch)
-        ? trimmedDebouncedValue
-        : null,
+    waveName: shouldSearchDefault ? trimmedDebouncedValue : null,
     limit: 20,
-    enabled:
-      shouldSearchDefault &&
-      (selectedCategory === CATEGORY.WAVES || allowWaveFetch),
+    enabled: shouldSearchDefault,
   });
 
   const pageResults = useMemo(() => {
@@ -446,12 +436,8 @@ export default function HeaderSearchModal({
   }, [shouldSearchPages, trimmedSearchValue, pageCatalog]);
 
   const profileResults: CommunityMemberMinimal[] = useMemo(
-    () =>
-      shouldSearchDefault &&
-      (selectedCategory === CATEGORY.PROFILES || allowProfileFetch)
-        ? (profiles ?? [])
-        : [],
-    [shouldSearchDefault, selectedCategory, allowProfileFetch, profiles]
+    () => (shouldSearchDefault ? (profiles ?? []) : []),
+    [shouldSearchDefault, profiles]
   );
 
   const nftResults: NFTSearchResult[] = useMemo(
@@ -460,81 +446,10 @@ export default function HeaderSearchModal({
   );
 
   const waveResults: ApiWave[] = useMemo(
-    () =>
-      shouldSearchDefault &&
-      (selectedCategory === CATEGORY.WAVES || allowWaveFetch)
-        ? (waves ?? [])
-        : [],
-    [shouldSearchDefault, selectedCategory, allowWaveFetch, waves]
+    () => (shouldSearchDefault ? (waves ?? []) : []),
+    [shouldSearchDefault, waves]
   );
 
-  const nftsSettled =
-    shouldSearchNfts &&
-    !isFetchingNfts &&
-    (nfts !== undefined || Boolean(nftsError));
-
-  const profilesSettled =
-    shouldSearchDefault &&
-    (selectedCategory === CATEGORY.PROFILES || allowProfileFetch) &&
-    !isFetchingProfiles &&
-    (profiles !== undefined || Boolean(profilesError));
-
-  useEffect(() => {
-    setAllowProfileFetch(false);
-    setAllowWaveFetch(false);
-  }, [debouncedValue, shouldSearchDefault]);
-
-  useEffect(() => {
-    if (selectedCategory === CATEGORY.PROFILES) {
-      setAllowProfileFetch(true);
-    }
-    if (selectedCategory === CATEGORY.WAVES) {
-      setAllowWaveFetch(true);
-    }
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    if (!shouldSearchDefault) {
-      return;
-    }
-
-    if (allowProfileFetch) {
-      return;
-    }
-
-    if (!shouldSearchNfts) {
-      setAllowProfileFetch(true);
-      return;
-    }
-
-    if (nftsSettled) {
-      setAllowProfileFetch(true);
-    }
-  }, [shouldSearchDefault, shouldSearchNfts, nftsSettled, allowProfileFetch]);
-
-  useEffect(() => {
-    if (!shouldSearchDefault) {
-      return;
-    }
-
-    if (allowWaveFetch) {
-      return;
-    }
-
-    if (!allowProfileFetch && selectedCategory !== CATEGORY.WAVES) {
-      return;
-    }
-
-    if (profilesSettled) {
-      setAllowWaveFetch(true);
-    }
-  }, [
-    shouldSearchDefault,
-    allowProfileFetch,
-    profilesSettled,
-    allowWaveFetch,
-    selectedCategory,
-  ]);
 
   const charactersRemaining = Math.max(
     MIN_SEARCH_LENGTH - searchInputLength,
@@ -632,9 +547,6 @@ export default function HeaderSearchModal({
     setWaveSearchDebouncedValue("");
     setSelectedCategory(CATEGORY.ALL);
     setSelectedItemIndex(0);
-    setAllowProfileFetch(false);
-    setAllowWaveFetch(false);
-    setState(STATE.INITIAL);
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
@@ -669,7 +581,6 @@ export default function HeaderSearchModal({
   };
 
   const [selectedItemIndex, setSelectedItemIndex] = useState<number>(0);
-  const [state, setState] = useState<STATE>(STATE.INITIAL);
 
   const getCurrentItems = (): HeaderSearchModalItemType[] => flattenedItems;
 
@@ -699,7 +610,7 @@ export default function HeaderSearchModal({
     Object.hasOwn(item, "serial_no");
 
   useKeyPressEvent("Enter", () => {
-    if (state !== STATE.SUCCESS) return;
+    if (derivedState !== STATE.SUCCESS) return;
     const items = getCurrentItems();
     if (!items || items.length === 0) return;
     const item = items[selectedItemIndex];
@@ -741,46 +652,41 @@ export default function HeaderSearchModal({
     }
   });
 
-  useEffect(() => {
-    setSelectedItemIndex(0);
-
+  const derivedState = useMemo(() => {
     if (!isSearching) {
-      setState(STATE.INITIAL);
-      return;
+      return STATE.INITIAL;
     }
 
     const hasResults = categoriesWithResults.length > 0;
+
+    if (hasResults) {
+      return STATE.SUCCESS;
+    }
+
+    if (isAwaitingDebouncedSearch) {
+      return STATE.LOADING;
+    }
+
     const anyFetching =
       (shouldSearchDefault && (isFetchingProfiles || isFetchingWaves)) ||
       (shouldSearchNfts && isFetchingNfts);
+
+    if (anyFetching) {
+      return STATE.LOADING;
+    }
+
     const anyError =
       (shouldSearchDefault &&
         (Boolean(profilesError) || Boolean(wavesError))) ||
       (shouldSearchNfts && Boolean(nftsError));
 
-    if (!hasResults) {
-      if (isAwaitingDebouncedSearch) {
-        setState(STATE.LOADING);
-        return;
-      }
-
-      if (anyError) {
-        setState(STATE.ERROR);
-        return;
-      }
-
-      if (anyFetching) {
-        setState(STATE.LOADING);
-        return;
-      }
-
-      setState(STATE.NO_RESULTS);
-      return;
+    if (anyError) {
+      return STATE.ERROR;
     }
 
-    setState(STATE.SUCCESS);
+    return STATE.NO_RESULTS;
   }, [
-    categoriesWithResults,
+    categoriesWithResults.length,
     isFetchingProfiles,
     isFetchingNfts,
     isFetchingWaves,
@@ -793,48 +699,36 @@ export default function HeaderSearchModal({
     isAwaitingDebouncedSearch,
   ]);
 
+  useEffect(() => {
+    setSelectedItemIndex(0);
+  }, [trimmedDebouncedValue]);
+
   const handleRetry = () => {
-    setState(STATE.LOADING);
-
-    const refetchPromises: Promise<unknown>[] = [];
-
-    const queueRefetch = (callback: () => Promise<unknown>) => {
-      refetchPromises.push(callback());
-    };
+    if (selectedCategory === CATEGORY.PAGES) {
+      return;
+    }
 
     if (selectedCategory === CATEGORY.ALL) {
       if (shouldSearchDefault) {
-        queueRefetch(refetchProfiles);
-        queueRefetch(refetchWaves);
+        refetchProfiles();
+        refetchWaves();
       }
       if (shouldSearchNfts) {
-        queueRefetch(refetchNfts);
+        refetchNfts();
       }
-    } else if (selectedCategory === CATEGORY.PAGES) {
-      setState(pageResults.length > 0 ? STATE.SUCCESS : STATE.NO_RESULTS);
-      return;
     } else if (selectedCategory === CATEGORY.PROFILES) {
       if (shouldSearchDefault) {
-        queueRefetch(refetchProfiles);
+        refetchProfiles();
       }
     } else if (selectedCategory === CATEGORY.NFTS) {
       if (shouldSearchNfts) {
-        queueRefetch(refetchNfts);
+        refetchNfts();
       }
     } else if (selectedCategory === CATEGORY.WAVES) {
       if (shouldSearchDefault) {
-        queueRefetch(refetchWaves);
+        refetchWaves();
       }
     }
-
-    if (refetchPromises.length === 0) {
-      setState(STATE.NO_RESULTS);
-      return;
-    }
-
-    Promise.all(refetchPromises).catch(() => {
-      setState(STATE.ERROR);
-    });
   };
 
   const activeElementRef = useRef<HTMLDivElement>(null);
@@ -1172,7 +1066,7 @@ export default function HeaderSearchModal({
                   )}
                   {/* Site-wide search results */}
                   {searchMode === SEARCH_MODE.SITE &&
-                    state === STATE.SUCCESS && (
+                    derivedState === STATE.SUCCESS && (
                       <div
                         ref={resultsPanelRef}
                         id={HEADER_SEARCH_RESULTS_PANEL_ID}
@@ -1183,8 +1077,7 @@ export default function HeaderSearchModal({
                       </div>
                     )}
                   {searchMode === SEARCH_MODE.SITE &&
-                    (state === STATE.LOADING ||
-                      (state === STATE.INITIAL && isSearching)) && (
+                    derivedState === STATE.LOADING && (
                       <div
                         ref={resultsPanelRef}
                         id={HEADER_SEARCH_RESULTS_PANEL_ID}
@@ -1197,7 +1090,7 @@ export default function HeaderSearchModal({
                       </div>
                     )}
                   {searchMode === SEARCH_MODE.SITE &&
-                    state === STATE.NO_RESULTS && (
+                    derivedState === STATE.NO_RESULTS && (
                       <div
                         ref={resultsPanelRef}
                         id={HEADER_SEARCH_RESULTS_PANEL_ID}
@@ -1209,7 +1102,7 @@ export default function HeaderSearchModal({
                         </p>
                       </div>
                     )}
-                  {searchMode === SEARCH_MODE.SITE && state === STATE.ERROR && (
+                  {searchMode === SEARCH_MODE.SITE && derivedState === STATE.ERROR && (
                     <div
                       ref={resultsPanelRef}
                       id={HEADER_SEARCH_RESULTS_PANEL_ID}
@@ -1250,8 +1143,7 @@ export default function HeaderSearchModal({
                     </div>
                   )}
                   {searchMode === SEARCH_MODE.SITE &&
-                    state === STATE.INITIAL &&
-                    !isSearching && (
+                    derivedState === STATE.INITIAL && (
                       <div
                         ref={resultsPanelRef}
                         id={HEADER_SEARCH_RESULTS_PANEL_ID}
