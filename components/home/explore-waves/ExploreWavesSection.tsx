@@ -18,14 +18,10 @@ export function ExploreWavesSection() {
   } = useQuery({
     queryKey: ["explore-waves-homepage", WAVES_LIMIT],
     queryFn: async () => {
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: "waves-overview",
-        params: {
-          type: "RECENTLY_DROPPED_TO",
-          limit: String(WAVES_LIMIT),
-          offset: "0",
-        },
+      const data = await commonApiFetch<ApiWave[]>({
+        endpoint: "waves-overview/hot",
       });
+      return data.slice(0, WAVES_LIMIT);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -45,11 +41,8 @@ export function ExploreWavesSection() {
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
-              Most active waves
+              Tired of bot replies?
             </span>
-            <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
-              Browse channels—jump into the conversation.
-            </p>
           </div>
           <Link
             href="/waves"

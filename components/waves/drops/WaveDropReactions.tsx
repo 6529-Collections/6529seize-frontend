@@ -295,6 +295,7 @@ function WaveDropReaction({
                   max_rating: 0,
                   reaction: null,
                   boosted: false,
+                  bookmarked: false,
                 };
 
             draft.context_profile_context = {
