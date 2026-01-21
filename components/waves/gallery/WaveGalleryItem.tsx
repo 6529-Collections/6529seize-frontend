@@ -50,7 +50,7 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
     return (
       <div className={containerClass}>
         <button
-          className="tw-relative tw-m-0 tw-aspect-square tw-w-full tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-border-none tw-bg-iron-900 tw-bg-transparent tw-p-0 tw-text-left"
+          className="tw-relative tw-m-0 tw-aspect-square tw-w-full tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-border-none tw-bg-iron-900 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500"
           onClick={handleImageClick}
           type="button"
         >
@@ -71,8 +71,8 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
               </div>
             )}
           </div>
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-transparent tw-to-transparent tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100" />
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-translate-y-2 tw-p-3 tw-opacity-0 tw-transition-all tw-duration-300 group-hover:tw-translate-y-0 group-hover:tw-opacity-100">
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-transparent tw-to-transparent tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100 group-focus-visible:tw-opacity-100" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-translate-y-2 tw-p-3 tw-opacity-0 tw-transition-all tw-duration-300 group-hover:tw-translate-y-0 group-hover:tw-opacity-100 group-focus-visible:tw-translate-y-0 group-focus-visible:tw-opacity-100">
             {drop.title && (
               <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-white">
                 {drop.title}
