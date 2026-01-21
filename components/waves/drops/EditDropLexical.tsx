@@ -14,10 +14,6 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import type {
-  EditorState,
-  TextNode
-} from "lexical";
 import {
   $createParagraphNode,
   $createTextNode,
@@ -26,8 +22,10 @@ import {
   COMMAND_PRIORITY_HIGH,
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
+  type EditorState,
   type LexicalNode,
   type RootNode,
+  type TextNode,
 } from "lexical";
 import React, {
   useCallback,
