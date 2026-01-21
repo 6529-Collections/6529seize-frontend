@@ -62,7 +62,7 @@ export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
 
       const target = e.target as HTMLElement;
       const triggerZone = triggerZoneRef.current;
-      if (!triggerZone || !triggerZone.contains(target)) {
+      if (!triggerZone?.contains(target)) {
         return;
       }
 
