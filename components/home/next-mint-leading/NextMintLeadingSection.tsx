@@ -1,6 +1,7 @@
 "use client";
 
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useNowMinting } from "@/hooks/useNowMinting";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
@@ -13,6 +14,8 @@ import { NextMintCard } from "./NextMintCard";
 
 export function NextMintLeadingSection() {
   const { seizeSettings, isLoaded } = useSeizeSettings();
+  const { nft: nowMinting, isFetching: isNowMintingFetching } = useNowMinting();
+
   const waveId = seizeSettings.memes_wave_id;
 
   const { decisionPoints, isFetching: isWinnersFetching } = useWaveDecisions({
@@ -30,10 +33,25 @@ export function NextMintLeadingSection() {
   const latestDecision = decisionPoints[decisionPoints.length - 1];
   const nextMint = latestDecision?.winners[0]?.drop ?? null;
 
-  // Get top 2 from leaderboard
-  const leading = drops.slice(0, 2);
+  // Get nextMint title
+  const nextMintTitle =
+    nextMint?.title ??
+    nextMint?.metadata.find((m) => m.data_key === "title")?.data_value;
 
-  const isFetching = isWinnersFetching || isLeaderboardFetching;
+  // Compare with nowMinting name (case-insensitive, trimmed)
+  const isNextMintSameAsNowMinting =
+    nowMinting?.name.toLowerCase().trim() ===
+    nextMintTitle?.toLowerCase().trim();
+
+  // Determine what to show
+  const showNextMint = nextMint && !isNextMintSameAsNowMinting;
+  const leadingCount = showNextMint ? 2 : 3;
+
+  // Get top drops from leaderboard
+  const leading = drops.slice(0, leadingCount);
+
+  const isFetching =
+    isNowMintingFetching || isWinnersFetching || isLeaderboardFetching;
 
   if (!isLoaded || !waveId) {
     return null;
@@ -61,7 +79,7 @@ export function NextMintLeadingSection() {
     </div>
   );
 
-  if (isFetching && !nextMint && leading.length === 0) {
+  if (isFetching && !showNextMint && leading.length === 0) {
     return (
       <section className={sectionClassName}>
         <div>
@@ -74,7 +92,7 @@ export function NextMintLeadingSection() {
     );
   }
 
-  if (!nextMint && leading.length === 0) {
+  if (!showNextMint && leading.length === 0) {
     return null;
   }
 
@@ -83,7 +101,7 @@ export function NextMintLeadingSection() {
       <div>
         {header}
         <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-3 lg:tw-gap-8">
-          {nextMint && <NextMintCard drop={nextMint} />}
+          {showNextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
           ))}
