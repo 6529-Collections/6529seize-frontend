@@ -9,6 +9,7 @@ import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import { LinkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { memo, useCallback, useMemo } from "react";
@@ -28,13 +29,14 @@ const BoostedDropCardHome = memo(
       [part?.content, part?.media]
     );
 
-    // Check if content is primarily a link
-    const urlRegex = /^https?:\/\/[^\s]+$/i;
+    // Check if content starts with a link (for icon display)
     const textContent = part?.content ?? "";
-    const isLink = urlRegex.test(textContent.trim());
-    const textColorClass = isLink ? "tw-text-primary-300" : "tw-text-iron-300";
+    const startsWithLink = /^https?:\/\//i.test(textContent.trim());
 
     const { author, wave, boosts } = drop;
+    const MAX_FIRE_ICONS = 5;
+    const fireIconsToShow = Math.min(boosts, MAX_FIRE_ICONS);
+    const remainingBoosts = boosts - MAX_FIRE_ICONS;
     const waveName = wave.name;
     const handleCardKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -53,22 +55,34 @@ const BoostedDropCardHome = memo(
         tabIndex={0}
         onClick={onClick}
         onKeyDown={handleCardKeyDown}
-        className="hover:tw-border-50/10 tw-group tw-relative tw-flex tw-w-60 tw-flex-shrink-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-black tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
+        className="hover:tw-border-50/10 tw-group tw-relative tw-flex tw-w-[480px] tw-flex-shrink-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-black tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_0_40px_-5px_rgba(255,255,255,0.15)]"
       >
         {/* Inner Highlight (Glass Edge) */}
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
 
-        <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-50/5 tw-bg-iron-950/60 tw-px-2.5 tw-py-1 tw-shadow-lg tw-backdrop-blur-md">
-          <BoostIcon
-            className="tw-size-3 tw-flex-shrink-0 tw-text-orange-400"
-            variant="filled"
-          />
-          <span className="tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-50">
-            {boosts}
+        {/* Time ago */}
+        <div className="tw-absolute tw-left-3 tw-top-3 tw-z-10 tw-rounded-full tw-border tw-border-solid tw-border-iron-50/5 tw-bg-iron-950/60 tw-px-2.5 tw-py-1 tw-shadow-lg tw-backdrop-blur-md">
+          <span className="tw-text-[10px] tw-text-iron-400">
+            {getTimeAgoShort(drop.created_at)}
           </span>
         </div>
 
-        <div className="tw-relative tw-aspect-[4/5] tw-w-full tw-overflow-hidden tw-rounded-xl sm:tw-aspect-[3/4]">
+        <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-flex tw-items-center tw-gap-0.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-50/5 tw-bg-iron-950/60 tw-px-2.5 tw-py-1 tw-shadow-lg tw-backdrop-blur-md">
+          {Array.from({ length: fireIconsToShow }).map((_, i) => (
+            <BoostIcon
+              key={i}
+              className="tw-size-3 tw-flex-shrink-0 tw-text-orange-400"
+              variant="filled"
+            />
+          ))}
+          {remainingBoosts > 0 && (
+            <span className="tw-ml-1 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-50">
+              +{remainingBoosts}
+            </span>
+          )}
+        </div>
+
+        <div className="tw-relative tw-aspect-[8/5] tw-w-full tw-overflow-hidden tw-rounded-xl">
           {media ? (
             <div className="tw-relative tw-h-full tw-w-full">
               {/* Glow effect */}
@@ -94,52 +108,56 @@ const BoostedDropCardHome = memo(
             </div>
           ) : (
             <div className="tw-relative tw-flex tw-size-full tw-items-center tw-justify-center tw-p-6">
-              {isLink ? (
+              {startsWithLink ? (
                 <LinkIcon className="tw-absolute tw-left-6 tw-top-8 tw-size-6 tw-text-iron-700 tw-opacity-50" />
               ) : (
                 <span className="tw-absolute tw-left-6 tw-top-8 tw-select-none tw-font-serif tw-text-6xl tw-leading-none tw-text-iron-800 tw-opacity-50">
                   {"\u201C"}
                 </span>
               )}
-              <div className="tw-relative tw-z-10 tw-w-full">
-                <ContentDisplay
-                  content={previewContent}
-                  className={`tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-md tw-font-normal tw-leading-relaxed ${textColorClass}`}
-                  textClassName="tw-line-clamp-6 tw-w-full tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
-                />
-              </div>
+              <ContentDisplay
+                content={previewContent}
+                className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-xl tw-font-normal tw-leading-relaxed tw-text-iron-300"
+                textClassName="tw-line-clamp-5 tw-w-full tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
+              />
+              {/* Gradient fade */}
+              <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-20 tw-bg-gradient-to-t tw-from-black tw-to-transparent" />
             </div>
           )}
         </div>
 
-        <div className="tw-relative tw-z-10 tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black tw-px-4 tw-py-4">
-          <ProfileAvatar
-            pfpUrl={author.pfp}
-            alt={author.handle ?? "User"}
-            size={ProfileBadgeSize.SMALL}
-          />
-          <div className="tw-flex tw-min-w-0 tw-flex-col">
-            {author.handle ? (
-              <Link
-                href={`/${author.handle}`}
-                onClick={(event) => event.stopPropagation()}
-                className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
-              >
-                {author.handle}
-              </Link>
-            ) : (
-              <span className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-colors group-hover:tw-text-white">
-                Anonymous
-              </span>
+        <div className="tw-relative tw-z-10 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black tw-px-4 tw-py-3">
+          {/* Author */}
+          <Link
+            href={author.handle ? `/${author.handle}` : "#"}
+            onClick={(event) => event.stopPropagation()}
+            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-opacity desktop-hover:hover:tw-opacity-80"
+          >
+            <ProfileAvatar
+              pfpUrl={author.pfp}
+              alt={author.handle ?? "User"}
+              size={ProfileBadgeSize.SMALL}
+            />
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+              {author.handle ?? "Anonymous"}
+            </span>
+          </Link>
+
+          {/* Wave */}
+          <Link
+            href={`/waves?wave=${wave.id}`}
+            onClick={(event) => event.stopPropagation()}
+            className="tw-group/wave tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all"
+          >
+            <span className="tw-text-xs tw-text-iron-500 tw-transition-colors desktop-hover:group-hover/wave:tw-text-iron-300 desktop-hover:group-hover/wave:tw-underline">{waveName}</span>
+            {wave.picture && (
+              <img
+                src={getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)}
+                alt={waveName}
+                className="tw-size-6 tw-rounded-md tw-object-cover tw-ring-1 tw-ring-transparent tw-transition-all desktop-hover:group-hover/wave:tw-ring-iron-600"
+              />
             )}
-            <Link
-              href={`/waves?wave=${wave.id}`}
-              onClick={(event) => event.stopPropagation()}
-              className="tw-truncate tw-text-xs tw-text-iron-500 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-300"
-            >
-              {waveName}
-            </Link>
-          </div>
+          </Link>
         </div>
       </div>
     );
