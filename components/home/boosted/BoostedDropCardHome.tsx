@@ -55,7 +55,7 @@ const BoostedDropCardHome = memo(
         tabIndex={0}
         onClick={onClick}
         onKeyDown={handleCardKeyDown}
-        className="hover:tw-border-50/10 tw-group tw-relative tw-flex tw-w-[480px] tw-flex-shrink-0 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-black tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_0_40px_-5px_rgba(255,255,255,0.15)]"
+        className="hover:tw-border-50/10 tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-black tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_0_40px_-5px_rgba(255,255,255,0.15)]"
       >
         {/* Inner Highlight (Glass Edge) */}
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
@@ -82,8 +82,8 @@ const BoostedDropCardHome = memo(
           )}
         </div>
 
-        <div className="tw-relative tw-aspect-[8/5] tw-w-full tw-overflow-hidden tw-rounded-xl">
-          {media ? (
+        {media ? (
+          <div className="tw-relative tw-aspect-[8/5] tw-w-full tw-overflow-hidden tw-rounded-xl">
             <div className="tw-relative tw-h-full tw-w-full">
               {/* Glow effect */}
               <div
@@ -106,25 +106,24 @@ const BoostedDropCardHome = memo(
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="tw-relative tw-flex tw-size-full tw-items-center tw-justify-center tw-p-6">
-              {startsWithLink ? (
-                <LinkIcon className="tw-absolute tw-left-6 tw-top-8 tw-size-6 tw-text-iron-700 tw-opacity-50" />
-              ) : (
-                <span className="tw-absolute tw-left-6 tw-top-8 tw-select-none tw-font-serif tw-text-6xl tw-leading-none tw-text-iron-800 tw-opacity-50">
-                  {"\u201C"}
-                </span>
-              )}
-              <ContentDisplay
-                content={previewContent}
-                className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-xl tw-font-normal tw-leading-relaxed tw-text-iron-300"
-                textClassName="tw-line-clamp-5 tw-w-full tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
-              />
-              {/* Gradient fade */}
-              <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-20 tw-bg-gradient-to-t tw-from-black tw-to-transparent" />
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="tw-relative tw-flex tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-p-6">
+            {startsWithLink ? (
+              <LinkIcon className="tw-absolute tw-left-6 tw-top-8 tw-size-6 tw-text-iron-700 tw-opacity-50" />
+            ) : (
+              <span className="tw-absolute tw-left-6 tw-top-8 tw-select-none tw-font-serif tw-text-6xl tw-leading-none tw-text-iron-800 tw-opacity-50">
+                {"\u201C"}
+              </span>
+            )}
+            <ContentDisplay
+              content={previewContent}
+              shouldClamp={false}
+              className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-1 tw-whitespace-pre-wrap tw-break-words tw-text-center tw-font-serif tw-text-lg tw-font-normal tw-leading-relaxed tw-text-iron-300"
+              textClassName="tw-line-clamp-6 tw-w-full tw-whitespace-pre-wrap tw-break-words tw-text-center tw-leading-relaxed"
+            />
+          </div>
+        )}
 
         <div className="tw-relative tw-z-10 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black tw-px-4 tw-py-3">
           {/* Author */}
