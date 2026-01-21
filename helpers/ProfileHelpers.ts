@@ -25,11 +25,12 @@ export const profileAndConsolidationsToProfileMin = ({
 }: {
   readonly profile: ApiIdentity;
 }): ProfileMinWithoutSubs | null =>
-  profile?.id && profile?.handle
+  profile.id && profile.handle
     ? {
         id: profile.id,
-        active_main_stage_submission_ids: profile.active_main_stage_submission_ids,
-        winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids ?? [],
+        active_main_stage_submission_ids:
+          profile.active_main_stage_submission_ids,
+        winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
         handle: profile.handle,
         pfp: profile.pfp ?? null,
         banner1_color: profile.banner1 ?? null,
@@ -42,6 +43,7 @@ export const profileAndConsolidationsToProfileMin = ({
         xtdh_rate: profile.xtdh_rate,
         level: profile.level,
         archived: false,
-        primary_address: profile.primary_wallet ?? "",
+        primary_address: profile.primary_wallet,
+        is_wave_creator: profile.is_wave_creator,
       }
     : null;
