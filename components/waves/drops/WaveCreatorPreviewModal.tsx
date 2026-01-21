@@ -57,7 +57,7 @@ export const WaveCreatorPreviewModal = ({
       <Dialog
         as="div"
         className="tw-relative tw-z-[9999] tw-cursor-default"
-        onClose={() => {}}
+        onClose={onClose}
       >
         <TransitionChild
           as={Fragment}
