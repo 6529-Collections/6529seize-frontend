@@ -121,16 +121,14 @@ export function useWaveGalleryDrops(waveId: string) {
     }
 
     if (timeSinceLastRefetch < minDebounceTime) {
-      if (!pendingRefetchRef.current) {
-        pendingRefetchRef.current = true;
-        timeoutRef.current = setTimeout(() => {
-          timeoutRef.current = null;
-          if (isFetchingRef.current || isFetchingNextPageRef.current) {
-            return;
-          }
-          executeRefetch();
-        }, minDebounceTime - timeSinceLastRefetch);
-      }
+      pendingRefetchRef.current = true;
+      timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = null;
+        if (isFetchingRef.current || isFetchingNextPageRef.current) {
+          return;
+        }
+        executeRefetch();
+      }, minDebounceTime - timeSinceLastRefetch);
       return;
     }
 

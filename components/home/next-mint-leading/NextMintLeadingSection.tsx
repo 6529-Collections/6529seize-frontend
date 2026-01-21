@@ -39,9 +39,11 @@ export function NextMintLeadingSection() {
     nextMint?.metadata.find((m) => m.data_key === "title")?.data_value;
 
   // Compare with nowMinting name (case-insensitive, trimmed)
+  // Only treat as same when both values exist; otherwise treat as not equal
   const isNextMintSameAsNowMinting =
-    nowMinting?.name.toLowerCase().trim() ===
-    nextMintTitle?.toLowerCase().trim();
+    !!nowMinting?.name &&
+    !!nextMintTitle &&
+    nowMinting.name.toLowerCase().trim() === nextMintTitle.toLowerCase().trim();
 
   // Determine what to show
   const showNextMint = nextMint && !isNextMintSameAsNowMinting;
