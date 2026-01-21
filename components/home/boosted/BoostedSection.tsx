@@ -12,9 +12,9 @@ const BOOSTED_DROPS_LIMIT = 50;
 const MAX_ROWS = 3;
 
 const MASONRY_BREAKPOINTS = {
-  default: 4,
+  default: 3,
   1280: 3,
-  1024: 3,
+  1024: 2,
   768: 2,
   640: 1,
 };
@@ -26,19 +26,17 @@ export function BoostedSection() {
   });
 
   // Detect breakpoints to determine column count
-  const isXl = useMediaQuery("(min-width: 1281px)");
-  const isLg = useMediaQuery("(min-width: 1024px)");
-  const isMd = useMediaQuery("(min-width: 768px)");
+  const isLg = useMediaQuery("(min-width: 1025px)");
   const isSm = useMediaQuery("(min-width: 640px)");
 
   // Calculate max items based on columns * MAX_ROWS (mobile: 1x6)
   const visibleDrops = useMemo(() => {
     if (!drops) return [];
     if (!isSm) return drops.slice(0, 6); // Mobile: 1 col × 6 items
-    const columns = isXl ? 4 : isLg ? 3 : 2;
+    const columns = isLg ? 3 : 2;
     const maxItems = columns * MAX_ROWS;
     return drops.slice(0, maxItems);
-  }, [drops, isXl, isLg, isMd, isSm]);
+  }, [drops, isLg, isSm]);
 
   const handleDropClick = useCallback(
     (drop: ApiDrop) => {
