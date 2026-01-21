@@ -41,9 +41,11 @@ export function ExploreWavesSection() {
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
-              Tired of bot replies?
+              Tired of bot replies? Join the most interesting chats in crypto
             </span>
-            <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">Most active waves</p>
+            <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
+              Most active waves
+            </p>
           </div>
           <Link
             href="/waves"
