@@ -145,6 +145,7 @@ export const WaveDropAdditionalInfo = ({
                 fill
                 sizes="(min-width: 768px) 400px, 100vw"
                 className="tw-object-contain"
+                unoptimized
               />
             </div>
           </div>
