@@ -12,7 +12,6 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-// import PullToRefresh from "./PullToRefresh";
 
 export default function LayoutWrapper({
   children,
@@ -88,8 +87,6 @@ export default function LayoutWrapper({
 
   return (
     <LayoutComponent>
-      {/* Temporarily disabled - users report pull-to-refresh is too aggressive */}
-      {/* {isApp && <PullToRefresh />} */}
       <ErrorBoundary
         key={refreshKey}
         FallbackComponent={LayoutErrorFallback}

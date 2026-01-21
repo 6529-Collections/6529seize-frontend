@@ -419,6 +419,22 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     []
   );
 
+  const blurActiveElement = useCallback(() => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    if (isApp) {
+      import("@capacitor/keyboard").then(({ Keyboard }) => {
+        Keyboard.hide().catch(() => {});
+      });
+    }
+  }, [isApp]);
+
+  const handleCancel = useCallback(() => {
+    blurActiveElement();
+    onCancel();
+  }, [blurActiveElement, onCancel]);
+
   const handleSave = useCallback(() => {
     if (!editorState) return;
 
@@ -430,12 +446,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     const sanitizedMarkdown = removeBlankLinePlaceholders(markdown);
 
     if (sanitizedMarkdown.trim() === normalizedInitialContent.trim()) {
-      onCancel();
+      handleCancel();
       return;
     }
 
+    blurActiveElement();
     onSave(sanitizedMarkdown, mentionedUsers);
-  }, [editorState, mentionedUsers, onSave, normalizedInitialContent, onCancel]);
+  }, [editorState, mentionedUsers, onSave, normalizedInitialContent, handleCancel, blurActiveElement]);
 
   return (
     <div className="tw-w-full" data-editor-mode="true">
@@ -479,7 +496,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <FocusPlugin isApp={isApp} />
           <KeyboardPlugin
             onSave={handleSave}
-            onCancel={onCancel}
+            onCancel={handleCancel}
             isSaving={isSaving}
             initialContent={normalizedInitialContent}
             mentionsRef={mentionsRef}
@@ -491,7 +508,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         <div className="tw-mt-1 tw-flex tw-items-center tw-text-xs tw-text-iron-400">
           escape to{" "}
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
             className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
           >
             cancel
@@ -510,7 +527,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
         <div className="tw-mb-2 tw-mt-3">
           <div className="tw-flex tw-gap-x-2">
             <button
-              onClick={onCancel}
+              onClick={handleCancel}
               disabled={isSaving}
               className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-150 active:tw-bg-iron-700 disabled:tw-opacity-50"
             >

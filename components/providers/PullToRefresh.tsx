@@ -1,16 +1,25 @@
 "use client";
 
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
-import useCapacitor from "@/hooks/useCapacitor";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
 const PULL_THRESHOLD = 80;
 const PULL_MAX = 140;
 const INDICATOR_SIZE = 36;
 
-export default function PullToRefresh() {
-  const { isCapacitor } = useCapacitor();
+interface PullToRefreshProps {
+  readonly triggerZoneRef: RefObject<HTMLElement | null>;
+}
+
+export default function PullToRefresh({ triggerZoneRef }: PullToRefreshProps) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
   const { globalRefresh } = useGlobalRefresh();
   const [pullDistance, setPullDistance] = useState(0);
@@ -52,9 +61,8 @@ export default function PullToRefresh() {
       if (isRefreshingRef.current) return;
 
       const target = e.target as HTMLElement;
-      const scrollableParent = getScrollableParent(target);
-
-      if (scrollableParent && scrollableParent.scrollTop > 0) {
+      const triggerZone = triggerZoneRef.current;
+      if (!triggerZone || !triggerZone.contains(target)) {
         return;
       }
 
@@ -66,7 +74,7 @@ export default function PullToRefresh() {
       isPulling.current = true;
       contentRef.current = document.body;
     },
-    [isAtTop, getScrollableParent]
+    [isAtTop, triggerZoneRef]
   );
 
   const handleTouchMove = useCallback(
@@ -173,8 +181,6 @@ export default function PullToRefresh() {
   }, []);
 
   useEffect(() => {
-    if (!isCapacitor) return;
-
     document.addEventListener("touchstart", handleTouchStart, {
       passive: true,
     });
@@ -198,15 +204,9 @@ export default function PullToRefresh() {
         contentRef.current.style.transition = "";
       }
     };
-  }, [
-    isCapacitor,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    handleTouchCancel,
-  ]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel]);
 
-  if (!isCapacitor || pullDistance === 0) return null;
+  if (pullDistance === 0) return null;
 
   const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
   const shouldTrigger = pullDistance >= PULL_THRESHOLD;
