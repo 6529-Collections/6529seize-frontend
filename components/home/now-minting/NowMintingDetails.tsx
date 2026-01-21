@@ -17,20 +17,18 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
     if (value <= 0) return "N/A";
     return `${value.toFixed(5)} ETH`;
   };
+  const floorPrice = formatEth(nft.floor_price);
 
   return (
     <div className="tw-w-full">
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="tw-flex tw-flex-col tw-gap-5">
         <NowMintingHeader
           cardNumber={nft.id}
           title={nft.name}
           artistHandle={nft.artist_seize_handle}
           artistName={nft.artist}
         />
-        <NowMintingStatsGrid
-          nftId={nft.id}
-          floorPrice={formatEth(nft.floor_price)}
-        />
+        <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
         <NowMintingDetailsAccordion
           nftId={nft.id}
           mintDate={nft.mint_date}
