@@ -9,7 +9,7 @@ export default function NowMintingSection() {
 
   if (isFetching && !nft) {
     return (
-      <section className="tw-px-4 tw-pb-32 tw-pt-10 md:tw-px-6 lg:tw-px-8">
+      <section className="tw-px-4 tw-pb-32 tw-pt-10 md:tw-pt-14 md:tw-px-6 lg:tw-px-8">
         <span className="tw-mb-4 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-zinc-200 md:tw-mb-6 md:tw-text-2xl">
           Latest Drop
         </span>
@@ -50,13 +50,13 @@ export default function NowMintingSection() {
   }
 
   return (
-    <section className="tw-px-4 tw-pb-16 tw-pt-10 md:tw-px-6 md:tw-pb-32 lg:tw-px-8">
+    <section className="tw-px-4 tw-pb-16 tw-pt-10 md:tw-pt-14 md:tw-px-6 md:tw-pb-32 lg:tw-px-8">
       <span className="tw-mb-4 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-zinc-200 md:tw-mb-6 md:tw-text-2xl">
         Latest Drop
       </span>
 
       <div className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-950">
-        <div className="tw-grid tw-h-full tw-items-center tw-grid-cols-1 tw-gap-y-10 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5 lg:tw-grid-cols-12 lg:tw-divide-x lg:tw-divide-y-0 xl:tw-grid-cols-9">
+        <div className="tw-grid tw-h-full tw-grid-cols-1 tw-gap-y-10 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5 lg:tw-grid-cols-12 lg:tw-divide-x lg:tw-divide-y-0 xl:tw-grid-cols-9">
           <div className="tw-px-6 tw-pt-6 md:tw-p-8 md:tw-pb-12 lg:tw-col-span-6 xl:tw-col-span-5">
             <NowMintingArtwork nft={nft} />
           </div>
