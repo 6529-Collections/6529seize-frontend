@@ -848,6 +848,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: contains_media
+          in: query
+          description: >-
+            If true then only drops that have at least one media attachment will
+            be returned (false by default)
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -7444,6 +7452,7 @@ components:
         - banner2
         - active_main_stage_submission_ids
         - winner_main_stage_drop_ids
+        - is_wave_creator
       properties:
         id:
           type: string
@@ -7510,6 +7519,8 @@ components:
           type: array
           items:
             type: string
+        is_wave_creator:
+          type: boolean
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -8229,6 +8240,7 @@ components:
         - archived
         - active_main_stage_submission_ids
         - winner_main_stage_drop_ids
+        - is_wave_creator
       properties:
         id:
           type: string
@@ -8282,6 +8294,8 @@ components:
           type: array
           items:
             type: string
+        is_wave_creator:
+          type: boolean
     ApiProfileProxy:
       type: object
       required:
