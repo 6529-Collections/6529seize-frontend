@@ -5,9 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const CONTRACT_PARAM = "xtdh_received_contract";
 
-export interface XtdhCollectionSelectionResult {
+interface XtdhCollectionSelectionResult {
   readonly selectedContract: string | null;
-  readonly handleCollectionSelect: (contract: string | null | undefined) => void;
+  readonly handleCollectionSelect: (
+    contract: string | null | undefined
+  ) => void;
   readonly clearSelection: () => void;
 }
 

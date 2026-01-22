@@ -2,10 +2,12 @@ import { getNodeEnv } from "@/config/env";
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
 import { toCanonicalRanges } from "@/components/nft-picker/NftPicker.utils";
 
-export const DEFAULT_GRANT_TOKENS_ERROR_MESSAGE =
+const DEFAULT_GRANT_TOKENS_ERROR_MESSAGE =
   "We couldn't load the granted tokens right now. Please try again.";
 
-export function mapTokensToRanges(tokens: readonly { token: string }[]): TokenRange[] {
+export function mapTokensToRanges(
+  tokens: readonly { token: string }[]
+): TokenRange[] {
   if (!tokens.length) {
     return [];
   }

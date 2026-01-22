@@ -24,7 +24,7 @@ import {
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import type { SortDirection } from "@/entities/ISort";
 
-export interface UseXtdhGrantsQueryParams {
+interface UseXtdhGrantsQueryParams {
   readonly grantor: string;
   readonly page?: number | undefined;
   readonly pageSize?: number | undefined;
@@ -40,7 +40,7 @@ export interface UseXtdhGrantsQueryParams {
 
 type XtdhGrantsInfiniteData = InfiniteData<ApiXTdhGrantsPage>;
 
-export type UseXtdhGrantsQueryResult = UseInfiniteQueryResult<
+type UseXtdhGrantsQueryResult = UseInfiniteQueryResult<
   XtdhGrantsInfiniteData,
   Error
 > & {
@@ -67,9 +67,15 @@ export function useXtdhGrantsQuery({
   sortDirection,
   enabled = true,
 }: Readonly<UseXtdhGrantsQueryParams>): UseXtdhGrantsQueryResult {
-  const normalizedPage = Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
-  const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0 ? Math.floor(pageSize) : DEFAULT_PAGE_SIZE;
-  const normalizedStatuses = normalizeGrantedStatuses(statuses ?? DEFAULT_FILTER_STATUSES);
+  const normalizedPage =
+    Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
+  const normalizedPageSize =
+    Number.isFinite(pageSize) && pageSize > 0
+      ? Math.floor(pageSize)
+      : DEFAULT_PAGE_SIZE;
+  const normalizedStatuses = normalizeGrantedStatuses(
+    statuses ?? DEFAULT_FILTER_STATUSES
+  );
   const isAllStatuses = areAllGrantedStatusesNormalized(normalizedStatuses);
   const serializedStatuses = isAllStatuses
     ? null
@@ -77,7 +83,7 @@ export function useXtdhGrantsQuery({
   const isEnabled = Boolean(grantor) && enabled;
   const statusKey = isAllStatuses
     ? DEFAULT_STATUS
-    : serializedStatuses ?? DEFAULT_FILTER_STATUSES.join(",");
+    : (serializedStatuses ?? DEFAULT_FILTER_STATUSES.join(","));
 
   const queryKey = useMemo(
     () => [
@@ -127,19 +133,21 @@ export function useXtdhGrantsQuery({
       });
     },
     initialPageParam: normalizedPage,
-    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : undefined),
+    getNextPageParam: (lastPage) =>
+      lastPage.next ? lastPage.page + 1 : undefined,
     enabled: isEnabled,
     staleTime: DEFAULT_STALE_TIME,
     placeholderData: keepPreviousData,
   });
 
-  const firstPage = query.data?.pages?.[0];
+  const firstPage = query.data?.pages[0];
   const grants = useMemo(
     () => query.data?.pages.flatMap((pageData) => pageData.data) ?? [],
     [query.data]
   );
   const totalCount = firstPage?.count ?? 0;
-  const errorMessage = query.error instanceof Error ? query.error.message : undefined;
+  const errorMessage =
+    query.error instanceof Error ? query.error.message : undefined;
 
   return {
     ...query,

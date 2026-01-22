@@ -15,8 +15,6 @@ export type GrantedSortField =
   | "valid_to"
   | "tdh_rate";
 
-export type GrantedStatusCounts = Partial<Record<GrantedFilterStatus, number>>;
-
 export type GrantedTab = "PENDING" | "ACTIVE" | "REVOKED" | "FAILED";
 
 export type GrantedActiveFilter = "ALL" | "ENDED" | "ACTIVE" | "NOT_STARTED";

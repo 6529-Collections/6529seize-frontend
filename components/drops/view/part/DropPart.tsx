@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import { memo, useRef } from "react";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
@@ -82,14 +82,14 @@ const DropPart = memo(
     return (
       <div
         ref={containerRef}
-        className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+        className="tw-relative tw-transform tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out"
       >
-        <div className="tw-pt-2 tw-flex tw-gap-x-3 tw-h-full tw-relative">
-          <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
+        <div className="tw-relative tw-flex tw-h-full tw-gap-x-3 tw-pt-2">
+          <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
             <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
               <DropPfp pfpUrl={profile.pfp} size={size} />
               <div
-                className={`tw-w-full tw-flex tw-flex-col ${
+                className={`tw-flex tw-w-full tw-flex-col ${
                   wave?.id ? "tw-justify-between" : "tw-justify-center"
                 } ${
                   size === DropPartSize.SMALL && !wave?.id
@@ -105,15 +105,15 @@ const DropPart = memo(
                     <Link
                       onClick={(e) => e.stopPropagation()}
                       href={`/waves?wave=${wave.id}`}
-                      className="tw-mb-0 tw-pb-0 tw-no-underline tw-text-xs tw-text-iron-400 hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-mb-0 tw-pb-0 tw-text-xs tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
                     >
                       <span>{wave.name}</span>
                     </Link>
                   )}
                   {isStorm && (
-                    <div className="tw-inline-flex tw-relative">
+                    <div className="tw-relative tw-inline-flex">
                       <svg
-                        className="tw-h-4 tw-w-4 tw-mr-2 tw-text-[#FEDF89]"
+                        className="tw-mr-2 tw-h-4 tw-w-4 tw-text-[#FEDF89]"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -154,19 +154,19 @@ const DropPart = memo(
               }`}
             >
               {dropTitle && (
-                <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-0">
+                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-text-iron-100">
                   {dropTitle}
                 </p>
               )}
-              <div className="tw-w-full tw-inline-flex tw-justify-between tw-space-x-2">
+              <div className="tw-inline-flex tw-w-full tw-justify-between tw-space-x-2">
                 {onPrevPart && isStorm && (
                   <button
                     disabled={!showPrevButton}
                     className={`${
                       showPrevButton
                         ? "tw-text-iron-300 hover:tw-text-primary-400"
-                        : "tw-text-iron-700 tw-cursor-default"
-                    } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
+                        : "tw-cursor-default tw-text-iron-700"
+                    } tw-rounded-lg tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onPrevPart();
@@ -202,8 +202,8 @@ const DropPart = memo(
                     className={`${
                       showNextButton
                         ? "tw-text-iron-300 hover:tw-text-primary-400"
-                        : "tw-text-iron-700 tw-cursor-default"
-                    } tw-bg-transparent tw-rounded-lg tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
+                        : "tw-cursor-default tw-text-iron-700"
+                    } tw-rounded-lg tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out`}
                     disabled={!showNextButton}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -237,5 +237,4 @@ const DropPart = memo(
 );
 
 DropPart.displayName = "DropPart";
-export { DropPartSize } from "./DropPart.types";
 export default DropPart;

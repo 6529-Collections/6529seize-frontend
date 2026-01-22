@@ -1,7 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
 type HomeTab = "feed" | "latest";
 
 const HOME_TAB_STORAGE_KEY = "home.activeTab";
@@ -56,56 +54,5 @@ export const setStoredHomeTab = (tab: HomeTab) => {
     console.warn("Failed to persist home tab to storage", error);
   }
 };
-
-export function useHomeTabs() {
-  const [activeTab, setActiveTab] = useState<HomeTab>(() => getStoredHomeTab());
-
-  useEffect(() => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined) {
-      return;
-    }
-
-    const params = new URLSearchParams(browserWindow.location.search);
-    if (!params.has("tab")) return;
-
-    params.delete("tab");
-    const search = params.toString();
-    const queryPrefix = search ? `?${search}` : "";
-    const hash = browserWindow.location.hash ?? "";
-    const nextUrl = `${browserWindow.location.pathname}${queryPrefix}${hash}`;
-    browserWindow.history.replaceState(null, "", nextUrl);
-  }, []);
-
-  useEffect(() => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined) {
-      return;
-    }
-
-    const handleTabEvent = (event: Event) => {
-      const detail = (event as CustomEvent<{ tab?: HomeTab | undefined }>).detail;
-      if (!detail?.tab) return;
-      if (detail.tab !== "feed" && detail.tab !== "latest") return;
-      setActiveTab(detail.tab);
-    };
-
-    browserWindow.addEventListener(HOME_TAB_EVENT, handleTabEvent as EventListener);
-
-    return () => {
-      browserWindow.removeEventListener(
-        HOME_TAB_EVENT,
-        handleTabEvent as EventListener
-      );
-    };
-  }, []);
-
-  const handleTabChange = useCallback((tab: HomeTab) => {
-    setActiveTab(tab);
-    setStoredHomeTab(tab);
-  }, []);
-
-  return { activeTab, handleTabChange } as const;
-}
 
 export type { HomeTab };

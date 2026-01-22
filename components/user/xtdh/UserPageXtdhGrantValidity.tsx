@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import TimePicker from "@/components/common/TimePicker";
 
-export interface UserPageXtdhGrantValidityProps {
+interface UserPageXtdhGrantValidityProps {
   readonly value: Date | null;
   readonly onChange: (value: Date | null) => void;
 }
@@ -89,21 +89,22 @@ export default function UserPageXtdhGrantValidity({
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">Validity</h3>
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          Validity
+        </h3>
         <label className="tw-inline-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-200">
           <input
             type="checkbox"
             className="tw-h-4 tw-w-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 focus:tw-ring-primary-400"
             checked={neverExpires}
             onChange={(event) => handleNeverExpiresChange(event.target.checked)}
-          />
-          {" "}
+          />{" "}
           <span>Never expires</span>
         </label>
       </div>
 
       {!neverExpires && (
-        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2">
           <CommonCalendar
             initialMonth={selectedDate.getMonth()}
             initialYear={selectedDate.getFullYear()}

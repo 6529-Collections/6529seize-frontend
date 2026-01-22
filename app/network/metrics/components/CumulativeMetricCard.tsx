@@ -43,20 +43,24 @@ function ChangeRow({
     : "tw-bg-red/20 tw-text-red";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
-      <span className="tw-w-8 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-neutral-500">
+    <div className="tw-grid tw-grid-cols-[36px_1fr_auto] tw-items-center tw-gap-2">
+      <span className="tw-text-xs tw-font-medium tw-uppercase tw-leading-none tw-tracking-wider tw-text-neutral-500">
         {label}
       </span>
-      <CustomTooltip
-        content={`${change >= 0 ? "+" : ""}${formatNumberWithCommas(change)} ${unit}`}
-        placement="top"
-      >
-        <span className={`tw-cursor-default tw-font-semibold ${colorClasses}`}>
-          {formatChange(change)}
-        </span>
-      </CustomTooltip>
+      <div className="tw-flex tw-min-w-0 tw-justify-end">
+        <CustomTooltip
+          content={`${change >= 0 ? "+" : ""}${formatNumberWithCommas(change)} ${unit}`}
+          placement="top"
+        >
+          <span
+            className={`tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-semibold tw-leading-none ${colorClasses}`}
+          >
+            {formatChange(change)}
+          </span>
+        </CustomTooltip>
+      </div>
       <span
-        className={`tw-rounded tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold ${badgeClasses}`}
+        className={`tw-inline-flex tw-min-w-[52px] tw-justify-center tw-rounded tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-leading-none ${badgeClasses}`}
       >
         {formatPercent(changePercent)}
       </span>
@@ -101,9 +105,9 @@ export default function CumulativeMetricCard({
         </div>
       </div>
 
-      <div className="tw-flex tw-gap-4">
+      <div className="tw-grid tw-min-h-[160px] tw-grid-cols-1 tw-items-start tw-gap-4 xl:tw-grid-cols-[1fr_auto_1fr] xl:tw-gap-6">
         {/* Total */}
-        <div className="tw-flex-1">
+        <div className="tw-flex tw-min-w-[120px] tw-flex-col tw-gap-1">
           <p
             className={`tw-mb-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider ${accentColor}`}
           >
@@ -117,20 +121,18 @@ export default function CumulativeMetricCard({
             }
             placement="top"
           >
-            <p className="tw-cursor-default tw-text-2xl tw-font-bold tw-text-white">
+            <p className="tw-cursor-default tw-text-3xl tw-font-bold tw-leading-none tw-text-white">
               {formatCompactNumber(total)}
             </p>
           </CustomTooltip>
-          {unit && (
-            <p className="tw-mt-1 tw-text-xs tw-text-neutral-500">{unit}</p>
-          )}
+          {unit && <p className="tw-text-xs tw-text-neutral-500">{unit}</p>}
         </div>
 
         {/* Divider */}
-        <div className="tw-w-px tw-bg-iron-700/50" />
+        <div className="tw-hidden tw-h-full tw-w-px tw-bg-iron-700/50 xl:tw-block" />
 
         {/* Changes */}
-        <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2">
+        <div className="tw-flex tw-min-w-[130px] tw-flex-col tw-gap-2">
           <p
             className={`tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider ${accentColor}`}
           >

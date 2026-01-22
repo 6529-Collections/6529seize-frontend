@@ -5,7 +5,10 @@ import { useCallback, useId, useMemo, useState } from "react";
 import { useTdhGrantTokensQuery } from "@/hooks/useTdhGrantTokensQuery";
 
 import type { GrantTokensDisclosureState } from "../types";
-import { getGrantTokensErrorMessage, mapTokensToRanges } from "../utils/grantTokens";
+import {
+  getGrantTokensErrorMessage,
+  mapTokensToRanges,
+} from "../utils/grantTokens";
 
 const TOKEN_PAGE_SIZE = 500;
 
@@ -14,7 +17,7 @@ type GrantTokensDisclosureParams = Pick<
   "chain" | "contractAddress" | "grantId"
 >;
 
-export interface UseGrantTokensDisclosureResult {
+interface UseGrantTokensDisclosureResult {
   readonly isOpen: boolean;
   readonly panelId: string;
   readonly toggleOpen: () => void;

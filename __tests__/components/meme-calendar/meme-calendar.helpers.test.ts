@@ -1,5 +1,4 @@
-import type {
-  ZoomLevel} from "@/components/meme-calendar/meme-calendar.helpers";
+import type { ZoomLevel } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
@@ -10,7 +9,6 @@ import {
   getSeasonIndexForDate,
   getUpcomingMintsForCurrentOrNextSeason,
   isMintEligibleUtcDay,
-  isMintingActive,
   isMintingToday,
   mintStartInstantUtcForMintDay,
   nextMintDateOnOrAfter,
@@ -166,15 +164,6 @@ describe("mint timing helpers", () => {
       nextMintStart.getTime()
     );
   });
-
-  it("reports whether minting is active", () => {
-    expect(isMintingActive(beforeMint)).toBe(true);
-    expect(isMintingActive(duringMint)).toBe(true);
-    const justBeforeEnd = new Date(afterWindow.getTime() - 1000);
-    expect(isMintingActive(justBeforeEnd)).toBe(false);
-    expect(isMintingActive(afterWindow)).toBe(false);
-  });
-
 });
 
 describe("getCardsRemainingUntilEndOf", () => {

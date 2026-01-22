@@ -13,16 +13,6 @@ export const DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE =
 export type InteractiveMediaMimeType =
   (typeof ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES)[number]["value"];
 
-export const ALLOWED_INTERACTIVE_MEDIA_MIME_TYPE_SET =
-  new Set<InteractiveMediaMimeType>(
-    ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.map((item) => item.value)
-  );
-
-export const isAllowedInteractiveMediaMimeType = (
-  value: string
-): value is InteractiveMediaMimeType =>
-  ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES.some((item) => item.value === value);
-
 export const INTERACTIVE_MEDIA_PROVIDERS = [
   { key: "ipfs", label: "IPFS" },
   { key: "arweave", label: "Arweave" },

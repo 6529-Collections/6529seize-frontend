@@ -101,7 +101,7 @@ export const isSubscriptionsAdmin = (connectedProfile: ApiIdentity | null) => {
   );
 };
 
-export const download = async (
+const download = async (
   contract: string,
   tokenId: string,
   planId: string,

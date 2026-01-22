@@ -14,7 +14,7 @@ import { useXtdhCollectionSelection } from "./hooks/useXtdhCollectionSelection";
 import { XtdhCollectionsList } from "./subcomponents/XtdhCollectionsList";
 import { XtdhCollectionTokensPanel } from "./collection-tokens";
 
-export interface XtdhReceivedSectionProps {
+interface XtdhReceivedSectionProps {
   readonly profileId: string | null;
   readonly pageSize?: number | undefined;
   readonly requireIdentity?: boolean | undefined;
@@ -31,12 +31,8 @@ export default function XtdhReceivedSection({
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebouncedValue(searchTerm, DEBOUNCE_DELAY);
 
-  const {
-    activeSortField,
-    activeSortDirection,
-    apiOrder,
-    handleSortChange,
-  } = useXtdhCollectionsFilters();
+  const { activeSortField, activeSortDirection, apiOrder, handleSortChange } =
+    useXtdhCollectionsFilters();
 
   const {
     collections,
@@ -59,20 +55,20 @@ export default function XtdhReceivedSection({
     collectionName: debouncedSearchTerm || undefined,
   });
 
-  const {
-    selectedContract,
-    handleCollectionSelect,
-    clearSelection,
-  } = useXtdhCollectionSelection();
+  const { selectedContract, handleCollectionSelect, clearSelection } =
+    useXtdhCollectionSelection();
 
-  const selectedCollection = useMemo<ApiXTdhCollectionsPage["data"][number] | null>(() => {
+  const selectedCollection = useMemo<
+    ApiXTdhCollectionsPage["data"][number] | null
+  >(() => {
     if (!selectedContract) {
       return null;
     }
     const normalized = selectedContract.trim().toLowerCase();
     return (
-      collections.find((collection) =>
-        (collection.contract?.trim().toLowerCase() ?? "") === normalized
+      collections.find(
+        (collection) =>
+          (collection.contract?.trim().toLowerCase() ?? "") === normalized
       ) ?? null
     );
   }, [collections, selectedContract]);
@@ -92,8 +88,6 @@ export default function XtdhReceivedSection({
     });
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-
-
   const showLoadMore = hasNextPage && isEnabled;
   const controlsDisabled = isLoading || isFetching;
 
@@ -108,12 +102,12 @@ export default function XtdhReceivedSection({
   }
 
   return (
-    <section className="tw-rounded-b-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-space-y-6">
+    <section className="tw-space-y-6 tw-rounded-b-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
       <header className="tw-px-6 tw-pt-6">
         <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {isViewingTokens ? "xTDH Tokens" : "xTDH Collections"}
         </h2>
-        <p className="tw-mt-1 tw-text-sm tw-text-iron-400 tw-mb-0">
+        <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
           {description}
         </p>
       </header>
@@ -155,7 +149,7 @@ export default function XtdhReceivedSection({
                 type="button"
                 onClick={handleLoadMore}
                 disabled={isFetchingNextPage}
-                className="tw-px-4 tw-py-2 tw-rounded-lg tw-text-sm tw-transition tw-bg-iron-900 tw-text-iron-400 tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
               >
                 {isFetchingNextPage ? "Loading..." : "Load More"}
               </button>

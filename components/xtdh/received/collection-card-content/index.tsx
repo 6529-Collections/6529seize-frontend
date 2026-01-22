@@ -111,19 +111,19 @@ export function XtdhReceivedCollectionCard({
   const content = (
     <div
       className={clsx(
-        "tw-flex tw-group tw-w-full tw-flex-col tw-items-stretch tw-text-left tw-transition-colors tw-duration-300 tw-overflow-hidden",
+        "tw-group tw-flex tw-w-full tw-flex-col tw-items-stretch tw-overflow-hidden tw-text-left tw-transition-colors tw-duration-300",
         interactionMode === "static"
-          ? "tw-rounded-xl tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-p-4"
-          : "tw-py-6 tw-px-6 desktop-hover:hover:tw-bg-iron-900 tw-rounded-b-xl",
+          ? "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+          : "tw-rounded-b-xl tw-px-6 tw-py-6 desktop-hover:hover:tw-bg-iron-900",
         isSelected && "tw-bg-iron-900/50",
         !isSelectable &&
           interactionMode === "button" &&
           "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
-      <header className="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6">
-        <div className="tw-flex tw-flex-col sm:tw-flex-row tw-min-w-0 tw-flex-1 sm:tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-16 tw-w-16 tw-bg-iron-800 tw-overflow-hidden tw-rounded-lg group-hover:tw-scale-105 tw-transition-transform tw-duration-300 tw-shadow-inner">
+      <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6 md:tw-flex-row">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
+          <div className="tw-relative tw-h-16 tw-w-16 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-shadow-inner tw-transition-transform tw-duration-300 group-hover:tw-scale-105">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -144,12 +144,12 @@ export function XtdhReceivedCollectionCard({
             </p>
             <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
               <p
-                className="tw-m-0 tw-text-xs tw-text-iron-500 tw-mb-0"
+                className="tw-m-0 tw-mb-0 tw-text-xs tw-text-iron-500"
                 title={secondaryLabelTitle}
               >
                 {secondaryLabel}
               </p>
-              <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-white/5 tw-border tw-border-solid tw-border-white/10 tw-px-2 tw-py-1 tw-text-[10px] tw-font-bold tw-uppercase tw-text-iron-400">
+              <span className="tw-inline-flex tw-items-center tw-rounded tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2 tw-py-1 tw-text-[10px] tw-font-bold tw-uppercase tw-text-iron-400">
                 {tokenTypeLabel}
               </span>
             </div>
@@ -157,7 +157,7 @@ export function XtdhReceivedCollectionCard({
         </div>
         <XtdhRatePill rateLabel={xtdhRateLabel} totalLabel={xtdhValueLabel} />
       </header>
-      <dl className="tw-mt-6 md:tw-mt-4 md:tw-ml-20 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-mb-0">
+      <dl className="tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3">
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
         <CollectionMetric
           label="Active tokens"
@@ -195,7 +195,7 @@ export function XtdhReceivedCollectionCard({
         onClick={handleSelect}
         disabled={!isSelectable}
         aria-pressed={isSelected}
-        className="tw-w-full tw-bg-transparent tw-p-0 tw-text-left tw-border-none"
+        className="tw-w-full tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
       >
         {content}
       </button>
@@ -203,14 +203,14 @@ export function XtdhReceivedCollectionCard({
   );
 }
 
-export function CollectionMetric({
+function CollectionMetric({
   label,
   value,
   className,
 }: Readonly<{ label: string; value: string; className?: string | undefined }>) {
   return (
     <div className={clsx("tw-flex tw-flex-col tw-text-left", className)}>
-      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1.5">
+      <dt className="tw-mb-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
         {label}
       </dt>
       <dd className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">

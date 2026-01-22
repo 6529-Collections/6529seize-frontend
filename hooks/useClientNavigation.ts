@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export interface UseClientNavigationOptions<T, TOptions = undefined> {
+interface UseClientNavigationOptions<T, TOptions = undefined> {
   /**
    * Initial state value (typically derived from URL/searchParams)
    */
@@ -26,7 +26,7 @@ export interface UseClientNavigationOptions<T, TOptions = undefined> {
   readonly canUsePushState: (targetUrl: string, options?: TOptions) => boolean;
 }
 
-export interface UseClientNavigationResult<T, TOptions = undefined> {
+interface UseClientNavigationResult<T, TOptions = undefined> {
   readonly state: T;
   readonly navigate: (
     newState: T,

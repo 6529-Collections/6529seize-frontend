@@ -2,9 +2,9 @@
 
 import { HeroHeader } from "./hero";
 import { NowMintingSection } from "./now-minting";
-import { NextMintLeadingSection } from "./next-mint-leading";
-import { BoostedSection } from "./boosted";
-import { ExploreWavesSection } from "./explore-waves";
+import { NextMintLeadingSection } from "@/components/home/next-mint-leading/NextMintLeadingSection";
+import { BoostedSection } from "@/components/home/boosted/BoostedSection";
+import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 
 export default function HomePageContent() {
   return (

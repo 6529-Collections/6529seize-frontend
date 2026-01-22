@@ -26,7 +26,7 @@ const describeAllTokensGrantText = (collectionLabel: string | null): string =>
 
 const describeTokenSelectionText = (
   tokenLabel: string,
-  collectionLabel: string | null,
+  collectionLabel: string | null
 ): string =>
   collectionLabel
     ? `${tokenLabel} selected from ${collectionLabel}.`
@@ -35,7 +35,9 @@ const describeTokenSelectionText = (
 const getTokenLabel = (tokenCount: number): string =>
   `${tokenCount} token${tokenCount === 1 ? "" : "s"}`;
 
-const getTotalSupplyCount = (contract: ContractOverview | null): number | null => {
+const getTotalSupplyCount = (
+  contract: ContractOverview | null
+): number | null => {
   if (!contract?.totalSupply) {
     return null;
   }
@@ -53,7 +55,7 @@ const getTotalSupplyCount = (contract: ContractOverview | null): number | null =
 const describeSelection = (
   selection: NftPickerSelection,
   collectionLabel: string | null,
-  totalSupplyCount: number | null,
+  totalSupplyCount: number | null
 ): SelectionDescription => {
   if (selection.allSelected) {
     return {
@@ -65,7 +67,10 @@ const describeSelection = (
   const tokenCount = selection.tokenIds.length;
 
   return {
-    text: describeTokenSelectionText(getTokenLabel(tokenCount), collectionLabel),
+    text: describeTokenSelectionText(
+      getTokenLabel(tokenCount),
+      collectionLabel
+    ),
     tokenCount,
   };
 };
@@ -91,7 +96,10 @@ const getPerTokenText = (amount: number, tokenCount: number | null): string => {
   return ` (~${perTokenText} xTDH per token)`;
 };
 
-const getAmountSummaryText = (amount: number, tokenCount: number | null): string => {
+const getAmountSummaryText = (
+  amount: number,
+  tokenCount: number | null
+): string => {
   const formattedTotal = amount.toLocaleString(undefined, {
     maximumFractionDigits: 6,
   });
@@ -101,7 +109,9 @@ const getAmountSummaryText = (amount: number, tokenCount: number | null): string
   return `Total grant: ${formattedTotal} xTDH${perTokenText}.`;
 };
 
-const getCollectionLabel = (contract: ContractOverview | null): string | null => {
+const getCollectionLabel = (
+  contract: ContractOverview | null
+): string | null => {
   if (!contract) {
     return null;
   }
@@ -167,7 +177,7 @@ const getValiditySummary = (validUntil: Date | null): string => {
   return `Grant valid until ${formatDateTime(timestamp)}.`;
 };
 
-export interface UserPageXtdhGrantSummaryProps {
+interface UserPageXtdhGrantSummaryProps {
   readonly contract: ContractOverview | null;
   readonly selection: NftPickerChange;
   readonly amount: number | null;
@@ -185,7 +195,9 @@ export default function UserPageXtdhGrantSummary({
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         {getSelectionSummary({ contract, selection, amount })}
       </p>
-      <p className="tw-m-0 tw-text-xs tw-text-iron-400">{getValiditySummary(validUntil)}</p>
+      <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+        {getValiditySummary(validUntil)}
+      </p>
     </div>
   );
 }

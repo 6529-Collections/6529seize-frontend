@@ -8,7 +8,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 const DISTRIBUTION_PAGE_SIZE = 100;
 
-export interface WaveRankRewards {
+interface WaveRankRewards {
   readonly nicTotal: number;
   readonly repTotal: number;
   readonly manualOutcomes: string[];
@@ -78,10 +78,11 @@ export function useWaveRankReward({
           nicTotal += item.amount;
         } else if (outcome.credit === ApiWaveOutcomeCredit.Rep) {
           repTotal += item.amount;
-        } else if (outcome.type === ApiWaveOutcomeType.Manual) {
-          if (item.description) {
-            manualOutcomes.push(item.description);
-          }
+        } else if (
+          outcome.type === ApiWaveOutcomeType.Manual &&
+          item.description
+        ) {
+          manualOutcomes.push(item.description);
         }
       }
     }

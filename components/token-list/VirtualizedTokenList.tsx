@@ -10,8 +10,6 @@ import { VirtualizedTokenListContent } from "./VirtualizedTokenListContent";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 
-export type { VirtualizedTokenListProps } from "./types";
-
 export function VirtualizedTokenList({
   contractAddress,
   chain,
@@ -25,7 +23,9 @@ export function VirtualizedTokenList({
   rowClassName,
   footerContent,
   footerClassName,
-  emptyState = <div className="tw-text-sm tw-text-iron-300">No tokens available.</div>,
+  emptyState = (
+    <div className="tw-text-sm tw-text-iron-300">No tokens available.</div>
+  ),
   onEndReached,
   endReachedOffset,
   layout = "list",
@@ -34,10 +34,14 @@ export function VirtualizedTokenList({
   tokens,
 }: Readonly<VirtualizedTokenListProps>) {
   const breakpoint = useBreakpoint();
-  const responsiveColumns = breakpoint === "LG" ? 3 : breakpoint === "MD" ? 2 : 1;
+  const responsiveColumns =
+    breakpoint === "LG" ? 3 : breakpoint === "MD" ? 2 : 1;
   const columns = columnsProp ?? responsiveColumns;
 
-  const totalCount = useMemo(() => getTotalCount(ranges, tokens), [ranges, tokens]);
+  const totalCount = useMemo(
+    () => getTotalCount(ranges, tokens),
+    [ranges, tokens]
+  );
 
   return (
     <VirtualizedTokenListContent
@@ -60,7 +64,6 @@ export function VirtualizedTokenList({
       emptyState={emptyState}
       layout={layout}
       columns={columns}
-
       tokens={tokens}
     />
   );

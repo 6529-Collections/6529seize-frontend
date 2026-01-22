@@ -19,7 +19,7 @@ export function formatCompactNumber(value: number): string {
 export function formatPercent(value: number | null): string {
   if (value === null) return "N/A";
   const sign = value >= 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}%`;
+  return `${sign}${value.toFixed(0)}%`;
 }
 
 export function formatChange(value: number): string {
