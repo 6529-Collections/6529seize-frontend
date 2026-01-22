@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import BoostIcon from "@/components/common/icons/BoostIcon";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
@@ -53,27 +54,31 @@ export function BoostedSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
-      <div className="tw-px-8">
-        <div className="tw-mb-8">
+    <section className="tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
+      <div className="tw-mb-8">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="tw-relative tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-orange-400/15 tw-via-orange-500/5 tw-to-orange-600/15 tw-p-1 tw-shadow-[0_10px_20px_-14px_rgba(251,146,60,0.6)] tw-ring-1 tw-ring-inset tw-ring-orange-400/20">
+            <div className="tw-absolute tw-inset-1.5 tw-rounded-full tw-border tw-border-white/5" />
+            <BoostIcon className="tw-relative tw-size-6 tw-text-orange-400 tw-drop-shadow-[0_4px_10px_rgba(251,146,60,0.35)]" />
+          </div>
           <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
             Boosted Drops
           </span>
-          <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
-            Community-boosted right now
-          </p>
         </div>
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
+          Community-boosted right now
+        </p>
+      </div>
 
-        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-          {visibleDrops.map((drop) => (
-            <div key={drop.id}>
-              <BoostedDropCardHome
-                drop={drop}
-                onClick={() => handleDropClick(drop)}
-              />
-            </div>
-          ))}
-        </div>
+      <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-y-4 tw-gap-x-2 lg:tw-grid-cols-3 md:tw-gap-x-3 lg:tw-gap-5">
+        {visibleDrops.map((drop) => (
+          <div key={drop.id}>
+            <BoostedDropCardHome
+              drop={drop}
+              onClick={() => handleDropClick(drop)}
+            />
+          </div>
+        ))}
       </div>
     </section>
   );

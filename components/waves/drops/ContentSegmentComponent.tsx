@@ -4,6 +4,7 @@ import MediaThumbnail from "./MediaThumbnail";
 interface ContentSegmentComponentProps {
   readonly segment: ContentSegment;
   readonly index: number;
+  readonly linkify?: boolean;
 }
 
 const URL_REGEX = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]"'])/g;
@@ -55,9 +56,14 @@ function linkifyText(text: string, segmentIndex: number): React.ReactNode[] {
 export default function ContentSegmentComponent({
   segment,
   index,
+  linkify = true,
 }: ContentSegmentComponentProps) {
   if (segment.type === "text") {
-    return <span key={`segment-${index}`}>{linkifyText(segment.content, index)}</span>;
+    return (
+      <span key={`segment-${index}`}>
+        {linkify ? linkifyText(segment.content, index) : segment.content}
+      </span>
+    );
   }
 
   if (segment.mediaInfo) {

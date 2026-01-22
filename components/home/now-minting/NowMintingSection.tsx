@@ -56,7 +56,7 @@ export default function NowMintingSection() {
       </span>
 
       <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-        <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+        <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9 tw-gap-x-6">
           <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
             <NowMintingArtwork nft={nft} />
           </div>

@@ -36,8 +36,8 @@ export function ExploreWavesSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-py-10 tw-pl-4 tw-pr-0 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
-      <div className="tw-px-8">
+    <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
+      <div>
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
@@ -59,7 +59,7 @@ export function ExploreWavesSection() {
           </Link>
         </div>
 
-        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-x-3 tw-gap-y-4 sm:tw-gap-5 lg:tw-grid-cols-3">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
                 <div key={`skeleton-${index}`} className="tw-w-full">
