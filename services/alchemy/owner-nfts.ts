@@ -1,3 +1,4 @@
+/** @api */
 import { goerli, sepolia } from "wagmi/chains";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
@@ -64,6 +65,7 @@ async function fetchLegacyUrl<T>(
   return (await response.json()) as T;
 }
 
+/** @api */
 export async function getNftsForContractAndOwner(
   chainId: number,
   contract: string,

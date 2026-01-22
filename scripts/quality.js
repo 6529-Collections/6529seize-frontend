@@ -49,12 +49,16 @@ const parseKnipJson = (stdout) => {
 
 const hasIssuesInRow = (row) => {
   if (!row) return false;
+  const hasItems = (value) => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (value && typeof value === "object") {
+      return Object.values(value).some((nested) => hasItems(nested));
+    }
+    return false;
+  };
   return Object.entries(row).some(([key, value]) => {
     if (key === "file" || key === "owners") return false;
-    if (Array.isArray(value)) return value.length > 0;
-    if (value && typeof value === "object")
-      return Object.keys(value).length > 0;
-    return false;
+    return hasItems(value);
   });
 };
 
@@ -73,37 +77,69 @@ const filterKnipData = (data) => {
   };
 };
 
-const getIssueCounts = (row) => {
-  const counts = [];
-  for (const [key, value] of Object.entries(row)) {
-    if (key === "file" || key === "owners") continue;
-    if (Array.isArray(value) && value.length > 0) {
-      counts.push(`${key}:${value.length}`);
-    } else if (value && typeof value === "object") {
-      const nestedCount = Object.values(value).reduce((total, items) => {
-        if (Array.isArray(items)) return total + items.length;
-        return total;
-      }, 0);
-      if (nestedCount > 0) counts.push(`${key}:${nestedCount}`);
-    }
-  }
-  return counts;
+const formatIssueLocation = (issue) => {
+  if (!issue || issue.line == null) return "";
+  const col = issue.col == null ? "" : `:${issue.col}`;
+  return `:${issue.line}${col}`;
 };
 
 const printKnipSummary = (data) => {
-  if (data.files.length > 0) {
-    console.error("Knip unused files:");
-    for (const file of data.files) {
-      console.error(`  ${file}`);
-    }
+  const issueLabels = {
+    files: "UNUSED FILE",
+    dependencies: "UNUSED DEP",
+    devDependencies: "UNUSED DEV DEP",
+    optionalPeerDependencies: "UNUSED OPTIONAL PEER DEP",
+    unlisted: "UNLISTED DEP",
+    binaries: "UNUSED BINARY",
+    unresolved: "UNRESOLVED IMPORT",
+    exports: "UNUSED EXPORT",
+    nsExports: "UNUSED NAMESPACE EXPORT",
+    types: "UNUSED TYPE EXPORT",
+    nsTypes: "UNUSED NAMESPACE TYPE",
+    enumMembers: "UNUSED ENUM MEMBER",
+    classMembers: "UNUSED CLASS MEMBER",
+    duplicates: "DUPLICATE EXPORT",
+    catalog: "UNUSED CATALOG ITEM",
+  };
+  const lines = [];
+  for (const file of data.files) {
+    lines.push(`${issueLabels.files}: ${file}`);
   }
   const issueRows = data.issues.filter((row) => hasIssuesInRow(row));
-  if (issueRows.length > 0) {
+  for (const row of issueRows) {
+    for (const [type, value] of Object.entries(row)) {
+      if (type === "file" || type === "owners") continue;
+      const label = issueLabels[type] ?? type.toUpperCase();
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (Array.isArray(item)) {
+            const names = item.map((entry) => entry?.name).filter(Boolean).join(", ");
+            lines.push(`${label}: ${row.file}: ${names || "(unknown)"}`);
+            continue;
+          }
+          const name = item?.name ?? "(unknown)";
+          const loc = formatIssueLocation(item);
+          lines.push(`${label}: ${row.file}: ${name}${loc}`);
+        }
+        continue;
+      }
+      if (value && typeof value === "object") {
+        for (const [parent, items] of Object.entries(value)) {
+          if (!Array.isArray(items)) continue;
+          for (const item of items) {
+            const name = item?.name ?? "(unknown)";
+            const loc = formatIssueLocation(item);
+            const fullName = parent ? `${parent}.${name}` : name;
+            lines.push(`${label}: ${row.file}: ${fullName}${loc}`);
+          }
+        }
+      }
+    }
+  }
+  if (lines.length > 0) {
     console.error("Knip issues:");
-    for (const row of issueRows) {
-      const counts = getIssueCounts(row);
-      const suffix = counts.length > 0 ? ` (${counts.join(", ")})` : "";
-      console.error(`  ${row.file}${suffix}`);
+    for (const line of lines) {
+      console.error(`  ${line}`);
     }
   }
 };
