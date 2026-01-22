@@ -1,13 +1,17 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useSignTypedData } from "wagmi";
 import { v4 as uuidv4 } from "uuid";
-import { useSignMessage } from "wagmi";
 import { postFormData } from "@/services/6529api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { FunctionSelectors } from "../nextgen_contracts";
+import {
+  FunctionSelectors,
+  NEXTGEN_ADMIN,
+  NEXTGEN_CHAIN_ID,
+} from "../nextgen_contracts";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -21,6 +25,10 @@ import {
   NextGenAdminHeadingRow,
   NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
+import { getPrivilegedActionChallenge } from "@/services/signing/privileged-action-challenge";
+import { buildNextGenCreateAllowlistTypedData } from "@/utils/signing/privileged-typed-data";
+import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
+import { isAddress } from "viem";
 interface Props {
   close: () => void;
 }
@@ -33,8 +41,9 @@ enum Type {
 
 export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const account = useSeizeConnectContext();
-  const signMessage = useSignMessage();
-  const uuid = useRef(uuidv4()).current;
+  const signTypedData = useSignTypedData();
+  const [signingNonce, setSigningNonce] = useState<string>();
+  const [signingExpiresAt, setSigningExpiresAt] = useState<number>();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -76,35 +85,62 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     setAllowlistStartTime("");
     setAllowlistEndTime("");
     setErrors([]);
+    setSigningNonce(undefined);
+    setSigningExpiresAt(undefined);
   }
 
-  function uploadFile() {
+  async function uploadFile() {
     setUploadError(undefined);
-    signMessage.reset();
+    signTypedData.reset();
     setUploading(true);
-    signMessage.signMessage({
-      message: uuid,
-    });
-  }
 
-  useEffect(() => {
-    if (signMessage.isError) {
-      setUploading(false);
-      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
-    }
-  }, [signMessage.isError]);
+    try {
+      const signerAddress = account.address;
+      if (!signerAddress || !isAddress(signerAddress)) {
+        throw new Error("Wallet not connected");
+      }
 
-  useEffect(() => {
-    if (signMessage.isSuccess && signMessage.data) {
+      const challenge = await getPrivilegedActionChallenge({
+        signerAddress,
+      });
+      setSigningNonce(challenge.nonce);
+      setSigningExpiresAt(challenge.expiresAt);
+
+      const typedData = buildNextGenCreateAllowlistTypedData({
+        chainId: NEXTGEN_CHAIN_ID,
+        verifyingContract: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
+        wallet: signerAddress,
+        collectionId: BigInt(collectionID),
+        allowlistType: type,
+        phase: phaseName,
+        startTime: BigInt(allowlistStartTime),
+        endTime: BigInt(allowlistEndTime),
+        mintPrice,
+        nonce: challenge.nonce,
+        expiresAt: BigInt(challenge.expiresAt),
+      });
+
+      const signature = await signTypedData.signTypedDataAsync({
+        domain: typedData.domain,
+        types: typedData.types,
+        primaryType: typedData.primaryType,
+        message: typedData.message,
+      });
+
       const formData = new FormData();
       formData.append("allowlist", allowlistFile);
+      const requestId = uuidv4();
       formData.append(
         "nextgen",
         JSON.stringify({
           collection_id: collectionID,
-          wallet: account.address as string,
-          signature: signMessage.data,
-          uuid: uuid,
+          wallet: signerAddress,
+          signature,
+          signature_type: "eip712",
+          nonce: challenge.nonce,
+          expires_at: challenge.expiresAt,
+          server_signature: challenge.serverSignature,
+          uuid: requestId,
           al_type: type,
           phase: phaseName,
           start_time: Number(allowlistStartTime),
@@ -113,25 +149,25 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
         })
       );
 
-      postFormData(
+      const response = await postFormData(
         `${publicEnv.API_ENDPOINT}/api/nextgen/create_allowlist`,
         formData
-      ).then((response) => {
-        setUploading(false);
-        if (response.status === 200 && response.response.merkle_root) {
-          setUploadSuccess(true);
-        } else {
-          setUploadError(
-            `Error: ${
-              response.response.error
-                ? response.response.error
-                : "Unknown error"
-            }`
-          );
-        }
-      });
+      );
+      if (response.status === 200 && response.response.merkle_root) {
+        setUploadSuccess(true);
+      } else {
+        setUploadError(
+          `Error: ${
+            response.response.error ? response.response.error : "Unknown error"
+          }`
+        );
+      }
+    } catch (e: any) {
+      setUploadError(`Error: ${e?.message ? String(e.message) : "Unknown error"}`);
+    } finally {
+      setUploading(false);
     }
-  }, [signMessage.data]);
+  }
 
   return (
     <Container className="no-padding">
@@ -239,8 +275,21 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
               </Button>
               {uploading && (
                 <span>
-                  Uploading... Sign Message <code>{uuid}</code> in your
-                  wallet...
+                  Uploading... Sign the allowlist upload request in your wallet
+                  {signingNonce ? (
+                    <>
+                      {" "}
+                      (nonce <code>{truncateTextMiddle(signingNonce, 18)}</code>
+                      {signingExpiresAt ? (
+                        <>
+                          {" "}
+                          expires at{" "}
+                          {new Date(signingExpiresAt * 1000).toUTCString()}
+                        </>
+                      ) : null}
+                      )
+                    </>
+                  ) : null}
                 </span>
               )}
               {uploadSuccess && <span className="text-success">Uploaded</span>}

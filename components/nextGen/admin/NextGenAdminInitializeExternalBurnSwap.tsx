@@ -1,13 +1,17 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useSignTypedData } from "wagmi";
 import { v4 as uuidv4 } from "uuid";
-import { useSignMessage } from "wagmi";
 import { postData } from "@/services/6529api";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { FunctionSelectors } from "../nextgen_contracts";
+import {
+  FunctionSelectors,
+  NEXTGEN_ADMIN,
+  NEXTGEN_CHAIN_ID,
+} from "../nextgen_contracts";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -25,6 +29,10 @@ import {
   NextGenAdminStatusFormGroup,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
+import { getPrivilegedActionChallenge } from "@/services/signing/privileged-action-challenge";
+import { buildNextGenRegisterBurnCollectionTypedData } from "@/utils/signing/privileged-typed-data";
+import { isAddress } from "viem";
+import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
 
 interface Props {
   close: () => void;
@@ -34,8 +42,9 @@ export default function NextGenAdminInitializeExternalBurnSwap(
   props: Readonly<Props>
 ) {
   const account = useSeizeConnectContext();
-  const signMessage = useSignMessage();
-  const uuid = useRef(uuidv4()).current;
+  const signTypedData = useSignTypedData();
+  const [signingNonce, setSigningNonce] = useState<string>();
+  const [signingExpiresAt, setSigningExpiresAt] = useState<number>();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -78,47 +87,71 @@ export default function NextGenAdminInitializeExternalBurnSwap(
     }
   );
 
-  function syncDB() {
+  async function syncDB() {
     setLoading(true);
     setUploadError(undefined);
-    signMessage.reset();
+    signTypedData.reset();
     contractWrite.reset();
+    setSigningNonce(undefined);
+    setSigningExpiresAt(undefined);
     const valid = validate();
     if (valid) {
-      signMessage.signMessage({
-        message: uuid,
-      });
-    } else {
-      setLoading(false);
-    }
-  }
+      try {
+        const signerAddress = account.address;
+        if (!signerAddress || !isAddress(signerAddress)) {
+          throw new Error("Wallet not connected");
+        }
 
-  useEffect(() => {
-    if (signMessage.isError) {
-      setLoading(false);
-      setUploadError(`Error: ${signMessage.error?.message.split(".")[0]}`);
-    }
-  }, [signMessage.isError]);
+        const challenge = await getPrivilegedActionChallenge({
+          signerAddress,
+        });
+        setSigningNonce(challenge.nonce);
+        setSigningExpiresAt(challenge.expiresAt);
 
-  useEffect(() => {
-    if (signMessage.isSuccess && signMessage.data) {
-      const data = {
-        wallet: account.address as string,
-        signature: signMessage.data,
-        uuid: uuid,
-        collection_id: mintCollectionID,
-        burn_collection: erc721Collection,
-        burn_collection_id: burnCollectionID,
-        min_token_index: tokenMin,
-        max_token_index: tokenMax,
-        burn_address: burnSwapAddress,
-        status: status,
-      };
+        const typedData = buildNextGenRegisterBurnCollectionTypedData({
+          chainId: NEXTGEN_CHAIN_ID,
+          verifyingContract: NEXTGEN_ADMIN[NEXTGEN_CHAIN_ID] as `0x${string}`,
+          wallet: signerAddress,
+          mintCollectionId: BigInt(mintCollectionID),
+          burnCollection: erc721Collection as `0x${string}`,
+          burnCollectionId: BigInt(burnCollectionID),
+          minTokenIndex: BigInt(tokenMin),
+          maxTokenIndex: BigInt(tokenMax),
+          burnAddress: burnSwapAddress as `0x${string}`,
+          status,
+          nonce: challenge.nonce,
+          expiresAt: BigInt(challenge.expiresAt),
+        });
 
-      postData(
-        `${publicEnv.API_ENDPOINT}/api/nextgen/register_burn_collection`,
-        data
-      ).then((response) => {
+        const signature = await signTypedData.signTypedDataAsync({
+          domain: typedData.domain,
+          types: typedData.types,
+          primaryType: typedData.primaryType,
+          message: typedData.message,
+        });
+
+        const requestId = uuidv4();
+        const data = {
+          wallet: signerAddress,
+          signature,
+          signature_type: "eip712",
+          nonce: challenge.nonce,
+          expires_at: challenge.expiresAt,
+          server_signature: challenge.serverSignature,
+          uuid: requestId,
+          collection_id: mintCollectionID,
+          burn_collection: erc721Collection,
+          burn_collection_id: burnCollectionID,
+          min_token_index: tokenMin,
+          max_token_index: tokenMax,
+          burn_address: burnSwapAddress,
+          status: status,
+        };
+
+        const response = await postData(
+          `${publicEnv.API_ENDPOINT}/api/nextgen/register_burn_collection`,
+          data
+        );
         if (response.status === 200 && response.response) {
           setSubmitting(true);
         } else {
@@ -131,9 +164,16 @@ export default function NextGenAdminInitializeExternalBurnSwap(
           );
           setLoading(false);
         }
-      });
+      } catch (e: any) {
+        setUploadError(
+          `Error: ${e?.message ? String(e.message) : "Unknown error"}`
+        );
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
     }
-  }, [signMessage.data]);
+  }
 
   function validate() {
     const errors = [];
@@ -264,8 +304,21 @@ export default function NextGenAdminInitializeExternalBurnSwap(
           {uploadError && <div className="text-danger">{uploadError}</div>}
           {loading && !contractWrite.isLoading && (
             <div>
-              Syncing with DB... Sign Message <code>{uuid}</code> in your
-              wallet...
+              Syncing with DB... Sign the request in your wallet
+              {signingNonce ? (
+                <>
+                  {" "}
+                  (nonce <code>{truncateTextMiddle(signingNonce, 18)}</code>
+                  {signingExpiresAt ? (
+                    <>
+                      {" "}
+                      expires at{" "}
+                      {new Date(signingExpiresAt * 1000).toUTCString()}
+                    </>
+                  ) : null}
+                  )
+                </>
+              ) : null}
             </div>
           )}
           {loading && contractWrite.isLoading && <div>Synced with DB.</div>}
