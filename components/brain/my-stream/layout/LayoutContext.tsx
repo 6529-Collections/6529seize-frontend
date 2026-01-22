@@ -155,7 +155,7 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor, isAndroid, isIos } = useCapacitor();
+  const { isAndroid, isIos } = useCapacitor();
   const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
 
   // Internal ref storage (source of truth)
@@ -372,11 +372,10 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (isAndroid) {
       capSpace = isKeyboardVisible ? 0 : 128;
     } else if (isIos) {
-      capSpace = 20;
+      capSpace = 0;
     }
 
-    const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
-    const style = calculateHeightStyle(adjustedSpaces, capSpace);
+    const style = calculateHeightStyle(spaces, capSpace);
 
     if (isAndroid) {
       return {
@@ -385,7 +384,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       };
     }
     return style;
-  }, [spaces, isAndroid, isKeyboardVisible, isIos, isCapacitor]);
+  }, [spaces, isAndroid, isKeyboardVisible, isIos]);
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};

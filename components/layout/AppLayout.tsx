@@ -62,7 +62,9 @@ export default function AppLayout({ children }: Props) {
     [registerRef, setHeaderRef]
   );
 
-  const safeAreaClass = shouldHideBottomNav
+  const isNavVisible =
+    !isSingleDropOpen && !isEditingOnMobile && !shouldHideBottomNav;
+  const safeAreaClass = isNavVisible
     ? ""
     : "tw-pb-[env(safe-area-inset-bottom,0px)]";
 

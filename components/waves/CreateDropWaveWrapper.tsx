@@ -78,16 +78,8 @@ export function CreateDropWaveWrapper({
   useResizeObserver(containerRef, fixedBottomRef, shouldObserve);
 
   const containerClassName = useMemo(() => {
-    const isMyStreamOrWaveChat =
-      context === CreateDropWaveWrapperContext.MY_STREAM ||
-      context === CreateDropWaveWrapperContext.WAVE_CHAT;
-
     if (capacitor.isIos) {
-      const marginClass =
-        isMyStreamOrWaveChat && !capacitor.keyboardVisible
-          ? "tw-mb-[3.75rem]"
-          : "";
-      return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass} tw-z-[998]`;
+      return "tw-max-h-[calc(100vh-14.7rem)] tw-z-[998]";
     }
 
     return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)] tw-z-30";
