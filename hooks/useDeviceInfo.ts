@@ -62,6 +62,10 @@ export default function useDeviceInfo(): DeviceInfo {
   const [info, setInfo] = useState<DeviceInfo>(() => getInfo(false));
 
   useEffect(() => {
+    const hasEventListenerApi =
+      typeof globalThis.addEventListener === "function" &&
+      typeof globalThis.removeEventListener === "function";
+
     const update = () =>
       setInfo((prev) => {
         const next = getInfo(touchDetectedRef.current);
@@ -76,18 +80,24 @@ export default function useDeviceInfo(): DeviceInfo {
         return next;
       });
 
-    globalThis.addEventListener("resize", update);
-
     const onceTouch = () => {
       touchDetectedRef.current = true;
       update();
-      globalThis.removeEventListener("touchstart", onceTouch);
+      if (hasEventListenerApi) {
+        globalThis.removeEventListener("touchstart", onceTouch);
+      }
     };
-    globalThis.addEventListener("touchstart", onceTouch, { passive: true });
+
+    if (hasEventListenerApi) {
+      globalThis.addEventListener("resize", update);
+      globalThis.addEventListener("touchstart", onceTouch, { passive: true });
+    }
 
     return () => {
-      globalThis.removeEventListener("resize", update);
-      globalThis.removeEventListener("touchstart", onceTouch);
+      if (hasEventListenerApi) {
+        globalThis.removeEventListener("resize", update);
+        globalThis.removeEventListener("touchstart", onceTouch);
+      }
     };
   }, [getInfo]);
 
