@@ -23,6 +23,7 @@ import {
 import { sharedConfig } from "@/config/nextConfig";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
+const sentryAuthToken = process.env["SENTRY_AUTH_TOKEN"];
 
 // ───────
 // Helpers
@@ -134,6 +135,14 @@ const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
 
   // Only print logs for uploading source maps in CI
   silent: !process.env["CI"],
+
+  // Upload source maps to Sentry but don't ship them to clients.
+  // (Sentry's Next.js build integration can delete generated client sourcemaps after upload.)
+  sourcemaps: {
+    // If we can't upload, don't generate them (prevents accidentally shipping public .map files).
+    disable: !sentryAuthToken,
+    deleteSourcemapsAfterUpload: true,
+  },
 
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/

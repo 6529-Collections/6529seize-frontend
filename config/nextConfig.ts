@@ -11,7 +11,6 @@ export function sharedConfig(
     reactCompiler: true,
     reactStrictMode: false,
     compress: true,
-    productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
     images: {
       loader: "default",
