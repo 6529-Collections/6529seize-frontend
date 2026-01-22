@@ -38,8 +38,8 @@ export function ExploreWavesSection() {
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div>
-        <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-          <div>
+        <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-items-end">
+          <div className="md:tw-text-center tw-max-w-sm md:tw-max-w-xl md:tw-mx-auto lg:tw-max-w-full">
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
               Tired of bot replies? Join the most interesting chats in crypto
             </span>
@@ -47,19 +47,9 @@ export function ExploreWavesSection() {
               Most active waves
             </p>
           </div>
-          <Link
-            href="/waves"
-            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
-          >
-            <span>View all</span>
-            <ArrowRightIcon
-              className="tw-size-4 tw-flex-shrink-0"
-              aria-hidden
-            />
-          </Link>
         </div>
 
-        <div className="tw-grid tw-grid-cols-2 tw-gap-x-3 tw-gap-y-4 sm:tw-gap-5 lg:tw-grid-cols-3">
+        <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-x-3 tw-gap-y-4 sm:tw-gap-5 lg:tw-grid-cols-3">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
                 <div key={`skeleton-${index}`} className="tw-w-full">
@@ -71,6 +61,19 @@ export function ExploreWavesSection() {
                   <ExploreWaveCard wave={wave} />
                 </div>
               ))}
+        </div>
+
+        <div className="tw-mt-8 md:tw-mt-10 tw-flex tw-justify-center">
+          <Link
+            href="/waves"
+            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
+          >
+            <span>View all</span>
+            <ArrowRightIcon
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden
+            />
+          </Link>
         </div>
       </div>
     </section>

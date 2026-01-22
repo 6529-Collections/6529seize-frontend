@@ -43,6 +43,9 @@ const BoostedDropCardHome = memo(
       },
       [onClick]
     );
+    const headerClasses = media
+      ? "tw-absolute tw-left-3 tw-right-3 tw-top-3 tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2"
+      : "tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pt-3 tw-pb-2 sm:tw-absolute sm:tw-left-3 sm:tw-right-3 sm:tw-top-3 sm:tw-px-0 sm:tw-pt-0 sm:tw-pb-0";
 
     return (
       <div
@@ -50,19 +53,19 @@ const BoostedDropCardHome = memo(
         tabIndex={0}
         onClick={onClick}
         onKeyDown={handleCardKeyDown}
-        className="hover:tw-border-50/10 tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-black tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_0_40px_-5px_rgba(255,255,255,0.15)]"
+        className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-950/70 tw-bg-black/70 tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_0_32px_-10px_rgba(255,255,255,0.12)]"
       >
         {/* Inner Highlight (Glass Edge) */}
-        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
+        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/5" />
 
-        <div className="tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pt-3 tw-pb-2 sm:tw-absolute sm:tw-left-3 sm:tw-right-3 sm:tw-top-3 sm:tw-px-0 sm:tw-pt-0 sm:tw-pb-0">
+        <div className={headerClasses}>
           {/* Time ago */}
-          <div className="tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60">
+          <div className="tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60">
             <span className="tw-text-[10px] tw-leading-4 tw-font-semibold tw-tracking-wide tw-text-zinc-300">
               {getTimeAgoShort(drop.created_at)}
             </span>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-0.5 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60 sm:tw-ml-auto">
+          <div className="tw-flex tw-items-center tw-gap-0.5 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60 sm:tw-ml-auto">
             {Array.from({ length: fireIconsToShow }).map((_, i) => (
               <BoostIcon
                 key={i}
@@ -81,8 +84,7 @@ const BoostedDropCardHome = memo(
         {media ? (
           <div className="tw-relative tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-overflow-hidden tw-rounded-xl">
             <div className="tw-relative tw-h-full tw-w-full">
-              <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-black/0 tw-via-black/35 tw-to-black/75" />
-              <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-p-5 tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
+              <div className="tw-relative tw-z-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
                 <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden">
                   <DropListItemContentMedia
                     media_mime_type={media.mime_type}
@@ -101,15 +103,15 @@ const BoostedDropCardHome = memo(
               <ContentDisplay
                 content={previewContent}
                 shouldClamp={false}
-                className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-font-normal tw-leading-relaxed tw-text-iron-300"
-                textClassName="tw-line-clamp-6 tw-max-w-full tw-break-words tw-leading-relaxed"
+                className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed tw-text-iron-300"
+                textClassName="tw-line-clamp-6 tw-max-w-full tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed"
               />
             </div>
-            <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-20 tw-h-6 sm:tw-h-10 md:tw-h-12 tw-bg-gradient-to-b tw-from-black/0 tw-to-black" />
+            <div className="tw-pointer-events-none tw-absolute tw-inset-x-0.5 tw-bottom-0 tw-z-20 tw-h-6 sm:tw-h-10 md:tw-h-12 tw-bg-gradient-to-b tw-from-black/0 tw-to-black/70" />
           </div>
         )}
 
-        <div className="tw-relative tw-z-10 tw-flex tw-flex-wrap tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black tw-px-4 tw-py-3  tw-items-center tw-justify-between">
+        <div className="tw-relative tw-z-10 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-zinc-900 tw-bg-black/70 tw-px-4 tw-py-3">
           {/* Author */}
           <Link
             href={author.handle ? `/${author.handle}` : "#"}

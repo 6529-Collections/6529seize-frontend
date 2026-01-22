@@ -47,11 +47,12 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group tw-block tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30 desktop-hover:hover:tw-border-white/10"
+      className="tw-group tw-relative tw-block tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30"
       aria-label={`View wave ${wave.name}`}
     >
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
       <div
-        className="tw-relative tw-aspect-[3/2] tw-overflow-hidden"
+        className="tw-relative tw-aspect-[2/1] sm:tw-aspect-[3/2] tw-overflow-hidden"
         style={imageAreaStyle}
       >
         {wave.picture && (

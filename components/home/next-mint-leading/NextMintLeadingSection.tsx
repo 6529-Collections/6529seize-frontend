@@ -86,8 +86,12 @@ export function NextMintLeadingSection() {
       <section className={sectionClassName}>
         <div>
           {header}
-          <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
-            <div className="tw-text-sm tw-text-white/40">Loading...</div>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-3 lg:tw-gap-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <NextMintLeadingSkeletonCard
+                key={`coming-up-skeleton-${index}`}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -112,3 +116,32 @@ export function NextMintLeadingSection() {
     </section>
   );
 }
+
+const NextMintLeadingSkeletonCard = () => {
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-3 tw-text-left sm:tw-gap-4">
+      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 sm:tw-px-3 sm:tw-py-2">
+          <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+          <div className="tw-h-3 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+        </div>
+        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950 tw-p-2 sm:tw-p-3">
+          <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-900/70" />
+        </div>
+      </div>
+
+      <div className="tw-flex tw-flex-col tw-gap-3">
+        <div>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-h-4 tw-w-10 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+            <div className="tw-h-4 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+          </div>
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
+            <div className="tw-size-6 tw-animate-pulse tw-rounded-full tw-bg-iron-800/60" />
+            <div className="tw-h-3 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
