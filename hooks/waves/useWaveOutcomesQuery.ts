@@ -13,9 +13,9 @@ import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/que
 import type { ApiWaveOutcomesPage } from "@/generated/models/ApiWaveOutcomesPage";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export type WaveOutcomesSortDirection = "ASC" | "DESC";
+type WaveOutcomesSortDirection = "ASC" | "DESC";
 
-export interface UseWaveOutcomesQueryParams {
+interface UseWaveOutcomesQueryParams {
   readonly waveId?: string | null | undefined;
   readonly pageSize?: number | undefined;
   readonly sortDirection?: WaveOutcomesSortDirection | undefined;
@@ -24,7 +24,7 @@ export interface UseWaveOutcomesQueryParams {
 
 type WaveOutcomesInfiniteData = InfiniteData<ApiWaveOutcomesPage>;
 
-export type UseWaveOutcomesQueryResult = UseInfiniteQueryResult<
+type UseWaveOutcomesQueryResult = UseInfiniteQueryResult<
   WaveOutcomesInfiniteData,
   Error
 > & {

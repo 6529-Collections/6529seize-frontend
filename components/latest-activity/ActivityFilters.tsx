@@ -12,7 +12,7 @@ interface ActivityFiltersProps {
   readonly isMobile: boolean;
 }
 
-export const ActivityContractItems = Object.freeze(
+const ActivityContractItems = Object.freeze(
   Object.values(ContractFilter).map((contract) => ({
     key: contract,
     label: contract,
@@ -39,9 +39,10 @@ export default function ActivityFilters({
     <Col
       sm={12}
       md={6}
-      className={`tailwind-scope tw-py-2 d-flex align-items-center gap-4 ${
+      className={`tailwind-scope d-flex align-items-center gap-4 tw-py-2 ${
         isMobile ? "justify-content-center" : "justify-content-end"
-      }`}>
+      }`}
+    >
       <CommonDropdown
         items={ActivityContractItems}
         activeItem={selectedContract}

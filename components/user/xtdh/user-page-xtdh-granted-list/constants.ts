@@ -6,14 +6,13 @@ import type {
   GrantedFilterStatus,
   GrantedFilterStatuses,
   GrantedSortField,
-  GrantedStatusCounts,
   GrantedTab,
 } from "./types";
 
 // DEFAULT_STATUSES represents the canonical "all statuses" sentinel ("ALL" only).
 // It is distinct from DEFAULT_FILTER_STATUSES, which reflects the actual UI default.
 export const DEFAULT_STATUS: GrantedFilterStatus = "ALL";
-export const DEFAULT_STATUSES: GrantedFilterStatuses = [DEFAULT_STATUS];
+const DEFAULT_STATUSES: GrantedFilterStatuses = [DEFAULT_STATUS];
 export const DEFAULT_SORT_FIELD: GrantedSortField = "created_at";
 export const DEFAULT_DIRECTION = SortDirection.DESC;
 
@@ -25,7 +24,7 @@ export const STATUS_LABELS: Record<GrantedFilterStatus, string> = {
   GRANTED: "Granted",
 };
 
-export const BASE_STATUS_ITEMS = [
+const BASE_STATUS_ITEMS = [
   { key: "ALL", label: STATUS_LABELS.ALL, value: "ALL" },
   { key: "PENDING", label: STATUS_LABELS.PENDING, value: "PENDING" },
   { key: "FAILED", label: STATUS_LABELS.FAILED, value: "FAILED" },
@@ -48,12 +47,7 @@ export const GRANTED_ACTIVE_FILTERS = [
 ] as const satisfies ReadonlyArray<CommonSelectItem<GrantedActiveFilter>>;
 
 const STATUS_ORDER = BASE_STATUS_ITEMS.map((item) => item.value);
-const STATUS_SET = new Set<string>(STATUS_ORDER);
-
-const isGrantedFilterStatus = (value: string): value is GrantedFilterStatus =>
-  STATUS_SET.has(value);
-
-export const SORT_ITEMS = [
+const SORT_ITEMS = [
   { key: "created_at", label: "Created At", value: "created_at" },
   { key: "valid_from", label: "Valid From", value: "valid_from" },
   { key: "valid_to", label: "Valid To", value: "valid_to" },
@@ -102,39 +96,6 @@ const DEFAULT_FILTER_STATUSES_PRESET: GrantedFilterStatus[] = [
 
 export const DEFAULT_FILTER_STATUSES: GrantedFilterStatuses =
   normalizeGrantedStatuses(DEFAULT_FILTER_STATUSES_PRESET);
-
-export function areDefaultFilterStatuses(
-  statuses: GrantedFilterStatuses
-): boolean {
-  const normalized = normalizeGrantedStatuses(statuses);
-  if (normalized.length !== DEFAULT_FILTER_STATUSES.length) {
-    return false;
-  }
-
-  return normalized.every(
-    (status, index) => status === DEFAULT_FILTER_STATUSES[index]
-  );
-}
-
-export function parseUserPageXtdhGrantedListStatuses(
-  value: string | null
-): GrantedFilterStatuses {
-  if (!value?.trim()) return DEFAULT_FILTER_STATUSES;
-  const parsed = value
-    .split(",")
-    .map((item) => item.trim().toUpperCase())
-    .filter(isGrantedFilterStatus);
-
-  return normalizeGrantedStatuses(parsed);
-}
-
-export function serializeUserPageXtdhGrantedListStatuses(
-  statuses: GrantedFilterStatuses
-): string | null {
-  return serializeNormalizedUserPageXtdhGrantedListStatuses(
-    normalizeGrantedStatuses(statuses)
-  );
-}
 
 export function serializeNormalizedUserPageXtdhGrantedListStatuses(
   normalizedStatuses: GrantedFilterStatuses
@@ -188,29 +149,6 @@ export function normalizeUserPageXtdhGrantedListSortDirection(
   return normalized === SortDirection.ASC
     ? SortDirection.ASC
     : SortDirection.DESC;
-}
-
-export function formatUserPageXtdhGrantedListStatusLabel(
-  status: GrantedFilterStatus,
-  count: number | undefined
-): string {
-  const base = STATUS_LABELS[status];
-  if (typeof count === "number") {
-    return `${base} (${count.toLocaleString()})`;
-  }
-  return base;
-}
-
-export function getUserPageXtdhGrantedListStatusItems(
-  statusCounts: GrantedStatusCounts
-): CommonSelectItem<GrantedFilterStatus>[] {
-  return BASE_STATUS_ITEMS.map((item) => ({
-    ...item,
-    label: formatUserPageXtdhGrantedListStatusLabel(
-      item.value,
-      statusCounts[item.value]
-    ),
-  }));
 }
 
 type GrantedApiParams = {

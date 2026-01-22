@@ -1,20 +1,3 @@
-import {
-  PARSE_ERROR_ARRAY_NAME,
-  parseTokenExpressionToRanges,
-} from "@/components/nft-picker/NftPicker.utils";
-import type { ParseErrorArray } from "@/components/nft-picker/NftPicker.utils";
-
-const isParseErrorArray = (error: unknown): error is ParseErrorArray => {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  const candidate = error as Partial<ParseErrorArray>;
-  return (
-    candidate.name === PARSE_ERROR_ARRAY_NAME && Array.isArray(candidate.errors)
-  );
-};
-
 const numberFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 });
@@ -36,7 +19,7 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 const ALL_TOKENS_LABEL = "All tokens";
 const UNKNOWN_TOKENS_LABEL = "an unknown number of tokens";
 
-export type TargetTokensCountInfo =
+type TargetTokensCountInfo =
   | { kind: "all"; label: string; count: null }
   | { kind: "count"; label: string; count: number }
   | { kind: "unknown"; label: string; count: null };
@@ -63,39 +46,6 @@ export const getTargetTokensCountInfo = (
     label: numberFormatter.format(normalizedCount),
     count: normalizedCount,
   };
-};
-
-export const formatTargetTokens = (tokens: readonly string[]): string => {
-  if (!tokens.length) {
-    return ALL_TOKENS_LABEL;
-  }
-
-  const tokensExpression = tokens.join(",");
-  const fallbackLabel = tokens.join(", ");
-
-  try {
-    const ranges = parseTokenExpressionToRanges(tokensExpression);
-    if (!ranges.length) {
-      return ALL_TOKENS_LABEL;
-    }
-
-    return ranges
-      .map((range) => {
-        const start = range.start.toString();
-        const end = range.end.toString();
-        return range.start === range.end ? start : `${start}-${end}`;
-      })
-      .join(", ");
-  } catch (error: unknown) {
-    if (isParseErrorArray(error)) {
-      console.error(
-        "[formatTargetTokens] Failed to parse target tokens expression:",
-        error
-      );
-      return fallbackLabel;
-    }
-    throw error;
-  }
 };
 
 interface DateTimeFormatOptions {
@@ -134,10 +84,6 @@ export const formatAmount = (value: number) => {
 
   return numberFormatter.format(Math.trunc(value));
 };
-
-export const formatTargetTokensCount = (
-  tokensCount: number | null | undefined
-): string => getTargetTokensCountInfo(tokensCount).label;
 
 const createDecimalFormatter = (maximumFractionDigits: number) =>
   new Intl.NumberFormat(undefined, {

@@ -8,7 +8,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 const DISTRIBUTION_PAGE_SIZE = 100;
 
-export interface WaveRankRewards {
+interface WaveRankRewards {
   readonly nicTotal: number;
   readonly repTotal: number;
   readonly manualOutcomes: string[];

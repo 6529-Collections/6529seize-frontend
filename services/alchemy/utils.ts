@@ -6,7 +6,6 @@ import type {
   AlchemyContractMetadataResponse,
   AlchemyContractResult,
   AlchemyOpenSeaMetadata,
-  AlchemyOwnedNft,
   AlchemySearchResponse,
   AlchemyTokenMetadataEntry,
   AlchemyTokenMetadataResponse,
@@ -290,7 +289,7 @@ export function processContractMetadataResponse(
 }
 
 export function processOwnerNftsResponse(
-  ownedNfts: AlchemyOwnedNft[]
+  ownedNfts: AlchemyTokenMetadataEntry[]
 ): OwnerNft[] {
   return ownedNfts.map((nft) => ({
     tokenId: nft.tokenId ?? "",

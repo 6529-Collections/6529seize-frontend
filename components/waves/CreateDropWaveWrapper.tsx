@@ -7,7 +7,6 @@ import { useDebouncedCallback } from "use-debounce";
 export enum CreateDropWaveWrapperContext {
   WAVE_CHAT = "WAVE_CHAT",
   SINGLE_DROP = "SINGLE_DROP",
-  MY_STREAM = "MY_STREAM",
 }
 
 interface CreateDropWaveWrapperProps {
@@ -87,7 +86,8 @@ export function CreateDropWaveWrapper({
   return (
     <div
       ref={containerRef}
-      className={`${containerClassName} tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-2 tw-px-4 tw-top-0 tw-sticky tw-w-full tw-rounded-b-xl tw-flex-none tw-transition-colors tw-duration-500 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800 tw-bg-iron-950`}>
+      className={`${containerClassName} tw-sticky tw-top-0 tw-w-full tw-flex-none tw-overflow-y-auto tw-rounded-b-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300`}
+    >
       {children}
       <div ref={fixedBottomRef}></div>
     </div>

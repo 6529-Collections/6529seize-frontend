@@ -56,13 +56,13 @@ export default function ProfileLevel({
   return (
     <div className="tw-relative">
       <div
-        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset ${mainColorClass}`}>
+        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-font-bold tw-leading-3 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${mainColorClass}`}
+      >
         {level}
       </div>
       <span
-        className={`${CIC_SIZE_CLASSES[size]} ${CIC_COLOR[cicType]} tw-flex-shrink-0 tw-absolute -tw-right-1 tw-block tw-rounded-full`}></span>
+        className={`${CIC_SIZE_CLASSES[size]} ${CIC_COLOR[cicType]} tw-absolute -tw-right-1 tw-block tw-flex-shrink-0 tw-rounded-full`}
+      ></span>
     </div>
   );
 }
-
-export { ProfileLevelSize as UserCICAndLevelSize };

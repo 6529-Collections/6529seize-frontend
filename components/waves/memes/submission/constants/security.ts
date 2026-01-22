@@ -27,7 +27,9 @@ export const canonicalizeInteractiveMediaHostname = (
 };
 
 const isIpfsHost = (hostname: string): boolean =>
-  INTERACTIVE_MEDIA_IPFS_HOSTS.has(canonicalizeInteractiveMediaHostname(hostname));
+  INTERACTIVE_MEDIA_IPFS_HOSTS.has(
+    canonicalizeInteractiveMediaHostname(hostname)
+  );
 
 const getArweaveTransactionIdFromSubdomain = (
   hostname: string
@@ -46,7 +48,7 @@ const isArweaveHost = (hostname: string): boolean => {
   return getArweaveTransactionIdFromSubdomain(hostname) !== null;
 };
 
-export const getInteractiveMediaProviderForHost = (
+const getInteractiveMediaProviderForHost = (
   hostname: string
 ): InteractiveMediaProvider | null => {
   if (isIpfsHost(hostname)) {
@@ -127,9 +129,7 @@ export const isInteractiveMediaContentPathAllowed = (
   if (provider === "arweave") {
     const subdomainIdentifier = getArweaveTransactionIdFromSubdomain(hostname);
     if (subdomainIdentifier) {
-      if (
-        !isInteractiveMediaContentIdentifier(provider, subdomainIdentifier)
-      ) {
+      if (!isInteractiveMediaContentIdentifier(provider, subdomainIdentifier)) {
         return false;
       }
 

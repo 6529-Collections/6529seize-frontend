@@ -7,8 +7,9 @@ export enum MemesSubmissionAdditionalInfoKey {
   ABOUT_ARTIST = "about_artist",
 }
 
-export const MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS: string[] =
-  Object.values(MemesSubmissionAdditionalInfoKey);
+export const MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS: string[] = Object.values(
+  MemesSubmissionAdditionalInfoKey
+);
 
 export interface AirdropEntry {
   id: string;
@@ -22,11 +23,6 @@ export interface PaymentInfo {
   payment_address: string;
   has_designated_payee: boolean;
   designated_payee_name: string;
-}
-
-export interface AllowlistBatch {
-  contract: string;
-  token_ids: number[];
 }
 
 export interface AllowlistBatchRaw {

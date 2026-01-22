@@ -6,7 +6,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 const DAYS_31_MS = 31 * 24 * 60 * 60 * 1000;
 
-export interface CommunityMetricsSeriesData {
+interface CommunityMetricsSeriesData {
   readonly stepsStartTimes: number[];
   readonly dropsCreated: number[];
   readonly distinctDroppers: number[];

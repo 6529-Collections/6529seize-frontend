@@ -28,7 +28,7 @@
     "lint:changed:csv:tight": "node scripts/eslint-rule-summary.cjs --changed --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
     "lint:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint  --no-warn-ignored --max-warnings=0'",
     "lint:changed:tight": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
-    "lint:uncommitted:tight": "bash -lc '{ git diff --name-only -z HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
+    "lint:uncommitted:tight": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 npx eslint --config eslint.config.tight.mjs --no-warn-ignored --max-warnings=0'",
     "lint:fix": "npx eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "lint:single": "npx eslint --config eslint.config.single.mjs",
     "format": "prettier --write .",

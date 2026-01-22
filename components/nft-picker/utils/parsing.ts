@@ -1,7 +1,7 @@
-import type { ParseError, TokenRange, TokenSelection } from "../types";
+import type { ParseError, TokenRange } from "../types";
 import { BIGINT_ONE, BIGINT_ZERO, MAX_ENUMERATION } from "./constants";
-import { makeError, throwParseErrors, isRangeTooLargeError } from "./errors";
-import { canonicalizeRanges, fromCanonicalRanges } from "./ranges";
+import { makeError, throwParseErrors } from "./errors";
+import { canonicalizeRanges } from "./ranges";
 
 interface Segment {
   value: string;
@@ -13,7 +13,7 @@ function isDelimiter(char: string): boolean {
   return char === "," || /\s/.test(char);
 }
 
-export function tokenize(input: string): Segment[] {
+function tokenize(input: string): Segment[] {
   const parts: Segment[] = [];
   let i = 0;
   while (i < input.length) {
@@ -218,25 +218,4 @@ export function parseTokenExpressionToRanges(input: string): TokenRange[] {
     throwParseErrors([parseError], parseError.message);
   }
   return canonical;
-}
-
-export function parseTokenExpressionToBigints(input: string): TokenSelection {
-  const ranges = parseTokenExpressionToRanges(input);
-  try {
-    return fromCanonicalRanges(ranges);
-  } catch (error) {
-    if (isRangeTooLargeError(error)) {
-      const trimmed = input.trim();
-      const displayValue = trimmed.length ? trimmed : input;
-      const parseError: ParseError = {
-        code: error.code,
-        input: displayValue,
-        index: 0,
-        length: Math.max(displayValue.length, 1),
-        message: error.message,
-      };
-      throwParseErrors([parseError], error.message);
-    }
-    throw error;
-  }
 }

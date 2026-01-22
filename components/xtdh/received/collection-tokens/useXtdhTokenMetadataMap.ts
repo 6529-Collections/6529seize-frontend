@@ -8,7 +8,7 @@ import type { TokenMetadata } from "@/types/nft";
 
 type TokenMetadataMap = Map<string, TokenMetadata>;
 
-export interface UseXtdhTokenMetadataMapResult {
+interface UseXtdhTokenMetadataMapResult {
   readonly metadataMap: TokenMetadataMap;
   readonly isFetching: boolean;
   readonly hasError: boolean;
@@ -16,7 +16,7 @@ export interface UseXtdhTokenMetadataMapResult {
 
 export function useXtdhTokenMetadataMap(
   contractAddress: `0x${string}` | null,
-  tokens: ApiXTdhTokensPage["data"],
+  tokens: ApiXTdhTokensPage["data"]
 ): UseXtdhTokenMetadataMapResult {
   const [metadataMap, setMetadataMap] = useState<TokenMetadataMap>(new Map());
 
@@ -30,7 +30,9 @@ export function useXtdhTokenMetadataMap(
     }
     return tokens
       .map((token) => token.token)
-      .filter((tokenId) => typeof tokenId === "number" && Number.isFinite(tokenId))
+      .filter(
+        (tokenId) => typeof tokenId === "number" && Number.isFinite(tokenId)
+      )
       .map((tokenId) => Math.trunc(tokenId).toString());
   }, [tokens]);
 

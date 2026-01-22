@@ -4,7 +4,10 @@ import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { SortDirection } from "@/entities/ISort";
-import type { XtdhCollectionsOrder, XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
+import type {
+  XtdhCollectionsOrder,
+  XtdhCollectionsSortField,
+} from "@/hooks/useXtdhCollectionsQuery";
 
 import {
   DEFAULT_COLLECTION_SORT_DIRECTION,
@@ -16,7 +19,7 @@ import {
 const SORT_PARAM = "xtdh_received_sort";
 const DIRECTION_PARAM = "xtdh_received_dir";
 
-export interface XtdhCollectionsFiltersResult {
+interface XtdhCollectionsFiltersResult {
   readonly activeSortField: XtdhCollectionsSortField;
   readonly activeSortDirection: SortDirection;
   readonly apiOrder: XtdhCollectionsOrder;
@@ -32,7 +35,8 @@ export function useXtdhCollectionsFilters(): XtdhCollectionsFiltersResult {
     [searchParams]
   );
   const activeSortDirection = useMemo(
-    () => parseCollectionSortDirection(searchParams?.get(DIRECTION_PARAM) ?? null),
+    () =>
+      parseCollectionSortDirection(searchParams?.get(DIRECTION_PARAM) ?? null),
     [searchParams]
   );
   const apiOrder: XtdhCollectionsOrder =

@@ -34,7 +34,13 @@ export type AlchemyContractMetadata = {
   symbol?: string | null | undefined;
   tokenType?: string | null | undefined;
   totalSupply?: string | null | undefined;
-  image?: { cachedUrl?: string | null | undefined; thumbnailUrl?: string | null | undefined } | null | undefined;
+  image?:
+    | {
+        cachedUrl?: string | null | undefined;
+        thumbnailUrl?: string | null | undefined;
+      }
+    | null
+    | undefined;
   bannerImageUrl?: string | null | undefined;
   description?: string | null | undefined;
   contractDeployer?: string | null | undefined;
@@ -52,7 +58,11 @@ export type AlchemyOpenSeaMetadata = {
   bannerImageUrl?: string | null | undefined;
   collectionName?: string | null | undefined;
   safelistRequestStatus?: string | null | undefined;
-  floorPrice?: number | { eth?: number | string | null | undefined } | null | undefined;
+  floorPrice?:
+    | number
+    | { eth?: number | string | null | undefined }
+    | null
+    | undefined;
   description?: string | null | undefined;
 };
 
@@ -82,7 +92,7 @@ export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
   isSpam?: boolean | undefined;
 };
 
-export type AlchemyNftMedia = {
+type AlchemyNftMedia = {
   cachedUrl?: string | null | undefined;
   thumbnailUrl?: string | null | undefined;
   originalUrl?: string | null | undefined;
@@ -93,36 +103,39 @@ export type AlchemyNftMedia = {
   size?: number | null | undefined;
 };
 
-export type AlchemyNftMetadata = {
+type AlchemyNftMetadata = {
   image?: string | null | undefined;
   name?: string | null | undefined;
   description?: string | null | undefined;
   [key: string]: unknown;
 };
 
-export type AlchemyNftCollection = {
+type AlchemyNftCollection = {
   name?: string | null | undefined;
   slug?: string | null | undefined;
   externalUrl?: string | null | undefined;
   bannerImageUrl?: string | null | undefined;
 };
 
-export type AlchemyNftMint = {
+type AlchemyNftMint = {
   mintAddress?: string | null | undefined;
   blockNumber?: string | null | undefined;
   timestamp?: string | null | undefined;
   transactionHash?: string | null | undefined;
 };
 
-export type AlchemyOwnedNftAcquiredAt = {
+type AlchemyOwnedNftAcquiredAt = {
   blockTimestamp?: string | null | undefined;
   blockNumber?: string | null | undefined;
 };
 
 export type AlchemyTokenMetadataEntry = {
   contract?:
-    | (AlchemyContractMetadata & { spamClassifications?: string[] | null | undefined })
-    | null | undefined;
+    | (AlchemyContractMetadata & {
+        spamClassifications?: string[] | null | undefined;
+      })
+    | null
+    | undefined;
   tokenId?: string | undefined;
   tokenType?: string | null | undefined;
   title?: string | null | undefined;
@@ -133,11 +146,14 @@ export type AlchemyTokenMetadataEntry = {
   animation?: AlchemyNftMedia | null | undefined;
   media?: AlchemyNftMedia[] | null | undefined;
   metadata?: AlchemyNftMetadata | null | undefined;
-  raw?: {
-    tokenUri?: string | null | undefined;
-    metadata?: AlchemyNftMetadata | null | undefined;
-    error?: string | null | undefined;
-  } | null | undefined;
+  raw?:
+    | {
+        tokenUri?: string | null | undefined;
+        metadata?: AlchemyNftMetadata | null | undefined;
+        error?: string | null | undefined;
+      }
+    | null
+    | undefined;
   collection?: AlchemyNftCollection | null | undefined;
   mint?: AlchemyNftMint | null | undefined;
   owners?: string[] | null | undefined;
@@ -153,10 +169,6 @@ export type AlchemyTokenMetadataResponse = {
   nfts?: AlchemyTokenMetadataEntry[] | undefined;
 };
 
-export type AlchemyOwnedNft = AlchemyTokenMetadataEntry & {
-  balance?: string | null | undefined;
-};
-
 export type OwnerNft = {
   tokenId: string;
   tokenType: string | null;
@@ -166,16 +178,20 @@ export type OwnerNft = {
 };
 
 export type AlchemyGetNftsForOwnerResponse = {
-  ownedNfts: AlchemyOwnedNft[];
+  ownedNfts: AlchemyTokenMetadataEntry[];
   pageKey?: string | undefined;
   totalCount?: number | undefined;
-  validAt?: {
-    blockNumber?: number | null | undefined;
-    blockHash?: string | null | undefined;
-    blockTimestamp?: string | null | undefined;
-  } | undefined;
-  error?: {
-    code?: number | undefined;
-    message?: string | undefined;
-  } | undefined;
+  validAt?:
+    | {
+        blockNumber?: number | null | undefined;
+        blockHash?: string | null | undefined;
+        blockTimestamp?: string | null | undefined;
+      }
+    | undefined;
+  error?:
+    | {
+        code?: number | undefined;
+        message?: string | undefined;
+      }
+    | undefined;
 };

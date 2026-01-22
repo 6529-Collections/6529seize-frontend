@@ -83,6 +83,12 @@ const formatIssueLocation = (issue) => {
   return `:${issue.line}${col}`;
 };
 
+const formatIssuePath = (file, issue) => {
+  if (!issue || issue.line == null) return file;
+  const col = issue.col == null ? "" : `:${issue.col}`;
+  return `${file}:${issue.line}${col}`;
+};
+
 const printKnipSummary = (data) => {
   const issueLabels = {
     files: "UNUSED FILE",
@@ -103,7 +109,7 @@ const printKnipSummary = (data) => {
   };
   const lines = [];
   for (const file of data.files) {
-    lines.push(`${issueLabels.files}: ${file}`);
+    lines.push(`${file} - ${issueLabels.files}`);
   }
   const issueRows = data.issues.filter((row) => hasIssuesInRow(row));
   for (const row of issueRows) {
@@ -113,13 +119,16 @@ const printKnipSummary = (data) => {
       if (Array.isArray(value)) {
         for (const item of value) {
           if (Array.isArray(item)) {
-            const names = item.map((entry) => entry?.name).filter(Boolean).join(", ");
-            lines.push(`${label}: ${row.file}: ${names || "(unknown)"}`);
+            const names = item
+              .map((entry) => entry?.name)
+              .filter(Boolean)
+              .join(", ");
+            lines.push(`${row.file} - ${label} - ${names || "(unknown)"}`);
             continue;
           }
           const name = item?.name ?? "(unknown)";
-          const loc = formatIssueLocation(item);
-          lines.push(`${label}: ${row.file}: ${name}${loc}`);
+          const path = formatIssuePath(row.file, item);
+          lines.push(`${path} - ${label} - ${name}`);
         }
         continue;
       }
@@ -128,9 +137,9 @@ const printKnipSummary = (data) => {
           if (!Array.isArray(items)) continue;
           for (const item of items) {
             const name = item?.name ?? "(unknown)";
-            const loc = formatIssueLocation(item);
+            const path = formatIssuePath(row.file, item);
             const fullName = parent ? `${parent}.${name}` : name;
-            lines.push(`${label}: ${row.file}: ${fullName}${loc}`);
+            lines.push(`${path} - ${label} - ${fullName}`);
           }
         }
       }

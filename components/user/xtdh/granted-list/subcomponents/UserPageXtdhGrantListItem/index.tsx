@@ -21,13 +21,8 @@ import {
 import { mapTokenCountToState } from "./formatters";
 import { GrantListItemContainer } from "./subcomponents/GrantListItemContainer";
 import { GrantTokensPanel } from "./subcomponents/GrantTokensPanel";
-import type {
-  TokenPanelState,
-  UserPageXtdhGrantListItemProps,
-} from "./types";
+import type { TokenPanelState, UserPageXtdhGrantListItemProps } from "./types";
 import { useGrantItemViewModel } from "./useGrantItemViewModel";
-
-export type { UserPageXtdhGrantListItemProps } from "./types";
 
 export function UserPageXtdhGrantListItem({
   grant,
@@ -136,11 +131,11 @@ export function UserPageXtdhGrantListItem({
           <button
             onClick={() => setActiveModal("STOP")}
             disabled={stopGrant.isPending || revokeGrant.isPending}
-            className="tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-lg tw-bg-iron-800 tw-text-iron-300 hover:tw-text-iron-100 hover:tw-bg-iron-700 tw-transition-colors disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-border-0 tw-p-0 tw-shadow-none tw-outline-none"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-p-0 tw-text-iron-300 tw-shadow-none tw-outline-none tw-transition-colors hover:tw-bg-iron-700 hover:tw-text-iron-100 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
           >
             {stopGrant.isPending ? (
               <svg
-                className="tw-animate-spin tw-h-4 tw-w-4"
+                className="tw-h-4 tw-w-4 tw-animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -164,7 +159,7 @@ export function UserPageXtdhGrantListItem({
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="tw-w-5 tw-h-5"
+                className="tw-h-5 tw-w-5"
               >
                 <path
                   fillRule="evenodd"
@@ -179,11 +174,11 @@ export function UserPageXtdhGrantListItem({
           <button
             onClick={() => setActiveModal("REVOKE")}
             disabled={stopGrant.isPending || revokeGrant.isPending}
-            className="tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-rounded-lg tw-bg-red/10 tw-text-red hover:tw-bg-red/20 tw-transition-colors disabled:tw-opacity-50 disabled:tw-cursor-not-allowed tw-border-0 tw-p-0 tw-shadow-none tw-outline-none"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-red/10 tw-p-0 tw-text-red tw-shadow-none tw-outline-none tw-transition-colors hover:tw-bg-red/20 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
           >
             {revokeGrant.isPending ? (
               <svg
-                className="tw-animate-spin tw-h-4 tw-w-4"
+                className="tw-h-4 tw-w-4 tw-animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -207,7 +202,7 @@ export function UserPageXtdhGrantListItem({
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="tw-w-5 tw-h-5"
+                className="tw-h-5 tw-w-5"
               >
                 <path
                   fillRule="evenodd"
@@ -220,7 +215,6 @@ export function UserPageXtdhGrantListItem({
         </CustomTooltip>
       </div>
     );
-
   }, [isSelf, status, stopGrant.isPending, revokeGrant.isPending]);
 
   if (isLoading) {
@@ -269,9 +263,9 @@ export function UserPageXtdhGrantListItem({
         isConfirming={stopGrant.isPending}
         confirmButtonClass="tw-cursor-pointer tw-bg-iron-800 tw-border-iron-800 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-text-white"
         icon={
-          <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700">
+          <span className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800">
             <svg
-              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-300"
+              className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-300"
               viewBox="0 0 24 24"
               fill="currentColor"
               aria-hidden="true"
@@ -296,9 +290,9 @@ export function UserPageXtdhGrantListItem({
         isConfirming={revokeGrant.isPending}
         confirmButtonClass="tw-cursor-pointer tw-bg-[#F04438] tw-border-[#F04438] hover:tw-bg-[#D92D20] hover:tw-border-[#D92D20]"
         icon={
-          <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-red/10 tw-border tw-border-solid tw-border-red/10">
+          <span className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-red/10 tw-bg-red/10">
             <svg
-              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-red tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-red tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

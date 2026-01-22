@@ -1,6 +1,6 @@
 export type SubmissionMediaCategory = "image" | "video" | "interactive";
 
-export interface SubmissionMediaType {
+interface SubmissionMediaType {
   mimeType: string;
   format: string;
   category: SubmissionMediaCategory;
