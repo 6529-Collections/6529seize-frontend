@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { CompactMenu } from "./CompactMenu";
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
+import { CompactMenu } from "@/components/compact-menu";
 
 interface TabOption {
   readonly key: string;
@@ -34,11 +34,11 @@ const OverflowTrigger: React.FC<OverflowTriggerProps> = ({
   fallbackLabel,
 }) => (
   <>
-    {isActiveInOverflow ? activeLabel ?? fallbackLabel : fallbackLabel}
+    {isActiveInOverflow ? (activeLabel ?? fallbackLabel) : fallbackLabel}
     <span
       className={clsx(
         "tw-ml-0.5 tw-inline-flex tw-transition-transform tw-duration-200",
-        isOpen ? "tw-rotate-180" : "",
+        isOpen ? "tw-rotate-180" : ""
       )}
     >
       <FontAwesomeIcon
@@ -59,7 +59,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
 }) => {
   const clampedMax = React.useMemo(
     () => Math.max(0, Math.floor(maxVisibleTabs)),
-    [maxVisibleTabs],
+    [maxVisibleTabs]
   );
   const [visibleTabs, overflowTabs] = React.useMemo(() => {
     const v = options.slice(0, clampedMax);
@@ -68,17 +68,17 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   }, [options, clampedMax]);
   const activeOption = React.useMemo(
     () => options.find((option) => option.key === activeKey),
-    [options, activeKey],
+    [options, activeKey]
   );
 
   const isActiveInOverflow = overflowTabs.some((tab) => tab.key === activeKey);
 
   const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const activeVisibleIndex = visibleTabs.findIndex(
-    (tab) => tab.key === activeKey,
+    (tab) => tab.key === activeKey
   );
   const [focusedTabIndex, setFocusedTabIndex] = React.useState(() =>
-    Math.max(activeVisibleIndex, 0),
+    Math.max(activeVisibleIndex, 0)
   );
 
   const handleSelect = (key: string) => {
@@ -107,10 +107,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   }, [activeVisibleIndex, visibleTabs.length]);
 
   const handleVisibleTabKeyDown = React.useCallback(
-    (
-      event: React.KeyboardEvent<HTMLButtonElement>,
-      currentIndex: number,
-    ) => {
+    (event: React.KeyboardEvent<HTMLButtonElement>, currentIndex: number) => {
       if (visibleTabs.length <= 1) {
         return;
       }
@@ -137,12 +134,16 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
       setFocusedTabIndex(nextIndex);
       tabRefs.current[nextIndex]?.focus();
     },
-    [visibleTabs.length],
+    [visibleTabs.length]
   );
 
   return (
     <div
-      className={clsx("tw-flex tw-gap-x-1", fullWidth ? "tw-w-full" : "tw-w-auto")}>
+      className={clsx(
+        "tw-flex tw-gap-x-1",
+        fullWidth ? "tw-w-full" : "tw-w-auto"
+      )}
+    >
       <div
         role="tablist"
         aria-orientation="horizontal"
@@ -160,13 +161,14 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             ref={(element) => {
               tabRefs.current[index] = element;
             }}
-            className={`tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200 ${
-              fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
+            className={`tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
+              fullWidth ? "tw-flex tw-justify-center tw-text-center" : ""
             } ${
               activeKey === option.key
-                ? "tw-text-white tw-border-primary-300"
-                : "tw-text-iron-400 hover:tw-text-iron-200 tw-border-transparent"
-            }`}>
+                ? "tw-border-primary-300 tw-text-white"
+                : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-200"
+            }`}
+          >
             {option.label}
           </button>
         ))}
@@ -179,16 +181,18 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           unstyledMenu
           unstyledItems
           triggerClassName={clsx(
-            "tw-flex-1 tw-py-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-border-b-2 tw-border-t-0 tw-border-x-0 tw-border-solid tw-bg-transparent tw-transition-all tw-duration-200",
+            "tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200",
             isActiveInOverflow
-              ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
-              : "tw-text-iron-400 hover:tw-text-iron-200",
+              ? "tw-border-b-2 tw-border-primary-400 tw-text-primary-300"
+              : "tw-text-iron-400 hover:tw-text-iron-200"
           )}
           trigger={
             <OverflowTrigger
               isActiveInOverflow={isActiveInOverflow}
               activeLabel={activeOption?.label}
-              fallbackLabel={TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel}
+              fallbackLabel={
+                TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel
+              }
             />
           }
           items={overflowTabs.map((option) => ({
