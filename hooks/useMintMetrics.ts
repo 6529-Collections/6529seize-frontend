@@ -5,7 +5,7 @@ import type { ApiMintMetrics } from "@/generated/models/ApiMintMetrics";
 import type { ApiMintMetricsPage } from "@/generated/models/ApiMintMetricsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export interface MintMetricsData {
+interface MintMetricsData {
   readonly items: ApiMintMetrics[];
   readonly totalCount: number;
 }

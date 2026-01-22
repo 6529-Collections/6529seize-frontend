@@ -189,5 +189,3 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
     isPending: mutation.isPending,
   };
 };
-
-export default useDropBoostMutation;

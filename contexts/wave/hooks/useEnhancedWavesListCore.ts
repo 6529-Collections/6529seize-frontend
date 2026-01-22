@@ -23,11 +23,11 @@ export interface MinimalWave {
 }
 
 // Wave type that includes the computed isPinned field from useWavesList
-export interface EnhancedApiWave extends ApiWave {
+interface EnhancedApiWave extends ApiWave {
   isPinned?: boolean;
 }
 
-export interface WavesDataSource {
+interface WavesDataSource {
   waves: EnhancedApiWave[];
   isFetching: boolean;
   isFetchingNextPage: boolean;

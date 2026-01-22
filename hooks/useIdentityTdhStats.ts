@@ -10,7 +10,7 @@ interface UseIdentityTdhStatsOptions {
   readonly staleTime?: number | undefined;
 }
 
-export interface IdentityTdhStats {
+interface IdentityTdhStats {
   readonly generationRate: number;
   readonly outgoingRate: number;
   readonly outgoingTotal: number;

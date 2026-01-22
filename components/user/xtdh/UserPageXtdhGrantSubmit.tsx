@@ -7,7 +7,7 @@ import type {
 } from "@/components/nft-picker/NftPicker.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 
-export interface UserPageXtdhGrantSubmitProps {
+interface UserPageXtdhGrantSubmitProps {
   readonly contract: ContractOverview | null;
   readonly selection: NftPickerChange;
   readonly amount: number | null;

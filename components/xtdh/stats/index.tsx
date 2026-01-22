@@ -17,5 +17,3 @@ export function XtdhStats({
     </section>
   );
 }
-
-export type { XtdhStatsProps } from "./types";

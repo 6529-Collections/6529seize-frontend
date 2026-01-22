@@ -15,7 +15,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 export type XtdhCollectionsSortField = "xtdh" | "xtdh_rate";
 export type XtdhCollectionsOrder = "ASC" | "DESC";
 
-export interface UseXtdhCollectionsQueryParams {
+interface UseXtdhCollectionsQueryParams {
   readonly identity?: string | null | undefined;
   readonly pageSize?: number | undefined;
   readonly sortField?: XtdhCollectionsSortField | undefined;
@@ -27,7 +27,7 @@ export interface UseXtdhCollectionsQueryParams {
 
 type XtdhCollectionsInfiniteData = InfiniteData<ApiXTdhCollectionsPage>;
 
-export type UseXtdhCollectionsQueryResult = UseInfiniteQueryResult<
+type UseXtdhCollectionsQueryResult = UseInfiniteQueryResult<
   XtdhCollectionsInfiniteData,
   Error
 > & {
@@ -55,10 +55,12 @@ export function useXtdhCollectionsQuery({
   const hasIdentity = Boolean(normalizedIdentity);
   const identityRequirementMet = requireIdentity ? hasIdentity : true;
   const isEnabled = identityRequirementMet && enabled;
-  const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0
-    ? Math.floor(pageSize)
-    : DEFAULT_PAGE_SIZE;
-  const normalizedOrder: XtdhCollectionsOrder = order === "ASC" ? "ASC" : "DESC";
+  const normalizedPageSize =
+    Number.isFinite(pageSize) && pageSize > 0
+      ? Math.floor(pageSize)
+      : DEFAULT_PAGE_SIZE;
+  const normalizedOrder: XtdhCollectionsOrder =
+    order === "ASC" ? "ASC" : "DESC";
 
   const queryKey = useMemo(
     () => [
@@ -70,7 +72,14 @@ export function useXtdhCollectionsQuery({
       requireIdentity,
       collectionName,
     ],
-    [normalizedIdentity, normalizedPageSize, sortField, normalizedOrder, requireIdentity, collectionName]
+    [
+      normalizedIdentity,
+      normalizedPageSize,
+      sortField,
+      normalizedOrder,
+      requireIdentity,
+      collectionName,
+    ]
   );
 
   const query = useInfiniteQuery({

@@ -10,7 +10,10 @@ import {
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiXTdhContributionsPage } from "@/generated/models/ApiXTdhContributionsPage";
-import type { XtdhTokensOrder, XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
+import type {
+  XtdhTokensOrder,
+  XtdhTokensSortField,
+} from "@/hooks/useXtdhTokensQuery";
 import {
   DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY,
   DEFAULT_TOKEN_CONTRIBUTORS_SORT_DIRECTION,
@@ -20,7 +23,7 @@ import {
 import { SortDirection } from "@/entities/ISort";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export interface UseXtdhTokenContributorsQueryParams {
+interface UseXtdhTokenContributorsQueryParams {
   readonly contract?: string | null | undefined;
   readonly tokenId?: number | null | undefined;
   readonly pageSize?: number | undefined;
@@ -32,7 +35,7 @@ export interface UseXtdhTokenContributorsQueryParams {
 
 type XtdhTokenContributorsInfiniteData = InfiniteData<ApiXTdhContributionsPage>;
 
-export type UseXtdhTokenContributorsQueryResult = UseInfiniteQueryResult<
+type UseXtdhTokenContributorsQueryResult = UseInfiniteQueryResult<
   XtdhTokenContributorsInfiniteData,
   Error
 > & {
