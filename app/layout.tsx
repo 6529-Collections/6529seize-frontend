@@ -1,5 +1,3 @@
-export const fetchCache = "force-no-store";
-
 // Side effect: Overrides globalThis.fetch on server-side to automatically
 // add auth headers (x-6529-internal-*) for rate limiter/WAF bypass
 import "@/lib/fetch/ssrFetch";
@@ -19,6 +17,9 @@ import StoreSetup from "@/components/providers/StoreSetup";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
+import { headers } from "next/headers";
+
+export const fetchCache = "force-no-store";
 
 export const metadata = getAppMetadata();
 export const viewport: Viewport = {
@@ -35,10 +36,15 @@ export default function RootLayout({
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
+  const getHeaders = headers as unknown as () => {
+    get(name: string): string | null;
+  };
+  const nonce = getHeaders().get("x-nonce") ?? undefined;
 
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        {nonce && <meta name="csp-nonce" content={nonce} />}
         <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
         <link rel="preconnect" href="https://media.artblocks.io" />
