@@ -142,9 +142,9 @@ export function WalletAddress(props: {
                     data-tooltip-id={uniqueIdEns}
                     aria-label={`copy-ens-btn`}
                     onClick={() => copy(props.displayEns ?? props.display)}
-                    dangerouslySetInnerHTML={{
-                      __html: resolveAddress(),
-                    }}></Dropdown.Item>
+                  >
+                    {resolveAddress()}
+                  </Dropdown.Item>
                 )}
 
                 <Dropdown.Item
@@ -174,9 +174,9 @@ export function WalletAddress(props: {
                     className={`${styles["address"]} ${
                       props.isUserPage ? styles["addressUserPage"] : ""
                     }`}
-                    dangerouslySetInnerHTML={{
-                      __html: resolveAddress(),
-                    }}></span>
+                  >
+                    {resolveAddress()}
+                  </span>
                 )}
                 <FontAwesomeIcon
                   icon={faCopy}

@@ -6,7 +6,7 @@ import { DelegationCenterSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
@@ -17,6 +17,7 @@ import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
+import { sanitizeUntrustedHtml } from "@/lib/security/sanitizeHtml";
 import {
   ANY_COLLECTION,
   GRADIENTS_COLLECTION,
@@ -464,6 +465,13 @@ export function DelegationToast(
     setShowToast: (show: boolean) => void;
   }>
 ) {
+  const sanitizedMessage = useMemo(() => {
+    if (!props.toast.message) {
+      return "";
+    }
+    return sanitizeUntrustedHtml(props.toast.message, { allowStyleAttribute: false });
+  }, [props.toast.message]);
+
   return (
     <div
       className={styles["toastWrapper"]}
@@ -485,7 +493,7 @@ export function DelegationToast(
           {props.toast.message && (
             <Toast.Body
               dangerouslySetInnerHTML={{
-                __html: props.toast.message,
+                __html: sanitizedMessage,
               }}
             ></Toast.Body>
           )}

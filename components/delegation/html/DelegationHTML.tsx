@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./DelegationHTML.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
+import { sanitizeUntrustedHtml } from "@/lib/security/sanitizeHtml";
 
 interface Props {
   path?: string | undefined;
@@ -13,6 +14,10 @@ interface Props {
 export default function DelegationHTML(props: Readonly<Props>) {
   const [html, setHtml] = useState("");
   const [error, setError] = useState(false);
+  const sanitizedHtml = useMemo(
+    () => sanitizeUntrustedHtml(html, { allowStyleAttribute: true }),
+    [html]
+  );
 
   let titleLighter = "";
   let titleDarker = props.title;
@@ -72,7 +77,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
           <Col
             className={styles["htmlContainer"]}
             dangerouslySetInnerHTML={{
-              __html: html,
+              __html: sanitizedHtml,
             }}
           ></Col>
         </Row>

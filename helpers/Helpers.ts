@@ -336,8 +336,16 @@ export function containsEmojis(s: string) {
 
 export function parseEmojis(s: string) {
   const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return s.replaceAll(regex, (_, hexValue) => {
-    return `&#x${hexValue};`;
+  return s.replaceAll(regex, (match, hexValue: string) => {
+    const codePoint = Number.parseInt(hexValue, 16);
+    if (!Number.isFinite(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
+      return match;
+    }
+    try {
+      return String.fromCodePoint(codePoint);
+    } catch {
+      return match;
+    }
   });
 }
 
