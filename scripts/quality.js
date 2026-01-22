@@ -187,6 +187,18 @@ if (behind > 0) {
 }
 
 try {
+  execSync("npm run format:uncommitted", { stdio: "inherit" });
+} catch (error) {
+  fail("Format uncommitted files failed.");
+}
+
+try {
+  execSync("npm run lint:diff", { stdio: "inherit" });
+} catch (error) {
+  fail("ESLint diff check failed.");
+}
+
+try {
   execSync("npx --no-install tsc --noEmit -p tsconfig.typecheck.json", {
     stdio: "inherit",
   });

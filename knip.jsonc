@@ -14,6 +14,7 @@
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "eslint.config.tight.mjs",
+      "eslint.config.diff.mjs",
       "jest.config.js",
       "jest.setup.js",
       "next-sitemap.config.ts",
@@ -40,6 +41,7 @@
       "next-sitemap.config.ts": ["exports"],
       "jest.config.js": ["exports"],
       "eslint.config.tight.mjs": ["exports"],
+      "eslint.config.diff.mjs": ["exports"],
       "utils/sentry-client-filters.ts": ["exports", "types"],
       "lib/fetch/ssrFetch.ts": ["exports"],
       "config/serverEnv.ts": ["exports"]
@@ -54,6 +56,7 @@
       "coderabbit"
     ],
     "ignoreDependencies": [
+      "eslint-plugin-diff",
       "@openapitools/openapi-generator-cli",
       "bootstrap",
       "pino-pretty",
