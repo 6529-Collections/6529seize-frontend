@@ -112,7 +112,7 @@
     "js-yaml": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "lexical": "^0.14.5",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "next": "16.1",
     "next-redux-wrapper": "^8.1.0",
     "next-sitemap": "^4.2.3",
