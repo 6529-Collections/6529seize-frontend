@@ -32,6 +32,7 @@ export class ApiProfileMin {
     'archived': boolean;
     'active_main_stage_submission_ids': Array<string>;
     'winner_main_stage_drop_ids': Array<string>;
+    'is_wave_creator': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -138,6 +139,12 @@ export class ApiProfileMin {
             "name": "winner_main_stage_drop_ids",
             "baseName": "winner_main_stage_drop_ids",
             "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "is_wave_creator",
+            "baseName": "is_wave_creator",
+            "type": "boolean",
             "format": ""
         }    ];
 

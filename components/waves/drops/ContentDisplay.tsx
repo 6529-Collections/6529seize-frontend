@@ -7,6 +7,7 @@ interface ContentDisplayProps {
   readonly onClick?: () => void;
   readonly className?: string | undefined;
   readonly textClassName?: string | undefined;
+  readonly shouldClamp?: boolean;
 }
 
 /**
@@ -17,9 +18,11 @@ export default function ContentDisplay({
   onClick,
   className,
   textClassName,
+  shouldClamp = true,
 }: ContentDisplayProps) {
+  const clampClass = shouldClamp ? "tw-line-clamp-1" : "";
   const containerClasses = [
-    "tw-text-iron-300 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5 tw-line-clamp-1",
+    "tw-text-iron-300 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5",
     onClick
       ? "tw-cursor-pointer hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
       : "",
@@ -27,10 +30,13 @@ export default function ContentDisplay({
   ]
     .filter(Boolean)
     .join(" ");
+  const textClasses = [clampClass, textClassName ?? ""]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <span className={containerClasses} onClick={onClick}>
-      <span className={`tw-line-clamp-1 ${textClassName ?? ""}`}>
+      <span className={textClasses}>
         {/* Render segments in their original order */}
         {content.segments.map((segment, i) => (
           <ContentSegmentComponent

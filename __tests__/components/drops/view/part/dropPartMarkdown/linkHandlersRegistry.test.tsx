@@ -461,6 +461,20 @@ describe("createLinkRenderer", () => {
       expect(isSmartLink("https://example.org/post")).toBe(false);
     });
 
+    it("renders fallback anchor instead of YouTube preview when hideLinkPreviews is true", () => {
+      const { renderAnchor } = createLinkRenderer({
+        onQuoteClick,
+        hideLinkPreviews: true,
+      });
+      const element = renderAnchor({
+        href: "https://youtu.be/video123",
+        children: "YouTube link",
+      } as any);
+      const { container } = render(<>{element}</>);
+      expect(screen.queryByTestId("youtube-preview")).toBeNull();
+      expect(container.querySelector('a[href="https://youtu.be/video123"]')).not.toBeNull();
+    });
+
     it("renders normal preview when hideLinkPreviews is false", () => {
       const { renderAnchor } = createLinkRenderer({
         onQuoteClick,

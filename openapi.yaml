@@ -848,6 +848,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: contains_media
+          in: query
+          description: >-
+            If true then only drops that have at least one media attachment will
+            be returned (false by default)
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -1042,6 +1050,95 @@ paths:
           description: successful operation
         "404":
           description: Drop not found
+  /drops/{dropId}/bookmark:
+    post:
+      tags:
+        - Drops
+      summary: Bookmark a drop
+      description: Requires the user to be authenticated
+      operationId: bookmarkDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDrop"
+        "400":
+          description: Invalid request
+        "404":
+          description: Drop not found
+    delete:
+      tags:
+        - Drops
+      summary: Remove bookmark from drop
+      description: Requires the user to be authenticated
+      operationId: unbookmarkDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDrop"
+        "404":
+          description: Drop not found
+  /drops-bookmarked/:
+    get:
+      tags:
+        - Drops
+      summary: Get bookmarked drops for authenticated user
+      description: >-
+        Requires the user to be authenticated. Returns drops bookmarked by the
+        current user, sorted by bookmark time.
+      operationId: getBookmarkedDrops
+      parameters:
+        - name: wave_id
+          in: query
+          description: Filter by wave
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 200
+        - name: sort_direction
+          in: query
+          description: Default is DESC (newest bookmarks first)
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropsPage"
   /drops/{dropId}:
     get:
       tags:
@@ -4137,6 +4234,22 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiWave"
+  /waves-overview/hot:
+    get:
+      tags:
+        - Waves
+      summary: Get hot waves overview.
+      description: Returns up to 25 public waves ranked by activity in the last 24 hours.
+      operationId: getHotWavesOverview
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWave"
   /waves:
     get:
       tags:
@@ -6845,6 +6958,7 @@ components:
         - max_rating
         - reaction
         - boosted
+        - bookmarked
       properties:
         rating:
           type: number
@@ -6859,6 +6973,8 @@ components:
           type: string
           nullable: true
         boosted:
+          type: boolean
+        bookmarked:
           type: boolean
     ApiDropMedia:
       type: object
@@ -7444,6 +7560,7 @@ components:
         - banner2
         - active_main_stage_submission_ids
         - winner_main_stage_drop_ids
+        - is_wave_creator
       properties:
         id:
           type: string
@@ -7510,6 +7627,8 @@ components:
           type: array
           items:
             type: string
+        is_wave_creator:
+          type: boolean
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -8229,6 +8348,7 @@ components:
         - archived
         - active_main_stage_submission_ids
         - winner_main_stage_drop_ids
+        - is_wave_creator
       properties:
         id:
           type: string
@@ -8282,6 +8402,8 @@ components:
           type: array
           items:
             type: string
+        is_wave_creator:
+          type: boolean
     ApiProfileProxy:
       type: object
       required:

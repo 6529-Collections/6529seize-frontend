@@ -18,14 +18,10 @@ export function ExploreWavesSection() {
   } = useQuery({
     queryKey: ["explore-waves-homepage", WAVES_LIMIT],
     queryFn: async () => {
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: "waves-overview",
-        params: {
-          type: "RECENTLY_DROPPED_TO",
-          limit: String(WAVES_LIMIT),
-          offset: "0",
-        },
+      const data = await commonApiFetch<ApiWave[]>({
+        endpoint: "waves-overview/hot",
       });
+      return data.slice(0, WAVES_LIMIT);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -40,15 +36,15 @@ export function ExploreWavesSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-py-10 md:tw-py-16 tw-pl-4 tw-pr-0 md:tw-px-6 lg:tw-px-8">
+    <section className="-tw-mx-8 tw-py-10 tw-pl-4 tw-pr-0 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div className="tw-px-8">
         <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
-              Explore waves
+              Tired of bot replies? Join the most interesting chats in crypto
             </span>
             <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
-              Browse channels—jump into the conversation.
+              Most active waves
             </p>
           </div>
           <Link
@@ -63,21 +59,15 @@ export function ExploreWavesSection() {
           </Link>
         </div>
 
-        <div className="-tw-mx-6 tw-flex tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-px-6 tw-pb-2 tw-scrollbar-none md:-tw-mx-8 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-5 lg:tw-overflow-visible lg:tw-pb-0">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {isLoading
             ? Array.from({ length: WAVES_LIMIT }).map((_, index) => (
-                <div
-                  key={`skeleton-${index}`}
-                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 lg:tw-w-full"
-                >
+                <div key={`skeleton-${index}`} className="tw-w-full">
                   <ExploreWaveCardSkeleton />
                 </div>
               ))
             : waves?.map((wave) => (
-                <div
-                  key={wave.id}
-                  className="tw-w-[80%] tw-shrink-0 sm:tw-w-80 lg:tw-w-full"
-                >
+                <div key={wave.id} className="tw-w-full">
                   <ExploreWaveCard wave={wave} />
                 </div>
               ))}

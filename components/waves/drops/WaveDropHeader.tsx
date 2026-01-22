@@ -12,8 +12,11 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
+import { WaveCreatorBadge } from "./WaveCreatorBadge";
+import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
 import { useMemo, useCallback } from "react";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
+import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 
 interface WaveDropHeaderProps {
@@ -35,44 +38,65 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
-  const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
-    useArtistPreviewModal();
+  const {
+    isModalOpen: isArtistPreviewOpen,
+    modalInitialTab,
+    handleBadgeClick: handleArtistBadgeClick,
+    handleModalClose: handleArtistModalClose,
+  } = useArtistPreviewModal();
+  const {
+    isModalOpen: isWaveCreatorPreviewOpen,
+    handleBadgeClick: handleWaveCreatorBadgeClick,
+    handleModalClose: handleWaveCreatorModalClose,
+  } = useWaveCreatorPreviewModal();
 
-  const submissionCount = useMemo(() =>
-    drop.author.active_main_stage_submission_ids?.length || 0,
+  const submissionCount = useMemo(
+    () => drop.author.active_main_stage_submission_ids.length || 0,
     [drop.author.active_main_stage_submission_ids]
   );
 
   const hasSubmissions = submissionCount > 0;
 
   // Check if this drop author has any main stage winner drop IDs
-  const winnerCount = useMemo(() =>
-    drop.author.winner_main_stage_drop_ids?.length || 0,
+  const winnerCount = useMemo(
+    () => drop.author.winner_main_stage_drop_ids.length || 0,
     [drop.author.winner_main_stage_drop_ids]
   );
 
   const isWinner = winnerCount > 0;
 
+  const isWaveCreator = drop.author.is_wave_creator;
+
   // Memoize event handlers to prevent unnecessary re-renders
-  const handleNavigation = useCallback((e: React.MouseEvent, path: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(path);
-  }, [router]);
+  const handleNavigation = useCallback(
+    (e: React.MouseEvent, path: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+      router.push(path);
+    },
+    [router]
+  );
 
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <p className={`tw-mb-0 tw-leading-none tw-font-semibold ${compact ? "tw-text-sm" : "tw-text-md"}`}>
+            <p
+              className={`tw-mb-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
+            >
               <UserProfileTooltipWrapper
                 user={drop.author.handle ?? drop.author.id}
               >
                 <Link
-                  onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
-                  href={`/${drop.author.handle}`}
-                  className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out"
+                  onClick={(e) =>
+                    handleNavigation(
+                      e,
+                      `/${drop.author.handle ?? drop.author.primary_address}`
+                    )
+                  }
+                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                  className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                 >
                   {drop.author.handle}
                 </Link>
@@ -85,50 +109,68 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             {hasSubmissions && (
               <ArtistSubmissionBadge
                 submissionCount={submissionCount}
-                onBadgeClick={() => handleBadgeClick("active")}
+                onBadgeClick={() => handleArtistBadgeClick("active")}
                 tooltipId={`header-badge-${drop.id}`}
               />
             )}
             {isWinner && (
               <ProfileWinnerBadge
                 winCount={winnerCount}
-                onBadgeClick={() => handleBadgeClick("winners")}
+                onBadgeClick={() => handleArtistBadgeClick("winners")}
                 tooltipId={`winner-badge-${drop.id}`}
               />
             )}
-            <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+            {isWaveCreator && (
+              <WaveCreatorBadge
+                tooltipId={`wave-creator-${drop.id}`}
+                onBadgeClick={handleWaveCreatorBadgeClick}
+              />
+            )}
+            <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
             <WaveDropTime timestamp={drop.created_at} />
           </div>
-          {badge && <div className="tw-ml-2">{badge}</div>}
+          {!!badge && <div className="tw-ml-2">{badge}</div>}
         </div>
       </div>
       <div>
-        {showWaveInfo && drop.wave && (
+        {showWaveInfo &&
           (() => {
-            const waveMeta = (drop.wave as unknown as {
-              chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
-            })?.chat;
+            const waveMeta = (
+              drop.wave as unknown as {
+                chat?:
+                  | {
+                      scope?:
+                        | {
+                            group?:
+                              | { is_direct_message?: boolean | undefined }
+                              | undefined;
+                          }
+                        | undefined;
+                    }
+                  | undefined;
+              }
+            ).chat;
             const waveHref = getWaveRoute({
               waveId: drop.wave.id,
-              isDirectMessage: waveMeta?.scope?.group?.is_direct_message ?? false,
+              isDirectMessage:
+                waveMeta?.scope?.group?.is_direct_message ?? false,
               isApp: false,
             });
             return (
               <Link
                 onClick={(e) => handleNavigation(e, waveHref)}
                 href={waveHref}
-                className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                className="tw-leading-0 -tw-mt-1 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
               >
                 {drop.wave.name}
               </Link>
             );
-          })()
-        )}
+          })()}
       </div>
 
       {isStorm && (
-        <div className="tw-inline-flex tw-relative tw-mt-2">
-          <span className="tw-text-xs tw-text-iron-50 tw-mb-1.5">
+        <div className="tw-relative tw-mt-2 tw-inline-flex">
+          <span className="tw-mb-1.5 tw-text-xs tw-text-iron-50">
             {currentPartIndex + 1} /{" "}
             <span className="tw-text-iron-400">{partsCount}</span>
           </span>
@@ -137,10 +179,15 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 
       {/* Artist Preview Modal */}
       <ArtistPreviewModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
+        isOpen={isArtistPreviewOpen}
+        onClose={handleArtistModalClose}
         user={drop.author}
         initialTab={modalInitialTab}
+      />
+      <WaveCreatorPreviewModal
+        isOpen={isWaveCreatorPreviewOpen}
+        onClose={handleWaveCreatorModalClose}
+        user={drop.author}
       />
     </>
   );

@@ -9,20 +9,27 @@ setup_vscode_settings() {
   local settings_file="$vscode_path/settings.json"
 
   # Keep existing color if present to avoid changing themes on sync runs.
+  local colors=("red" "orange" "yellow" "green" "blue" "purple" "pink" "teal")
   local existing_color=""
   if [[ -f "$settings_file" ]]; then
     existing_color=$(grep -m1 '"titleBar.activeBackground"' "$settings_file" 2>/dev/null | sed -E 's/.*"titleBar.activeBackground"\s*:\s*"([^"]+)".*/\1/') || true
   fi
-
-  local colors=("red" "orange" "yellow" "green" "blue" "purple" "pink" "teal")
-  local color=${existing_color:-${colors[$RANDOM % ${#colors[@]}]}}
+  # Validate extracted color is one of our known colors
+  local valid_color=""
+  for c in "${colors[@]}"; do
+    if [[ "$existing_color" == "$c" ]]; then
+      valid_color="$existing_color"
+      break
+    fi
+  done
+  local color=${valid_color:-${colors[$RANDOM % ${#colors[@]}]}}
 
   mkdir -p "$vscode_path"
-  cat > "$settings_file" <<EOF
+  cat > "$settings_file" <<'EOF'
 {
   "workbench.colorCustomizations": {
-    "titleBar.activeBackground": "$color",
-    "titleBar.inactiveBackground": "$color"
+    "titleBar.activeBackground": "__COLOR__",
+    "titleBar.inactiveBackground": "__COLOR__"
   },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -87,12 +94,13 @@ setup_vscode_settings() {
   // --- Tailwind IntelliSense (if using the extension) ---
   "tailwindCSS.experimental.classRegex": [
     "['\"`]([^'\"`]*tw-[^'\"`]*)['\"`]",
-    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"] ,
-    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"] ,
+    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
+    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     ["cva\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ]
 }
 EOF
+  sed -i '' "s/__COLOR__/$color/g" "$settings_file"
 
   printf "%s" "$color"
 }

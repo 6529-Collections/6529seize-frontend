@@ -1,9 +1,8 @@
 import type {
   AnchorHTMLAttributes,
   ClassAttributes,
-  ImgHTMLAttributes} from "react";
-import {
-  type ReactElement,
+  ImgHTMLAttributes,
+  ReactElement,
 } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { ExtraProps } from "react-markdown";
@@ -89,10 +88,6 @@ export const createLinkRenderer = ({
       renderExternalOrInternalLink(stableHref, anchorProps);
     const matchSeize = findMatch(seizeHandlers, stableHref);
     const renderOpenGraph = () => {
-      if (hideLinkPreviews) {
-        return renderFallbackAnchor();
-      }
-
       if (!shouldUseOpenGraphPreview(stableHref, parsedUrl)) {
         return renderFallbackAnchor();
       }
@@ -147,6 +142,10 @@ export const createLinkRenderer = ({
         return renderFallbackAnchor();
       }
     };
+
+    if (hideLinkPreviews) {
+      return renderFallbackAnchor();
+    }
 
     if (matchSeize) {
       const rendered = renderFromHandler(matchSeize);
