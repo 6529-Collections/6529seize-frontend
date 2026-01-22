@@ -10,11 +10,11 @@ export default function NowMintingSection() {
   if (isFetching && !nft) {
     return (
       <section className="tw-px-4 tw-pt-6 md:tw-px-6 tw-pb-3 md:tw-pb-6 md:tw-pt-8 lg:tw-px-8">
-        <span className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-zinc-200 md:tw-mb-4 md:tw-text-2xl">
+        <span className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-mb-4 md:tw-text-2xl">
           Latest Drop
         </span>
 
-        <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+        <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950">
           <div className="tw-grid tw-grid-cols-1 tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
             <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
               <div className="tw-relative tw-h-[clamp(360px,65vw,640px)] tw-w-full tw-animate-pulse tw-rounded-none tw-bg-iron-800/50" />
@@ -51,12 +51,12 @@ export default function NowMintingSection() {
 
   return (
     <section className="tw-px-4 tw-pt-6 md:tw-px-6 tw-pb-3 md:tw-pb-6 md:tw-pt-8 lg:tw-px-8">
-      <span className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-zinc-200 md:tw-mb-4 md:tw-text-2xl">
+      <span className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-mb-4 md:tw-text-2xl">
         Latest Drop
       </span>
 
-      <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-        <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+      <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950">
+        <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9 tw-gap-x-6">
           <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
             <NowMintingArtwork nft={nft} />
           </div>

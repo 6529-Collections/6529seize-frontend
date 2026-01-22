@@ -25,7 +25,7 @@ function NowMintingArtistHandlePill({
   });
 
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-2.5 tw-py-1">
+    <span className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-backdrop-blur-sm">
       {profile?.pfp ? (
         <Image
           src={resolveIpfsUrl(profile.pfp)}
@@ -52,7 +52,7 @@ function NowMintingArtistNamePill({
   readonly artistName: string;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-2.5 tw-py-1">
+    <span className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-backdrop-blur-sm">
       <div className="tw-size-4 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-900 tw-object-contain" />
       <span className="tw-text-sm tw-font-medium tw-text-iron-200">
         {artistName}
@@ -82,7 +82,7 @@ export default function NowMintingHeader({
       </Link>
 
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+        <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-400 tw-backdrop-blur-sm">
           Card #{cardNumber}
         </span>
         {artistHandles.length > 0 ? (
