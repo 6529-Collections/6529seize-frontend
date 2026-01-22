@@ -4,10 +4,10 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTransfer } from "./TransferState";
 
+import RecipientSelector from "@/components/common/RecipientSelector";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import RecipientSelector from "@/components/common/RecipientSelector";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { ContractType } from "@/types/enums";
 import {

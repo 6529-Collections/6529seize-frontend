@@ -1,19 +1,19 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { AuthContext } from "../auth/Auth";
-import UserCICAndLevel, {
-  UserCICAndLevelSize,
-} from "../user/utils/UserCICAndLevel";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { AuthContext } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import RecipientSelector from "../common/RecipientSelector";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
+import HeaderUserConnect from "../header/user/HeaderUserConnect";
+import UserCICAndLevel, {
+    UserCICAndLevelSize,
+} from "../user/utils/UserCICAndLevel";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
