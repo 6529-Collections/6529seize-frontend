@@ -1,5 +1,5 @@
-import { renderHook, act } from '@testing-library/react';
 import useDeviceInfo from '@/hooks/useDeviceInfo';
+import { act, renderHook } from '@testing-library/react';
 
 jest.mock('@/hooks/useCapacitor', () => ({ __esModule: true, default: jest.fn(() => ({ isCapacitor: false })) }));
 const capacitorMock = require('@/hooks/useCapacitor').default as jest.Mock;
@@ -7,24 +7,28 @@ const capacitorMock = require('@/hooks/useCapacitor').default as jest.Mock;
 let touchStartHandler: EventListener | null = null;
 
 function defineMatchMedia(pointerFine = true, width = false) {
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,
-    value: jest.fn((query: string) => ({
-      matches: query === '(pointer: fine)' ? pointerFine : query === '(max-width: 768px)' ? width : false,
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-    })),
+    value: jest.fn((query: string) => {
+      if (query === '(pointer: fine)') {
+        return { matches: pointerFine, addEventListener: jest.fn(), removeEventListener: jest.fn() };
+      }
+      if (query === '(max-width: 768px)') {
+        return { matches: width, addEventListener: jest.fn(), removeEventListener: jest.fn() };
+      }
+      return { matches: false, addEventListener: jest.fn(), removeEventListener: jest.fn() };
+    }),
   });
 }
 
 describe('useDeviceInfo', () => {
   beforeEach(() => {
-    jest.spyOn(window, 'addEventListener').mockImplementation((event, handler) => {
+    jest.spyOn(globalThis, 'addEventListener').mockImplementation((event, handler) => {
       if (event === 'touchstart') {
         touchStartHandler = handler as EventListener;
       }
     });
-    jest.spyOn(window, 'removeEventListener');
+    jest.spyOn(globalThis, 'removeEventListener');
   });
 
   afterEach(() => {
@@ -34,7 +38,7 @@ describe('useDeviceInfo', () => {
   });
 
   it('detects classic mobile user agent', () => {
-    Object.defineProperty(window.navigator, 'userAgent', { value: 'iPhone', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'iPhone', configurable: true });
     defineMatchMedia(false, false);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(true);
@@ -53,7 +57,7 @@ describe('useDeviceInfo', () => {
 
   it('detects capacitor mobile with desktop UA', () => {
     capacitorMock.mockReturnValue({ isCapacitor: true });
-    Object.defineProperty(window.navigator, 'userAgent', { value: 'Macintosh', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'Macintosh', configurable: true });
     defineMatchMedia(false, true);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(true);
@@ -72,7 +76,7 @@ describe('useDeviceInfo', () => {
 
   it('returns false for desktop without touch', () => {
     capacitorMock.mockReturnValue({ isCapacitor: false });
-    Object.defineProperty(window.navigator, 'userAgent', { value: 'Mozilla/5.0', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'Mozilla/5.0', configurable: true });
     defineMatchMedia(true, false);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(false);
@@ -82,7 +86,7 @@ describe('useDeviceInfo', () => {
 
   it('hasTouchScreen stays false when fine pointer is present even after touch', () => {
     capacitorMock.mockReturnValue({ isCapacitor: false });
-    Object.defineProperty(window.navigator, 'userAgent', { value: 'Mozilla/5.0', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'Mozilla/5.0', configurable: true });
     defineMatchMedia(true, false);
     const { result } = renderHook(() => useDeviceInfo());
 
