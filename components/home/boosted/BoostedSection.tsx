@@ -1,7 +1,6 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import BoostIcon from "@/components/common/icons/BoostIcon";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";

@@ -12,6 +12,12 @@ import Link from "next/link";
 import { LeadingCard } from "./LeadingCard";
 import { NextMintCard } from "./NextMintCard";
 
+const SKELETON_KEYS = [
+  "coming-up-skeleton-1",
+  "coming-up-skeleton-2",
+  "coming-up-skeleton-3",
+];
+
 export function NextMintLeadingSection() {
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const { nft: nowMinting, isFetching: isNowMintingFetching } = useNowMinting();
@@ -87,10 +93,8 @@ export function NextMintLeadingSection() {
         <div>
           {header}
           <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-3 lg:tw-gap-8">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <NextMintLeadingSkeletonCard
-                key={`coming-up-skeleton-${index}`}
-              />
+            {SKELETON_KEYS.map((key) => (
+              <NextMintLeadingSkeletonCard key={key} />
             ))}
           </div>
         </div>
