@@ -37,14 +37,43 @@ export default class LruTtlCache<K, V> {
     return entry.value;
   }
 
-  set(key: K, value: V): void {
-    const expiresAt = Date.now() + this.ttlMs;
+  has(key: K): boolean {
+    const entry = this.map.get(key);
+    if (!entry) {
+      return false;
+    }
+
+    if (Date.now() > entry.expiresAt) {
+      this.map.delete(key);
+      return false;
+    }
+
+    return true;
+  }
+
+  delete(key: K): boolean {
+    return this.map.delete(key);
+  }
+
+  clear(): void {
+    this.map.clear();
+  }
+
+  set(key: K, value: V, ttlMs?: number): void {
+    const expiresAt = Date.now() + this.normalizeTtlMs(ttlMs);
     if (this.map.has(key)) {
       this.map.delete(key);
     }
 
     this.map.set(key, { value, expiresAt });
     this.prune();
+  }
+
+  private normalizeTtlMs(ttlMs: number | undefined): number {
+    if (typeof ttlMs === "number" && Number.isFinite(ttlMs)) {
+      return Math.max(1000, ttlMs);
+    }
+    return this.ttlMs;
   }
 
   private prune(): void {

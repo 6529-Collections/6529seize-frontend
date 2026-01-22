@@ -1,3 +1,5 @@
+import LruTtlCache from "@/lib/cache/lruTtl";
+
 interface LinkPreviewMedia {
   readonly url?: string | null | undefined;
   readonly secureUrl?: string | null | undefined;
@@ -74,7 +76,13 @@ export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
   | GoogleWorkspaceLinkPreview;
 
-const linkPreviewCache = new Map<string, Promise<LinkPreviewResponse>>();
+const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
+const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
+
+const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
+  max: LINK_PREVIEW_CACHE_MAX_ITEMS,
+  ttlMs: LINK_PREVIEW_CACHE_TTL_MS,
+});
 
 const normalizeUrl = (url: string): string => url.trim();
 
