@@ -34,7 +34,6 @@ export default function useDeviceInfo(): DeviceInfo {
         standalone?: boolean | undefined;
       };
 
-      const hasFinePointer = win.matchMedia?.("(pointer: fine)")?.matches ?? false;
       const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
       const hasTouchScreen = touchDetected || maxTouchPoints > 0;
 
