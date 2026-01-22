@@ -386,8 +386,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (isAndroid) {
       navSpace = isAndroidKeyboardVisible ? 0 : navAdjustedSpaces.mobileNavSpace;
       capSpace = isAndroidKeyboardVisible ? 0 : Math.max(0, 128 - navSpace);
-    } else if (isIos) {
-      capSpace = 0;
     }
 
     const style = calculateHeightStyle(
