@@ -60,7 +60,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
             src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
             alt={`${wave.name} cover`}
             fill
-            sizes="(max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
             className="tw-object-cover tw-transition-transform tw-duration-700 tw-will-change-transform desktop-hover:group-hover:tw-scale-105"
           />
         )}
