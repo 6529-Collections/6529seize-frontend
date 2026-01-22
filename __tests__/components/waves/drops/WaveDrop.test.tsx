@@ -16,6 +16,7 @@ jest.mock('@/components/waves/drops/WaveDropRatings', () => () => <div data-test
 jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => () => <div data-testid="mobile" />);
 
 jest.mock('@/hooks/isMobileDevice');
+jest.mock('@/hooks/useIsTouchDevice', () => ({ __esModule: true, default: jest.fn(() => false) }));
 
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
