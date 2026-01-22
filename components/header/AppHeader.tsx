@@ -5,8 +5,14 @@ import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useWave } from "@/hooks/useWave";
 import { useWaveById } from "@/hooks/useWaveById";
-import { Bars3Icon } from "@heroicons/react/24/outline";
+import { useWaveViewMode } from "@/hooks/useWaveViewMode";
+import {
+  Bars3Icon,
+  ChatBubbleLeftIcon,
+  Squares2X2Icon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
@@ -73,13 +79,18 @@ export default function AppHeader() {
   const pathSegments = pathname.split("/").filter(Boolean);
   const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
-    ? pathSegments[pathSegments.length - 1]
-        ?.replace(/[-_]/g, " ")
+    ? pathSegments
+        .at(-1)
+        ?.replaceAll(/[-_]/g, " ")
         .replace(/^./, (c) => c.toUpperCase())
     : "Home";
 
   const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
+
+  const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
+  const { isRankWave, isMemesWave, isDm } = useWave(wave);
+  const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
 
   const isWavesRoute = pathname === "/waves";
   const isMessagesRoute = pathname === "/messages";
@@ -92,6 +103,24 @@ export default function AppHeader() {
 
   const showBackButton =
     isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
+
+  const pfpImage = pfp ? (
+    <Image
+      src={resolveIpfsUrlSync(pfp)}
+      alt="pfp"
+      width={40}
+      height={40}
+      className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-object-contain"
+    />
+  ) : (
+    <div className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+  );
+
+  const pfpElement = address ? (
+    pfpImage
+  ) : (
+    <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
+  );
 
   const finalTitle: React.ReactNode = (() => {
     if (pathname === "/waves/create") return "Waves";
@@ -127,25 +156,29 @@ export default function AppHeader() {
                 : "tw-border-transparent tw-bg-transparent"
             }`}
           >
-            {address ? (
-              pfp ? (
-                <Image
-                  src={resolveIpfsUrlSync(pfp)}
-                  alt="pfp"
-                  width={40}
-                  height={40}
-                  className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-object-contain"
-                />
-              ) : (
-                <div className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
-              )
-            ) : (
-              <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
-            )}
+            {pfpElement}
           </button>
         )}
-        <div className="tw-flex-1 tw-text-center tw-text-sm tw-font-semibold">
-          {finalTitle}
+        <div className="tw-flex tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
+          <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>
+          {showGalleryToggle && (
+            <button
+              type="button"
+              onClick={toggleViewMode}
+              aria-label={
+                viewMode === "chat"
+                  ? "Switch to gallery view"
+                  : "Switch to chat view"
+              }
+              className="tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300"
+            >
+              {viewMode === "chat" ? (
+                <Squares2X2Icon className="tw-h-4 tw-w-4" />
+              ) : (
+                <ChatBubbleLeftIcon className="tw-h-4 tw-w-4" />
+              )}
+            </button>
+          )}
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <HeaderActionButtons />
