@@ -34,7 +34,7 @@ export const WaveGallery: React.FC<WaveGalleryProps> = ({
     return (
       <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
-          <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
+          <div className="tw-h-8 tw-w-8 tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
           <span className="tw-text-sm tw-text-iron-400">
             Loading gallery...
           </span>
@@ -83,7 +83,7 @@ export const WaveGallery: React.FC<WaveGalleryProps> = ({
         {hasNextPage && (
           <div className="tw-flex tw-justify-center tw-py-8">
             {isFetchingNextPage ? (
-              <div className="tw-h-6 tw-w-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
+              <div className="tw-h-6 tw-w-6 tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
             ) : (
               <InfiniteScrollTrigger onIntersection={handleIntersection} />
             )}
