@@ -332,7 +332,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
 
   useEffect(() => {
     const activeProof = findActiveProof(originalProofs);
-    if (activeProof) {
+    if (activeProof?.proof) {
       setCurrentProof({
         ...activeProof,
         proof: activeProof.proof,

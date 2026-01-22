@@ -43,7 +43,7 @@ export default function useDeviceInfo(): DeviceInfo {
         /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
       const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
       const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
-      const widthMobile = win.matchMedia("(max-width: 768px)").matches;
+      const widthMobile = win.matchMedia?.("(max-width: 768px)")?.matches ?? false;
 
       const isMobileDevice =
         uaDataMobile ??
