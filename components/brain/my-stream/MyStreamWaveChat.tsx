@@ -98,13 +98,33 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     };
   }, [searchParams, wave.id, firstUnreadSerialNo]);
 
+  useEffect(() => {
+    if (
+      initialDropState?.waveId === wave.id &&
+      initialDropState.dividerSerialNo !== null
+    ) {
+      capturedDividerRef.current = {
+        waveId: wave.id,
+        serialNo: initialDropState.dividerSerialNo,
+      };
+    } else if (
+      !capturedDividerRef.current ||
+      capturedDividerRef.current.waveId !== wave.id
+    ) {
+      capturedDividerRef.current = {
+        waveId: wave.id,
+        serialNo: firstUnreadSerialNo,
+      };
+    }
+  }, [initialDropState, wave.id, firstUnreadSerialNo]);
+
   const scrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
 
   const dividerTarget =
     initialDropState?.waveId === wave.id
       ? initialDropState.dividerSerialNo
-      : capturedDividerRef.current.serialNo;
+      : capturedDividerRef.current?.serialNo ?? null;
 
   useEffect(() => {
     if (!initialDropState) {
