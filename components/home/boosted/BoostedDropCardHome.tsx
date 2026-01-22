@@ -12,6 +12,8 @@ import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Link from "next/link";
 import { memo, useCallback, useMemo } from "react";
+import BoostedDropLinkPreview from "./BoostedDropLinkPreview";
+import { extractStandaloneUrl } from "./extractStandaloneUrl";
 
 interface BoostedDropCardHomeProps {
   readonly drop: ApiDrop;
@@ -22,6 +24,11 @@ const BoostedDropCardHome = memo(
   ({ drop, onClick }: BoostedDropCardHomeProps) => {
     const part = drop.parts[0];
     const media = part?.media[0];
+
+    const standaloneUrl = useMemo(
+      () => extractStandaloneUrl(part?.content),
+      [part?.content]
+    );
 
     const previewContent = useMemo(
       () => buildProcessedContent(part?.content, part?.media, "View drop..."),
@@ -46,6 +53,10 @@ const BoostedDropCardHome = memo(
     const headerClasses = media
       ? "tw-absolute tw-left-3 tw-right-3 tw-top-3 tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2"
       : "tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pt-3 tw-pb-2 sm:tw-absolute sm:tw-left-3 sm:tw-right-3 sm:tw-top-3 sm:tw-px-0 sm:tw-pt-0 sm:tw-pb-0";
+
+    const contentContainerClasses = standaloneUrl
+      ? "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-stretch tw-justify-stretch tw-overflow-hidden tw-rounded-xl tw-p-3"
+      : "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12";
 
     return (
       <div
@@ -97,17 +108,23 @@ const BoostedDropCardHome = memo(
             </div>
           </div>
         ) : (
-          <div className="tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12">
-           
-            <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-center">
-              <ContentDisplay
-                content={previewContent}
-                shouldClamp={false}
-                className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed tw-text-iron-300"
-                textClassName="tw-line-clamp-6 tw-max-w-full tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed"
-              />
+          <div className={contentContainerClasses}>
+
+            <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-justify-center tw-min-w-0 tw-max-w-full">
+              {standaloneUrl ? (
+                <BoostedDropLinkPreview href={standaloneUrl} />
+              ) : (
+                <ContentDisplay
+                  content={previewContent}
+                  shouldClamp={false}
+                  className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed tw-text-iron-300"
+                  textClassName="tw-line-clamp-6 tw-max-w-full tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed"
+                />
+              )}
             </div>
-            <div className="tw-pointer-events-none tw-absolute tw-inset-x-0.5 tw-bottom-0 tw-z-20 tw-h-6 sm:tw-h-10 md:tw-h-12 tw-bg-gradient-to-b tw-from-black/0 tw-to-black/70" />
+            {!standaloneUrl && (
+              <div className="tw-pointer-events-none tw-absolute tw-inset-x-0.5 tw-bottom-0 tw-z-20 tw-h-6 sm:tw-h-10 md:tw-h-12 tw-bg-gradient-to-b tw-from-black/0 tw-to-black/70" />
+            )}
           </div>
         )}
 
