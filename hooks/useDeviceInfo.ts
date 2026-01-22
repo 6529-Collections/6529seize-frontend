@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import useCapacitor from "./useCapacitor";
 
 interface DeviceInfo {
@@ -10,70 +10,65 @@ interface DeviceInfo {
   readonly isAppleMobile: boolean;
 }
 
-/**
- * Hook that provides comprehensive device and screen information.
- * Combines functionality of useIsMobileDevice and useHasTouchScreen.
- *
- * @returns Object containing device information:
- * - isMobileDevice: Whether the device is a mobile device (based on user agent)
- * - hasTouchScreen: Whether the device has a touch screen
- * - isApp: Whether the device is an app
- */
-
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
+  const touchDetectedRef = useRef(false);
 
-  const getInfo = useCallback((): DeviceInfo => {
-    if (typeof window === "undefined" || typeof navigator === "undefined") {
-      const info: DeviceInfo = {
-        isMobileDevice: false,
-        hasTouchScreen: false,
-        isApp: false,
-        isAppleMobile: false,
+  const getInfo = useCallback(
+    (touchDetected: boolean): DeviceInfo => {
+      if (typeof globalThis === "undefined" || typeof navigator === "undefined") {
+        return {
+          isMobileDevice: false,
+          hasTouchScreen: false,
+          isApp: false,
+          isAppleMobile: false,
+        };
+      }
+
+      const win = globalThis as typeof globalThis & {
+        matchMedia: (query: string) => MediaQueryList;
       };
-      return info;
-    }
+      const nav = navigator as Navigator & {
+        msMaxTouchPoints?: number | undefined;
+        userAgentData?: { mobile?: boolean | undefined } | undefined;
+        standalone?: boolean | undefined;
+      };
 
-    const win = window as any;
-    const nav = navigator as Navigator & {
-      msMaxTouchPoints?: number | undefined;
-      userAgentData?: { mobile?: boolean | undefined } | undefined;
-      standalone?: boolean | undefined;
-    };
+      const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
+      const hasTouchScreen = touchDetected || maxTouchPoints > 0;
 
-    const hasTouchScreen =
-      (nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0) > 0 ||
-      "ontouchstart" in win ||
-      win.matchMedia("(pointer: coarse)").matches;
+      const ua = nav.userAgent;
+      const uaDataMobile = nav.userAgentData?.mobile;
+      const classicMobile =
+        /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
+      const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
+      const widthMobile = win.matchMedia?.("(max-width: 768px)")?.matches ?? false;
 
-    const ua = nav.userAgent;
-    const uaDataMobile = nav.userAgentData?.mobile;
-    const classicMobile =
-      /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-    const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
-    const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
-    const widthMobile = win.matchMedia("(max-width: 768px)").matches;
+      const isMobileDevice =
+        uaDataMobile ??
+        (classicMobile || (isCapacitor && (iPadDesktopUA || widthMobile)));
 
-    const isMobileDevice =
-      uaDataMobile ??
-      (classicMobile || (isCapacitor && (iPadDesktopUA || widthMobile)));
+      return {
+        isMobileDevice,
+        hasTouchScreen,
+        isApp: isCapacitor,
+        isAppleMobile: appleMobile,
+      };
+    },
+    [isCapacitor]
+  );
 
-    const info: DeviceInfo = {
-      isMobileDevice,
-      hasTouchScreen,
-      isApp: isCapacitor,
-      isAppleMobile: appleMobile,
-    };
-    return info;
-  }, [isCapacitor]);
-
-  const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
+  const [info, setInfo] = useState<DeviceInfo>(() => getInfo(false));
 
   useEffect(() => {
-    const mq = window.matchMedia("(pointer: coarse)");
+    const hasEventListenerApi =
+      typeof globalThis.addEventListener === "function" &&
+      typeof globalThis.removeEventListener === "function";
+
     const update = () =>
       setInfo((prev) => {
-        const next = getInfo();
+        const next = getInfo(touchDetectedRef.current);
         if (
           prev.isMobileDevice === next.isMobileDevice &&
           prev.hasTouchScreen === next.hasTouchScreen &&
@@ -85,19 +80,24 @@ export default function useDeviceInfo(): DeviceInfo {
         return next;
       });
 
-    mq.addEventListener("change", update);
-    window.addEventListener("resize", update);
-
     const onceTouch = () => {
+      touchDetectedRef.current = true;
       update();
-      window.removeEventListener("touchstart", onceTouch);
+      if (hasEventListenerApi) {
+        globalThis.removeEventListener("touchstart", onceTouch);
+      }
     };
-    window.addEventListener("touchstart", onceTouch, { passive: true });
+
+    if (hasEventListenerApi) {
+      globalThis.addEventListener("resize", update);
+      globalThis.addEventListener("touchstart", onceTouch, { passive: true });
+    }
 
     return () => {
-      mq.removeEventListener("change", update);
-      window.removeEventListener("resize", update);
-      window.removeEventListener("touchstart", onceTouch);
+      if (hasEventListenerApi) {
+        globalThis.removeEventListener("resize", update);
+        globalThis.removeEventListener("touchstart", onceTouch);
+      }
     };
   }, [getInfo]);
 
