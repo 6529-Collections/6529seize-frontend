@@ -9,26 +9,25 @@ import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
 
 import { getYoutubeFetchUrl, parseYoutubeLink } from "./youtube";
 
-const normalizeYoutubeHtml = (html: string): string => {
-  let normalized = html.replace(/width="[^"]*"/i, 'width="100%"');
-  normalized = normalized.replace(/height="[^"]*"/i, 'height="100%"');
+const getYoutubeEmbedUrl = (href: string, videoId: string): string => {
+  try {
+    const input = new URL(href);
+    const embed = new URL(`https://www.youtube-nocookie.com/embed/${videoId}`);
 
-  if (/style="[^"]*"/i.test(normalized)) {
-    normalized = normalized.replace(
-      /style="([^"]*)"/i,
-      (_, styles: string) => {
-        const cleanedStyles = styles.replace(/;?\s*$/, "");
-        return `style="${cleanedStyles};width:100%;height:100%;"`;
-      }
-    );
-  } else {
-    normalized = normalized.replace(
-      /<iframe/i,
-      '<iframe style="width:100%;height:100%;"'
-    );
+    const list = input.searchParams.get("list");
+    if (list && /^[A-Za-z0-9_-]{6,}$/.test(list)) {
+      embed.searchParams.set("list", list);
+    }
+
+    const index = input.searchParams.get("index");
+    if (index && /^\d+$/.test(index)) {
+      embed.searchParams.set("index", index);
+    }
+
+    return embed.toString();
+  } catch {
+    return `https://www.youtube-nocookie.com/embed/${videoId}`;
   }
-
-  return normalized;
 };
 
 interface YoutubePreviewProps {
@@ -63,10 +62,7 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
         }
 
         if (data) {
-          setPreview({
-            ...data,
-            html: normalizeYoutubeHtml(data.html),
-          });
+          setPreview(data);
         } else {
           setHasError(true);
         }
@@ -116,8 +112,17 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
             <div
               className="tw-relative tw-w-full tw-aspect-video tw-bg-black"
               data-testid="youtube-embed"
-              dangerouslySetInnerHTML={{ __html: preview.html }}
-            />
+            >
+              <iframe
+                src={getYoutubeEmbedUrl(href, videoId)}
+                title={preview.title ?? `YouTube video ${videoId}`}
+                className="tw-absolute tw-inset-0 tw-h-full tw-w-full"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
           ) : (
             <button
               type="button"

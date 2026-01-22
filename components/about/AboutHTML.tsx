@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
+import { sanitizeUntrustedHtml } from "@/lib/security/sanitizeHtml";
 
 interface Props {
   path: string;
@@ -15,6 +16,10 @@ export default function AboutHTML(props: Readonly<Props>) {
   useEffect(() => {
     fetchAboutSectionFile(props.path).then(setHtml);
   }, [props.path]);
+  const sanitizedHtml = useMemo(
+    () => sanitizeUntrustedHtml(html, { allowStyleAttribute: true }),
+    [html]
+  );
 
   let titleLighter = "";
   let titleDarker = props.title;
@@ -41,7 +46,7 @@ export default function AboutHTML(props: Readonly<Props>) {
         <Col
           className={styles["htmlContainer"]}
           dangerouslySetInnerHTML={{
-            __html: html,
+            __html: sanitizedHtml,
           }}></Col>
       </Row>
     </Container>

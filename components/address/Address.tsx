@@ -146,10 +146,9 @@ export default function Address(props: Readonly<Props>) {
                 className={`${styles["consolidationDisplay"]} ${
                   props.isUserPage ? styles["consolidationDisplayUserPage"] : ""
                 }`}
-                dangerouslySetInnerHTML={{
-                  __html: props.display ? parseEmojis(props.display) : ``,
-                }}
-              ></span>
+              >
+                {props.display ? parseEmojis(props.display) : ""}
+              </span>
             </Link>
           </Dropdown.Toggle>
         </Dropdown>

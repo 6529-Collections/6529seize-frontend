@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import type { BaseNFT, NFTHistory } from "@/entities/INFT";
 import styles from "./Timeline.module.scss";
@@ -58,13 +59,19 @@ export default function Timeline(props: Readonly<Props>) {
   };
 
   function printAttribute(label: string, value: any, fullWidth?: boolean) {
+    const displayValue = String(numberWithCommasFromString(value ?? ""));
+    const lines = displayValue.split("\n");
     return (
       <Col sm={12} md={fullWidth ? 12 : 6}>
         <b>{label}:</b>{" "}
-        <div
-          dangerouslySetInnerHTML={{
-            __html: numberWithCommasFromString(value).replaceAll("\n", "<br>"),
-          }}></div>
+        <div>
+          {lines.map((line, index) => (
+            <Fragment key={index}>
+              {line}
+              {index < lines.length - 1 ? <br /> : null}
+            </Fragment>
+          ))}
+        </div>
       </Col>
     );
   }
