@@ -75,7 +75,7 @@ interface BottomNavigationProps {
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) => {
   const { registerRef } = useLayout();
-  const { isAndroid } = useCapacitor();
+  const { isAndroid, isIos } = useCapacitor();
   const { isApp } = useDeviceInfo();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
@@ -101,7 +101,8 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) =
     [isApp]
   );
 
-  const paddingClass = isAndroid ? "tw-pb-[env(safe-area-inset-bottom,0px)]" : "";
+  const paddingClass =
+    isAndroid || isIos ? "tw-pb-[env(safe-area-inset-bottom,0px)]" : "";
 
   const hiddenStyle = hidden
     ? "tw-opacity-0 tw-translate-y-full tw-pointer-events-none"

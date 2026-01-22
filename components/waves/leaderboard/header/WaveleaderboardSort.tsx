@@ -126,7 +126,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   return (
     <div
       id="tabsId"
-      className="tw-flex tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
+      className="tw-flex tw-rounded-lg tw-whitespace-nowrap tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
     >
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.RANK)}
