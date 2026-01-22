@@ -132,18 +132,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       return;
     }
 
-    const prevSerial = prevLatestSerialNoRef.current;
     prevLatestSerialNoRef.current = latestSerialNo;
-
-    if (prevSerial !== null && latestSerialNo > prevSerial && !isAtBottom) {
-      setUnreadDividerSerialNo((current) => {
-        if (current === null) {
-          return prevSerial + 1;
-        }
-        return current;
-      });
-    }
-  }, [latestSerialNo, isAtBottom, setUnreadDividerSerialNo]);
+  }, [latestSerialNo]);
 
   useEffect(() => {
     if (latestSerialNo === null) {
