@@ -7,12 +7,21 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
+  readonly viewMode: WaveViewMode;
+  readonly onToggleViewMode: () => void;
+  readonly showGalleryToggle: boolean;
 }
 
-export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
+export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
+  wave,
+  viewMode,
+  onToggleViewMode,
+  showGalleryToggle,
+}) => {
   const { isMemesWave } = useWave(wave);
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
@@ -45,11 +54,16 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
   return (
     <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
       <div className="tw-w-full tw-bg-iron-950">
-        <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
+        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3">
           {isMemesWave ? (
             <MyStreamWaveTabsMeme wave={wave} />
           ) : (
-            <MyStreamWaveTabsDefault wave={wave} />
+            <MyStreamWaveTabsDefault
+              wave={wave}
+              viewMode={viewMode}
+              onToggleViewMode={onToggleViewMode}
+              showGalleryToggle={showGalleryToggle}
+            />
           )}
         </div>
       </div>

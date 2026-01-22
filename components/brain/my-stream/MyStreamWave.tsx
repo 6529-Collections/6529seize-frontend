@@ -17,6 +17,8 @@ import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { useWaveViewMode } from "@/hooks/useWaveViewMode";
+import { useWave } from "@/hooks/useWave";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -68,6 +70,14 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
 
+  // View mode for chat/gallery toggle
+  const { viewMode, toggleViewMode } = useWaveViewMode(waveId);
+
+  // Get wave type info to determine if gallery toggle should be shown
+  // Show for CHAT type waves (normal waves), hide for RANK, MEMES, and DMs
+  const { isRankWave, isMemesWave, isDm } = useWave(wave);
+  const showGalleryToggle = !isRankWave && !isMemesWave && !isDm;
+
   useBreakpoint();
 
   // For handling clicks on drops
@@ -88,6 +98,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       <MyStreamWaveChat
         wave={wave}
         firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
+        viewMode={showGalleryToggle ? viewMode : "chat"}
+        onDropClick={onDropClick}
       />
     ),
     [MyStreamWaveTab.LEADERBOARD]: (
@@ -109,7 +121,12 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       key={stableWaveKey}
     >
       {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
-      <MyStreamWaveTabs wave={wave} />
+      <MyStreamWaveTabs
+        wave={wave}
+        viewMode={viewMode}
+        onToggleViewMode={toggleViewMode}
+        showGalleryToggle={showGalleryToggle}
+      />
 
       <div
         className="tw-relative tw-flex-grow tw-overflow-hidden"

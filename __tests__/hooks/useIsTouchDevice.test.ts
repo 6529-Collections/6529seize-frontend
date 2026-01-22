@@ -7,12 +7,12 @@ describe("useIsTouchDevice", () => {
   let touchStartHandler: EventListener | null = null;
 
   beforeEach(() => {
-    addEventListenerSpy = jest.spyOn(window, "addEventListener").mockImplementation((event, handler) => {
+    addEventListenerSpy = jest.spyOn(globalThis, "addEventListener").mockImplementation((event, handler) => {
       if (event === "touchstart") {
         touchStartHandler = handler as EventListener;
       }
     });
-    removeEventListenerSpy = jest.spyOn(window, "removeEventListener");
+    removeEventListenerSpy = jest.spyOn(globalThis, "removeEventListener");
   });
 
   afterEach(() => {
@@ -23,7 +23,7 @@ describe("useIsTouchDevice", () => {
   });
 
   it("returns false initially when fine pointer is detected", () => {
-    Object.defineProperty(window, "matchMedia", {
+    Object.defineProperty(globalThis, "matchMedia", {
       writable: true,
       value: jest.fn((query: string) => ({
         matches: query === "(pointer: fine)",
@@ -35,7 +35,7 @@ describe("useIsTouchDevice", () => {
   });
 
   it("returns false initially and does not listen for touch when fine pointer exists", () => {
-    Object.defineProperty(window, "matchMedia", {
+    Object.defineProperty(globalThis, "matchMedia", {
       writable: true,
       value: jest.fn((query: string) => ({
         matches: query === "(pointer: fine)",
@@ -47,7 +47,7 @@ describe("useIsTouchDevice", () => {
   });
 
   it("returns false initially but switches to true after touchstart when no fine pointer", () => {
-    Object.defineProperty(window, "matchMedia", {
+    Object.defineProperty(globalThis, "matchMedia", {
       writable: true,
       value: jest.fn(() => ({ matches: false })),
     });
@@ -65,7 +65,7 @@ describe("useIsTouchDevice", () => {
   });
 
   it("removes touchstart listener after first touch", () => {
-    Object.defineProperty(window, "matchMedia", {
+    Object.defineProperty(globalThis, "matchMedia", {
       writable: true,
       value: jest.fn(() => ({ matches: false })),
     });
@@ -82,7 +82,7 @@ describe("useIsTouchDevice", () => {
   });
 
   it("cleans up event listener on unmount", () => {
-    Object.defineProperty(window, "matchMedia", {
+    Object.defineProperty(globalThis, "matchMedia", {
       writable: true,
       value: jest.fn(() => ({ matches: false })),
     });

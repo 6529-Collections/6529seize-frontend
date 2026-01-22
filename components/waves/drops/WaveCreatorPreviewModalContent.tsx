@@ -117,11 +117,7 @@ export const WaveCreatorPreviewModalContent: React.FC<
               {waves.length > 0 && (
                 <div className="tw-flex tw-flex-col tw-gap-3">
                   {waves.map((wave) => (
-                    <WaveCreatorPreviewItem
-                      key={wave.id}
-                      wave={wave}
-                      onNavigate={onClose}
-                    />
+                    <WaveCreatorPreviewItem key={wave.id} wave={wave} />
                   ))}
                 </div>
               )}

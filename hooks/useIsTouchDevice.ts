@@ -6,11 +6,15 @@ export default function useIsTouchDevice(): boolean {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis === "undefined") {
       return;
     }
 
-    const hasFinePointer = window.matchMedia?.("(pointer: fine)")?.matches;
+    const win = globalThis as typeof globalThis & {
+      matchMedia?: (query: string) => MediaQueryList;
+    };
+
+    const hasFinePointer = win.matchMedia?.("(pointer: fine)")?.matches;
     if (hasFinePointer) {
       setIsTouchDevice(false);
       return;
@@ -18,13 +22,13 @@ export default function useIsTouchDevice(): boolean {
 
     const onTouchStart = () => {
       setIsTouchDevice(true);
-      window.removeEventListener("touchstart", onTouchStart);
+      globalThis.removeEventListener("touchstart", onTouchStart);
     };
 
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    globalThis.addEventListener("touchstart", onTouchStart, { passive: true });
 
     return () => {
-      window.removeEventListener("touchstart", onTouchStart);
+      globalThis.removeEventListener("touchstart", onTouchStart);
     };
   }, []);
 

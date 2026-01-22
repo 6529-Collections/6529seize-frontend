@@ -25,12 +25,12 @@ export default function NowMintingStatsGrid({
   const statusTone = manifoldClaim?.isFinalized ? "ended" : status;
 
   const editionSize = manifoldClaim
-    ? formatEditionSize(manifoldClaim)
+    ? formatEditionSize(manifoldClaim).replace(/\s*\/\s*/, "/")
     : undefined;
   const mintPrice = manifoldClaim ? formatClaimCost(manifoldClaim) : undefined;
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
+    <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
       <NowMintingStatsItem label="Edition" value={editionSize} />
       <NowMintingStatsItem
         label="Status"

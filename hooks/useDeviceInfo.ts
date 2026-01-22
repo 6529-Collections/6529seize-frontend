@@ -16,7 +16,7 @@ export default function useDeviceInfo(): DeviceInfo {
 
   const getInfo = useCallback(
     (touchDetected: boolean): DeviceInfo => {
-      if (typeof window === "undefined" || typeof navigator === "undefined") {
+      if (typeof globalThis === "undefined" || typeof navigator === "undefined") {
         return {
           isMobileDevice: false,
           hasTouchScreen: false,
@@ -25,8 +25,8 @@ export default function useDeviceInfo(): DeviceInfo {
         };
       }
 
-      const win = window as typeof window & {
-        matchMedia: typeof window.matchMedia;
+      const win = globalThis as typeof globalThis & {
+        matchMedia: (query: string) => MediaQueryList;
       };
       const nav = navigator as Navigator & {
         msMaxTouchPoints?: number | undefined;
@@ -76,18 +76,18 @@ export default function useDeviceInfo(): DeviceInfo {
         return next;
       });
 
-    window.addEventListener("resize", update);
+    globalThis.addEventListener("resize", update);
 
     const onceTouch = () => {
       touchDetectedRef.current = true;
       update();
-      window.removeEventListener("touchstart", onceTouch);
+      globalThis.removeEventListener("touchstart", onceTouch);
     };
-    window.addEventListener("touchstart", onceTouch, { passive: true });
+    globalThis.addEventListener("touchstart", onceTouch, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("touchstart", onceTouch);
+      globalThis.removeEventListener("resize", update);
+      globalThis.removeEventListener("touchstart", onceTouch);
     };
   }, [getInfo]);
 

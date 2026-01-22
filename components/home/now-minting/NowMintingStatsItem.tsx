@@ -19,11 +19,15 @@ export default function NowMintingStatsItem({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-1">
-      <span className="tw-text-xs tw-font-medium tw-text-iron-500">{label}</span>
+      <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+        {label}
+      </span>
       {isLoading ? (
         <span className="tw-h-6 tw-w-20 tw-animate-pulse tw-rounded tw-bg-iron-800" />
       ) : (
-        <span className={`tw-font-mono tw-text-base md:tw-text-lg tw-font-medium ${getValueColor()}`}>
+        <span
+          className={`tw-whitespace-nowrap tw-font-mono tw-text-sm tw-font-medium md:tw-text-base ${getValueColor()}`}
+        >
           {value}
         </span>
       )}
