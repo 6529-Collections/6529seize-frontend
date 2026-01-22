@@ -24,10 +24,12 @@ interface Props {
   hideMintBtn?: boolean | undefined;
   small?: boolean | undefined;
   isError?: boolean | undefined;
+  showThankYou?: boolean | undefined;
 }
 
 export default function MintCountdownBox(props: Readonly<Props>) {
-  const { mintInfo, linkInfo, hideMintBtn, small, isError } = props;
+  const { mintInfo, linkInfo, hideMintBtn, small, isError, showThankYou } =
+    props;
 
   // Derived flags
   const hasMintInfo = Boolean(mintInfo);
@@ -71,7 +73,9 @@ export default function MintCountdownBox(props: Readonly<Props>) {
         <p className="mb-1 tw-font-medium">
           All NFTs have been successfully minted.
         </p>
-        <p className="mb-0 tw-text-md">Thank you for participating!</p>
+        {showThankYou && (
+          <p className="mb-0 tw-text-md">Thank you for participating!</p>
+        )}
       </div>
     );
   }
@@ -81,7 +85,9 @@ export default function MintCountdownBox(props: Readonly<Props>) {
       <div className={containerClasses}>
         <h4 className="mb-3">⌛️ Mint Phase Complete</h4>
         <p className="mb-1 tw-font-medium">This mint phase has ended.</p>
-        <p className="mb-0 tw-text-md">Thank you for participating!</p>
+        {showThankYou && (
+          <p className="mb-0 tw-text-md">Thank you for participating!</p>
+        )}
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useShowThankYouForMint } from "@/hooks/useShowThankYouForMint";
 import type {
   ManifoldClaim} from "@/hooks/useManifoldClaim";
 import {
@@ -13,6 +14,7 @@ import { render, screen } from "@testing-library/react";
 
 jest.mock("@/hooks/useManifoldClaim");
 jest.mock("@/hooks/useCapacitor");
+jest.mock("@/hooks/useShowThankYouForMint");
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: jest.fn(),
 }));
@@ -57,6 +59,8 @@ const mockUseCapacitor = useCapacitor as jest.MockedFunction<
 const mockUseCookieConsent = useCookieConsent as jest.MockedFunction<
   typeof useCookieConsent
 >;
+const mockUseShowThankYouForMint =
+  useShowThankYouForMint as jest.MockedFunction<typeof useShowThankYouForMint>;
 
 const baseClaim: ManifoldClaim = {
   instanceId: 1,
@@ -71,6 +75,8 @@ const baseClaim: ManifoldClaim = {
   memePhase: undefined,
   isFetching: false,
   isFinalized: false,
+  isSoldOut: false,
+  isError: false,
 };
 
 beforeEach(() => {
@@ -80,6 +86,12 @@ beforeEach(() => {
     country: "US",
     consent: jest.fn(),
     reject: jest.fn(),
+  });
+  mockUseShowThankYouForMint.mockReturnValue({
+    showThankYou: false,
+    isLoading: false,
+    error: null as any,
+    balance: 0,
   });
 });
 

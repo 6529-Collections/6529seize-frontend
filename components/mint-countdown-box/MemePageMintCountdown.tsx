@@ -1,12 +1,14 @@
 "use client";
 
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
   ManifoldClaimStatus,
   ManifoldPhase,
   useMemesManifoldClaim,
 } from "@/hooks/useManifoldClaim";
+import { useShowThankYouForMint } from "@/hooks/useShowThankYouForMint";
 import { useEffect, useState } from "react";
 import MintCountdownBox from "./MintCountdownBox";
 
@@ -66,10 +68,18 @@ export default function MemePageMintCountdown(
   };
 
   const hideMintBtn = props.hide_mint_btn || (isIos && country !== "US");
+  const mintInfo = getMintInfo();
+  const shouldCheckParticipation =
+    !!mintInfo?.isFinalized || !!mintInfo?.isSoldOut;
+  const { showThankYou } = useShowThankYouForMint({
+    contract: MEMES_CONTRACT,
+    tokenId: props.nft_id,
+    enabled: shouldCheckParticipation,
+  });
 
   return (
     <MintCountdownBox
-      mintInfo={getMintInfo()}
+      mintInfo={mintInfo}
       linkInfo={{
         href: "/the-memes/mint",
         target: "_self",
@@ -77,6 +87,7 @@ export default function MemePageMintCountdown(
       hideMintBtn={hideMintBtn}
       small={props.hide_mint_btn}
       isError={isError}
+      showThankYou={showThankYou}
     />
   );
 }

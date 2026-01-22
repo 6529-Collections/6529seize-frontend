@@ -1,6 +1,10 @@
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
-export default function NowMintingCountdownSoldOut() {
+export default function NowMintingCountdownSoldOut({
+  showThankYou,
+}: {
+  readonly showThankYou: boolean;
+}) {
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-3 tw-text-left tw-backdrop-blur-sm md:tw-p-4">
       <div className="tw-flex tw-items-start tw-gap-3">
@@ -14,9 +18,11 @@ export default function NowMintingCountdownSoldOut() {
           <span className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
             All NFTs have been successfully minted.
           </span>
-          <span className="tw-text-xs tw-text-iron-500">
-            Thank you for participating.
-          </span>
+          {showThankYou && (
+            <span className="tw-text-xs tw-text-iron-500">
+              Thank you for participating.
+            </span>
+          )}
         </div>
       </div>
     </div>

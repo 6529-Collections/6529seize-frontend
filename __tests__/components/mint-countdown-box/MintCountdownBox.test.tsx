@@ -144,6 +144,9 @@ describe("MintCountdownBox (new API)", () => {
       );
       expect(screen.getByText(/Mint Phase Complete/i)).toBeInTheDocument();
       expect(screen.queryByTestId("date-countdown")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Thank you for participating/i)
+      ).not.toBeInTheDocument();
     });
 
     it("shows ended state (sold out) message", () => {
@@ -156,6 +159,21 @@ describe("MintCountdownBox (new API)", () => {
         screen.getByText(/Mint Complete - Sold Out!/i)
       ).toBeInTheDocument();
       expect(screen.queryByTestId("date-countdown")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Thank you for participating/i)
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows thank-you text when explicitly enabled", () => {
+      render(
+        <MintCountdownBox
+          mintInfo={{ title: "X", date: 1640995200, isFinalized: true }}
+          showThankYou={true}
+        />
+      );
+      expect(
+        screen.getByText(/Thank you for participating/i)
+      ).toBeInTheDocument();
     });
   });
 
