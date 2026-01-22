@@ -41,7 +41,8 @@
     "deadcode": "npm run deadcode:knip && npm run deadcode:deps",
     "cr": "coderabbit --type uncommitted --base main --prompt-only",
     "sync": "bash scripts/worktree/wt-sync.sh",
-    "quality": "node scripts/quality.js"
+    "quality": "node scripts/quality.js",
+    "quality:cr": "node scripts/quality.js --coderabbit"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "^1.11.1",

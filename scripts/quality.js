@@ -5,6 +5,9 @@ const REMOTE = "origin";
 const BRANCH = "main";
 const TARGET = `${REMOTE}/${BRANCH}`;
 
+const args = process.argv.slice(2);
+const enableCoderabbit = args.includes("--coderabbit");
+
 const run = (command, options = {}) =>
   execSync(command, {
     encoding: "utf8",
@@ -252,3 +255,19 @@ if (ahead > 0) {
 }
 
 console.log(`Branch is up to date with ${TARGET}.`);
+
+if (enableCoderabbit) {
+  const uncommittedFiles = run("git status --porcelain");
+  if (uncommittedFiles) {
+    console.log("\nRunning CodeRabbit review on uncommitted changes...\n");
+    try {
+      execSync("coderabbit --prompt-only --type uncommitted", {
+        stdio: "inherit",
+      });
+    } catch (error) {
+      // CodeRabbit may exit with non-zero even on success, just let output through
+    }
+  } else {
+    console.log("\nNo uncommitted changes to review with CodeRabbit.");
+  }
+}
