@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { selectEditingDropId } from "@/store/editSlice";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
@@ -49,9 +50,14 @@ export default function AppLayout({ children }: Props) {
   const isHomeFeedView = pathname === "/" && homeActiveTab === "feed";
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
-  const { isVisible: isKeyboardVisible, isAndroid } = useAndroidKeyboard();
+  const { isVisible: isAndroidKeyboardVisible, isAndroid } =
+    useAndroidKeyboard();
+  const { isIos, keyboardVisible: isIosKeyboardVisible } = useCapacitor();
   const isEditingOnMobile = isApp && editingDropId !== null;
-  const shouldHideBottomNav = isAndroid && isKeyboardVisible;
+  const isKeyboardVisible =
+    (isAndroid && isAndroidKeyboardVisible) ||
+    (isIos && isIosKeyboardVisible);
+  const shouldHideBottomNav = isKeyboardVisible;
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -64,9 +70,10 @@ export default function AppLayout({ children }: Props) {
 
   const isNavVisible =
     !isSingleDropOpen && !isEditingOnMobile && !shouldHideBottomNav;
-  const safeAreaClass = isNavVisible
-    ? ""
-    : "tw-pb-[env(safe-area-inset-bottom,0px)]";
+  const safeAreaClass =
+    !isNavVisible && !isKeyboardVisible
+      ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
+      : "";
 
   return (
     <div
