@@ -24,7 +24,7 @@ export type MintCountdownState =
   | { type: "finalized" }
   | { type: "countdown"; countdown: CountdownData };
 
-export interface UseMintCountdownStateOptions {
+interface UseMintCountdownStateOptions {
   hideMintBtn?: boolean;
 }
 

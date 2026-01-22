@@ -2,7 +2,7 @@ import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectio
 import type { ApiXTdhTokensPage } from "@/generated/models/ApiXTdhTokensPage";
 import type { TokenMetadata } from "@/types/nft";
 
-export type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
+type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
 
 export type ApiXtdhToken = ApiXTdhTokensPage["data"][number];
 
@@ -36,11 +36,10 @@ export interface XtdhTokensListProps {
     | undefined;
 }
 
-export interface UseXtdhTokensListStateParams
-  extends Pick<
-    XtdhTokensListProps,
-    "tokens" | "isEnabled" | "isLoading" | "isError"
-  > {}
+export interface UseXtdhTokensListStateParams extends Pick<
+  XtdhTokensListProps,
+  "tokens" | "isEnabled" | "isLoading" | "isError"
+> {}
 
 export interface XtdhTokensListState {
   readonly isDisabled: boolean;

@@ -15,7 +15,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 export type XtdhTokensSortField = "xtdh" | "xtdh_rate";
 export type XtdhTokensOrder = "ASC" | "DESC";
 
-export interface UseXtdhTokensQueryParams {
+interface UseXtdhTokensQueryParams {
   readonly identity?: string | null | undefined;
   readonly contract?: string | null | undefined;
   readonly pageSize?: number | undefined;
@@ -27,7 +27,7 @@ export interface UseXtdhTokensQueryParams {
 
 type XtdhTokensInfiniteData = InfiniteData<ApiXTdhTokensPage>;
 
-export type UseXtdhTokensQueryResult = UseInfiniteQueryResult<
+type UseXtdhTokensQueryResult = UseInfiniteQueryResult<
   XtdhTokensInfiniteData,
   Error
 > & {
@@ -55,11 +55,13 @@ export function useXtdhTokensQuery({
   const normalizedContract = contract?.trim() ?? "";
   const hasIdentity = Boolean(normalizedIdentity);
   const identityRequirementMet = requireIdentity ? hasIdentity : true;
-  const hasRequiredFilters = identityRequirementMet && Boolean(normalizedContract);
+  const hasRequiredFilters =
+    identityRequirementMet && Boolean(normalizedContract);
   const isEnabled = hasRequiredFilters && enabled;
-  const normalizedPageSize = Number.isFinite(pageSize) && pageSize > 0
-    ? Math.floor(pageSize)
-    : DEFAULT_PAGE_SIZE;
+  const normalizedPageSize =
+    Number.isFinite(pageSize) && pageSize > 0
+      ? Math.floor(pageSize)
+      : DEFAULT_PAGE_SIZE;
   const normalizedOrder: XtdhTokensOrder = order === "ASC" ? "ASC" : "DESC";
 
   const queryKey = useMemo(

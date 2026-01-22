@@ -173,7 +173,7 @@ export function mintStartInstantUtcForMintDay(utcDay: Date): Date {
   );
 }
 
-export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
+function mintEndInstantUtcForMintDay(utcDay: Date): Date {
   const nextDay = new Date(
     Date.UTC(
       utcDay.getUTCFullYear(),
@@ -186,54 +186,6 @@ export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
     MINT_END_EUROPE_HOUR,
     MINT_END_EUROPE_MINUTE
   );
-}
-
-function getMintWindowForMintDay(utcDay: Date): { start: Date; end: Date } {
-  return {
-    start: mintStartInstantUtcForMintDay(utcDay),
-    end: mintEndInstantUtcForMintDay(utcDay),
-  };
-}
-
-function getActiveMintWindow(
-  now: Date
-): { mintDayUtc: Date; start: Date; end: Date } | null {
-  const todayUtc = startOfUtcDay(now);
-  const candidates: Date[] = [];
-
-  const latestMint = prevMintDateOnOrBefore(todayUtc);
-  if (latestMint) {
-    candidates.push(latestMint);
-  }
-
-  const dayBefore = new Date(
-    Date.UTC(
-      todayUtc.getUTCFullYear(),
-      todayUtc.getUTCMonth(),
-      todayUtc.getUTCDate() - 1
-    )
-  );
-  if (+dayBefore >= +FIRST_MINT_DATE) {
-    const previousMint = prevMintDateOnOrBefore(dayBefore);
-    if (
-      previousMint &&
-      (!latestMint || previousMint.getTime() !== latestMint.getTime())
-    ) {
-      candidates.push(previousMint);
-    }
-  }
-
-  for (const mintDay of candidates) {
-    const window = getMintWindowForMintDay(mintDay);
-    if (
-      now.getTime() >= window.start.getTime() &&
-      now.getTime() < window.end.getTime()
-    ) {
-      return { mintDayUtc: mintDay, ...window };
-    }
-  }
-
-  return null;
 }
 
 function immediatelyNextMintInstantUTC(now: Date): Date {
@@ -513,12 +465,6 @@ export function getCardsRemainingUntilEndOf(
 
 export function getNextMintStart(now: Date = new Date()): Date {
   return immediatelyNextMintInstantUTC(now);
-}
-
-export function isMintingActive(d: Date = new Date()): boolean {
-  return (
-    isMintEligibleUtcDay(startOfUtcDay(d)) || getActiveMintWindow(d) !== null
-  );
 }
 
 export function isMintingToday(): boolean {
@@ -812,7 +758,7 @@ export function formatToFullDivision(d: Date): React.ReactNode {
   const eonDates = getRangeDatesByZoom("eon", idx);
 
   return (
-    <table className="tw-inline-table tw-table-auto tw-w-auto tw-border-collapse">
+    <table className="tw-inline-table tw-w-auto tw-table-auto tw-border-collapse">
       <tbody>
         {printDivision("SZN", szn, range(seasonDates.start, seasonDates.end))}
         {printDivision("Year", year, range(yearDates.start, yearDates.end))}
@@ -832,10 +778,10 @@ export function formatToFullDivision(d: Date): React.ReactNode {
 function printDivision(label: string, number: number, range: string) {
   return (
     <tr>
-      <td className="tw-py-1 tw-font-semibold tw-pr-4 tw-whitespace-nowrap">
+      <td className="tw-whitespace-nowrap tw-py-1 tw-pr-4 tw-font-semibold">
         {label} {number.toLocaleString()}
       </td>
-      <td className="tw-py-1 tw-whitespace-nowrap">
+      <td className="tw-whitespace-nowrap tw-py-1">
         <span className="tw-text-gray-400">{range}</span>
       </td>
     </tr>

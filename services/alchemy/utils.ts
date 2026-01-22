@@ -6,21 +6,25 @@ import type {
   AlchemyContractMetadataResponse,
   AlchemyContractResult,
   AlchemyOpenSeaMetadata,
-  AlchemyOwnedNft,
   AlchemySearchResponse,
   AlchemyTokenMetadataEntry,
   AlchemyTokenMetadataResponse,
   OwnerNft,
   SearchContractsResult,
 } from "./types";
-import type { ContractOverview, Suggestion, SupportedChain, TokenMetadata } from "@/types/nft";
+import type {
+  ContractOverview,
+  Suggestion,
+  SupportedChain,
+  TokenMetadata,
+} from "@/types/nft";
 
 const NETWORK_MAP: Record<SupportedChain, string> = {
   ethereum: "eth-mainnet",
 };
 
 export function resolveNetwork(chain: SupportedChain = "ethereum"): string {
-  return NETWORK_MAP[chain] ?? NETWORK_MAP.ethereum;
+  return NETWORK_MAP[chain];
 }
 
 export function ensureQuery(query: string): string {
@@ -31,9 +35,7 @@ export function ensureQuery(query: string): string {
   return trimmed;
 }
 
-export function toSafelist(
-  status: string | null | undefined
-): Suggestion["safelist"] {
+function toSafelist(status: string | null | undefined): Suggestion["safelist"] {
   if (!status) {
     return undefined;
   }
@@ -48,7 +50,7 @@ export function toSafelist(
   return undefined;
 }
 
-export function parseFloorPrice(
+function parseFloorPrice(
   meta: AlchemyOpenSeaMetadata | undefined
 ): number | null {
   if (!meta) {
@@ -71,14 +73,17 @@ export function parseFloorPrice(
   return null;
 }
 
-type OpenSeaMetadataSource = {
-  openSeaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
-  openseaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
-  openSea?: AlchemyOpenSeaMetadata | null | undefined;
-  opensea?: AlchemyOpenSeaMetadata | null | undefined;
-} | null | undefined;
+type OpenSeaMetadataSource =
+  | {
+      openSeaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
+      openseaMetadata?: AlchemyOpenSeaMetadata | null | undefined;
+      openSea?: AlchemyOpenSeaMetadata | null | undefined;
+      opensea?: AlchemyOpenSeaMetadata | null | undefined;
+    }
+  | null
+  | undefined;
 
-export function resolveOpenSeaMetadata(
+function resolveOpenSeaMetadata(
   ...sources: OpenSeaMetadataSource[]
 ): AlchemyOpenSeaMetadata | undefined {
   for (const source of sources) {
@@ -97,10 +102,22 @@ export function resolveOpenSeaMetadata(
   return undefined;
 }
 
-export function pickImage(source?: {
-  image?: { cachedUrl?: string | null | undefined; thumbnailUrl?: string | null | undefined } | null | undefined;
+function pickImage(source?: {
+  image?:
+    | {
+        cachedUrl?: string | null | undefined;
+        thumbnailUrl?: string | null | undefined;
+      }
+    | null
+    | undefined;
   imageUrl?: string | null | undefined;
-  media?: { thumbnailUrl?: string | null | undefined; gateway?: string | null | undefined }[] | null | undefined;
+  media?:
+    | {
+        thumbnailUrl?: string | null | undefined;
+        gateway?: string | null | undefined;
+      }[]
+    | null
+    | undefined;
 }): string | null {
   if (!source) {
     return null;
@@ -115,8 +132,8 @@ export function pickImage(source?: {
     return source.image.thumbnailUrl;
   }
   if (source.media && source.media.length > 0) {
-    const mediaItem = source.media.find((item) => item?.thumbnailUrl) ??
-      source.media[0];
+    const mediaItem =
+      source.media.find((item) => item.thumbnailUrl) ?? source.media[0];
     if (mediaItem?.thumbnailUrl) {
       return mediaItem.thumbnailUrl;
     }
@@ -127,8 +144,14 @@ export function pickImage(source?: {
   return null;
 }
 
-export function pickThumbnail(source?: {
-  image?: { thumbnailUrl?: string | null | undefined; cachedUrl?: string | null | undefined } | null | undefined;
+function pickThumbnail(source?: {
+  image?:
+    | {
+        thumbnailUrl?: string | null | undefined;
+        cachedUrl?: string | null | undefined;
+      }
+    | null
+    | undefined;
   media?: { thumbnailUrl?: string | null | undefined }[] | null | undefined;
 }): string | null {
   if (!source) {
@@ -141,8 +164,8 @@ export function pickThumbnail(source?: {
     return source.image.cachedUrl;
   }
   if (source.media && source.media.length > 0) {
-    const mediaItem = source.media.find((item) => item?.thumbnailUrl) ??
-      source.media[0];
+    const mediaItem =
+      source.media.find((item) => item.thumbnailUrl) ?? source.media[0];
     if (mediaItem?.thumbnailUrl) {
       return mediaItem.thumbnailUrl;
     }
@@ -167,9 +190,7 @@ export function normaliseAddress(
   }
 }
 
-export function extractContract(
-  contract: AlchemyContractResult
-): Suggestion | null {
+function extractContract(contract: AlchemyContractResult): Suggestion | null {
   const baseMeta = contract.contractMetadata ?? contract;
   const openSea = resolveOpenSeaMetadata(contract, baseMeta);
   const address =
@@ -208,7 +229,7 @@ export function extractContract(
     totalSupply: totalSupply ?? undefined,
     floorPriceEth,
     imageUrl: imageUrl ?? null,
-    isSpam: isSpam ?? false,
+    isSpam,
     safelist,
     deployer: deployer ?? null,
   };
@@ -267,7 +288,9 @@ export function processContractMetadataResponse(
   };
 }
 
-export function processOwnerNftsResponse(ownedNfts: AlchemyOwnedNft[]): OwnerNft[] {
+export function processOwnerNftsResponse(
+  ownedNfts: AlchemyTokenMetadataEntry[]
+): OwnerNft[] {
   return ownedNfts.map((nft) => ({
     tokenId: nft.tokenId ?? "",
     tokenType: nft.tokenType ?? null,
@@ -285,7 +308,9 @@ function parseTokenIdToBigint(tokenId: string): bigint {
   return BigInt(trimmed);
 }
 
-function normaliseTokenMetadata(token: AlchemyTokenMetadataEntry): TokenMetadata | null {
+function normaliseTokenMetadata(
+  token: AlchemyTokenMetadataEntry
+): TokenMetadata | null {
   const tokenIdRaw = token.tokenId ?? "";
   try {
     const tokenId = parseTokenIdToBigint(tokenIdRaw);
@@ -316,7 +341,9 @@ function normaliseTokenMetadata(token: AlchemyTokenMetadataEntry): TokenMetadata
   }
 }
 
-export function processTokenMetadataResponse(payload: AlchemyTokenMetadataResponse): TokenMetadata[] {
+export function processTokenMetadataResponse(
+  payload: AlchemyTokenMetadataResponse
+): TokenMetadata[] {
   const tokens = payload.tokens ?? payload.nfts ?? [];
   const results: TokenMetadata[] = [];
   for (const token of tokens) {

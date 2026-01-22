@@ -1,9 +1,9 @@
-import { render, screen, act } from "@testing-library/react";
+import MyStreamWaveChat from "@/components/brain/my-stream/MyStreamWaveChat";
+import { editSlice } from "@/store/editSlice";
+import { configureStore } from "@reduxjs/toolkit";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
-import { editSlice } from "@/store/editSlice";
-import MyStreamWaveChat from "@/components/brain/my-stream/MyStreamWaveChat";
 
 const replaceMock = jest.fn();
 const searchParamsMock = { get: jest.fn() };
@@ -23,11 +23,15 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ waveViewStyle: { height: "1px" } }),
 }));
 
-let capturedProps: any = {};
+const capturedPropsHolder = { current: {} as any };
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
-    capturedProps = props;
+    capturedPropsHolder.current = props;
+    return <div data-testid="drops" />;
+  },
+  WaveDropsAllWithoutProvider: (props: any) => {
+    capturedPropsHolder.current = props;
     return <div data-testid="drops" />;
   },
 }));
@@ -55,21 +59,26 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ isApp: false }),
 }));
 
+jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
+  UnreadDividerProvider: ({ children }: any) => <>{children}</>,
+}));
+
 jest.mock("@/components/waves/gallery", () => ({
   WaveGallery: () => <div data-testid="gallery" />,
 }));
 
-const wave = { id: "10" } as any;
+const wave = { id: "10", metrics: { muted: false } } as any;
 const mockOnDropClick = jest.fn();
 
 describe("MyStreamWaveChat", () => {
   let store: any;
 
   beforeEach(() => {
-    capturedProps = {};
+    capturedPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
     mockIsMemesWave = false;
+    mockOnDropClick.mockClear();
     store = configureStore({
       reducer: { edit: editSlice.reducer },
     });
@@ -93,7 +102,7 @@ describe("MyStreamWaveChat", () => {
       );
     });
     expect(replaceMock).toHaveBeenCalled();
-    expect(capturedProps.initialDrop).toBe(5);
+    expect(capturedPropsHolder.current.initialDrop).toBe(5);
     expect(screen.getByTestId("memes-btn")).toBeInTheDocument();
   });
 
@@ -110,7 +119,7 @@ describe("MyStreamWaveChat", () => {
       );
     });
     expect(replaceMock).not.toHaveBeenCalled();
-    expect(capturedProps.initialDrop).toBeNull();
+    expect(capturedPropsHolder.current.initialDrop).toBeNull();
     expect(screen.queryByTestId("memes-btn")).toBeNull();
   });
 });

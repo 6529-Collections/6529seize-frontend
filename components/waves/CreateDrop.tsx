@@ -26,6 +26,7 @@ import { DropMode } from "./PrivilegedDropCreator";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -57,6 +58,7 @@ export default function CreateDrop({
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
+  const unreadDividerContext = useUnreadDividerOptional();
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
@@ -225,13 +227,18 @@ export default function CreateDrop({
       // Process immediately - avoids state update timing issues
       processNextDrop();
 
+      // Clear unread divider when user sends a message
+      if (unreadDividerContext) {
+        unreadDividerContext.setUnreadDividerSerialNo(null);
+      }
+
       // Trigger UI updates
       onDropAddedToQueue();
 
       // Explicitly blur any focused input to close keyboard
       (document.activeElement as HTMLElement)?.blur();
     },
-    [onDropAddedToQueue, processNextDrop]
+    [onDropAddedToQueue, processNextDrop, unreadDividerContext]
   );
 
   const createDropContentProps = useMemo(

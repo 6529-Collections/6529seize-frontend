@@ -50,7 +50,6 @@ export const useWaveNavigation = ({
     const params = new URLSearchParams();
     params.set("wave", waveId);
     if (firstUnreadDropSerialNo) {
-      params.set("serialNo", String(firstUnreadDropSerialNo));
       params.set("divider", String(firstUnreadDropSerialNo));
     }
     return `${basePath}?${params.toString()}`;
@@ -85,7 +84,6 @@ export const useWaveNavigation = ({
       const nextWaveId = waveId === currentWaveId ? null : waveId;
       setActiveWave(nextWaveId, {
         isDirectMessage,
-        serialNo: nextWaveId ? firstUnreadDropSerialNo : null,
         divider: nextWaveId ? firstUnreadDropSerialNo : null,
       });
     },

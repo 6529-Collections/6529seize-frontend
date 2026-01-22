@@ -3,7 +3,7 @@
 import XtdhReceivedSection from "../../received";
 import type { ReactElement } from "react";
 
-export interface UserXtdhReceivedSectionProps {
+interface UserXtdhReceivedSectionProps {
   readonly profileId: string | null;
 }
 

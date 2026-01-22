@@ -255,17 +255,17 @@ export interface ProfileActivityLogProxyActionChanged extends ProfileActivityLog
   };
 }
 
-export interface ProfileActivityLogDropComment extends ProfileActivityLogBase {
+interface ProfileActivityLogDropComment extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.DROP_COMMENT;
   readonly contents: {};
 }
 
-export interface ProfileActivityLogDropRatingEdit extends ProfileActivityLogBase {
+interface ProfileActivityLogDropRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.DROP_RATING_EDIT;
   readonly contents: {};
 }
 
-export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
+interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.DROP_CREATED;
   readonly contents: {};
 }
@@ -412,16 +412,6 @@ export interface CollectedCard {
   readonly rank: number | null;
   readonly seized_count: number | null;
   readonly szn: number | null;
-}
-
-export interface ProfileMinimal {
-  readonly id: string;
-  readonly handle: string;
-  readonly pfp: string | null;
-  readonly cic: number;
-  readonly rep: number;
-  readonly tdh: number;
-  readonly level: number;
 }
 
 export enum ProfileConnectedStatus {

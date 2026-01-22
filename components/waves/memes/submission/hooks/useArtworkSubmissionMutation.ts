@@ -38,7 +38,7 @@ interface ArtworkSubmissionData {
 /**
  * Function to transform form data into API request format
  */
-export const transformToApiRequest = (data: {
+const transformToApiRequest = (data: {
   waveId: string;
   traits: TraitsData;
   operationalData?: OperationalData | undefined;

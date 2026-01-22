@@ -66,6 +66,3 @@ export default function ProfileBadge({
     </div>
   );
 }
-
-export { ProfileBadgeSize } from "./ProfileAvatar";
-export type { ProfileBadgeProps };

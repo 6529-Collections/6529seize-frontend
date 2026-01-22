@@ -4,7 +4,10 @@ import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { SortDirection } from "@/entities/ISort";
-import type { XtdhTokensOrder, XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
+import type {
+  XtdhTokensOrder,
+  XtdhTokensSortField,
+} from "@/hooks/useXtdhTokensQuery";
 
 import {
   DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY,
@@ -20,7 +23,7 @@ const SORT_PARAM = "xtdh_token_contrib_sort";
 const DIRECTION_PARAM = "xtdh_token_contrib_dir";
 const GROUP_PARAM = "xtdh_token_contrib_group";
 
-export interface XtdhTokenContributorsFiltersResult {
+interface XtdhTokenContributorsFiltersResult {
   readonly activeSortField: XtdhTokensSortField;
   readonly activeSortDirection: SortDirection;
   readonly activeGroupBy: XtdhTokenContributorsGroupBy;

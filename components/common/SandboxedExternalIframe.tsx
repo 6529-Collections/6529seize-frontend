@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 // - intentionally omits allow-pointer-lock, allow-same-origin and allow-popups to preserve isolation and block window spawning.
 const DEFAULT_SANDBOX = "allow-scripts";
 
-export interface SandboxedExternalIframeProps {
+interface SandboxedExternalIframeProps {
   readonly src: string;
   readonly title: string;
   readonly className?: string | undefined;

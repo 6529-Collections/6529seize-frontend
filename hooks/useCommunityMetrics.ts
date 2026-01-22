@@ -5,9 +5,9 @@ import type { ApiCommunityMetrics } from "@/generated/models/ApiCommunityMetrics
 import type { ApiCommunityMetricSample } from "@/generated/models/ApiCommunityMetricSample";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export type CommunityMetricsInterval = "DAY" | "WEEK";
+type CommunityMetricsInterval = "DAY" | "WEEK";
 
-export interface MetricSample {
+interface MetricSample {
   readonly eventCount: number;
   readonly valueCount: number;
   readonly periodStart: number;
@@ -21,7 +21,7 @@ export interface MetricData {
   readonly valueCountChangePercent: number | null;
 }
 
-export interface CommunityMetrics {
+interface CommunityMetrics {
   readonly dropsCreated: MetricData;
   readonly distinctDroppers: MetricData;
   readonly mainStageSubmissions: MetricData;
