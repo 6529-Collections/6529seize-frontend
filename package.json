@@ -36,9 +36,8 @@
     "format:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
     "format:uncommitted": "bash -lc '{ git diff --name-only -z HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
     "deadcode:knip": "knip",
-    "deadcode:exports": "ts-prune -p tsconfig.ts-prune.json --error",
     "deadcode:deps": "depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp\"",
-    "deadcode": "npm run deadcode:knip && npm run deadcode:exports && npm run deadcode:deps",
+    "deadcode": "npm run deadcode:knip && npm run deadcode:deps",
     "cr": "coderabbit --type uncommitted --base main --prompt-only",
     "sync": "bash scripts/worktree/wt-sync.sh",
     "quality": "node scripts/quality.js"
@@ -196,7 +195,6 @@
     "tailwindcss": "^3.4.4",
     "ts-jest": "^29.3.2",
     "ts-morph": "^27.0.0",
-    "ts-prune": "^0.10.3",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
