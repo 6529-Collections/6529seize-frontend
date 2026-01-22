@@ -24,7 +24,7 @@ const NETWORK_MAP: Record<SupportedChain, string> = {
 };
 
 export function resolveNetwork(chain: SupportedChain = "ethereum"): string {
-  return NETWORK_MAP[chain] ?? NETWORK_MAP.ethereum;
+  return NETWORK_MAP[chain];
 }
 
 export function ensureQuery(query: string): string {
@@ -133,7 +133,7 @@ function pickImage(source?: {
   }
   if (source.media && source.media.length > 0) {
     const mediaItem =
-      source.media.find((item) => item?.thumbnailUrl) ?? source.media[0];
+      source.media.find((item) => item.thumbnailUrl) ?? source.media[0];
     if (mediaItem?.thumbnailUrl) {
       return mediaItem.thumbnailUrl;
     }
@@ -165,7 +165,7 @@ function pickThumbnail(source?: {
   }
   if (source.media && source.media.length > 0) {
     const mediaItem =
-      source.media.find((item) => item?.thumbnailUrl) ?? source.media[0];
+      source.media.find((item) => item.thumbnailUrl) ?? source.media[0];
     if (mediaItem?.thumbnailUrl) {
       return mediaItem.thumbnailUrl;
     }
@@ -229,7 +229,7 @@ function extractContract(contract: AlchemyContractResult): Suggestion | null {
     totalSupply: totalSupply ?? undefined,
     floorPriceEth,
     imageUrl: imageUrl ?? null,
-    isSpam: isSpam ?? false,
+    isSpam,
     safelist,
     deployer: deployer ?? null,
   };

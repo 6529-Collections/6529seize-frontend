@@ -50,7 +50,7 @@ export function useWaveOutcomeDistributionQuery({
 }: Readonly<UseWaveOutcomeDistributionQueryParams>): UseWaveOutcomeDistributionQueryResult {
   const normalizedWaveId = waveId?.trim() ?? "";
   const normalizedOutcomeIndex =
-    outcomeIndex == null ? "" : String(outcomeIndex).trim();
+    outcomeIndex === null ? "" : String(outcomeIndex).trim();
   const hasRequiredParams =
     Boolean(normalizedWaveId) && Boolean(normalizedOutcomeIndex);
   const isEnabled = hasRequiredParams && enabled;

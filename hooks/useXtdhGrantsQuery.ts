@@ -140,7 +140,7 @@ export function useXtdhGrantsQuery({
     placeholderData: keepPreviousData,
   });
 
-  const firstPage = query.data?.pages?.[0];
+  const firstPage = query.data?.pages[0];
   const grants = useMemo(
     () => query.data?.pages.flatMap((pageData) => pageData.data) ?? [],
     [query.data]

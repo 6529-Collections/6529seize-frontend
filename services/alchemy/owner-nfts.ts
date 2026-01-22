@@ -115,7 +115,7 @@ export async function getNftsForContractAndOwner(
       continue;
     }
 
-    ownedNfts.push(...(response.ownedNfts ?? []));
+    ownedNfts.push(...response.ownedNfts);
 
     if (!response.pageKey) {
       break;

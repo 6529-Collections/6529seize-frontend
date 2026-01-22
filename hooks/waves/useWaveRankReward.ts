@@ -78,10 +78,11 @@ export function useWaveRankReward({
           nicTotal += item.amount;
         } else if (outcome.credit === ApiWaveOutcomeCredit.Rep) {
           repTotal += item.amount;
-        } else if (outcome.type === ApiWaveOutcomeType.Manual) {
-          if (item.description) {
-            manualOutcomes.push(item.description);
-          }
+        } else if (
+          outcome.type === ApiWaveOutcomeType.Manual &&
+          item.description
+        ) {
+          manualOutcomes.push(item.description);
         }
       }
     }
