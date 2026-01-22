@@ -18,8 +18,13 @@ describe('TimelineMedia', () => {
   });
 
   it('renders iframe when type HTML', () => {
-    const { container } = render(<TimelineMedia url="page.html" type={MediaType.HTML} />);
+    const { container } = render(
+      <TimelineMedia url="https://example.com/page.html" type={MediaType.HTML} />
+    );
     const frame = container.querySelector('iframe');
-    expect(frame).toHaveAttribute('src', 'page.html');
+    expect(frame).toHaveAttribute('src', 'https://example.com/page.html');
+    expect(frame).toHaveAttribute('sandbox', 'allow-scripts');
+    expect(frame).toHaveAttribute('allow', '');
+    expect(frame).toHaveAttribute('referrerpolicy', 'no-referrer');
   });
 });
