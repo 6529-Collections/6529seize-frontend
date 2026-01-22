@@ -113,8 +113,13 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   );
 
   const prevLatestSerialNoRef = useRef<number | null>(null);
+  const initializedWaveRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (initializedWaveRef.current === waveId) {
+      return;
+    }
+    initializedWaveRef.current = waveId;
     setVisibleLatestSerial(null);
     prevLatestSerialNoRef.current = null;
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
@@ -319,11 +324,14 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         bottomPaddingClassName={bottomPaddingClassName}
         boostedDrops={boostedDrops}
         onBoostedDropClick={queueSerialTarget}
+        onScrollToUnread={queueSerialTarget}
       />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>
   );
 };
+
+export const WaveDropsAllWithoutProvider: React.FC<WaveDropsAllProps> = WaveDropsAllInner;
 
 const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   waveId,

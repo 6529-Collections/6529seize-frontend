@@ -49,6 +49,7 @@ interface WaveDropsContentProps {
   readonly bottomPaddingClassName?: string | undefined;
   readonly boostedDrops?: ApiDrop[] | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
+  readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -73,6 +74,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   bottomPaddingClassName,
   boostedDrops,
   onBoostedDropClick,
+  onScrollToUnread,
 }) => {
   const { unreadDividerSerialNo } = useUnreadDivider();
   const dropsCount = waveMessages?.drops.length ?? 0;
@@ -119,6 +121,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         unreadDividerSerialNo={unreadDividerSerialNo}
         boostedDrops={boostedDrops}
         onBoostedDropClick={onBoostedDropClick}
+        onScrollToUnread={onScrollToUnread}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

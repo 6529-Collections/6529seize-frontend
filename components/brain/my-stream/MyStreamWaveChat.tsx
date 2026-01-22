@@ -1,11 +1,12 @@
 "use client";
 
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
-import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
+import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
+import { UnreadDividerProvider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
@@ -47,6 +48,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  
+  const capturedDividerRef = useRef<{ waveId: string; serialNo: number | null } | null>(null);
+  
+  if (!capturedDividerRef.current || capturedDividerRef.current.waveId !== wave.id) {
+    capturedDividerRef.current = { waveId: wave.id, serialNo: firstUnreadSerialNo };
+  }
 
   const scrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
@@ -54,7 +61,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const dividerTarget =
     initialDropState?.waveId === wave.id
       ? initialDropState.dividerSerialNo
-      : firstUnreadSerialNo;
+      : capturedDividerRef.current.serialNo;
 
   useEffect(() => {
     const dropParam = searchParams?.get("serialNo");
@@ -137,38 +144,43 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`${containerClassName}`}
-      style={containerStyle}>
-      
-      <WaveDropsAll
-        key={wave.id}
-        waveId={wave.id}
-        onReply={handleReply}
-        onQuote={handleQuote}
-        activeDrop={activeDrop}
-        initialDrop={scrollTarget}
-        dividerSerialNo={dividerTarget}
-        dropId={null}
-        isMuted={wave.metrics?.muted ?? false}
-      />
-      {!(isApp && editingDropId) && (
-        <div className="tw-mt-auto">
-          <CreateDropWaveWrapper>
-            <PrivilegedDropCreator
-              activeDrop={activeDrop}
-              onCancelReplyQuote={onCancelReplyQuote}
-              onDropAddedToQueue={onCancelReplyQuote}
-              wave={wave}
-              dropId={null}
-              fixedDropMode={DropMode.BOTH}
-            />
-          </CreateDropWaveWrapper>
-        </div>
-      )}
-      {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
-    </div>
+    <UnreadDividerProvider
+      initialSerialNo={dividerTarget ?? null}
+      key={`unread-divider-${wave.id}`}
+    >
+      <div
+        ref={containerRef}
+        className={`${containerClassName}`}
+        style={containerStyle}>
+        
+        <WaveDropsAllWithoutProvider
+          key={wave.id}
+          waveId={wave.id}
+          onReply={handleReply}
+          onQuote={handleQuote}
+          activeDrop={activeDrop}
+          initialDrop={scrollTarget}
+          dividerSerialNo={dividerTarget}
+          dropId={null}
+          isMuted={wave.metrics?.muted ?? false}
+        />
+        {!(isApp && editingDropId) && (
+          <div className="tw-mt-auto">
+            <CreateDropWaveWrapper>
+              <PrivilegedDropCreator
+                activeDrop={activeDrop}
+                onCancelReplyQuote={onCancelReplyQuote}
+                onDropAddedToQueue={onCancelReplyQuote}
+                wave={wave}
+                dropId={null}
+                fixedDropMode={DropMode.BOTH}
+              />
+            </CreateDropWaveWrapper>
+          </div>
+        )}
+        {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
+      </div>
+    </UnreadDividerProvider>
   );
 };
 

@@ -4,6 +4,7 @@ import DropMobileMenuHandler from '@/components/waves/drops/DropMobileMenuHandle
 import { DropSize } from '@/helpers/waves/drop.helpers';
 
 jest.mock('@/hooks/isMobileDevice', () => () => true);
+jest.mock('@/hooks/useIsTouchDevice', () => ({ __esModule: true, default: () => true }));
 
 jest.mock('@/components/waves/drops/WaveDropMobileMenu', () => ({
   __esModule: true,

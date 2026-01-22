@@ -1,25 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function useIsTouchDevice(): boolean {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
-    const globalScope = globalThis as typeof globalThis & {
-      window?: Window | undefined;
-      navigator?: Navigator | undefined;
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const hasFinePointer = window.matchMedia?.("(pointer: fine)")?.matches;
+    if (hasFinePointer) {
+      setIsTouchDevice(false);
+      return;
+    }
+
+    const onTouchStart = () => {
+      setIsTouchDevice(true);
+      window.removeEventListener("touchstart", onTouchStart);
     };
-    const browserWindow = globalScope.window;
-    const browserNavigator = globalScope.navigator;
 
-    const isTouch =
-      !!browserWindow &&
-      ("ontouchstart" in browserWindow ||
-        (browserNavigator?.maxTouchPoints ?? 0) > 0 ||
-        browserWindow.matchMedia?.("(pointer: coarse)")?.matches);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
 
-    setIsTouchDevice(isTouch);
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+    };
   }, []);
 
   return isTouchDevice;

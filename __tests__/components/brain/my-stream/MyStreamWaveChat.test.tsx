@@ -21,13 +21,17 @@ jest.mock('@/components/brain/my-stream/layout/LayoutContext', () => ({
   useLayout: () => ({ waveViewStyle: { height: '1px' } })
 }));
 
-let capturedProps: any = {};
+const capturedPropsHolder = { current: {} as any };
 jest.mock('@/components/waves/drops/wave-drops-all', () => ({
   __esModule: true,
   default: (props: any) => {
-    capturedProps = props;
+    capturedPropsHolder.current = props;
     return <div data-testid="drops" />;
-  }
+  },
+  WaveDropsAllWithoutProvider: (props: any) => {
+    capturedPropsHolder.current = props;
+    return <div data-testid="drops" />;
+  },
 }));
 
 jest.mock('@/components/waves/CreateDropWaveWrapper', () => ({
@@ -50,13 +54,17 @@ jest.mock('@/hooks/useDeviceInfo', () => ({
   default: () => ({ isApp: false }),
 }));
 
+jest.mock('@/contexts/wave/UnreadDividerContext', () => ({
+  UnreadDividerProvider: ({ children }: any) => <>{children}</>,
+}));
+
 const wave = { id: '10' } as any;
 
 describe('MyStreamWaveChat', () => {
   let store: any;
 
   beforeEach(() => {
-    capturedProps = {};
+    capturedPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
     mockIsMemesWave = false;
@@ -77,20 +85,20 @@ describe('MyStreamWaveChat', () => {
     searchParamsMock.get.mockReturnValueOnce('5').mockReturnValue(null);
     mockIsMemesWave = true;
     await act(async () => {
-      renderWithProvider(<MyStreamWaveChat wave={wave} />);
+      renderWithProvider(<MyStreamWaveChat wave={wave} firstUnreadSerialNo={null} />);
     });
     expect(replaceMock).toHaveBeenCalled();
-    expect(capturedProps.initialDrop).toBe(5);
+    expect(capturedPropsHolder.current.initialDrop).toBe(5);
     expect(screen.getByTestId('memes-btn')).toBeInTheDocument();
   });
 
   it('sets initialDrop null when no param', async () => {
     searchParamsMock.get.mockReturnValue(null);
     await act(async () => {
-      renderWithProvider(<MyStreamWaveChat wave={wave} />);
+      renderWithProvider(<MyStreamWaveChat wave={wave} firstUnreadSerialNo={null} />);
     });
     expect(replaceMock).not.toHaveBeenCalled();
-    expect(capturedProps.initialDrop).toBeNull();
+    expect(capturedPropsHolder.current.initialDrop).toBeNull();
     expect(screen.queryByTestId('memes-btn')).toBeNull();
   });
 });

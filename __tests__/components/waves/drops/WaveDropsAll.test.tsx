@@ -85,6 +85,11 @@ jest.mock('@/components/waves/drops/WaveDropsScrollBottomButton', () => ({
   }
 }));
 
+jest.mock('@/components/waves/drops/WaveDropsScrollToUnreadButton', () => ({
+  __esModule: true,
+  WaveDropsScrollToUnreadButton: () => <button data-testid="scroll-unread-btn" />
+}));
+
 jest.mock('@/components/waves/drops/WaveDropsEmptyPlaceholder', () => ({
   __esModule: true,
   default: () => <div data-testid="empty-placeholder" />
