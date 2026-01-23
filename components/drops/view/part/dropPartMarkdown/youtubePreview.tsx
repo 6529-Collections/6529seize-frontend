@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import type {
-  YoutubeOEmbedResponse} from "@/services/api/youtube";
-import {
-  fetchYoutubePreview
-} from "@/services/api/youtube";
+import type { YoutubeOEmbedResponse } from "@/services/api/youtube";
+import { fetchYoutubePreview } from "@/services/api/youtube";
 
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
+import { useLinkPreviewContext } from "@/components/waves/LinkPreviewContext";
 
 import { getYoutubeFetchUrl, parseYoutubeLink } from "./youtube";
 
@@ -14,13 +12,10 @@ const normalizeYoutubeHtml = (html: string): string => {
   normalized = normalized.replace(/height="[^"]*"/i, 'height="100%"');
 
   if (/style="[^"]*"/i.test(normalized)) {
-    normalized = normalized.replace(
-      /style="([^"]*)"/i,
-      (_, styles: string) => {
-        const cleanedStyles = styles.replace(/;?\s*$/, "");
-        return `style="${cleanedStyles};width:100%;height:100%;"`;
-      }
-    );
+    normalized = normalized.replace(/style="([^"]*)"/i, (_, styles: string) => {
+      const cleanedStyles = styles.replace(/;?\s*$/, "");
+      return `style="${cleanedStyles};width:100%;height:100%;"`;
+    });
   } else {
     normalized = normalized.replace(
       /<iframe/i,
@@ -35,6 +30,13 @@ interface YoutubePreviewProps {
   readonly href: string;
 }
 
+type PreviewState = {
+  readonly href: string;
+  readonly preview: YoutubeOEmbedResponse | null;
+  readonly hasError: boolean;
+  readonly showEmbed: boolean;
+};
+
 const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   const linkInfo = useMemo(() => parseYoutubeLink(href), [href]);
   if (!linkInfo) {
@@ -42,17 +44,30 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   }
 
   const { videoId } = linkInfo;
-  const [preview, setPreview] = useState<YoutubeOEmbedResponse | null>(null);
-  const [hasError, setHasError] = useState(false);
-  const [showEmbed, setShowEmbed] = useState(false);
+  const { hideActions } = useLinkPreviewContext();
+  const [state, setState] = useState<PreviewState>(() => ({
+    href,
+    preview: null,
+    hasError: false,
+    showEmbed: false,
+  }));
+
+  const isCurrent = state.href === href;
+  const preview = isCurrent ? state.preview : null;
+  const hasError = isCurrent ? state.hasError : false;
+  const showEmbed = isCurrent ? state.showEmbed : false;
+
+  const handleShowEmbed = () => {
+    setState((prev) =>
+      prev.href === href
+        ? { ...prev, showEmbed: true }
+        : { href, preview: null, hasError: false, showEmbed: true }
+    );
+  };
 
   useEffect(() => {
     const abortController = new AbortController();
     let isActive = true;
-
-    setPreview(null);
-    setHasError(false);
-    setShowEmbed(false);
 
     const fetchUrl = getYoutubeFetchUrl(href, videoId);
 
@@ -63,13 +78,29 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
         }
 
         if (data) {
-          setPreview({
+          const normalizedPreview = {
             ...data,
             html: normalizeYoutubeHtml(data.html),
-          });
-        } else {
-          setHasError(true);
+          };
+
+          setState((prev) =>
+            prev.href === href
+              ? { ...prev, preview: normalizedPreview, hasError: false }
+              : {
+                  href,
+                  preview: normalizedPreview,
+                  hasError: false,
+                  showEmbed: false,
+                }
+          );
+          return;
         }
+
+        setState((prev) =>
+          prev.href === href
+            ? { ...prev, preview: null, hasError: true, showEmbed: false }
+            : { href, preview: null, hasError: true, showEmbed: false }
+        );
       })
       .catch((error) => {
         if (!isActive) {
@@ -80,7 +111,11 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
           return;
         }
 
-        setHasError(true);
+        setState((prev) =>
+          prev.href === href
+            ? { ...prev, preview: null, hasError: true, showEmbed: false }
+            : { href, preview: null, hasError: true, showEmbed: false }
+        );
       });
 
     return () => {
@@ -95,11 +130,11 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
   if (!preview) {
     return (
-      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-        <div className="tw-flex-1 tw-min-w-0">
-          <div className="tw-aspect-video tw-w-full tw-rounded-lg tw-bg-iron-800 tw-animate-pulse" />
+      <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-aspect-video tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800" />
         </div>
-        <ChatItemHrefButtons href={href} />
+        {!hideActions && <ChatItemHrefButtons href={href} />}
       </div>
     );
   }
@@ -109,20 +144,20 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
     : `Play YouTube video ${videoId}`;
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
+    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+      <div className="tw-min-w-0 tw-flex-1">
         <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-black">
           {showEmbed ? (
             <div
-              className="tw-relative tw-w-full tw-aspect-video tw-bg-black"
+              className="tw-relative tw-aspect-video tw-w-full tw-bg-black"
               data-testid="youtube-embed"
               dangerouslySetInnerHTML={{ __html: preview.html }}
             />
           ) : (
             <button
               type="button"
-              className="tw-relative tw-w-full tw-aspect-video tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer"
-              onClick={() => setShowEmbed(true)}
+              className="tw-relative tw-aspect-video tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+              onClick={handleShowEmbed}
               aria-label={ariaLabel}
             >
               <img
@@ -146,18 +181,18 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
         </div>
         <div className="tw-mt-2 tw-space-y-1">
           {preview.title && (
-            <p className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-mb-0">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
               {preview.title}
             </p>
           )}
           {preview.author_name && (
-            <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+            <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
               {preview.author_name}
             </p>
           )}
         </div>
       </div>
-      <ChatItemHrefButtons href={href} />
+      {!hideActions && <ChatItemHrefButtons href={href} />}
     </div>
   );
 };

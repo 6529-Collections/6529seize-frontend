@@ -1,6 +1,8 @@
 "use client";
 
-import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
+import type { SyntheticEvent } from "react";
+
+import SmartLinkPreview from "@/components/waves/SmartLinkPreview";
 
 const getFallbackLabel = (href: string): string => {
   try {
@@ -12,14 +14,25 @@ const getFallbackLabel = (href: string): string => {
   }
 };
 
+const stopPropagation = (event: SyntheticEvent) => {
+  event.stopPropagation();
+  event.nativeEvent.stopImmediatePropagation();
+};
+
 export default function BoostedDropLinkPreview({
   href,
 }: {
   readonly href: string;
 }) {
   return (
-    <div className="tw-h-full tw-w-full tw-min-w-0 tw-max-w-full">
-      <LinkPreviewCard
+    <div
+      className="tw-h-full tw-w-full tw-min-w-0 tw-max-w-full"
+      onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
+      onTouchStart={stopPropagation}
+    >
+      <SmartLinkPreview
         href={href}
         variant="home"
         renderFallback={() => (
@@ -28,7 +41,7 @@ export default function BoostedDropLinkPreview({
             target="_blank"
             rel="noopener noreferrer nofollow"
             onClick={(e) => e.stopPropagation()}
-            className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-break-words tw-[overflow-wrap:anywhere] tw-transition tw-duration-200 hover:tw-text-white"
+            className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
           >
             {getFallbackLabel(href)}
           </a>
@@ -37,4 +50,3 @@ export default function BoostedDropLinkPreview({
     </div>
   );
 }
-
