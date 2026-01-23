@@ -38,7 +38,7 @@ export function BoostedSection() {
 
   if (isLoading) {
     return (
-      <section className="-tw-mx-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-4 tw-py-16 md:tw-px-6 lg:tw-px-8">
+      <section className="-tw-mx-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-zinc-900 tw-bg-iron-950 tw-px-4 tw-py-16 md:tw-px-6 lg:tw-px-8">
         <div className="tw-px-8">
           <div className="tw-flex tw-h-64 tw-items-center tw-justify-center">
             <div className="tw-text-sm tw-text-iron-500">Loading...</div>
@@ -53,18 +53,20 @@ export function BoostedSection() {
   }
 
   return (
-    <section className="-tw-mx-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
-      <div className="tw-px-8">
+    <section className="tw-border-x-0 tw-border-y tw-border-solid tw-border-zinc-900 tw-bg-iron-950 tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
+      <div>
         <div className="tw-mb-8">
-          <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
-            Boosted Drops
-          </span>
-          <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
+          <div className="tw-flex tw-items-center">
+            <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white md:tw-text-2xl">
+              Boosted Drops
+            </span>
+          </div>
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
             Community-boosted right now
           </p>
         </div>
 
-        <div className="tw-grid tw-grid-cols-1 tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+        <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4 xl:tw-gap-6">
           {visibleDrops.map((drop) => (
             <div key={drop.id}>
               <BoostedDropCardHome

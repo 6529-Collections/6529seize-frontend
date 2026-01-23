@@ -47,11 +47,12 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group tw-block tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30 desktop-hover:hover:tw-border-white/10"
+      className="tw-group tw-relative tw-block tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500/30"
       aria-label={`View wave ${wave.name}`}
     >
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
       <div
-        className="tw-relative tw-aspect-[3/2] tw-overflow-hidden"
+        className="tw-relative tw-aspect-[2/1] sm:tw-aspect-[3/2] tw-overflow-hidden"
         style={imageAreaStyle}
       >
         {wave.picture && (
@@ -59,19 +60,19 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
             src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
             alt={`${wave.name} cover`}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
             className="tw-object-cover tw-transition-transform tw-duration-700 tw-will-change-transform desktop-hover:group-hover:tw-scale-105"
           />
         )}
       </div>
 
-      <div className="tw-p-5">
-        <span className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 md:tw-line-clamp-1">
+      <div className="tw-px-4 tw-py-6 sm:tw-p-5">
+        <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 sm:tw-text-base">
           {wave.name}
         </span>
 
         {hasDrops && (
-          <div className="tw-mb-3 tw-mt-2 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-500">
+          <div className="tw-mb-3 tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[11px] tw-text-iron-500 sm:tw-text-xs">
             <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-500" />
             <span className="tw-text-iron-300">
               {getTimeAgoShort(lastMessageTime)} ·{" "}
@@ -82,16 +83,16 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         )}
 
         {!hasDrops && (
-          <div className="tw-mb-3 tw-text-[11px] tw-text-iron-500">
+          <div className="tw-mb-3 tw-text-[11px] tw-text-iron-500 sm:tw-text-xs">
             No drops yet
           </div>
         )}
 
         {hasDrops && (
-          <div className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-black tw-p-2 tw-shadow-inner">
-            <div className="tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-shadow-sm">
+          <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-black tw-p-1 tw-shadow-inner sm:tw-gap-3 sm:tw-p-2">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-shadow-sm sm:tw-h-7 sm:tw-w-7">
               <ChatBubbleLeftIcon
-                className="tw-size-3.5 tw-shrink-0 tw-text-iron-400"
+                className="tw-size-3 tw-shrink-0 tw-text-iron-400 sm:tw-size-3.5"
                 aria-hidden="true"
               />
             </div>
@@ -115,7 +116,7 @@ function MessagePreviewContent({
 }) {
   if (isLoading) {
     return (
-      <div className="tw-h-7 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+      <div className="tw-h-6 tw-flex-1 tw-min-w-0 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
     );
   }
 
@@ -126,8 +127,10 @@ function MessagePreviewContent({
   return (
     <ContentDisplay
       content={previewContent}
-      className="tw-line-clamp-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400"
-      textClassName="tw-line-clamp-1 tw-break-words"
+      shouldClamp={false}
+      className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 tw-overflow-hidden tw-text-iron-400"
+      textClassName="tw-line-clamp-1 tw-break-words tw-text-[10px] tw-font-medium tw-leading-tight sm:tw-text-xs"
+      linkify={false}
     />
   );
 }

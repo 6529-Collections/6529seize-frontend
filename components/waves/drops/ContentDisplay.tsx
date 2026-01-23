@@ -8,6 +8,7 @@ interface ContentDisplayProps {
   readonly className?: string | undefined;
   readonly textClassName?: string | undefined;
   readonly shouldClamp?: boolean;
+  readonly linkify?: boolean;
 }
 
 /**
@@ -19,6 +20,7 @@ export default function ContentDisplay({
   className,
   textClassName,
   shouldClamp = true,
+  linkify = true,
 }: ContentDisplayProps) {
   const clampClass = shouldClamp ? "tw-line-clamp-1" : "";
   const containerClasses = [
@@ -43,6 +45,7 @@ export default function ContentDisplay({
             key={`segment-${i}`}
             segment={segment}
             index={i}
+            linkify={linkify}
           />
         ))}
       </span>
