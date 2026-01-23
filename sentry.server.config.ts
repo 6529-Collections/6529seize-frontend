@@ -7,6 +7,10 @@ import {
   filterTunnelRouteErrors,
   tagSecurityProbes,
 } from "@/config/sentryProbes";
+import {
+  sanitizeSentryBreadcrumb,
+  sanitizeSentryEvent,
+} from "@/utils/sentry-sanitizer";
 import * as Sentry from "@sentry/nextjs";
 
 const dsn = publicEnv.SENTRY_DSN;
@@ -23,9 +27,13 @@ Sentry.init({
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
-  // Enable sending user PII (Personally Identifiable Information)
+  // Default to NOT sending PII unless explicitly reviewed and required.
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: false,
+
+  beforeBreadcrumb(breadcrumb) {
+    return sanitizeSentryBreadcrumb(breadcrumb);
+  },
 
   // ------------------------------------------------------------
   // Handle obvious bot / exploit probes more gently
@@ -35,6 +43,10 @@ Sentry.init({
     if (filtered === null) {
       return null;
     }
-    return tagSecurityProbes(filtered);
+    return sanitizeSentryEvent(tagSecurityProbes(filtered));
+  },
+
+  beforeSendTransaction(event) {
+    return sanitizeSentryEvent(tagSecurityProbes(event as any) as any);
   },
 });
