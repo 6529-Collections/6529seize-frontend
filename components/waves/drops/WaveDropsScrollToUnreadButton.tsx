@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC, RefObject } from "react";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 type UnreadPosition = "hidden" | "above" | "below";
 
@@ -9,12 +9,17 @@ interface WaveDropsScrollToUnreadButtonProps {
   readonly unreadDividerSerialNo: number | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
   readonly onScrollToUnread: (serialNo: number) => void;
+  readonly onDismiss: () => void;
 }
+
+const SWIPE_THRESHOLD = 80;
 
 export const WaveDropsScrollToUnreadButton: FC<
   WaveDropsScrollToUnreadButtonProps
-> = ({ unreadDividerSerialNo, scrollContainerRef, onScrollToUnread }) => {
+> = ({ unreadDividerSerialNo, scrollContainerRef, onScrollToUnread, onDismiss }) => {
   const [unreadPosition, setUnreadPosition] = useState<UnreadPosition>("hidden");
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
 
   const checkUnreadVisibility = useCallback(() => {
     if (unreadDividerSerialNo === null) {
@@ -79,6 +84,31 @@ export const WaveDropsScrollToUnreadButton: FC<
     checkUnreadVisibility();
   }, [unreadDividerSerialNo, checkUnreadVisibility]);
 
+  const handleDismiss = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDismiss();
+  }, [onDismiss]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const deltaX = e.touches[0].clientX - touchStartXRef.current;
+    if (deltaX > 0) {
+      setSwipeOffset(deltaX);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (swipeOffset >= SWIPE_THRESHOLD) {
+      onDismiss();
+    }
+    setSwipeOffset(0);
+    touchStartXRef.current = null;
+  }, [swipeOffset, onDismiss]);
+
   if (unreadPosition === "hidden" || unreadDividerSerialNo === null) {
     return null;
   }
@@ -88,28 +118,50 @@ export const WaveDropsScrollToUnreadButton: FC<
   };
 
   const isPointingUp = unreadPosition === "above";
+  const swipeOpacity = Math.max(0, 1 - swipeOffset / SWIPE_THRESHOLD);
 
   return (
-    <button
-      onClick={handleClick}
-      className="tw-flex-shrink-0 tw-absolute tw-z-[49] tw-bottom-14 lg:tw-bottom-12 tw-right-2 lg:tw-right-6 tw-rounded-full tw-border-0 tw-bg-rose-500 tw-text-white tw-min-w-[2.75rem] tw-h-10 lg:tw-h-8 tw-px-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-opacity-75 hover:tw-opacity-100 tw-transition-all tw-duration-300"
-      aria-label="Scroll to first unread message"
+    <div
+      className="tw-flex-shrink-0 tw-absolute tw-z-[49] tw-bottom-14 lg:tw-bottom-12 tw-right-2 lg:tw-right-6"
+      style={{
+        transform: `translateX(${swipeOffset}px)`,
+        opacity: swipeOpacity,
+        transition: swipeOffset === 0 ? "all 0.2s ease-out" : "none",
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
-      <svg
-        className="tw-flex-shrink-0 tw-size-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
+      <button
+        onClick={handleDismiss}
+        className="tw-hidden lg:tw-flex tw-absolute -tw-top-1.5 -tw-right-1.5 tw-z-50 tw-size-4 tw-rounded-full tw-bg-iron-700 tw-text-iron-300 tw-items-center tw-justify-center hover:tw-bg-iron-600 tw-transition-colors tw-border-0"
+        aria-label="Dismiss"
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d={isPointingUp ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"}
-        />
-      </svg>
-      <span className="tw-hidden lg:tw-inline tw-text-sm tw-font-medium">New messages</span>
-    </button>
+        <svg className="tw-size-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <button
+        onClick={handleClick}
+        className="tw-rounded-full tw-border-0 tw-bg-rose-500 tw-text-white tw-min-w-[2.75rem] tw-h-10 lg:tw-h-8 tw-px-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-opacity-75 hover:tw-opacity-100 tw-transition-all tw-duration-300"
+        aria-label="Scroll to first unread message"
+      >
+        <svg
+          className="tw-flex-shrink-0 tw-size-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d={isPointingUp ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"}
+          />
+        </svg>
+        <span className="tw-hidden lg:tw-inline tw-text-sm tw-font-medium">New messages</span>
+      </button>
+    </div>
   );
 };
