@@ -170,7 +170,7 @@ export const WaveDropsScrollToUnreadButton: FC<
       <div className="tw-relative tw-group">
         <button
           onClick={handleDismiss}
-          className="tw-sr-only lg:tw-not-sr-only lg:tw-flex tw-opacity-0 group-hover:tw-opacity-100 tw-absolute -tw-top-2 -tw-right-2 tw-z-50 tw-size-6 tw-rounded-full tw-bg-rose-500 tw-text-white tw-items-center tw-justify-center hover:tw-bg-rose-600 tw-transition-all tw-duration-200 tw-border tw-border-solid tw-border-iron-950"
+          className="tw-hidden lg:tw-flex tw-opacity-0 group-hover:tw-opacity-100 tw-absolute -tw-top-2 -tw-right-2 tw-z-50 tw-size-6 tw-rounded-full tw-bg-rose-500 tw-text-white tw-items-center tw-justify-center hover:tw-bg-rose-600 tw-transition-all tw-duration-200 tw-border tw-border-solid tw-border-iron-950"
           aria-label="Dismiss"
         >
           <svg className="tw-size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
