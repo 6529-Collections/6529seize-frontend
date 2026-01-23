@@ -173,7 +173,9 @@ export default {
     scrollbar({ nocompatible: true }),
     containerQueries,
     plugin(({ addVariant }) => {
-      addVariant("desktop-hover", "@media (hover: hover) and (pointer: fine)");
+      // Use any-* queries so hybrid devices (touchscreen + trackpad/mouse) still
+      // get hover styles even if the primary pointer is coarse.
+      addVariant("desktop-hover", "@media (any-hover: hover)");
     }),
   ],
 } satisfies Config;
