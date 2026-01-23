@@ -23,6 +23,7 @@
     "knip": "knip --fix --allow-remove-files",
     "lint:quiet": "eslint . --quiet",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "lint:csv": "node scripts/eslint-rule-summary.cjs --output eslint-rule-summary.csv",
     "lint:csv:tight": "node scripts/eslint-rule-summary.cjs --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
     "lint:changed:csv": "node scripts/eslint-rule-summary.cjs --changed --output eslint-rule-summary.csv",

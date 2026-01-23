@@ -57,16 +57,20 @@ function RecipientSelectedDisplay({
   readonly onWalletSelect: (wallet: string) => void;
 }) {
   const wallets =
-    profile?.wallets ??
-    (selectedProfile.wallet
-      ? [
-          {
-            wallet: selectedProfile.wallet,
-            display: selectedProfile.display || selectedProfile.handle,
-            tdh: 0,
-          },
-        ]
-      : []);
+    profile?.wallets && profile.wallets.length > 0
+      ? profile.wallets
+      : selectedProfile.wallet
+        ? [
+            {
+              wallet: selectedProfile.wallet,
+              display:
+                selectedProfile.display ||
+                selectedProfile.handle ||
+                selectedProfile.wallet,
+              tdh: 0,
+            },
+          ]
+        : [];
   let walletsContent;
   if (isIdentityLoading) {
     walletsContent = (
@@ -316,7 +320,7 @@ export default function RecipientSelector({
       }
     }
 
-    if (wallets.length === 1) {
+    if (wallets.length === 1 && wallets[0]) {
       onWalletSelect(wallets[0].wallet);
     }
   }, [selectedProfile, isIdentityLoading, profile?.wallets, selectedWallet, pendingWalletMatch, onWalletSelect]);
