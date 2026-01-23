@@ -11,6 +11,7 @@ import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { isAddress } from "viem";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
 const MIN_SEARCH_LENGTH = 3;
@@ -404,8 +405,15 @@ export default function RecipientSelector({
     }
 
     if (data.length === 1 && data[0]) {
-      setPendingWalletMatch(debouncedQuery);
-      onProfileSelect(data[0]);
+      const result = data[0];
+      const walletMatch = areEqualAddresses(result.wallet, debouncedQuery);
+      const handleMatch = areEqualAddresses(result.handle, debouncedQuery);
+      const displayMatch = areEqualAddresses(result.display, debouncedQuery);
+
+      if (isExactAddress ? walletMatch : walletMatch || handleMatch || displayMatch) {
+        setPendingWalletMatch(debouncedQuery);
+        onProfileSelect(result);
+      }
     }
   }, [data, debouncedQuery, trimmedQuery, selectedProfile, onProfileSelect]);
 
