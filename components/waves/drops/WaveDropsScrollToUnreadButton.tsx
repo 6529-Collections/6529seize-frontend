@@ -12,14 +12,16 @@ interface WaveDropsScrollToUnreadButtonProps {
   readonly onDismiss: () => void;
 }
 
-const SWIPE_THRESHOLD = 80;
+const SWIPE_THRESHOLD = 25;
 
 export const WaveDropsScrollToUnreadButton: FC<
   WaveDropsScrollToUnreadButtonProps
 > = ({ unreadDividerSerialNo, scrollContainerRef, onScrollToUnread, onDismiss }) => {
   const [unreadPosition, setUnreadPosition] = useState<UnreadPosition>("hidden");
   const [swipeOffset, setSwipeOffset] = useState(0);
+  const swipeOffsetRef = useRef(0);
   const touchStartXRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
 
   const checkUnreadVisibility = useCallback(() => {
     if (unreadDividerSerialNo === null) {
@@ -97,17 +99,56 @@ export const WaveDropsScrollToUnreadButton: FC<
     if (touchStartXRef.current === null) return;
     const deltaX = e.touches[0].clientX - touchStartXRef.current;
     if (deltaX > 0) {
+      swipeOffsetRef.current = deltaX;
       setSwipeOffset(deltaX);
     }
   }, []);
 
   const handleTouchEnd = useCallback(() => {
-    if (swipeOffset >= SWIPE_THRESHOLD) {
+    if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
       onDismiss();
     }
+    swipeOffsetRef.current = 0;
     setSwipeOffset(0);
     touchStartXRef.current = null;
-  }, [swipeOffset, onDismiss]);
+  }, [onDismiss]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    isDraggingRef.current = true;
+    touchStartXRef.current = e.clientX;
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDraggingRef.current || touchStartXRef.current === null) return;
+    const deltaX = e.clientX - touchStartXRef.current;
+    if (deltaX > 0) {
+      swipeOffsetRef.current = deltaX;
+      setSwipeOffset(deltaX);
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    if (!isDraggingRef.current) return;
+    if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
+      onDismiss();
+    }
+    swipeOffsetRef.current = 0;
+    setSwipeOffset(0);
+    touchStartXRef.current = null;
+    isDraggingRef.current = false;
+  }, [onDismiss]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isDraggingRef.current) {
+      if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
+        onDismiss();
+      }
+      swipeOffsetRef.current = 0;
+      setSwipeOffset(0);
+      touchStartXRef.current = null;
+      isDraggingRef.current = false;
+    }
+  }, [onDismiss]);
 
   if (unreadPosition === "hidden" || unreadDividerSerialNo === null) {
     return null;
@@ -131,6 +172,10 @@ export const WaveDropsScrollToUnreadButton: FC<
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="tw-relative tw-group">
         <button
