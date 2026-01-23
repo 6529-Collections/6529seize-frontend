@@ -399,10 +399,9 @@ export default function RecipientSelector({
       return;
     }
 
-    if (data.length === 1) {
-      const result = data[0];
+    if (data.length === 1 && data[0]) {
       setPendingWalletMatch(debouncedQuery);
-      onProfileSelect(result);
+      onProfileSelect(data[0]);
     }
   }, [data, debouncedQuery, selectedProfile, onProfileSelect]);
 
