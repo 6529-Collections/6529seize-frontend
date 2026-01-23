@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -10,8 +10,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { isAddress } from "viem";
-import { areEqualAddresses } from "@/helpers/Helpers";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
 const MIN_SEARCH_LENGTH = 3;
@@ -92,15 +92,18 @@ function RecipientSelectedDisplay({
     walletsContent = wallets.map(
       (w: { wallet: string; display: string | null; tdh: number }) => {
         const isSel = selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
-        const hasDisplay = w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
+        const hasDisplay =
+          w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
         return (
           <button
             key={w.wallet}
             type="button"
             onClick={() => onWalletSelect(w.wallet)}
             className={[
-              "tw-flex tw-w-full tw-flex-col tw-min-h-[58px] tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 hover:tw-bg-white/15",
-              hasDisplay ? "tw-items-start tw-justify-between" : "tw-items-start tw-justify-center",
+              "tw-flex tw-min-h-[58px] tw-w-full tw-flex-col tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 hover:tw-bg-white/15",
+              hasDisplay
+                ? "tw-items-start tw-justify-between"
+                : "tw-items-start tw-justify-center",
               isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
             ].join(" ")}
           >
@@ -265,7 +268,10 @@ export default function RecipientSelector({
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<CommunityMemberMinimal[]>([]);
-  const [pendingWalletMatch, setPendingWalletMatch] = useState<string | null>(null);
+  const [pendingWalletMatch, setPendingWalletMatch] = useState<string | null>(
+    null
+  );
+  const pendingMatchAttempted = useRef(false);
 
   const handleOrWallet =
     selectedProfile?.handle ?? selectedProfile?.wallet ?? null;
@@ -293,6 +299,7 @@ export default function RecipientSelector({
 
   useEffect(() => {
     if (!open) {
+      pendingMatchAttempted.current = false;
       setQuery("");
       setIsSearching(false);
       setResults([]);
@@ -305,7 +312,12 @@ export default function RecipientSelector({
   }, [open]);
 
   useEffect(() => {
-    if (!selectedProfile || isIdentityLoading || !profile?.wallets || selectedWallet) {
+    if (
+      !selectedProfile ||
+      isIdentityLoading ||
+      !profile?.wallets ||
+      selectedWallet
+    ) {
       return;
     }
 
@@ -320,15 +332,22 @@ export default function RecipientSelector({
       );
       if (matchedWallet) {
         onWalletSelect(matchedWallet.wallet);
-        setPendingWalletMatch(null);
-        return;
       }
+      setPendingWalletMatch(null);
+      return;
     }
 
-    if (wallets.length === 1 && wallets[0]) {
+    if (wallets.length === 1 && wallets[0] && !pendingMatchAttempted.current) {
       onWalletSelect(wallets[0].wallet);
     }
-  }, [selectedProfile, isIdentityLoading, profile?.wallets, selectedWallet, pendingWalletMatch, onWalletSelect]);
+  }, [
+    selectedProfile,
+    isIdentityLoading,
+    profile?.wallets,
+    selectedWallet,
+    pendingWalletMatch,
+    onWalletSelect,
+  ]);
 
   const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
   const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
@@ -392,7 +411,13 @@ export default function RecipientSelector({
   }, [enabled, data, setResults]);
 
   useEffect(() => {
-    if (selectedProfile || !data || data.length === 0 || !debouncedQuery || !trimmedQuery) {
+    if (
+      selectedProfile ||
+      !data ||
+      data.length === 0 ||
+      !debouncedQuery ||
+      !trimmedQuery
+    ) {
       return;
     }
 
@@ -407,10 +432,9 @@ export default function RecipientSelector({
     if (data.length === 1 && data[0]) {
       const result = data[0];
       const walletMatch = areEqualAddresses(result.wallet, debouncedQuery);
-      const handleMatch = areEqualAddresses(result.handle, debouncedQuery);
-      const displayMatch = areEqualAddresses(result.display, debouncedQuery);
 
-      if (isExactAddress ? walletMatch : walletMatch || handleMatch || displayMatch) {
+      if (isExactAddress ? walletMatch : isLikelyEns) {
+        pendingMatchAttempted.current = true;
         setPendingWalletMatch(debouncedQuery);
         onProfileSelect(result);
       }
@@ -477,6 +501,7 @@ export default function RecipientSelector({
   );
 
   const handleClear = () => {
+    pendingMatchAttempted.current = false;
     setPendingWalletMatch(null);
     onProfileSelect(null);
     onWalletSelect(null);
@@ -527,4 +552,4 @@ export default function RecipientSelector({
   );
 }
 
-export { RecipientSelectedDisplay, RecipientSearchDisplay };
+export { RecipientSearchDisplay, RecipientSelectedDisplay };
