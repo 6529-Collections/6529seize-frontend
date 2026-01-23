@@ -31,7 +31,7 @@ const STATUS_CONFIGS: Record<StatusType, StatusConfig> = {
     iconBg: "tw-bg-iron-900/60",
     iconRing: "tw-ring-white/10",
     topLeftText: "Mint Complete",
-    blackDivText: "All editions have been minted.",
+    blackDivText: "All editions have been minted!",
   },
   finalized: {
     icon: <ClockIcon className="tw-size-7 tw-text-iron-300" />,
@@ -44,10 +44,12 @@ const STATUS_CONFIGS: Record<StatusType, StatusConfig> = {
 
 interface NowMintingCountdownStatusProps {
   readonly type: StatusType;
+  readonly hideNextDrop?: boolean;
 }
 
 export default function NowMintingCountdownStatus({
   type,
+  hideNextDrop,
 }: NowMintingCountdownStatusProps) {
   const config = STATUS_CONFIGS[type];
   const nextMintDate = getNextMintStart();
@@ -64,7 +66,7 @@ export default function NowMintingCountdownStatus({
           {config.topLeftText}
         </span>
       </div>
-      <div className="tw-mb-3 tw-flex tw-h-14 tw-items-center tw-justify-center tw-gap-3 tw-rounded-md tw-border tw-border-white/5 tw-bg-black/80 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+      <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-gap-3 tw-rounded-md tw-border tw-border-white/5 tw-bg-black/80 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
         <div
           className={`tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-ring-1 ${config.iconBg} ${config.iconRing}`}
         >
@@ -74,7 +76,7 @@ export default function NowMintingCountdownStatus({
           {config.blackDivText}
         </span>
       </div>
-      {type !== "error" && (
+      {type !== "error" && !hideNextDrop && (
         <div className="tw-mt-3 tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950">
           Next drop {formattedDate}
         </div>

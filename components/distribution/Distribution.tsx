@@ -307,7 +307,7 @@ export default function DistributionPage(props: Readonly<Props>) {
       isValidNftId &&
       nftId
     ) {
-      return <NowMintingCountdown nftId={Number.parseInt(nftId, 10)} />;
+      return <NowMintingCountdown nftId={Number.parseInt(nftId, 10)} hideNextDrop fullWidth />;
     }
 
     return <></>;
