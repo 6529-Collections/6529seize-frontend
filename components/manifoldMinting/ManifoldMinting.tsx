@@ -542,10 +542,10 @@ function ManifoldMemesMintingPhases(
 
   return (
     <Container className="no-padding">
-      {distribution?.airdrops && (
+      {distribution?.airdrops !== undefined && distribution.airdrops > 0 && (
         <Row className="tw-pb-2">
           <Col className="tw-text-lg tw-font-bold">
-            Airdrops: x{distribution?.airdrops}
+            Airdrops: x{distribution.airdrops}
           </Col>
         </Row>
       )}
