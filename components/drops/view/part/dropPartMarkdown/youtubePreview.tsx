@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import type { YoutubeOEmbedResponse } from "@/services/api/youtube";
 import { fetchYoutubePreview } from "@/services/api/youtube";
 
@@ -76,10 +77,11 @@ const sanitizeIframeAllow = (value: string | null): string | null => {
 
   const allowedTokens: string[] = [];
   for (const token of tokens) {
-    if (ALLOWED_IFRAME_ALLOW_FEATURES.has(token)) {
-      if (!allowedTokens.includes(token)) {
-        allowedTokens.push(token);
-      }
+    if (
+      ALLOWED_IFRAME_ALLOW_FEATURES.has(token) &&
+      !allowedTokens.includes(token)
+    ) {
+      allowedTokens.push(token);
     }
   }
 
@@ -145,7 +147,7 @@ const canonicalizeYoutubeEmbedUrl = (url: URL): URL | null => {
 };
 
 const sanitizeYoutubeEmbedHtml = (html: string): string | null => {
-  if (typeof window === "undefined" || typeof DOMParser === "undefined") {
+  if (typeof globalThis === "undefined" || typeof DOMParser === "undefined") {
     return null;
   }
 
@@ -174,9 +176,10 @@ const sanitizeYoutubeEmbedHtml = (html: string): string | null => {
     return null;
   }
 
-  const attributes: string[] = [];
-  attributes.push(`src="${escapeHtmlAttribute(canonicalSrc.toString())}"`);
-  attributes.push(`style="${DEFAULT_IFRAME_STYLE}"`);
+  const attributes: string[] = [
+    `src="${escapeHtmlAttribute(canonicalSrc.toString())}"`,
+    `style="${DEFAULT_IFRAME_STYLE}"`,
+  ];
 
   const title = iframe.getAttribute("title");
   if (title) {
@@ -259,8 +262,12 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
     const fetchUrl = getYoutubeFetchUrl(href, videoId);
 
-    fetchYoutubePreview(fetchUrl, abortController.signal)
-      .then((data) => {
+    const loadPreview = async () => {
+      try {
+        const data = await fetchYoutubePreview(
+          fetchUrl,
+          abortController.signal
+        );
         if (!isActive) {
           return;
         }
@@ -299,8 +306,7 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
             ? { ...prev, preview: null, hasError: true, showEmbed: false }
             : { href, preview: null, hasError: true, showEmbed: false }
         );
-      })
-      .catch((error) => {
+      } catch (error) {
         if (!isActive) {
           return;
         }
@@ -314,7 +320,10 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
             ? { ...prev, preview: null, hasError: true, showEmbed: false }
             : { href, preview: null, hasError: true, showEmbed: false }
         );
-      });
+      }
+    };
+
+    void loadPreview();
 
     return () => {
       isActive = false;
@@ -358,10 +367,16 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
               onClick={handleShowEmbed}
               aria-label={ariaLabel}
             >
-              <img
+              <Image
                 src={preview.thumbnail_url}
-                alt={preview.title ?? `YouTube video ${videoId}`}
-                className="tw-h-full tw-w-full tw-object-cover"
+                alt={
+                  preview.title
+                    ? `YouTube thumbnail for ${preview.title}`
+                    : "YouTube video thumbnail"
+                }
+                fill
+                sizes="100vw"
+                className="tw-object-cover"
               />
               <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black/40">
                 <svg
