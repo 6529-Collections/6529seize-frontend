@@ -383,7 +383,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </Col>
               {isLastCard && (
                 <Col sm={12} md={6} className="d-flex align-items-center">
-                  {nft && <NowMintingCountdown nftId={nft.id} />}
+                  {nft && <NowMintingCountdown nftId={nft.id} fullWidth />}
                 </Col>
               )}
             </Row>
