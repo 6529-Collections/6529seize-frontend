@@ -66,7 +66,7 @@ export default function NowMintingCountdownStatus({
           {config.topLeftText}
         </span>
       </div>
-      <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-gap-3 tw-rounded-md tw-border tw-border-white/5 tw-bg-black/80 tw-shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+      <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-gap-3 tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
         <div
           className={`tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-ring-1 ${config.iconBg} ${config.iconRing}`}
         >
