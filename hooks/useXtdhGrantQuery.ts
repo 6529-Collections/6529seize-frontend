@@ -3,12 +3,12 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export interface UseXtdhGrantQueryParams {
+interface UseXtdhGrantQueryParams {
   readonly grantId: string | null;
   readonly enabled?: boolean | undefined;
 }
 
-export type UseXtdhGrantQueryResult = UseQueryResult<ApiXTdhGrant, Error> & {
+type UseXtdhGrantQueryResult = UseQueryResult<ApiXTdhGrant, Error> & {
   readonly grant: ApiXTdhGrant | undefined;
   readonly errorMessage?: string | undefined;
   readonly isEnabled: boolean;
@@ -36,7 +36,8 @@ export function useXtdhGrantQuery({
     staleTime: DEFAULT_STALE_TIME,
   });
 
-  const errorMessage = query.error instanceof Error ? query.error.message : undefined;
+  const errorMessage =
+    query.error instanceof Error ? query.error.message : undefined;
 
   return {
     ...query,

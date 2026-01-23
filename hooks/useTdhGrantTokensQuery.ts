@@ -17,13 +17,13 @@ import { commonApiFetch } from "@/services/api/common-api";
 const DEFAULT_PAGE_SIZE = 500;
 const MAX_PAGE_SIZE = 2000;
 
-export interface UseTdhGrantTokensQueryParams {
+interface UseTdhGrantTokensQueryParams {
   readonly grantId: string;
   readonly pageSize?: number | undefined;
   readonly enabled?: boolean | undefined;
 }
 
-export type UseTdhGrantTokensQueryResult = UseInfiniteQueryResult<
+type UseTdhGrantTokensQueryResult = UseInfiniteQueryResult<
   InfiniteData<ApiXTdhGrantTokensPage>,
   Error
 > & {

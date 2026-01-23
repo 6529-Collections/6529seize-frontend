@@ -1,16 +1,20 @@
 "use client";
 
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
-import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
+import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
+import { WaveGallery } from "@/components/waves/gallery";
 import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
+import { UnreadDividerProvider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
+import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
@@ -18,9 +22,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
-import { WaveGallery } from "@/components/waves/gallery";
-import type { WaveViewMode } from "@/hooks/useWaveViewMode";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -48,6 +49,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const { isMemesWave } = useWave(wave);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
+
   const [activeDropState, setActiveDropState] = useState<{
     readonly waveId: string;
     readonly activeDrop: ActiveDropState | null;
@@ -62,6 +64,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const setActiveDropForWave = (nextActiveDrop: ActiveDropState | null) => {
     setActiveDropState({ waveId: wave.id, activeDrop: nextActiveDrop });
   };
+
+  const capturedDividerRef = useRef<{
+    waveId: string;
+    serialNo: number | null;
+  } | null>(null);
+
+  if (
+    !capturedDividerRef.current ||
+    capturedDividerRef.current.waveId !== wave.id
+  ) {
+    capturedDividerRef.current = {
+      waveId: wave.id,
+      serialNo: firstUnreadSerialNo,
+    };
+  }
 
   const initialDropState = useMemo<InitialDropState | null>(() => {
     const dropParam = searchParams.get("serialNo");
@@ -90,13 +107,33 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     };
   }, [searchParams, wave.id, firstUnreadSerialNo]);
 
+  useEffect(() => {
+    if (
+      initialDropState?.waveId === wave.id &&
+      initialDropState.dividerSerialNo !== null
+    ) {
+      capturedDividerRef.current = {
+        waveId: wave.id,
+        serialNo: initialDropState.dividerSerialNo,
+      };
+    } else if (
+      !capturedDividerRef.current ||
+      capturedDividerRef.current.waveId !== wave.id
+    ) {
+      capturedDividerRef.current = {
+        waveId: wave.id,
+        serialNo: firstUnreadSerialNo,
+      };
+    }
+  }, [initialDropState, wave.id, firstUnreadSerialNo]);
+
   const scrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
 
   const dividerTarget =
     initialDropState?.waveId === wave.id
       ? initialDropState.dividerSerialNo
-      : firstUnreadSerialNo;
+      : (capturedDividerRef.current?.serialNo ?? null);
 
   useEffect(() => {
     if (!initialDropState) {
@@ -117,12 +154,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
 
   const { waveViewStyle } = useLayout();
 
-  // Create container class based on wave type
   const containerClassName = useMemo(() => {
     const baseStyles =
       "tw-w-full tw-flex tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow";
 
-    // Always use flex-grow for consistent height handling
     const heightClass = "tw-flex-grow";
 
     return `${baseStyles} ${heightClass}`;
@@ -169,38 +204,43 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={`${containerClassName}`}
-      style={waveViewStyle}
+    <UnreadDividerProvider
+      initialSerialNo={dividerTarget ?? null}
+      key={`unread-divider-${wave.id}`}
     >
-      <WaveDropsAll
-        key={wave.id}
-        waveId={wave.id}
-        onReply={handleReply}
-        onQuote={handleQuote}
-        activeDrop={activeDrop}
-        initialDrop={scrollTarget}
-        dividerSerialNo={dividerTarget}
-        dropId={null}
-        isMuted={wave.metrics.muted}
-      />
-      {!(isApp && editingDropId) && (
-        <div className="tw-mt-auto">
-          <CreateDropWaveWrapper>
-            <PrivilegedDropCreator
-              activeDrop={activeDrop}
-              onCancelReplyQuote={onCancelReplyQuote}
-              onDropAddedToQueue={onCancelReplyQuote}
-              wave={wave}
-              dropId={null}
-              fixedDropMode={DropMode.BOTH}
-            />
-          </CreateDropWaveWrapper>
-        </div>
-      )}
-      {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
-    </div>
+      <div
+        ref={containerRef}
+        className={`${containerClassName}`}
+        style={waveViewStyle}
+      >
+        <WaveDropsAllWithoutProvider
+          key={wave.id}
+          waveId={wave.id}
+          onReply={handleReply}
+          onQuote={handleQuote}
+          activeDrop={activeDrop}
+          initialDrop={scrollTarget}
+          dividerSerialNo={dividerTarget}
+          dropId={null}
+          isMuted={wave.metrics.muted}
+        />
+        {!(isApp && editingDropId) && (
+          <div className="tw-mt-auto">
+            <CreateDropWaveWrapper>
+              <PrivilegedDropCreator
+                activeDrop={activeDrop}
+                onCancelReplyQuote={onCancelReplyQuote}
+                onDropAddedToQueue={onCancelReplyQuote}
+                wave={wave}
+                dropId={null}
+                fixedDropMode={DropMode.BOTH}
+              />
+            </CreateDropWaveWrapper>
+          </div>
+        )}
+        {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
+      </div>
+    </UnreadDividerProvider>
   );
 };
 

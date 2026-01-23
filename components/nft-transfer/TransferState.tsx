@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 
-export type TransferItem = {
+type TransferItem = {
   key: string;
   contract: string;
   contractType: ContractType;

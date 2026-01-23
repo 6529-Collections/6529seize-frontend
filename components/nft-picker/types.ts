@@ -47,12 +47,12 @@ export type NftPickerChange =
   | NftPickerSelectionError
   | null;
 
-export type NftPickerOnChange = {
+type NftPickerOnChange = {
   // Bivariant to accept handlers that only handle the successful selection shape.
   bivarianceHack(output: NftPickerChange): void;
 }["bivarianceHack"];
 
-export type NftPickerValue = {
+type NftPickerValue = {
   chain: SupportedChain;
   contractAddress?: `0x${string}` | undefined;
   selectedIds: Readonly<TokenSelection>;
@@ -65,7 +65,6 @@ export type NftPickerProps = {
   readonly onChange: NftPickerOnChange;
   readonly onContractChange?:
     | ((meta: ContractOverview | null) => void)
-    | undefined
     | undefined;
   readonly chain?: SupportedChain | undefined;
   readonly outputMode?: OutputMode | undefined;
@@ -78,38 +77,14 @@ export type NftPickerProps = {
   readonly className?: string | undefined;
   readonly renderTokenExtra?:
     | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
-    | undefined
     | undefined;
   readonly variant?: "card" | "flat" | undefined;
 };
 
-export type ParseErrorArray = ParseError[] & { message: string; name: string };
 export type ParseError = {
   code?: string | undefined;
   input: string;
   index: number;
   length: number;
   message: string;
-};
-
-export type CanonicalTokenState = {
-  ids: TokenSelection;
-  ranges: TokenRange[];
-};
-
-export type TokenListRow = {
-  tokenId: bigint;
-  range?: TokenRange | undefined;
-};
-
-export type SearchQueryParams = {
-  query: string;
-  chain?: SupportedChain | undefined;
-  hideSpam?: boolean | undefined;
-};
-
-export type TokenMetadataRequest = {
-  address: `0x${string}`;
-  tokenIds: readonly string[];
-  chain?: SupportedChain | undefined;
 };

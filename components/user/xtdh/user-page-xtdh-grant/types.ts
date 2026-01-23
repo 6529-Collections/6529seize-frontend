@@ -4,7 +4,7 @@ import type {
   NftPickerSelection,
 } from "@/components/nft-picker/NftPicker.types";
 
-export interface UserPageXtdhGrantFormState {
+interface UserPageXtdhGrantFormState {
   contract: ContractOverview | null;
   selection: NftPickerChange;
   amount: number | null;
@@ -12,19 +12,19 @@ export interface UserPageXtdhGrantFormState {
   formKey: number;
 }
 
-export interface UserPageXtdhGrantSubmissionState {
+interface UserPageXtdhGrantSubmissionState {
   submitError: string | null;
   submitSuccess: string | null;
   isSubmitting: boolean;
 }
 
-export interface UserPageXtdhGrantLimitsState {
+interface UserPageXtdhGrantLimitsState {
   maxGrantRate: number | null;
   isMaxGrantLoading: boolean;
   isMaxGrantError: boolean;
 }
 
-export interface UserPageXtdhGrantFormControls {
+interface UserPageXtdhGrantFormControls {
   setContract: (contract: ContractOverview | null) => void;
   setSelection: (selection: NftPickerChange) => void;
   setAmount: (amount: number | null) => void;
@@ -44,9 +44,9 @@ export type GrantValidationParams = UserPageXtdhGrantFormState & {
 export type GrantValidationResult =
   | { success: false; message: string }
   | {
-    success: true;
-    contract: ContractOverview;
-    selection: NftPickerSelection;
-    amount: number;
-    validUntil: Date | null;
-  };
+      success: true;
+      contract: ContractOverview;
+      selection: NftPickerSelection;
+      amount: number;
+      validUntil: Date | null;
+    };

@@ -30,7 +30,7 @@ export default function NowMintingStatsGrid({
   const mintPrice = manifoldClaim ? formatClaimCost(manifoldClaim) : undefined;
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
+    <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
       <NowMintingStatsItem label="Edition" value={editionSize} />
       <NowMintingStatsItem
         label="Status"

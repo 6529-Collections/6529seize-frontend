@@ -1,3 +1,4 @@
+/** @api */
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { TokenMetadata } from "@/types/nft";
 
@@ -14,6 +15,7 @@ import {
 
 const MAX_BATCH_SIZE = 100;
 
+/** @api */
 export async function getTokensMetadata(
   params: TokenMetadataParams
 ): Promise<TokenMetadata[]> {

@@ -47,7 +47,6 @@ export enum QueryKey {
   PROFILE_DISTRIBUTIONS = "PROFILE_DISTRIBUTIONS",
   TDH_GRANTS = "TDH_GRANTS",
   TDH_GRANT_TOKENS = "TDH_GRANT_TOKENS",
-  PROFILE_CONSOLIDATED_TDH = "PROFILE_CONSOLIDATED_TDH",
   PROFILE_COLLECTED = "PROFILE_COLLECTED",
   PROFILE_COLLECTED_TRANSFER = "PROFILE_COLLECTED_TRANSFER",
   PROFILE_DROPS = "PROFILE_DROPS",
@@ -304,9 +303,9 @@ const createReactQueryContextValue = (
       return;
     }
     queryClient.setQueryData<InfiniteData<ApiWave[]>>(queryKey, {
-        pages: [wavesOverview],
-        pageParams: [undefined],
-      });
+      pages: [wavesOverview],
+      pageParams: [undefined],
+    });
   };
 
   const setWaveDrops = ({

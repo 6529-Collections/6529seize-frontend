@@ -5,13 +5,13 @@ import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificatio
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
-export type IFeedItemWaveCreated = {
+type IFeedItemWaveCreated = {
   readonly serial_no: number;
   readonly item: ApiWave;
   readonly type: ApiFeedItemType.WaveCreated;
 };
 
-export type IFeedItemDropCreated = {
+type IFeedItemDropCreated = {
   readonly serial_no: number;
   readonly item: ApiDrop;
   readonly type: ApiFeedItemType.DropCreated;
@@ -22,7 +22,7 @@ type IFeedItemDropRepliedItem = {
   readonly reply: ApiDrop;
 };
 
-export type IFeedItemDropReplied = {
+type IFeedItemDropReplied = {
   readonly serial_no: number;
   readonly item: IFeedItemDropRepliedItem;
   readonly type: ApiFeedItemType.DropReplied;

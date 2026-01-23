@@ -14,12 +14,12 @@ export default function NowMintingStatsItem({
   const getValueColor = () => {
     if (status === "active") return "tw-text-emerald-400";
     if (status === "ended") return "tw-text-iron-400";
-    return "tw-text-white";
+    return "tw-text-iron-100";
   };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-1">
-      <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+      <span className="tw-text-xs tw-font-medium tw-text-iron-400">
         {label}
       </span>
       {isLoading ? (

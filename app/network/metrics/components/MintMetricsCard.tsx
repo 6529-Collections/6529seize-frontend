@@ -13,10 +13,15 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
 
   // Max total (subs + mints) for scaling
   const maxTotal = Math.max(...data.map((d) => d.subscriptions + d.mints));
+  const GAP_CSS = "clamp(2px, 0.5vw, 8px)";
+  const gridTemplate = `repeat(${data.length}, minmax(2px, 1fr))`;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
-      <div className="tw-flex tw-h-16 tw-items-end tw-gap-3">
+      <div
+        className="tw-grid tw-h-16 tw-items-end"
+        style={{ columnGap: GAP_CSS, gridTemplateColumns: gridTemplate }}
+      >
         {data.map((item) => {
           const total = item.subscriptions + item.mints;
           const totalHeight = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
@@ -52,7 +57,7 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
               placement="top"
             >
               <div
-                className="tw-flex tw-flex-1 tw-cursor-default tw-flex-col tw-overflow-hidden tw-rounded-t tw-transition-all hover:tw-opacity-80"
+                className="tw-flex tw-cursor-default tw-flex-col tw-overflow-hidden tw-rounded-t tw-transition-all hover:tw-opacity-80"
                 style={{ height: `${Math.max(totalHeight, 3)}%` }}
               >
                 <div
@@ -70,7 +75,10 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
       </div>
       {/* Card ID labels - hide when too many items */}
       {data.length <= 10 && (
-        <div className="tw-flex tw-gap-3">
+        <div
+          className="tw-grid"
+          style={{ columnGap: GAP_CSS, gridTemplateColumns: gridTemplate }}
+        >
           {data.map((item) => (
             <div
               key={item.card}

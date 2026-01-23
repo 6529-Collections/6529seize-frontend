@@ -1,9 +1,10 @@
+/** @api */
 import { goerli, sepolia } from "wagmi/chains";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import type {
   AlchemyGetNftsForOwnerResponse,
-  AlchemyOwnedNft,
+  AlchemyTokenMetadataEntry,
   OwnerNft,
 } from "./types";
 import { processOwnerNftsResponse } from "./utils";
@@ -60,15 +61,19 @@ async function fetchLegacyUrl<T>(
   url: string,
   signal?: AbortSignal
 ): Promise<T> {
-  const response = await fetch(url, { ...legacyOptions, ...(signal !== undefined ? { signal: signal } : {}) });
+  const response = await fetch(url, {
+    ...legacyOptions,
+    ...(signal !== undefined ? { signal: signal } : {}),
+  });
   return (await response.json()) as T;
 }
 
+/** @api */
 export async function getNftsForContractAndOwner(
   chainId: number,
   contract: string,
   owner: string,
-  nfts: AlchemyOwnedNft[] = [],
+  nfts: AlchemyTokenMetadataEntry[] = [],
   pageKey?: string,
   retries = 0,
   signal?: AbortSignal
@@ -86,7 +91,7 @@ export async function getNftsForContractAndOwner(
 
   const apiKey = getAlchemyApiKey();
   const baseUrl = `https://${path}.g.alchemy.com/nft/v3/${apiKey}/getNFTsForOwner?owner=${owner}&contractAddresses[]=${contract}`;
-  const ownedNfts: AlchemyOwnedNft[] = [...nfts];
+  const ownedNfts: AlchemyTokenMetadataEntry[] = [...nfts];
   let nextPageKey = pageKey;
   let attempts = retries;
 
@@ -110,7 +115,7 @@ export async function getNftsForContractAndOwner(
       continue;
     }
 
-    ownedNfts.push(...(response.ownedNfts ?? []));
+    ownedNfts.push(...response.ownedNfts);
 
     if (!response.pageKey) {
       break;

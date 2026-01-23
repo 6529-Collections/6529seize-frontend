@@ -41,36 +41,6 @@ export function formatCountdown(timestamp: number | null): string {
 }
 
 /**
- * Format timestamp into adaptive countdown display
- * - > 1 day: "2d 14h" (approximate)
- * - < 1 day: "05:30:45" (precise HH:MM:SS)
- * @param timestampSeconds Future timestamp in SECONDS (Unix timestamp)
- * @returns Formatted string for display
- */
-export function formatCountdownAdaptive(timestampSeconds: number): string {
-  const now = Date.now();
-  const targetMs = timestampSeconds * 1000;
-  const diff = targetMs - now;
-
-  if (diff <= 0) return "00:00:00";
-
-  const totalSeconds = Math.floor(diff / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  // More than 1 day: approximate
-  if (days > 0) {
-    return `${days}d ${hours}h`;
-  }
-
-  // Less than 1 day: precise HH:MM:SS
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-}
-
-/**
  * Format timestamp into verbose countdown display with labels.
  * @param timestampSeconds Future timestamp in SECONDS (Unix timestamp)
  * @returns Formatted string like "2d 3h 4m 5s"

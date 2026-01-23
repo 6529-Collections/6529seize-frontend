@@ -331,11 +331,13 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
   }, [props.mint_counts]);
 
   useEffect(() => {
-    const currentProof = findActiveProof(originalProofs);
-    setCurrentProof({
-      ...currentProof!,
-      proof: currentProof!.proof!,
-    });
+    const activeProof = findActiveProof(originalProofs);
+    if (activeProof?.proof) {
+      setCurrentProof({
+        ...activeProof,
+        proof: activeProof.proof,
+      });
+    }
   }, [props.fetchingMintCounts]);
 
   function renderAllowlistStatus() {

@@ -12,7 +12,14 @@
     //    (Next.js entries are auto-added by the Next plugin)
     "entry": [
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
-      "app/**/route.{ts,tsx}"          // Next App Router route handlers (if used)
+      "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
+      "eslint.config.tight.mjs",
+      "eslint.config.diff.mjs",
+      "jest.config.js",
+      "jest.setup.js",
+      "next-sitemap.config.ts",
+      "playwright.config.ts",
+      "services/**/index.{ts,tsx}"
     ],
   
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
@@ -21,10 +28,23 @@
   
     // 4) Report unused exports even in entry files (private repos benefit from this)
     "includeEntryExports": true,
+
+    // Ignore exports explicitly tagged as API endpoints (e.g. /** @api */)
+    "tags": ["-api"],
   
     // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
     "ignoreIssues": {
-      "generated/**": ["exports", "types", "enumMembers"] // ignore only these issue kinds
+      "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
+      "services/**": ["files"],
+      "lib/storage/idb-keyval.ts": ["files"],
+      "playwright.config.ts": ["exports"],
+      "next-sitemap.config.ts": ["exports"],
+      "jest.config.js": ["exports"],
+      "eslint.config.tight.mjs": ["exports"],
+      "eslint.config.diff.mjs": ["exports"],
+      "utils/sentry-client-filters.ts": ["exports", "types"],
+      "lib/fetch/ssrFetch.ts": ["exports"],
+      "config/serverEnv.ts": ["exports"]
     },
     "ignoreFiles": [
       "generated/**",        // don't list generated files as "Unused files"
@@ -32,10 +52,26 @@
       "next-sitemap.config.js",
       "stubs/empty.js"
     ],
+    "ignoreBinaries": [
+      "coderabbit"
+    ],
     "ignoreDependencies": [
+      "eslint-plugin-diff",
       "@openapitools/openapi-generator-cli",
       "bootstrap",
-      "pino-pretty"
+      "pino-pretty",
+      "@jest/globals",
+      "@testing-library/react",
+      "@testing-library/user-event",
+      "babel-jest",
+      "eslint-plugin-jsx-a11y",
+      "identity-obj-proxy",
+      "istanbul-lib-coverage",
+      "jest-environment-jsdom",
+      "nodemon",
+      "ts-jest",
+      "ts-morph",
+      "tsx"
     ],
   
     // Disable Jest and Playwright plugins so test-only usages are reported

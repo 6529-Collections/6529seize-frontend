@@ -3,10 +3,6 @@
 import { useMemo, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
-import {
-  CompactMenu,
-  type CompactMenuItem,
-} from "@/components/common/CompactMenu";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import type { WaveGroupType } from "../../../WaveGroup.types";
@@ -16,6 +12,7 @@ import WaveGroupEditButton, {
 import WaveGroupRemoveButton, {
   type WaveGroupRemoveButtonHandle,
 } from "../../WaveGroupRemoveButton";
+import { CompactMenu, CompactMenuItem } from "@/components/compact-menu";
 
 const GROUP_OPTIONS_LABEL = "Group options";
 

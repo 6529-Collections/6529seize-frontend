@@ -13,9 +13,9 @@ import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/que
 import type { ApiWaveOutcomeDistributionItemsPage } from "@/generated/models/ApiWaveOutcomeDistributionItemsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export type WaveOutcomeDistributionSortDirection = "ASC" | "DESC";
+type WaveOutcomeDistributionSortDirection = "ASC" | "DESC";
 
-export interface UseWaveOutcomeDistributionQueryParams {
+interface UseWaveOutcomeDistributionQueryParams {
   readonly waveId?: string | null | undefined;
   readonly outcomeIndex?: string | number | null | undefined;
   readonly pageSize?: number | undefined;
@@ -26,7 +26,7 @@ export interface UseWaveOutcomeDistributionQueryParams {
 type WaveOutcomeDistributionInfiniteData =
   InfiniteData<ApiWaveOutcomeDistributionItemsPage>;
 
-export type UseWaveOutcomeDistributionQueryResult = UseInfiniteQueryResult<
+type UseWaveOutcomeDistributionQueryResult = UseInfiniteQueryResult<
   WaveOutcomeDistributionInfiniteData,
   Error
 > & {
@@ -50,7 +50,7 @@ export function useWaveOutcomeDistributionQuery({
 }: Readonly<UseWaveOutcomeDistributionQueryParams>): UseWaveOutcomeDistributionQueryResult {
   const normalizedWaveId = waveId?.trim() ?? "";
   const normalizedOutcomeIndex =
-    outcomeIndex == null ? "" : String(outcomeIndex).trim();
+    outcomeIndex === null ? "" : String(outcomeIndex).trim();
   const hasRequiredParams =
     Boolean(normalizedWaveId) && Boolean(normalizedOutcomeIndex);
   const isEnabled = hasRequiredParams && enabled;

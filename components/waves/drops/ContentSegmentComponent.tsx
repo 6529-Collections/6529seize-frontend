@@ -4,10 +4,10 @@ import MediaThumbnail from "./MediaThumbnail";
 interface ContentSegmentComponentProps {
   readonly segment: ContentSegment;
   readonly index: number;
+  readonly linkify?: boolean;
 }
 
 const URL_REGEX = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]"'])/g;
-
 function linkifyText(text: string, segmentIndex: number): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -30,7 +30,7 @@ function linkifyText(text: string, segmentIndex: number): React.ReactNode[] {
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="tw-text-primary-300 hover:tw-text-primary-400 tw-transition tw-duration-300"
+        className="tw-text-iron-200/90 tw-underline tw-decoration-white/20 tw-underline-offset-2 tw-transition-colors tw-duration-300 hover:tw-text-iron-50 hover:tw-decoration-white/45"
       >
         {match[0]}
       </a>
@@ -55,9 +55,14 @@ function linkifyText(text: string, segmentIndex: number): React.ReactNode[] {
 export default function ContentSegmentComponent({
   segment,
   index,
+  linkify = true,
 }: ContentSegmentComponentProps) {
   if (segment.type === "text") {
-    return <span key={`segment-${index}`}>{linkifyText(segment.content, index)}</span>;
+    return (
+      <span key={`segment-${index}`}>
+        {linkify ? linkifyText(segment.content, index) : segment.content}
+      </span>
+    );
   }
 
   if (segment.mediaInfo) {
