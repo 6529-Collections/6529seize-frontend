@@ -391,7 +391,7 @@ export default function RecipientSelector({
   }, [enabled, data, setResults]);
 
   useEffect(() => {
-    if (selectedProfile || !data || data.length === 0 || !debouncedQuery) {
+    if (selectedProfile || !data || data.length === 0 || !debouncedQuery || !trimmedQuery) {
       return;
     }
 
@@ -407,7 +407,7 @@ export default function RecipientSelector({
       setPendingWalletMatch(debouncedQuery);
       onProfileSelect(data[0]);
     }
-  }, [data, debouncedQuery, selectedProfile, onProfileSelect]);
+  }, [data, debouncedQuery, trimmedQuery, selectedProfile, onProfileSelect]);
 
   useEffect(() => {
     const hasOverflow = (el: HTMLElement | null) =>
