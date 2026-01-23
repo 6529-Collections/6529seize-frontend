@@ -81,7 +81,7 @@ function RecipientSelectedDisplay({
     );
   } else {
     walletsContent = wallets.map(
-      (w: { wallet: string; display: string; tdh: number }) => {
+      (w: { wallet: string; display: string | null; tdh: number }) => {
         const isSel = selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
         const hasDisplay = w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
         return (
