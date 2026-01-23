@@ -166,13 +166,6 @@ export const WaveDropsScrollToUnreadButton: FC<
         opacity: swipeOpacity,
         transition: swipeOffset === 0 ? "all 0.2s ease-out" : "none",
       }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
     >
       <div className="tw-relative tw-group">
         <button
@@ -186,6 +179,13 @@ export const WaveDropsScrollToUnreadButton: FC<
         </button>
         <button
           onClick={handleClick}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
           className="tw-rounded-full tw-border-0 tw-bg-rose-500 tw-text-white tw-min-w-[2.75rem] tw-h-10 lg:tw-h-8 tw-px-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-opacity-75 hover:tw-opacity-100 tw-transition-all tw-duration-300"
           aria-label="Scroll to first unread message"
         >
