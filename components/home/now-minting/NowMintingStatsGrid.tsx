@@ -1,8 +1,8 @@
 import { useAuth } from "@/components/auth/Auth";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
-  formatClaimStatus,
   formatClaimCost,
+  formatClaimStatus,
   formatEditionSize,
 } from "@/helpers/manifoldDisplayHelpers";
 import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
@@ -45,20 +45,20 @@ export default function NowMintingStatsGrid({
   const balanceTooltip = balance > 0 ? `SEIZED x${balance}` : "UNSEIZED";
   const showBalance = connectedProfile && !isBalanceLoading;
 
-  const editionLabel = (
+  const editionValue = (
     <span className="tw-flex tw-items-center tw-gap-2">
-      Edition
+      {editionSize}
       {showBalance && (
         <>
           <span
             data-tooltip-id={`balance-tooltip-${nftId}`}
-            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1 tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-1"
+            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1 tw-rounded tw-bg-iron-800 tw-p-1.5 tw-font-sans tw-leading-none"
           >
             <FontAwesomeIcon
               icon={faLayerGroup}
               className="tw-size-3 tw-text-iron-400"
             />
-            <span className="tw-text-[10px] tw-font-medium tw-text-iron-300">
+            <span className="tw-text-[12px] tw-font-medium tw-text-iron-300">
               {balance}
             </span>
           </span>
@@ -84,7 +84,7 @@ export default function NowMintingStatsGrid({
 
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
-      <NowMintingStatsItem label={editionLabel} value={editionSize} />
+      <NowMintingStatsItem label="Edition" value={editionValue} />
       <NowMintingStatsItem
         label="Status"
         value={statusLabel}

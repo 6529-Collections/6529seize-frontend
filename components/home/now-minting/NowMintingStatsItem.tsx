@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 interface NowMintingStatsItemProps {
   readonly label: ReactNode;
-  readonly value?: string | undefined;
+  readonly value?: ReactNode;
   readonly status?: "active" | "upcoming" | "ended" | undefined;
   readonly isLoading?: boolean;
 }
