@@ -221,7 +221,7 @@ function RecipientSearchDisplay({
             />
             <div className="tw-min-w-0 tw-flex-1">
               <div className="tw-truncate tw-text-sm tw-font-medium">
-                {r.display || r.handle}
+                {r.handle || r.display}
               </div>
               <div className="tw-truncate tw-text-[11px] tw-opacity-60">
                 TDH: {r.tdh.toLocaleString()} - Level: {r.level}
@@ -359,7 +359,7 @@ export default function RecipientSelector({
           handle: identity.handle,
           wallet: identity.primary_wallet,
           pfp: identity.pfp,
-          display: identity.handle ?? null,
+          display: identity.display ?? null,
           normalised_handle: identity.normalised_handle,
           primary_wallet: identity.primary_wallet,
           tdh: identity.tdh,
