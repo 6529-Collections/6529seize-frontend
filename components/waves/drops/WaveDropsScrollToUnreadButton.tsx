@@ -97,11 +97,9 @@ export const WaveDropsScrollToUnreadButton: FC<
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (touchStartXRef.current === null) return;
-    const deltaX = e.touches[0].clientX - touchStartXRef.current;
-    if (deltaX > 0) {
-      swipeOffsetRef.current = deltaX;
-      setSwipeOffset(deltaX);
-    }
+    const deltaX = Math.max(0, e.touches[0].clientX - touchStartXRef.current);
+    swipeOffsetRef.current = deltaX;
+    setSwipeOffset(deltaX);
   }, []);
 
   const handleTouchEnd = useCallback(() => {
@@ -120,11 +118,9 @@ export const WaveDropsScrollToUnreadButton: FC<
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDraggingRef.current || touchStartXRef.current === null) return;
-    const deltaX = e.clientX - touchStartXRef.current;
-    if (deltaX > 0) {
-      swipeOffsetRef.current = deltaX;
-      setSwipeOffset(deltaX);
-    }
+    const deltaX = Math.max(0, e.clientX - touchStartXRef.current);
+    swipeOffsetRef.current = deltaX;
+    setSwipeOffset(deltaX);
   }, []);
 
   const handleMouseUp = useCallback(() => {
@@ -163,6 +159,8 @@ export const WaveDropsScrollToUnreadButton: FC<
 
   return (
     <div
+      role="group"
+      aria-label="New messages notification"
       className="tw-flex-shrink-0 tw-absolute tw-z-[49] tw-bottom-14 lg:tw-bottom-12 tw-right-2 lg:tw-right-6"
       style={{
         transform: `translateX(${swipeOffset}px)`,
@@ -180,7 +178,7 @@ export const WaveDropsScrollToUnreadButton: FC<
       <div className="tw-relative tw-group">
         <button
           onClick={handleDismiss}
-          className="tw-hidden lg:tw-flex tw-opacity-0 group-hover:tw-opacity-100 tw-absolute -tw-top-2 -tw-right-2 tw-z-50 tw-size-6 tw-rounded-full tw-bg-rose-500 tw-text-white tw-items-center tw-justify-center hover:tw-bg-rose-600 tw-transition-all tw-duration-200 tw-border tw-border-solid tw-border-iron-950"
+          className="tw-sr-only lg:tw-not-sr-only lg:tw-flex tw-opacity-0 group-hover:tw-opacity-100 tw-absolute -tw-top-2 -tw-right-2 tw-z-50 tw-size-6 tw-rounded-full tw-bg-rose-500 tw-text-white tw-items-center tw-justify-center hover:tw-bg-rose-600 tw-transition-all tw-duration-200 tw-border tw-border-solid tw-border-iron-950"
           aria-label="Dismiss"
         >
           <svg className="tw-size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

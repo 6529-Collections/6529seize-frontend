@@ -47,7 +47,7 @@ interface WaveDropsMessageListSectionProps {
   readonly boostedDrops?: ApiDrop[] | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
-  readonly onDismissUnread?: (() => void) | undefined;
+  readonly onDismissUnread: () => void;
 }
 
 const MIN_DROPS_FOR_PAGINATION = 25;
@@ -114,7 +114,7 @@ export const WaveDropsMessageListSection: React.FC<
         />
         <div ref={bottomAnchorRef} style={{ height: "1px" }} />
       </WaveDropsReverseContainer>
-      {onScrollToUnread && onDismissUnread && (
+      {onScrollToUnread && (
         <WaveDropsScrollToUnreadButton
           unreadDividerSerialNo={unreadDividerSerialNo ?? null}
           scrollContainerRef={scrollContainerRef}
