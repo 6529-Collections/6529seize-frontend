@@ -130,7 +130,7 @@ function RecipientSelectedDisplay({
           />
           <div className="tw-min-w-0">
             <div className="tw-truncate tw-text-sm tw-font-medium">
-              {selectedProfile.display || selectedProfile.handle}
+              {selectedProfile.handle || selectedProfile.display}
             </div>
             <div className="tw-truncate tw-text-[11px] tw-opacity-60">
               TDH: {selectedProfile.tdh.toLocaleString()} - Level:{" "}
@@ -469,6 +469,7 @@ export default function RecipientSelector({
   );
 
   const handleClear = () => {
+    setPendingWalletMatch(null);
     onProfileSelect(null);
     onWalletSelect(null);
     setResults([]);
