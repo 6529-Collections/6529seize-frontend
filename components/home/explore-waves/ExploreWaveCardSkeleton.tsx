@@ -4,7 +4,7 @@ export function ExploreWaveCardSkeleton() {
   return (
     <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10">
       {/* Image Skeleton */}
-      <div className="tw-aspect-[3/2] tw-animate-pulse tw-bg-iron-900" />
+      <div className="tw-aspect-[2/1] tw-animate-pulse tw-bg-iron-900" />
 
       {/* Content Skeleton */}
       <div className="tw-px-4 tw-py-6 sm:tw-p-5">

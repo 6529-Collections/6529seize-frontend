@@ -8,7 +8,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import Link from "next/link";
-import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleBottomCenterIcon } from "@heroicons/react/24/outline";
 import { extractDropPreview, useWaveLatestDrop } from "./useWaveLatestDrop";
 
 interface ExploreWaveCardProps {
@@ -52,7 +52,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     >
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-white/10" />
       <div
-        className="tw-relative tw-aspect-[2/1] tw-overflow-hidden sm:tw-aspect-[3/2]"
+        className="tw-relative tw-aspect-[2/1] tw-overflow-hidden"
         style={imageAreaStyle}
       >
         {wave.picture && (
@@ -89,9 +89,9 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         )}
 
         {hasDrops && (
-          <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-black tw-p-1 tw-shadow-inner sm:tw-gap-3 sm:tw-p-2">
-            <div className="tw-flex tw-h-5 tw-w-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-shadow-sm sm:tw-h-7 sm:tw-w-7">
-              <ChatBubbleLeftIcon
+          <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-iron-800/60 tw-p-1 tw-shadow-inner sm:tw-gap-3 sm:tw-p-2">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700/40 sm:tw-h-7 sm:tw-w-7">
+              <ChatBubbleBottomCenterIcon
                 className="tw-size-3 tw-shrink-0 tw-text-iron-400 sm:tw-size-3.5"
                 aria-hidden="true"
               />
