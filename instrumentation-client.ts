@@ -7,12 +7,19 @@ import {
   INDEXEDDB_ERROR_MESSAGE,
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
+import {
+  sanitizeSentryBreadcrumb,
+  sanitizeSentryEvent,
+  sanitizeUrlString,
+} from "@/utils/sentry-sanitizer";
 import { shouldFilterByFilenameExceptions } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";
 const dsn = publicEnv.SENTRY_DSN;
+const replayEnabled =
+  sentryEnabled && isProduction && publicEnv.SENTRY_REPLAY_ENABLED === "true";
 
 const noisyPatterns = [
   "EmptyRanges",
@@ -82,17 +89,17 @@ function handleIndexedDBError(event: Sentry.Event): void {
 function extractUrlFromError(error: TypeError, event: Sentry.Event): string {
   const urlMatch = URL_REGEX.exec(error.message.slice(0, 2048));
   if (urlMatch?.[1]) {
-    return urlMatch[1];
+    return String(sanitizeUrlString(urlMatch[1]));
   }
 
   const fetchBreadcrumb = event.breadcrumbs?.find(
     (crumb) => crumb.category === "fetch" || crumb.type === "http"
   );
   if (fetchBreadcrumb?.data?.["url"]) {
-    return fetchBreadcrumb.data["url"];
+    return String(sanitizeUrlString(fetchBreadcrumb.data["url"]));
   }
   if (event.request?.url) {
-    return event.request.url;
+    return String(sanitizeUrlString(event.request.url));
   }
   return "unknown";
 }
@@ -144,17 +151,27 @@ Sentry.init({
   ...(dsn && { dsn }),
   enabled: sentryEnabled,
 
-  integrations: [Sentry.replayIntegration()],
+  integrations(integrations) {
+    if (!replayEnabled) return integrations;
+    return [...integrations, Sentry.replayIntegration()];
+  },
 
   tracesSampleRate: 0.1,
 
   enableLogs: true,
 
-  replaysSessionSampleRate: sentryEnabled && isProduction ? 0.1 : 0,
+  // Session Replay is opt-in because it can capture sensitive user content.
+  replaysSessionSampleRate: replayEnabled ? 0.1 : 0,
 
-  replaysOnErrorSampleRate: sentryEnabled && isProduction ? 1.0 : 0,
+  replaysOnErrorSampleRate: replayEnabled ? 1.0 : 0,
 
-  sendDefaultPii: true,
+  // Default to NOT sending PII unless explicitly reviewed and required.
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
+  sendDefaultPii: false,
+
+  beforeBreadcrumb(breadcrumb) {
+    return sanitizeSentryBreadcrumb(breadcrumb);
+  },
 
   beforeSend(event, hint) {
     if (shouldFilterEvent(event, hint)) {
@@ -176,7 +193,11 @@ Sentry.init({
       handleNetworkError(event, error, value);
     }
 
-    return event;
+    return sanitizeSentryEvent(event);
+  },
+
+  beforeSendTransaction(event) {
+    return sanitizeSentryEvent(event as any);
   },
 });
 
