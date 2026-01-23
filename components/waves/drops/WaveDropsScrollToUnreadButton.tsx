@@ -132,36 +132,38 @@ export const WaveDropsScrollToUnreadButton: FC<
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <button
-        onClick={handleDismiss}
-        className="tw-hidden lg:tw-flex tw-absolute -tw-top-1.5 -tw-right-1.5 tw-z-50 tw-size-4 tw-rounded-full tw-bg-iron-700 tw-text-iron-300 tw-items-center tw-justify-center hover:tw-bg-iron-600 tw-transition-colors tw-border-0"
-        aria-label="Dismiss"
-      >
-        <svg className="tw-size-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <button
-        onClick={handleClick}
-        className="tw-rounded-full tw-border-0 tw-bg-rose-500 tw-text-white tw-min-w-[2.75rem] tw-h-10 lg:tw-h-8 tw-px-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-opacity-75 hover:tw-opacity-100 tw-transition-all tw-duration-300"
-        aria-label="Scroll to first unread message"
-      >
-        <svg
-          className="tw-flex-shrink-0 tw-size-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
+      <div className="tw-relative tw-group">
+        <button
+          onClick={handleDismiss}
+          className="tw-hidden lg:tw-flex tw-opacity-0 group-hover:tw-opacity-100 tw-absolute -tw-top-2 -tw-right-2 tw-z-50 tw-size-6 tw-rounded-full tw-bg-rose-500 tw-text-white tw-items-center tw-justify-center hover:tw-bg-rose-600 tw-transition-all tw-duration-200 tw-border tw-border-solid tw-border-iron-950"
+          aria-label="Dismiss"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d={isPointingUp ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"}
-          />
-        </svg>
-        <span className="tw-hidden lg:tw-inline tw-text-sm tw-font-medium">New messages</span>
-      </button>
+          <svg className="tw-size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <button
+          onClick={handleClick}
+          className="tw-rounded-full tw-border-0 tw-bg-rose-500 tw-text-white tw-min-w-[2.75rem] tw-h-10 lg:tw-h-8 tw-px-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-opacity-75 hover:tw-opacity-100 tw-transition-all tw-duration-300"
+          aria-label="Scroll to first unread message"
+        >
+          <svg
+            className="tw-flex-shrink-0 tw-size-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d={isPointingUp ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"}
+            />
+          </svg>
+          <span className="tw-hidden lg:tw-inline tw-text-sm tw-font-medium">New messages</span>
+        </button>
+      </div>
     </div>
   );
 };
