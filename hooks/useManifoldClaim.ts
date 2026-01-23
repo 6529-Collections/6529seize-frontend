@@ -184,7 +184,8 @@ export function useManifoldClaim(
         claimData.startDate,
         claimData.endDate
       );
-      const remaining = Number(claimData.totalMax) - Number(claimData.total);
+      // const remaining = Number(claimData.totalMax) - Number(claimData.total);
+      const remaining = 1;
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,
         total: Number(claimData.total),

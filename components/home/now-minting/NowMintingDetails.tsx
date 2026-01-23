@@ -15,7 +15,7 @@ interface NowMintingDetailsProps {
 export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
   const formatEth = (value: number) => {
     if (value <= 0) return "N/A";
-    return `${value.toFixed(5)} ETH`;
+    return `${parseFloat(value.toFixed(5))} ETH`;
   };
   const floorPrice = formatEth(nft.floor_price);
 

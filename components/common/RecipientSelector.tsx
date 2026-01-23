@@ -10,6 +10,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
+import { isAddress } from "viem";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
 const MIN_SEARCH_LENGTH = 3;
@@ -72,20 +73,24 @@ function RecipientSelectedDisplay({
     walletsContent = wallets.map(
       (w: { wallet: string; display: string; tdh: number }) => {
         const isSel = selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
+        const hasDisplay = w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
         return (
           <button
             key={w.wallet}
             type="button"
             onClick={() => onWalletSelect(w.wallet)}
             className={[
-              "tw-flex tw-w-full tw-flex-col tw-items-start tw-justify-between tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 hover:tw-bg-white/15",
+              "tw-flex tw-w-full tw-flex-col tw-min-h-[58px] tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 hover:tw-bg-white/15",
+              hasDisplay ? "tw-items-start tw-justify-between" : "tw-items-start tw-justify-center",
               isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
             ].join(" ")}
           >
             <div className="tw-text-sm tw-font-medium">
               {w.display || w.wallet}
             </div>
-            <div className="tw-text-[11px] tw-opacity-60">{w.wallet}</div>
+            {hasDisplay && (
+              <div className="tw-text-[11px] tw-opacity-60">{w.wallet}</div>
+            )}
           </button>
         );
       }
@@ -125,7 +130,9 @@ function RecipientSelectedDisplay({
       </div>
 
       <div className="tw-flex tw-min-h-0 tw-flex-col tw-space-y-2 tw-pt-4">
-        <div className="tw-text-sm">Choose destination wallet</div>
+        {wallets.length > 1 && (
+          <div className="tw-text-sm">Choose destination wallet</div>
+        )}
         <div
           ref={walletsListRef}
           className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"
@@ -173,7 +180,7 @@ function RecipientSearchDisplay({
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={placeholder ?? "Search by handle, ens or wallet"}
+        placeholder={placeholder ?? "Search profile by handle, ens or wallet"}
         className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-bg-white/20 focus:tw-outline-none"
         ref={searchInputRef}
       />
@@ -239,6 +246,7 @@ export default function RecipientSelector({
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<CommunityMemberMinimal[]>([]);
+  const [pendingWalletMatch, setPendingWalletMatch] = useState<string | null>(null);
 
   const handleOrWallet =
     selectedProfile?.handle ?? selectedProfile?.wallet ?? null;
@@ -273,8 +281,35 @@ export default function RecipientSelector({
       setWalletsHasOverflow(false);
       setResultsAtEnd(false);
       setWalletsAtEnd(false);
+      setPendingWalletMatch(null);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!selectedProfile || isIdentityLoading || !profile?.wallets || selectedWallet) {
+      return;
+    }
+
+    const wallets = profile.wallets;
+
+    if (pendingWalletMatch) {
+      const normalizedMatch = pendingWalletMatch.toLowerCase();
+      const matchedWallet = wallets.find(
+        (w) =>
+          w.wallet.toLowerCase() === normalizedMatch ||
+          w.display?.toLowerCase() === normalizedMatch
+      );
+      if (matchedWallet) {
+        onWalletSelect(matchedWallet.wallet);
+        setPendingWalletMatch(null);
+        return;
+      }
+    }
+
+    if (wallets.length === 1) {
+      onWalletSelect(wallets[0].wallet);
+    }
+  }, [selectedProfile, isIdentityLoading, profile?.wallets, selectedWallet, pendingWalletMatch, onWalletSelect]);
 
   const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
   const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
@@ -336,6 +371,26 @@ export default function RecipientSelector({
     }
     setResults(data ?? []);
   }, [enabled, data, setResults]);
+
+  useEffect(() => {
+    if (selectedProfile || !data || data.length === 0 || !debouncedQuery) {
+      return;
+    }
+
+    const normalizedQuery = debouncedQuery.toLowerCase();
+    const isExactAddress = isAddress(debouncedQuery);
+    const isLikelyEns = normalizedQuery.endsWith(".eth");
+
+    if (!isExactAddress && !isLikelyEns) {
+      return;
+    }
+
+    if (data.length === 1) {
+      const result = data[0];
+      setPendingWalletMatch(debouncedQuery);
+      onProfileSelect(result);
+    }
+  }, [data, debouncedQuery, selectedProfile, onProfileSelect]);
 
   useEffect(() => {
     const hasOverflow = (el: HTMLElement | null) =>
@@ -439,7 +494,7 @@ export default function RecipientSelector({
           resultsHasOverflow={resultsHasOverflow}
           resultsAtEnd={resultsAtEnd}
           searchInputRef={searchInputRef}
-          placeholder={placeholder ?? "Search by handle, ens or wallet"}
+          placeholder={placeholder ?? "Search profile by handle, ens or wallet"}
         />
       )}
     </div>

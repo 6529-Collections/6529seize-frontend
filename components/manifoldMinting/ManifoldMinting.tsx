@@ -1,7 +1,7 @@
 "use client";
 
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
+import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants/constants";
@@ -225,7 +225,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     return (
       <Col sm={{ span: 12, order: 2 }} md={{ span: 5, order: 1 }}>
         <Container className="no-padding">
-          <Row className="pt-2 pb-2">
+          <Row className="pb-2">
             <Col
               xs={12}
               className="d-flex align-items-center justify-content-between"
@@ -271,9 +271,9 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           </Row>
           <Row>
             <Col>
-              <MemePageMintCountdown
-                nft_id={props.token_id}
-                hide_mint_btn={true}
+              <NowMintingCountdown
+                nftId={props.token_id}
+                hideMintBtn={true}
               />
             </Col>
           </Row>

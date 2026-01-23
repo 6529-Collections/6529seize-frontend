@@ -9,7 +9,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 import { AuthContext } from "@/components/auth/Auth";
-import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
+import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
@@ -383,7 +383,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </Col>
               {isLastCard && (
                 <Col sm={12} md={6} className="d-flex align-items-center">
-                  {nft && <MemePageMintCountdown nft_id={nft.id} />}
+                  {nft && <NowMintingCountdown nftId={nft.id} />}
                 </Col>
               )}
             </Row>

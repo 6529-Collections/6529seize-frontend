@@ -128,7 +128,10 @@ export default function ManifoldMintingConnect(
           <button
             className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(false)}>
+            onClick={() => {
+              reset();
+              setMintForFren(false);
+            }}>
             Mint for me
           </button>
           <button

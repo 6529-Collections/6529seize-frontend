@@ -1,8 +1,9 @@
 import type { CountdownData } from "@/hooks/useMintCountdownState";
 import { formatCountdownVerbose } from "@/utils/timeFormatters";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { memo, useEffect, useRef, useState } from "react";
+import { Tooltip } from "react-tooltip";
 
 interface NowMintingCountdownActiveProps {
   readonly countdown: CountdownData;
@@ -13,11 +14,35 @@ export default function NowMintingCountdownActive({
 }: NowMintingCountdownActiveProps) {
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/40 tw-p-3 tw-text-left md:tw-p-4">
+      {countdown.showAllowlistInfo && (
+        <>
+          <InformationCircleIcon
+            data-tooltip-id="allowlist-info"
+            data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
+            className="tw-absolute tw-right-3 tw-top-3 tw-size-4 tw-cursor-help tw-text-iron-400 hover:tw-text-iron-300"
+          />
+          <Tooltip
+            id="allowlist-info"
+            place="left"
+            style={{
+              backgroundColor: "#37373E",
+              color: "white",
+              padding: "10px 14px",
+              maxWidth: "250px",
+              fontSize: "14px",
+              lineHeight: "1.4",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
+              borderRadius: "6px",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+            }}
+          />
+        </>
+      )}
       <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between">
-        <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
+        <span className="tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-300">
           {countdown.title}
         </span>
-        {countdown.isActive && (
+        {countdown.isActive ? (
           <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-success/20 tw-bg-success/10 tw-px-2 tw-py-0.5">
             <span className="tw-relative tw-flex tw-h-2 tw-w-2">
               <span className="tw-absolute tw-inline-flex tw-h-full tw-w-full tw-animate-ping tw-rounded-full tw-bg-success/60" />
@@ -27,9 +52,15 @@ export default function NowMintingCountdownActive({
               Live
             </span>
           </div>
+        ) : (
+          <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-amber-500/20 tw-bg-amber-500/10 tw-px-2 tw-py-0.5">
+            <span className="tw-text-[10px] tw-font-semibold tw-text-amber-400">
+              Upcoming
+            </span>
+          </div>
         )}
       </div>
-      <div className="tw-mb-3 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-white/5 tw-bg-iron-950/80 tw-p-3 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+      <div className="tw-mb-3 tw-flex tw-h-14 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
         <div className="tw-text-xl tw-font-bold tw-tabular-nums tw-text-iron-50 md:tw-text-2xl">
           <LiveCountdown targetTimestampSeconds={countdown.targetDate} />
         </div>

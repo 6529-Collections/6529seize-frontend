@@ -1,9 +1,15 @@
+import { useAuth } from "@/components/auth/Auth";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   formatClaimStatus,
   formatClaimCost,
   formatEditionSize,
 } from "@/helpers/manifoldDisplayHelpers";
 import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
+import { useNftBalance } from "@/hooks/useNftBalance";
+import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip } from "react-tooltip";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface NowMintingStatsGridProps {
@@ -19,6 +25,13 @@ export default function NowMintingStatsGrid({
   const status = manifoldClaim?.status;
   const isStatusLoading = !manifoldClaim;
 
+  const { connectedProfile } = useAuth();
+  const { balance, isLoading: isBalanceLoading } = useNftBalance({
+    consolidationKey: connectedProfile?.consolidation_key ?? null,
+    contract: MEMES_CONTRACT,
+    tokenId: nftId,
+  });
+
   const statusLabel = manifoldClaim
     ? formatClaimStatus(manifoldClaim)
     : undefined;
@@ -29,9 +42,49 @@ export default function NowMintingStatsGrid({
     : undefined;
   const mintPrice = manifoldClaim ? formatClaimCost(manifoldClaim) : undefined;
 
+  const balanceTooltip = balance > 0 ? `SEIZED x${balance}` : "UNSEIZED";
+  const showBalance = connectedProfile && !isBalanceLoading;
+
+  const editionLabel = (
+    <span className="tw-flex tw-items-center tw-gap-2">
+      Edition
+      {showBalance && (
+        <>
+          <span
+            data-tooltip-id="balance-tooltip"
+            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1 tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-1"
+          >
+            <FontAwesomeIcon
+              icon={faLayerGroup}
+              className="tw-size-3 tw-text-iron-400"
+            />
+            <span className="tw-text-[10px] tw-font-medium tw-text-iron-300">
+              {balance}
+            </span>
+          </span>
+          <Tooltip
+            id="balance-tooltip"
+            content={balanceTooltip}
+            place="top"
+            border="1px solid rgba(255, 255, 255, 0.15)"
+            style={{
+              backgroundColor: "#26272B",
+              color: "white",
+              padding: "6px 10px",
+              fontSize: "12px",
+              fontWeight: 600,
+              borderRadius: "6px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+            }}
+          />
+        </>
+      )}
+    </span>
+  );
+
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
-      <NowMintingStatsItem label="Edition" value={editionSize} />
+      <NowMintingStatsItem label={editionLabel} value={editionSize} />
       <NowMintingStatsItem
         label="Status"
         value={statusLabel}
