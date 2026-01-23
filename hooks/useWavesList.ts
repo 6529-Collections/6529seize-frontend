@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useContext,
-  useMemo,
-  useCallback,
-  useRef,
-  useEffect,
-  useState,
-} from "react";
+import { useContext, useMemo, useCallback, useRef } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
@@ -53,8 +46,7 @@ const useWavesList = () => {
     refetch: refetchPinnedWaves,
   } = usePinnedWavesServer();
   const [following] = useShowFollowingWaves();
-  // Use state for allWaves instead of ref to ensure reactivity
-  const [allWaves, setAllWaves] = useState<EnhancedWave[]>([]);
+  const allWavesRef = useRef<EnhancedWave[]>([]);
 
   // Use ref to avoid too many re-renders for derived values
   const prevMainWavesRef = useRef<ApiWave[]>([]);
@@ -181,15 +173,11 @@ const useWavesList = () => {
 
   // New drops counting logic has been removed and will be managed by context
 
-  // Update allWaves state when the combined waves change
-  useEffect(() => {
-    // Using a functional update and removing the allWaves dependency
-    // to break the infinite update cycle
-    setAllWaves((prevWaves) => {
-      return !areWavesEqual(combinedWaves, prevWaves)
-        ? combinedWaves
-        : prevWaves;
-    });
+  const allWaves = useMemo(() => {
+    if (!areWavesEqual(combinedWaves, allWavesRef.current)) {
+      allWavesRef.current = combinedWaves;
+    }
+    return allWavesRef.current;
   }, [combinedWaves]);
 
   // Use server-side loading and error states
