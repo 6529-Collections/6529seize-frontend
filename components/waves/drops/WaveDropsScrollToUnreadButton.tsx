@@ -92,11 +92,12 @@ export const WaveDropsScrollToUnreadButton: FC<
   }, [onDismiss]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!e.touches[0]) return;
     touchStartXRef.current = e.touches[0].clientX;
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
+    if (touchStartXRef.current === null || !e.touches[0]) return;
     const deltaX = Math.max(0, e.touches[0].clientX - touchStartXRef.current);
     swipeOffsetRef.current = deltaX;
     setSwipeOffset(deltaX);
