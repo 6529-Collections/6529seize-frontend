@@ -160,8 +160,6 @@ export const WaveDropsScrollToUnreadButton: FC<
 
   return (
     <div
-      role="group"
-      aria-label="New messages notification"
       className="tw-flex-shrink-0 tw-absolute tw-z-[49] tw-bottom-14 lg:tw-bottom-12 tw-right-2 lg:tw-right-6"
       style={{
         transform: `translateX(${swipeOffset}px)`,
