@@ -60,7 +60,7 @@ export default function NowMintingCountdownActive({
           </div>
         )}
       </div>
-      <div className="tw-mb-3 tw-flex tw-h-14 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+      <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
         <div className="tw-text-xl tw-font-bold tw-tabular-nums tw-text-iron-50 md:tw-text-2xl">
           <LiveCountdown targetTimestampSeconds={countdown.targetDate} />
         </div>
@@ -69,7 +69,7 @@ export default function NowMintingCountdownActive({
       {countdown.showMintBtn && (
         <Link
           href="/the-memes/mint"
-          className="tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 desktop-hover:hover:tw-ring-iron-300"
+          className="tw-mt-3 tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 desktop-hover:hover:tw-ring-iron-300"
         >
           Mint
           <ArrowRightIcon

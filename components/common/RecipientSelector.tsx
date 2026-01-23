@@ -56,7 +56,17 @@ function RecipientSelectedDisplay({
   readonly selectedWallet: string | null;
   readonly onWalletSelect: (wallet: string) => void;
 }) {
-  const wallets = profile?.wallets ?? [];
+  const wallets =
+    profile?.wallets ??
+    (selectedProfile.wallet
+      ? [
+          {
+            wallet: selectedProfile.wallet,
+            display: selectedProfile.display || selectedProfile.handle,
+            tdh: 0,
+          },
+        ]
+      : []);
   let walletsContent;
   if (isIdentityLoading) {
     walletsContent = (

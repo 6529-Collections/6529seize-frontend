@@ -266,15 +266,13 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               </Table>
             </Col>
             <Col xs={12} className="pt-3">
-              {printMint()}
-            </Col>
-          </Row>
-          <Row>
-            <Col>
               <NowMintingCountdown
                 nftId={props.token_id}
                 hideMintBtn={true}
               />
+            </Col>
+            <Col xs={12} className="pt-3">
+              {printMint()}
             </Col>
           </Row>
         </Container>
@@ -298,7 +296,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (fetching) {
     return (
-      <Container className="pt-4 pb-4">
+      <Container className="pt-4 pb-4 px-4">
         {printTitle()}
         <Row className="pt-2">
           <Col className="d-flex align-items-center gap-3">
@@ -318,7 +316,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!manifoldClaim || !instance || !nftImage) {
     return (
-      <Container className="pt-4 pb-4">
+      <Container className="pt-4 pb-4 px-4">
         {printTitle()}
         <Row>
           <Col>
@@ -330,7 +328,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="pt-4 pb-4">
+    <Container className="pt-4 pb-4 px-4">
       <Row className="pb-3">
         {printImage()}
         {printActions(instance, manifoldClaim)}

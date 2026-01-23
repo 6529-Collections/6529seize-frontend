@@ -358,7 +358,7 @@ export default function ManifoldMintingWidget(
                 props.claim.status !== ManifoldClaimStatus.ACTIVE ||
                 !mintCount
               }
-              className="tw-w-full tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white tw-px-4 tw-py-2.5 tw-font-semibold tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+              className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
               onClick={onMint}
             >
               <b>{getButtonText()}</b>
@@ -439,18 +439,7 @@ export default function ManifoldMintingWidget(
       props.claim.status === ManifoldClaimStatus.ENDED ||
       props.claim.isFinalized
     ) {
-      return (
-        <button
-          disabled
-          className="tw-w-full tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-bg-primary-500 tw-ring-primary-500 tw-text-white tw-px-4 tw-py-2.5 tw-font-semibold disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
-        >
-          <b>
-            {props.claim.status === ManifoldClaimStatus.ENDED
-              ? "ENDED"
-              : "SOLD OUT"}
-          </b>
-        </button>
-      );
+      return <></>;
     }
     if (!mintForAddress) {
       return <></>;
@@ -506,7 +495,7 @@ export default function ManifoldMintingWidget(
             </Col>
           </Row>
         )}
-      <Row className="pt-2">
+      <Row>
         <Col>{printContent()}</Col>
       </Row>
     </Container>

@@ -51,7 +51,7 @@ export default function NowMintingStatsGrid({
       {showBalance && (
         <>
           <span
-            data-tooltip-id="balance-tooltip"
+            data-tooltip-id={`balance-tooltip-${nftId}`}
             className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1 tw-rounded tw-bg-iron-800 tw-px-1.5 tw-py-1"
           >
             <FontAwesomeIcon
@@ -63,7 +63,7 @@ export default function NowMintingStatsGrid({
             </span>
           </span>
           <Tooltip
-            id="balance-tooltip"
+            id={`balance-tooltip-${nftId}`}
             content={balanceTooltip}
             place="top"
             border="1px solid rgba(255, 255, 255, 0.15)"
