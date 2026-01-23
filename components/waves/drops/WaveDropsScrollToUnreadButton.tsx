@@ -22,6 +22,7 @@ export const WaveDropsScrollToUnreadButton: FC<
   const swipeOffsetRef = useRef(0);
   const touchStartXRef = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
+  const suppressClickRef = useRef(false);
 
   const checkUnreadVisibility = useCallback(() => {
     if (unreadDividerSerialNo === null) {
@@ -87,6 +88,12 @@ export const WaveDropsScrollToUnreadButton: FC<
   }, [unreadDividerSerialNo, checkUnreadVisibility]);
 
   const handleDismiss = useCallback((e: React.MouseEvent) => {
+    if (suppressClickRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      suppressClickRef.current = false;
+      return;
+    }
     e.stopPropagation();
     onDismiss();
   }, [onDismiss]);
@@ -105,6 +112,7 @@ export const WaveDropsScrollToUnreadButton: FC<
 
   const handleTouchEnd = useCallback(() => {
     if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
+      suppressClickRef.current = true;
       onDismiss();
     }
     swipeOffsetRef.current = 0;
@@ -127,6 +135,7 @@ export const WaveDropsScrollToUnreadButton: FC<
   const handleMouseUp = useCallback(() => {
     if (!isDraggingRef.current) return;
     if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
+      suppressClickRef.current = true;
       onDismiss();
     }
     swipeOffsetRef.current = 0;
@@ -138,6 +147,7 @@ export const WaveDropsScrollToUnreadButton: FC<
   const handleMouseLeave = useCallback(() => {
     if (isDraggingRef.current) {
       if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
+        suppressClickRef.current = true;
         onDismiss();
       }
       swipeOffsetRef.current = 0;
@@ -151,7 +161,13 @@ export const WaveDropsScrollToUnreadButton: FC<
     return null;
   }
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (suppressClickRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      suppressClickRef.current = false;
+      return;
+    }
     onScrollToUnread(unreadDividerSerialNo);
   };
 
