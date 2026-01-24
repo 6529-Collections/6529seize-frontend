@@ -44,8 +44,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const { canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
 
-  // Get device info from useDeviceInfo hook
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
   let mediaImageScale = ImageScale.AUTOx800;
   if (isMobileScreen) {
     mediaImageScale = ImageScale.AUTOx450;
@@ -53,9 +52,8 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     mediaImageScale = ImageScale.AUTOx600;
   }
 
-  // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
-    hasTouchScreen,
+    hasTouchScreen: shouldUseTouchUI,
   });
 
   // Extract metadata
@@ -75,7 +73,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   return (
     <div
       className="tw-w-full tw-cursor-pointer tw-@container"
-      onClick={() => !hasTouchScreen && onDropClick(drop)}
+      onClick={() => !shouldUseTouchUI && onDropClick(drop)}
     >
       <div className="tw-group tw-w-full">
         <div {...touchHandlers}>
@@ -86,7 +84,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
                   <MemesLeaderboardDropArtistInfo drop={drop} />
                   <div className="tw-flex tw-gap-2 tw-text-iron-400">
-                    {!hasTouchScreen && (
+                    {!shouldUseTouchUI && (
                       <>
                         <WaveDropActionsOpen drop={drop} />
                         {canDelete && <WaveDropActionsOptions drop={drop} />}
@@ -203,7 +201,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
         </div>
 
         {/* Touch slide-up menu for leaderboard */}
-        {hasTouchScreen &&
+        {shouldUseTouchUI &&
           createPortal(
             <CommonDropdownItemsMobileWrapper
               isOpen={isActive}

@@ -2,7 +2,7 @@
 
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import useCreateModalState from "@/hooks/useCreateModalState";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
@@ -70,7 +70,8 @@ const WebUnifiedWavesListWaves = forwardRef<
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
     const { openWave, isApp } = useCreateModalState();
-    const isTouchDevice = useIsTouchDevice();
+    const { shouldUseTouchUI } = useDeviceInfo();
+    const isTouchDevice = shouldUseTouchUI;
 
     useImperativeHandle(ref, () => ({
       sentinelRef,

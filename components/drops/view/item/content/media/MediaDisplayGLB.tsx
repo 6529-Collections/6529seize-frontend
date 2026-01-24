@@ -21,7 +21,7 @@ export default function MediaDisplayGLB({
   const modelRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
 
   useEffect(() => {
     const modelViewer = modelRef.current;
@@ -48,7 +48,7 @@ export default function MediaDisplayGLB({
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [isActive, hasTouchScreen]);
+  }, [isActive]);
 
   const handleCubeToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -155,7 +155,7 @@ export default function MediaDisplayGLB({
         </button>
 
         {/* Tooltip for desktop only */}
-        {!hasTouchScreen && (
+        {!shouldUseTouchUI && (
           <Tooltip
             id="glb-cube-tooltip"
             place="left"

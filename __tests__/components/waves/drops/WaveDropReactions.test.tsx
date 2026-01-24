@@ -23,9 +23,9 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiDelete: jest.fn(),
 }));
 
-jest.mock("@/hooks/useIsTouchDevice", () => ({
+jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: jest.fn(() => false),
+  default: jest.fn(() => ({ shouldUseTouchUI: false })),
 }));
 
 jest.mock("@/hooks/useLongPressInteraction", () => ({
@@ -345,8 +345,8 @@ describe("WaveDropReactions", () => {
   });
 
   it("adds touch handlers for long press on touch devices", () => {
-    const mockUseIsTouchDevice = require("@/hooks/useIsTouchDevice").default;
-    mockUseIsTouchDevice.mockReturnValue(true);
+    const mockUseDeviceInfo = require("@/hooks/useDeviceInfo").default;
+    mockUseDeviceInfo.mockReturnValue({ shouldUseTouchUI: true });
 
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue(
@@ -378,7 +378,7 @@ describe("WaveDropReactions", () => {
     const reactionButton = screen.getAllByRole("button")[0];
     expect(reactionButton).toBeInTheDocument();
 
-    mockUseIsTouchDevice.mockReturnValue(false);
+    mockUseDeviceInfo.mockReturnValue({ shouldUseTouchUI: false });
   });
 
   it("renders profile handles as clickable links in tooltip", async () => {

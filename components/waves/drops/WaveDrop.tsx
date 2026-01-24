@@ -8,7 +8,7 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -99,10 +99,12 @@ const getDropClasses = (
   groupingClass: string,
   location: DropLocation,
   rank: number | null,
-  isDrop: boolean
+  isDrop: boolean,
+  hasTouch: boolean
 ): string => {
+  const touchSelectClass = hasTouch ? "touch-select-none" : "";
   const baseClasses =
-    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+    `${touchSelectClass} tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300`.trim();
 
   const streamClasses = "tw-rounded-xl";
 
@@ -172,7 +174,8 @@ const WaveDrop = ({
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { shouldUseTouchUI } = useDeviceInfo();
+  const hasTouch = shouldUseTouchUI || isMobile;
   const compact = useCompactMode();
 
   const isProfileView = location === DropLocation.PROFILE;
@@ -343,7 +346,8 @@ const WaveDrop = ({
     groupingClass,
     location,
     drop.rank,
-    isDrop
+    isDrop,
+    hasTouch
   );
 
   return (

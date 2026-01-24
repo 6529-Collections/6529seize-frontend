@@ -29,7 +29,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   tooltipId = "submission-badge",
 }) => {
   const isMobile = useIsMobileDevice();
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
@@ -37,7 +37,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
   if (submissionCount === 0) return null;
 
   const dataTooltipId =
-    !isMobile && !hasTouchScreen ? uniqueTooltipId : undefined;
+    !isMobile && !shouldUseTouchUI ? uniqueTooltipId : undefined;
 
   return (
     <>
@@ -74,7 +74,7 @@ export const ArtistSubmissionBadge: React.FC<ArtistSubmissionBadgeProps> = ({
       </button>
 
       {/* Tooltip - only on non-touch devices */}
-      {!isMobile && !hasTouchScreen && (
+      {!isMobile && !shouldUseTouchUI && (
         <Tooltip
           id={uniqueTooltipId}
           place="top"

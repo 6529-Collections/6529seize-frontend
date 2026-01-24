@@ -40,7 +40,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
-    const { hasTouchScreen } = useDeviceInfo();
+    const { shouldUseTouchUI } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
@@ -56,7 +56,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-      if (hasTouchScreen) {
+      if (shouldUseTouchUI) {
         return;
       }
 
@@ -86,7 +86,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           timerRef.current = null;
         }
       };
-    }, [activeSort, animationKey, hasTouchScreen]);
+    }, [activeSort, animationKey, shouldUseTouchUI]);
 
     const hasUserVoted = drop.context_profile_context?.rating !== undefined;
 
@@ -121,19 +121,19 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       setIsVotingModalOpen(true);
     };
 
-    const transitionClasses = !hasTouchScreen
+    const transitionClasses = !shouldUseTouchUI
       ? "tw-transition-all tw-duration-300 tw-ease-out"
       : "";
     const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
     const containerClass = `${groupClasses} tw-relative tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 
     const highlightAnimation =
-      isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
+      isHighlighting && !shouldUseTouchUI ? "tw-animate-gallery-reveal" : "";
 
     const baseImageClasses =
       "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-none tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
-    const imageScaleClasses = hasTouchScreen
+    const imageScaleClasses = shouldUseTouchUI
       ? ""
       : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
 

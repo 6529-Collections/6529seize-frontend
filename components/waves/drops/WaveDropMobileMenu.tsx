@@ -66,6 +66,55 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   );
 
   const [copied, setCopied] = useState(false);
+  const [copiedText, setCopiedText] = useState(false);
+
+  const extractTextFromDrop = (): string => {
+    if (!drop.parts || drop.parts.length === 0) {
+      return "";
+    }
+
+    const textParts = drop.parts
+      .map((part) => {
+        if (!part.content) return "";
+        let text = part.content;
+        text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+        text = text.replace(/\*\*([^\*]+)\*\*/g, "$1");
+        text = text.replace(/\*([^\*]+)\*/g, "$1");
+        text = text.replace(/`([^`]+)`/g, "$1");
+        text = text.replace(/#{1,6}\s+/g, "");
+        text = text.replace(/\n{3,}/g, "\n\n");
+        return text.trim();
+      })
+      .filter((text) => text.length > 0);
+
+    return textParts.join("\n\n");
+  };
+
+  const copyTextToClipboard = () => {
+    if (longPressTriggered) return;
+    if (isTemporaryDrop) return;
+
+    const text = extractTextFromDrop();
+    if (!text) return;
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedText(true);
+        setTimeout(() => setCopiedText(false), 2000);
+      });
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopiedText(true);
+      setTimeout(() => setCopiedText(false), 2000);
+    }
+  };
 
   const copyToClipboard = () => {
     if (longPressTriggered) return;
@@ -244,6 +293,40 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             }}
             onOpenChange={closeMenu}
           />
+        )}
+
+        {extractTextFromDrop() && (
+          <button
+            className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
+              isTemporaryDrop
+                ? "tw-cursor-default tw-opacity-50"
+                : "active:tw-bg-iron-800"
+            } tw-transition-colors tw-duration-200`}
+            onClick={copyTextToClipboard}
+            disabled={isTemporaryDrop}
+          >
+            <svg
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
+              />
+            </svg>
+            <span
+              className={`tw-text-base tw-font-semibold ${
+                copiedText ? "tw-text-primary-400" : "tw-text-iron-300"
+              }`}
+            >
+              {copiedText ? "Copied!" : "Copy text"}
+            </span>
+          </button>
         )}
 
         {showCopyOption && (

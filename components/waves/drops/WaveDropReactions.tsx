@@ -10,7 +10,7 @@ import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import clsx from "clsx";
@@ -39,7 +39,8 @@ interface WaveDropReactionsProps {
 
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
-  const isTouchDevice = useIsTouchDevice();
+  const { shouldUseTouchUI } = useDeviceInfo();
+  const isTouchDevice = shouldUseTouchUI;
 
   const handleOpenDialog = useCallback((reactionKey: string) => {
     setDialogReaction(reactionKey);

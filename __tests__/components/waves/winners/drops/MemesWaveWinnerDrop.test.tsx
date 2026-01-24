@@ -15,7 +15,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg
 jest.mock('next/link', () => ({ __esModule: true, default: ({href,children,onClick,className}:any) => <a href={href} onClick={onClick} className={className}>{children}</a> }));
 jest.mock('@/components/memes/drops/MemeDropTraits', () => () => <div data-testid="traits" />);
 jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia', () => () => <div data-testid="media" />);
-jest.mock('@/hooks/useDeviceInfo', () => ({ __esModule: true, default: () => ({ hasTouchScreen: false }) }));
+jest.mock('@/hooks/useDeviceInfo', () => ({ __esModule: true, default: () => ({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false }) }));
 jest.mock('@/hooks/useLongPressInteraction', () => ({ __esModule: true, default: () => ({ isActive:false, setIsActive: jest.fn(), touchHandlers:{} }) }));
 jest.mock('@/components/waves/drops/WaveDropActionsOpen', () => () => <div data-testid="actions" />);
 jest.mock('@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper', () => (p:any) => <div>{p.children}</div>);

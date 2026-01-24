@@ -8,7 +8,7 @@ import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,7 +52,8 @@ export default function EndedParticipationDrop({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { shouldUseTouchUI } = useDeviceInfo();
+  const hasTouch = shouldUseTouchUI || isMobile;
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();

@@ -179,6 +179,7 @@ interface MockSetupOptions {
     isAppleMobile?: boolean | undefined;
     isMobileDevice?: boolean | undefined;
     hasTouchScreen?: boolean | undefined;
+    shouldUseTouchUI?: boolean | undefined;
     isApp?: boolean | undefined;
   } | undefined;
 }
@@ -258,6 +259,7 @@ function setupMocks(options: MockSetupOptions = {}) {
     isAppleMobile: options.deviceInfo?.isAppleMobile ?? false,
     isMobileDevice: options.deviceInfo?.isMobileDevice ?? false,
     hasTouchScreen: options.deviceInfo?.hasTouchScreen ?? false,
+    shouldUseTouchUI: options.deviceInfo?.shouldUseTouchUI ?? false,
     isApp: options.deviceInfo?.isApp ?? false
   });
 

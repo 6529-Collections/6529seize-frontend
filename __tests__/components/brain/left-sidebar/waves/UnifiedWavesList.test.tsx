@@ -32,6 +32,7 @@ type DeviceInfo = {
   isApp: boolean;
   isMobileDevice: boolean;
   hasTouchScreen: boolean;
+  shouldUseTouchUI: boolean;
   isAppleMobile: boolean;
 };
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<typeof useDeviceInfo>;
@@ -42,6 +43,7 @@ beforeEach(() => {
     isApp: false,
     isMobileDevice: false,
     hasTouchScreen: false,
+    shouldUseTouchUI: false,
     isAppleMobile: false,
   } as DeviceInfo);
 });
@@ -72,6 +74,8 @@ describe('UnifiedWavesList', () => {
       isApp: true,
       isMobileDevice: false,
       hasTouchScreen: false,
+      shouldUseTouchUI: false,
+      shouldUseTouchUI: false,
       isAppleMobile: false,
     } as DeviceInfo);
     const fetchNextPage = jest.fn();

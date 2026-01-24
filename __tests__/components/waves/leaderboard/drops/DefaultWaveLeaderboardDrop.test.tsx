@@ -4,7 +4,7 @@ import { DefaultWaveLeaderboardDrop } from '@/components/waves/leaderboard/drops
 import type { ApiWave } from '@/generated/models/ObjectSerializer';
 
 jest.mock('@/hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: () => ({ canShowVote: true, canDelete: true }) }));
-jest.mock('@/hooks/useDeviceInfo', () => ({ __esModule: true, default: () => ({ hasTouchScreen: false }) }));
+jest.mock('@/hooks/useDeviceInfo', () => ({ __esModule: true, default: () => ({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false }) }));
 jest.mock('@/hooks/isMobileScreen', () => ({ __esModule: true, default: () => false }));
 jest.mock('@/hooks/useLongPressInteraction', () => ({ __esModule: true, default: () => ({ isActive:false, setIsActive: jest.fn(), touchHandlers:{} }) }));
 

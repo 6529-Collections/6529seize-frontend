@@ -43,12 +43,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   wave,
   onDropClick,
 }) => {
-  // Get device info from useDeviceInfo hook
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
 
-  // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
-    hasTouchScreen,
+    hasTouchScreen: shouldUseTouchUI,
   });
 
   const title =
@@ -82,7 +80,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   return (
     <div
       onClick={() => onDropClick(extendedDrop)}
-      className="touch-select-none tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
+      className={`${shouldUseTouchUI ? "touch-select-none" : ""} tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full`.trim()}
     >
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/20 tw-shadow-[0_0_15px_rgba(251,191,36,0.08)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
@@ -140,7 +138,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 </div>
               </div>
 
-              {!hasTouchScreen && (
+              {!shouldUseTouchUI && (
                 <div className="tw-flex tw-items-start tw-flex-shrink-0">
                   <div className="tw-h-8">
                     <WaveDropActionsOpen drop={extendedDrop} />
@@ -255,7 +253,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           </div>
 
           {/* Touch slide-up menu */}
-          {hasTouchScreen &&
+          {shouldUseTouchUI &&
             createPortal(
               <CommonDropdownItemsMobileWrapper
                 isOpen={isActive}

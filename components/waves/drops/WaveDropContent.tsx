@@ -3,7 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropPart from "./WaveDropPart";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface WaveDropContentProps {
   readonly drop: ExtendedDrop;
@@ -38,8 +38,8 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   mediaImageScale = ImageScale.AUTOx450,
   hasTouch,
 }) => {
-  const isTouchDevice = useIsTouchDevice();
-  const effectiveHasTouch = hasTouch ?? isTouchDevice;
+  const { shouldUseTouchUI } = useDeviceInfo();
+  const effectiveHasTouch = hasTouch ?? shouldUseTouchUI;
 
   return (
     <WaveDropPart

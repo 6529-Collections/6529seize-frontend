@@ -46,6 +46,8 @@ describe("NetworkPageLayout", () => {
       isApp: false,
       isMobileDevice: false,
       hasTouchScreen: false,
+      shouldUseTouchUI: false,
+      isAppleMobile: false,
     });
   });
 
@@ -73,6 +75,8 @@ describe("NetworkPageLayout", () => {
       isApp: true,
       isMobileDevice: false,
       hasTouchScreen: false,
+      shouldUseTouchUI: false,
+      isAppleMobile: false,
     });
 
     renderComponent();

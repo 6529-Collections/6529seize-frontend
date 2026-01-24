@@ -34,7 +34,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const { activeWave } = useMyStream();
   const { id: activeWaveId, set: setActiveWave } = activeWave;
   const prefetchWaveData = usePrefetchWaveData();
-  const { isApp, hasTouchScreen } = useDeviceInfo();
+  const { isApp, shouldUseTouchUI } = useDeviceInfo();
   const isDropWave = wave.type !== ApiWaveType.Chat;
 
   const formattedWaveName = useMemo(() => {
@@ -139,7 +139,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       }`}>
       <Link
         href={href}
-         {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
+         {...(!shouldUseTouchUI && { onMouseEnter: onWaveHover })}
         onClick={handleWaveClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive

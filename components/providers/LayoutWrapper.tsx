@@ -18,7 +18,7 @@ export default function LayoutWrapper({
 }: {
   readonly children: ReactNode;
 }) {
-  const { isApp, hasTouchScreen } = useDeviceInfo();
+  const { isApp, shouldUseTouchUI } = useDeviceInfo();
   const { refreshKey } = useGlobalRefresh();
   const isSmallScreen = useIsMobileScreen();
   const [isTouchTabletViewport, setIsTouchTabletViewport] = useState(() => {
@@ -30,7 +30,7 @@ export default function LayoutWrapper({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!hasTouchScreen) {
+    if (!shouldUseTouchUI) {
       setIsTouchTabletViewport(false);
       return;
     }
@@ -64,7 +64,7 @@ export default function LayoutWrapper({
         mediaQuery.onchange = previousOnChange ?? null;
       }
     };
-  }, [hasTouchScreen]);
+  }, [shouldUseTouchUI]);
 
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
@@ -73,7 +73,7 @@ export default function LayoutWrapper({
     WebLayout;
 
   const isSmallLayout =
-    hasTouchScreen && (isSmallScreen || isTouchTabletViewport);
+    shouldUseTouchUI && (isSmallScreen || isTouchTabletViewport);
 
   if (isApp) {
     LayoutComponent = MobileLayout;

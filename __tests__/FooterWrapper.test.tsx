@@ -8,7 +8,9 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: jest.fn(() => ({
     isMobileDevice: false,
     hasTouchScreen: false,
+    shouldUseTouchUI: false,
     isApp: false,
+    isAppleMobile: false,
   })),
 }));
 jest.mock("next/navigation", () => ({ usePathname: jest.fn() }));
