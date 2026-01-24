@@ -77,12 +77,12 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       .map((part) => {
         if (!part.content) return "";
         let text = part.content;
-        text = text.replace(/\[([^\]]{1,1000})\]\([^\)]{1,1000}\)/g, "$1");
-        text = text.replace(/\*\*([^\*]{1,1000})\*\*/g, "$1");
-        text = text.replace(/\*([^\*]{1,1000})\*/g, "$1");
-        text = text.replace(/`([^`]{1,1000})`/g, "$1");
-        text = text.replace(/#{1,6}\s+/g, "");
-        text = text.replace(/\n{3,}/g, "\n\n");
+        text = text.replaceAll(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+        text = text.replaceAll(/\*\*([^*]+)\*\*/g, "$1");
+        text = text.replaceAll(/\*([^*]+)\*/g, "$1");
+        text = text.replaceAll(/`([^`]+)`/g, "$1");
+        text = text.replaceAll(/#{1,6}\s+/g, "");
+        text = text.replaceAll(/\n{3,}/g, "\n\n");
         return text.trim();
       })
       .filter((text) => text.length > 0);
@@ -90,33 +90,23 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     return textParts.join("\n\n");
   };
 
-  const copyTextToClipboard = () => {
+  const copyTextToClipboard = async () => {
     if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
     const text = extractTextFromDrop();
     if (!text) return;
 
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopiedText(true);
-        setTimeout(() => setCopiedText(false), 2000);
-      });
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
+    try {
+      await navigator.clipboard.writeText(text);
       setCopiedText(true);
       setTimeout(() => setCopiedText(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
     }
   };
 
-  const copyToClipboard = () => {
+  const copyToClipboard = async () => {
     if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
@@ -143,22 +133,12 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       isApp: false,
     })}`;
 
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(dropLink).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = dropLink;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
+    try {
+      await navigator.clipboard.writeText(dropLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy link:", err);
     }
   };
 

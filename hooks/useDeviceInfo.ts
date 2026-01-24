@@ -48,9 +48,7 @@ export default function useDeviceInfo(): DeviceInfo {
       const hasHover = hasAnyHover || hasPrimaryHover;
 
       let shouldUseTouchUI = false;
-      if (hasFinePointer || hasHover) {
-        shouldUseTouchUI = false;
-      } else if (maxTouchPoints > 0) {
+      if (!(hasFinePointer || hasHover) && maxTouchPoints > 0) {
         const ua = nav.userAgent ?? "";
         const isMobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
         shouldUseTouchUI = isMobileUA;
