@@ -77,10 +77,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       .map((part) => {
         if (!part.content) return "";
         let text = part.content;
-        text = text.replace(/\[([^\]]{1,1000}?)\]\([^\)]{1,1000}?\)/g, "$1");
-        text = text.replace(/\*\*([^\*]{1,1000}?)\*\*/g, "$1");
-        text = text.replace(/\*([^\*]{1,1000}?)\*/g, "$1");
-        text = text.replace(/`([^`]{1,1000}?)`/g, "$1");
+        text = text.replace(/\[([^\]]{1,1000})\]\([^\)]{1,1000}\)/g, "$1");
+        text = text.replace(/\*\*([^\*]{1,1000})\*\*/g, "$1");
+        text = text.replace(/\*([^\*]{1,1000})\*/g, "$1");
+        text = text.replace(/`([^`]{1,1000})`/g, "$1");
         text = text.replace(/#{1,6}\s+/g, "");
         text = text.replace(/\n{3,}/g, "\n\n");
         return text.trim();
