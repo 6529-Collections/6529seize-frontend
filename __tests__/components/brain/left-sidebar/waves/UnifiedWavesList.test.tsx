@@ -75,7 +75,6 @@ describe('UnifiedWavesList', () => {
       isMobileDevice: false,
       hasTouchScreen: false,
       shouldUseTouchUI: false,
-      shouldUseTouchUI: false,
       isAppleMobile: false,
     } as DeviceInfo);
     const fetchNextPage = jest.fn();
