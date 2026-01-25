@@ -76,7 +76,11 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onBoostedDropClick,
   onScrollToUnread,
 }) => {
-  const { unreadDividerSerialNo } = useUnreadDivider();
+  const { unreadDividerSerialNo, setUnreadDividerSerialNo } = useUnreadDivider();
+
+  const handleDismissUnread = () => {
+    setUnreadDividerSerialNo(null);
+  };
   const dropsCount = waveMessages?.drops.length ?? 0;
   const isInitialLoading =
     !!waveMessages?.isLoading &&
@@ -122,6 +126,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         boostedDrops={boostedDrops}
         onBoostedDropClick={onBoostedDropClick}
         onScrollToUnread={onScrollToUnread}
+        onDismissUnread={handleDismissUnread}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

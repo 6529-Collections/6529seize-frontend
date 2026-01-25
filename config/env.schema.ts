@@ -116,6 +116,7 @@ export const publicEnvSchema = z.object({
   AWS_RUM_REGION: z.string().optional(),
   AWS_RUM_SAMPLE_RATE: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
+  SENTRY_REPLAY_ENABLED: z.enum(["true", "false"]).optional(),
 
     /**
    * ────────────────

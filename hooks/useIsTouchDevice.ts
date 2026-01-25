@@ -14,9 +14,28 @@ export default function useIsTouchDevice(): boolean {
       matchMedia?: (query: string) => MediaQueryList;
     };
 
-    const hasFinePointer = win.matchMedia?.("(pointer: fine)")?.matches;
-    if (hasFinePointer) {
+    const nav = globalThis.navigator as Navigator | undefined;
+    const maxTouchPoints = nav?.maxTouchPoints ?? 0;
+
+    // Prefer "any-*" media queries so hybrid devices (touchscreen + trackpad/mouse)
+    // aren't misclassified as touch-only when the primary pointer is coarse.
+    const hasAnyFinePointer = win.matchMedia?.("(any-pointer: fine)")?.matches ?? false;
+    const hasPrimaryFinePointer = win.matchMedia?.("(pointer: fine)")?.matches ?? false;
+    const hasFinePointer = hasAnyFinePointer || hasPrimaryFinePointer;
+
+    const hasAnyHover = win.matchMedia?.("(any-hover: hover)")?.matches ?? false;
+    const hasPrimaryHover = win.matchMedia?.("(hover: hover)")?.matches ?? false;
+    const hasHover = hasAnyHover || hasPrimaryHover;
+
+    if (hasFinePointer || hasHover) {
       setIsTouchDevice(false);
+      return;
+    }
+
+    // If there's no fine pointer and the device advertises touch points, treat it
+    // as touch (important for first-touch interactions like long-press menus).
+    if (maxTouchPoints > 0) {
+      setIsTouchDevice(true);
       return;
     }
 
