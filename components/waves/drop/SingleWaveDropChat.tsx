@@ -8,11 +8,8 @@ import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,
 } from "../CreateDropWaveWrapper";
-import type {
-  ActiveDropState} from "@/types/dropInteractionTypes";
-import {
-  ActiveDropAction
-} from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 
@@ -31,10 +28,12 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   // Apply Android keyboard adjustments to the fixed input area
   const inputContainerStyle = useMemo(() => {
     return {
-      paddingBottom: isKeyboardVisible ? "0px" : "calc(env(safe-area-inset-bottom))",
+      paddingBottom: isKeyboardVisible
+        ? "0px"
+        : "calc(env(safe-area-inset-bottom))",
     };
   }, [isKeyboardVisible]);
-  
+
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
     drop: drop,
@@ -62,12 +61,12 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   return (
-    <div className="tw-flex-1 tw-flex tw-flex-col tw-h-full tw-min-h-0">
-      <div className="tw-flex-1 tw-flex tw-flex-col tw-min-h-0 tw-overflow-hidden tw-bg-iron-950 tw-relative lg:tw-border tw-border-l-0 lg:tw-border-r lg:tw-border-solid tw-border-iron-800 tw-border-y-0">
-        <div className="tw-flex-1 tw-flex tw-flex-col tw-min-h-0 tw-relative">
-          <div className="tw-w-full tw-flex tw-flex-col tw-flex-1 tw-min-h-0">
-            <div className="tw-w-full tw-flex tw-flex-col tw-flex-1 tw-min-h-0">
-              <div className="tw-flex-1 tw-min-h-0">
+    <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-1 tw-flex-col">
+      <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-border-y-0 tw-border-l-0 tw-border-iron-800 tw-bg-iron-950 lg:tw-border lg:tw-border-r lg:tw-border-solid">
+        <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+          <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col">
+            <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-flex-col">
+              <div className="tw-min-h-0 tw-flex-1">
                 <WaveDropsAll
                   waveId={wave.id}
                   onReply={({
@@ -103,12 +102,18 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                 />
               </div>
               <div
-                style={isApp ? inputContainerStyle : {
-                  paddingBottom: "calc(env(safe-area-inset-bottom))",
-                }}
-                className="tw-mt-auto">
+                style={
+                  isApp
+                    ? inputContainerStyle
+                    : {
+                        paddingBottom: "calc(env(safe-area-inset-bottom))",
+                      }
+                }
+                className="tw-mt-auto"
+              >
                 <CreateDropWaveWrapper
-                  context={CreateDropWaveWrapperContext.SINGLE_DROP}>
+                  context={CreateDropWaveWrapperContext.SINGLE_DROP}
+                >
                   <PrivilegedDropCreator
                     activeDrop={activeDrop}
                     onCancelReplyQuote={resetActiveDrop}
