@@ -1,5 +1,9 @@
+import LruTtlCache from "@/lib/cache/lruTtl";
+
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 50;
+const MAX_ALIAS_ENTRIES = MAX_CACHE_ENTRIES * 4;
+const ALIAS_TTL_MS = CACHE_TTL_MS * 3;
 
 export type TikTokPreviewKind = "video" | "profile";
 
@@ -31,7 +35,10 @@ type CacheEntry = {
 };
 
 const cache = new Map<string, CacheEntry>();
-const aliasMap = new Map<string, string>();
+const aliasMap = new LruTtlCache<string, string>({
+  max: MAX_ALIAS_ENTRIES,
+  ttlMs: ALIAS_TTL_MS,
+});
 const requests = new Map<string, Promise<TikTokPreviewResult>>();
 
 function getCacheKey(url: string): string {

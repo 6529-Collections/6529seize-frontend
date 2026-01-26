@@ -10,6 +10,7 @@ import {
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
 import { escapeRegExp } from "@/lib/text/regex";
+import LruTtlCache from "@/lib/cache/lruTtl";
 import {
   parseFarcasterResource,
   type FarcasterResourceIdentifier,
@@ -32,6 +33,7 @@ const CAST_CACHE_TTL_MS = 20 * 60 * 1000;
 const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const CHANNEL_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const FRAME_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const CACHE_MAX_ITEMS = 500;
 
 const FETCH_TIMEOUT_MS = 6000;
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
@@ -58,50 +60,22 @@ const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
   policy: PUBLIC_URL_POLICY,
 };
 
-type CacheEntry<T> = {
-  readonly value: T;
-  readonly expiresAt: number;
-};
-
-const castCache = new Map<string, CacheEntry<FarcasterCastPreview | null>>();
-const profileCache = new Map<
-  string,
-  CacheEntry<FarcasterProfilePreview | null>
->();
-const channelCache = new Map<
-  string,
-  CacheEntry<FarcasterChannelPreview | null>
->();
-const frameCache = new Map<string, CacheEntry<FarcasterFramePreview | null>>();
-
-const getCacheValue = <T>(
-  cache: Map<string, CacheEntry<T>>,
-  key: string
-): T | undefined => {
-  const entry = cache.get(key);
-  if (!entry) {
-    return undefined;
-  }
-
-  if (entry.expiresAt > Date.now()) {
-    return entry.value;
-  }
-
-  cache.delete(key);
-  return undefined;
-};
-
-const setCacheValue = <T>(
-  cache: Map<string, CacheEntry<T>>,
-  key: string,
-  value: T,
-  ttlMs: number
-): void => {
-  cache.set(key, {
-    value,
-    expiresAt: Date.now() + ttlMs,
-  });
-};
+const castCache = new LruTtlCache<string, FarcasterCastPreview | null>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: CAST_CACHE_TTL_MS,
+});
+const profileCache = new LruTtlCache<string, FarcasterProfilePreview | null>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: PROFILE_CACHE_TTL_MS,
+});
+const channelCache = new LruTtlCache<string, FarcasterChannelPreview | null>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: CHANNEL_CACHE_TTL_MS,
+});
+const frameCache = new LruTtlCache<string, FarcasterFramePreview | null>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: FRAME_CACHE_TTL_MS,
+});
 
 const createAbortController = (
   timeoutMs: number
@@ -421,7 +395,7 @@ const mapWarpcastChannel = (
 const fetchCastPreview = async (
   identifier: Extract<FarcasterResourceIdentifier, { type: "cast" }>
 ): Promise<FarcasterCastPreview | null> => {
-  const cached = getCacheValue(castCache, identifier.canonicalUrl);
+  const cached = castCache.get(identifier.canonicalUrl);
   if (cached !== undefined) {
     return cached;
   }
@@ -431,14 +405,14 @@ const fetchCastPreview = async (
   });
 
   const mapped = mapWarpcastCast(response, identifier.canonicalUrl);
-  setCacheValue(castCache, identifier.canonicalUrl, mapped, CAST_CACHE_TTL_MS);
+  castCache.set(identifier.canonicalUrl, mapped);
   return mapped;
 };
 
 const fetchProfilePreview = async (
   identifier: Extract<FarcasterResourceIdentifier, { type: "profile" }>
 ): Promise<FarcasterProfilePreview | null> => {
-  const cached = getCacheValue(profileCache, identifier.canonicalUrl);
+  const cached = profileCache.get(identifier.canonicalUrl);
   if (cached !== undefined) {
     return cached;
   }
@@ -451,19 +425,14 @@ const fetchProfilePreview = async (
   );
 
   const mapped = mapWarpcastUser(response, identifier.canonicalUrl);
-  setCacheValue(
-    profileCache,
-    identifier.canonicalUrl,
-    mapped,
-    PROFILE_CACHE_TTL_MS
-  );
+  profileCache.set(identifier.canonicalUrl, mapped);
   return mapped;
 };
 
 const fetchChannelPreview = async (
   identifier: Extract<FarcasterResourceIdentifier, { type: "channel" }>
 ): Promise<FarcasterChannelPreview | null> => {
-  const cached = getCacheValue(channelCache, identifier.canonicalUrl);
+  const cached = channelCache.get(identifier.canonicalUrl);
   if (cached !== undefined) {
     return cached;
   }
@@ -476,12 +445,7 @@ const fetchChannelPreview = async (
   );
 
   const mapped = mapWarpcastChannel(response, identifier.canonicalUrl);
-  setCacheValue(
-    channelCache,
-    identifier.canonicalUrl,
-    mapped,
-    CHANNEL_CACHE_TTL_MS
-  );
+  channelCache.set(identifier.canonicalUrl, mapped);
   return mapped;
 };
 
@@ -582,21 +546,21 @@ const fetchHtml = async (
 const detectFramePreview = async (
   url: URL
 ): Promise<FarcasterFramePreview | null> => {
-  const cached = getCacheValue(frameCache, url.toString());
+  const cached = frameCache.get(url.toString());
   if (cached !== undefined) {
     return cached;
   }
 
   const result = await fetchHtml(url);
   if (!result) {
-    setCacheValue(frameCache, url.toString(), null, FRAME_CACHE_TTL_MS);
+    frameCache.set(url.toString(), null);
     return null;
   }
 
   const { html, finalUrl } = result;
 
   if (!hasFrameMeta(html)) {
-    setCacheValue(frameCache, url.toString(), null, FRAME_CACHE_TTL_MS);
+    frameCache.set(url.toString(), null);
     return null;
   }
 
@@ -634,7 +598,7 @@ const detectFramePreview = async (
     },
   };
 
-  setCacheValue(frameCache, url.toString(), preview, FRAME_CACHE_TTL_MS);
+  frameCache.set(url.toString(), preview);
   return preview;
 };
 
