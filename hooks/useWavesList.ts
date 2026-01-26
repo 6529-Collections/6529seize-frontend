@@ -46,8 +46,6 @@ const useWavesList = () => {
     refetch: refetchPinnedWaves,
   } = usePinnedWavesServer();
   const [following] = useShowFollowingWaves();
-  const allWavesRef = useRef<EnhancedWave[]>([]);
-
   // Use ref to avoid too many re-renders for derived values
   const prevMainWavesRef = useRef<ApiWave[]>([]);
   const prevPinnedWavesRef = useRef<EnhancedWave[]>([]);
@@ -173,12 +171,7 @@ const useWavesList = () => {
 
   // New drops counting logic has been removed and will be managed by context
 
-  const allWaves = useMemo(() => {
-    if (!areWavesEqual(combinedWaves, allWavesRef.current)) {
-      allWavesRef.current = combinedWaves;
-    }
-    return allWavesRef.current;
-  }, [combinedWaves]);
+  const allWaves = combinedWaves;
 
   // Use server-side loading and error states
   const isPinnedWavesLoading = isPinnedWavesLoadingServer;
