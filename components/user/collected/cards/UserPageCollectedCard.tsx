@@ -86,7 +86,7 @@ export default function UserPageCollectedCard({
   const OverlayControls = isSelectMode ? (
     <div
       className={[
-        "tw-pointer-events-none tw-absolute tw-inset-0",
+        "tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10",
         "tw-flex tw-items-start tw-justify-end",
         "tw-p-2",
       ].join(" ")}

@@ -63,10 +63,10 @@ jest.mock("@/components/the-memes/MemePageTimeline", () => ({
     show ? <div data-testid="timeline">Timeline</div> : null,
 }));
 
-jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => {
-  const MockMemePageMintCountdown = () => <div data-testid="mint-countdown" />;
-  MockMemePageMintCountdown.displayName = "MockMemePageMintCountdown";
-  return MockMemePageMintCountdown;
+jest.mock("@/components/home/now-minting/NowMintingCountdown", () => {
+  const MockNowMintingCountdown = () => <div data-testid="mint-countdown" />;
+  MockNowMintingCountdown.displayName = "MockNowMintingCountdown";
+  return MockNowMintingCountdown;
 });
 
 jest.mock("@/components/nft-image/NFTImage", () => {

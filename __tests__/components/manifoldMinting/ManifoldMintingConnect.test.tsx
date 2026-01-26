@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ManifoldMintingConnect from '@/components/manifoldMinting/ManifoldMintingConnect';
@@ -8,14 +7,10 @@ import { CookieConsentProvider } from '@/components/cookies/CookieConsentContext
 jest.mock('@/components/header/user/HeaderUserConnect', () => () => <div data-testid="header-connect" />);
 
 jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  const Form: any = (p: any) => <form {...p}>{p.children}</form>;
-  Form.Control = (p: any) => <input data-testid="mint-input" {...p} />;
   return {
     Container: (p: any) => <div data-testid="container" {...p} />,
     Row: (p: any) => <div data-testid="row" {...p} />,
     Col: (p: any) => <div data-testid="col" {...p} />,
-    Form,
   };
 });
 
@@ -25,9 +20,26 @@ jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   UserCICAndLevelSize: { XLARGE: 'XLARGE' },
 }));
 
-jest.mock('wagmi', () => ({
-  useEnsName: () => ({ data: undefined, isFetched: false }),
-  useEnsAddress: () => ({ data: undefined, isFetched: false }),
+let mockOnProfileSelect: ((profile: any) => void) | null = null;
+let mockOnWalletSelect: ((wallet: string | null) => void) | null = null;
+
+jest.mock('@/components/common/RecipientSelector', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    mockOnProfileSelect = props.onProfileSelect;
+    mockOnWalletSelect = props.onWalletSelect;
+    return (
+      <div data-testid="recipient-selector">
+        <span data-testid="selector-label">{props.label}</span>
+        {props.selectedProfile && (
+          <span data-testid="selected-profile">{props.selectedProfile.handle}</span>
+        )}
+        {props.selectedWallet && (
+          <span data-testid="selected-wallet">{props.selectedWallet}</span>
+        )}
+      </div>
+    );
+  },
 }));
 
 jest.mock('@/components/auth/SeizeConnectContext', () => ({
@@ -52,7 +64,11 @@ function renderConnected(onMintFor = jest.fn()) {
 
 
 describe('ManifoldMintingConnect', () => {
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockOnProfileSelect = null;
+    mockOnWalletSelect = null;
+  });
 
   it('shows connect prompt when not connected', () => {
     (mockedConnect as jest.Mock).mockReturnValue({ isConnected: false });
@@ -69,24 +85,40 @@ describe('ManifoldMintingConnect', () => {
     expect(onMintFor).toHaveBeenCalledWith(seizeCtx.address);
   });
 
-  it('allows minting for fren when valid address entered', async () => {
-    const { onMintFor } = renderConnected();
+  it('shows RecipientSelector when mint for fren is clicked', async () => {
+    renderConnected();
     await userEvent.click(screen.getByRole('button', { name: /Mint for fren/i }));
-    const input = screen.getByTestId('mint-input');
-    const frenAddress = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-    await userEvent.type(input, frenAddress);
-    await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenAddress));
-    expect(screen.queryByText('Invalid Address')).not.toBeInTheDocument();
+    expect(screen.getByTestId('recipient-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('selector-label')).toHaveTextContent('Mint For');
   });
 
-  it('shows validation message for invalid address', async () => {
+  it('calls onMintFor with selected wallet when wallet is selected', async () => {
     const { onMintFor } = renderConnected();
     await userEvent.click(screen.getByRole('button', { name: /Mint for fren/i }));
-    const input = screen.getByTestId('mint-input');
-    await userEvent.type(input, 'notanaddress');
-    expect(screen.getByText('Invalid Address')).toBeInTheDocument();
-    expect(onMintFor).toHaveBeenCalledTimes(2);
-    expect(onMintFor).toHaveBeenLastCalledWith('');
+    
+    const frenWallet = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    
+    if (mockOnProfileSelect && mockOnWalletSelect) {
+      mockOnProfileSelect({ handle: 'fren', wallet: frenWallet });
+      mockOnWalletSelect(frenWallet);
+    }
+    
+    await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenWallet));
+  });
+
+  it('reverts to own address when switching back to mint for me', async () => {
+    const { onMintFor, seizeCtx } = renderConnected();
+    await userEvent.click(screen.getByRole('button', { name: /Mint for fren/i }));
+    
+    const frenWallet = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    if (mockOnProfileSelect && mockOnWalletSelect) {
+      mockOnProfileSelect({ handle: 'fren', wallet: frenWallet });
+      mockOnWalletSelect(frenWallet);
+    }
+    
+    await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenWallet));
+    
+    await userEvent.click(screen.getByRole('button', { name: /Mint for me/i }));
+    await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(seizeCtx.address));
   });
 });
-
