@@ -358,10 +358,7 @@ export default function ManifoldMintingWidget(
                 props.claim.status !== ManifoldClaimStatus.ACTIVE ||
                 !mintCount
               }
-              className="btn btn-primary btn-block"
-              style={{
-                padding: "0.6rem",
-              }}
+              className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
               onClick={onMint}
             >
               <b>{getButtonText()}</b>
@@ -442,21 +439,7 @@ export default function ManifoldMintingWidget(
       props.claim.status === ManifoldClaimStatus.ENDED ||
       props.claim.isFinalized
     ) {
-      return (
-        <button
-          disabled
-          className="btn btn-primary btn-block"
-          style={{
-            padding: "0.6rem",
-          }}
-        >
-          <b>
-            {props.claim.status === ManifoldClaimStatus.ENDED
-              ? "ENDED"
-              : "SOLD OUT"}
-          </b>
-        </button>
-      );
+      return <></>;
     }
     if (!mintForAddress) {
       return <></>;
@@ -512,7 +495,7 @@ export default function ManifoldMintingWidget(
             </Col>
           </Row>
         )}
-      <Row className="pt-2">
+      <Row>
         <Col>{printContent()}</Col>
       </Row>
     </Container>

@@ -1,18 +1,19 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { Col, Container, Form, Row } from "react-bootstrap";
-import { useEnsAddress, useEnsName } from "wagmi";
-import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
-import { AuthContext } from "../auth/Auth";
-import UserCICAndLevel, {
-  UserCICAndLevelSize,
-} from "../user/utils/UserCICAndLevel";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { AuthContext } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import RecipientSelector from "../common/RecipientSelector";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
+import HeaderUserConnect from "../header/user/HeaderUserConnect";
+import UserCICAndLevel, {
+    UserCICAndLevelSize,
+} from "../user/utils/UserCICAndLevel";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
@@ -25,50 +26,14 @@ export default function ManifoldMintingConnect(
   const { country } = useCookieConsent();
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);
-
-  const [mintForInput, setMintForInput] = useState<string>("");
-  const [mintForEns, setMintForEns] = useState<string>("");
-  const [mintForAddress, setMintForAddress] = useState("");
-  const [mintForLock, setMintForLock] = useState<boolean>(false);
+  const [selectedProfile, setSelectedProfile] =
+    useState<CommunityMemberMinimal | null>(null);
+  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
 
   function reset() {
-    setMintForInput("");
-    setMintForEns("");
-    setMintForAddress("");
-    setMintForLock(false);
+    setSelectedProfile(null);
+    setSelectedWallet(null);
   }
-
-  const addressToEns = useEnsName({
-    address: mintForAddress as `0x${string}`,
-    chainId: 1,
-  });
-  const ensToAddress = useEnsAddress({
-    name: mintForEns,
-    chainId: 1,
-  });
-
-  useEffect(() => {
-    if (addressToEns.data && !mintForLock && mintForFren) {
-      const newEns = addressToEns.data;
-
-      setMintForEns(newEns);
-      setMintForInput(`${newEns} - ${mintForInput}`);
-    }
-    if (mintForInput) {
-      setMintForLock(true);
-    }
-  }, [addressToEns.isFetched]);
-
-  useEffect(() => {
-    if (ensToAddress.data && !mintForLock && mintForFren) {
-      const newAddress = ensToAddress.data;
-
-      setMintForAddress(newAddress);
-      setMintForInput(`${mintForInput} - ${newAddress}`);
-
-      setMintForLock(true);
-    }
-  }, [ensToAddress.isFetched]);
 
   useEffect(() => {
     reset();
@@ -76,54 +41,25 @@ export default function ManifoldMintingConnect(
   }, [account.address]);
 
   useEffect(() => {
-    if (mintForFren) {
-      props.onMintFor(mintForAddress);
+    if (mintForFren && selectedWallet) {
+      props.onMintFor(selectedWallet);
     } else {
       props.onMintFor(account.address as string);
     }
-  }, [mintForAddress, mintForFren]);
+  }, [selectedWallet, mintForFren, account.address, props]);
 
   function printMintFor() {
     return (
-      <div className="d-flex flex-column pt-2 pb-1">
-        <span className="font-smaller font-lighter">Mint For</span>
-        <span className="d-flex align-items-center justify-content-between">
-          <Form.Control
-            style={{ fontSize: "smaller" }}
-            autoFocus
-            disabled={mintForLock}
-            placeholder={"0x... or ENS"}
-            type="text"
-            value={mintForInput}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (isValidEthAddress(value)) {
-                setMintForAddress(value);
-              }
-              if (value.endsWith(".eth")) {
-                setMintForEns(value);
-              }
-              setMintForInput(value);
-            }}
-          />
-        </span>
-        {!mintForAddress && mintForInput && (
-          <span className="font-smaller font-lighter text-danger pt-1">
-            Invalid Address
-          </span>
-        )}
-        {mintForLock && (
-          <span className="d-flex justify-content-end">
-            <button
-              className="btn-link decoration-none font-color"
-              style={{
-                width: "fit-content",
-              }}
-              onClick={() => reset()}>
-              <span className="font-smaller font-lighter pt-1">clear</span>
-            </button>
-          </span>
-        )}
+      <div className="tw-pt-2 tw-pb-1">
+        <RecipientSelector
+          open={mintForFren}
+          selectedProfile={selectedProfile}
+          selectedWallet={selectedWallet}
+          onProfileSelect={setSelectedProfile}
+          onWalletSelect={setSelectedWallet}
+          label="Mint For"
+          placeholder="Search by handle, ens or wallet"
+        />
       </div>
     );
   }
@@ -192,7 +128,10 @@ export default function ManifoldMintingConnect(
           <button
             className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(false)}>
+            onClick={() => {
+              reset();
+              setMintForFren(false);
+            }}>
             Mint for me
           </button>
           <button

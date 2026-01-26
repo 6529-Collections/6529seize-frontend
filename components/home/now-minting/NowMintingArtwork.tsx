@@ -38,7 +38,7 @@ export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
           nft={nft}
           animation={shouldAnimate}
           height={650}
-          showBalance={true}
+          showBalance={false}
         />
         {shouldGate && !interactiveEnabled && (
           <button
