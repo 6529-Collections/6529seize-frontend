@@ -221,10 +221,12 @@ function setupMocks(options: MockSetupOptions = {}) {
   const waveMessagesMock =
     hasWaveMessagesOverride && options.waveMessages === undefined
       ? undefined
-      : {
+      : options.waveMessages
+      ? {
           ...defaultWaveMessages,
-          ...(options.waveMessages ?? {}),
-        };
+          ...options.waveMessages,
+        }
+      : defaultWaveMessages;
 
   let currentWaveMessages = waveMessagesMock as WaveMessagesMock | undefined;
 

@@ -46,8 +46,6 @@ const useWavesList = () => {
     refetch: refetchPinnedWaves,
   } = usePinnedWavesServer();
   const [following] = useShowFollowingWaves();
-  // Use ref to avoid too many re-renders for derived values
-  const prevMainWavesRef = useRef<ApiWave[]>([]);
   const prevPinnedWavesRef = useRef<EnhancedWave[]>([]);
 
   // Track connected identity state - memoize to prevent re-renders
@@ -74,7 +72,6 @@ const useWavesList = () => {
   const mainWavesMap = useMemo(() => {
     const map = new Map<string, ApiWave>();
     mainWaves.forEach((wave) => map.set(wave.id, wave));
-    prevMainWavesRef.current = mainWaves;
     return map;
   }, [mainWaves]);
 
@@ -84,7 +81,7 @@ const useWavesList = () => {
   }, [mainWavesMap]);
 
   // Server provides full pinned waves data, so no individual fetching needed
-  const missingPinnedIds: string[] = [];
+  const missingPinnedIds = useMemo<string[]>(() => [], []);
   // Function to refetch all waves (main and pinned)
   const refetchAllWaves = useCallback(() => {
     // Refetch main waves overview
@@ -206,7 +203,7 @@ const useWavesList = () => {
       removePinnedWave: unpinWave,
 
       // Additional data that might be useful
-      mainWaves: prevMainWavesRef.current,
+      mainWaves,
       missingPinnedIds,
       mainWavesRefetch,
       // Refetch all waves including main and pinned
@@ -219,12 +216,12 @@ const useWavesList = () => {
       hasNextPage,
       fetchNextPageStable,
       mainWavesStatus,
+      mainWaves,
       allPinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
       pinWave,
       unpinWave,
-      prevMainWavesRef.current,
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,

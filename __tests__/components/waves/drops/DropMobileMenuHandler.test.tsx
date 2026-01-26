@@ -12,7 +12,9 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
 jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
   __esModule: true,
   default: (props: any) => (
-    <div
+    <button
+      type="button"
+      aria-label="menu"
       data-testid="menu"
       data-open={props.isOpen}
       onClick={() => props.onReply()}
@@ -41,7 +43,7 @@ test("opens menu on long press", () => {
     jest.advanceTimersByTime(600);
   });
   const menu = getByTestId("menu");
-  expect(menu.getAttribute("data-open")).toBe("true");
+  expect(menu.dataset.open).toBe("true");
   fireEvent.click(menu);
-  expect(menu.getAttribute("data-open")).toBe("false");
+  expect(menu.dataset.open).toBe("false");
 });
