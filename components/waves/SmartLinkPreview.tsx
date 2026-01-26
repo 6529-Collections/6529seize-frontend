@@ -34,16 +34,34 @@ const getFallbackLabel = (href: string): string => {
   }
 };
 
-const DefaultFallback = ({ href }: { readonly href: string }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer nofollow"
-    className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
-  >
-    {getFallbackLabel(href)}
-  </a>
-);
+const DefaultFallback = ({ href }: { readonly href: string }) => {
+  let isHttpUrl = false;
+  try {
+    const parsed = new URL(href);
+    isHttpUrl = parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    isHttpUrl = false;
+  }
+
+  if (!isHttpUrl) {
+    return (
+      <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100">
+        {getFallbackLabel(href)}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+    >
+      {getFallbackLabel(href)}
+    </a>
+  );
+};
 
 const findMatch = (
   handlers: readonly LinkHandler[],
