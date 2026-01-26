@@ -2,7 +2,9 @@
 
 import type { SyntheticEvent } from "react";
 
+import { ensureTwitterLink } from "@/components/drops/view/part/dropPartMarkdown/twitter";
 import SmartLinkPreview from "@/components/waves/SmartLinkPreview";
+import BoostedTweetPreview from "./BoostedTweetPreview";
 
 const getFallbackLabel = (href: string): string => {
   try {
@@ -11,6 +13,14 @@ const getFallbackLabel = (href: string): string => {
     return host || href;
   } catch {
     return href;
+  }
+};
+
+const getTwitterPayload = (href: string) => {
+  try {
+    return ensureTwitterLink(href);
+  } catch {
+    return null;
   }
 };
 
@@ -24,6 +34,22 @@ export default function BoostedDropLinkPreview({
 }: {
   readonly href: string;
 }) {
+  const twitterPayload = getTwitterPayload(href);
+  if (twitterPayload) {
+    const { tweetId, href: normalizedHref } = twitterPayload;
+    return (
+      <div
+        className="tw-h-full tw-w-full tw-min-w-0 tw-max-w-full"
+        onClick={stopPropagation}
+        onMouseDown={stopPropagation}
+        onPointerDown={stopPropagation}
+        onTouchStart={stopPropagation}
+      >
+        <BoostedTweetPreview href={normalizedHref} tweetId={tweetId} />
+      </div>
+    );
+  }
+
   return (
     <div
       className="tw-h-full tw-w-full tw-min-w-0 tw-max-w-full"
