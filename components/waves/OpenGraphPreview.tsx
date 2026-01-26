@@ -247,8 +247,8 @@ export function LinkPreviewCardLayout({
 
   if (resolvedVariant === "home") {
     return (
-      <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch">
-        <div className="tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
+      <div className="tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch">
+        <div className="tw-h-full tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
           {children}
         </div>
       </div>
@@ -392,7 +392,7 @@ export default function OpenGraphPreview({
           target={linkTarget}
           rel={linkRel}
           onClick={(e) => e.stopPropagation()}
-          className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
+          className="tw-relative tw-block tw-h-full tw-w-full tw-min-h-0 tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
           data-testid="og-preview-card"
         >
           {imageUrl && (
@@ -406,7 +406,7 @@ export default function OpenGraphPreview({
               unoptimized
             />
           )}
-          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-black/40 tw-to-black/5" />
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-black/5" />
           <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
             {domain && (
               <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200/80">
@@ -414,12 +414,12 @@ export default function OpenGraphPreview({
               </span>
             )}
             <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-transition tw-duration-200 hover:tw-text-white">
-              <span className="tw-line-clamp-2">
+              <span className="tw-line-clamp-1">
                 {wrapLongUnbrokenSegments(title ?? domain ?? href)}
               </span>
             </span>
             {description && (
-              <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-100/80">
+              <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-1 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-100/80">
                 {wrapLongUnbrokenSegments(description)}
               </p>
             )}
