@@ -95,7 +95,9 @@
 
   /* Prevent text selection on touch devices only */
   .touch-select-none {
-    @media (pointer: coarse) {
+    // Use any-* queries so hybrid devices (touchscreen + trackpad/mouse) don't
+    // get treated as touch-only when the primary pointer is coarse.
+    @media (any-hover: none) and (any-pointer: coarse) {
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -724,7 +726,7 @@ h5:not(.tailwind-scope h5) {
   }
 }
 
-@media (hover: none) and (pointer: coarse) {
+@media (any-hover: none) and (any-pointer: coarse) {
   .touch-visible {
     display: block !important;
   }

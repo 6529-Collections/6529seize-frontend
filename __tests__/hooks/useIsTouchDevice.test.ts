@@ -5,8 +5,10 @@ describe("useIsTouchDevice", () => {
   let addEventListenerSpy: jest.SpyInstance;
   let removeEventListenerSpy: jest.SpyInstance;
   let touchStartHandler: EventListener | null = null;
+  let originalMaxTouchPoints: number | undefined;
 
   beforeEach(() => {
+    originalMaxTouchPoints = (globalThis.navigator as Navigator | undefined)?.maxTouchPoints;
     addEventListenerSpy = jest.spyOn(globalThis, "addEventListener").mockImplementation((event, handler) => {
       if (event === "touchstart") {
         touchStartHandler = handler as EventListener;
@@ -19,6 +21,20 @@ describe("useIsTouchDevice", () => {
     addEventListenerSpy.mockRestore();
     removeEventListenerSpy.mockRestore();
     touchStartHandler = null;
+    if (typeof originalMaxTouchPoints === "number") {
+      Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
+        value: originalMaxTouchPoints,
+        configurable: true,
+      });
+    } else {
+      // Ensure tests don't leak touch points across cases.
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete (globalThis.navigator as any).maxTouchPoints;
+      } catch {
+        // ignore
+      }
+    }
     jest.restoreAllMocks();
   });
 
@@ -43,6 +59,32 @@ describe("useIsTouchDevice", () => {
     });
 
     renderHook(() => useIsTouchDevice());
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("touchstart", expect.any(Function), expect.any(Object));
+  });
+
+  it("returns true initially when maxTouchPoints > 0 and no fine pointer", () => {
+    Object.defineProperty(globalThis.navigator, "maxTouchPoints", { value: 10, configurable: true });
+    Object.defineProperty(globalThis, "matchMedia", {
+      writable: true,
+      value: jest.fn(() => ({ matches: false })),
+    });
+
+    const { result } = renderHook(() => useIsTouchDevice());
+    expect(result.current).toBe(true);
+    expect(addEventListenerSpy).not.toHaveBeenCalledWith("touchstart", expect.any(Function), expect.any(Object));
+  });
+
+  it("returns false when a fine pointer exists even if maxTouchPoints > 0", () => {
+    Object.defineProperty(globalThis.navigator, "maxTouchPoints", { value: 10, configurable: true });
+    Object.defineProperty(globalThis, "matchMedia", {
+      writable: true,
+      value: jest.fn((query: string) => ({
+        matches: query === "(any-pointer: fine)",
+      })),
+    });
+
+    const { result } = renderHook(() => useIsTouchDevice());
+    expect(result.current).toBe(false);
     expect(addEventListenerSpy).not.toHaveBeenCalledWith("touchstart", expect.any(Function), expect.any(Object));
   });
 

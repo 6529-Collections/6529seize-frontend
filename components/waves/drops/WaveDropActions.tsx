@@ -55,7 +55,7 @@ export default function WaveDropActions({
     <div
       className={`tw-absolute tw-right-2 tw-z-20 ${
         compact ? "-tw-top-4" : "tw-top-0"
-      } tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out group-hover:tw-opacity-100`}
+      } tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out desktop-hover:group-hover:tw-opacity-100 focus-within:tw-opacity-100`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-8 tw-items-center tw-rounded-lg tw-bg-iron-950 tw-shadow tw-ring-1 tw-ring-inset tw-ring-iron-800">
