@@ -90,7 +90,7 @@ const BoostedDropCardHome = memo(
       : "tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pt-3 tw-pb-2 sm:tw-absolute sm:tw-left-3 sm:tw-right-3 sm:tw-top-3 sm:tw-px-0 sm:tw-pt-0 sm:tw-pb-0";
 
     const contentContainerClasses = previewUrl
-      ? "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl tw-p-3"
+      ? "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl"
       : "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12";
     const contentWrapperClasses = previewUrl
       ? "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-flex-col tw-justify-start tw-gap-3"
@@ -248,7 +248,7 @@ const BoostedDropCardHome = memo(
           <div className={contentContainerClasses} ref={contentContainerRef}>
             <div className={contentWrapperClasses} ref={contentWrapperRef}>
               {previewUrl && (
-                <div className="tw-min-h-0" ref={previewRef}>
+                <div className="tw-flex-1 tw-min-h-0 tw-shrink-0" ref={previewRef}>
                   <BoostedDropLinkPreview href={previewUrl} />
                 </div>
               )}

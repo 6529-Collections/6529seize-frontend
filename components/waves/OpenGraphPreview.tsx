@@ -247,8 +247,8 @@ export function LinkPreviewCardLayout({
 
   if (resolvedVariant === "home") {
     return (
-      <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch">
-        <div className="tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
+      <div className="tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch">
+        <div className="tw-h-full tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
           {children}
         </div>
       </div>
@@ -406,7 +406,7 @@ export default function OpenGraphPreview({
               unoptimized
             />
           )}
-          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-black/40 tw-to-black/5" />
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-black/5" />
           <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
             {domain && (
               <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200/80">
