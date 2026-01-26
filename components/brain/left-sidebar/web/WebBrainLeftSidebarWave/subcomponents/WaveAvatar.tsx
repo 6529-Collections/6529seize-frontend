@@ -1,3 +1,4 @@
+import WavePicture from "@/components/waves/WavePicture";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -45,11 +46,11 @@ export const WaveAvatar = ({
           : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
       }`}
     >
-      {/* <WavePicture
+      <WavePicture
         name={wave.name}
         picture={wave.picture}
         contributors={wave.contributors}
-      /> */}
+      />
       {isDropWave && (
         <div className="tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg">
           {DROP_ICON}
