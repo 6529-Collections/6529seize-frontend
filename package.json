@@ -37,7 +37,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:changed": "bash -lc '{ git diff --name-only -z main...HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
-    "format:uncommitted": "bash -lc '{ git diff --name-only -z HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
+    "format:uncommitted": "bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\" \"*.json\" \"*.css\" \"*.scss\" \":(exclude)generated/**\"; } | xargs -0 prettier --write --ignore-unknown'",
     "deadcode:knip": "knip",
     "deadcode:deps": "depcheck --ignores=\"eslint,eslint-*,@types/*,jest,ts-jest,playwright,@playwright/test,tailwindcss,postcss,autoprefixer\" --ignore-patterns=\".next,coverage,public,generated,tmp_gen_outp\"",
     "deadcode": "npm run deadcode:knip && npm run deadcode:deps",
