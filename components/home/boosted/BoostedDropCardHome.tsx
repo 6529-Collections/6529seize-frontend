@@ -91,10 +91,11 @@ const BoostedDropCardHome = memo(
     const contentContainerClasses = previewUrl
       ? "tw-relative tw-flex tw-aspect-[2/1] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl"
       : "tw-relative tw-flex tw-aspect-[2/1] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12";
+    const contentWrapperGapClasses = hasTextContent
+      ? "tw-gap-2 sm:tw-gap-3"
+      : "";
     const contentWrapperClasses = previewUrl
-      ? `tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] ${
-          hasTextContent ? "tw-gap-2 sm:tw-gap-3" : ""
-        }`
+      ? `tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] ${contentWrapperGapClasses}`
       : "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-min-w-0 tw-max-w-full";
     const textClampClass = previewUrl
       ? "tw-line-clamp-2 sm:tw-line-clamp-3"
