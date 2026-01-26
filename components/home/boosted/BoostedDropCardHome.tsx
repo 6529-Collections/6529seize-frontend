@@ -210,7 +210,6 @@ const BoostedDropCardHome = memo(
           {/* Time ago */}
           <div className="tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60">
             <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-zinc-300">
-            <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-zinc-300">
               {getTimeAgoShort(drop.created_at)}
             </span>
           </div>
@@ -224,7 +223,6 @@ const BoostedDropCardHome = memo(
             ))}
             {remainingBoosts > 0 && (
               <span className="tw-ml-1 tw-text-[10px] tw-font-bold tw-tabular-nums tw-leading-4 tw-text-iron-50">
-              <span className="tw-ml-1 tw-text-[10px] tw-font-bold tw-tabular-nums tw-leading-4 tw-text-iron-50">
                 +{remainingBoosts}
               </span>
             )}
@@ -232,7 +230,6 @@ const BoostedDropCardHome = memo(
         </div>
 
         {media ? (
-          <div className="tw-relative tw-aspect-[5/2] tw-w-full tw-overflow-hidden tw-rounded-xl sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5]">
           <div className="tw-relative tw-aspect-[5/2] tw-w-full tw-overflow-hidden tw-rounded-xl sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5]">
             <div className="tw-relative tw-h-full tw-w-full">
               <div className="tw-relative tw-z-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
