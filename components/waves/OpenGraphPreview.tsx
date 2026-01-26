@@ -392,7 +392,7 @@ export default function OpenGraphPreview({
           target={linkTarget}
           rel={linkRel}
           onClick={(e) => e.stopPropagation()}
-          className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
+          className="tw-relative tw-block tw-h-full tw-w-full tw-min-h-0 tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
           data-testid="og-preview-card"
         >
           {imageUrl && (
@@ -414,12 +414,12 @@ export default function OpenGraphPreview({
               </span>
             )}
             <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-transition tw-duration-200 hover:tw-text-white">
-              <span className="tw-line-clamp-2">
+              <span className="tw-line-clamp-1">
                 {wrapLongUnbrokenSegments(title ?? domain ?? href)}
               </span>
             </span>
             {description && (
-              <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-100/80">
+              <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-1 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-100/80">
                 {wrapLongUnbrokenSegments(description)}
               </p>
             )}

@@ -85,21 +85,28 @@ const BoostedDropCardHome = memo(
       },
       [onClick]
     );
-    const headerClasses = media
-      ? "tw-absolute tw-left-3 tw-right-3 tw-top-3 tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2"
-      : "tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-pt-3 tw-pb-2 sm:tw-absolute sm:tw-left-3 sm:tw-right-3 sm:tw-top-3 sm:tw-px-0 sm:tw-pt-0 sm:tw-pb-0";
+    const headerClasses =
+      "tw-absolute tw-left-3 tw-right-3 tw-top-3 tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2";
 
     const contentContainerClasses = previewUrl
-      ? "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl"
-      : "tw-relative tw-flex tw-aspect-[5/2] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12";
+      ? "tw-relative tw-flex tw-aspect-[2/1] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl"
+      : "tw-relative tw-flex tw-aspect-[2/1] sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12";
     const contentWrapperClasses = previewUrl
-      ? "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-flex-col tw-justify-start tw-gap-3"
-      : "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-justify-center tw-min-w-0 tw-max-w-full";
-    const textClampClass = previewUrl ? "tw-line-clamp-3" : "tw-line-clamp-6";
+      ? `tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] ${
+          hasTextContent ? "tw-gap-2 sm:tw-gap-3" : ""
+        }`
+      : "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-min-w-0 tw-max-w-full";
+    const textClampClass = previewUrl
+      ? "tw-line-clamp-2 sm:tw-line-clamp-3"
+      : "tw-line-clamp-6";
     const contentClassName = previewUrl
-      ? "tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed tw-text-iron-300"
-      : "tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed tw-text-iron-300";
-    const contentTextClassName = `${textClampClass} tw-max-w-full tw-break-words tw-tracking-[0.01em] tw-font-normal tw-leading-relaxed`;
+      ? "tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-px-3 tw-pb-3 sm:tw-px-4 sm:tw-pb-4 tw-tracking-[0.01em] tw-font-normal tw-text-iron-300"
+      : "tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-tracking-[0.01em] tw-font-normal tw-text-iron-300";
+    const contentTextClassName = `${textClampClass} tw-max-w-full tw-break-words tw-tracking-[0.01em] tw-font-normal`;
+    const shouldShowTextContent =
+      !previewUrl ||
+      (hasTextContent &&
+        (!effectiveHasMeasuredOverflow || !effectiveHideOverflowText));
 
     const measureOverflow = useCallback(() => {
       if (!shouldMeasureOverflow) {
@@ -201,13 +208,11 @@ const BoostedDropCardHome = memo(
         tabIndex={0}
         onClick={onClick}
         onKeyDown={handleCardKeyDown}
-        className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-950/70 tw-bg-black/70 tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:tw--translate-y-1.5 hover:tw-shadow-[0_0_32px_-10px_rgba(255,255,255,0.12)]"
+        className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/70 tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:-tw-translate-y-1.5 hover:tw-shadow-[0_0_32px_-10px_rgba(255,255,255,0.12)]"
       >
-        {/* Inner Highlight (Glass Edge) */}
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/5" />
 
         <div className={headerClasses}>
-          {/* Time ago */}
           <div className="tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60">
             <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-zinc-300">
               {getTimeAgoShort(drop.created_at)}
@@ -230,7 +235,7 @@ const BoostedDropCardHome = memo(
         </div>
 
         {media ? (
-          <div className="tw-relative tw-aspect-[5/2] tw-w-full tw-overflow-hidden tw-rounded-xl sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5]">
+          <div className="tw-relative tw-aspect-[2/1] tw-w-full tw-overflow-hidden tw-rounded-xl sm:tw-aspect-[5/4] md:tw-aspect-[8/5] lg:tw-aspect-[5/4] xl:tw-aspect-[8/5]">
             <div className="tw-relative tw-h-full tw-w-full">
               <div className="tw-relative tw-z-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-transition-transform tw-duration-700 group-hover:tw-scale-[1.02]">
                 <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden">
@@ -248,7 +253,7 @@ const BoostedDropCardHome = memo(
           <div className={contentContainerClasses} ref={contentContainerRef}>
             <div className={contentWrapperClasses} ref={contentWrapperRef}>
               {previewUrl && (
-                <div className="tw-flex-1 tw-min-h-0 tw-shrink-0" ref={previewRef}>
+                <div className="tw-min-h-0 tw-overflow-hidden" ref={previewRef}>
                   <BoostedDropLinkPreview href={previewUrl} />
                 </div>
               )}
@@ -266,10 +271,7 @@ const BoostedDropCardHome = memo(
                   />
                 </div>
               )}
-              {(!previewUrl ||
-                (hasTextContent &&
-                  effectiveHasMeasuredOverflow &&
-                  !effectiveHideOverflowText)) && (
+              {shouldShowTextContent && (
                 <ContentDisplay
                   content={previewContent}
                   shouldClamp={false}
@@ -285,7 +287,6 @@ const BoostedDropCardHome = memo(
         )}
 
         <div className="tw-relative tw-z-10 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-zinc-900 tw-bg-black/70 tw-px-4 tw-py-3">
-          {/* Author */}
           <Link
             href={author.handle ? `/${author.handle}` : "#"}
             onClick={(event) => event.stopPropagation()}
@@ -301,7 +302,6 @@ const BoostedDropCardHome = memo(
             </span>
           </Link>
 
-          {/* Wave */}
           <Link
             href={`/waves?wave=${wave.id}`}
             onClick={(event) => event.stopPropagation()}

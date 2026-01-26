@@ -24,7 +24,7 @@ export default function ContentDisplay({
 }: ContentDisplayProps) {
   const clampClass = shouldClamp ? "tw-line-clamp-1" : "";
   const containerClasses = [
-    "tw-text-iron-400 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5 tw-px-4",
+    "tw-text-iron-400 tw-font-normal tw-text-sm tw-flex tw-items-center tw-gap-1.5 tw-px-4 tw-pb-3",
     onClick
       ? "tw-cursor-pointer hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
       : "",
