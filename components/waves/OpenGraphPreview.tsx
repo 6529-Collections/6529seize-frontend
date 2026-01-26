@@ -5,6 +5,10 @@ import Link from "next/link";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
+import {
+  useLinkPreviewVariant,
+  type LinkPreviewVariant,
+} from "./LinkPreviewContext";
 
 export interface OpenGraphPreviewData {
   title?: unknown | undefined;
@@ -30,6 +34,7 @@ export interface OpenGraphPreviewData {
 interface OpenGraphPreviewProps {
   readonly href: string;
   readonly preview?: OpenGraphPreviewData | null | undefined;
+  readonly variant?: LinkPreviewVariant | undefined;
 }
 
 type MaybeRecord = Record<string, unknown>;
@@ -97,14 +102,14 @@ function extractImageFromValue(value: unknown): string | undefined {
   if (typeof value === "object") {
     const record = value as MaybeRecord;
     return (
-      extractImageFromValue(record["url"]) ||
-      extractImageFromValue(record["secure_url"]) ||
-      extractImageFromValue(record["secureUrl"]) ||
-      extractImageFromValue(record["src"]) ||
-      extractImageFromValue(record["href"]) ||
-      extractImageFromValue(record["image"]) ||
-      extractImageFromValue(record["thumbnail"]) ||
-      extractImageFromValue(record["contentUrl"]) ||
+      extractImageFromValue(record["url"]) ??
+      extractImageFromValue(record["secure_url"]) ??
+      extractImageFromValue(record["secureUrl"]) ??
+      extractImageFromValue(record["src"]) ??
+      extractImageFromValue(record["href"]) ??
+      extractImageFromValue(record["image"]) ??
+      extractImageFromValue(record["thumbnail"]) ??
+      extractImageFromValue(record["contentUrl"]) ??
       extractImageFromValue(record["content_url"])
     );
   }
@@ -212,8 +217,8 @@ function deriveDomain(
   preview: OpenGraphPreviewData | null | undefined
 ): string | undefined {
   return (
-    readFirstString(preview, DOMAIN_KEYS) ||
-    extractDomainFromUrl(readFirstString(preview, URL_KEYS)) ||
+    readFirstString(preview, DOMAIN_KEYS) ??
+    extractDomainFromUrl(readFirstString(preview, URL_KEYS)) ??
     extractDomainFromUrl(href)
   );
 }
@@ -230,15 +235,29 @@ function getRelativeHref(href: string): string | undefined {
 export function LinkPreviewCardLayout({
   href,
   children,
+  variant,
 }: {
   readonly href: string;
   readonly children: ReactNode;
+  readonly variant?: LinkPreviewVariant | undefined;
 }) {
+  const contextVariant = useLinkPreviewVariant();
+  const resolvedVariant = variant ?? contextVariant;
   const relativeHref = getRelativeHref(href);
+
+  if (resolvedVariant === "home") {
+    return (
+      <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch">
+        <div className="tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0 tw-max-w-full tw-overflow-hidden focus-within:tw-overflow-visible">
+      <div className="tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
         {children}
       </div>
       <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
@@ -254,8 +273,8 @@ export function hasOpenGraphContent(
   }
 
   return Boolean(
-    readFirstString(preview, TITLE_KEYS) ||
-    readFirstString(preview, DESCRIPTION_KEYS) ||
+    readFirstString(preview, TITLE_KEYS) ??
+    readFirstString(preview, DESCRIPTION_KEYS) ??
     extractImageUrl(preview)
   );
 }
@@ -263,7 +282,10 @@ export function hasOpenGraphContent(
 export default function OpenGraphPreview({
   href,
   preview,
+  variant,
 }: OpenGraphPreviewProps) {
+  const contextVariant = useLinkPreviewVariant();
+  const resolvedVariant = variant ?? contextVariant;
   const relativeHref = getRelativeHref(href);
   const effectiveHref = relativeHref ?? href;
   const isExternalLink = !relativeHref;
@@ -271,13 +293,31 @@ export default function OpenGraphPreview({
   const linkRel = isExternalLink ? "noopener noreferrer" : undefined;
 
   if (typeof preview === "undefined") {
-    return (
-      <LinkPreviewCardLayout href={href}>
-        <div
-          className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+    if (resolvedVariant === "home") {
+      return (
+        <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
           <div
-            className="tw-animate-pulse tw-flex tw-flex-col tw-gap-y-3"
-            data-testid="og-preview-skeleton">
+            className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30"
+            data-testid="og-preview-skeleton"
+          >
+            <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-bg-gradient-to-br tw-from-iron-900/40 tw-via-iron-800/20 tw-to-iron-900/40" />
+            <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
+              <div className="tw-h-3 tw-w-24 tw-rounded tw-bg-iron-800/50" />
+              <div className="tw-h-5 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
+              <div className="tw-h-4 tw-w-2/3 tw-rounded tw-bg-iron-800/30" />
+            </div>
+          </div>
+        </LinkPreviewCardLayout>
+      );
+    }
+
+    return (
+      <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+        <div className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+          <div
+            className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-3"
+            data-testid="og-preview-skeleton"
+          >
             <div className="tw-w-full tw-rounded-lg tw-bg-iron-800/60" />
             <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
             <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
@@ -292,15 +332,41 @@ export default function OpenGraphPreview({
   const description = readFirstString(preview, DESCRIPTION_KEYS);
   const imageUrl = extractImageUrl(preview);
   const domain = deriveDomain(href, preview);
-  const hasContent = Boolean(title || description || imageUrl);
+  const hasContent = Boolean(title ?? description ?? imageUrl);
 
   if (!hasContent) {
+    if (resolvedVariant === "home") {
+      return (
+        <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+          <Link
+            href={effectiveHref}
+            target={linkTarget}
+            rel={linkRel}
+            onClick={(e) => e.stopPropagation()}
+            className="tw-relative tw-flex tw-h-full tw-w-full tw-items-end tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
+            data-testid="og-preview-unavailable"
+          >
+            <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900/30 tw-via-black/20 tw-to-iron-900/30" />
+            <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-1 tw-p-4">
+              <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+                Link unavailable
+              </span>
+              <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition tw-duration-200 hover:tw-text-white">
+                {wrapLongUnbrokenSegments(domain ?? href)}
+              </span>
+            </div>
+          </Link>
+        </LinkPreviewCardLayout>
+      );
+    }
+
     return (
-      <LinkPreviewCardLayout href={href}>
+      <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
         <div
           className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
-          data-testid="og-preview-unavailable">
-          <div className="tw-text-center tw-space-y-2">
+          data-testid="og-preview-unavailable"
+        >
+          <div className="tw-space-y-2 tw-text-center">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
               Link unavailable
             </p>
@@ -308,7 +374,8 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+              className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+            >
               {wrapLongUnbrokenSegments(domain ?? href)}
             </Link>
           </div>
@@ -318,52 +385,96 @@ export default function OpenGraphPreview({
   }
 
   return (
-    <LinkPreviewCardLayout href={href}>
-      <div
-        className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
-        data-testid="og-preview-card">
-        <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
+    <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+      {resolvedVariant === "home" ? (
+        <Link
+          href={effectiveHref}
+          target={linkTarget}
+          rel={linkRel}
+          onClick={(e) => e.stopPropagation()}
+          className="tw-relative tw-block tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
+          data-testid="og-preview-card"
+        >
           {imageUrl && (
-            <Link
-              href={effectiveHref}
-              target={linkTarget}
-              rel={linkRel}
-              className="tw-block md:tw-w-60 md:tw-flex-shrink-0">
-              <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
-                <Image
-                  src={imageUrl}
-                  alt={title ?? domain ?? "Link preview"}
-                  width={1200}
-                  height={630}
-                  className="tw-h-full tw-w-full tw-object-cover"
-                  loading="lazy"
-                  sizes="(max-width: 768px) 100vw, 240px"
-                  unoptimized
-                />
-              </div>
-            </Link>
+            <Image
+              src={imageUrl}
+              alt={title ?? domain ?? "Link preview"}
+              fill
+              className="tw-object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 480px"
+              unoptimized
+            />
           )}
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-black/40 tw-to-black/5" />
+          <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
             {domain && (
-              <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
-            {wrapLongUnbrokenSegments(domain)}
+              <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-200/80">
+                {wrapLongUnbrokenSegments(domain)}
               </span>
             )}
-            <Link
-              href={effectiveHref}
-              target={linkTarget}
-              rel={linkRel}
-              className="tw-break-words tw-[overflow-wrap:anywhere] tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
-              {wrapLongUnbrokenSegments(title ?? domain ?? href)}
-            </Link>
+            <span className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50 tw-transition tw-duration-200 hover:tw-text-white">
+              <span className="tw-line-clamp-2">
+                {wrapLongUnbrokenSegments(title ?? domain ?? href)}
+              </span>
+            </span>
             {description && (
-              <p className="tw-m-0 tw-text-sm tw-text-iron-300 tw-line-clamp-3 tw-break-words tw-[overflow-wrap:anywhere] tw-whitespace-pre-line">
+              <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-100/80">
                 {wrapLongUnbrokenSegments(description)}
               </p>
             )}
           </div>
+        </Link>
+      ) : (
+        <div
+          className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          data-testid="og-preview-card"
+        >
+          <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
+            {imageUrl && (
+              <Link
+                href={effectiveHref}
+                target={linkTarget}
+                rel={linkRel}
+                className="tw-block md:tw-w-60 md:tw-flex-shrink-0"
+              >
+                <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
+                  <Image
+                    src={imageUrl}
+                    alt={title ?? domain ?? "Link preview"}
+                    width={1200}
+                    height={630}
+                    className="tw-h-full tw-w-full tw-object-cover"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, 240px"
+                    unoptimized
+                  />
+                </div>
+              </Link>
+            )}
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
+              {domain && (
+                <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+                  {wrapLongUnbrokenSegments(domain)}
+                </span>
+              )}
+              <Link
+                href={effectiveHref}
+                target={linkTarget}
+                rel={linkRel}
+                className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+              >
+                {wrapLongUnbrokenSegments(title ?? domain ?? href)}
+              </Link>
+              {description && (
+                <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-3 tw-whitespace-pre-line tw-break-words tw-text-sm tw-text-iron-300">
+                  {wrapLongUnbrokenSegments(description)}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </LinkPreviewCardLayout>
   );
 }
