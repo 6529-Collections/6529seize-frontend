@@ -51,11 +51,16 @@ async function run() {
       __NEXT_EXPERIMENTAL_MCP_SERVER: "true",
       PORT: String(port),
     };
-    console.log(`Starting Next.js dev server on port ${port}...`);
+    const useTurbo = process.env.USE_TURBO !== "false";
+    console.log(`Starting Next.js dev server on port ${port}${useTurbo ? "" : " (Turbopack disabled)"}...`);
+
+    const devArgs = useTurbo
+      ? ["dev", "-p", String(port), ...extraArgs]
+      : ["dev", "--webpack", "-p", String(port), ...extraArgs];
 
     const child = spawn(
       "next",
-      ["dev", "-p", String(port), ...extraArgs],
+      devArgs,
       {
         stdio: "inherit",
         env,

@@ -1,7 +1,7 @@
 "use client";
 
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
+import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "@/constants/constants";
@@ -225,7 +225,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     return (
       <Col sm={{ span: 12, order: 2 }} md={{ span: 5, order: 1 }}>
         <Container className="no-padding">
-          <Row className="pt-2 pb-2">
+          <Row className="pb-2">
             <Col
               xs={12}
               className="d-flex align-items-center justify-content-between"
@@ -266,15 +266,13 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               </Table>
             </Col>
             <Col xs={12} className="pt-3">
-              {printMint()}
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <MemePageMintCountdown
-                nft_id={props.token_id}
-                hide_mint_btn={true}
+              <NowMintingCountdown
+                nftId={props.token_id}
+                hideMintBtn={true}
               />
+            </Col>
+            <Col xs={12} className="pt-3">
+              {printMint()}
             </Col>
           </Row>
         </Container>
@@ -298,7 +296,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (fetching) {
     return (
-      <Container className="pt-4 pb-4">
+      <Container className="pt-4 pb-4 px-4">
         {printTitle()}
         <Row className="pt-2">
           <Col className="d-flex align-items-center gap-3">
@@ -318,7 +316,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   if (!manifoldClaim || !instance || !nftImage) {
     return (
-      <Container className="pt-4 pb-4">
+      <Container className="pt-4 pb-4 px-4">
         {printTitle()}
         <Row>
           <Col>
@@ -330,7 +328,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   }
 
   return (
-    <Container className="pt-4 pb-4">
+    <Container className="pt-4 pb-4 px-4">
       <Row className="pb-3">
         {printImage()}
         {printActions(instance, manifoldClaim)}
@@ -544,10 +542,10 @@ function ManifoldMemesMintingPhases(
 
   return (
     <Container className="no-padding">
-      {distribution?.airdrops && (
+      {distribution?.airdrops !== undefined && distribution.airdrops > 0 && (
         <Row className="tw-pb-2">
           <Col className="tw-text-lg tw-font-bold">
-            Airdrops: x{distribution?.airdrops}
+            Airdrops: x{distribution.airdrops}
           </Col>
         </Row>
       )}
