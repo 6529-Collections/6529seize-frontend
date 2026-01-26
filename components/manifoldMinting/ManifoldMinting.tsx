@@ -250,15 +250,17 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                   <tr>
                     <td className="pt-2">Edition Size</td>
                     <td className="pt-2">
-                      <span className="d-flex align-items-center gap-1">
+                      <span className="d-flex align-items-center justify-content-end tw-gap-1.5">
+                        {manifoldClaim.isFetching && <Spinner dimension={12} />}
                         <b>
                           {numberWithCommas(manifoldClaim.total)} /{" "}
                           {numberWithCommas(manifoldClaim.totalMax)}
-                          {manifoldClaim.remaining > 0 && (
-                            <> ({manifoldClaim.remaining} remaining)</>
-                          )}
+                          {manifoldClaim.remaining > 0 &&
+                            manifoldClaim.status !==
+                              ManifoldClaimStatus.ENDED && (
+                              <> ({manifoldClaim.remaining} remaining)</>
+                            )}
                         </b>
-                        {manifoldClaim.isFetching && <Spinner dimension={12} />}
                       </span>
                     </td>
                   </tr>
@@ -266,10 +268,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               </Table>
             </Col>
             <Col xs={12} className="pt-3">
-              <NowMintingCountdown
-                nftId={props.token_id}
-                hideMintBtn={true}
-              />
+              <NowMintingCountdown nftId={props.token_id} hideMintBtn={true} />
             </Col>
             <Col xs={12} className="pt-3">
               {printMint()}
@@ -415,15 +414,16 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               <tr>
                 <td className="pt-2">Edition Size</td>
                 <td className="pt-2">
-                  <span className="d-flex align-items-center gap-1">
+                  <span className="d-flex align-items-center tw-gap-1.5">
+                    {manifoldClaim.isFetching && <Spinner dimension={12} />}
                     <b>
                       {numberWithCommas(manifoldClaim.total)} /{" "}
                       {numberWithCommas(manifoldClaim.totalMax)}
-                      {manifoldClaim.remaining > 0 && (
-                        <> ({manifoldClaim.remaining} remaining)</>
-                      )}
+                      {manifoldClaim.remaining > 0 &&
+                        manifoldClaim.status !== ManifoldClaimStatus.ENDED && (
+                          <> ({manifoldClaim.remaining} remaining)</>
+                        )}
                     </b>
-                    {manifoldClaim.isFetching && <Spinner dimension={12} />}
                   </span>
                 </td>
               </tr>
