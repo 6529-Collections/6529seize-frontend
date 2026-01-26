@@ -16,7 +16,7 @@ export default function HomePageTextSection() {
             </h2>
           </header>
 
-          <div className="tw-flex tw-flex-col md:tw-text-center lg:tw-col-span-7 lg:tw-row-start-2 lg:tw-text-left">
+          <div className="tw-flex tw-flex-col md:tw-text-center lg:tw-col-span-7 lg:tw-row-start-2 lg:tw-text-left xl:tw-pr-8">
             <p className="tw-mb-0 tw-text-lg tw-text-balance lg:tw-text-pretty tw-font-normal tw-text-iron-300 sm:tw-text-xl">
               a decentralized, permissionless global network that funds, builds,
               and coordinates public-goods work across art, science, culture,
