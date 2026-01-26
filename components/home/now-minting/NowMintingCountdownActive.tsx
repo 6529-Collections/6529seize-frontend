@@ -32,7 +32,7 @@ export default function NowMintingCountdownActive({
           }}
         />
       )}
-      <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between">
+      <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
         <span className="tw-py-0.5 tw-text-xs tw-font-semibold tw-text-iron-300">
           {countdown.title}
         </span>
