@@ -2,7 +2,7 @@
 
 import Address from "@/components/address/Address";
 import DotLoader from "@/components/dotLoader/DotLoader";
-import MemePageMintCountdown from "@/components/mint-countdown-box/MemePageMintCountdown";
+import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import NotFound from "@/components/not-found/NotFound";
 import Pagination from "@/components/pagination/Pagination";
 import ScrollToButton from "@/components/scrollTo/ScrollToButton";
@@ -307,7 +307,7 @@ export default function DistributionPage(props: Readonly<Props>) {
       isValidNftId &&
       nftId
     ) {
-      return <MemePageMintCountdown nft_id={Number.parseInt(nftId, 10)} />;
+      return <NowMintingCountdown nftId={Number.parseInt(nftId, 10)} hideNextDrop fullWidth />;
     }
 
     return <></>;

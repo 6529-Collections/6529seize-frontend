@@ -3,41 +3,58 @@ import {
   useMintCountdownState,
 } from "@/hooks/useMintCountdownState";
 import NowMintingCountdownActive from "./NowMintingCountdownActive";
-import NowMintingCountdownError from "./NowMintingCountdownError";
-import NowMintingCountdownFinalized from "./NowMintingCountdownFinalized";
 import NowMintingCountdownLoading from "./NowMintingCountdownLoading";
-import NowMintingCountdownSoldOut from "./NowMintingCountdownSoldOut";
+import NowMintingCountdownStatus from "./NowMintingCountdownStatus";
 
 interface NowMintingCountdownProps {
   readonly nftId: number;
+  readonly hideMintBtn?: boolean;
+  readonly hideNextDrop?: boolean;
+  readonly fullWidth?: boolean;
 }
 
 export default function NowMintingCountdown({
   nftId,
+  hideMintBtn,
+  hideNextDrop,
+  fullWidth,
 }: NowMintingCountdownProps) {
-  const state = useMintCountdownState(nftId);
+  const state = useMintCountdownState(
+    nftId,
+    hideMintBtn === undefined ? undefined : { hideMintBtn }
+  );
 
   return (
-    <div className="tw-group tw-relative tw-mt-auto">
-      <NowMintingCountdownContent state={state} />
+    <div
+      className={`tw-group tw-relative tw-mt-auto ${fullWidth ? "tw-w-full" : ""}`}
+    >
+      <NowMintingCountdownContent
+        state={state}
+        {...(hideNextDrop !== undefined && { hideNextDrop })}
+      />
     </div>
   );
 }
 
 function NowMintingCountdownContent({
   state,
+  hideNextDrop,
 }: {
   readonly state: MintCountdownState;
+  readonly hideNextDrop?: boolean;
 }) {
   switch (state.type) {
     case "loading":
       return <NowMintingCountdownLoading />;
     case "error":
-      return <NowMintingCountdownError />;
     case "sold_out":
-      return <NowMintingCountdownSoldOut />;
     case "finalized":
-      return <NowMintingCountdownFinalized />;
+      return (
+        <NowMintingCountdownStatus
+          type={state.type}
+          {...(hideNextDrop !== undefined && { hideNextDrop })}
+        />
+      );
     case "countdown":
       return <NowMintingCountdownActive countdown={state.countdown} />;
   }
