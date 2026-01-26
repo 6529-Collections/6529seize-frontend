@@ -1,39 +1,232 @@
 import { useEffect, useMemo, useState } from "react";
-import type {
-  YoutubeOEmbedResponse} from "@/services/api/youtube";
-import {
-  fetchYoutubePreview
-} from "@/services/api/youtube";
+import Image from "next/image";
+import type { YoutubeOEmbedResponse } from "@/services/api/youtube";
+import { fetchYoutubePreview } from "@/services/api/youtube";
 
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
+import { useLinkPreviewContext } from "@/components/waves/LinkPreviewContext";
 
 import { getYoutubeFetchUrl, parseYoutubeLink } from "./youtube";
 
-const normalizeYoutubeHtml = (html: string): string => {
-  let normalized = html.replace(/width="[^"]*"/i, 'width="100%"');
-  normalized = normalized.replace(/height="[^"]*"/i, 'height="100%"');
+const YOUTUBE_EMBED_HOSTS = new Map<string, string>([
+  ["youtube.com", "www.youtube.com"],
+  ["www.youtube.com", "www.youtube.com"],
+  ["youtube-nocookie.com", "www.youtube-nocookie.com"],
+  ["www.youtube-nocookie.com", "www.youtube-nocookie.com"],
+]);
 
-  if (/style="[^"]*"/i.test(normalized)) {
-    normalized = normalized.replace(
-      /style="([^"]*)"/i,
-      (_, styles: string) => {
-        const cleanedStyles = styles.replace(/;?\s*$/, "");
-        return `style="${cleanedStyles};width:100%;height:100%;"`;
-      }
-    );
-  } else {
-    normalized = normalized.replace(
-      /<iframe/i,
-      '<iframe style="width:100%;height:100%;"'
-    );
+const ALLOWED_IFRAME_ALLOW_FEATURES = new Set([
+  "accelerometer",
+  "autoplay",
+  "clipboard-write",
+  "encrypted-media",
+  "gyroscope",
+  "picture-in-picture",
+  "web-share",
+]);
+
+const ALLOWED_IFRAME_LOADING_VALUES = new Set(["lazy", "eager"]);
+const ALLOWED_IFRAME_REFERRER_POLICIES = new Set([
+  "no-referrer",
+  "no-referrer-when-downgrade",
+  "origin",
+  "origin-when-cross-origin",
+  "same-origin",
+  "strict-origin",
+  "strict-origin-when-cross-origin",
+  "unsafe-url",
+]);
+
+const ALLOWED_EMBED_QUERY_PARAMS = new Set([
+  "autoplay",
+  "controls",
+  "enablejsapi",
+  "end",
+  "feature",
+  "index",
+  "list",
+  "loop",
+  "modestbranding",
+  "mute",
+  "origin",
+  "playsinline",
+  "rel",
+  "start",
+]);
+
+const DEFAULT_IFRAME_STYLE = "width:100%;height:100%;";
+
+const escapeHtmlAttribute = (value: string): string =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("'", "&#39;");
+
+const sanitizeIframeAllow = (value: string | null): string | null => {
+  if (!value) {
+    return null;
   }
 
-  return normalized;
+  const tokens = value
+    .split(";")
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .map((token) => token.split(/\s+/)[0] ?? "");
+
+  const allowedTokens: string[] = [];
+  for (const token of tokens) {
+    if (
+      ALLOWED_IFRAME_ALLOW_FEATURES.has(token) &&
+      !allowedTokens.includes(token)
+    ) {
+      allowedTokens.push(token);
+    }
+  }
+
+  return allowedTokens.length > 0 ? allowedTokens.join("; ") : null;
+};
+
+const sanitizeIframeLoading = (value: string | null): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return ALLOWED_IFRAME_LOADING_VALUES.has(normalized) ? normalized : null;
+};
+
+const sanitizeIframeReferrerPolicy = (value: string | null): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return ALLOWED_IFRAME_REFERRER_POLICIES.has(normalized) ? normalized : null;
+};
+
+const sanitizeIframeFrameBorder = (value: string | null): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized === "0" || normalized === "1" ? normalized : null;
+};
+
+const canonicalizeYoutubeEmbedUrl = (url: URL): URL | null => {
+  if (url.protocol !== "https:") {
+    return null;
+  }
+
+  const hostname = url.hostname.toLowerCase();
+  const canonicalHost = YOUTUBE_EMBED_HOSTS.get(hostname);
+  if (!canonicalHost) {
+    return null;
+  }
+
+  const pathSegments = url.pathname.split("/").filter(Boolean);
+  if (pathSegments.length !== 2 || pathSegments[0] !== "embed") {
+    return null;
+  }
+
+  const videoId = pathSegments[1] ?? "";
+  if (!/^[A-Za-z0-9_-]{6,}$/.test(videoId)) {
+    return null;
+  }
+
+  const canonical = new URL(`https://${canonicalHost}/embed/${videoId}`);
+  for (const [key, value] of url.searchParams.entries()) {
+    if (ALLOWED_EMBED_QUERY_PARAMS.has(key)) {
+      canonical.searchParams.set(key, value);
+    }
+  }
+
+  return canonical;
+};
+
+const sanitizeYoutubeEmbedHtml = (html: string): string | null => {
+  if (typeof globalThis === "undefined" || typeof DOMParser === "undefined") {
+    return null;
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const iframe = doc.querySelector("iframe");
+
+  if (!iframe) {
+    return null;
+  }
+
+  const src = iframe.getAttribute("src");
+  if (!src) {
+    return null;
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(src);
+  } catch {
+    return null;
+  }
+
+  const canonicalSrc = canonicalizeYoutubeEmbedUrl(parsedUrl);
+  if (!canonicalSrc) {
+    return null;
+  }
+
+  const attributes: string[] = [
+    `src="${escapeHtmlAttribute(canonicalSrc.toString())}"`,
+    `style="${DEFAULT_IFRAME_STYLE}"`,
+  ];
+
+  const title = iframe.getAttribute("title");
+  if (title) {
+    attributes.push(`title="${escapeHtmlAttribute(title)}"`);
+  }
+
+  const allow = sanitizeIframeAllow(iframe.getAttribute("allow"));
+  if (allow) {
+    attributes.push(`allow="${escapeHtmlAttribute(allow)}"`);
+  }
+
+  if (iframe.hasAttribute("allowfullscreen")) {
+    attributes.push("allowfullscreen");
+  }
+
+  const loading = sanitizeIframeLoading(iframe.getAttribute("loading"));
+  if (loading) {
+    attributes.push(`loading="${loading}"`);
+  }
+
+  const referrerPolicy = sanitizeIframeReferrerPolicy(
+    iframe.getAttribute("referrerpolicy")
+  );
+  if (referrerPolicy) {
+    attributes.push(`referrerpolicy="${referrerPolicy}"`);
+  }
+
+  const frameBorder = sanitizeIframeFrameBorder(
+    iframe.getAttribute("frameborder")
+  );
+  if (frameBorder) {
+    attributes.push(`frameborder="${frameBorder}"`);
+  }
+
+  return `<iframe ${attributes.join(" ")}></iframe>`;
 };
 
 interface YoutubePreviewProps {
   readonly href: string;
 }
+
+type PreviewState = {
+  readonly href: string;
+  readonly preview: YoutubeOEmbedResponse | null;
+  readonly hasError: boolean;
+  readonly showEmbed: boolean;
+};
 
 const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   const linkInfo = useMemo(() => parseYoutubeLink(href), [href]);
@@ -42,36 +235,78 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   }
 
   const { videoId } = linkInfo;
-  const [preview, setPreview] = useState<YoutubeOEmbedResponse | null>(null);
-  const [hasError, setHasError] = useState(false);
-  const [showEmbed, setShowEmbed] = useState(false);
+  const { hideActions } = useLinkPreviewContext();
+  const [state, setState] = useState<PreviewState>(() => ({
+    href,
+    preview: null,
+    hasError: false,
+    showEmbed: false,
+  }));
+
+  const isCurrent = state.href === href;
+  const preview = isCurrent ? state.preview : null;
+  const hasError = isCurrent ? state.hasError : false;
+  const showEmbed = isCurrent ? state.showEmbed : false;
+
+  const handleShowEmbed = () => {
+    setState((prev) =>
+      prev.href === href
+        ? { ...prev, showEmbed: true }
+        : { href, preview: null, hasError: false, showEmbed: true }
+    );
+  };
 
   useEffect(() => {
     const abortController = new AbortController();
     let isActive = true;
 
-    setPreview(null);
-    setHasError(false);
-    setShowEmbed(false);
-
     const fetchUrl = getYoutubeFetchUrl(href, videoId);
 
-    fetchYoutubePreview(fetchUrl, abortController.signal)
-      .then((data) => {
+    const loadPreview = async () => {
+      try {
+        const data = await fetchYoutubePreview(
+          fetchUrl,
+          abortController.signal
+        );
         if (!isActive) {
           return;
         }
 
         if (data) {
-          setPreview({
+          const sanitizedHtml = sanitizeYoutubeEmbedHtml(data.html);
+          if (!sanitizedHtml) {
+            setState((prev) =>
+              prev.href === href
+                ? { ...prev, preview: null, hasError: true, showEmbed: false }
+                : { href, preview: null, hasError: true, showEmbed: false }
+            );
+            return;
+          }
+
+          const normalizedPreview = {
             ...data,
-            html: normalizeYoutubeHtml(data.html),
-          });
-        } else {
-          setHasError(true);
+            html: sanitizedHtml,
+          };
+
+          setState((prev) =>
+            prev.href === href
+              ? { ...prev, preview: normalizedPreview, hasError: false }
+              : {
+                  href,
+                  preview: normalizedPreview,
+                  hasError: false,
+                  showEmbed: false,
+                }
+          );
+          return;
         }
-      })
-      .catch((error) => {
+
+        setState((prev) =>
+          prev.href === href
+            ? { ...prev, preview: null, hasError: true, showEmbed: false }
+            : { href, preview: null, hasError: true, showEmbed: false }
+        );
+      } catch (error) {
         if (!isActive) {
           return;
         }
@@ -80,8 +315,15 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
           return;
         }
 
-        setHasError(true);
-      });
+        setState((prev) =>
+          prev.href === href
+            ? { ...prev, preview: null, hasError: true, showEmbed: false }
+            : { href, preview: null, hasError: true, showEmbed: false }
+        );
+      }
+    };
+
+    void loadPreview();
 
     return () => {
       isActive = false;
@@ -95,11 +337,11 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
   if (!preview) {
     return (
-      <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-        <div className="tw-flex-1 tw-min-w-0">
-          <div className="tw-aspect-video tw-w-full tw-rounded-lg tw-bg-iron-800 tw-animate-pulse" />
+      <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-aspect-video tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800" />
         </div>
-        <ChatItemHrefButtons href={href} />
+        {!hideActions && <ChatItemHrefButtons href={href} />}
       </div>
     );
   }
@@ -109,26 +351,32 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
     : `Play YouTube video ${videoId}`;
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
+    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+      <div className="tw-min-w-0 tw-flex-1">
         <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-black">
           {showEmbed ? (
             <div
-              className="tw-relative tw-w-full tw-aspect-video tw-bg-black"
+              className="tw-relative tw-aspect-video tw-w-full tw-bg-black"
               data-testid="youtube-embed"
               dangerouslySetInnerHTML={{ __html: preview.html }}
             />
           ) : (
             <button
               type="button"
-              className="tw-relative tw-w-full tw-aspect-video tw-border-0 tw-bg-transparent tw-p-0 tw-cursor-pointer"
-              onClick={() => setShowEmbed(true)}
+              className="tw-relative tw-aspect-video tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+              onClick={handleShowEmbed}
               aria-label={ariaLabel}
             >
-              <img
+              <Image
                 src={preview.thumbnail_url}
-                alt={preview.title ?? `YouTube video ${videoId}`}
-                className="tw-h-full tw-w-full tw-object-cover"
+                alt={
+                  preview.title
+                    ? `YouTube thumbnail for ${preview.title}`
+                    : "YouTube video thumbnail"
+                }
+                fill
+                sizes="100vw"
+                className="tw-object-cover"
               />
               <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black/40">
                 <svg
@@ -146,18 +394,18 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
         </div>
         <div className="tw-mt-2 tw-space-y-1">
           {preview.title && (
-            <p className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-mb-0">
+            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
               {preview.title}
             </p>
           )}
           {preview.author_name && (
-            <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+            <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
               {preview.author_name}
             </p>
           )}
         </div>
       </div>
-      <ChatItemHrefButtons href={href} />
+      {!hideActions && <ChatItemHrefButtons href={href} />}
     </div>
   );
 };

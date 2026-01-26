@@ -10,17 +10,26 @@ import OpenGraphPreview, {
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 import EnsPreviewCard from "./ens/EnsPreviewCard";
 import { isEnsPreview, type EnsPreview } from "./ens/types";
+import {
+  useLinkPreviewVariant,
+  type LinkPreviewVariant,
+} from "./LinkPreviewContext";
 
 interface LinkPreviewCardProps {
   readonly href: string;
   readonly renderFallback: () => ReactElement;
+  readonly variant?: LinkPreviewVariant | undefined;
 }
 
 type PreviewState =
-  | { readonly type: "loading" }
-  | { readonly type: "fallback" }
-  | { readonly type: "success"; readonly data: OpenGraphPreviewData }
-  | { readonly type: "ens"; readonly data: EnsPreview };
+  | { readonly type: "loading"; readonly href: string }
+  | { readonly type: "fallback"; readonly href: string }
+  | {
+      readonly type: "success";
+      readonly href: string;
+      readonly data: OpenGraphPreviewData;
+    }
+  | { readonly type: "ens"; readonly href: string; readonly data: EnsPreview };
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -43,13 +52,17 @@ const toPreviewData = (
 export default function LinkPreviewCard({
   href,
   renderFallback,
+  variant,
 }: LinkPreviewCardProps) {
-  const [state, setState] = useState<PreviewState>({ type: "loading" });
+  const contextVariant = useLinkPreviewVariant();
+  const resolvedVariant = variant ?? contextVariant;
+  const [state, setState] = useState<PreviewState>(() => ({
+    type: "loading",
+    href,
+  }));
 
   useEffect(() => {
     let active = true;
-
-    setState({ type: "loading" });
 
     fetchLinkPreview(href)
       .then((response) => {
@@ -58,21 +71,21 @@ export default function LinkPreviewCard({
         }
 
         if (isEnsPreview(response)) {
-          setState({ type: "ens", data: response });
+          setState({ type: "ens", data: response, href });
           return;
         }
 
         const previewData = toPreviewData(response);
         if (hasOpenGraphContent(previewData)) {
-          setState({ type: "success", data: previewData });
+          setState({ type: "success", data: previewData, href });
           return;
         }
 
-        setState({ type: "fallback" });
+        setState({ type: "fallback", href });
       })
       .catch(() => {
         if (active) {
-          setState({ type: "fallback" });
+          setState({ type: "fallback", href });
         }
       });
 
@@ -81,13 +94,21 @@ export default function LinkPreviewCard({
     };
   }, [href]);
 
-  if (state.type === "fallback") {
+  const isCurrent = state.href === href;
+
+  if (isCurrent && state.type === "fallback") {
     const fallbackContent = renderFallback();
 
     return (
-      <LinkPreviewCardLayout href={href}>
-        <div className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
-          <div className="tw-flex tw-h-full tw-w-full tw-max-w-full tw-items-center tw-justify-start tw-overflow-hidden tw-break-words tw-[overflow-wrap:anywhere]">
+      <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+        <div
+          className={
+            resolvedVariant === "home"
+              ? "tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-4"
+              : "tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          }
+        >
+          <div className="tw-[overflow-wrap:anywhere] tw-flex tw-h-full tw-w-full tw-max-w-full tw-items-center tw-justify-start tw-overflow-hidden tw-break-words">
             {fallbackContent}
           </div>
         </div>
@@ -95,19 +116,37 @@ export default function LinkPreviewCard({
     );
   }
 
-  if (state.type === "success") {
-    return <OpenGraphPreview href={href} preview={state.data} />;
+  if (isCurrent && state.type === "success") {
+    return (
+      <OpenGraphPreview
+        href={href}
+        preview={state.data}
+        variant={resolvedVariant}
+      />
+    );
   }
 
-  if (state.type === "ens") {
+  if (isCurrent && state.type === "ens") {
     return (
-      <LinkPreviewCardLayout href={href}>
-        <div className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+      <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+        <div
+          className={
+            resolvedVariant === "home"
+              ? "tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-4"
+              : "tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          }
+        >
           <EnsPreviewCard preview={state.data} />
         </div>
       </LinkPreviewCardLayout>
     );
   }
 
-  return <OpenGraphPreview href={href} preview={undefined} />;
+  return (
+    <OpenGraphPreview
+      href={href}
+      preview={undefined}
+      variant={resolvedVariant}
+    />
+  );
 }

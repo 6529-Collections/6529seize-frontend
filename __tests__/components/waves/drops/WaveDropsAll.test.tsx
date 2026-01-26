@@ -218,17 +218,19 @@ function setupMocks(options: MockSetupOptions = {}) {
     "waveMessages"
   );
 
-  const waveMessagesMock =
-    hasWaveMessagesOverride && options.waveMessages === undefined
-      ? undefined
-      : options.waveMessages
-      ? {
-          ...defaultWaveMessages,
-          ...options.waveMessages,
-        }
-      : defaultWaveMessages;
+  let waveMessagesMock: WaveMessagesMock | undefined;
+  if (hasWaveMessagesOverride && options.waveMessages === undefined) {
+    waveMessagesMock = undefined;
+  } else if (options.waveMessages) {
+    waveMessagesMock = {
+      ...defaultWaveMessages,
+      ...options.waveMessages,
+    };
+  } else {
+    waveMessagesMock = defaultWaveMessages;
+  }
 
-  let currentWaveMessages = waveMessagesMock as WaveMessagesMock | undefined;
+  let currentWaveMessages: WaveMessagesMock | undefined = waveMessagesMock;
 
   useVirtualizedWaveDropsMock.mockImplementation(() => ({
     waveMessages: currentWaveMessages as any,
