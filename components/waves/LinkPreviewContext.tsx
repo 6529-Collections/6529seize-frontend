@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 export type LinkPreviewVariant = "chat" | "home";
 
@@ -21,16 +21,21 @@ export const LinkPreviewProvider = ({
 }: {
   readonly variant?: LinkPreviewVariant | undefined;
   readonly children: ReactNode;
-}) => (
-  <LinkPreviewContext.Provider
-    value={{
+}) => {
+  const value = useMemo(
+    () => ({
       variant,
       hideActions: variant === "home",
-    }}
-  >
-    {children}
-  </LinkPreviewContext.Provider>
-);
+    }),
+    [variant]
+  );
+
+  return (
+    <LinkPreviewContext.Provider value={value}>
+      {children}
+    </LinkPreviewContext.Provider>
+  );
+};
 
 export const useLinkPreviewContext = (): LinkPreviewContextValue =>
   useContext(LinkPreviewContext);
