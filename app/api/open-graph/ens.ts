@@ -11,6 +11,7 @@ import {
 } from "@/components/waves/ens/types";
 import type { EnsTarget } from "@/lib/ens/detect";
 import { stripHtmlTags } from "@/lib/text/html";
+import LruTtlCache from "@/lib/cache/lruTtl";
 import { ens_normalize } from "@adraffy/ens-normalize";
 import * as contentHash from "@ensdomains/content-hash";
 import { toUnicode } from "punycode";
@@ -95,15 +96,20 @@ const publicClient = createPublicClient({
 const NAME_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const ADDRESS_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const OWNERSHIP_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+const CACHE_MAX_ITEMS = 500;
 
-interface CacheEntry<T> {
-  readonly expiresAt: number;
-  readonly data: T;
-}
-
-const nameCache = new Map<string, CacheEntry<EnsNamePreview>>();
-const addressCache = new Map<string, CacheEntry<EnsAddressPreview>>();
-const ownershipCache = new Map<string, CacheEntry<EnsOwnership>>();
+const nameCache = new LruTtlCache<string, EnsNamePreview>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: NAME_CACHE_TTL_MS,
+});
+const addressCache = new LruTtlCache<string, EnsAddressPreview>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: ADDRESS_CACHE_TTL_MS,
+});
+const ownershipCache = new LruTtlCache<string, EnsOwnership>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: OWNERSHIP_CACHE_TTL_MS,
+});
 
 export class EnsPreviewError extends Error {
   readonly status: number;
@@ -117,34 +123,6 @@ export class EnsPreviewError extends Error {
 type ContenthashResult = EnsContenthash | null;
 
 type NullableAddress = string | null | undefined;
-
-function now(): number {
-  return Date.now();
-}
-
-function fromCache<T>(
-  cache: Map<string, CacheEntry<T>>,
-  key: string
-): T | null {
-  const entry = cache.get(key);
-  if (!entry) {
-    return null;
-  }
-  if (entry.expiresAt <= now()) {
-    cache.delete(key);
-    return null;
-  }
-  return entry.data;
-}
-
-function storeCache<T>(
-  cache: Map<string, CacheEntry<T>>,
-  key: string,
-  data: T,
-  ttlMs: number
-): void {
-  cache.set(key, { data, expiresAt: now() + ttlMs });
-}
 
 function normalizeEnsName(name: string): {
   normalized: string;
@@ -353,7 +331,7 @@ async function loadOwnership(
   node: Hex
 ): Promise<EnsOwnership> {
   const cacheKey = normalized.toLowerCase();
-  const cached = fromCache(ownershipCache, cacheKey);
+  const cached = ownershipCache.get(cacheKey);
   if (cached) {
     return cached;
   }
@@ -443,7 +421,7 @@ async function loadOwnership(
     ...(gracePeriodEnds === null ? {} : { gracePeriodEnds }),
   };
 
-  storeCache(ownershipCache, cacheKey, ownership, OWNERSHIP_CACHE_TTL_MS);
+  ownershipCache.set(cacheKey, ownership);
 
   return ownership;
 }
@@ -469,7 +447,7 @@ async function fetchTextRecords(
 
 async function fetchEnsName(input: string): Promise<EnsNamePreview> {
   const cacheKey = input.toLowerCase();
-  const cached = fromCache(nameCache, cacheKey);
+  const cached = nameCache.get(cacheKey);
   if (cached) {
     return cached;
   }
@@ -538,14 +516,14 @@ async function fetchEnsName(input: string): Promise<EnsNamePreview> {
     links: createLinksForName(normalized, address),
   };
 
-  storeCache(nameCache, cacheKey, preview, NAME_CACHE_TTL_MS);
+  nameCache.set(cacheKey, preview);
 
   return preview;
 }
 
 async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
   const cacheKey = address.toLowerCase();
-  const cached = fromCache(addressCache, cacheKey);
+  const cached = addressCache.get(cacheKey);
   if (cached) {
     return cached;
   }
@@ -589,7 +567,7 @@ async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
     links: createLinksForAddress(checksummed),
   };
 
-  storeCache(addressCache, cacheKey, preview, ADDRESS_CACHE_TTL_MS);
+  addressCache.set(cacheKey, preview);
 
   return preview;
 }

@@ -7,6 +7,7 @@ import {
   fetchPublicUrl,
   parsePublicUrl,
 } from "@/lib/security/urlGuard";
+import LruTtlCache from "@/lib/cache/lruTtl";
 import {
   decodeHtmlEntities,
   replaceHtmlBreaksWithNewlines,
@@ -20,6 +21,8 @@ import type {
 } from "@/services/api/tiktok-preview";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const CACHE_STALE_TTL_MS = 3 * CACHE_TTL_MS;
+const CACHE_MAX_ITEMS = 500;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT =
   "6529seize-tiktok-preview/1.0 (+https://6529.io; Fetching public TikTok oEmbed data)";
@@ -56,7 +59,10 @@ type CacheEntry = {
   revalidating: boolean;
 };
 
-const cache = new Map<string, CacheEntry>();
+const cache = new LruTtlCache<string, CacheEntry>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: CACHE_STALE_TTL_MS,
+});
 const revalidating = new Set<string>();
 
 const TRACKING_PARAM_PREFIXES = ["utm_", "is_from_", "share_"];

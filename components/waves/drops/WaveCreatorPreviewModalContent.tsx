@@ -36,6 +36,7 @@ export const WaveCreatorPreviewModalContent: React.FC<
     identity,
     waveName: null,
     enabled: isOpen,
+    directMessage: false,
   });
 
   const onBottomIntersection = (state: boolean) => {

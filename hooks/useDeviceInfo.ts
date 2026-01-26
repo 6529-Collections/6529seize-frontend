@@ -16,7 +16,10 @@ export default function useDeviceInfo(): DeviceInfo {
 
   const getInfo = useCallback(
     (touchDetected: boolean): DeviceInfo => {
-      if (typeof globalThis === "undefined" || typeof navigator === "undefined") {
+      if (
+        typeof globalThis === "undefined" ||
+        typeof navigator === "undefined"
+      ) {
         return {
           isMobileDevice: false,
           hasTouchScreen: false,
@@ -43,7 +46,8 @@ export default function useDeviceInfo(): DeviceInfo {
         /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
       const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
       const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
-      const widthMobile = win.matchMedia?.("(max-width: 768px)")?.matches ?? false;
+      const widthMobile =
+        win.matchMedia?.("(max-width: 768px)")?.matches ?? false;
 
       const isMobileDevice =
         uaDataMobile ??

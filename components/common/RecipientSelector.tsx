@@ -244,7 +244,7 @@ function RecipientSearchDisplay({
   );
 }
 
-export interface RecipientSelectorProps {
+interface RecipientSelectorProps {
   readonly open: boolean;
   readonly selectedProfile: CommunityMemberMinimal | null;
   readonly selectedWallet: string | null;
@@ -551,5 +551,3 @@ export default function RecipientSelector({
     </div>
   );
 }
-
-export { RecipientSearchDisplay, RecipientSelectedDisplay };
