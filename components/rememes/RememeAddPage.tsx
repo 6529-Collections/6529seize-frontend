@@ -19,12 +19,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { useSignMessage } from "wagmi";
+import { useSignTypedData } from "wagmi";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import type { ProcessedRememe } from "./RememeAddComponent";
 import RememeAddComponent from "./RememeAddComponent";
 import styles from "./Rememes.module.scss";
+import { getPrivilegedActionChallenge } from "@/services/signing/privileged-action-challenge";
+import { buildRememeAddTypedData } from "@/utils/signing/privileged-typed-data";
+import { isAddress } from "viem";
+import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
 
 interface CheckList {
   status: boolean;
@@ -39,7 +43,15 @@ export default function RememeAddPage() {
 
   const { seizeSettings } = useSeizeSettings();
 
-  const signMessage = useSignMessage();
+  const signTypedData = useSignTypedData();
+  const [signingNonce, setSigningNonce] = useState<string>();
+  const [signingExpiresAt, setSigningExpiresAt] = useState<number>();
+  const [pendingRememeSubmission, setPendingRememeSubmission] = useState<{
+    rememe: ReturnType<typeof buildRememeObject>;
+    nonce: string;
+    expiresAt: number;
+    serverSignature: string;
+  }>();
   const [memes, setMemes] = useState<NFT[]>([]);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
@@ -107,10 +119,10 @@ export default function RememeAddPage() {
   }, [addRememe, userTDH]);
 
   useEffect(() => {
-    if (signMessage.isError) {
-      setSignErrors([`Error: ${signMessage.error?.message.split(".")[0]}`]);
+    if (signTypedData.isError) {
+      setSignErrors([`Error: ${signTypedData.error?.message.split(".")[0]}`]);
     }
-  }, [signMessage.isError]);
+  }, [signTypedData.isError]);
 
   useEffect(() => {
     fetchUrl(`${publicEnv.API_ENDPOINT}/api/memes_lite`).then(
@@ -140,12 +152,20 @@ export default function RememeAddPage() {
   }, [connectedProfile]);
 
   useEffect(() => {
-    if (signMessage.isSuccess && signMessage.data) {
+    if (
+      signTypedData.isSuccess &&
+      signTypedData.data &&
+      pendingRememeSubmission
+    ) {
       setSubmitting(true);
       postData(`${publicEnv.API_ENDPOINT}/api/rememes/add`, {
         address: address,
-        signature: signMessage.data,
-        rememe: buildRememeObject(),
+        signature: signTypedData.data,
+        signature_type: "eip712",
+        nonce: pendingRememeSubmission.nonce,
+        expires_at: pendingRememeSubmission.expiresAt,
+        server_signature: pendingRememeSubmission.serverSignature,
+        rememe: pendingRememeSubmission.rememe,
       }).then((response) => {
         const success = response.status === 201;
         const processedRememe: ProcessedRememe = response.response;
@@ -176,7 +196,7 @@ export default function RememeAddPage() {
         });
       });
     }
-  }, [signMessage.data]);
+  }, [signTypedData.data, pendingRememeSubmission]);
 
   function buildRememeObject() {
     return {
@@ -222,7 +242,10 @@ export default function RememeAddPage() {
                           setReferences(references);
                           setCheckList([]);
                           setSignErrors([]);
-                          signMessage.reset();
+                          signTypedData.reset();
+                          setSigningNonce(undefined);
+                          setSigningExpiresAt(undefined);
+                          setPendingRememeSubmission(undefined);
                         }}
                       />
                     </Col>
@@ -292,11 +315,67 @@ export default function RememeAddPage() {
                       onClick={() => {
                         setSignErrors([]);
                         setSubmissionResult(undefined);
-                        if (addRememe) {
-                          signMessage.signMessage({
-                            message: JSON.stringify(buildRememeObject()),
-                          });
+                        if (!addRememe) return;
+                        if (!address || !isAddress(address)) {
+                          setSignErrors(["Error: Wallet not connected"]);
+                          return;
                         }
+
+                        signTypedData.reset();
+                        setSigningNonce(undefined);
+                        setSigningExpiresAt(undefined);
+                        setPendingRememeSubmission(undefined);
+
+                        const rememe = buildRememeObject();
+                        if (!rememe.contract || !isAddress(rememe.contract)) {
+                          setSignErrors([
+                            "Error: Invalid ReMemes contract address",
+                          ]);
+                          return;
+                        }
+                        getPrivilegedActionChallenge({ signerAddress: address })
+                          .then((challenge) => {
+                            setSigningNonce(challenge.nonce);
+                            setSigningExpiresAt(challenge.expiresAt);
+                            setPendingRememeSubmission({
+                              rememe,
+                              nonce: challenge.nonce,
+                              expiresAt: challenge.expiresAt,
+                              serverSignature: challenge.serverSignature,
+                            });
+
+                            const tokenIds = (rememe.token_ids ?? []).map((id) =>
+                              BigInt(id)
+                            );
+                            const refs = (rememe.references ?? []).map((n) =>
+                              BigInt(n)
+                            );
+
+                            const typedData = buildRememeAddTypedData({
+                              chainId: 1,
+                              verifyingContract: rememe.contract as `0x${string}`,
+                              wallet: address,
+                              contract: rememe.contract as `0x${string}`,
+                              tokenIds,
+                              references: refs,
+                              nonce: challenge.nonce,
+                              expiresAt: BigInt(challenge.expiresAt),
+                            });
+
+                            signTypedData.signTypedData({
+                              domain: typedData.domain,
+                              types: typedData.types,
+                              primaryType: typedData.primaryType,
+                              message: typedData.message,
+                            });
+                          })
+                          .catch((e: any) => {
+                            setSignErrors([
+                              `Error: ${
+                                e?.message ? String(e.message) : "Unknown error"
+                              }`,
+                            ]);
+                          });
                       }}
                     >
                       Add Rememe
@@ -313,11 +392,25 @@ export default function RememeAddPage() {
                 )}
               </Col>
             </Row>
-            {(submitting || signMessage.isPending) && (
+            {(submitting || signTypedData.isPending) && (
               <Row className="pt-3">
                 <Col xs={12}>
-                  {signMessage.isPending && "Signing Message"}
+                  {signTypedData.isPending && "Signing request"}
                   {submitting && "Adding Rememe"}
+                  {signTypedData.isPending && signingNonce ? (
+                    <>
+                      {" "}
+                      (nonce <code>{truncateTextMiddle(signingNonce, 18)}</code>
+                      {signingExpiresAt ? (
+                        <>
+                          {" "}
+                          expires at{" "}
+                          {new Date(signingExpiresAt * 1000).toUTCString()}
+                        </>
+                      ) : null}
+                      )
+                    </>
+                  ) : null}
                   <div className="d-inline">
                     <div
                       className={`spinner-border ${styles["loader"]}`}

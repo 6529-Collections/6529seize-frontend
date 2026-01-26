@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NextGenAdminInitializeExternalBurnSwap from "@/components/nextGen/admin/NextGenAdminInitializeExternalBurnSwap";
 
@@ -21,9 +21,18 @@ jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useParsedCollectionIndex: jest.fn(),
 }));
 jest.mock("uuid", () => ({ v4: () => "uuid" }));
-jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
+jest.mock("wagmi", () => ({ useSignTypedData: jest.fn() }));
+jest.mock("@/services/signing/privileged-action-challenge", () => ({
+  getPrivilegedActionChallenge: jest.fn(() =>
+    Promise.resolve({
+      nonce: "nonce",
+      expiresAt: 123,
+      serverSignature: "serverSig",
+    })
+  ),
+}));
 
-import { useSignMessage } from "wagmi";
+import { useSignTypedData } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   getCollectionIdsForAddress,
@@ -36,11 +45,8 @@ import {
 } from "@/components/nextGen/nextgen_helpers";
 
 const signMessageState: any = {
-  signMessage: jest.fn(),
+  signTypedDataAsync: jest.fn(() => Promise.resolve("sig")),
   reset: jest.fn(),
-  isError: false,
-  isSuccess: false,
-  data: undefined,
 };
 const contractWriteState: any = {
   writeContract: jest.fn(),
@@ -53,14 +59,16 @@ const contractWriteState: any = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: "0x1" });
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    address: "0x0000000000000000000000000000000000000001",
+  });
   (useGlobalAdmin as jest.Mock).mockReturnValue({ data: true });
   (useFunctionAdmin as jest.Mock).mockReturnValue({ data: true });
   (useCollectionIndex as jest.Mock).mockReturnValue({ data: 3 });
   (useParsedCollectionIndex as jest.Mock).mockReturnValue(3);
   (useCollectionAdmin as jest.Mock).mockReturnValue({ data: [] });
   (getCollectionIdsForAddress as jest.Mock).mockReturnValue(["1"]);
-  (useSignMessage as jest.Mock).mockReturnValue(signMessageState);
+  (useSignTypedData as jest.Mock).mockReturnValue(signMessageState);
   (useMinterContractWrite as jest.Mock).mockReturnValue(contractWriteState);
 });
 
@@ -81,15 +89,21 @@ test("calls signMessage when form valid", async () => {
   const user = userEvent.setup();
   renderComponent();
   const inputs = screen.getAllByRole("textbox");
-  await user.type(inputs[0], "erc");
+  await user.type(
+    inputs[0],
+    "0x0000000000000000000000000000000000000002"
+  );
   await user.type(inputs[1], "1");
   const select = screen.getByRole("combobox");
   await user.selectOptions(select, "1");
   await user.type(screen.getAllByRole("textbox")[2], "1");
   await user.type(screen.getAllByRole("textbox")[3], "2");
-  await user.type(screen.getAllByRole("textbox")[4], "addr");
+  await user.type(
+    screen.getAllByRole("textbox")[4],
+    "0x0000000000000000000000000000000000000003"
+  );
   fireEvent.click(screen.getByText("Submit"));
-  expect(signMessageState.signMessage).toHaveBeenCalledWith({
-    message: "uuid",
-  });
+  await waitFor(() =>
+    expect(signMessageState.signTypedDataAsync).toHaveBeenCalled()
+  );
 });
