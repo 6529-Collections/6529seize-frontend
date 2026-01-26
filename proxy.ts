@@ -8,6 +8,7 @@ import {
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { publicEnv } from "./config/env";
+import { createContentSecurityPolicyValue } from "./config/securityHeaders";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
 const redirectMappings = [
@@ -90,6 +91,48 @@ const STATIC_PATH_SUFFIXES = [
   ".svg",
   ".webp",
 ] as const;
+
+type CspContext = {
+  readonly requestHeaders: Headers;
+  readonly cspValue: string;
+};
+
+function base64Encode(bytes: Uint8Array): string {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(bytes).toString("base64");
+  }
+  let binary = "";
+  for (const b of bytes) {
+    binary += String.fromCharCode(b);
+  }
+  return btoa(binary);
+}
+
+function createNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return base64Encode(bytes);
+}
+
+function nextResponse(req: NextRequest, ctx: CspContext | undefined) {
+  const res = ctx
+    ? NextResponse.next({ request: { headers: ctx.requestHeaders } })
+    : NextResponse.next();
+  if (ctx) {
+    res.headers.set("Content-Security-Policy", ctx.cspValue);
+  }
+  return res;
+}
+
+function withCspHeader(
+  res: NextResponse,
+  ctx: CspContext | undefined
+): NextResponse {
+  if (ctx) {
+    res.headers.set("Content-Security-Policy", ctx.cspValue);
+  }
+  return res;
+}
 
 function stripTrailingSlashes(value: string): string {
   let end = value.length;
@@ -257,13 +300,14 @@ function handleRedirects(req: NextRequest): NextResponse | undefined {
 
 async function enforceAccessControl(
   req: NextRequest,
-  normalizedPathname: string
+  normalizedPathname: string,
+  ctx: CspContext | undefined
 ): Promise<NextResponse> {
   if (
     normalizedPathname === "/access" ||
     normalizedPathname === "/restricted"
   ) {
-    return NextResponse.next();
+    return nextResponse(req, ctx);
   }
 
   const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
@@ -276,30 +320,52 @@ async function enforceAccessControl(
   if (response.status === 401) {
     req.nextUrl.pathname = "/access";
     req.nextUrl.search = "";
-    return NextResponse.redirect(req.nextUrl);
+    return withCspHeader(NextResponse.redirect(req.nextUrl), ctx);
   }
 
   if (response.status === 403) {
     req.nextUrl.pathname = "/restricted";
     req.nextUrl.search = "";
-    return NextResponse.redirect(req.nextUrl);
+    return withCspHeader(NextResponse.redirect(req.nextUrl), ctx);
   }
 
-  return NextResponse.next();
+  return nextResponse(req, ctx);
 }
 
 export default async function proxy(req: NextRequest) {
   try {
-    const redirectResponse = handleRedirects(req);
-    if (redirectResponse) {
-      return redirectResponse;
-    }
-
     const { pathname } = req.nextUrl;
     const normalizedPathname =
       pathname.length > 1 && pathname.endsWith("/")
         ? pathname.slice(0, -1)
         : pathname;
+
+    const bypassAccessControl =
+      STATIC_PATH_PREFIXES.some((prefix) => normalizedPathname.startsWith(prefix)) ||
+      STATIC_PATH_SUFFIXES.some((suffix) => normalizedPathname.endsWith(suffix));
+
+    const skipCsp =
+      normalizedPathname.startsWith("/_next") ||
+      normalizedPathname.startsWith("/api") ||
+      STATIC_PATH_SUFFIXES.some((suffix) => normalizedPathname.endsWith(suffix));
+
+    const ctx: CspContext | undefined = skipCsp
+      ? undefined
+      : (() => {
+          const nonce = createNonce();
+          const requestHeaders = new Headers(req.headers);
+          requestHeaders.set("x-nonce", nonce);
+
+          return {
+            requestHeaders,
+            cspValue: createContentSecurityPolicyValue({ nonce, publicEnv }),
+          };
+        })();
+
+    const redirectResponse = handleRedirects(req);
+    if (redirectResponse) {
+      return withCspHeader(redirectResponse, ctx);
+    }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)
@@ -310,20 +376,25 @@ export default async function proxy(req: NextRequest) {
       const [pathnamePart, searchPart] = redirectTarget.split("?");
       clone.pathname = pathnamePart || "/";
       clone.search = searchPart ? `?${searchPart}` : "";
-      return NextResponse.redirect(clone, 301);
+      return withCspHeader(NextResponse.redirect(clone, 301), ctx);
     }
 
-    if (
-      STATIC_PATH_PREFIXES.some((prefix) =>
-        normalizedPathname.startsWith(prefix)
-      ) ||
-      STATIC_PATH_SUFFIXES.some((suffix) => normalizedPathname.endsWith(suffix))
-    ) {
-      return NextResponse.next();
+    if (bypassAccessControl) {
+      return nextResponse(req, ctx);
     }
 
-    return enforceAccessControl(req, normalizedPathname);
+    return enforceAccessControl(req, normalizedPathname, ctx);
   } catch (error) {
-    return NextResponse.redirect(new URL("/error", req.url));
+    const nonce = createNonce();
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-nonce", nonce);
+    const fallbackCtx: CspContext = {
+      requestHeaders,
+      cspValue: createContentSecurityPolicyValue({ nonce, publicEnv }),
+    };
+    return withCspHeader(
+      NextResponse.redirect(new URL("/error", req.url)),
+      fallbackCtx
+    );
   }
 }
