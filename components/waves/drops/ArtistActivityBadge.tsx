@@ -143,7 +143,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
 
         {config.showDot && (
           <span
-            className="tw-pointer-events-none tw-absolute -tw-top-1 -tw-right-1 tw-size-2 tw-rounded-full tw-bg-amber-400 tw-border tw-border-iron-900 tw-shadow-[0_0_0_1px_rgba(0,0,0,0.25)]"
+            className="tw-pointer-events-none tw-absolute -tw-top-1 -tw-right-1 tw-size-2 tw-rounded-full tw-bg-[#FFD700] tw-border tw-border-solid tw-border-iron-900 tw-shadow-[0_0_0_1px_rgba(0,0,0,0.25)]"
             aria-hidden="true"
           />
         )}
