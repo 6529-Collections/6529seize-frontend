@@ -27,7 +27,7 @@ const PALETTE_ICON_CLASS = "tw-w-2.5 tw-h-2.5 tw-text-white tw-flex-shrink-0";
 const TROPHY_ICON_CLASS =
   "tw-w-2.5 tw-h-2.5 tw-text-amber-400 tw-flex-shrink-0 desktop-hover:hover:tw-text-amber-300/90";
 const BOTH_STATE_DOT_CLASS =
-  "tw-pointer-events-none tw-absolute -tw-top-1 -tw-right-1 tw-size-2 tw-rounded-full tw-bg-blue-500 tw-border tw-border-solid tw-border-blue-900 tw-shadow-[0_0_0_1px_rgba(0,0,0,0.25)]";
+  "tw-pointer-events-none tw-absolute -tw-top-1 -tw-right-1 tw-size-[9px] tw-rounded-full tw-bg-blue-500 tw-border tw-border-solid tw-border-iron-900 tw-shadow-[0_0_0_1px_rgba(0,0,0,0.25)]";
 
 type BadgeState = "none" | "active" | "winners" | "both";
 
