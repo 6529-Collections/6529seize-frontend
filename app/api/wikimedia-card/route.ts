@@ -16,17 +16,12 @@ import {
   type UrlGuardHostPolicy,
 } from "@/lib/security/urlGuard";
 import { sanitizeHtmlToText } from "@/lib/text/html";
+import LruTtlCache from "@/lib/cache/lruTtl";
 
 const USER_AGENT = "6529seize-wikimedia-preview/1.0 (+https://6529.io)";
 const REQUEST_TIMEOUT_MS = 8000;
 const SHORT_LINK_MAX_REDIRECTS = 5;
-
-type CacheEntry = {
-  readonly data: WikimediaCardResponse;
-  readonly expiresAt: number;
-};
-
-const cache = new Map<string, CacheEntry>();
+const CACHE_MAX_ITEMS = 1000;
 
 const TTL_BY_KIND: Record<WikimediaCardResponse["kind"], number> = {
   article: 24 * 60 * 60 * 1000,
@@ -35,6 +30,11 @@ const TTL_BY_KIND: Record<WikimediaCardResponse["kind"], number> = {
   wikidata: 24 * 60 * 60 * 1000,
   unavailable: 60 * 60 * 1000,
 };
+
+const cache = new LruTtlCache<string, WikimediaCardResponse>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: TTL_BY_KIND.unavailable,
+});
 
 interface SummaryTarget {
   readonly type: "summary";
@@ -1201,10 +1201,9 @@ export async function GET(request: NextRequest) {
   }
 
   const cacheKey = sanitizeCacheKey(targetUrl);
-  const now = Date.now();
   const cached = cache.get(cacheKey);
-  if (cached && cached.expiresAt > now) {
-    return NextResponse.json(cached.data);
+  if (cached) {
+    return NextResponse.json(cached);
   }
 
   const languages = parseAcceptLanguage(request.headers.get("accept-language"));
@@ -1220,10 +1219,9 @@ export async function GET(request: NextRequest) {
 
   const card = await buildCard(target, languages);
   const ttl = TTL_BY_KIND[card.kind] ?? TTL_BY_KIND.unavailable;
-  const entry: CacheEntry = { data: card, expiresAt: now + ttl };
 
-  cache.set(cacheKey, entry);
-  cache.set(card.canonicalUrl, entry);
+  cache.set(cacheKey, card, ttl);
+  cache.set(card.canonicalUrl, card, ttl);
 
   return NextResponse.json(card);
 }

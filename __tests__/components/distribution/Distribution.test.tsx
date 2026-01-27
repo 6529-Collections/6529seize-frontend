@@ -48,10 +48,10 @@ jest.mock("next/image", () => ({
 }));
 
 // Mock child components
-jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
+jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
   __esModule: true,
-  default: ({ nft_id }: any) => (
-    <div data-testid="mint-countdown" data-nft-id={nft_id} />
+  default: ({ nftId }: any) => (
+    <div data-testid="mint-countdown" data-nft-id={nftId} />
   ),
 }));
 

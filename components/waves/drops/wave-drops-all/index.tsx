@@ -321,7 +321,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   );
 };
 
-export const WaveDropsAllWithoutProvider: React.FC<WaveDropsAllProps> = WaveDropsAllInner;
+export const WaveDropsAllWithoutProvider: React.FC<WaveDropsAllProps> =
+  WaveDropsAllInner;
 
 const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   waveId,

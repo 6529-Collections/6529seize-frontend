@@ -5,7 +5,7 @@ import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops
 import { WaveGallery } from "@/components/waves/gallery";
 import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
 import PrivilegedDropCreator, {
-    DropMode,
+  DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
 import { UnreadDividerProvider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -65,10 +65,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     setActiveDropState({ waveId: wave.id, activeDrop: nextActiveDrop });
   };
 
-  const capturedDividerRef = useRef<{ waveId: string; serialNo: number | null } | null>(null);
+  const capturedDividerRef = useRef<{
+    waveId: string;
+    serialNo: number | null;
+  } | null>(null);
 
-  if (!capturedDividerRef.current || capturedDividerRef.current.waveId !== wave.id) {
-    capturedDividerRef.current = { waveId: wave.id, serialNo: firstUnreadSerialNo };
+  if (
+    !capturedDividerRef.current ||
+    capturedDividerRef.current.waveId !== wave.id
+  ) {
+    capturedDividerRef.current = {
+      waveId: wave.id,
+      serialNo: firstUnreadSerialNo,
+    };
   }
 
   const initialDropState = useMemo<InitialDropState | null>(() => {
@@ -124,7 +133,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const dividerTarget =
     initialDropState?.waveId === wave.id
       ? initialDropState.dividerSerialNo
-      : capturedDividerRef.current?.serialNo ?? null;
+      : (capturedDividerRef.current?.serialNo ?? null);
 
   useEffect(() => {
     if (!initialDropState) {

@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
+
 interface NowMintingStatsItemProps {
-  readonly label: string;
-  readonly value?: string | undefined;
+  readonly label: ReactNode;
+  readonly value?: ReactNode;
   readonly status?: "active" | "upcoming" | "ended" | undefined;
   readonly isLoading?: boolean;
 }
@@ -18,8 +20,8 @@ export default function NowMintingStatsItem({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-1">
-      <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+    <div className="tw-flex tw-flex-col tw-gap-1.5">
+      <span className="tw-text-xs tw-uppercase tw-tracking-wider tw-font-medium tw-text-iron-400">
         {label}
       </span>
       {isLoading ? (

@@ -1,3 +1,5 @@
+import LruTtlCache from "@/lib/cache/lruTtl";
+
 export type WikimediaSource = "wikipedia" | "wikimedia-commons" | "wikidata";
 
 export interface WikimediaImage {
@@ -86,7 +88,13 @@ export type WikimediaCardResponse =
   | WikimediaWikidataCard
   | WikimediaUnavailableCard;
 
-const wikimediaCache = new Map<string, Promise<WikimediaCardResponse>>();
+const WIKIMEDIA_CARD_CACHE_TTL_MS = 5 * 60 * 1000;
+const WIKIMEDIA_CARD_CACHE_MAX_ITEMS = 200;
+
+const wikimediaCache = new LruTtlCache<string, Promise<WikimediaCardResponse>>({
+  max: WIKIMEDIA_CARD_CACHE_MAX_ITEMS,
+  ttlMs: WIKIMEDIA_CARD_CACHE_TTL_MS,
+});
 
 const normalizeUrl = (url: string): string => url.trim();
 
@@ -135,4 +143,3 @@ export const fetchWikimediaCard = async (
 
   return requestPromise;
 };
-

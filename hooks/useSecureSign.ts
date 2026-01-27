@@ -67,6 +67,12 @@ interface UseSecureSignReturn {
   isSigningPending: boolean;
   reset: () => void;
 }
+
+type SignatureType = "eoa" | "contract";
+
+interface UseSecureSignOptions {
+  signatureType?: SignatureType | undefined;
+}
 /**
  * SECURITY: Validate Ethereum address format
  * Ensures address follows proper format and prevents injection
@@ -120,13 +126,40 @@ function validateMessage(message: string): void {
  * SECURITY: Validate signature format
  * Ensures returned signature follows expected format
  */
-function validateSignature(signature: string): void {
+const SIGNATURE_HEX_PATTERN = /^0x[a-fA-F0-9]+$/;
+const MIN_EOA_SIGNATURE_HEX_LENGTH = 130;
+const MAX_CONTRACT_SIGNATURE_HEX_LENGTH = 8192;
+
+function validateEoaSignature(signature: string): void {
   if (typeof signature !== "string") {
     throw new ProviderValidationError("Signature must be a string");
   }
 
-  // Ethereum signatures should be 65 bytes (130 hex chars + 0x prefix)
+  // Ethereum EOA signatures should be 65 bytes (130 hex chars + 0x prefix)
   if (!/^0x[a-fA-F0-9]{130}$/.test(signature)) {
+    throw new ProviderValidationError("Invalid signature format");
+  }
+}
+
+function validateContractSignature(signature: string): void {
+  if (typeof signature !== "string") {
+    throw new ProviderValidationError("Signature must be a string");
+  }
+
+  if (!SIGNATURE_HEX_PATTERN.test(signature)) {
+    throw new ProviderValidationError("Invalid signature format");
+  }
+
+  const hexLength = signature.length - 2;
+  if (hexLength < MIN_EOA_SIGNATURE_HEX_LENGTH) {
+    throw new ProviderValidationError("Invalid signature format");
+  }
+
+  if (hexLength % 2 !== 0) {
+    throw new ProviderValidationError("Invalid signature format");
+  }
+
+  if (hexLength > MAX_CONTRACT_SIGNATURE_HEX_LENGTH) {
     throw new ProviderValidationError("Invalid signature format");
   }
 }
@@ -136,10 +169,13 @@ function validateSignature(signature: string): void {
  * Uses Wagmi's useSignMessage for proper provider management and security
  * This approach works with all connector types including custom AppWallet connectors
  */
-export const useSecureSign = (): UseSecureSignReturn => {
+export const useSecureSign = (
+  options?: UseSecureSignOptions
+): UseSecureSignReturn => {
   const [isSigningPending, setIsSigningPending] = useState(false);
   const { address: connectedAddress, isConnected } = useAppKitAccount();
   const wagmiSignMessage = useSignMessage();
+  const signatureType: SignatureType = options?.signatureType ?? "eoa";
 
   const reset = useCallback(() => {
     setIsSigningPending(false);
@@ -157,14 +193,18 @@ export const useSecureSign = (): UseSecureSignReturn => {
         validateSigningContext(isConnected, connectedAddress);
 
         // Execute the signature operation using Wagmi
-        return await executeWagmiSignature(wagmiSignMessage, message);
+        return await executeWagmiSignature(
+          wagmiSignMessage,
+          message,
+          signatureType
+        );
       } catch (error: unknown) {
         return classifySigningError(error);
       } finally {
         setIsSigningPending(false);
       }
     },
-    [connectedAddress, isConnected, wagmiSignMessage]
+    [connectedAddress, isConnected, signatureType, wagmiSignMessage]
   );
 
   return {
@@ -224,7 +264,8 @@ const validateSigningContext = (
  */
 const executeWagmiSignature = async (
   wagmiSignMessage: ReturnType<typeof useSignMessage>,
-  message: string
+  message: string,
+  signatureType: SignatureType
 ): Promise<SignatureResult> => {
   try {
     const signature = await wagmiSignMessage.signMessageAsync({ message });
@@ -233,7 +274,11 @@ const executeWagmiSignature = async (
     message = "";
 
     // SECURITY: Validate signature format before returning
-    validateSignature(signature);
+    if (signatureType === "contract") {
+      validateContractSignature(signature);
+    } else {
+      validateEoaSignature(signature);
+    }
 
     return {
       signature,

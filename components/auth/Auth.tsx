@@ -10,7 +10,7 @@ import {
   useCallback,
   useRef,
 } from "react";
-import type { TypeOptions} from "react-toastify";
+import type { TypeOptions } from "react-toastify";
 import { Slide, ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -138,7 +138,9 @@ export default function Auth({
     signMessage,
     isSigningPending,
     reset: resetSigning,
-  } = useSecureSign();
+  } = useSecureSign({
+    signatureType: isSafeWallet ? "contract" : "eoa",
+  });
   const [showSignModal, setShowSignModal] = useState(false);
 
   const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(

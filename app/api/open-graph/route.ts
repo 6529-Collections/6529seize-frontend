@@ -8,6 +8,7 @@ import {
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
+import LruTtlCache from "@/lib/cache/lruTtl";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
   HTML_ACCEPT_HEADER,
@@ -19,6 +20,7 @@ import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_MAX_ITEMS = 500;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT = LINK_PREVIEW_USER_AGENT;
 const MAX_REDIRECTS = 5;
@@ -122,12 +124,10 @@ function createFetchConfig(url: URL): {
   };
 }
 
-type CacheEntry = {
-  readonly expiresAt: number;
-  readonly data: LinkPreviewResponse;
-};
-
-const cache = new Map<string, CacheEntry>();
+const cache = new LruTtlCache<string, LinkPreviewResponse>({
+  max: CACHE_MAX_ITEMS,
+  ttlMs: CACHE_TTL_MS,
+});
 
 const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
@@ -329,18 +329,13 @@ export async function GET(request: NextRequest) {
 
   const cached = cache.get(plan.cacheKey);
 
-  if (cached && cached.expiresAt > Date.now()) {
-    return NextResponse.json(cached.data);
+  if (cached) {
+    return NextResponse.json(cached);
   }
 
   try {
     const { data, ttl } = await plan.execute();
-    const entry: CacheEntry = {
-      data,
-      expiresAt: Date.now() + ttl,
-    };
-
-    cache.set(plan.cacheKey, entry);
+    cache.set(plan.cacheKey, data, ttl);
 
     return NextResponse.json(data);
   } catch (error) {
