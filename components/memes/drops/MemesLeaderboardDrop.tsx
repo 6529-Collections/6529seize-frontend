@@ -18,6 +18,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import Link from "next/link";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
@@ -73,7 +74,16 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   return (
     <div
       className="tw-w-full tw-cursor-pointer tw-@container"
-      onClick={() => !shouldUseTouchUI && onDropClick(drop)}
+      onClick={() => {
+        if (shouldUseTouchUI) return;
+        startDropOpen({
+          dropId: drop.id,
+          waveId: drop.wave.id,
+          source: "leaderboard_memes",
+          isMobile: isMobileScreen,
+        });
+        onDropClick(drop);
+      }}
     >
       <div className="tw-group tw-w-full">
         <div {...touchHandlers}>
