@@ -53,9 +53,6 @@ export const isNavItemActive = (
   const isMessagesView = pathname === "/messages" || viewParam === "messages";
 
   if (item.kind === "route") {
-    if (item.name === "Stream") {
-      return isHomeFeedPath && activeView === null;
-    }
     if (item.name === "Home") {
       return (
         pathname === "/" &&
@@ -65,6 +62,9 @@ export const isNavItemActive = (
         !isWavesView &&
         !isMessagesView
       );
+    }
+    if (item.name === "Discover") {
+      return (pathname === "/discover" || pathname.startsWith("/discover/")) && activeView === null;
     }
     return pathname === item.href && activeView === null;
   }
