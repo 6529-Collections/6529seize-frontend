@@ -22,6 +22,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
@@ -114,6 +115,12 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
 
     const handleImageClick = () => {
+      startDropOpen({
+        dropId: drop.id,
+        waveId: drop.wave.id,
+        source: "leaderboard_grid",
+        isMobile: isMobileScreen,
+      });
       onDropClick(drop);
     };
 
