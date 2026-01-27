@@ -129,30 +129,12 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       return `${newItemsText}${waveData.name} | Brain`;
     })();
 
-    if (isHomeFeedTab) {
-      if (waveTitle) return waveTitle;
-
-      const prefix =
-        streamHasNewItems && notificationCount === 0
-          ? "(New messages) My Stream"
-          : "My Stream";
-      return `${prefix} | Brain`;
-    }
-
     if (isWaveRoute && waveTitle) {
       return waveTitle;
     }
 
     return title;
-  }, [
-    isHomeFeedTab,
-    isWaveRoute,
-    waveParam,
-    waveData,
-    streamHasNewItems,
-    title,
-    notificationCount,
-  ]);
+  }, [isWaveRoute, waveParam, waveData, title, notificationCount]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
