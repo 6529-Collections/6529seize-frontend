@@ -18,7 +18,6 @@ type TitleContextType = {
   notificationCount: number;
   setNotificationCount: (count: number) => void;
   setWaveData: (data: { name: string; newItemsCount: number } | null) => void;
-  setStreamHasNewItems: (hasNewItems: boolean) => void;
 };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
@@ -80,7 +79,6 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     name: string;
     newItemsCount: number;
   } | null>(null);
-  const [streamHasNewItems, setStreamHasNewItems] = useState(false);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
   const waveParam =
@@ -106,7 +104,6 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       const defaultTitle = getDefaultTitleForRoute(pathname);
       setTitle(defaultTitle);
       setWaveData(null);
-      setStreamHasNewItems(false);
     }
   }, [pathname, searchParams]);
 
@@ -153,7 +150,6 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       notificationCount,
       setNotificationCount,
       setWaveData,
-      setStreamHasNewItems,
     };
   }, [computedTitle, notificationCount]);
 

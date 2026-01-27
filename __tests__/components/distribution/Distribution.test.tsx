@@ -20,7 +20,6 @@ jest.mock("@/contexts/TitleContext", () => ({
     notificationCount: 0,
     setNotificationCount: jest.fn(),
     setWaveData: jest.fn(),
-    setStreamHasNewItems: jest.fn(),
   }),
 }));
 
