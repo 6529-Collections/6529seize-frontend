@@ -26,6 +26,8 @@ const TROPHY_BUTTON_CLASS =
 const PALETTE_ICON_CLASS = "tw-w-2.5 tw-h-2.5 tw-text-white tw-flex-shrink-0";
 const TROPHY_ICON_CLASS =
   "tw-w-2.5 tw-h-2.5 tw-text-amber-400 tw-flex-shrink-0 desktop-hover:hover:tw-text-amber-300/90";
+const BOTH_STATE_DOT_CLASS =
+  "tw-pointer-events-none tw-absolute -tw-top-1 -tw-right-1 tw-size-2 tw-rounded-full tw-bg-blue-500 tw-border tw-border-solid tw-border-blue-900 tw-shadow-[0_0_0_1px_rgba(0,0,0,0.25)]";
 
 type BadgeState = "none" | "active" | "winners" | "both";
 
@@ -61,8 +63,8 @@ const BADGE_CONFIG: Record<
     initialTab: "winners",
   },
   both: {
-    icon: faPalette,
-    buttonClassName: PALETTE_BUTTON_CLASS,
+    icon: faTrophy,
+    buttonClassName: TROPHY_BUTTON_CLASS,
     showDot: true,
     initialTab: "active",
   },
@@ -142,10 +144,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
         <FontAwesomeIcon icon={config.icon} className={iconClassName} />
 
         {config.showDot && (
-          <span
-            className="tw-pointer-events-none tw-absolute -tw-top-1 -tw-right-1 tw-size-2 tw-rounded-full tw-bg-[#FFD700] tw-border tw-border-solid tw-border-iron-900 tw-shadow-[0_0_0_1px_rgba(0,0,0,0.25)]"
-            aria-hidden="true"
-          />
+          <span className={BOTH_STATE_DOT_CLASS} aria-hidden="true" />
         )}
       </button>
 

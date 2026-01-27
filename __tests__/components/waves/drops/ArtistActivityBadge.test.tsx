@@ -65,7 +65,7 @@ describe("ArtistActivityBadge", () => {
     expect(onBadgeClick).toHaveBeenCalledWith("winners");
   });
 
-  it("renders palette with gold dot for both states and opens active tab", () => {
+  it("renders trophy with blue dot for both states and opens active tab", () => {
     const onBadgeClick = jest.fn();
     const { container } = render(
       <ArtistActivityBadge submissionCount={1} winCount={1} onBadgeClick={onBadgeClick} />
@@ -77,8 +77,8 @@ describe("ArtistActivityBadge", () => {
       "View 1 art submission and 1 winning artwork"
     );
 
-    const paletteIcon = container.querySelector('svg[data-icon="palette"]');
-    expect(paletteIcon).toBeInTheDocument();
+    const trophyIcon = container.querySelector('svg[data-icon="trophy"]');
+    expect(trophyIcon).toBeInTheDocument();
 
     const dot = container.querySelector('span[aria-hidden="true"]');
     expect(dot).toBeInTheDocument();
@@ -100,4 +100,3 @@ describe("ArtistActivityBadge", () => {
     expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument();
   });
 });
-
