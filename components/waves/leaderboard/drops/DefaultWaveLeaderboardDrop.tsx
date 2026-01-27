@@ -12,6 +12,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
@@ -59,18 +60,27 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
   return (
     <div
-      onClick={() => onDropClick(drop)}
-      className="tw-@container tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative">
+      onClick={() => {
+        startDropOpen({
+          dropId: drop.id,
+          waveId: drop.wave.id,
+          source: "leaderboard_list",
+          isMobile: isMobileScreen,
+        });
+        onDropClick(drop);
+      }}
+      className="tw-group tw-relative tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-@container"
+    >
       <div className={getBorderClasses()} {...touchHandlers}>
         <div className="tw-flex tw-flex-col tw-gap-3">
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
               <div className="tw-flex tw-items-center">
-                <div className="tw-h-8 tw-hidden lg:tw-block">
+                <div className="tw-hidden tw-h-8 lg:tw-block">
                   <WaveDropActionsOpen drop={drop} />
                 </div>
-                <div className="tw-h-8 tw-hidden lg:tw-block">
+                <div className="tw-hidden tw-h-8 lg:tw-block">
                   {canDelete && <WaveDropActionsOptions drop={drop} />}
                 </div>
               </div>
@@ -79,18 +89,22 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
           <div className="tw-space-y-2">
             <div className="tw-ml-[3.35rem]">
-              <WaveLeaderboardDropContent drop={drop} isCompetitionDrop={true} />
+              <WaveLeaderboardDropContent
+                drop={drop}
+                isCompetitionDrop={true}
+              />
             </div>
           </div>
-          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-gap-x-4">
+          <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-[3.25rem]">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
               <WaveLeaderboardDropRaters drop={drop} />
               <WaveLeaderboardDropFooter drop={drop} />
             </div>
             {canShowVote && (
               <div
-                className="tw-flex tw-justify-center tw-pt-4 @[700px]:tw-pt-0 @[700px]:tw-ml-auto tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 @[700px]:tw-border-t-0"
-                onClick={(e) => e.stopPropagation()}>
+                className="tw-flex tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <VotingModalButton
                   drop={drop}
                   onClick={() => setIsVotingModalOpen(true)}
