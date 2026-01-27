@@ -166,7 +166,7 @@ export const useNotificationsController =
         params.delete("reload");
         const newUrl = params.toString()
           ? `${pathname}?${params.toString()}`
-          : pathname || "/my-stream/notifications";
+          : pathname || "/notifications";
         router.replace(newUrl, { scroll: false });
       };
 

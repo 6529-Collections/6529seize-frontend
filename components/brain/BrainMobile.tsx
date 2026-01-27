@@ -119,7 +119,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const hasWave = Boolean(waveId);
 
   useEffect(() => {
-    const tabParam = searchParams?.get("tab");
     const viewParam = searchParams?.get("view");
     const createParam = searchParams?.get("create");
 
@@ -152,12 +151,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       return;
     }
 
-    if (
-      pathname === "/" &&
-      (!tabParam || tabParam === "feed") &&
-      !waveId &&
-      !viewParam
-    ) {
+    if (pathname === "/" && !waveId && !viewParam) {
       setActiveView(BrainView.DEFAULT);
     }
   }, [pathname, searchParams, waveId, isApp]);
