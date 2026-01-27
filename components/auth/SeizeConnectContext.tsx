@@ -24,9 +24,11 @@ import {
   useAppKitAccount,
   useAppKitState,
   useDisconnect,
+  useWalletInfo,
 } from "@reown/appkit/react";
 import { getAddress, isAddress } from "viem";
 import { WalletErrorBoundary } from "./error-boundary";
+import { isSafeWalletInfo } from "@/utils/wallet-detection";
 
 // Custom error types for better error handling
 class WalletConnectionError extends Error {
@@ -345,6 +347,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const account = useAppKitAccount();
+  const { walletInfo } = useWalletInfo();
   const { disconnect } = useDisconnect();
   const { open } = useAppKit();
   const state = useAppKitState();
@@ -582,9 +585,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
       address: connectedAddress,
-      walletName: undefined,
-      walletIcon: undefined,
-      isSafeWallet: false,
+      walletName: walletInfo?.name,
+      walletIcon: walletInfo?.icon,
+      isSafeWallet: isSafeWalletInfo(walletInfo),
       seizeConnect,
       seizeDisconnect,
       seizeDisconnectAndLogout,
@@ -599,6 +602,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [
       connectedAddress,
+      walletInfo?.name,
+      walletInfo?.icon,
+      walletInfo?.type,
       seizeConnect,
       seizeDisconnect,
       seizeDisconnectAndLogout,
