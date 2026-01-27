@@ -81,7 +81,6 @@
     "@reown/appkit": "^1.8.8",
     "@reown/appkit-adapter-wagmi": "^1.8.8",
     "@reown/appkit-common": "^1.8.11",
-    "@sentry/core": "^10.37.0",
     "@sentry/nextjs": "^10.27.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",

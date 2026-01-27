@@ -1,7 +1,7 @@
 "use client";
 
-import { startSpanManual } from "@sentry/core";
-import type { Span } from "@sentry/core";
+import { startSpanManual } from "@sentry/nextjs";
+import type { Span } from "@sentry/nextjs";
 
 type DropOpenSource =
   | "leaderboard_list"
@@ -28,13 +28,38 @@ const getNowMs = () =>
     : Date.now();
 
 const getRoute = () => {
-  const win = globalThis.window;
+  const win = globalThis.window ?? null;
+  if (!win || !win.location) {
+    return "";
+  }
   return `${win.location.pathname}${win.location.search}`;
 };
 
 const getRumClient = () => {
   const win = globalThis.window;
   return (win as unknown as { awsRum?: { recordEvent?: Function } }).awsRum;
+};
+
+const endSentrySpan = (span: Span | null) => {
+  if (!span) {
+    return;
+  }
+
+  try {
+    const maybeSpan = span as unknown as {
+      end?: () => void;
+      finish?: () => void;
+    };
+    if (typeof maybeSpan.end === "function") {
+      maybeSpan.end();
+      return;
+    }
+    if (typeof maybeSpan.finish === "function") {
+      maybeSpan.finish();
+    }
+  } catch {
+    // ignore tracing errors
+  }
 };
 
 export const startDropOpen = (params: {
@@ -69,6 +94,8 @@ export const startDropOpen = (params: {
   }
 
   const timeoutId = win.setTimeout(() => {
+    const entry = pendingOpens.get(dropId);
+    endSentrySpan(entry?.span ?? null);
     pendingOpens.delete(dropId);
   }, DROP_OPEN_TIMEOUT_MS);
 
@@ -120,7 +147,7 @@ export const markDropOpenReady = (params: {
       try {
         entry.span.setAttribute("duration_ms", durationMs);
         entry.span.setAttribute("route", payload.route);
-        entry.span.end();
+        endSentrySpan(entry.span);
       } catch {
         // ignore tracing errors
       }
