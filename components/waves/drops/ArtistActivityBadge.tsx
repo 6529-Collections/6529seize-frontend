@@ -120,6 +120,8 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   const ariaLabel = tooltipContent;
   const isPaletteIcon = config.icon === faPalette;
   const iconClassName = isPaletteIcon ? PALETTE_ICON_CLASS : TROPHY_ICON_CLASS;
+  const describedById =
+    showTooltip && isTooltipOpen ? uniqueTooltipId : undefined;
 
   return (
     <>
@@ -134,8 +136,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
         onMouseLeave={() => setIsTooltipOpen(false)}
         className={config.buttonClassName}
         aria-label={ariaLabel}
-        aria-expanded="false"
-        aria-haspopup="dialog"
+        aria-describedby={describedById}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
         <FontAwesomeIcon icon={config.icon} className={iconClassName} />
@@ -151,6 +152,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
       {showTooltip && (
         <Tooltip
           id={uniqueTooltipId}
+          role="tooltip"
           place="top"
           positionStrategy="absolute"
           content={tooltipContent}
