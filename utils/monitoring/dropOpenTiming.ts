@@ -16,8 +16,10 @@ type PendingDropOpen = {
   source: DropOpenSource;
   isMobile: boolean;
   span: Span | null;
-  timeoutId: ReturnType<typeof setTimeout> | null;
+  timeoutId: TimeoutId | null;
 };
+
+type TimeoutId = ReturnType<typeof globalThis.setTimeout> | number;
 
 const pendingOpens = new Map<string, PendingDropOpen>();
 const DROP_OPEN_TIMEOUT_MS = 30000;
