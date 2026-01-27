@@ -6,9 +6,7 @@ export const mainSegment = (url: string): string => {
 
 export const sameMainPath = (a: string, b: string): boolean => mainSegment(a) === mainSegment(b);
 
-export const getHomeLatestRoute = (): string => "/";
-
-export const getHomeFeedRoute = (): string => "/?tab=feed";
+export const getHomeRoute = (): string => "/";
 
 export const getWavesBaseRoute = (_isApp: boolean): string => "/waves";
 

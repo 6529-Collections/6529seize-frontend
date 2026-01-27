@@ -1,4 +1,3 @@
-import type { HomeTab } from "@/components/home/useHomeTabs";
 import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 
 export const isNavItemActive = (
@@ -6,10 +5,8 @@ export const isNavItemActive = (
   pathname: string,
   searchParams: URLSearchParams,
   activeView: ViewKey | null,
-  isCurrentWaveDm: boolean,
-  homeActiveTab: HomeTab
+  isCurrentWaveDm: boolean
 ): boolean => {
-  // User profile pages and Network routes are active only when no in-app view is selected
   if (item.name === "Network" && activeView === null) {
     // Profile pages (/[user])
     if (pathname.startsWith("/[user]")) {
@@ -43,11 +40,8 @@ export const isNavItemActive = (
   const hasWaveParam = typeof waveParam === "string";
   const isWavesPath = pathname === "/waves";
   const isMessagesPath = pathname === "/messages";
-  const tabParam = searchParams?.get("tab");
-  const isFeedTab = homeActiveTab === "feed";
-  const isHomeFeedPath = pathname === "/" && (tabParam === "feed" || isFeedTab);
   const isWaveSubRoute =
-    hasWaveParam && (isHomeFeedPath || isWavesPath || isMessagesPath);
+    hasWaveParam && (isWavesPath || isMessagesPath);
   const viewParam = searchParams?.get("view");
   const isWavesView = pathname === "/waves" || viewParam === "waves";
   const isMessagesView = pathname === "/messages" || viewParam === "messages";
@@ -57,7 +51,6 @@ export const isNavItemActive = (
       return (
         pathname === "/" &&
         activeView === null &&
-        !isFeedTab &&
         !hasWaveParam &&
         !isWavesView &&
         !isMessagesView

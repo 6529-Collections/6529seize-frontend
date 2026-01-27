@@ -83,14 +83,12 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [streamHasNewItems, setStreamHasNewItems] = useState(false);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
-  const tabParam = searchParams?.get("tab");
   const waveParam =
     myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
     (pathname === "/" && searchParams?.get("view") === "waves");
-  const isHomeFeedTab = pathname === "/" && tabParam === "feed";
 
   useEffect(() => {
     if (routeRef.current === pathname) {
@@ -101,30 +99,16 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     setTitle(defaultTitle);
   }, [pathname]);
 
-  // Update title when route or query changes
   useEffect(() => {
-    const pathChanged = routeRef.current !== pathname;
-    const queryChanged =
-      queryRef.current?.toString() !== searchParams?.toString();
-
-    if (pathChanged) {
+    if (routeRef.current !== pathname) {
       routeRef.current = pathname;
       queryRef.current = searchParams;
       const defaultTitle = getDefaultTitleForRoute(pathname);
       setTitle(defaultTitle);
-      // Reset wave data when leaving the home feed tab
-      if (!isHomeFeedTab) {
-        setWaveData(null);
-        setStreamHasNewItems(false);
-      }
-    } else if (queryChanged && isHomeFeedTab) {
-      queryRef.current = searchParams;
-      // Reset wave data when navigating between waves or back to stream
-      if (!waveParam) {
-        setWaveData(null);
-      }
+      setWaveData(null);
+      setStreamHasNewItems(false);
     }
-  }, [pathname, searchParams, isHomeFeedTab, waveParam]);
+  }, [pathname, searchParams]);
 
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {

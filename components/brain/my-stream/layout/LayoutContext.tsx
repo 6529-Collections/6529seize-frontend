@@ -107,10 +107,10 @@ interface LayoutContextType {
   // Style for feed view
   myStreamFeedStyle: React.CSSProperties;
 
-  // Style for homepage feed view (excludes header/breadcrumbs, includes tabs)
+  // Style for homepage view (excludes header/breadcrumbs, includes tabs)
   homepageFeedStyle: React.CSSProperties;
 
-  // Style for small screen layout feed (includes header and tabs)
+  // Style for small screen layout (includes header and tabs)
   smallScreenFeedStyle: React.CSSProperties;
 
   // Style for mobile waves view
