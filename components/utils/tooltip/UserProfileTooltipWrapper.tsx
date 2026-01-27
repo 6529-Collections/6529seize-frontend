@@ -14,10 +14,9 @@ export default function UserProfileTooltipWrapper({
   children, 
   placement = "auto" 
 }: UserProfileTooltipWrapperProps) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
 
-  // If it's a touch device, just render the children without the tooltip
-  if (hasTouchScreen) {
+  if (shouldUseTouchUI) {
     return <>{children}</>;
   }
 

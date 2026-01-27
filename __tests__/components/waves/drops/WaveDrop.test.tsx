@@ -32,9 +32,9 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => () => (
 ));
 
 jest.mock("@/hooks/isMobileDevice");
-jest.mock("@/hooks/useIsTouchDevice", () => ({
+jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: jest.fn(() => false),
+  default: jest.fn(() => ({ shouldUseTouchUI: false })),
 }));
 
 jest.mock("next/navigation", () => ({

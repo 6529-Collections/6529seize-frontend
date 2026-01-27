@@ -35,7 +35,7 @@ function WebSidebarNavItem({
   hasIndicator,
   "data-section": dataSection,
 }: SidebarPrimaryItemProps) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
 
   const content = (
     <div
@@ -74,7 +74,7 @@ function WebSidebarNavItem({
 
   const commonProps = {
     "aria-label": collapsed ? label : undefined,
-    ...(!hasTouchScreen && {
+    ...(!shouldUseTouchUI && {
       "data-tooltip-id": "sidebar-tooltip",
       "data-tooltip-content": label,
       "data-tooltip-hidden": !collapsed,

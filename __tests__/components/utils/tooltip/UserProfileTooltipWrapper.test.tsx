@@ -39,6 +39,10 @@ jest.mock('@/hooks/useDeviceInfo', () => ({
   __esModule: true,
   default: () => ({
     hasTouchScreen: false,
+    shouldUseTouchUI: false,
+    isMobileDevice: false,
+    isApp: false,
+    isAppleMobile: false,
   }),
 }));
 
@@ -72,6 +76,10 @@ describe('UserProfileTooltipWrapper', () => {
     // Mock touch device
     const mockUseDeviceInfo = jest.fn(() => ({
       hasTouchScreen: true,
+      shouldUseTouchUI: true,
+      isMobileDevice: false,
+      isApp: false,
+      isAppleMobile: false,
     }));
     
     jest.doMock('../../../../hooks/useDeviceInfo', () => ({

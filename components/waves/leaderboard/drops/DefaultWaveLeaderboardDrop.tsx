@@ -30,12 +30,12 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 > = ({ drop, onDropClick }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
 
   // Use the hook for long press interactions
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
-    hasTouchScreen,
+    hasTouchScreen: shouldUseTouchUI,
   });
 
   const getBorderClasses = () => {
@@ -131,7 +131,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       )}
 
       {/* Mobile menu slide-up */}
-      {hasTouchScreen &&
+      {shouldUseTouchUI &&
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}

@@ -70,7 +70,7 @@ beforeEach(() => {
 });
 
 test('calls onDropClick when not touch screen', async () => {
-  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false });
   useIsMobileScreen.mockReturnValue(false);
   const onClick = jest.fn();
   const { container } = render(
@@ -81,7 +81,7 @@ test('calls onDropClick when not touch screen', async () => {
 });
 
 test('does not call onDropClick on touch devices', async () => {
-  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true, shouldUseTouchUI: true, isMobileDevice: false, isApp: false, isAppleMobile: false });
   useIsMobileScreen.mockReturnValue(false);
   const onClick = jest.fn();
   const { container } = render(
@@ -92,7 +92,7 @@ test('does not call onDropClick on touch devices', async () => {
 });
 
 test('opens voting modal on desktop', async () => {
-  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false });
   useIsMobileScreen.mockReturnValue(false);
   render(<MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
   expect(screen.getByTestId('modal')).toHaveTextContent('closed');
@@ -101,7 +101,7 @@ test('opens voting modal on desktop', async () => {
 });
 
 test('uses mobile modal on small screens', async () => {
-  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false });
   useIsMobileScreen.mockReturnValue(true);
   render(<MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
   await userEvent.click(screen.getByTestId('vote-btn'));

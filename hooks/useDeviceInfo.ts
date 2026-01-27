@@ -6,6 +6,7 @@ import useCapacitor from "./useCapacitor";
 interface DeviceInfo {
   readonly isMobileDevice: boolean;
   readonly hasTouchScreen: boolean;
+  readonly shouldUseTouchUI: boolean;
   readonly isApp: boolean;
   readonly isAppleMobile: boolean;
 }
@@ -23,6 +24,7 @@ export default function useDeviceInfo(): DeviceInfo {
         return {
           isMobileDevice: false,
           hasTouchScreen: false,
+          shouldUseTouchUI: false,
           isApp: false,
           isAppleMobile: false,
         };
@@ -40,6 +42,21 @@ export default function useDeviceInfo(): DeviceInfo {
       const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
       const hasTouchScreen = touchDetected || maxTouchPoints > 0;
 
+      const hasAnyFinePointer = win.matchMedia?.("(any-pointer: fine)")?.matches ?? false;
+      const hasPrimaryFinePointer = win.matchMedia?.("(pointer: fine)")?.matches ?? false;
+      const hasFinePointer = hasAnyFinePointer || hasPrimaryFinePointer;
+
+      const hasAnyHover = win.matchMedia?.("(any-hover: hover)")?.matches ?? false;
+      const hasPrimaryHover = win.matchMedia?.("(hover: hover)")?.matches ?? false;
+      const hasHover = hasAnyHover || hasPrimaryHover;
+
+      let shouldUseTouchUI = false;
+      if (!(hasFinePointer || hasHover) && maxTouchPoints > 0) {
+        const ua = nav.userAgent ?? "";
+        const isMobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+        shouldUseTouchUI = isMobileUA;
+      }
+
       const ua = nav.userAgent;
       const uaDataMobile = nav.userAgentData?.mobile;
       const classicMobile =
@@ -56,6 +73,7 @@ export default function useDeviceInfo(): DeviceInfo {
       return {
         isMobileDevice,
         hasTouchScreen,
+        shouldUseTouchUI,
         isApp: isCapacitor,
         isAppleMobile: appleMobile,
       };
@@ -76,6 +94,7 @@ export default function useDeviceInfo(): DeviceInfo {
         if (
           prev.isMobileDevice === next.isMobileDevice &&
           prev.hasTouchScreen === next.hasTouchScreen &&
+          prev.shouldUseTouchUI === next.shouldUseTouchUI &&
           prev.isApp === next.isApp &&
           prev.isAppleMobile === next.isAppleMobile
         ) {

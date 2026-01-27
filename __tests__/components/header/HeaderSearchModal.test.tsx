@@ -162,6 +162,7 @@ function setup(options: SetupOptions = {}) {
     isApp: false,
     isMobileDevice: false,
     hasTouchScreen: false,
+    shouldUseTouchUI: false,
     isAppleMobile: false,
   });
   useAppWalletsMock.mockReturnValue({ appWalletsSupported: true });

@@ -4,6 +4,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 jest.mock("@/hooks/useDeviceInfo", () => () => ({
   isMobileDevice: true,
   hasTouchScreen: true,
+  shouldUseTouchUI: true,
   isApp: true,
   isAppleMobile: false,
 }));

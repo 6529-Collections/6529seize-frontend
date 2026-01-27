@@ -1,7 +1,7 @@
 "use client";
 
 import useCreateModalState from "@/hooks/useCreateModalState";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -33,7 +33,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
     useCreateModalState();
-  const isTouchDevice = useIsTouchDevice();
+  const { shouldUseTouchUI } = useDeviceInfo();
+  const isTouchDevice = shouldUseTouchUI;
 
   const shouldRenderCreateDirectMessage = !isApp;
 

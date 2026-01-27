@@ -46,12 +46,10 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   winner,
   onDropClick,
 }) => {
-  // Get device info from useDeviceInfo hook
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
 
-  // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
-    hasTouchScreen,
+    hasTouchScreen: shouldUseTouchUI,
   });
 
   const shadowClass = getRankShadowClass(winner.place);
@@ -83,7 +81,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
           </div>
 
           {/* Show open icon when not a touch device */}
-          {!hasTouchScreen && (
+          {!shouldUseTouchUI && (
             <div className="tw-flex tw-items-start tw-flex-shrink-0">
               <div className="tw-h-8">
                 <WaveDropActionsOpen drop={extendedDrop} />
@@ -130,7 +128,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
       </div>
 
       {/* Touch slide-up menu */}
-      {hasTouchScreen &&
+      {shouldUseTouchUI &&
         createPortal(
           <CommonDropdownItemsMobileWrapper
             isOpen={isActive}

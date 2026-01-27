@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface MemesLeaderboardDropCardProps {
   readonly drop: ExtendedDrop;
@@ -29,10 +30,11 @@ const MemesLeaderboardDropCard: React.FC<MemesLeaderboardDropCardProps> = ({
   drop,
   children,
 }) => {
+  const { shouldUseTouchUI } = useDeviceInfo();
   const borderClasses = getBorderClasses(drop);
 
   return (
-    <div className="touch-select-none tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full">
+    <div className={`${shouldUseTouchUI ? "touch-select-none" : ""} tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full`.trim()}>
       <div className={`${borderClasses} tw-bg-iron-950`}>
         {children}
       </div>

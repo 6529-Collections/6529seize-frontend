@@ -33,7 +33,7 @@ const WebBrainLeftSidebarWave = ({
   const { activeWave } = useMyStream();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
-  const { hasTouchScreen } = useDeviceInfo();
+  const { shouldUseTouchUI } = useDeviceInfo();
 
   const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
     basePath,
@@ -43,7 +43,7 @@ const WebBrainLeftSidebarWave = ({
     prefetchWaveData,
     searchParams,
     waveId: wave.id,
-    hasTouchScreen,
+    hasTouchScreen: shouldUseTouchUI,
     firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
   });
 
@@ -65,8 +65,8 @@ const WebBrainLeftSidebarWave = ({
   const haveNewDrops = wave.newDropsCount.count > 0;
   const tooltipId = `wave-collapsed-${wave.id}`;
   const expandedTooltipId = `wave-expanded-${wave.id}`;
-  const showCollapsedTooltip = collapsed && !hasTouchScreen;
-  const showExpandedTooltip = !collapsed && !hasTouchScreen && isNameTruncated;
+  const showCollapsedTooltip = collapsed && !shouldUseTouchUI;
+  const showExpandedTooltip = !collapsed && !shouldUseTouchUI && isNameTruncated;
 
   if (collapsed) {
     return (

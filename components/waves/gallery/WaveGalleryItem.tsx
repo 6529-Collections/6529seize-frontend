@@ -21,7 +21,7 @@ interface WaveGalleryItemProps {
 export const WaveGalleryItem = memo<WaveGalleryItemProps>(
   ({ drop, onDropClick }) => {
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
-    const { hasTouchScreen } = useDeviceInfo();
+    const { shouldUseTouchUI } = useDeviceInfo();
     const mediaImageScale = isTabletOrSmaller
       ? ImageScale.AUTOx450
       : ImageScale.AUTOx1080;
@@ -37,13 +37,13 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
       onDropClick(drop);
     };
 
-    const transitionClasses = !hasTouchScreen
+    const transitionClasses = !shouldUseTouchUI
       ? "tw-transition-all tw-duration-300 tw-ease-out"
       : "";
 
     const containerClass = `tw-group ${transitionClasses} tw-relative tw-bg-iron-950/50 tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-700`;
 
-    const imageScaleClasses = hasTouchScreen
+    const imageScaleClasses = shouldUseTouchUI
       ? ""
       : "tw-transform tw-duration-500 tw-ease-out group-hover:tw-scale-105";
 

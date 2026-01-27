@@ -54,7 +54,7 @@ beforeEach(() => {
 test('opens voting modal when button clicked', async () => {
   const user = userEvent.setup();
   useRules.mockReturnValue({ canShowVote: true, canDelete: true });
-  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false });
   useIsMobileScreen.mockReturnValue(false);
   render(<DefaultWaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />);
   expect(screen.getByTestId('modal')).toHaveTextContent('false');
@@ -65,7 +65,7 @@ test('opens voting modal when button clicked', async () => {
 
 test('uses mobile modal and hides options when cannot delete', () => {
   useRules.mockReturnValue({ canShowVote: true, canDelete: false });
-  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false, shouldUseTouchUI: false, isMobileDevice: false, isApp: false, isAppleMobile: false });
   useIsMobileScreen.mockReturnValue(true);
   useLongPressInteraction.mockReturnValue({ isActive: false, setIsActive: jest.fn(), touchHandlers: {} });
   render(<DefaultWaveLeaderboardDrop drop={drop} wave={wave} onDropClick={jest.fn()} />);

@@ -9,13 +9,40 @@ const capacitorMock = require("@/hooks/useCapacitor").default as jest.Mock;
 
 let touchStartHandler: EventListener | null = null;
 
-function defineMatchMedia(pointerFine = true, width = false) {
+function defineMatchMedia(
+  pointerFine = true,
+  anyPointerFine = true,
+  hover = true,
+  anyHover = true,
+  width = false
+) {
   Object.defineProperty(globalThis, "matchMedia", {
     writable: true,
     value: jest.fn((query: string) => {
       if (query === "(pointer: fine)") {
         return {
           matches: pointerFine,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        };
+      }
+      if (query === "(any-pointer: fine)") {
+        return {
+          matches: anyPointerFine,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        };
+      }
+      if (query === "(hover: hover)") {
+        return {
+          matches: hover,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        };
+      }
+      if (query === "(any-hover: hover)") {
+        return {
+          matches: anyHover,
           addEventListener: jest.fn(),
           removeEventListener: jest.fn(),
         };
@@ -63,12 +90,13 @@ describe("useDeviceInfo", () => {
       value: 5,
       configurable: true,
     });
-    defineMatchMedia(false, false);
+    defineMatchMedia(false, false, false, false, false);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(true);
     expect(result.current.isAppleMobile).toBe(true);
     expect(result.current.isApp).toBe(false);
     expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(true);
   });
 
   it("detects capacitor mobile with desktop UA", () => {
@@ -81,12 +109,13 @@ describe("useDeviceInfo", () => {
       value: 5,
       configurable: true,
     });
-    defineMatchMedia(false, true);
+    defineMatchMedia(false, false, false, false, true);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(true);
     expect(result.current.isApp).toBe(true);
     expect(result.current.isAppleMobile).toBe(true);
     expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(false);
   });
 
   it("returns false for desktop without touch", () => {
@@ -99,10 +128,11 @@ describe("useDeviceInfo", () => {
       value: 0,
       configurable: true,
     });
-    defineMatchMedia(true, false);
+    defineMatchMedia(true, true, true, true, false);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.isMobileDevice).toBe(false);
     expect(result.current.hasTouchScreen).toBe(false);
+    expect(result.current.shouldUseTouchUI).toBe(false);
     expect(result.current.isAppleMobile).toBe(false);
   });
 
@@ -116,10 +146,11 @@ describe("useDeviceInfo", () => {
       value: 0,
       configurable: true,
     });
-    defineMatchMedia(true, false);
+    defineMatchMedia(true, true, true, true, false);
     const { result } = renderHook(() => useDeviceInfo());
 
     expect(result.current.hasTouchScreen).toBe(false);
+    expect(result.current.shouldUseTouchUI).toBe(false);
 
     act(() => {
       if (touchStartHandler) {
@@ -128,6 +159,7 @@ describe("useDeviceInfo", () => {
     });
 
     expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(false);
   });
 
   it("hasTouchScreen is true when maxTouchPoints > 0 even without touch event", () => {
@@ -140,8 +172,39 @@ describe("useDeviceInfo", () => {
       value: 5,
       configurable: true,
     });
-    defineMatchMedia(true, false);
+    defineMatchMedia(true, true, true, true, false);
     const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(false);
+  });
+
+  it('shouldUseTouchUI is false for desktop with fine pointer and hover', () => {
+    capacitorMock.mockReturnValue({ isCapacitor: false });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'Mozilla/5.0', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'maxTouchPoints', { value: 10, configurable: true });
+    defineMatchMedia(true, true, true, true, false);
+    const { result } = renderHook(() => useDeviceInfo());
+    expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(false);
+  });
+
+  it('shouldUseTouchUI is true for mobile device without fine pointer or hover', () => {
+    capacitorMock.mockReturnValue({ isCapacitor: false });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'Android', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'maxTouchPoints', { value: 5, configurable: true });
+    defineMatchMedia(false, false, false, false, false);
+    const { result } = renderHook(() => useDeviceInfo());
+    expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(true);
+  });
+
+  it('shouldUseTouchUI is false for touchscreen laptop (has fine pointer)', () => {
+    capacitorMock.mockReturnValue({ isCapacitor: false });
+    Object.defineProperty(globalThis.navigator, 'userAgent', { value: 'Mozilla/5.0 Windows', configurable: true });
+    Object.defineProperty(globalThis.navigator, 'maxTouchPoints', { value: 10, configurable: true });
+    defineMatchMedia(true, true, true, true, false);
+    const { result } = renderHook(() => useDeviceInfo());
+    expect(result.current.hasTouchScreen).toBe(true);
+    expect(result.current.shouldUseTouchUI).toBe(false);
   });
 });
