@@ -7,9 +7,8 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
-import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -29,6 +28,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
 
   const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
   const isWinner = winnerCount > 0;
+  const hasActivityBadge = hasSubmissions || isWinner;
 
   const handleBadgeClick = (tab: "active" | "winners") => {
     setModalInitialTab(tab);
@@ -72,18 +72,12 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
               />
             </div>
             <div className="tw-inline-flex tw-items-center tw-gap-x-1">
-              {isWinner && (
-                <ProfileWinnerBadge
-                  winCount={winnerCount}
-                  onBadgeClick={() => handleBadgeClick("winners")}
-                  tooltipId={`single-drop-winner-badge-${drop.id}`}
-                />
-              )}
-              {hasSubmissions && (
-                <ArtistSubmissionBadge
+              {hasActivityBadge && (
+                <ArtistActivityBadge
                   submissionCount={submissionCount}
-                  onBadgeClick={() => handleBadgeClick("active")}
-                  tooltipId={`single-drop-badge-${drop.id}`}
+                  winCount={winnerCount}
+                  onBadgeClick={handleBadgeClick}
+                  tooltipId={`single-drop-activity-badge-${drop.id}`}
                 />
               )}
             </div>

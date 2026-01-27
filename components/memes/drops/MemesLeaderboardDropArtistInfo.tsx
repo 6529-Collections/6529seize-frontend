@@ -9,9 +9,8 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
-import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
+import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {
@@ -29,6 +28,7 @@ const MemesLeaderboardDropArtistInfo = ({
 
   const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
   const isWinner = winnerCount > 0;
+  const hasActivityBadge = hasSubmissions || isWinner;
 
   return (
     <div className="tw-flex tw-gap-x-3">
@@ -60,24 +60,18 @@ const MemesLeaderboardDropArtistInfo = ({
               onClick={(e) => e.stopPropagation()}
               className="tw-no-underline desktop-hover:hover:tw-underline"
             >
-              <span className="tw-text-sm tw-font-bold tw-text-white">
-                {drop.author?.handle}
-              </span>
-            </Link>
-          )}
+            <span className="tw-text-sm tw-font-bold tw-text-white">
+              {drop.author?.handle}
+            </span>
+          </Link>
+        )}
 
-          {isWinner && (
-            <ProfileWinnerBadge
-              winCount={winnerCount}
-              onBadgeClick={() => handleBadgeClick("winners")}
-              tooltipId={`leaderboard-winner-badge-${drop.id}`}
-            />
-          )}
-          {hasSubmissions && (
-            <ArtistSubmissionBadge
+          {hasActivityBadge && (
+            <ArtistActivityBadge
               submissionCount={submissionCount}
-              onBadgeClick={() => handleBadgeClick("active")}
-              tooltipId={`leaderboard-badge-${drop.id}`}
+              winCount={winnerCount}
+              onBadgeClick={handleBadgeClick}
+              tooltipId={`leaderboard-activity-badge-${drop.id}`}
             />
           )}
 
