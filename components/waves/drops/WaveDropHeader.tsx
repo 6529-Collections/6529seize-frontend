@@ -9,9 +9,8 @@ import UserCICAndLevel, {
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistSubmissionBadge } from "./ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
-import { ProfileWinnerBadge } from "./ProfileWinnerBadge";
+import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { WaveCreatorBadge } from "./WaveCreatorBadge";
 import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
 import { useMemo, useCallback } from "react";
@@ -64,6 +63,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   );
 
   const isWinner = winnerCount > 0;
+  const hasActivityBadge = hasSubmissions || isWinner;
 
   const isWaveCreator = drop.author.is_wave_creator;
 
@@ -106,18 +106,12 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               level={drop.author.level}
               size={UserCICAndLevelSize.SMALL}
             />
-            {hasSubmissions && (
-              <ArtistSubmissionBadge
+            {hasActivityBadge && (
+              <ArtistActivityBadge
                 submissionCount={submissionCount}
-                onBadgeClick={() => handleArtistBadgeClick("active")}
-                tooltipId={`header-badge-${drop.id}`}
-              />
-            )}
-            {isWinner && (
-              <ProfileWinnerBadge
                 winCount={winnerCount}
-                onBadgeClick={() => handleArtistBadgeClick("winners")}
-                tooltipId={`winner-badge-${drop.id}`}
+                onBadgeClick={handleArtistBadgeClick}
+                tooltipId={`header-activity-badge-${drop.id}`}
               />
             )}
             {isWaveCreator && (
