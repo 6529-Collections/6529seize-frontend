@@ -26,7 +26,7 @@ import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import BrainNotifications from "./notifications/NotificationsContainer";
-import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { getHomeRoute } from "@/helpers/navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "@/components/auth/Auth";
@@ -83,7 +83,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       params.delete('wave');
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
-        : pathname || getHomeFeedRoute();
+        : pathname || getHomeRoute();
       router.push(newUrl, { scroll: false });
     },
   });
@@ -106,7 +106,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     params.delete('drop');
     const newUrl = params.toString()
       ? `${pathname}?${params.toString()}`
-      : pathname || getHomeFeedRoute();
+      : pathname || getHomeRoute();
     router.push(newUrl, { scroll: false });
   };
 

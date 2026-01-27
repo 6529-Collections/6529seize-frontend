@@ -22,7 +22,7 @@ interface Props {
 const NavItem = ({ item }: Props) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { activeView, handleNavClick, homeActiveTab } = useViewContext();
+  const { activeView, handleNavClick } = useViewContext();
 
   const { name } = item;
   const { icon } = item;
@@ -106,8 +106,7 @@ const NavItem = ({ item }: Props) => {
     pathname ?? "",
     searchParams ?? new URLSearchParams(),
     activeView,
-    isCurrentWaveDmValue,
-    homeActiveTab ?? "latest"
+    isCurrentWaveDmValue
   );
 
   return (
