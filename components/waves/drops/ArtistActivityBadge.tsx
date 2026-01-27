@@ -128,6 +128,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   return (
     <>
       <button
+        type="button"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
