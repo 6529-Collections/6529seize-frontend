@@ -71,7 +71,7 @@ export const startDropOpen = (params: {
   source: DropOpenSource;
   isMobile: boolean;
 }) => {
-  const win = globalThis.window;
+  const win = globalThis.window ?? null;
 
   const { dropId, waveId, source, isMobile } = params;
   const startMs = getNowMs();
@@ -85,9 +85,33 @@ export const startDropOpen = (params: {
     pendingOpens.delete(dropId);
   }
 
-  let span: Span | null = null;
+  const registerPendingOpen = (createdSpan: Span | null) => {
+    const handleTimeout = () => {
+      const entry = pendingOpens.get(dropId);
+      endSentrySpan(entry?.span ?? null);
+      pendingOpens.delete(dropId);
+    };
+
+    const timeoutId =
+      win && typeof win.setTimeout === "function"
+        ? win.setTimeout(handleTimeout, DROP_OPEN_TIMEOUT_MS)
+        : typeof globalThis.setTimeout === "function"
+          ? globalThis.setTimeout(handleTimeout, DROP_OPEN_TIMEOUT_MS)
+          : null;
+
+    pendingOpens.set(dropId, {
+      startMs,
+      dropId,
+      waveId,
+      source,
+      isMobile,
+      span: createdSpan,
+      timeoutId,
+    });
+  };
+
   try {
-    span = startSpanManual(
+    startSpanManual(
       {
         name: "ui.drop_popup.open",
         op: "ui.action",
@@ -99,27 +123,13 @@ export const startDropOpen = (params: {
           route: getRoute(),
         },
       },
-      (createdSpan) => createdSpan
+      (createdSpan) => {
+        registerPendingOpen(createdSpan);
+      }
     );
   } catch {
-    span = null;
+    registerPendingOpen(null);
   }
-
-  const timeoutId = win.setTimeout(() => {
-    const entry = pendingOpens.get(dropId);
-    endSentrySpan(entry?.span ?? null);
-    pendingOpens.delete(dropId);
-  }, DROP_OPEN_TIMEOUT_MS);
-
-  pendingOpens.set(dropId, {
-    startMs,
-    dropId,
-    waveId,
-    source,
-    isMobile,
-    span,
-    timeoutId,
-  });
 };
 
 export const markDropOpenReady = (params: {
