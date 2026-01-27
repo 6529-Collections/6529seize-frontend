@@ -21,35 +21,6 @@ describe("isNavItemActive", () => {
     ).toBe(true);
   });
 
-  it("handles Stream route based on tab query", () => {
-    const item: NavItem = {
-      kind: "route",
-      name: "Stream",
-      href: "/",
-      icon: "",
-    } as any;
-    expect(
-      isNavItemActive(
-        item,
-        "/",
-        new URLSearchParams(),
-        null,
-        false,
-        "feed"
-      )
-    ).toBe(true);
-    expect(
-      isNavItemActive(
-        item,
-        "/",
-        new URLSearchParams(),
-        null,
-        false,
-        "latest"
-      )
-    ).toBe(false);
-  });
-
   it("marks Home active for latest tab", () => {
     const item: NavItem = {
       kind: "route",
@@ -77,6 +48,35 @@ describe("isNavItemActive", () => {
         "feed"
       )
     ).toBe(false);
+  });
+
+  it("returns true for Discover item when on discover routes with no active view", () => {
+    const item: NavItem = {
+      kind: "route",
+      name: "Discover",
+      href: "/discover",
+      icon: "",
+    } as any;
+    expect(
+      isNavItemActive(
+        item,
+        "/discover",
+        new URLSearchParams(),
+        null,
+        false,
+        "latest"
+      )
+    ).toBe(true);
+    expect(
+      isNavItemActive(
+        item,
+        "/discover/something",
+        new URLSearchParams(),
+        null,
+        false,
+        "latest"
+      )
+    ).toBe(true);
   });
 
   it("returns true for waves view when viewing non-DM wave sub route", () => {

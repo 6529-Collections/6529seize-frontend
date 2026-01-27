@@ -16,7 +16,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useSearchParams, useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
-  getHomeFeedRoute,
   getHomeLatestRoute,
   getMessagesBaseRoute,
   getWaveRoute,
@@ -119,15 +118,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const handleNavClick = useCallback(
     (item: NavItem) => {
       if (item.kind === "route") {
-        if (item.name === "Stream") {
-          // activeView will become null automatically when URL changes (no wave/view params)
-          setLastVisitedWave(null);
-          setLastVisitedDm(null);
-          setHomeActiveTab("feed");
-          setStoredHomeTab("feed");
-          router.push(getHomeFeedRoute());
-        } else if (item.name === "Home") {
-          // activeView will become null automatically when URL changes
+        if (item.name === "Home") {
           setHomeActiveTab("latest");
           setStoredHomeTab("latest");
           router.push(getHomeLatestRoute());

@@ -27,7 +27,7 @@ const NavItem = ({ item }: Props) => {
   const { name } = item;
   const { icon } = item;
 
-  const isStream = name === "Stream";
+  const isLogoItem = name === "Home";
 
   // Determine if the current wave (if any) is a DM
   const waveIdFromQuery =
@@ -123,7 +123,7 @@ const NavItem = ({ item }: Props) => {
         <motion.div
           layoutId="nav-indicator"
           className={`tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-0.5 tw-bg-white tw-rounded-full ${
-            isStream ? "tw-top-1" : ""
+            isLogoItem ? "tw-top-1" : ""
           }`}
         />
       )}
