@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import {
   useQuery,
   useMutation,
@@ -78,8 +78,11 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     }
   }, [isAuthenticated, PINNED_WAVES_QUERY_KEY, queryClient]);
 
-  // Derive pinned IDs from pinned waves
-  const pinnedIds = pinnedWaves.map((wave) => wave.id);
+  // Derive pinned IDs from pinned waves with stable identity
+  const pinnedIds = useMemo(
+    () => pinnedWaves.map((wave) => wave.id),
+    [pinnedWaves]
+  );
 
   // Shared invalidation logic for both pin and unpin operations
   const invalidateWavesQueries = useCallback(() => {
