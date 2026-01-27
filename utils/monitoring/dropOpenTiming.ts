@@ -36,8 +36,11 @@ const getRoute = () => {
 };
 
 const getRumClient = () => {
-  const win = globalThis.window;
-  return (win as unknown as { awsRum?: { recordEvent?: Function } }).awsRum;
+  const win = globalThis.window ?? null;
+  if (!win) {
+    return undefined;
+  }
+  return (win as unknown as { awsRum?: { recordEvent?: Function } })?.awsRum;
 };
 
 const endSentrySpan = (span: Span | null) => {
@@ -72,6 +75,15 @@ export const startDropOpen = (params: {
 
   const { dropId, waveId, source, isMobile } = params;
   const startMs = getNowMs();
+
+  const existing = pendingOpens.get(dropId);
+  if (existing) {
+    if (existing.timeoutId !== null) {
+      globalThis.clearTimeout(existing.timeoutId);
+    }
+    endSentrySpan(existing.span);
+    pendingOpens.delete(dropId);
+  }
 
   let span: Span | null = null;
   try {
@@ -120,13 +132,25 @@ export const markDropOpenReady = (params: {
   }
 
   const finish = () => {
-    const durationMs = Math.round(getNowMs() - entry.startMs);
+    const activeEntry = pendingOpens.get(entry.dropId);
+    if (!activeEntry) {
+      return;
+    }
+    const isSameEntry =
+      activeEntry === entry ||
+      (activeEntry.startMs === entry.startMs &&
+        activeEntry.waveId === entry.waveId);
+    if (!isSameEntry) {
+      return;
+    }
+
+    const durationMs = Math.round(getNowMs() - activeEntry.startMs);
     const payload = {
       duration_ms: durationMs,
-      drop_id: entry.dropId,
-      wave_id: entry.waveId,
-      source: entry.source,
-      is_mobile: entry.isMobile,
+      drop_id: activeEntry.dropId,
+      wave_id: activeEntry.waveId,
+      source: activeEntry.source,
+      is_mobile: activeEntry.isMobile,
       route: getRoute(),
     };
 
@@ -143,20 +167,20 @@ export const markDropOpenReady = (params: {
       }
     }
 
-    if (entry.span) {
+    if (activeEntry.span) {
       try {
-        entry.span.setAttribute("duration_ms", durationMs);
-        entry.span.setAttribute("route", payload.route);
-        endSentrySpan(entry.span);
+        activeEntry.span.setAttribute("duration_ms", durationMs);
+        activeEntry.span.setAttribute("route", payload.route);
+        endSentrySpan(activeEntry.span);
       } catch {
         // ignore tracing errors
       }
     }
 
-    if (entry.timeoutId !== null) {
-      globalThis.clearTimeout(entry.timeoutId);
+    if (activeEntry.timeoutId !== null) {
+      globalThis.clearTimeout(activeEntry.timeoutId);
     }
-    pendingOpens.delete(entry.dropId);
+    pendingOpens.delete(activeEntry.dropId);
   };
 
   // Wait for next paint so "ready" reflects rendered UI.
