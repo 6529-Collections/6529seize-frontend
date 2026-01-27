@@ -43,7 +43,7 @@ describe('NavItem notifications', () => {
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useNotificationsContext as jest.Mock).mockReturnValue({ removeAllDeliveredNotifications });
     (useAuth as jest.Mock).mockReturnValue({ connectedProfile: { handle: 'user' } });
-    (useTitle as jest.Mock).mockReturnValue({ setTitle, title: '6529.io', notificationCount: 0, setNotificationCount: jest.fn(), setWaveData: jest.fn(), setStreamHasNewItems: jest.fn() });
+    (useTitle as jest.Mock).mockReturnValue({ setTitle, title: '6529.io', notificationCount: 0, setNotificationCount: jest.fn(), setWaveData: jest.fn() });
     (useWaveData as jest.Mock).mockReturnValue({ data: null });
     (useWave as jest.Mock).mockReturnValue({ isDm: false });
   });
