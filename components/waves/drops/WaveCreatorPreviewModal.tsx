@@ -57,7 +57,7 @@ export const WaveCreatorPreviewModal = ({
       <Dialog
         as="div"
         className="tw-relative tw-z-[9999] tw-cursor-default"
-        onClose={onClose}
+        onClose={() => {}}
       >
         <TransitionChild
           as={Fragment}
@@ -77,13 +77,7 @@ export const WaveCreatorPreviewModal = ({
           />
         </TransitionChild>
 
-        <div
-          className="tw-fixed tw-inset-0 tw-z-[100] tw-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-        >
+        <div className="tw-fixed tw-inset-0 tw-z-[100] tw-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block">
           <div className="tw-flex tw-min-h-full tw-items-center tw-justify-center tw-p-4">
             <TransitionChild
               as={Fragment}
@@ -121,7 +115,10 @@ export const WaveCreatorPreviewModal = ({
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full"
               >
-                <DialogPanel className="tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform">
+                <DialogPanel
+                  className="tw-pointer-events-auto tw-relative tw-max-h-[90vh] tw-w-screen tw-transform-gpu tw-overflow-hidden tw-rounded-t-xl tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/25 tw-will-change-transform"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <WaveCreatorPreviewModalContent
                     user={user}
                     isOpen={isOpen}
