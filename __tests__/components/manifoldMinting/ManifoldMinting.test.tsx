@@ -27,7 +27,7 @@ jest.mock("@/components/manifoldMinting/ManifoldMintingWidget", () => ({
   __esModule: true,
   default: () => <div data-testid="widget" />,
 }));
-jest.mock("@/components/mint-countdown-box/MemePageMintCountdown", () => ({
+jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
   __esModule: true,
   default: () => <div data-testid="countdown" />,
 }));

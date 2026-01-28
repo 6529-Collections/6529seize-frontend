@@ -11,7 +11,11 @@ export default function ArtistProfileHandle(
     const handleElements = handles.reduce((acc: any, handle, index) => {
       handle = handle.trim();
       acc.push(
-        <Link href={`/${handle}`} key={handle}>
+        <Link
+          href={`/${handle}`}
+          key={handle}
+          className="tw-no-underline"
+        >
           {handle}
         </Link>
       );

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useWaves } from "@/hooks/useWaves";
 import CircleLoader, {
@@ -10,6 +10,8 @@ import CommonIntersectionElement from "@/components/utils/CommonIntersectionElem
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { WaveCreatorPreviewItem } from "./WaveCreatorPreviewItem";
 import { shortenAddress } from "@/helpers/address.helpers";
+import { useRouter } from "next/navigation";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface WaveCreatorPreviewModalContentProps {
   readonly user: ApiProfileMin;
@@ -21,6 +23,7 @@ interface WaveCreatorPreviewModalContentProps {
 export const WaveCreatorPreviewModalContent: React.FC<
   WaveCreatorPreviewModalContentProps
 > = ({ user, isOpen, onClose, isApp = false }) => {
+  const router = useRouter();
   const identity = user.handle ?? user.primary_address;
   const displayName = user.handle ?? shortenAddress(user.primary_address);
 
@@ -36,6 +39,7 @@ export const WaveCreatorPreviewModalContent: React.FC<
     identity,
     waveName: null,
     enabled: isOpen,
+    directMessage: false,
   });
 
   const onBottomIntersection = (state: boolean) => {
@@ -59,6 +63,12 @@ export const WaveCreatorPreviewModalContent: React.FC<
   const waveCountLabel = isInitialLoading
     ? "Loading waves..."
     : `Showing ${waves.length} wave${wavePlural}`;
+  const handleWaveSelect = useCallback(
+    (_wave: ApiWave, href: string) => {
+      router.push(href);
+    },
+    [router]
+  );
 
   return (
     <div className="tailwind-scope tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/5 tw-bg-[#0E1012] tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
@@ -117,7 +127,11 @@ export const WaveCreatorPreviewModalContent: React.FC<
               {waves.length > 0 && (
                 <div className="tw-flex tw-flex-col tw-gap-3">
                   {waves.map((wave) => (
-                    <WaveCreatorPreviewItem key={wave.id} wave={wave} />
+                    <WaveCreatorPreviewItem
+                      key={wave.id}
+                      wave={wave}
+                      onSelect={handleWaveSelect}
+                    />
                   ))}
                 </div>
               )}

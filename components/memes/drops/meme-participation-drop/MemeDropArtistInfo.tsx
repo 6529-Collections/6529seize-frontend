@@ -9,9 +9,8 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistSubmissionBadge } from "@/components/waves/drops/ArtistSubmissionBadge";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
-import { ProfileWinnerBadge } from "@/components/waves/drops/ProfileWinnerBadge";
+import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemeDropArtistInfoProps {
@@ -28,6 +27,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
 
   const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
   const isWinner = winnerCount > 0;
+  const hasActivityBadge = hasSubmissions || isWinner;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -59,18 +59,12 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
               </span>
             )}
           </Link>
-          {isWinner && (
-            <ProfileWinnerBadge
-              winCount={winnerCount}
-              onBadgeClick={() => handleBadgeClick("winners")}
-              tooltipId={`meme-winner-badge-${drop.id}`}
-            />
-          )}
-          {hasSubmissions && (
-            <ArtistSubmissionBadge
+          {hasActivityBadge && (
+            <ArtistActivityBadge
               submissionCount={submissionCount}
-              onBadgeClick={() => handleBadgeClick("active")}
-              tooltipId={`meme-badge-${drop.id}`}
+              winCount={winnerCount}
+              onBadgeClick={handleBadgeClick}
+              tooltipId={`meme-activity-badge-${drop.id}`}
             />
           )}
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
