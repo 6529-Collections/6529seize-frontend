@@ -3,7 +3,10 @@
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import {
+  formatFullDateTime,
+  getNextMintStart,
+} from "@/components/meme-calendar/meme-calendar.helpers";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -48,11 +51,15 @@ export default function LatestDropNextMintSection({
   const authorHandle = author.handle ?? author.primary_address;
   const authorName = author.handle ?? "Anonymous";
   const submittedAt = formatDropTimestamp(drop.created_at);
+  const description =
+    drop.metadata.find((m) => m.data_key === "description")?.data_value ?? null;
+  const nextMintStart = getNextMintStart();
+  const nextMintLabel = formatFullDateTime(nextMintStart, "local");
 
   return (
     <section className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-6 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
       <span className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-mb-4 md:tw-text-2xl">
-        Latest Drop
+        Next Drop
       </span>
 
       <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950">
@@ -88,12 +95,10 @@ export default function LatestDropNextMintSection({
                   <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-emerald-400">
                     NEXT MINT
                   </span>
-                  {submittedAt && (
-                    <span className="tw-font-mono tw-text-xs tw-text-white/50">
-                      {submittedAt}
-                    </span>
-                  )}
                 </div>
+                <span className="tw-mt-1 tw-font-mono tw-text-xs tw-text-white/50">
+                  {nextMintLabel}
+                </span>
 
                 <Link
                   href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
@@ -102,16 +107,11 @@ export default function LatestDropNextMintSection({
                   {title}
                 </Link>
 
-                <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                  <MediaTypeBadge
-                    mimeType={media?.mime_type}
-                    dropId={drop.id}
-                    size="sm"
-                  />
-                  <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-400 tw-backdrop-blur-sm">
-                    Drop #{drop.serial_no}
-                  </span>
-                </div>
+                {description && (
+                  <p className="tw-mt-3 tw-line-clamp-2 tw-text-sm tw-leading-relaxed tw-text-iron-300">
+                    {description}
+                  </p>
+                )}
 
                 {authorHandle ? (
                   <Link
@@ -150,10 +150,6 @@ export default function LatestDropNextMintSection({
                 <NowMintingStatsItem
                   label="Submitted"
                   value={submittedAt ?? "—"}
-                />
-                <NowMintingStatsItem
-                  label="Parts"
-                  value={`${drop.parts_count}`}
                 />
               </div>
             </div>
