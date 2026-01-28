@@ -462,7 +462,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-  const [showOptions, setShowOptions] = useState(false);
+  const [userShowOptions, setUserShowOptions] = useState(false);
+  const closeOnNextInputRef = useRef(false);
+  const showOptions = isWideContainer || userShowOptions;
 
   useEffect(() => {
     const container = actionsContainerRef.current;
@@ -474,11 +476,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         const width = entry.contentRect.width;
         const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
         setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
-        if (isWide) {
-          setShowOptions(true);
-        } else {
-          setShowOptions(false);
-        }
       }
     });
 
@@ -739,6 +736,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setMentionedUsers([]);
     setReferencedNfts([]);
     setDrop(null);
+    setUserShowOptions(false);
+    closeOnNextInputRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
@@ -991,14 +990,46 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     setFiles(updatedFiles);
+    if (!isWideContainer) {
+      setUserShowOptions(false);
+      closeOnNextInputRef.current = false;
+    }
   };
+
+  const handleSetShowOptions = useCallback(
+    (next: boolean) => {
+      setUserShowOptions(next);
+      if (isWideContainer) {
+        closeOnNextInputRef.current = false;
+        return;
+      }
+      closeOnNextInputRef.current = next;
+    },
+    [isWideContainer]
+  );
 
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
-      if (!isWideContainer) {
-        setShowOptions(false);
+      if (!isWideContainer && closeOnNextInputRef.current) {
+        setUserShowOptions(false);
+        closeOnNextInputRef.current = false;
       }
+    },
+    [isWideContainer]
+  );
+
+  const handleEditorBlur = useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      if (isWideContainer) {
+        return;
+      }
+      const nextTarget = event.relatedTarget as Node | null;
+      if (nextTarget && actionsContainerRef.current?.contains(nextTarget)) {
+        return;
+      }
+      setUserShowOptions(false);
+      closeOnNextInputRef.current = false;
     },
     [isWideContainer]
   );
@@ -1150,7 +1181,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             handleFileChange={handleFileChange}
             onAddMetadataClick={onAddMetadataClick}
             breakIntoStorm={breakIntoStorm}
-            setShowOptions={setShowOptions}
+            setShowOptions={handleSetShowOptions}
             onGifDrop={onGifDrop}
           />
           <div className="tw-w-full tw-flex-grow">
@@ -1165,6 +1196,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               isDropMode={isDropMode}
               canSubmit={canSubmit}
               onEditorState={handleEditorStateChange}
+              onEditorBlur={handleEditorBlur}
               onReferencedNft={onReferencedNft}
               onMentionedUser={onMentionedUser}
               onDrop={onDrop}
