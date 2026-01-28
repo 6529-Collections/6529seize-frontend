@@ -7,7 +7,7 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
-import HomeIcon from "../common/icons/HomeIcon";
+import DiscoverIcon from "../common/icons/DiscoverIcon";
 import LogoIcon from "../common/icons/LogoIcon";
 import Squares2X2Icon from "../common/icons/Squares2X2Icon";
 import UsersIcon from "../common/icons/UsersIcon";
@@ -18,10 +18,10 @@ import type { NavItem as NavItemData } from "./navTypes";
 const items: NavItemData[] = [
   {
     kind: "route",
-    name: "Home",
-    href: "/",
-    icon: "home",
-    iconComponent: HomeIcon,
+    name: "Discover",
+    href: "/discover",
+    icon: "discover",
+    iconComponent: DiscoverIcon,
   },
   {
     kind: "view",
@@ -40,9 +40,9 @@ const items: NavItemData[] = [
   },
   {
     kind: "route",
-    name: "Stream",
+    name: "Home",
     href: "/",
-    icon: "stream",
+    icon: "home",
     iconComponent: LogoIcon,
     iconSizeClass: "tw-size-9",
   },
@@ -120,7 +120,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) =
             <li
               key={item.name}
               className={`tw-flex tw-flex-1 tw-justify-center tw-items-end ${
-                item.name === "Stream" ? "-tw-translate-y-1" : ""
+                item.name === "Home" ? "-tw-translate-y-1" : ""
               } tw-h-full tw-min-w-0`}>
               <NavItem item={item} />
             </li>

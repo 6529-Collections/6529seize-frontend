@@ -1,5 +1,5 @@
 import {
-  getHomeFeedRoute,
+  getHomeRoute,
   getMessagesBaseRoute,
   getNotificationsRoute,
   getWaveRoute,
@@ -200,7 +200,7 @@ function resolveMyStreamHomeRedirect({
     return `${getWavesBaseRoute(false)}?${params.toString()}`;
   }
 
-  return getHomeFeedRoute();
+  return getHomeRoute();
 }
 
 function resolveMyStreamRedirect(

@@ -10,47 +10,11 @@ describe("isNavItemActive", () => {
       icon: "",
     } as any;
     expect(
-      isNavItemActive(
-        item,
-        "/network",
-        new URLSearchParams(),
-        null,
-        false,
-        "latest"
-      )
+      isNavItemActive(item, "/network", new URLSearchParams(), null, false)
     ).toBe(true);
   });
 
-  it("handles Stream route based on tab query", () => {
-    const item: NavItem = {
-      kind: "route",
-      name: "Stream",
-      href: "/",
-      icon: "",
-    } as any;
-    expect(
-      isNavItemActive(
-        item,
-        "/",
-        new URLSearchParams(),
-        null,
-        false,
-        "feed"
-      )
-    ).toBe(true);
-    expect(
-      isNavItemActive(
-        item,
-        "/",
-        new URLSearchParams(),
-        null,
-        false,
-        "latest"
-      )
-    ).toBe(false);
-  });
-
-  it("marks Home active for latest tab", () => {
+  it("marks Home active on root with no overlay", () => {
     const item: NavItem = {
       kind: "route",
       name: "Home",
@@ -58,25 +22,29 @@ describe("isNavItemActive", () => {
       icon: "",
     } as any;
     expect(
-      isNavItemActive(
-        item,
-        "/",
-        new URLSearchParams(),
-        null,
-        false,
-        "latest"
-      )
+      isNavItemActive(item, "/", new URLSearchParams(), null, false)
+    ).toBe(true);
+  });
+
+  it("returns true for Discover item when on discover routes with no active view", () => {
+    const item: NavItem = {
+      kind: "route",
+      name: "Discover",
+      href: "/discover",
+      icon: "",
+    } as any;
+    expect(
+      isNavItemActive(item, "/discover", new URLSearchParams(), null, false)
     ).toBe(true);
     expect(
       isNavItemActive(
         item,
-        "/",
+        "/discover/something",
         new URLSearchParams(),
         null,
-        false,
-        "feed"
+        false
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("returns true for waves view when viewing non-DM wave sub route", () => {
@@ -89,11 +57,10 @@ describe("isNavItemActive", () => {
     expect(
       isNavItemActive(
         item,
-        '/waves',
-        new URLSearchParams({ wave: 'x1' }),
+        "/waves",
+        new URLSearchParams({ wave: "x1" }),
         null,
-        false,
-        "latest"
+        false
       )
     ).toBe(true);
   });
@@ -108,11 +75,10 @@ describe("isNavItemActive", () => {
     expect(
       isNavItemActive(
         item,
-        '/messages',
-        new URLSearchParams({ wave: 'dm1' }),
+        "/messages",
+        new URLSearchParams({ wave: "dm1" }),
         null,
-        true,
-        "latest"
+        true
       )
     ).toBe(true);
   });

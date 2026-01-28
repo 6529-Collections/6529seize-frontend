@@ -16,7 +16,7 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
-import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { getHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
 
@@ -41,7 +41,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       params.delete("wave");
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
-        : pathname || getHomeFeedRoute();
+        : pathname || getHomeRoute();
       router.push(newUrl, { scroll: false });
     },
   });

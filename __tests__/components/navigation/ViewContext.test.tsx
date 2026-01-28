@@ -80,22 +80,22 @@ describe("ViewContext", () => {
     expect(push).toHaveBeenCalledWith("/");
   });
 
-  it("navigates to feed tab when Stream is clicked", () => {
+  it("navigates to home (latest) when Home is clicked", () => {
     render(
       <ViewProvider>
         <TestNavComponent
           item={
             {
               kind: "route",
-              name: "Stream",
+              name: "Home",
               href: "/",
-              icon: "s",
+              icon: "home",
             } as NavItem
           }
         />
       </ViewProvider>
     );
-    expect(push).toHaveBeenCalledWith("/?tab=feed");
+    expect(push).toHaveBeenCalledWith("/");
   });
 
   it("navigates to waves view when no last visited wave", () => {
