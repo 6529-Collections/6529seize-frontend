@@ -8,7 +8,7 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useHasTouchInput from "@/hooks/useHasTouchInput";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -172,7 +172,7 @@ const WaveDrop = ({
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const hasTouch = useHasTouchInput() || isMobile;
   const compact = useCompactMode();
 
   const isProfileView = location === DropLocation.PROFILE;
@@ -258,6 +258,15 @@ const WaveDrop = ({
     }
     setIsSlideUp(false);
   }, [editingDropId, dispatch]);
+
+  const handleOpenTouchActions = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      setLongPressTriggered(false);
+      setIsSlideUp(true);
+    },
+    []
+  );
 
   const handleOnEdit = useCallback(() => {
     setIsSlideUp(false); // Close mobile menu when entering edit mode
@@ -391,6 +400,8 @@ const WaveDrop = ({
                 isStorm={isStorm}
                 currentPartIndex={activePartIndex}
                 partsCount={drop.parts.length}
+                showActionsButton={hasTouch && showReplyAndQuote && !isEditing}
+                onOpenActions={handleOpenTouchActions}
               />
             )}
             <div
