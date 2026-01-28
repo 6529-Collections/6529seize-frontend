@@ -32,20 +32,25 @@ export function GithubUploadModal(
   const errorMessage = apiError ?? result?.error ?? "Upload failed";
   const canClose = !isLoading;
 
+  let modalTitle: string;
+  if (isLoading) {
+    modalTitle = "Publish to GitHub";
+  } else if (result?.success) {
+    modalTitle = "Published to GitHub";
+  } else {
+    modalTitle = "Upload failed";
+  }
+
   return (
     <Modal
       show={show}
-      onHide={canClose ? onClose : undefined}
+      onHide={canClose ? onClose : () => {}}
       backdrop={isLoading ? "static" : true}
       keyboard={canClose}
     >
       <Modal.Header closeButton={canClose}>
         <Modal.Title className="tw-text-lg tw-font-semibold">
-          {isLoading
-            ? "Publish to GitHub"
-            : result?.success
-              ? "Published to GitHub"
-              : "Upload failed"}
+          {modalTitle}
         </Modal.Title>
       </Modal.Header>
       <hr className="mb-0 mt-0" />
@@ -93,8 +98,8 @@ export function GithubUploadModal(
                     Deleted files ({result.deleted_files.length})
                   </p>
                   <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
-                    {result.deleted_files.map((f, i) => (
-                      <li key={i}>{f}</li>
+                    {result.deleted_files.map((f) => (
+                      <li key={f}>{f}</li>
                     ))}
                   </ul>
                 </div>
@@ -105,8 +110,8 @@ export function GithubUploadModal(
                     Uploaded files ({result.uploaded_files.length})
                   </p>
                   <ul className="tw-mb-0 tw-list-disc tw-space-y-0.5 tw-pl-4 tw-text-sm tw-text-iron-800">
-                    {result.uploaded_files.map((f, i) => (
-                      <li key={i}>{f}</li>
+                    {result.uploaded_files.map((f) => (
+                      <li key={f}>{f}</li>
                     ))}
                   </ul>
                 </div>

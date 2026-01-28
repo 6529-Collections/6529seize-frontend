@@ -29,6 +29,21 @@ function getErrorMessage(error: unknown): string {
   return "Something went wrong.";
 }
 
+function getGithubUploadTooltip(
+  overview: DistributionOverview | null
+): string | null {
+  if (overview?.is_normalized === true) {
+    if ((overview?.photos_count ?? 0) === 0) {
+      return "Upload distribution photos first";
+    }
+    if ((overview?.automatic_airdrops_count ?? 0) === 0) {
+      return "Upload automatic airdrops first";
+    }
+    return null;
+  }
+  return "Finalize and normalize the distribution first";
+}
+
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
@@ -55,13 +70,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     overview?.is_normalized === true &&
     (overview?.photos_count ?? 0) > 0 &&
     (overview?.automatic_airdrops_count ?? 0) > 0;
-  const githubUploadTooltip = !overview?.is_normalized
-    ? "Finalize and normalize the distribution first"
-    : (overview?.photos_count ?? 0) === 0
-      ? "Upload distribution photos first"
-      : (overview?.automatic_airdrops_count ?? 0) === 0
-        ? "Upload automatic airdrops first"
-        : null;
+  const githubUploadTooltip = getGithubUploadTooltip(overview);
 
   const refreshOverview = useCallback(
     async (contract: string, tokenId?: string) => {
@@ -191,6 +200,68 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       setIsUploadingToGithub(false);
     }
   };
+
+  const handleUploadPhotos = useCallback(
+    async (contract: string, tokenId: string, files: File[]) => {
+      setShowUploadPhotos(false);
+      setIsUploading(true);
+      try {
+        const uploadedUrls = await uploadDistributionPhotos({
+          contract,
+          tokenId,
+          files,
+        });
+        setToast({
+          type: "success",
+          message: `Successfully uploaded ${uploadedUrls.length} photo(s)`,
+        });
+        await refreshOverview(contract, tokenId);
+      } catch (error: unknown) {
+        setToast({ type: "error", message: getErrorMessage(error) });
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [setToast, refreshOverview]
+  );
+
+  const handleUploadAirdrops = useCallback(
+    async (contract: string, tokenId: string, csvContent: string) => {
+      setShowAutomaticAirdrops(false);
+      setIsUploadingAirdrops(true);
+      try {
+        const response = await commonApiPost<
+          { csv: string },
+          {
+            success: boolean;
+            message?: string | undefined;
+            error?: string | undefined;
+          }
+        >({
+          endpoint: `distributions/${contract}/${tokenId}/automatic_airdrops`,
+          body: { csv: csvContent },
+        });
+        if (response.success) {
+          setToast({
+            type: "success",
+            message:
+              response.message || "Successfully uploaded automatic airdrops",
+          });
+          await refreshOverview(contract, tokenId);
+        } else {
+          setToast({
+            type: "error",
+            message: response.error || "Upload failed",
+          });
+        }
+      } catch (error: unknown) {
+        setToast({ type: "error", message: getErrorMessage(error) });
+      } finally {
+        setIsUploadingAirdrops(false);
+      }
+    },
+    [setToast, refreshOverview]
+  );
 
   if (!isSubscriptionsAdmin(connectedProfile)) {
     return <></>;
@@ -379,83 +450,14 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             handleClose={() => setShowUploadPhotos(false)}
             existingPhotosCount={overview?.photos_count ?? 0}
             confirmedTokenId={confirmedTokenId}
-            onUpload={async (
-              contract: string,
-              tokenId: string,
-              files: File[]
-            ) => {
-              setShowUploadPhotos(false);
-              setIsUploading(true);
-              try {
-                const uploadedUrls = await uploadDistributionPhotos({
-                  contract,
-                  tokenId,
-                  files,
-                });
-
-                setToast({
-                  type: "success",
-                  message: `Successfully uploaded ${uploadedUrls.length} photo(s)`,
-                });
-                await refreshOverview(contract, tokenId);
-              } catch (error: unknown) {
-                setToast({
-                  type: "error",
-                  message: getErrorMessage(error),
-                });
-              } finally {
-                setIsUploading(false);
-              }
-            }}
+            onUpload={handleUploadPhotos}
           />
           <AutomaticAirdropsModal
             plan={distributionPlan}
             show={showAutomaticAirdrops}
             handleClose={() => setShowAutomaticAirdrops(false)}
             confirmedTokenId={confirmedTokenId}
-            onUpload={async (
-              contract: string,
-              tokenId: string,
-              csvContent: string
-            ) => {
-              setShowAutomaticAirdrops(false);
-              setIsUploadingAirdrops(true);
-              try {
-                const response = await commonApiPost<
-                  { csv: string },
-                  {
-                    success: boolean;
-                    message?: string | undefined;
-                    error?: string | undefined;
-                  }
-                >({
-                  endpoint: `distributions/${contract}/${tokenId}/automatic_airdrops`,
-                  body: { csv: csvContent },
-                });
-
-                if (response.success) {
-                  setToast({
-                    type: "success",
-                    message:
-                      response.message ||
-                      "Successfully uploaded automatic airdrops",
-                  });
-                  await refreshOverview(contract, tokenId);
-                } else {
-                  setToast({
-                    type: "error",
-                    message: response.error || "Upload failed",
-                  });
-                }
-              } catch (error: unknown) {
-                setToast({
-                  type: "error",
-                  message: getErrorMessage(error),
-                });
-              } finally {
-                setIsUploadingAirdrops(false);
-              }
-            }}
+            onUpload={handleUploadAirdrops}
           />
         </>
       )}
