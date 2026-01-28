@@ -12,6 +12,7 @@ import useHasTouchInput from "@/hooks/useHasTouchInput";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { createBreakpoint } from "react-use";
 import { useDispatch, useSelector } from "react-redux";
 import type { DropInteractionParams } from "./Drop";
 import { DropLocation } from "./Drop";
@@ -30,6 +31,8 @@ import WaveDropReply from "./WaveDropReply";
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
+
+const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -173,6 +176,9 @@ const WaveDrop = ({
 
   const isMobile = useIsMobileDevice();
   const hasTouch = useHasTouchInput() || isMobile;
+  const breakpoint = useBreakpoint();
+  const isMdUp = breakpoint === "MD";
+  const allowLongPress = hasTouch && !isMdUp;
   const compact = useCompactMode();
 
   const isProfileView = location === DropLocation.PROFILE;
@@ -188,25 +194,25 @@ const WaveDrop = ({
   const groupingClass = getGroupingClass();
 
   const handleLongPress = useCallback(() => {
-    if (!hasTouch) return;
+    if (!allowLongPress) return;
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch, editingDropId, dispatch]);
+  }, [allowLongPress, editingDropId, dispatch]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      if (!hasTouch) return;
+      if (!allowLongPress) return;
       // Don't allow mobile menu when in edit mode
       if (isEditing) return;
       const touch = e.touches[0];
       touchStartPosition.current = { x: touch!.clientX, y: touch!.clientY };
       longPressTimeoutRef.current = setTimeout(handleLongPress, 500);
     },
-    [hasTouch, handleLongPress, isEditing]
+    [allowLongPress, handleLongPress, isEditing]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -216,22 +222,26 @@ const WaveDrop = ({
     touchStartPosition.current = null;
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartPosition.current) return;
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!allowLongPress) return;
+      if (!touchStartPosition.current) return;
 
-    const touch = e.touches[0];
-    const moveThreshold = 10; // pixels
+      const touch = e.touches[0];
+      const moveThreshold = 10; // pixels
 
-    const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
-    const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
+      const deltaX = Math.abs(touch!.clientX - touchStartPosition.current.x);
+      const deltaY = Math.abs(touch!.clientY - touchStartPosition.current.y);
 
-    if (
-      (deltaX > moveThreshold || deltaY > moveThreshold) &&
-      longPressTimeoutRef.current
-    ) {
-      clearTimeout(longPressTimeoutRef.current);
-    }
-  }, []);
+      if (
+        (deltaX > moveThreshold || deltaY > moveThreshold) &&
+        longPressTimeoutRef.current
+      ) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    },
+    [allowLongPress]
+  );
 
   const handleOnReply = useCallback(() => {
     // Cancel any active edit mode first
@@ -423,7 +433,7 @@ const WaveDrop = ({
                 isSaving={dropUpdateMutation.isPending}
                 onSave={handleEditSave}
                 onCancel={handleEditCancel}
-                hasTouch={hasTouch}
+                hasTouch={allowLongPress}
               />
             </div>
           </div>
