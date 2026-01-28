@@ -9,6 +9,7 @@ import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import Image from "next/image";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
@@ -44,6 +45,267 @@ function getGithubUploadTooltip(
   return "Finalize and normalize the distribution first";
 }
 
+function canPublishToGithub(overview: DistributionOverview | null): boolean {
+  return (
+    overview?.is_normalized === true &&
+    (overview?.photos_count ?? 0) > 0 &&
+    (overview?.automatic_airdrops_count ?? 0) > 0
+  );
+}
+
+function SubscriptionFooterMain({
+  contract,
+  confirmedTokenId,
+  distributionPlan,
+  overview,
+  isLoadingOverview,
+  isResetting,
+  isUploading,
+  isUploadingAirdrops,
+  isFinalizing,
+  isUploadingToGithub,
+  showGithubModal,
+  githubUploadResult,
+  githubUploadError,
+  showConfirmTokenId,
+  showUploadPhotos,
+  showAutomaticAirdrops,
+  canPublish,
+  githubUploadTooltip,
+  onConfirmTokenId,
+  onChangeTokenId,
+  onResetSubscriptions,
+  onShowAutomaticAirdrops,
+  onShowUploadPhotos,
+  onFinalize,
+  onUploadToGithub,
+  onCloseGithubModal,
+  onUploadPhotos,
+  onUploadAirdrops,
+  onCloseUploadPhotos,
+  onCloseAutomaticAirdrops,
+}: Readonly<{
+  contract: string;
+  confirmedTokenId: string;
+  distributionPlan: AllowlistDescription | null;
+  overview: DistributionOverview | null;
+  isLoadingOverview: boolean;
+  isResetting: boolean;
+  isUploading: boolean;
+  isUploadingAirdrops: boolean;
+  isFinalizing: boolean;
+  isUploadingToGithub: boolean;
+  showGithubModal: boolean;
+  githubUploadResult: GithubUploadResult | null;
+  githubUploadError: string | null;
+  showConfirmTokenId: boolean;
+  showUploadPhotos: boolean;
+  showAutomaticAirdrops: boolean;
+  canPublish: boolean;
+  githubUploadTooltip: string | null;
+  onConfirmTokenId: (tokenId: string) => void;
+  onChangeTokenId: () => void;
+  onResetSubscriptions: () => void;
+  onShowAutomaticAirdrops: () => void;
+  onShowUploadPhotos: () => void;
+  onFinalize: () => void;
+  onUploadToGithub: () => void;
+  onCloseGithubModal: () => void;
+  onUploadPhotos: (
+    contract: string,
+    tokenId: string,
+    files: File[]
+  ) => Promise<void>;
+  onUploadAirdrops: (
+    contract: string,
+    tokenId: string,
+    csvContent: string
+  ) => Promise<void>;
+  onCloseUploadPhotos: () => void;
+  onCloseAutomaticAirdrops: () => void;
+}>) {
+  return (
+    <div className="pt-3 pb-3 d-flex flex-column align-items-end gap-2">
+      <div className="w-100 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+        <span className="tw-text-sm tw-text-iron-400">
+          Contract: The Memes - {formatAddress(contract)} | Token ID:{" "}
+          {confirmedTokenId}
+        </span>
+        <div className="d-flex align-items-center gap-2">
+          <button
+            onClick={onChangeTokenId}
+            type="button"
+            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
+          >
+            Change Token ID
+          </button>
+          <button
+            onClick={onResetSubscriptions}
+            disabled={isResetting}
+            type="button"
+            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#f87171] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#f87171]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100"
+          >
+            {isResetting ? (
+              <span className="d-flex gap-2 align-items-center">
+                <CircleLoader />
+                <span>Resetting</span>
+              </span>
+            ) : (
+              <>Reset Subscriptions</>
+            )}
+          </button>
+        </div>
+      </div>
+      <div className="mt-5 d-flex align-items-center justify-content-end gap-2">
+        <button
+          onClick={onShowAutomaticAirdrops}
+          disabled={isUploadingAirdrops}
+          type="button"
+          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
+        >
+          {isUploadingAirdrops ? (
+            <span className="d-flex gap-2 align-items-center">
+              <CircleLoader />
+              <span>Uploading</span>
+            </span>
+          ) : (
+            <>
+              Upload Automatic Airdrops
+              {isLoadingOverview ? (
+                <span className="tw-ml-2">
+                  <CircleLoader />
+                </span>
+              ) : (
+                <span className="tw-ml-2">
+                  (Addresses: {overview?.automatic_airdrops_addresses ?? 0} |
+                  Count: {overview?.automatic_airdrops_count ?? 0})
+                </span>
+              )}
+            </>
+          )}
+        </button>
+        <button
+          onClick={onShowUploadPhotos}
+          disabled={isUploading}
+          type="button"
+          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
+        >
+          {isUploading ? (
+            <span className="d-flex gap-2 align-items-center">
+              <CircleLoader />
+              <span>Uploading</span>
+            </span>
+          ) : (
+            <>
+              Upload Distribution Photos
+              {isLoadingOverview ? (
+                <span className="tw-ml-2">
+                  <CircleLoader />
+                </span>
+              ) : (
+                <span className="tw-ml-2">({overview?.photos_count ?? 0})</span>
+              )}
+            </>
+          )}
+        </button>
+      </div>
+      <div className="mt-2 d-flex align-items-center justify-content-end gap-2">
+        <button
+          onClick={onFinalize}
+          disabled={isFinalizing}
+          type="button"
+          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#86efac] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#86efac]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#14532d] hover:tw-text-iron-100"
+        >
+          {isFinalizing ? (
+            <span className="d-flex gap-2 align-items-center">
+              <CircleLoader />
+              <span>Finalizing</span>
+            </span>
+          ) : (
+            <>
+              Finalize Distribution
+              {isLoadingOverview ? (
+                <span className="tw-ml-2">
+                  <CircleLoader />
+                </span>
+              ) : (
+                <span className="tw-ml-2">
+                  {overview?.is_normalized ? "✅" : "❌"}
+                </span>
+              )}
+            </>
+          )}
+        </button>
+        <span
+          className="tw-inline-flex"
+          title={githubUploadTooltip ?? undefined}
+          {...(isUploadingToGithub || !canPublish
+            ? { tabIndex: 0, "aria-disabled": true as const }
+            : {})}
+        >
+          <button
+            onClick={onUploadToGithub}
+            disabled={isUploadingToGithub || !canPublish}
+            type="button"
+            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-200 hover:tw-text-iron-900 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            {isUploadingToGithub ? (
+              <span className="d-flex gap-2 align-items-center">
+                <CircleLoader />
+                <span>Publishing…</span>
+              </span>
+            ) : (
+              <>
+                <Image
+                  src="/github.png"
+                  alt=""
+                  width={18}
+                  height={18}
+                  unoptimized
+                  className="tw-shrink-0"
+                />
+                <span>Publish to GitHub</span>
+              </>
+            )}
+          </button>
+        </span>
+      </div>
+      <GithubUploadModal
+        show={showGithubModal}
+        onClose={onCloseGithubModal}
+        onRetry={onUploadToGithub}
+        isLoading={isUploadingToGithub}
+        result={githubUploadResult}
+        apiError={githubUploadError}
+      />
+      {distributionPlan && (
+        <>
+          <ConfirmTokenIdModal
+            plan={distributionPlan}
+            show={showConfirmTokenId}
+            onConfirm={onConfirmTokenId}
+          />
+          <UploadDistributionPhotosModal
+            plan={distributionPlan}
+            show={showUploadPhotos}
+            handleClose={onCloseUploadPhotos}
+            existingPhotosCount={overview?.photos_count ?? 0}
+            confirmedTokenId={confirmedTokenId}
+            onUpload={onUploadPhotos}
+          />
+          <AutomaticAirdropsModal
+            plan={distributionPlan}
+            show={showAutomaticAirdrops}
+            handleClose={onCloseAutomaticAirdrops}
+            confirmedTokenId={confirmedTokenId}
+            onUpload={onUploadAirdrops}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
@@ -66,10 +328,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
 
-  const canPublishToGithub =
-    overview?.is_normalized === true &&
-    (overview?.photos_count ?? 0) > 0 &&
-    (overview?.automatic_airdrops_count ?? 0) > 0;
   const githubUploadTooltip = getGithubUploadTooltip(overview);
 
   const refreshOverview = useCallback(
@@ -282,192 +540,44 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   }
 
   const contract = MEMES_CONTRACT;
+  const handleResetSubscriptions = () => {
+    if (distributionPlan) {
+      resetSubscriptions(contract, confirmedTokenId, distributionPlan.id);
+    }
+  };
 
   return (
-    <div className="pt-3 pb-3 d-flex flex-column align-items-end gap-2">
-      <div className="w-100 d-flex align-items-center justify-content-between gap-2 flex-wrap">
-        <span className="tw-text-sm tw-text-iron-400">
-          Contract: The Memes - {formatAddress(contract)} | Token ID:{" "}
-          {confirmedTokenId}
-        </span>
-        <div className="d-flex align-items-center gap-2">
-          <button
-            onClick={handleChangeTokenId}
-            type="button"
-            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
-          >
-            Change Token ID
-          </button>
-          <button
-            onClick={() =>
-              distributionPlan &&
-              resetSubscriptions(
-                contract,
-                confirmedTokenId,
-                distributionPlan.id
-              )
-            }
-            disabled={isResetting}
-            type="button"
-            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#f87171] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#f87171]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#7f1d1d] hover:tw-text-iron-100"
-          >
-            {isResetting ? (
-              <span className="d-flex gap-2 align-items-center">
-                <CircleLoader />
-                <span>Resetting</span>
-              </span>
-            ) : (
-              <>Reset Subscriptions</>
-            )}
-          </button>
-        </div>
-      </div>
-      <div className="mt-5 d-flex align-items-center justify-content-end gap-2">
-        <button
-          onClick={() => setShowAutomaticAirdrops(true)}
-          disabled={isUploadingAirdrops}
-          type="button"
-          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
-        >
-          {isUploadingAirdrops ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Uploading</span>
-            </span>
-          ) : (
-            <>
-              Upload Automatic Airdrops
-              {isLoadingOverview ? (
-                <span className="tw-ml-2">
-                  <CircleLoader />
-                </span>
-              ) : (
-                <span className="tw-ml-2">
-                  (Addresses: {overview?.automatic_airdrops_addresses ?? 0} |
-                  Count: {overview?.automatic_airdrops_count ?? 0})
-                </span>
-              )}
-            </>
-          )}
-        </button>
-        <button
-          onClick={() => setShowUploadPhotos(true)}
-          disabled={isUploading}
-          type="button"
-          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-400/20 hover:tw-text-iron-100"
-        >
-          {isUploading ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Uploading</span>
-            </span>
-          ) : (
-            <>
-              Upload Distribution Photos
-              {isLoadingOverview ? (
-                <span className="tw-ml-2">
-                  <CircleLoader />
-                </span>
-              ) : (
-                <span className="tw-ml-2">({overview?.photos_count ?? 0})</span>
-              )}
-            </>
-          )}
-        </button>
-      </div>
-      <div className="mt-2 d-flex align-items-center justify-content-end gap-2">
-        <button
-          onClick={() => finalizeDistribution(contract, confirmedTokenId)}
-          disabled={isFinalizing}
-          type="button"
-          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#86efac] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#86efac]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#14532d] hover:tw-text-iron-100"
-        >
-          {isFinalizing ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Finalizing</span>
-            </span>
-          ) : (
-            <>
-              Finalize Distribution
-              {isLoadingOverview ? (
-                <span className="tw-ml-2">
-                  <CircleLoader />
-                </span>
-              ) : (
-                <span className="tw-ml-2">
-                  {overview?.is_normalized ? "✅" : "❌"}
-                </span>
-              )}
-            </>
-          )}
-        </button>
-        <span
-          className="tw-inline-flex"
-          title={githubUploadTooltip ?? undefined}
-          {...(isUploadingToGithub || !canPublishToGithub
-            ? { tabIndex: 0, "aria-disabled": true as const }
-            : {})}
-        >
-          <button
-            onClick={() => uploadToGithub(contract, confirmedTokenId)}
-            disabled={isUploadingToGithub || !canPublishToGithub}
-            type="button"
-            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-200 hover:tw-text-iron-900 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-          >
-            {isUploadingToGithub ? (
-              <span className="d-flex gap-2 align-items-center">
-                <CircleLoader />
-                <span>Publishing…</span>
-              </span>
-            ) : (
-              <>
-                <Image
-                  src="/github.png"
-                  alt=""
-                  width={18}
-                  height={18}
-                  unoptimized
-                  className="tw-shrink-0"
-                />
-                <span>Publish to GitHub</span>
-              </>
-            )}
-          </button>
-        </span>
-      </div>
-      <GithubUploadModal
-        show={showGithubModal}
-        onClose={() => setShowGithubModal(false)}
-        onRetry={() => uploadToGithub(contract, confirmedTokenId)}
-        isLoading={isUploadingToGithub}
-        result={githubUploadResult}
-        apiError={githubUploadError}
-      />
-      {distributionPlan && (
-        <>
-          <ConfirmTokenIdModal
-            plan={distributionPlan}
-            show={showConfirmTokenId}
-            onConfirm={handleConfirmTokenId}
-          />
-          <UploadDistributionPhotosModal
-            plan={distributionPlan}
-            show={showUploadPhotos}
-            handleClose={() => setShowUploadPhotos(false)}
-            existingPhotosCount={overview?.photos_count ?? 0}
-            confirmedTokenId={confirmedTokenId}
-            onUpload={handleUploadPhotos}
-          />
-          <AutomaticAirdropsModal
-            plan={distributionPlan}
-            show={showAutomaticAirdrops}
-            handleClose={() => setShowAutomaticAirdrops(false)}
-            confirmedTokenId={confirmedTokenId}
-            onUpload={handleUploadAirdrops}
-          />
-        </>
-      )}
-    </div>
+    <SubscriptionFooterMain
+      contract={contract}
+      confirmedTokenId={confirmedTokenId}
+      distributionPlan={distributionPlan}
+      overview={overview}
+      isLoadingOverview={isLoadingOverview}
+      isResetting={isResetting}
+      isUploading={isUploading}
+      isUploadingAirdrops={isUploadingAirdrops}
+      isFinalizing={isFinalizing}
+      isUploadingToGithub={isUploadingToGithub}
+      showGithubModal={showGithubModal}
+      githubUploadResult={githubUploadResult}
+      githubUploadError={githubUploadError}
+      showConfirmTokenId={showConfirmTokenId}
+      showUploadPhotos={showUploadPhotos}
+      showAutomaticAirdrops={showAutomaticAirdrops}
+      canPublish={canPublishToGithub(overview)}
+      githubUploadTooltip={githubUploadTooltip}
+      onConfirmTokenId={handleConfirmTokenId}
+      onChangeTokenId={handleChangeTokenId}
+      onResetSubscriptions={handleResetSubscriptions}
+      onShowAutomaticAirdrops={() => setShowAutomaticAirdrops(true)}
+      onShowUploadPhotos={() => setShowUploadPhotos(true)}
+      onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
+      onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}
+      onCloseGithubModal={() => setShowGithubModal(false)}
+      onUploadPhotos={handleUploadPhotos}
+      onUploadAirdrops={handleUploadAirdrops}
+      onCloseUploadPhotos={() => setShowUploadPhotos(false)}
+      onCloseAutomaticAirdrops={() => setShowAutomaticAirdrops(false)}
+    />
   );
 }
