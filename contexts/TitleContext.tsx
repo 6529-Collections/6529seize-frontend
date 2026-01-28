@@ -18,7 +18,6 @@ type TitleContextType = {
   notificationCount: number;
   setNotificationCount: (count: number) => void;
   setWaveData: (data: { name: string; newItemsCount: number } | null) => void;
-  setStreamHasNewItems: (hasNewItems: boolean) => void;
 };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
@@ -80,17 +79,14 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     name: string;
     newItemsCount: number;
   } | null>(null);
-  const [streamHasNewItems, setStreamHasNewItems] = useState(false);
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
-  const tabParam = searchParams?.get("tab");
   const waveParam =
     myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
     (pathname === "/" && searchParams?.get("view") === "waves");
-  const isHomeFeedTab = pathname === "/" && tabParam === "feed";
 
   useEffect(() => {
     if (routeRef.current === pathname) {
@@ -101,30 +97,15 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     setTitle(defaultTitle);
   }, [pathname]);
 
-  // Update title when route or query changes
   useEffect(() => {
-    const pathChanged = routeRef.current !== pathname;
-    const queryChanged =
-      queryRef.current?.toString() !== searchParams?.toString();
-
-    if (pathChanged) {
+    if (routeRef.current !== pathname) {
       routeRef.current = pathname;
       queryRef.current = searchParams;
       const defaultTitle = getDefaultTitleForRoute(pathname);
       setTitle(defaultTitle);
-      // Reset wave data when leaving the home feed tab
-      if (!isHomeFeedTab) {
-        setWaveData(null);
-        setStreamHasNewItems(false);
-      }
-    } else if (queryChanged && isHomeFeedTab) {
-      queryRef.current = searchParams;
-      // Reset wave data when navigating between waves or back to stream
-      if (!waveParam) {
-        setWaveData(null);
-      }
+      setWaveData(null);
     }
-  }, [pathname, searchParams, isHomeFeedTab, waveParam]);
+  }, [pathname, searchParams]);
 
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {
@@ -145,30 +126,12 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       return `${newItemsText}${waveData.name} | Brain`;
     })();
 
-    if (isHomeFeedTab) {
-      if (waveTitle) return waveTitle;
-
-      const prefix =
-        streamHasNewItems && notificationCount === 0
-          ? "(New messages) My Stream"
-          : "My Stream";
-      return `${prefix} | Brain`;
-    }
-
     if (isWaveRoute && waveTitle) {
       return waveTitle;
     }
 
     return title;
-  }, [
-    isHomeFeedTab,
-    isWaveRoute,
-    waveParam,
-    waveData,
-    streamHasNewItems,
-    title,
-    notificationCount,
-  ]);
+  }, [isWaveRoute, waveParam, waveData, title, notificationCount]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
@@ -187,7 +150,6 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       notificationCount,
       setNotificationCount,
       setWaveData,
-      setStreamHasNewItems,
     };
   }, [computedTitle, notificationCount]);
 

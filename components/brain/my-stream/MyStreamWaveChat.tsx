@@ -10,7 +10,7 @@ import PrivilegedDropCreator, {
 import { UnreadDividerProvider } from "@/contexts/wave/UnreadDividerContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getHomeFeedRoute } from "@/helpers/navigation.helpers";
+import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
@@ -148,7 +148,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     params.delete("divider");
     const href = params.toString()
       ? `${pathname}?${params.toString()}`
-      : pathname || getHomeFeedRoute();
+      : pathname || getHomeRoute();
     router.replace(href, { scroll: false });
   }, [initialDropState, searchParams, router, pathname]);
 

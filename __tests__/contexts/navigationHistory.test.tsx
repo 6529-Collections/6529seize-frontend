@@ -25,7 +25,7 @@ const hardBack = jest.fn();
 (useRouter as jest.Mock).mockReturnValue(routerMock);
 (usePathname as jest.Mock).mockReturnValue("/");
 (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-(useViewContext as jest.Mock).mockReturnValue({ hardBack, homeActiveTab: "latest" });
+(useViewContext as jest.Mock).mockReturnValue({ hardBack });
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NavigationHistoryProvider>{children}</NavigationHistoryProvider>

@@ -33,7 +33,7 @@ export default function AppLayout({ children }: Props) {
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
-  const { activeView, homeActiveTab } = useViewContext();
+  const { activeView } = useViewContext();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSingleDropOpen = searchParams?.get("drop") !== null;
@@ -47,7 +47,6 @@ export default function AppLayout({ children }: Props) {
     pathname === "/messages" ||
     pathname === "/notifications" ||
     (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
-  const isHomeFeedView = pathname === "/" && homeActiveTab === "feed";
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { isVisible: isAndroidKeyboardVisible, isAndroid } =
@@ -78,7 +77,7 @@ export default function AppLayout({ children }: Props) {
   return (
     <div
       className={`${safeAreaClass} ${
-        isHomeFeedView ? "tw-overflow-hidden" : "tw-overflow-auto"
+        "tw-overflow-auto"
       }`}
     >
       <PullToRefresh triggerZoneRef={headerRef} />
@@ -92,7 +91,7 @@ export default function AppLayout({ children }: Props) {
       ) : (
         <main>{children}</main>
       )}
-      {!isSingleDropOpen && !isStreamRoute && !isHomeFeedView && (
+      {!isSingleDropOpen && !isStreamRoute && (
         <div className="tw-h-16 tw-w-full" />
       )}
       {!isSingleDropOpen && !isEditingOnMobile && (
