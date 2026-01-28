@@ -8,10 +8,15 @@ import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
+import Image from "next/image";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
+import {
+  GithubUploadModal,
+  type GithubUploadResult,
+} from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
 import { UploadDistributionPhotosModal } from "./ReviewDistributionPlanTableSubscriptionFooterUploadPhotos";
 
 function getErrorMessage(error: unknown): string {
@@ -36,8 +41,27 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingAirdrops, setIsUploadingAirdrops] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [isUploadingToGithub, setIsUploadingToGithub] = useState(false);
+  const [showGithubModal, setShowGithubModal] = useState(false);
+  const [githubUploadResult, setGithubUploadResult] =
+    useState<GithubUploadResult | null>(null);
+  const [githubUploadError, setGithubUploadError] = useState<string | null>(
+    null
+  );
   const [overview, setOverview] = useState<DistributionOverview | null>(null);
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
+
+  const canPublishToGithub =
+    overview?.is_normalized === true &&
+    (overview?.photos_count ?? 0) > 0 &&
+    (overview?.automatic_airdrops_count ?? 0) > 0;
+  const githubUploadTooltip = !overview?.is_normalized
+    ? "Finalize and normalize the distribution first"
+    : (overview?.photos_count ?? 0) === 0
+      ? "Upload distribution photos first"
+      : (overview?.automatic_airdrops_count ?? 0) === 0
+        ? "Upload automatic airdrops first"
+        : null;
 
   const refreshOverview = useCallback(
     async (contract: string, tokenId?: string) => {
@@ -144,6 +168,27 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       });
     } finally {
       setIsFinalizing(false);
+    }
+  };
+
+  const uploadToGithub = async (contract: string, tokenId: string) => {
+    setShowGithubModal(true);
+    setGithubUploadResult(null);
+    setGithubUploadError(null);
+    setIsUploadingToGithub(true);
+    try {
+      const response = await commonApiPost<
+        Record<string, never>,
+        GithubUploadResult
+      >({
+        endpoint: `distributions/${contract}/${tokenId}/github-upload`,
+        body: {},
+      });
+      setGithubUploadResult(response);
+    } catch (error: unknown) {
+      setGithubUploadError(getErrorMessage(error));
+    } finally {
+      setIsUploadingToGithub(false);
     }
   };
 
@@ -286,7 +331,41 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             </>
           )}
         </button>
+        <button
+          onClick={() => uploadToGithub(contract, confirmedTokenId)}
+          disabled={isUploadingToGithub || !canPublishToGithub}
+          type="button"
+          title={githubUploadTooltip ?? undefined}
+          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-200 hover:tw-text-iron-900 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+        >
+          {isUploadingToGithub ? (
+            <span className="d-flex gap-2 align-items-center">
+              <CircleLoader />
+              <span>Publishing…</span>
+            </span>
+          ) : (
+            <>
+              <Image
+                src="/github.png"
+                alt=""
+                width={18}
+                height={18}
+                unoptimized
+                className="tw-shrink-0"
+              />
+              <span>Publish to GitHub</span>
+            </>
+          )}
+        </button>
       </div>
+      <GithubUploadModal
+        show={showGithubModal}
+        onClose={() => setShowGithubModal(false)}
+        onRetry={() => uploadToGithub(contract, confirmedTokenId)}
+        isLoading={isUploadingToGithub}
+        result={githubUploadResult}
+        apiError={githubUploadError}
+      />
       {distributionPlan && (
         <>
           <ConfirmTokenIdModal
