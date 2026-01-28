@@ -402,32 +402,39 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
             </>
           )}
         </button>
-        <button
-          onClick={() => uploadToGithub(contract, confirmedTokenId)}
-          disabled={isUploadingToGithub || !canPublishToGithub}
-          type="button"
+        <span
+          className="tw-inline-flex"
           title={githubUploadTooltip ?? undefined}
-          className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-200 hover:tw-text-iron-900 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          {...(isUploadingToGithub || !canPublishToGithub
+            ? { tabIndex: 0, "aria-disabled": true as const }
+            : {})}
         >
-          {isUploadingToGithub ? (
-            <span className="d-flex gap-2 align-items-center">
-              <CircleLoader />
-              <span>Publishing…</span>
-            </span>
-          ) : (
-            <>
-              <Image
-                src="/github.png"
-                alt=""
-                width={18}
-                height={18}
-                unoptimized
-                className="tw-shrink-0"
-              />
-              <span>Publish to GitHub</span>
-            </>
-          )}
-        </button>
+          <button
+            onClick={() => uploadToGithub(contract, confirmedTokenId)}
+            disabled={isUploadingToGithub || !canPublishToGithub}
+            type="button"
+            className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-none tw-bg-white tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-400/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-200 hover:tw-text-iron-900 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+          >
+            {isUploadingToGithub ? (
+              <span className="d-flex gap-2 align-items-center">
+                <CircleLoader />
+                <span>Publishing…</span>
+              </span>
+            ) : (
+              <>
+                <Image
+                  src="/github.png"
+                  alt=""
+                  width={18}
+                  height={18}
+                  unoptimized
+                  className="tw-shrink-0"
+                />
+                <span>Publish to GitHub</span>
+              </>
+            )}
+          </button>
+        </span>
       </div>
       <GithubUploadModal
         show={showGithubModal}
