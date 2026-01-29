@@ -411,10 +411,12 @@ const getOptimisticDrop = (
         : null,
       replies_count: 0,
       quotes_count: 0,
+      mentioned_waves: [],
     })),
     parts_count: dropRequest.parts.length,
     referenced_nfts: dropRequest.referenced_nfts,
     mentioned_users: dropRequest.mentioned_users,
+
     metadata: dropRequest.metadata,
     rating: 0,
     top_raters: [],
