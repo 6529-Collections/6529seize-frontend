@@ -5,6 +5,7 @@ import ProfileAvatar, {
 } from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -14,22 +15,18 @@ interface NextMintCardProps {
   readonly drop: ApiDrop;
 }
 
-const formatDropTimestamp = (timestamp: number): string | null => {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  const dateLabel = new Intl.DateTimeFormat(undefined, {
-    month: "short",
+const formatNextMintDateTime = (date: Date): string => {
+  const dateParts = new Intl.DateTimeFormat(undefined, {
     day: "numeric",
-  }).format(date);
+    month: "short",
+  }).formatToParts(date);
+  const day = dateParts.find((p) => p.type === "day")?.value ?? "";
+  const month = dateParts.find((p) => p.type === "month")?.value ?? "";
+  const dateLabel = `${day} ${month}`;
   const timeLabel = new Intl.DateTimeFormat(undefined, {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
   }).format(date);
-
   return `${dateLabel} · ${timeLabel}`;
 };
 
@@ -41,7 +38,8 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Untitled";
   const author = drop.author;
-  const timestamp = formatDropTimestamp(drop.created_at);
+  const nextMintDate = getNextMintStart();
+  const timestamp = formatNextMintDateTime(nextMintDate);
 
   return (
     <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-300">
@@ -53,14 +51,12 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               NEXT MINT
             </span>
           </div>
-          {timestamp && (
-            <span className="tw-font-mono tw-text-xs tw-text-white/50">
-              {timestamp}
-            </span>
-          )}
+          <span className="tw-font-mono tw-text-xs tw-text-white/50">
+            {timestamp}
+          </span>
         </div>
         <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50">
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105 tw-[&>div]:tw-mx-0">
+          <div className="tw-[&>div]:tw-mx-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {media ? (
               <DropListItemContentMedia
                 media_mime_type={media.mime_type}
@@ -86,7 +82,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
             />
             <Link
               href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-              className="tw-m-0 tw-min-w-0 tw-flex-1 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
+              className="tw-m-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
             >
               {title}
             </Link>
