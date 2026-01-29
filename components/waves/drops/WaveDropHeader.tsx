@@ -14,6 +14,7 @@ import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { WaveCreatorBadge } from "./WaveCreatorBadge";
 import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
 import { useMemo, useCallback } from "react";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { useCompactMode } from "@/contexts/CompactModeContext";
@@ -25,6 +26,10 @@ interface WaveDropHeaderProps {
   readonly partsCount: number;
   readonly showWaveInfo: boolean;
   readonly badge?: React.ReactNode | undefined;
+  readonly showActionsButton?: boolean | undefined;
+  readonly onOpenActions?:
+    | ((e: React.MouseEvent<HTMLButtonElement>) => void)
+    | undefined;
 }
 
 const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
@@ -34,6 +39,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   partsCount,
   showWaveInfo,
   badge,
+  showActionsButton = false,
+  onOpenActions,
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
@@ -125,6 +132,16 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           </div>
           {!!badge && <div className="tw-ml-2">{badge}</div>}
         </div>
+        {showActionsButton && onOpenActions && (
+          <button
+            type="button"
+            aria-label="Open drop actions"
+            onClick={onOpenActions}
+            className="tw-hidden tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-300 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 md:tw-flex"
+          >
+            <EllipsisVerticalIcon className="tw-h-5 tw-w-5" />
+          </button>
+        )}
       </div>
       <div>
         {showWaveInfo &&

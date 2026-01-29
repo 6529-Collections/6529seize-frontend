@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Dialog,
   DialogPanel,
@@ -7,23 +9,29 @@ import {
 } from "@headlessui/react";
 import type { ReactNode } from "react";
 import { Fragment } from "react";
+import useHasTouchInput from "@/hooks/useHasTouchInput";
 
 export default function CommonDropdownItemsMobileWrapper({
   isOpen,
   setOpen,
   label,
+  hideOnDesktopHover = true,
   children,
 }: {
   readonly isOpen: boolean;
   readonly setOpen: (isOpen: boolean) => void;
   readonly label?: string | undefined;
+  readonly hideOnDesktopHover?: boolean | undefined;
   readonly children: ReactNode;
 }) {
+  const hasTouchInput = useHasTouchInput();
+  const shouldHideOnDesktopHover = hideOnDesktopHover && !hasTouchInput;
+
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-absolute tw-z-[1000] lg:desktop-hover:tw-hidden"
+        className={`tailwind-scope tw-absolute tw-z-[1000] ${shouldHideOnDesktopHover ? "lg:desktop-hover:tw-hidden" : ""}`}
         onClose={setOpen}
       >
         <TransitionChild
