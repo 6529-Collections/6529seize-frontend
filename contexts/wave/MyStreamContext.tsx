@@ -2,12 +2,11 @@
 
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { ApiDropId } from "@/generated/models/ApiDropId";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import type {
-  ReactNode} from "react";
+import type { ReactNode } from "react";
 import React, {
   createContext,
   useCallback,
@@ -20,21 +19,14 @@ import React, {
 import type { WaveMessages } from "./hooks/types";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedDmWavesList from "./hooks/useEnhancedDmWavesList";
-import type {
-  MinimalWave,
-} from "./hooks/useEnhancedWavesList";
+import type { MinimalWave } from "./hooks/useEnhancedWavesList";
 import useEnhancedWavesList from "./hooks/useEnhancedWavesList";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
-import type {
-  Listener as WaveMessagesListener,
-} from "./hooks/useWaveMessagesStore";
+import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
-import type {
-  ProcessIncomingDropType} from "./hooks/useWaveRealtimeUpdater";
-import {
-  useWaveRealtimeUpdater,
-} from "./hooks/useWaveRealtimeUpdater";
+import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
+import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -77,7 +69,7 @@ interface MyStreamContextType {
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
   readonly fetchNextPageForWave: (
     props: NextPageProps
-  ) => Promise<(ApiDrop | ApiLightDrop)[] | null>;
+  ) => Promise<(ApiDrop | ApiDropId)[] | null>;
   readonly fetchAroundSerialNo: (waveId: string, serialNo: number) => void;
   readonly processIncomingDrop: (
     drop: ApiDrop,

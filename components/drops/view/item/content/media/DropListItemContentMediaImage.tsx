@@ -4,6 +4,7 @@ import { FallbackImage } from "@/components/common/FallbackImage";
 import { fullScreenSupported } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
 import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -49,6 +50,7 @@ function DropListItemContentMediaImage({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
+  const { hasTouchScreen } = useDeviceInfo();
 
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
@@ -128,13 +130,13 @@ function DropListItemContentMediaImage({
 
   const modalContent = (
     <div
-      className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
+      className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
       onClick={handleCloseModal}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
     >
-      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-pointer-events-none"></div>
+      <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80"></div>
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
@@ -142,11 +144,11 @@ function DropListItemContentMediaImage({
         onZoom={(e) => setIsZoomed(e.state.scale > 1)}
       >
         {({ resetTransform }) => (
-          <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
-            <div className="tw-relative tw-flex tw-flex-col lg:tw-flex-row tw-max-w-[95vw] tw-max-h-[90vh]">
+          <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
+            <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
               <div
                 role="button"
-                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-flex-1 tw-min-h-0 tw-min-w-0"
+                className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center"
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={0}
                 aria-label="Full size drop media"
@@ -165,12 +167,12 @@ function DropListItemContentMediaImage({
                     src={src}
                     alt="Full size drop media"
                     style={{ pointerEvents: "auto" }}
-                    className="tw-max-h-[75vh] lg:tw-max-h-[90vh] tw-max-w-full tw-object-contain"
+                    className="tw-max-h-[75vh] tw-max-w-full tw-object-contain lg:tw-max-h-[90vh]"
                   />
                 </TransformComponent>
               </div>
 
-              <div className="tw-fixed tw-top-2 tw-right-4 tw-flex tw-flex-row tw-gap-x-4 tw-z-[1001] tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-top-0 lg:tw-right-auto lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-ml-4 lg:tw-pt-0 lg:tw-self-start">
+              <div className="tw-fixed tw-right-4 tw-top-2 tw-z-[1001] tw-flex tw-flex-row tw-gap-x-4 tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-right-auto lg:tw-top-0 lg:tw-ml-4 lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-self-start lg:tw-pt-0">
                 {isZoomed && (
                   <button
                     onClick={(e) => {
@@ -179,7 +181,7 @@ function DropListItemContentMediaImage({
                       setIsZoomed(false);
                     }}
                     data-tooltip-id="reset-zoom"
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700"
                     aria-label="Reset"
                   >
                     <FontAwesomeIcon
@@ -202,7 +204,7 @@ function DropListItemContentMediaImage({
                   <button
                     onClick={handleFullScreen}
                     data-tooltip-id="full-screen"
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700"
                     aria-label="Full screen"
                   >
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
@@ -216,7 +218,7 @@ function DropListItemContentMediaImage({
                       onContainerClick();
                     }}
                     data-tooltip-id="view-drop-details"
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700"
                     aria-label="View drop details"
                   >
                     <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -285,13 +287,15 @@ function DropListItemContentMediaImage({
     <>
       <div
         ref={ref}
-        className={`tw-w-full tw-h-full tw-flex tw-items-center tw-relative tw-mx-[1px] ${
+        className={`tw-relative tw-mx-[1px] tw-flex tw-h-full tw-w-full tw-items-center ${
           isCompetitionDrop ? "tw-justify-center" : ""
         }`}
       >
         {!loaded && errorCount <= maxRetries && (
           <div
-            className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
+            className={`tw-rounded-xl tw-bg-iron-800 ${
+              hasTouchScreen ? "" : "tw-animate-pulse"
+            }`}
             style={loadingPlaceholderStyle}
           />
         )}
@@ -305,7 +309,7 @@ function DropListItemContentMediaImage({
             alt="Drop media"
             fill
             sizes="(max-width: 768px) 100vw, 768px"
-            className={`tw-max-w-full tw-max-h-full ${
+            className={`tw-max-h-full tw-max-w-full ${
               !loaded ? "tw-opacity-0" : "tw-opacity-100"
             } ${disableModal ? "" : "tw-cursor-pointer"}`}
             style={{
@@ -324,14 +328,16 @@ function DropListItemContentMediaImage({
             </span>
             <button
               onClick={manualRetry}
-              className="tw-bg-iron-700 hover:tw-bg-iron-600 tw-text-white tw-px-3 tw-py-1 tw-rounded-md tw-text-xs"
+              className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
             >
               Retry
             </button>
           </div>
         )}
       </div>
-      {!disableModal && isModalOpen && createPortal(modalContent, document.body)}
+      {!disableModal &&
+        isModalOpen &&
+        createPortal(modalContent, document.body)}
     </>
   );
 }

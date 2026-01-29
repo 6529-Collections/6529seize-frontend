@@ -8,11 +8,7 @@ export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
 export * from '../models/ApiAggregatedActivityPage';
-export * from '../models/ApiArtistItem';
 export * from '../models/ApiArtistNameItem';
-export * from '../models/ApiArtistsNft';
-export * from '../models/ApiArtistsPage';
-export * from '../models/ApiArtistsWork';
 export * from '../models/ApiAvailableRatingCredit';
 export * from '../models/ApiBlockItem';
 export * from '../models/ApiBlocksPage';
@@ -42,6 +38,7 @@ export * from '../models/ApiCreateGroup';
 export * from '../models/ApiCreateGroupDescription';
 export * from '../models/ApiCreateMediaUploadUrlRequest';
 export * from '../models/ApiCreateMediaUrlResponse';
+export * from '../models/ApiCreateMentionedWave';
 export * from '../models/ApiCreateNewProfileProxy';
 export * from '../models/ApiCreateNewProfileProxyAllocateCicAction';
 export * from '../models/ApiCreateNewProfileProxyAllocateRepAction';
@@ -65,6 +62,7 @@ export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostsPage';
 export * from '../models/ApiDropContextProfileContext';
+export * from '../models/ApiDropId';
 export * from '../models/ApiDropMedia';
 export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
@@ -107,6 +105,7 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMentionedWave';
 export * from '../models/ApiMintMetrics';
 export * from '../models/ApiMintMetricsPage';
 export * from '../models/ApiNft';
@@ -261,11 +260,7 @@ import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropReque
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
 import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
-import { ApiArtistItem } from '../models/ApiArtistItem';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
-import { ApiArtistsNft } from '../models/ApiArtistsNft';
-import { ApiArtistsPage } from '../models/ApiArtistsPage';
-import { ApiArtistsWork } from '../models/ApiArtistsWork';
 import { ApiAvailableRatingCredit } from '../models/ApiAvailableRatingCredit';
 import { ApiBlockItem } from '../models/ApiBlockItem';
 import { ApiBlocksPage } from '../models/ApiBlocksPage';
@@ -295,6 +290,7 @@ import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
 import { ApiCreateMediaUploadUrlRequest } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
+import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
 import { ApiCreateNewProfileProxyAllocateCicAction    } from '../models/ApiCreateNewProfileProxyAllocateCicAction';
 import { ApiCreateNewProfileProxyAllocateRepAction    } from '../models/ApiCreateNewProfileProxyAllocateRepAction';
@@ -318,6 +314,7 @@ import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
+import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -360,6 +357,7 @@ import { ApiLightDrop         } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiMintMetrics } from '../models/ApiMintMetrics';
 import { ApiMintMetricsPage } from '../models/ApiMintMetricsPage';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
@@ -560,11 +558,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
     "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
-    "ApiArtistItem": ApiArtistItem,
     "ApiArtistNameItem": ApiArtistNameItem,
-    "ApiArtistsNft": ApiArtistsNft,
-    "ApiArtistsPage": ApiArtistsPage,
-    "ApiArtistsWork": ApiArtistsWork,
     "ApiAvailableRatingCredit": ApiAvailableRatingCredit,
     "ApiBlockItem": ApiBlockItem,
     "ApiBlocksPage": ApiBlocksPage,
@@ -593,6 +587,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateGroupDescription": ApiCreateGroupDescription,
     "ApiCreateMediaUploadUrlRequest": ApiCreateMediaUploadUrlRequest,
     "ApiCreateMediaUrlResponse": ApiCreateMediaUrlResponse,
+    "ApiCreateMentionedWave": ApiCreateMentionedWave,
     "ApiCreateNewProfileProxy": ApiCreateNewProfileProxy,
     "ApiCreateNewProfileProxyAllocateCicAction": ApiCreateNewProfileProxyAllocateCicAction,
     "ApiCreateNewProfileProxyAllocateRepAction": ApiCreateNewProfileProxyAllocateRepAction,
@@ -616,6 +611,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropBoost": ApiDropBoost,
     "ApiDropBoostsPage": ApiDropBoostsPage,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
+    "ApiDropId": ApiDropId,
     "ApiDropMedia": ApiDropMedia,
     "ApiDropMentionedUser": ApiDropMentionedUser,
     "ApiDropMetadata": ApiDropMetadata,
@@ -650,6 +646,7 @@ let typeMap: {[index: string]: any} = {
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
+    "ApiMentionedWave": ApiMentionedWave,
     "ApiMintMetrics": ApiMintMetrics,
     "ApiMintMetricsPage": ApiMintMetricsPage,
     "ApiNft": ApiNft,

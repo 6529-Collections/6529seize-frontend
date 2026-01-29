@@ -1,12 +1,9 @@
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropId } from "@/generated/models/ApiDropId";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-import type {
-  ApiLightDrop} from "@/generated/models/ObjectSerializer";
-import {
-  ApiDropSearchStrategy
-} from "@/generated/models/ObjectSerializer";
-import type { Drop} from "@/helpers/waves/drop.helpers";
+import { ApiDropSearchStrategy } from "@/generated/models/ObjectSerializer";
+import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
 import {
   commonApiFetch,
@@ -117,31 +114,33 @@ export async function fetchAroundSerialNoWaveMessages(
 }
 
 /**
- * Fetches light wave messages (drops) for a specific wave
+ * Fetches light wave messages (drop ids) for a specific wave
  * @param waveId The ID of the wave to fetch messages for
- * @param serialNo The serial number to fetch messages before
+ * @param oldestSerialNo Unused with drop-ids paging (kept for interface compatibility)
+ * @param targetSerialNo The serial number to scroll to
  * @param signal Optional AbortSignal for cancellation
- * @returns Array of ApiLightDrop with wave data attached, or null if the request fails
+ * @returns Array of drop ids and full drops around the target, or null if the request fails
  */
 export async function fetchLightWaveMessages(
   waveId: string,
   oldestSerialNo: number,
   targetSerialNo: number,
   signal?: AbortSignal
-): Promise<(ApiLightDrop | ApiDrop)[] | null> {
-  const params: LightDropsApiParams = {
-    max_serial_no: oldestSerialNo,
+): Promise<(ApiDropId | ApiDrop)[] | null> {
+  void oldestSerialNo;
+  const params: DropIdsApiParams = {
     wave_id: waveId,
-    limit: 2000,
+    min_serial_no: targetSerialNo,
+    limit: DROP_IDS_PAGE_LIMIT,
   };
 
   try {
     const results = await Promise.all([
-      findLightDropBySerialNoWithPagination(targetSerialNo, params, signal),
+      findDropIdsBySerialNoWithPagination(targetSerialNo, params, signal),
       fetchAroundSerialNoWaveMessages(waveId, targetSerialNo, signal),
     ]);
 
-    const combined: (ApiLightDrop | ApiDrop)[] = [];
+    const combined: (ApiDropId | ApiDrop)[] = [];
 
     for (const drop of results[0]) {
       combined.push(drop);
@@ -402,52 +401,66 @@ export const maxOrNull = (
   return nums.length > 0 ? Math.max(...nums) : null;
 };
 
+const DROP_IDS_PAGE_LIMIT = 5000;
+
 /**
- * Parameters for the /light-drops API endpoint.
+ * Parameters for the /drop-ids API endpoint.
  */
-interface LightDropsApiParams {
+interface DropIdsApiParams {
   /** The ID of the wave to fetch messages for. Required by the API. */
   wave_id: string;
-  /** The maximum number of items to return. API requires 1-2000. Defaults to 2000 if not specified by caller. */
+  /** Fetch items with serial_no greater than or equal to this value. Required. */
+  min_serial_no: number;
+  /** Fetch items with serial_no less than or equal to this value. Optional. */
+  max_serial_no?: number | undefined;
+  /** The maximum number of items to return. API requires 1-5000. Defaults to 5000 if not specified by caller. */
   limit?: number | undefined;
-  /** Fetch items with serial_no less than or equal to this value. For pagination. Required. */
-  max_serial_no: number;
-  // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist
+  // Add any other specific, known query parameters for /drop-ids from openapi.yaml if they exist
 }
 
-async function findLightDropBySerialNoWithPagination(
+async function findDropIdsBySerialNoWithPagination(
   targetSerialNo: number,
-  apiParams: LightDropsApiParams, // wave_id and max_serial_no are mandatory here
+  apiParams: DropIdsApiParams,
   signal?: AbortSignal
-): Promise<ApiLightDrop[]> {
-  // Return type changed to ApiLightDrop[]
-  let currentMaxSerialForNextCall: number = apiParams.max_serial_no;
+): Promise<ApiDropId[]> {
+  let currentMaxSerialForNextCall: number | null =
+    apiParams.max_serial_no ?? null;
   let requestsMade = 0;
   const MAX_REQUESTS = 20;
 
-  const allFetchedDropsMap = new Map<number, ApiLightDrop>(); // Used to store unique drops by serial_no
+  const allFetchedDropsMap = new Map<number, ApiDropId>(); // Used to store unique drops by serial_no
   let targetFound = false;
 
   if (!apiParams.wave_id) {
     throw new Error("wave_id is required in apiParams");
   }
+  if (!apiParams.min_serial_no) {
+    throw new Error("min_serial_no is required in apiParams");
+  }
 
   const itemsPerRequest =
-    apiParams.limit && apiParams.limit > 0 && apiParams.limit <= 2000
+    typeof apiParams.limit === "number" &&
+    apiParams.limit > 0 &&
+    apiParams.limit <= DROP_IDS_PAGE_LIMIT
       ? apiParams.limit
-      : 2000;
+      : DROP_IDS_PAGE_LIMIT;
 
   while (requestsMade < MAX_REQUESTS && !targetFound) {
     requestsMade++;
 
     const paramsForCurrentRequest: Record<string, string> = {
       wave_id: apiParams.wave_id,
+      min_serial_no: apiParams.min_serial_no.toString(),
       limit: itemsPerRequest.toString(),
-      max_serial_no: currentMaxSerialForNextCall.toString(),
     };
 
-    const currentBatch = await commonApiFetchWithRetry<ApiLightDrop[]>({
-      endpoint: `light-drops`,
+    if (currentMaxSerialForNextCall !== null) {
+      paramsForCurrentRequest["max_serial_no"] =
+        currentMaxSerialForNextCall.toString();
+    }
+
+    const currentBatch = await commonApiFetchWithRetry<ApiDropId[]>({
+      endpoint: `drop-ids`,
       params: paramsForCurrentRequest,
       signal,
       retryOptions: {
@@ -465,13 +478,14 @@ async function findLightDropBySerialNoWithPagination(
     if (!currentBatch || currentBatch.length === 0) {
       if (!targetFound) {
         // Only throw if target hasn't been found in a previous batch that was processed before an empty one
-        const message = `Target serial number ${targetSerialNo} not found. No (more) items match criteria with wave_id=${apiParams.wave_id} and max_serial_no=${currentMaxSerialForNextCall}.`;
+        const maxSerialLabel = currentMaxSerialForNextCall ?? "newest";
+        const message = `Target serial number ${targetSerialNo} not found. No (more) items match criteria with wave_id=${apiParams.wave_id} and max_serial_no=${maxSerialLabel}.`;
         throw new Error(message);
       }
       break; // Target was found, and now we got an empty batch, so we are done.
     }
 
-    let smallestSerialInCurrentBatch = currentBatch[0]?.serial_no;
+    let smallestSerialInCurrentBatch = currentBatch[0]?.serial_no ?? null;
     for (const drop of currentBatch) {
       if (!allFetchedDropsMap.has(drop.serial_no)) {
         allFetchedDropsMap.set(drop.serial_no, drop);
@@ -479,7 +493,10 @@ async function findLightDropBySerialNoWithPagination(
       if (drop.serial_no === targetSerialNo) {
         targetFound = true;
       }
-      if (drop.serial_no < smallestSerialInCurrentBatch!) {
+      if (
+        smallestSerialInCurrentBatch === null ||
+        drop.serial_no < smallestSerialInCurrentBatch
+      ) {
         smallestSerialInCurrentBatch = drop.serial_no;
       }
     }
@@ -489,27 +506,32 @@ async function findLightDropBySerialNoWithPagination(
       break;
     }
 
+    if (smallestSerialInCurrentBatch === null) {
+      break;
+    }
+
     // Prepare for next iteration or check if we should stop
     if (
       currentBatch.length < itemsPerRequest &&
-      smallestSerialInCurrentBatch! > targetSerialNo
+      smallestSerialInCurrentBatch > targetSerialNo
     ) {
       // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
       // This means target is not in the dataset in the range we are looking.
       break; // Target not found, and no more data in the desired direction.
     }
-    currentMaxSerialForNextCall = smallestSerialInCurrentBatch!;
 
-    // Safety break: if max_serial_no for next call is not less than targetSerialNo after fetching a full page
-    // and target not found, it implies we might be stuck or target is much lower.
-    // This is mostly covered by the previous condition, but acts as a safeguard.
+    // Avoid infinite loops if the API returns the same lowest serial repeatedly.
     if (
-      currentMaxSerialForNextCall >= targetSerialNo &&
-      currentBatch.length === itemsPerRequest &&
-      requestsMade < MAX_REQUESTS
+      currentMaxSerialForNextCall !== null &&
+      smallestSerialInCurrentBatch >= currentMaxSerialForNextCall &&
+      currentBatch.length === itemsPerRequest
     ) {
-      // continue, we expect to find it in subsequent pages
-    } else if (currentMaxSerialForNextCall < targetSerialNo && !targetFound) {
+      break;
+    }
+
+    currentMaxSerialForNextCall = smallestSerialInCurrentBatch;
+
+    if (currentMaxSerialForNextCall < targetSerialNo) {
       // We've passed the target serial number range in pagination without finding it.
       break;
     }
@@ -525,8 +547,6 @@ async function findLightDropBySerialNoWithPagination(
     );
   }
 
-  // Filter accumulated drops: all items with serial_no >= targetSerialNo
-  // and also <= initial apiParams.max_serial_no (the starting point of the fetch)
   const finalDrops = Array.from(allFetchedDropsMap.values()).sort(
     (a, b) => b.serial_no - a.serial_no
   ); // Sort descending by serial_no
