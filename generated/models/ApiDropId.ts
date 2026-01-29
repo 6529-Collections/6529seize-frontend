@@ -13,9 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiArtistsNft {
-    'id': number;
-    'collaboration_with': Array<string>;
+export class ApiDropId {
+    'id': string;
+    'serial_no': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,18 +25,18 @@ export class ApiArtistsNft {
         {
             "name": "id",
             "baseName": "id",
-            "type": "number",
-            "format": "int64"
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "collaboration_with",
-            "baseName": "collaboration_with",
-            "type": "Array<string>",
-            "format": ""
+            "name": "serial_no",
+            "baseName": "serial_no",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiArtistsNft.attributeTypeMap;
+        return ApiDropId.attributeTypeMap;
     }
 
     public constructor() {
