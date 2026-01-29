@@ -46,12 +46,12 @@ export default function UserPageHeaderPfpWrapper({
       <button
         onClick={() => setIsEditPfpOpen(true)}
         disabled={!canEdit}
-        className="tw-group tw-bg-transparent tw-border-none tw-relative tw-p-1 tw-rounded-lg"
+        className="tw-group tw-bg-transparent tw-border-none tw-relative tw-p-0 tw-rounded-2xl"
         aria-label={canEdit ? "Edit profile picture" : "Profile picture"}>
         {children}
 
         {canEdit && (
-          <div className="tw-left-1 tw-right-1 tw-top-[4px] tw-bottom-[4px] edit-profile tw-bg-black/50 tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out tw-rounded-lg">
+          <div className="edit-profile tw-bg-black/50 tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out tw-rounded-2xl">
             <div className="tw-absolute tw-bottom-2 tw-right-2">
               <PencilIcon />
             </div>

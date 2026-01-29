@@ -13,10 +13,10 @@ import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import UserLevel from "../utils/level/UserLevel";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
@@ -24,7 +24,6 @@ import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
-import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -68,6 +67,11 @@ export default function UserPageHeaderClient({
     () => hydratedProfile ?? initialProfile,
     [hydratedProfile, initialProfile]
   );
+
+  const banner1Color =
+    getBannerColorValue(profile?.banner1) ?? defaultBanner1;
+  const banner2Color =
+    getBannerColorValue(profile?.banner2) ?? defaultBanner2;
 
   const mainAddress = useMemo(() => {
     const primaryWallet = profile?.primary_wallet;
@@ -156,65 +160,165 @@ export default function UserPageHeaderClient({
 
   return (
     <div className="tailwind-scope">
-      <section className="tw-pb-6 md:tw-pb-8">
-        <UserPageHeaderBanner
-          profile={profile}
-          defaultBanner1={defaultBanner1}
-          defaultBanner2={defaultBanner2}
-          canEdit={canEdit}
-        />
-        <div className="tw-relative tw-mx-auto tw-px-2 lg:tw-px-6 xl:tw-px-8">
-          <div className="tw-flex tw-flex-col">
-            <div className="tw-flex tw-justify-between">
-              <div className="-tw-mt-16 tw-w-min sm:-tw-mt-24">
-                <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
-                  <UserPageHeaderPfp
+      <section className="tw-relative tw-pb-6 md:tw-pb-8">
+        <div className="tw-relative tw-w-full">
+          <UserPageHeaderBanner
+            profile={profile}
+            defaultBanner1={banner1Color}
+            defaultBanner2={banner2Color}
+            canEdit={canEdit}
+          />
+        </div>
+
+        <div className="tw-relative tw-bg-zinc-950">
+          <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
+            <div className="tw-hidden sm:tw-block">
+              <div className="tw-flex tw-items-end tw-gap-6 tw-pt-2">
+                <div className="tw-relative tw-flex-shrink-0 -tw-mt-18">
+                  <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
+                    <UserPageHeaderPfp
+                      profile={profile}
+                      defaultBanner1={banner1Color}
+                      defaultBanner2={banner2Color}
+                    />
+                  </UserPageHeaderPfpWrapper>
+                </div>
+
+                <div className="tw-flex-1 tw-flex tw-items-start tw-justify-between tw-pb-1 tw-pt-2">
+                  <div>
+                    <UserPageHeaderName
+                      profile={profile}
+                      canEdit={canEdit}
+                      mainAddress={mainAddress}
+                      level={profile.level}
+                      profileEnabledAt={profileEnabledAt}
+                      variant="title"
+                    />
+                    <div className="tw-mt-2">
+                      <UserPageHeaderName
+                        profile={profile}
+                        canEdit={canEdit}
+                        mainAddress={mainAddress}
+                        level={profile.level}
+                        profileEnabledAt={profileEnabledAt}
+                        variant="meta"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="tw-flex tw-items-center tw-gap-3">
+                    {!isMyProfile &&
+                      profile.handle &&
+                      connectedProfile?.handle && (
+                        <UserFollowBtn
+                          handle={profile.handle}
+                          onDirectMessage={
+                            profile.primary_wallet
+                              ? () =>
+                                  handleCreateDirectMessage(
+                                    profile.primary_wallet
+                                  )
+                              : undefined
+                          }
+                          directMessageLoading={directMessageLoading}
+                        />
+                      )}
+                  </div>
+                </div>
+              </div>
+
+              {showAbout && (
+                <div className="tw-mt-4">
+                  <UserPageHeaderAbout
                     profile={profile}
-                    defaultBanner1={profile.banner1 ?? defaultBanner1}
-                    defaultBanner2={profile.banner2 ?? defaultBanner2}
+                    statement={aboutStatement}
+                    canEdit={canEdit}
                   />
-                </UserPageHeaderPfpWrapper>
-              </div>
-              <div className="tw-mt-4">
-                {!isMyProfile && profile.handle && connectedProfile?.handle && (
-                  <UserFollowBtn
-                    handle={profile.handle}
-                    onDirectMessage={
-                      profile.primary_wallet
-                        ? () =>
-                            handleCreateDirectMessage(profile.primary_wallet)
-                        : undefined
-                    }
-                    directMessageLoading={directMessageLoading}
-                  />
-                )}
+                </div>
+              )}
+
+              <div className="tw-mt-4 tw-pb-6 tw-border-b tw-border-white/5">
+                <UserPageHeaderStats
+                  profile={profile}
+                  handleOrWallet={normalizedHandleOrWallet}
+                  followersCount={followersCount}
+                />
               </div>
             </div>
 
-            <UserPageHeaderName
-              profile={profile}
-              canEdit={canEdit}
-              mainAddress={mainAddress}
-            />
+            <div className="sm:tw-hidden">
+              <div className="tw-flex tw-items-end tw-justify-between -tw-mt-14 tw-mb-3">
+                <div className="tw-relative tw-flex-shrink-0">
+                  <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
+                    <UserPageHeaderPfp
+                      profile={profile}
+                      defaultBanner1={banner1Color}
+                      defaultBanner2={banner2Color}
+                    />
+                  </UserPageHeaderPfpWrapper>
+                </div>
 
-            <div className="tw-mt-2">
-              <UserLevel level={profile.level} />
+                <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
+                  {!isMyProfile &&
+                    profile.handle &&
+                    connectedProfile?.handle && (
+                      <UserFollowBtn
+                        handle={profile.handle}
+                        onDirectMessage={
+                          profile.primary_wallet
+                            ? () =>
+                                handleCreateDirectMessage(
+                                  profile.primary_wallet
+                                )
+                            : undefined
+                        }
+                        directMessageLoading={directMessageLoading}
+                      />
+                    )}
+                </div>
+              </div>
+
+              <div className="tw-mb-4">
+                <div className="tw-pt-2">
+                  <UserPageHeaderName
+                    profile={profile}
+                    canEdit={canEdit}
+                    mainAddress={mainAddress}
+                    level={profile.level}
+                    profileEnabledAt={profileEnabledAt}
+                    variant="title"
+                  />
+                  <div className="tw-mt-2">
+                    <UserPageHeaderName
+                      profile={profile}
+                      canEdit={canEdit}
+                      mainAddress={mainAddress}
+                      level={profile.level}
+                      profileEnabledAt={profileEnabledAt}
+                      variant="meta"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {showAbout && (
+                <div className="tw-mb-4">
+                  <UserPageHeaderAbout
+                    profile={profile}
+                    statement={aboutStatement}
+                    canEdit={canEdit}
+                  />
+                </div>
+              )}
+
+              <div className="tw-flex tw-items-center tw-gap-4 tw-pb-6 tw-border-b tw-border-white/5 tw-overflow-x-auto">
+                <UserPageHeaderStats
+                  profile={profile}
+                  handleOrWallet={normalizedHandleOrWallet}
+                  followersCount={followersCount}
+                />
+              </div>
             </div>
-            {showAbout && (
-              <UserPageHeaderAbout
-                profile={profile}
-                statement={aboutStatement}
-                canEdit={canEdit}
-              />
-            )}
-            <UserPageHeaderStats
-              profile={profile}
-              handleOrWallet={normalizedHandleOrWallet}
-              followersCount={followersCount}
-            />
-            <UserPageHeaderProfileEnabledAt
-              profileEnabledAt={profileEnabledAt}
-            />
           </div>
         </div>
       </section>

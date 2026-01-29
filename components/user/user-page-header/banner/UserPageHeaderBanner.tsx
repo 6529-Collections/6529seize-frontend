@@ -5,6 +5,11 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getBannerColorValue,
+  getBannerImageUrl,
+} from "@/helpers/profile-banner.helpers";
 import UserPageHeaderEditBanner from "./UserPageHeaderEditBanner";
 
 export default function UserPageHeaderBanner({
@@ -19,28 +24,50 @@ export default function UserPageHeaderBanner({
   readonly canEdit: boolean;
 }) {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+  const bannerImageUrl = getBannerImageUrl(profile?.banner1);
+  const scaledBannerUrl = bannerImageUrl
+    ? getScaledImageUri(bannerImageUrl, ImageScale.AUTOx450)
+    : null;
+  const banner1Color =
+    getBannerColorValue(profile?.banner1) ?? defaultBanner1;
+  const banner2Color =
+    getBannerColorValue(profile?.banner2) ?? defaultBanner2;
 
   return (
-    <div
-      className="tw-h-24 sm:tw-h-36 tw-group tw-relative tw-overflow-hidden"
-      style={{
-        background: `linear-gradient(45deg, ${
-          profile?.banner1 ?? defaultBanner1
-        } 0%, ${profile?.banner2 ?? defaultBanner2} 100%)`,
-      }}>
+    <div className="tw-group tw-relative tw-z-10 tw-h-[11.25rem] tw-w-full tw-overflow-hidden sm:tw-h-[14.5625rem]">
+      {scaledBannerUrl ? (
+        <div
+          className="tw-absolute tw-inset-0"
+          style={{
+            backgroundImage: `url(${scaledBannerUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+      ) : (
+        <div
+          className="tw-absolute tw-inset-0"
+          style={{
+            background: `linear-gradient(45deg, ${banner1Color} 0%, ${banner2Color} 100%)`,
+          }}
+        />
+      )}
+      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-ring-1 tw-ring-inset tw-ring-white/5" />
+      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-bg-[url('https://grainy-gradients.vercel.app/noise.svg')] tw-opacity-20 tw-mix-blend-overlay" />
+      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-bg-gradient-to-t tw-from-[#09090b] tw-to-transparent tw-opacity-90" />
+
       {canEdit && (
-        <div className="">
-          <button
-            onClick={() => setIsEditOpen(true)}
-            className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-p-0"
-            aria-label="Edit banner image">
-            <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
-              <div className="tw-absolute tw-bottom-4 tw-right-4">
-                <PencilIcon />
-              </div>
+        <button
+          onClick={() => setIsEditOpen(true)}
+          className="tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0"
+          aria-label="Edit banner"
+        >
+          <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
+            <div className="tw-absolute tw-bottom-4 tw-right-4">
+              <PencilIcon />
             </div>
-          </button>
-        </div>
+          </div>
+        </button>
       )}
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isEditOpen && (
@@ -48,7 +75,8 @@ export default function UserPageHeaderBanner({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}>
+            onClicked={(e) => e.stopPropagation()}
+          >
             <UserPageHeaderEditBanner
               profile={profile}
               defaultBanner1={defaultBanner1}
