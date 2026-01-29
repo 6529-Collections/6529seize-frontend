@@ -20,7 +20,10 @@ export interface ExtendedDrop extends ApiDrop {
   stableHash: string;
 }
 
-interface ExtendedLightDrop extends ApiLightDrop {
+export type LightDropSummary = Pick<ApiLightDrop, "id" | "serial_no"> &
+  Partial<Omit<ApiLightDrop, "id" | "serial_no">>;
+
+interface ExtendedLightDrop extends LightDropSummary {
   type: DropSize.LIGHT;
   waveId: string;
   stableKey: string;

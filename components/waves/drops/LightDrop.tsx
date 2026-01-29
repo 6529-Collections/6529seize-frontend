@@ -1,27 +1,27 @@
 import type { FC } from "react";
-import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { LightDropSummary } from "@/helpers/waves/drop.helpers";
 
 interface LightDropProps {
-  readonly drop: ApiLightDrop;
+  readonly drop: LightDropSummary;
 }
 
 const LightDrop: FC<LightDropProps> = () => {
   return (
-    <div className="tw-flex tw-flex-col tw-w-full tw-p-3 tw-gap-2 tw-border-b tw-border-iron-800">
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-border-b tw-border-iron-800 tw-p-3">
       <div className="tw-flex tw-items-center tw-gap-2">
-        <div className="tw-w-8 tw-h-8 tw-rounded-full tw-bg-iron-800" />
+        <div className="tw-h-8 tw-w-8 tw-rounded-full tw-bg-iron-800" />
         <div className="tw-flex tw-flex-col tw-gap-1">
-          <div className="tw-w-24 tw-h-3 tw-rounded tw-bg-iron-800" />
-          <div className="tw-w-16 tw-h-2 tw-rounded tw-bg-iron-800" />
+          <div className="tw-h-3 tw-w-24 tw-rounded tw-bg-iron-800" />
+          <div className="tw-h-2 tw-w-16 tw-rounded tw-bg-iron-800" />
         </div>
       </div>
       <div className="tw-flex tw-flex-col tw-gap-1">
-        <div className="tw-w-full tw-h-3 tw-rounded tw-bg-iron-800" />
-        <div className="tw-w-3/4 tw-h-3 tw-rounded tw-bg-iron-800" />
+        <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800" />
+        <div className="tw-h-3 tw-w-3/4 tw-rounded tw-bg-iron-800" />
       </div>
-      <div className="tw-flex tw-justify-between tw-mt-1">
-        <div className="tw-w-20 tw-h-2 tw-rounded tw-bg-iron-800" />
-        <div className="tw-w-12 tw-h-2 tw-rounded tw-bg-iron-800" />
+      <div className="tw-mt-1 tw-flex tw-justify-between">
+        <div className="tw-h-2 tw-w-20 tw-rounded tw-bg-iron-800" />
+        <div className="tw-h-2 tw-w-12 tw-rounded tw-bg-iron-800" />
       </div>
     </div>
   );

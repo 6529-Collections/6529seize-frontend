@@ -15,7 +15,8 @@
     "postbuild": "next-sitemap --config next-sitemap.config.ts",
     "start": "next start -p 3001",
     "test": "cross-env NODE_ENV=test jest --silent --verbose=false --coverageReporters=none",
-    "test-json": "cross-env NODE_ENV=test jest --silent --json --outputFile=test-results/jest-results.json --forceExit ; npm run test-extract-failed-names",
+    "test:no-coverage": "cross-env NODE_ENV=test jest --silent --verbose=false --coverage=false",
+    "test-json": "cross-env NODE_ENV=test jest --silent --json --outputFile=test-results/jest-results.json --coverage=false --forceExit ; npm run test-extract-failed-names",
     "test-json-changed": "cross-env NODE_ENV=test jest --silent --json --outputFile=test-results/jest-results.json --changedSince=main --coverage=false --forceExit ; npm run test-extract-failed-names",
     "test-extract-failed-names": "node test-results/list-failed-tests.cjs",
     "test:e2e": "playwright test",
@@ -168,6 +169,7 @@
     "autoprefixer": "^10.4.22",
     "babel-jest": "^29.7.0",
     "babel-plugin-react-compiler": "^1.0.0",
+    "baseline-browser-mapping": "^2.9.19",
     "depcheck": "^1.4.7",
     "dotenv": "^16.0.3",
     "esbuild": "^0.25.10",
@@ -203,6 +205,7 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
+    "yaml": "^2.4.2",
     "zod": "^3.25.76"
   },
   "overrides": {
