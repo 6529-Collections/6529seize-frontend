@@ -199,7 +199,7 @@ export default function UserPageHeaderEditPfp({
       <button
         type="button"
         aria-label="Close edit profile picture modal"
-        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] tw-cursor-pointer tw-border-none tw-p-0"
+        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-sm tw-cursor-pointer tw-border-none tw-p-0"
         onClick={onClose}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">

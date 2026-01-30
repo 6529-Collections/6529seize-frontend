@@ -17,8 +17,8 @@ const SIZE_CLASSES: Record<
     rate: "tw-text-xs",
   },
   [UserStatsRowSize.MEDIUM]: {
-    text: "tw-text-base",
-    rate: "tw-text-sm",
+    text: "tw-text-md",
+    rate: "tw-text-xs",
   },
 };
 
@@ -54,93 +54,83 @@ export default function UserStatsRow({
 
   return (
     <div className={`@container ${className}`}>
-      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-1 sm:tw-gap-y-0.5 tw-gap-x-4 lg:tw-gap-x-6">
         <Link
           href={`/${routeHandle}/collected`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
             {formatStatFloor(tdh)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
+          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
             TDH
           </span>
           {tdh_rate > 0 && (
             <>
               {" "}
-              <span className={`${classes.rate} tw-font-medium tw-text-iron-400`}>
-                +
-                <span className="tw-text-iron-50">
-                  {formatStatFloor(tdh_rate)}
-                </span>
+              <span
+                className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
+              >
+                +{formatStatFloor(tdh_rate)}
               </span>
             </>
           )}
         </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
 
         <Link
           href={`/${routeHandle}/xtdh`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
             {formatStatFloor(xtdh)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
+          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
             xTDH
           </span>
           {xtdh_rate > 0 && (
             <>
               {" "}
-              <span className={`${classes.rate} tw-font-medium tw-text-iron-400`}>
-                +
-                <span className="tw-text-iron-50">
-                  {formatStatFloor(xtdh_rate)}
-                </span>
+              <span
+                className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
+              >
+                +{formatStatFloor(xtdh_rate)}
               </span>
             </>
           )}
         </Link>
 
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
-
         <Link
           href={`/${routeHandle}/identity`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
             {formatStatFloor(cic)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
+          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
             NIC
           </span>
         </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
 
         <Link
           href={`/${routeHandle}/rep`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
             {formatStatFloor(rep)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
+          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
             Rep
           </span>
         </Link>
-
-        <div className="tw-text-iron-600 tw-mx-3">|</div>
 
         <Link
           href={`/${routeHandle}/followers`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-50`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
             {formatNumberWithCommas(count)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-400`}>
+          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
             {followerLabel}
           </span>
         </Link>

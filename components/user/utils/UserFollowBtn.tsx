@@ -186,7 +186,7 @@ export default function UserFollowBtn({
         className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
           following
             ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-            : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
+            : "tw-bg-iron-200 tw-text-iron-950 tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300"
         } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
       >
         {mutating || isFetching ? (

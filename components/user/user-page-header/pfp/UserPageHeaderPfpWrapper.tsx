@@ -42,23 +42,25 @@ export default function UserPageHeaderPfpWrapper({
   }, [isEditPfpOpen]);
 
   return (
-    <div>
+    <div className="tw-inline-flex tw-w-fit">
       <button
         onClick={() => setIsEditPfpOpen(true)}
         disabled={!canEdit}
-        className="tw-group tw-bg-transparent tw-border-none tw-relative tw-p-1 tw-rounded-lg"
-        aria-label={canEdit ? "Edit profile picture" : "Profile picture"}>
+        className="tw-group tw-relative tw-inline-flex tw-w-fit tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0"
+        aria-label={canEdit ? "Edit profile picture" : "Profile picture"}
+      >
         {children}
 
         {canEdit && (
-          <div className="tw-left-1 tw-right-1 tw-top-[4px] tw-bottom-[4px] edit-profile tw-bg-black/50 tw-absolute tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out tw-rounded-lg">
+          <div className="edit-profile tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-bg-black tw-bg-black/50 tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out">
             <div className="tw-absolute tw-bottom-2 tw-right-2">
               <PencilIcon />
             </div>
           </div>
         )}
       </button>
-      {isMounted && isEditPfpOpen &&
+      {isMounted &&
+        isEditPfpOpen &&
         createPortal(
           <UserPageHeaderEditPfp
             profile={profile}
