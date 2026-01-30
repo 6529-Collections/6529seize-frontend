@@ -5,6 +5,9 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import UserSettingsBackground from "@/components/user/settings/UserSettingsBackground";
 import UserSettingsBannerImageInput from "@/components/user/settings/UserSettingsBannerImageInput";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -20,6 +23,10 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 
 type BannerEditMode = "gradient" | "image";
+const bannerTabs: CommonSelectItem<BannerEditMode>[] = [
+  { key: "gradient", label: "Gradient", value: "gradient" },
+  { key: "image", label: "Image", value: "image" },
+];
 
 export default function UserPageHeaderEditBanner({
   profile,
@@ -147,7 +154,10 @@ export default function UserPageHeaderEditBanner({
       if (bannerFile) {
         try {
           setIsUploading(true);
-          const uploaded = await multiPartUpload({ file: bannerFile, path: "drop" });
+          const uploaded = await multiPartUpload({
+            file: bannerFile,
+            path: "drop",
+          });
           banner1Value = uploaded.url;
         } catch (error) {
           const message =
@@ -193,57 +203,40 @@ export default function UserPageHeaderEditBanner({
       open
       aria-modal="true"
       aria-labelledby={dialogTitleId}
-      className="tailwind-scope tw-m-0 tw-p-0 tw-border-0 tw-bg-transparent tw-w-screen tw-h-[100dvh] tw-cursor-default"
-      style={{ inset: 0, position: "fixed", zIndex: 1100 }}>
+      className="tailwind-scope tw-m-0 tw-h-[100dvh] tw-w-screen tw-cursor-default tw-border-0 tw-bg-transparent tw-p-0"
+      style={{ inset: 0, position: "fixed", zIndex: 1100 }}
+    >
       <button
         type="button"
         aria-label="Close edit banner modal"
-        className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-sm tw-cursor-pointer tw-border-none tw-p-0"
+        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-overflow-y-auto tw-items-center tw-justify-center tw-p-2 lg:tw-p-4">
+      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
         <div
           ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 tw-p-6 lg:tw-p-8 sm:tw-max-w-3xl md:tw-max-w-2xl">
+          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
+        >
           <h2 id={dialogTitleId} className="tw-sr-only">
             Edit Banner
           </h2>
           <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
             <div>
               <p className="tw-mb-1 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-                Edit banner
+                Edit profile cover
               </p>
               <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-                Choose a gradient or upload an image for your profile banner.
+                Choose a gradient or upload an image for your profile cover.
               </p>
             </div>
 
-            <div className="tw-inline-flex tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-gap-1">
-              <button
-                type="button"
-                onClick={() => setEditMode("gradient")}
-                className={`tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out ${
-                  editMode === "gradient"
-                    ? "tw-bg-iron-700 tw-text-white"
-                    : "tw-text-iron-400 hover:tw-text-iron-200"
-                }`}
-                aria-pressed={editMode === "gradient"}
-              >
-                Gradient
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditMode("image")}
-                className={`tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out ${
-                  editMode === "image"
-                    ? "tw-bg-iron-700 tw-text-white"
-                    : "tw-text-iron-400 hover:tw-text-iron-200"
-                }`}
-                aria-pressed={editMode === "image"}
-              >
-                Image
-              </button>
-            </div>
+            <CommonTabs<BannerEditMode>
+              items={bannerTabs}
+              activeItem={editMode}
+              setSelected={setEditMode}
+              filterLabel="Banner editor mode"
+              fill={false}
+            />
 
             {editMode === "gradient" ? (
               <UserSettingsBackground
@@ -259,7 +252,18 @@ export default function UserPageHeaderEditBanner({
               />
             )}
 
-            <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
+            <div className="tw-pt-6">
+              <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
+                <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
+                <SecondaryButton
+                  disabled={isSaving}
+                  onClicked={onClose}
+                  className="tw-mt-3 tw-w-full sm:tw-mt-0 sm:tw-w-auto"
+                >
+                  Cancel
+                </SecondaryButton>
+              </div>
+            </div>
           </form>
         </div>
       </div>

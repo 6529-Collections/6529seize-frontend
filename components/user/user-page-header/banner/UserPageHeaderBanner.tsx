@@ -24,17 +24,15 @@ export default function UserPageHeaderBanner({
   readonly canEdit: boolean;
 }) {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
-  const bannerImageUrl = getBannerImageUrl(profile?.banner1);
+  const bannerImageUrl = getBannerImageUrl(profile.banner1);
   const scaledBannerUrl = bannerImageUrl
     ? getScaledImageUri(bannerImageUrl, ImageScale.AUTOx450)
     : null;
-  const banner1Color =
-    getBannerColorValue(profile?.banner1) ?? defaultBanner1;
-  const banner2Color =
-    getBannerColorValue(profile?.banner2) ?? defaultBanner2;
+  const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
+  const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-[11.25rem] tw-w-full tw-overflow-hidden sm:tw-h-[14.5625rem]">
+    <div className="tw-group tw-relative tw-z-10 tw-h-32 tw-w-full tw-overflow-hidden sm:tw-h-48">
       {scaledBannerUrl ? (
         <div
           className="tw-absolute tw-inset-0"
@@ -52,9 +50,7 @@ export default function UserPageHeaderBanner({
           }}
         />
       )}
-      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-ring-1 tw-ring-inset tw-ring-white/5" />
-      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-bg-[url('https://grainy-gradients.vercel.app/noise.svg')] tw-opacity-20 tw-mix-blend-overlay" />
-      <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-bg-gradient-to-t tw-from-[#09090b] tw-to-transparent tw-opacity-90" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5" />
 
       {canEdit && (
         <button

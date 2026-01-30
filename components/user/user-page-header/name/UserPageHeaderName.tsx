@@ -48,14 +48,14 @@ export default function UserPageHeaderName({
   return (
     <div className={showTitle && showMeta ? "tw-space-y-2" : ""}>
       {showTitle && (
-        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
-            <p className="tw-break-all tw-text-left tw-mb-0 tw-text-[1.75rem] md:tw-text-[2rem] tw-font-semibold tw-text-white tw-tracking-tight tw-leading-none">
+            <p className="tw-mb-0 tw-break-all tw-text-left tw-text-[1.75rem] tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-[2rem]">
               {displayName}
             </p>
           </UserPageHeaderNameWrapper>
           {profile?.handle && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-self-center tw-h-5 tw-w-5 md:tw-h-6 md:tw-w-6">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center md:tw-h-6 md:tw-w-6">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
           )}
@@ -63,10 +63,10 @@ export default function UserPageHeaderName({
       )}
 
       {showMeta && (
-        <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-2 tw-gap-y-1 sm:tw-gap-x-3">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           {profile?.classification && (
             <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-              <div className="tw-block tw-text-zinc-400 hover:tw-text-white tw-font-medium tw-text-sm tw-leading-4 tw-transition tw-duration-300 tw-ease-out">
+              <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-zinc-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
                 {CLASSIFICATIONS[profile.classification].title}
               </div>
             </UserPageClassificationWrapper>
@@ -77,9 +77,11 @@ export default function UserPageHeaderName({
           <UserLevel level={level} size="xs" />
           {profileEnabledLabel && (
             <>
-              <span className="tw-text-zinc-600 sm:tw-text-zinc-700">&bull;</span>
+              <span className="tw-text-zinc-600 sm:tw-text-zinc-700">
+                &bull;
+              </span>
               <p
-                className="tw-mb-0 tw-text-zinc-500 tw-text-sm tw-font-medium"
+                className="tw-mb-0 tw-text-sm tw-font-medium tw-text-zinc-500"
                 suppressHydrationWarning
               >
                 Profile enabled: {profileEnabledLabel}

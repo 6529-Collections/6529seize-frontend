@@ -1,6 +1,6 @@
 const BANNER_IMAGE_PREFIXES = ["http://", "https://", "ipfs://"];
 
-export const isBannerImageUrl = (value?: string | null): value is string => {
+const isBannerImageUrl = (value?: string | null): value is string => {
   if (!value) {
     return false;
   }
@@ -13,9 +13,7 @@ export const isBannerImageUrl = (value?: string | null): value is string => {
 export const getBannerImageUrl = (value?: string | null): string | null =>
   isBannerImageUrl(value) ? value : null;
 
-export const getBannerColorValue = (
-  value?: string | null
-): string | null => {
+export const getBannerColorValue = (value?: string | null): string | null => {
   if (!value) {
     return null;
   }

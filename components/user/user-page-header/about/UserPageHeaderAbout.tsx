@@ -47,7 +47,11 @@ export default function UserPageHeaderAbout({
     <div>
       {view === AboutStatementView.STATEMENT && (
         <div className="tw-max-w-3xl">
-          <div className="tw-flex tw-items-start tw-gap-2">
+          <div
+            className={`tw-inline-flex tw-items-start tw-gap-2${
+              canEdit ? "tw-group" : ""
+            }`}
+          >
             {canEdit ? (
               <button
                 type="button"
@@ -55,7 +59,7 @@ export default function UserPageHeaderAbout({
                 aria-label={
                   statement ? "Edit About statement" : "Add About statement"
                 }
-                className="tw-flex-1 tw-text-left tw-bg-transparent tw-border-none tw-p-0"
+                className="tw-flex-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
               >
                 <UserPageHeaderAboutStatement statement={statement} />
               </button>
@@ -69,7 +73,8 @@ export default function UserPageHeaderAbout({
                 aria-label={
                   statement ? "Edit About statement" : "Add About statement"
                 }
-                className="tw-shrink-0 tw-bg-transparent tw-border-none tw-p-0 tw-text-iron-400 hover:tw-text-iron-200 tw-transition tw-duration-200">
+                className="tw-pointer-events-none tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 group-focus-within:tw-pointer-events-auto group-focus-within:tw-opacity-100 group-hover:tw-pointer-events-auto group-hover:tw-opacity-100 hover:tw-text-iron-200"
+              >
                 <PencilIcon />
               </button>
             )}
