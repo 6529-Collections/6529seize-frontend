@@ -23,7 +23,7 @@ export default function UserLevel({
 
   const getSizeClasses = () => {
     if (size === "sm") {
-      return "tw-text-sm tw-font-semibold tw-ring-2 tw-py-1";
+      return "tw-text-sm tw-font-semibold tw-ring-1 tw-py-1";
     }
     if (size === "xs") {
       return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-[0.1875rem]";
@@ -31,7 +31,7 @@ export default function UserLevel({
     if (size === "xxs") {
       return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-0";
     }
-    return "tw-text-base tw-font-semibold tw-ring-2 tw-py-1";
+    return "tw-text-base tw-font-semibold tw-ring-1 tw-py-1";
   };
 
   const classes = `${getColorClasses()} ${getSizeClasses()}`;

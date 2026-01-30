@@ -13,10 +13,10 @@ import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import UserLevel from "../utils/level/UserLevel";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
@@ -24,7 +24,6 @@ import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
-import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -69,13 +68,16 @@ export default function UserPageHeaderClient({
     [hydratedProfile, initialProfile]
   );
 
+  const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
+  const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
+
   const mainAddress = useMemo(() => {
-    const primaryWallet = profile?.primary_wallet;
+    const primaryWallet = profile.primary_wallet;
     if (primaryWallet) {
       return primaryWallet.toLowerCase();
     }
     return fallbackMainAddress.toLowerCase();
-  }, [profile?.primary_wallet, fallbackMainAddress]);
+  }, [profile.primary_wallet, fallbackMainAddress]);
 
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
@@ -156,27 +158,52 @@ export default function UserPageHeaderClient({
 
   return (
     <div className="tailwind-scope">
-      <section className="tw-pb-6 md:tw-pb-8">
-        <UserPageHeaderBanner
-          profile={profile}
-          defaultBanner1={defaultBanner1}
-          defaultBanner2={defaultBanner2}
-          canEdit={canEdit}
-        />
-        <div className="tw-relative tw-mx-auto tw-px-2 lg:tw-px-6 xl:tw-px-8">
-          <div className="tw-flex tw-flex-col">
-            <div className="tw-flex tw-justify-between">
-              <div className="-tw-mt-16 tw-w-min sm:-tw-mt-24">
+      <section className="tw-relative tw-pb-6 md:tw-pb-8">
+        <div className="tw-relative tw-w-full">
+          <UserPageHeaderBanner
+            profile={profile}
+            defaultBanner1={banner1Color}
+            defaultBanner2={banner2Color}
+            canEdit={canEdit}
+          />
+        </div>
+
+        <div className="tw-relative tw-bg-zinc-950">
+          <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
+            <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-x-4 md:tw-pt-2">
+              <div className="tw-relative tw-order-1 -tw-mt-[3.125rem] tw-flex-shrink-0 sm:-tw-mt-[4.75rem]">
                 <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
                   <UserPageHeaderPfp
                     profile={profile}
-                    defaultBanner1={profile.banner1 ?? defaultBanner1}
-                    defaultBanner2={profile.banner2 ?? defaultBanner2}
+                    defaultBanner1={banner1Color}
+                    defaultBanner2={banner2Color}
                   />
                 </UserPageHeaderPfpWrapper>
               </div>
-              <div className="tw-mt-4">
-                {!isMyProfile && profile.handle && connectedProfile?.handle && (
+
+              <div className="tw-order-3 tw-w-full tw-pb-1 tw-pt-2 sm:tw-order-2 sm:tw-w-auto sm:tw-flex-1">
+                <UserPageHeaderName
+                  profile={profile}
+                  canEdit={canEdit}
+                  mainAddress={mainAddress}
+                  level={profile.level}
+                  profileEnabledAt={profileEnabledAt}
+                  variant="title"
+                />
+                <div className="tw-mt-2">
+                  <UserPageHeaderName
+                    profile={profile}
+                    canEdit={canEdit}
+                    mainAddress={mainAddress}
+                    level={profile.level}
+                    profileEnabledAt={profileEnabledAt}
+                    variant="meta"
+                  />
+                </div>
+              </div>
+
+              <div className="tw-order-2 tw-mb-2 tw-flex tw-items-center tw-gap-3 sm:tw-order-3 sm:tw-mb-0">
+                {!isMyProfile && profile.handle && connectedProfile?.handle ? (
                   <UserFollowBtn
                     handle={profile.handle}
                     onDirectMessage={
@@ -187,34 +214,27 @@ export default function UserPageHeaderClient({
                     }
                     directMessageLoading={directMessageLoading}
                   />
-                )}
+                ) : null}
               </div>
             </div>
 
-            <UserPageHeaderName
-              profile={profile}
-              canEdit={canEdit}
-              mainAddress={mainAddress}
-            />
+            {showAbout ? (
+              <div className="tw-mt-4">
+                <UserPageHeaderAbout
+                  profile={profile}
+                  statement={aboutStatement}
+                  canEdit={canEdit}
+                />
+              </div>
+            ) : null}
 
-            <div className="tw-mt-2">
-              <UserLevel level={profile.level} />
-            </div>
-            {showAbout && (
-              <UserPageHeaderAbout
+            <div className="tw-flex tw-items-center tw-gap-4 tw-overflow-x-auto tw-border-b tw-border-white/5 tw-pb-6 sm:tw-mt-4 sm:tw-overflow-visible sm:tw-border-b-0 sm:tw-pb-0">
+              <UserPageHeaderStats
                 profile={profile}
-                statement={aboutStatement}
-                canEdit={canEdit}
+                handleOrWallet={normalizedHandleOrWallet}
+                followersCount={followersCount}
               />
-            )}
-            <UserPageHeaderStats
-              profile={profile}
-              handleOrWallet={normalizedHandleOrWallet}
-              followersCount={followersCount}
-            />
-            <UserPageHeaderProfileEnabledAt
-              profileEnabledAt={profileEnabledAt}
-            />
+            </div>
           </div>
         </div>
       </section>

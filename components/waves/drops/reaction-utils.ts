@@ -1,6 +1,7 @@
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 
 type ReactionEntry = {
   reaction: string;
@@ -87,8 +88,8 @@ export const toProfileMin = (
     id: profile.id ?? profile.primary_wallet,
     handle: profile.handle ?? null,
     pfp: profile.pfp ?? null,
-    banner1_color: profile.banner1 ?? null,
-    banner2_color: profile.banner2 ?? null,
+    banner1_color: getBannerColorValue(profile.banner1),
+    banner2_color: getBannerColorValue(profile.banner2),
     cic: profile.cic,
     rep: profile.rep,
     tdh: profile.tdh,

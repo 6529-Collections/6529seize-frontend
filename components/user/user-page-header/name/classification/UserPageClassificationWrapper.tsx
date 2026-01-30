@@ -19,7 +19,7 @@ export default function UserPageClassificationWrapper({
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
 
   return (
-    <div className="md:-tw-mt-0.5">
+    <div className="tw-inline-flex">
       <button
         onClick={() => setIsEditOpen(true)}
         disabled={!canEdit}

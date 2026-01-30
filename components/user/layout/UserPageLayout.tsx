@@ -29,7 +29,7 @@ export default function UserPageLayout({
           handleOrWallet={normalizedHandleOrWallet}
           fallbackMainAddress={mainAddress}
         />
-        <div className="tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
+        <div className="tw-px-4 sm:tw-px-6 md:tw-px-8 tw-mx-auto">
           <UserPageTabs />
           <div className="tw-mt-6 lg:tw-mt-8">{children}</div>
         </div>
