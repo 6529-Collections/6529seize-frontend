@@ -6,7 +6,16 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { ReactNode } from "react";
 import CollapsibleDropPreview from "./CollapsibleDropPreview";
+
+function wrapDropContentInCollapsible(content: ReactNode) {
+  return (
+    <CollapsibleDropPreview>
+      <div className="tw-w-full tw-min-w-0">{content}</div>
+    </CollapsibleDropPreview>
+  );
+}
 
 interface NotificationDropProps {
   readonly drop: ApiDrop;
@@ -44,11 +53,7 @@ export default function NotificationDrop({
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
       onDropContentClick={onDropContentClick}
-      wrapContentOnly={(content) => (
-        <CollapsibleDropPreview>
-          <div className="tw-w-full tw-min-w-0">{content}</div>
-        </CollapsibleDropPreview>
-      )}
+      wrapContentOnly={wrapDropContentInCollapsible}
     />
   );
 }

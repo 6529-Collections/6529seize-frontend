@@ -230,16 +230,7 @@ export default function CollapsibleDropPreview({
         </div>
       )}
 
-      {!hasMeasured ? (
-        <div
-          ref={measureRef}
-          className="tw-pointer-events-none tw-w-full tw-min-w-0 tw-opacity-0"
-          style={{ minHeight: COLLAPSED_TOTAL_PX }}
-          aria-hidden
-        >
-          {children}
-        </div>
-      ) : (
+      {hasMeasured ? (
         <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-flex-nowrap">
           <div
             className="tw-relative tw-z-0 tw-flex-shrink-0 tw-overflow-hidden"
@@ -274,7 +265,7 @@ export default function CollapsibleDropPreview({
               className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-4 tw-w-full"
               style={{
                 background:
-                  "linear-gradient(to bottom, rgba(10,10,10,0.35) 0%, transparent 100%)",
+                  "linear-gradient(to bottom, rgba(19, 19, 22,0.35) 0%, transparent 100%)",
               }}
               aria-hidden
             />
@@ -301,7 +292,7 @@ export default function CollapsibleDropPreview({
               style={{
                 height: EXPAND_FADE_PX,
                 background:
-                  "linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.3) 30%, rgb(10 10 10) 100%)",
+                  "linear-gradient(to bottom, transparent 0%, rgba(19, 19, 22,0.3) 30%, rgb(19 19 22) 100%)",
               }}
               aria-hidden
             />
@@ -310,7 +301,7 @@ export default function CollapsibleDropPreview({
               style={{
                 top: EXPAND_FADE_PX,
                 height: EXPAND_SOLID_PX,
-                background: "rgb(10 10 10)",
+                background: "rgb(19 19 22)",
               }}
               aria-hidden
             />
@@ -319,7 +310,7 @@ export default function CollapsibleDropPreview({
               style={{
                 height: EXPAND_FADE_PX,
                 background:
-                  "linear-gradient(to top, transparent 0%, rgba(10,10,10,0.3) 30%, rgb(10 10 10) 100%)",
+                  "linear-gradient(to top, transparent 0%, rgba(19, 19, 22,0.3) 30%, rgb(19 19 22) 100%)",
               }}
               aria-hidden
             />
@@ -351,6 +342,15 @@ export default function CollapsibleDropPreview({
               </span>
             </button>
           </div>
+        </div>
+      ) : (
+        <div
+          ref={measureRef}
+          className="tw-pointer-events-none tw-w-full tw-min-w-0 tw-opacity-0"
+          style={{ minHeight: COLLAPSED_TOTAL_PX }}
+          aria-hidden
+        >
+          {children}
         </div>
       )}
     </div>
