@@ -12,8 +12,8 @@ import useHasTouchInput from "@/hooks/useHasTouchInput";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { createBreakpoint } from "react-use";
 import { useDispatch, useSelector } from "react-redux";
+import { createBreakpoint } from "react-use";
 import type { DropInteractionParams } from "./Drop";
 import { DropLocation } from "./Drop";
 import type { BoostAnimationState } from "./DropBoostAnimation";
@@ -135,6 +135,7 @@ interface WaveDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly wrapContentOnly?: (content: React.ReactNode) => React.ReactNode;
 }
 
 const WaveDrop = ({
@@ -151,6 +152,7 @@ const WaveDrop = ({
   onQuoteClick,
   onDropContentClick,
   showReplyAndQuote,
+  wrapContentOnly,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -365,6 +367,94 @@ const WaveDrop = ({
     isDrop
   );
 
+  const contentBlock = (
+    <>
+      {drop.reply_to &&
+        (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
+          drop.author.handle !== previousDrop.author.handle) &&
+        drop.reply_to.drop_id !== dropViewDropId && (
+          <WaveDropReply
+            onReplyClick={onReplyClick}
+            dropId={drop.reply_to.drop_id}
+            dropPartId={drop.reply_to.drop_part_id}
+            maybeDrop={
+              drop.reply_to.drop
+                ? { ...drop.reply_to.drop, wave: drop.wave }
+                : null
+            }
+          />
+        )}
+      <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
+        {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
+        <div
+          className="tw-flex tw-w-full tw-flex-col tw-gap-y-1"
+          style={{
+            maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
+          }}
+        >
+          {showAuthorInfo && (
+            <WaveDropHeader
+              drop={drop}
+              showWaveInfo={showWaveInfo}
+              isStorm={isStorm}
+              currentPartIndex={activePartIndex}
+              partsCount={drop.parts.length}
+              showActionsButton={hasTouch && showReplyAndQuote && !isEditing}
+              onOpenActions={handleOpenTouchActions}
+            />
+          )}
+          <div
+            className={`tw-w-full ${
+              shouldGroupWithPreviousDrop && !isProfileView
+                ? "tw-pl-[3.25rem]"
+                : ""
+            }`}
+          >
+            <WaveDropContent
+              drop={drop}
+              activePartIndex={activePartIndex}
+              setActivePartIndex={setActivePartIndex}
+              onLongPress={handleLongPress}
+              onDropContentClick={onDropContentClick}
+              onQuoteClick={onQuoteClick}
+              setLongPressTriggered={setLongPressTriggered}
+              isEditing={isEditing}
+              isSaving={dropUpdateMutation.isPending}
+              onSave={handleEditSave}
+              onCancel={handleEditCancel}
+              hasTouch={allowLongPress}
+            />
+          </div>
+        </div>
+      </div>
+      {!isMobile && showReplyAndQuote && !isEditing && (
+        <WaveDropActions
+          drop={drop}
+          activePartIndex={activePartIndex}
+          onReply={handleOnReply}
+          onQuote={handleOnQuote}
+          onEdit={handleOnEdit}
+        />
+      )}
+    </>
+  );
+
+  const reactionsRow = (
+    <div
+      className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${
+        compact
+          ? "tw-ml-11 tw-w-[calc(100%-2.5rem)]"
+          : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
+      }`}
+    >
+      {drop.metadata.length > 0 && (
+        <WaveDropMetadata metadata={drop.metadata} />
+      )}
+      {!!drop.raters_count && <WaveDropRatings drop={drop} />}
+      <WaveDropReactions drop={drop} />
+    </div>
+  );
+
   return (
     <div
       className={`${
@@ -380,86 +470,8 @@ const WaveDrop = ({
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
       >
-        {drop.reply_to &&
-          (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
-            drop.author.handle !== previousDrop.author.handle) &&
-          drop.reply_to.drop_id !== dropViewDropId && (
-            <WaveDropReply
-              onReplyClick={onReplyClick}
-              dropId={drop.reply_to.drop_id}
-              dropPartId={drop.reply_to.drop_part_id}
-              maybeDrop={
-                drop.reply_to.drop
-                  ? { ...drop.reply_to.drop, wave: drop.wave }
-                  : null
-              }
-            />
-          )}
-        <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
-          <div
-            className="tw-flex tw-w-full tw-flex-col tw-gap-y-1"
-            style={{
-              maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
-            }}
-          >
-            {showAuthorInfo && (
-              <WaveDropHeader
-                drop={drop}
-                showWaveInfo={showWaveInfo}
-                isStorm={isStorm}
-                currentPartIndex={activePartIndex}
-                partsCount={drop.parts.length}
-                showActionsButton={hasTouch && showReplyAndQuote && !isEditing}
-                onOpenActions={handleOpenTouchActions}
-              />
-            )}
-            <div
-              className={`tw-w-full ${
-                shouldGroupWithPreviousDrop && !isProfileView
-                  ? "tw-pl-[3.25rem]"
-                  : ""
-              }`}
-            >
-              <WaveDropContent
-                drop={drop}
-                activePartIndex={activePartIndex}
-                setActivePartIndex={setActivePartIndex}
-                onLongPress={handleLongPress}
-                onDropContentClick={onDropContentClick}
-                onQuoteClick={onQuoteClick}
-                setLongPressTriggered={setLongPressTriggered}
-                isEditing={isEditing}
-                isSaving={dropUpdateMutation.isPending}
-                onSave={handleEditSave}
-                onCancel={handleEditCancel}
-                hasTouch={allowLongPress}
-              />
-            </div>
-          </div>
-        </div>
-        {!isMobile && showReplyAndQuote && !isEditing && (
-          <WaveDropActions
-            drop={drop}
-            activePartIndex={activePartIndex}
-            onReply={handleOnReply}
-            onQuote={handleOnQuote}
-            onEdit={handleOnEdit}
-          />
-        )}
-        <div
-          className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${
-            compact
-              ? "tw-ml-11 tw-w-[calc(100%-2.5rem)]"
-              : "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
-          }`}
-        >
-          {drop.metadata.length > 0 && (
-            <WaveDropMetadata metadata={drop.metadata} />
-          )}
-          {!!drop.raters_count && <WaveDropRatings drop={drop} />}
-          <WaveDropReactions drop={drop} />
-        </div>
+        {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
+        {reactionsRow}
         <WaveDropMobileMenu
           drop={drop}
           isOpen={effectiveIsSlideUp}
