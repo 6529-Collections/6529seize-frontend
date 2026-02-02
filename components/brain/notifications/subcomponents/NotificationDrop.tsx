@@ -1,17 +1,12 @@
 "use client";
 
-import type {
-  DropInteractionParams} from "@/components/waves/drops/Drop";
-import Drop, {
-  DropLocation,
-} from "@/components/waves/drops/Drop";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type {
-  ExtendedDrop} from "@/helpers/waves/drop.helpers";
-import {
-  convertApiDropToExtendedDrop
-} from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import CollapsibleDropPreview from "./CollapsibleDropPreview";
 
 interface NotificationDropProps {
   readonly drop: ApiDrop;
@@ -35,20 +30,22 @@ export default function NotificationDrop({
   const extendedDrop = convertApiDropToExtendedDrop(drop);
 
   return (
-    <Drop
-      drop={extendedDrop}
-      previousDrop={null}
-      nextDrop={null}
-      showWaveInfo={true}
-      showReplyAndQuote={true}
-      activeDrop={activeDrop}
-      location={DropLocation.MY_STREAM}
-      dropViewDropId={null}
-      onReply={onReply}
-      onQuote={onQuote}
-      onReplyClick={onReplyClick}
-      onQuoteClick={onQuoteClick}
-      onDropContentClick={onDropContentClick}
-    />
+    <CollapsibleDropPreview>
+      <Drop
+        drop={extendedDrop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={true}
+        showReplyAndQuote={true}
+        activeDrop={activeDrop}
+        location={DropLocation.MY_STREAM}
+        dropViewDropId={null}
+        onReply={onReply}
+        onQuote={onQuote}
+        onReplyClick={onReplyClick}
+        onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
+      />
+    </CollapsibleDropPreview>
   );
 }
