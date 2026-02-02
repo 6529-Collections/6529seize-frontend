@@ -123,7 +123,9 @@ export default function NotificationDropReactedGroup({
                 const href = profile.handle ? `/${profile.handle}` : undefined;
                 const displayName =
                   profile.handle ??
-                  (profile.id != null ? String(profile.id) : undefined);
+                  (profile.id === null || profile.id === undefined
+                    ? undefined
+                    : String(profile.id));
                 const title =
                   displayName !== undefined && displayName !== ""
                     ? displayName
