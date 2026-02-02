@@ -11,7 +11,9 @@ function getDropId(n: INotificationDropReacted): string {
   return drop?.id ?? `no-drop-${n.id}`;
 }
 
-function isDropReacted(item: TypedNotification): item is INotificationDropReacted {
+function isDropReacted(
+  item: TypedNotification
+): item is INotificationDropReacted {
   return item.cause === ApiNotificationCause.DropReacted;
 }
 
@@ -43,8 +45,9 @@ export function groupReactionNotifications(
   const indexToGroup = new Map<number, GroupedReactionsItem>();
   byDropId.forEach(({ anchorIndex, notifications }) => {
     if (notifications.length < 2) return;
-    const latest = notifications.reduce((a, b) =>
-      a.created_at >= b.created_at ? a : b
+    const latest = notifications.reduce(
+      (a, b) => (a.created_at >= b.created_at ? a : b),
+      notifications[0]!
     );
     const drop = latest.related_drops[0]!;
     indexToGroup.set(anchorIndex, {
@@ -66,11 +69,7 @@ export function groupReactionNotifications(
     if (isDropReacted(item)) {
       const key = getDropId(item);
       const group = byDropId.get(key);
-      if (
-        group &&
-        group.notifications.length >= 2 &&
-        group.anchorIndex !== i
-      ) {
+      if (group && group.notifications.length >= 2 && group.anchorIndex !== i) {
         continue;
       }
     }

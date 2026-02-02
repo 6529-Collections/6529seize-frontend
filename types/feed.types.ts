@@ -159,9 +159,7 @@ export type GroupedReactionsItem = {
   readonly id: number;
 };
 
-export type NotificationDisplayItem =
-  | TypedNotification
-  | GroupedReactionsItem;
+export type NotificationDisplayItem = TypedNotification | GroupedReactionsItem;
 
 export function isGroupedReactionsItem(
   item: NotificationDisplayItem
@@ -170,7 +168,7 @@ export function isGroupedReactionsItem(
     typeof item === "object" &&
     item !== null &&
     "type" in item &&
-    (item as GroupedReactionsItem).type === "grouped_reactions"
+    item.type === "grouped_reactions"
   );
 }
 

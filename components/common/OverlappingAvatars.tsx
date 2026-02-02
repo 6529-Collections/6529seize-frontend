@@ -43,14 +43,14 @@ export default function OverlappingAvatars({
     "tw-transition-transform tw-duration-200 tw-ease-out hover:tw-scale-110 hover:!tw-z-[100]";
 
   return (
-    <div className={`tw-flex tw-items-center tw-overflow-visible ${overlapClass}`}>
+    <div
+      className={`tw-flex tw-items-center tw-overflow-visible ${overlapClass}`}
+    >
       {slice.map((item, index) => {
-        const transformOrigin =
-          index === 0
-            ? "left center"
-            : index === slice.length - 1
-              ? "right center"
-              : "center center";
+        let transformOrigin: string;
+        if (index === 0) transformOrigin = "left center";
+        else if (index === slice.length - 1) transformOrigin = "right center";
+        else transformOrigin = "center center";
 
         const content = item.pfpUrl ? (
           <img

@@ -119,12 +119,11 @@ export default function NotificationDropReactedGroup({
                     ":",
                     ""
                   );
-                  const transformOrigin =
-                    index === 0
-                      ? "left center"
-                      : index === emojiItems.length - 1
-                        ? "right center"
-                        : "center center";
+                  let transformOrigin: string;
+                  if (index === 0) transformOrigin = "left center";
+                  else if (index === emojiItems.length - 1)
+                    transformOrigin = "right center";
+                  else transformOrigin = "center center";
                   return (
                     <div
                       key={n.id}
