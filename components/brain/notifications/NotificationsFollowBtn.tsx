@@ -46,11 +46,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
         ApiIdentitySubscriptionActions
       >({
         endpoint: `identities/${profile.handle}/subscriptions`,
-        body: {
-          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-          ),
-        },
+        body: DEFAULT_SUBSCRIPTION_BODY,
       });
     },
     onSuccess: () => {
