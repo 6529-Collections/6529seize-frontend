@@ -1,16 +1,21 @@
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { TypedNotification } from "@/types/feed.types";
+import {
+  type NotificationDisplayItem,
+  isGroupedReactionsItem,
+} from "@/types/feed.types";
 import { memo, useMemo } from "react";
+import NotificationDropReactedGroup from "./drop-reacted/NotificationDropReactedGroup";
 import NotificationItem from "./NotificationItem";
 
 interface NotificationItemsProps {
-  readonly items: TypedNotification[];
+  readonly items: NotificationDisplayItem[];
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly onMarkGroupAsRead?: ((ids: number[]) => Promise<void>) | undefined;
 }
 
 function NotificationItemsComponent({
@@ -19,14 +24,16 @@ function NotificationItemsComponent({
   onReply,
   onQuote,
   onDropContentClick,
+  onMarkGroupAsRead,
 }: NotificationItemsProps) {
-  const keyedNotifications = useMemo(
+  const keyedItems = useMemo(
     () =>
-      items.map((notification, index) => {
-        const keySuffix = notification.id ?? `fallback-${index}`;
-
+      items.map((item, index) => {
+        const keySuffix = isGroupedReactionsItem(item)
+          ? `group-${item.drop.id}`
+          : item.id ?? `fallback-${index}`;
         return {
-          notification,
+          item,
           key: `notification-${keySuffix}`,
           domId: `feed-item-${keySuffix}`,
         };
@@ -36,15 +43,37 @@ function NotificationItemsComponent({
 
   return (
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3">
-      {keyedNotifications.map(({ notification, key, domId }) => (
+      {keyedItems.map(({ item, key, domId }) => (
         <div key={key} id={domId}>
-          <NotificationItem
-            notification={notification}
-            activeDrop={activeDrop}
-            onReply={onReply}
-            onQuote={onQuote}
-            onDropContentClick={onDropContentClick}
-          />
+          {isGroupedReactionsItem(item) ? (
+            <div className="tw-flex">
+              <div className="tw-relative lg:tw-hidden">
+                <div className="tw-h-full tw-w-[1px] -tw-translate-x-8 tw-bg-iron-800" />
+              </div>
+              <div className="tw-w-full">
+                <NotificationDropReactedGroup
+                  group={item}
+                  activeDrop={activeDrop}
+                  onReply={onReply}
+                  onQuote={onQuote}
+                  onDropContentClick={onDropContentClick}
+                  onMarkAsRead={
+                    onMarkGroupAsRead
+                      ? (ids) => onMarkGroupAsRead(ids)
+                      : undefined
+                  }
+                />
+              </div>
+            </div>
+          ) : (
+            <NotificationItem
+              notification={item}
+              activeDrop={activeDrop}
+              onReply={onReply}
+              onQuote={onQuote}
+              onDropContentClick={onDropContentClick}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -59,7 +88,8 @@ const NotificationItems = memo(
       prevProps.activeDrop === nextProps.activeDrop &&
       prevProps.onReply === nextProps.onReply &&
       prevProps.onQuote === nextProps.onQuote &&
-      prevProps.onDropContentClick === nextProps.onDropContentClick
+      prevProps.onDropContentClick === nextProps.onDropContentClick &&
+      prevProps.onMarkGroupAsRead === nextProps.onMarkGroupAsRead
     );
   }
 );
