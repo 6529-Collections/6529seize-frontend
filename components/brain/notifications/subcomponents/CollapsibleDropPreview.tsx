@@ -1,7 +1,14 @@
 "use client";
 
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 const SLICE_HEIGHT_PX = 140;
 const TOP_HEIGHT_PX = SLICE_HEIGHT_PX;
@@ -80,6 +87,11 @@ export default function CollapsibleDropPreview({
     }
   }, []);
 
+  useLayoutEffect(() => {
+    if (hasMeasured) return;
+    measureNow();
+  }, [hasMeasured, measureNow]);
+
   useEffect(() => {
     if (hostWidth <= 0) return;
 
@@ -115,7 +127,10 @@ export default function CollapsibleDropPreview({
     });
 
     const t = setTimeout(() => {
-      expandedRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      expandedRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }, EXPAND_ANIMATION_MS);
 
     return () => {
@@ -171,8 +186,7 @@ export default function CollapsibleDropPreview({
 
   return (
     <div ref={hostRef} className="tw-relative tw-w-full tw-min-w-0">
-      {/* Fixed-position measurer with exact width to match wrapping */}
-      {hostWidth > 0 && (
+      {hostWidth > 0 && hasMeasured && (
         <div
           className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
           style={{ width: hostWidth }}
@@ -186,11 +200,15 @@ export default function CollapsibleDropPreview({
 
       {!hasMeasured ? (
         <div
-          className="tw-w-full tw-min-w-0"
+          ref={measureRef}
+          className="tw-pointer-events-none tw-w-full tw-min-w-0 tw-opacity-0"
           style={{ minHeight: COLLAPSED_TOTAL_PX }}
-        />
+          aria-hidden
+        >
+          {children}
+        </div>
       ) : (
-        <div className="tw-w-full tw-min-w-0 tw-flex tw-flex-col">
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col">
           {/* TOP SLICE */}
           <div
             className="tw-w-full tw-overflow-hidden"
@@ -237,7 +255,7 @@ export default function CollapsibleDropPreview({
 
             {/* Bottom fade */}
             <div
-              className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-bottom-0"
+              className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0"
               style={{
                 height: EXPAND_FADE_PX,
                 background:
@@ -250,29 +268,29 @@ export default function CollapsibleDropPreview({
             <button
               type="button"
               onClick={onExpand}
-              className="tw-group tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-flex-row tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-center tw-outline-none focus:tw-outline-none tw-transition-colors tw-duration-200"
+              className="tw-group tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-flex-row tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-center tw-outline-none tw-transition-colors tw-duration-200 focus:tw-outline-none"
               style={{ minHeight: EXPAND_SECTION_HEIGHT_PX }}
               aria-label="Expand drop"
             >
               <span className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center tw-justify-center tw-gap-0">
                 <span className="tw-flex tw-transition-transform tw-duration-200 group-hover:tw-translate-y-[-2px]">
-                  <ChevronUpIcon className="tw-h-4 tw-w-4 tw-text-iron-400 group-hover:tw-text-white tw-transition-colors tw-duration-200" />
+                  <ChevronUpIcon className="tw-h-4 tw-w-4 tw-text-iron-400 tw-transition-colors tw-duration-200 group-hover:tw-text-white" />
                 </span>
                 <span className="tw-flex tw-transition-transform tw-duration-200 group-hover:tw-translate-y-[2px]">
-                  <ChevronDownIcon className="tw-h-4 tw-w-4 tw-text-iron-400 group-hover:tw-text-white tw-transition-colors tw-duration-200" />
+                  <ChevronDownIcon className="tw-h-4 tw-w-4 tw-text-iron-400 tw-transition-colors tw-duration-200 group-hover:tw-text-white" />
                 </span>
               </span>
 
-              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-text-sm tw-font-medium tw-leading-none tw-text-iron-300 group-hover:tw-text-white tw-transition-colors tw-duration-200">
+              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-text-sm tw-font-medium tw-leading-none tw-text-iron-300 tw-transition-colors tw-duration-200 group-hover:tw-text-white">
                 expand
               </span>
 
               <span className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center tw-justify-center tw-gap-0">
                 <span className="tw-flex tw-transition-transform tw-duration-200 group-hover:tw-translate-y-[-2px]">
-                  <ChevronUpIcon className="tw-h-4 tw-w-4 tw-text-iron-400 group-hover:tw-text-white tw-transition-colors tw-duration-200" />
+                  <ChevronUpIcon className="tw-h-4 tw-w-4 tw-text-iron-400 tw-transition-colors tw-duration-200 group-hover:tw-text-white" />
                 </span>
                 <span className="tw-flex tw-transition-transform tw-duration-200 group-hover:tw-translate-y-[2px]">
-                  <ChevronDownIcon className="tw-h-4 tw-w-4 tw-text-iron-400 group-hover:tw-text-white tw-transition-colors tw-duration-200" />
+                  <ChevronDownIcon className="tw-h-4 tw-w-4 tw-text-iron-400 tw-transition-colors tw-duration-200 group-hover:tw-text-white" />
                 </span>
               </span>
             </button>
