@@ -43,8 +43,9 @@ export default function CollapsibleDropPreview({
   const [animateMaxHeight, setAnimateMaxHeight] = useState<number | null>(null);
 
   const prefersReducedMotion = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof globalThis.window === "undefined") return false;
+    return globalThis.window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches;
   }, []);
 
   const isOverflowing = useMemo(() => {
