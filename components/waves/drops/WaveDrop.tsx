@@ -135,7 +135,9 @@ interface WaveDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly wrapContentOnly?: (content: React.ReactNode) => React.ReactNode;
+  readonly wrapContentOnly?:
+    | ((content: React.ReactNode) => React.ReactNode)
+    | undefined;
 }
 
 const WaveDrop = ({
