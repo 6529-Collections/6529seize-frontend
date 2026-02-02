@@ -1,19 +1,18 @@
 "use client";
 
-import type {
-  Drop as DropType,
-  ExtendedDrop} from "@/helpers/waves/drop.helpers";
-import {
-  DropSize
-} from "@/helpers/waves/drop.helpers";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import WaveDrop from "./WaveDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import ParticipationDrop from "./participation/ParticipationDrop";
-import WinnerDrop from "./winner/WinnerDrop";
-import DropContext from "./DropContext";
+import type {
+  Drop as DropType,
+  ExtendedDrop,
+} from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useMemo } from "react";
+import DropContext from "./DropContext";
+import ParticipationDrop from "./participation/ParticipationDrop";
+import WaveDrop from "./WaveDrop";
+import WinnerDrop from "./winner/WinnerDrop";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
@@ -41,6 +40,7 @@ interface DropProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
+  readonly wrapContentOnly?: (content: React.ReactNode) => React.ReactNode;
 }
 
 export default function Drop({
@@ -58,6 +58,7 @@ export default function Drop({
   onDropContentClick,
   showReplyAndQuote,
   parentContainerRef,
+  wrapContentOnly,
 }: DropProps) {
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
@@ -109,6 +110,7 @@ export default function Drop({
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
+        wrapContentOnly={wrapContentOnly}
       />
     ),
   };
