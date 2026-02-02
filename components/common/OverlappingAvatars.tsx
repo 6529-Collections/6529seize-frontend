@@ -1,8 +1,12 @@
 "use client";
 
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import Link from "next/link";
 import type { MouseEvent } from "react";
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
 
 export interface OverlappingAvatarItem {
   readonly key: string;
@@ -10,6 +14,7 @@ export interface OverlappingAvatarItem {
   readonly href?: string;
   readonly ariaLabel?: string;
   readonly fallback?: string;
+  readonly title?: string;
 }
 
 interface OverlappingAvatarsProps {
@@ -35,6 +40,8 @@ export default function OverlappingAvatars({
   overlapClass = "-tw-space-x-2",
   onItemClick,
 }: OverlappingAvatarsProps) {
+  const baseId = useId();
+  const isTouchDevice = useIsTouchDevice();
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
   const avatarRing =
@@ -68,6 +75,9 @@ export default function OverlappingAvatars({
           </div>
         );
 
+        const showTooltip =
+          !isTouchDevice && item.title !== undefined && item.title !== "";
+        const tooltipId = showTooltip ? `${baseId}-${index}` : undefined;
         const wrapper = (
           <div
             key={item.key}
@@ -76,25 +86,42 @@ export default function OverlappingAvatars({
               zIndex: slice.length - index,
               transformOrigin,
             }}
+            {...(tooltipId !== undefined && { "data-tooltip-id": tooltipId })}
           >
             {content}
           </div>
         );
 
-        if (item.href) {
+        const anchor = item.href ? (
+          <Link
+            key={item.key}
+            href={item.href}
+            className="tw-m-0 tw-inline-flex tw-border-none tw-bg-transparent tw-p-0"
+            aria-label={item.ariaLabel}
+            onClick={(e) => onItemClick?.(e, item)}
+          >
+            {wrapper}
+          </Link>
+        ) : (
+          wrapper
+        );
+
+        if (showTooltip && tooltipId !== undefined) {
           return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className="tw-m-0 tw-inline-flex tw-border-none tw-bg-transparent tw-p-0"
-              aria-label={item.ariaLabel}
-              onClick={(e) => onItemClick?.(e, item)}
-            >
-              {wrapper}
-            </Link>
+            <span key={item.key} className="tw-inline-flex">
+              {anchor}
+              <Tooltip
+                id={tooltipId}
+                place="top"
+                delayShow={250}
+                style={TOOLTIP_STYLES}
+              >
+                {item.title}
+              </Tooltip>
+            </span>
           );
         }
-        return wrapper;
+        return anchor;
       })}
     </div>
   );

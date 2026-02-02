@@ -10,7 +10,7 @@ import type {
   GroupedReactionsItem,
   INotificationDropReacted,
 } from "@/types/feed.types";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import NotificationsFollowAllBtn from "../NotificationsFollowAllBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
@@ -19,9 +19,6 @@ import {
   useWaveNavigation,
 } from "../utils/navigationUtils";
 import ReactionEmojiPreview from "./ReactionEmojiPreview";
-
-const MAX_OVERLAP_AVATARS = 5;
-const MAX_OVERLAP_EMOJIS = 5;
 
 function notificationsLatestPerUser(
   notifications: GroupedReactionsItem["notifications"]
@@ -38,6 +35,35 @@ function notificationsLatestPerUser(
   const list = Array.from(byUser.values());
   list.sort((a, b) => a.id - b.id);
   return list;
+}
+
+type ReactionGroup = {
+  readonly reaction: string;
+  readonly rawId: string;
+  readonly notifications: INotificationDropReacted[];
+};
+
+function groupLatestByReaction(
+  latestPerUser: INotificationDropReacted[]
+): ReactionGroup[] {
+  const byReaction = new Map<string, INotificationDropReacted[]>();
+  for (const n of latestPerUser) {
+    const reaction = n.additional_context.reaction;
+    const list = byReaction.get(reaction) ?? [];
+    list.push(n);
+    byReaction.set(reaction, list);
+  }
+  return Array.from(byReaction.entries())
+    .map(([reaction, list]) => ({
+      reaction,
+      rawId: reaction.replaceAll(":", ""),
+      notifications: list,
+    }))
+    .sort((a, b) => {
+      const aLatest = Math.max(...a.notifications.map((n) => n.created_at));
+      const bLatest = Math.max(...b.notifications.map((n) => n.created_at));
+      return bLatest - aLatest;
+    });
 }
 
 interface NotificationDropReactedGroupProps {
@@ -67,8 +93,7 @@ export default function NotificationDropReactedGroup({
   const idsKey = ids.join(",");
   const latestPerUser = notificationsLatestPerUser(notifications);
   const fullReactors = latestPerUser.map((n) => n.related_identity);
-  const reactors = fullReactors.slice(0, MAX_OVERLAP_AVATARS);
-  const emojiItems = latestPerUser.slice(0, MAX_OVERLAP_EMOJIS);
+  const reactionGroups = groupLatestByReaction(latestPerUser);
 
   useEffect(() => {
     hasMarkedRef.current = false;
@@ -85,64 +110,55 @@ export default function NotificationDropReactedGroup({
   return (
     <div ref={rootRef} className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-flex tw-h-7 tw-min-w-0 tw-flex-shrink-0 tw-items-center tw-justify-start tw-overflow-visible">
-          <OverlappingAvatars
-            items={reactors.map((profile) => {
-              const key =
-                profile.id ?? profile.handle ?? profile.primary_address ?? "";
-              const item: {
-                key: string;
-                pfpUrl: string | null;
-                ariaLabel: string;
-                fallback: string;
-                href?: string;
-              } = {
-                key,
-                pfpUrl: profile.pfp ? parseIpfsUrl(profile.pfp) : null,
-                ariaLabel: profile.handle
-                  ? `View @${profile.handle}`
-                  : "View profile",
-                fallback: profile.handle?.slice(0, 2).toUpperCase() ?? "?",
-              };
-              if (profile.handle) item.href = `/${profile.handle}`;
-              return item;
-            })}
-            maxCount={MAX_OVERLAP_AVATARS}
-            size="md"
-          />
-        </div>
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-2 min-[390px]:tw-flex-row min-[390px]:tw-items-center min-[390px]:tw-justify-between min-[390px]:tw-gap-x-2">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
-            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+            <span className="tw-mr-1 tw-text-sm tw-font-normal tw-text-iron-400">
               New reactions
             </span>
-            {emojiItems.length > 0 && (
-              <div className="tw-flex tw-items-center -tw-space-x-2 tw-overflow-visible">
-                {emojiItems.map((n, index) => {
-                  const rawId = n.additional_context.reaction.replaceAll(
-                    ":",
-                    ""
-                  );
-                  let transformOrigin: string;
-                  if (index === 0) transformOrigin = "left center";
-                  else if (index === emojiItems.length - 1)
-                    transformOrigin = "right center";
-                  else transformOrigin = "center center";
-                  return (
-                    <div
-                      key={n.id}
-                      className="tw-relative tw-flex-shrink-0 tw-overflow-visible tw-transition-transform tw-duration-200 tw-ease-out hover:!tw-z-[100] hover:tw-scale-110"
-                      style={{
-                        zIndex: emojiItems.length - index,
-                        transformOrigin,
-                      }}
-                    >
-                      <ReactionEmojiPreview rawId={rawId} />
+            {reactionGroups.map((rg, index) => {
+              const profiles = rg.notifications.map((n) => n.related_identity);
+              const avatarItems = profiles.map((profile) => {
+                const key =
+                  profile.id ?? profile.handle ?? profile.primary_address ?? "";
+                const href = profile.handle ? `/${profile.handle}` : undefined;
+                const displayName =
+                  profile.handle ??
+                  (profile.id != null ? String(profile.id) : undefined);
+                const title =
+                  displayName !== undefined && displayName !== ""
+                    ? displayName
+                    : undefined;
+                return {
+                  key,
+                  pfpUrl: profile.pfp ? parseIpfsUrl(profile.pfp) : null,
+                  ariaLabel: profile.handle
+                    ? `View @${profile.handle}`
+                    : "View profile",
+                  fallback: profile.handle?.slice(0, 2).toUpperCase() ?? "?",
+                  ...(href !== undefined && { href }),
+                  ...(title !== undefined && { title }),
+                };
+              });
+              return (
+                <Fragment key={rg.reaction}>
+                  {index > 0 && (
+                    <span className="tw-mx-0.5 tw-flex-shrink-0 tw-text-xs tw-font-bold tw-text-iron-400">
+                      &#8226;
+                    </span>
+                  )}
+                  <div className="tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-gap-x-0.5 tw-overflow-visible">
+                    <OverlappingAvatars
+                      items={avatarItems}
+                      size="md"
+                      overlapClass="-tw-space-x-1"
+                    />
+                    <div className="tw-relative tw-flex-shrink-0 tw-overflow-visible tw-transition-transform tw-duration-200 tw-ease-out hover:!tw-z-[100] hover:tw-scale-110">
+                      <ReactionEmojiPreview rawId={rg.rawId} />
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                </Fragment>
+              );
+            })}
             <NotificationTimestamp createdAt={createdAt} />
           </div>
           {fullReactors.length > 0 && (
