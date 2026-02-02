@@ -206,6 +206,7 @@ export const useWaveDropsSerialScroll = ({
     scrollOperationAbortController.current = new AbortController();
     const signal = scrollOperationAbortController.current.signal;
 
+    let didSucceed = false;
     try {
       if (signal.aborted) {
         scrollOperationLockRef.current = false;
@@ -237,6 +238,7 @@ export const useWaveDropsSerialScroll = ({
       }
 
       const success = await smoothScrollWithRetries();
+      didSucceed = success;
 
       if (!signal.aborted) {
         setTimeout(() => {
@@ -251,6 +253,9 @@ export const useWaveDropsSerialScroll = ({
         console.warn("Scroll operation failed:", error);
       }
     } finally {
+      if (!didSucceed || signal.aborted) {
+        lastScrolledToSerialRef.current = null;
+      }
       scrollOperationLockRef.current = false;
       setIsScrolling(false);
     }

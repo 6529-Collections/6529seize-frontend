@@ -42,6 +42,11 @@ export default function CollapsibleDropPreview({
   const [isExpanded, setIsExpanded] = useState(false);
   const [animateMaxHeight, setAnimateMaxHeight] = useState<number | null>(null);
 
+  const prefersReducedMotion = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
+
   const isOverflowing = useMemo(() => {
     if (!hasMeasured) return false;
     return measuredHeight > COLLAPSED_TOTAL_PX;
@@ -114,13 +119,21 @@ export default function CollapsibleDropPreview({
   }, [hostWidth, measureNow]);
 
   const onExpand = useCallback(() => {
-    setAnimateMaxHeight(COLLAPSED_TOTAL_PX);
+    if (!prefersReducedMotion) {
+      setAnimateMaxHeight(COLLAPSED_TOTAL_PX);
+    }
     setIsExpanded(true);
-  }, []);
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     if (!isExpanded) return;
     if (measuredHeight <= 0) return;
+
+    if (prefersReducedMotion) {
+      setAnimateMaxHeight(measuredHeight);
+      expandedRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+      return;
+    }
 
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => setAnimateMaxHeight(measuredHeight));
@@ -137,7 +150,7 @@ export default function CollapsibleDropPreview({
       cancelAnimationFrame(id);
       clearTimeout(t);
     };
-  }, [isExpanded, measuredHeight]);
+  }, [isExpanded, measuredHeight, prefersReducedMotion]);
 
   const measureBottomSlice = useCallback(() => {
     const el = bottomSliceContentRef.current;
@@ -181,14 +194,14 @@ export default function CollapsibleDropPreview({
 
     return (
       <div ref={hostRef} className="tw-relative tw-w-full tw-min-w-0">
-        {/* Fixed measurer (still needed for dynamic content changes) */}
         {hostWidth > 0 && (
           <div
             className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
             style={{ width: hostWidth }}
             aria-hidden
+            inert
           >
-            <div ref={measureRef} className="tw-w-full tw-min-w-0">
+            <div ref={measureRef} className="tw-w-full tw-min-w-0" inert>
               {children}
             </div>
           </div>
@@ -199,7 +212,9 @@ export default function CollapsibleDropPreview({
           className="tw-w-full tw-min-w-0 tw-overflow-y-hidden tw-overflow-x-visible"
           style={{
             maxHeight: maxH,
-            transition: `max-height ${EXPAND_ANIMATION_MS}ms ease-out`,
+            transition: prefersReducedMotion
+              ? "none"
+              : `max-height ${EXPAND_ANIMATION_MS}ms ease-out`,
           }}
         >
           {children}
@@ -223,8 +238,9 @@ export default function CollapsibleDropPreview({
           className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
           style={{ width: hostWidth }}
           aria-hidden
+          inert
         >
-          <div ref={measureRef} className="tw-w-full tw-min-w-0">
+          <div ref={measureRef} className="tw-w-full tw-min-w-0" inert>
             {children}
           </div>
         </div>
@@ -349,6 +365,7 @@ export default function CollapsibleDropPreview({
           className="tw-pointer-events-none tw-w-full tw-min-w-0 tw-opacity-0"
           style={{ minHeight: COLLAPSED_TOTAL_PX }}
           aria-hidden
+          inert
         >
           {children}
         </div>

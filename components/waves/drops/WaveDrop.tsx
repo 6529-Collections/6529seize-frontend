@@ -371,7 +371,7 @@ const WaveDrop = ({
     <>
       {drop.reply_to &&
         (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
-          drop.author.handle !== previousDrop.author.handle) &&
+          drop.author.handle !== previousDrop?.author?.handle) &&
         drop.reply_to.drop_id !== dropViewDropId && (
           <WaveDropReply
             onReplyClick={onReplyClick}

@@ -130,7 +130,8 @@ export const WaveDropsScrollToUnreadButton: FC<
   const isButtonVisible =
     unreadPosition !== "hidden" &&
     unreadDividerSerialNo !== null &&
-    !hasSeenDivider;
+    !hasSeenDivider &&
+    !userDismissed;
 
   useEffect(() => {
     if (!isButtonVisible) return;
@@ -143,7 +144,7 @@ export const WaveDropsScrollToUnreadButton: FC<
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isButtonVisible, onDismiss]);
+  }, [isButtonVisible, onDismiss, userDismissed]);
 
   const handleDismiss = useCallback(
     (e: React.MouseEvent) => {
