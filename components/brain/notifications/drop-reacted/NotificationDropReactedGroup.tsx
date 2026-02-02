@@ -10,7 +10,7 @@ import type {
   GroupedReactionsItem,
   INotificationDropReacted,
 } from "@/types/feed.types";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import NotificationsFollowAllBtn from "../NotificationsFollowAllBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
@@ -64,11 +64,15 @@ export default function NotificationDropReactedGroup({
   const { drop, notifications, createdAt } = group;
   const isDirectMessage = getIsDirectMessage(drop.wave);
   const ids = notifications.map((n) => n.id);
+  const idsKey = ids.join(",");
   const latestPerUser = notificationsLatestPerUser(notifications);
-  const reactors = latestPerUser
-    .slice(0, MAX_OVERLAP_AVATARS)
-    .map((n) => n.related_identity);
+  const fullReactors = latestPerUser.map((n) => n.related_identity);
+  const reactors = fullReactors.slice(0, MAX_OVERLAP_AVATARS);
   const emojiItems = latestPerUser.slice(0, MAX_OVERLAP_EMOJIS);
+
+  useEffect(() => {
+    hasMarkedRef.current = false;
+  }, [idsKey]);
 
   const handleDropContentClick = (clickedDrop: ExtendedDrop) => {
     if (!hasMarkedRef.current && onMarkAsRead) {
@@ -141,10 +145,10 @@ export default function NotificationDropReactedGroup({
             )}
             <NotificationTimestamp createdAt={createdAt} />
           </div>
-          {reactors.length > 0 && (
+          {fullReactors.length > 0 && (
             <div className="tw-flex-shrink-0">
               <NotificationsFollowAllBtn
-                profiles={reactors}
+                profiles={fullReactors}
                 size={UserFollowBtnSize.SMALL}
               />
             </div>

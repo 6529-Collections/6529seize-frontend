@@ -1,5 +1,6 @@
 "use client";
 
+import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -13,7 +14,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
-import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 
 interface UseNotificationsQueryProps {
   /**
@@ -153,10 +153,13 @@ export function useNotificationsQuery({
     return reverse ? [...data].reverse() : data;
   }, [query.data, reverse]);
 
-  const items = useMemo<NotificationDisplayItem[]>(
-    () => groupReactionNotifications(rawItems),
-    [rawItems]
-  );
+  const items = useMemo<NotificationDisplayItem[]>(() => {
+    if (!query.data) return [];
+    const grouped = (query.data.pages as TypedNotificationsResponse[]).flatMap(
+      (page) => groupReactionNotifications(page.notifications)
+    );
+    return reverse ? [...grouped].reverse() : grouped;
+  }, [query.data, reverse]);
 
   const isInitialQueryDone = query.isSuccess || query.isError;
 

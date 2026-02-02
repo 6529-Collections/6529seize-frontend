@@ -30,7 +30,11 @@ export function FollowBtnCheckIcon() {
   );
 }
 
-export function FollowBtnPlusIcon({ size }: { size: UserFollowBtnSize }) {
+export function FollowBtnPlusIcon({
+  size,
+}: {
+  readonly size: UserFollowBtnSize;
+}) {
   return (
     <svg
       className={FOLLOW_BTN_SVG_CLASSES[size]}

@@ -81,13 +81,12 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
             : "tw-cursor-pointer tw-bg-primary-500 tw-text-white tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600"
         } tw-flex tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-70`}
       >
-        {mutating ? (
-          <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
-        ) : allFollowed ? (
-          <FollowBtnCheckIcon />
-        ) : (
-          <FollowBtnPlusIcon size={size} />
-        )}
+        {(() => {
+          if (mutating)
+            return <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />;
+          if (allFollowed) return <FollowBtnCheckIcon />;
+          return <FollowBtnPlusIcon size={size} />;
+        })()}
         <span>{label}</span>
       </button>
     </div>

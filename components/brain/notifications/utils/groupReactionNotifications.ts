@@ -22,7 +22,11 @@ export function groupReactionNotifications(
 ): NotificationDisplayItem[] {
   const byDropId = new Map<
     string,
-    { anchorIndex: number; notifications: INotificationDropReacted[] }
+    {
+      anchorIndex: number;
+      anchorCreatedAt: number;
+      notifications: INotificationDropReacted[];
+    }
   >();
 
   items.forEach((item, index) => {
@@ -34,12 +38,16 @@ export function groupReactionNotifications(
     if (!existing) {
       byDropId.set(key, {
         anchorIndex: index,
+        anchorCreatedAt: item.created_at,
         notifications: [item],
       });
       return;
     }
     existing.notifications.push(item);
-    existing.anchorIndex = Math.max(existing.anchorIndex, index);
+    if (item.created_at >= existing.anchorCreatedAt) {
+      existing.anchorIndex = index;
+      existing.anchorCreatedAt = item.created_at;
+    }
   });
 
   const indexToGroup = new Map<number, GroupedReactionsItem>();
