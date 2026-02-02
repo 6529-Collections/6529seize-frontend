@@ -8,14 +8,14 @@ import {
   type MutableRefObject,
   type UIEventHandler,
 } from "react";
-import type { TypedNotification } from "@/types/feed.types";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 import { NEAR_TOP_SCROLL_THRESHOLD_PX } from "../../constants";
 import {
   STICK_TO_BOTTOM_SCROLL_THRESHOLD_PX,
 } from "../utils/constants";
 
 interface UseNotificationsScrollParams {
-  readonly items: TypedNotification[];
+  readonly items: NotificationDisplayItem[];
   readonly isAuthenticated: boolean;
   readonly isFetchingNextPage: boolean;
   readonly hasNextPage: boolean;

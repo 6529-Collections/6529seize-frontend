@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import MyStreamNoItems from "../../my-stream/layout/MyStreamNoItems";
 import NotificationsWrapper from "../NotificationsWrapper";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
-import type { TypedNotification } from "@/types/feed.types";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import NotificationsStateMessage from "./NotificationsStateMessage";
 
@@ -20,10 +20,11 @@ interface NotificationsContentProps {
   readonly handleProxyDisable: () => void;
   readonly showLoader: boolean;
   readonly showNoItems: boolean;
-  readonly items: TypedNotification[];
+  readonly items: NotificationDisplayItem[];
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
+  readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
 }
 
 export default function NotificationsContent({
@@ -42,6 +43,7 @@ export default function NotificationsContent({
   loadingOlder,
   activeDrop,
   setActiveDrop,
+  markNotificationIdsAsRead,
 }: NotificationsContentProps): ReactNode {
   if (isLoadingProfile) {
     return (
@@ -109,6 +111,7 @@ export default function NotificationsContent({
       loadingOlder={loadingOlder}
       activeDrop={activeDrop}
       setActiveDrop={setActiveDrop}
+      markNotificationIdsAsRead={markNotificationIdsAsRead}
     />
   );
 }

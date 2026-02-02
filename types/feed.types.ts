@@ -151,6 +151,29 @@ export type TypedNotification =
   | INotificationAllDrops
   | INotificationPriorityAlert;
 
+export type GroupedReactionsItem = {
+  readonly type: "grouped_reactions";
+  readonly notifications: readonly INotificationDropReacted[];
+  readonly drop: ApiDrop;
+  readonly createdAt: number;
+  readonly id: number;
+};
+
+export type NotificationDisplayItem =
+  | TypedNotification
+  | GroupedReactionsItem;
+
+export function isGroupedReactionsItem(
+  item: NotificationDisplayItem
+): item is GroupedReactionsItem {
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "type" in item &&
+    (item as GroupedReactionsItem).type === "grouped_reactions"
+  );
+}
+
 /**
  * Fallback type for unknown/unsupported notification causes.
  * Used to render generic notifications that don't match known causes.
