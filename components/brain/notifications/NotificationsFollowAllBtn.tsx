@@ -47,7 +47,7 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
       return;
     }
     try {
-      await Promise.all(
+      const results = await Promise.allSettled(
         toFollow.map((profile) =>
           commonApiPost<
             ApiIdentitySubscriptionActions,
@@ -58,12 +58,20 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
           })
         )
       );
-      onIdentityFollowChange();
-    } catch (error) {
-      setToast({
-        message: error instanceof Error ? error.message : String(error),
-        type: "error",
-      });
+      const hasFulfilled = results.some((r) => r.status === "fulfilled");
+      const rejected = results.filter(
+        (r): r is PromiseRejectedResult => r.status === "rejected"
+      );
+      if (hasFulfilled) onIdentityFollowChange();
+      if (rejected.length > 0) {
+        const messages = rejected.map((r) =>
+          r.reason instanceof Error ? r.reason.message : String(r.reason)
+        );
+        setToast({
+          message: messages.join("; "),
+          type: "error",
+        });
+      }
     } finally {
       setMutating(false);
     }
