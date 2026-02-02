@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { TypedNotification } from "@/types/feed.types";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 import type {
   ActiveDropState} from "@/types/dropInteractionTypes";
 import {
@@ -34,10 +34,11 @@ const hasChatScope = (wave: ExtendedDrop["wave"]): wave is WaveWithChatScope =>
   typeof wave === "object" && wave !== null && "chat" in wave;
 
 interface NotificationsWrapperProps {
-  readonly items: TypedNotification[];
+  readonly items: NotificationDisplayItem[];
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (drop: ActiveDropState | null) => void;
+  readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
 }
 
 export default function NotificationsWrapper({
@@ -45,6 +46,7 @@ export default function NotificationsWrapper({
   loadingOlder,
   activeDrop,
   setActiveDrop,
+  markNotificationIdsAsRead,
 }: NotificationsWrapperProps) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -109,6 +111,7 @@ export default function NotificationsWrapper({
         onReply={onReply}
         onQuote={onQuote}
         onDropContentClick={onDropContentClick}
+        onMarkGroupAsRead={markNotificationIdsAsRead}
       />
     </div>
   );

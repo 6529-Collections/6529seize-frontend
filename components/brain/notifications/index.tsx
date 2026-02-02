@@ -49,6 +49,7 @@ export default function Notifications({
     pagination,
     contentState,
     handlers,
+    markNotificationIdsAsRead,
   } = useNotificationsController();
 
   const activeFilterKey = useMemo(
@@ -105,6 +106,7 @@ export default function Notifications({
             loadingOlder={isFetchingNextPage}
             activeDrop={activeDrop}
             setActiveDrop={setActiveDrop}
+            markNotificationIdsAsRead={markNotificationIdsAsRead}
           />
         </div>
       </div>
