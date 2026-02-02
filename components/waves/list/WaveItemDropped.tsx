@@ -11,17 +11,21 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
     <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
       <div className="tw-hidden tw-flex-shrink @[320px]/wave:tw-flex">
         <OverlappingAvatars
-          items={contributors.map((c, index) => ({
-            key: `${c.contributor_identity ?? "anon"}-${c.contributor_pfp ?? "no-pfp"}-${index}`,
-            pfpUrl: c.contributor_pfp ?? null,
-            href: c.contributor_identity
+          items={contributors.map((c, index) => {
+            const href = c.contributor_identity
               ? `/${c.contributor_identity}`
-              : undefined,
-            ariaLabel: c.contributor_identity
-              ? `View @${c.contributor_identity}`
-              : "View contributor profile",
-            fallback: c.contributor_identity?.slice(0, 2).toUpperCase() ?? "?",
-          }))}
+              : undefined;
+            return {
+              key: `${c.contributor_identity ?? "anon"}-${c.contributor_pfp ?? "no-pfp"}-${index}`,
+              pfpUrl: c.contributor_pfp ?? null,
+              ...(href !== undefined && { href }),
+              ariaLabel: c.contributor_identity
+                ? `View @${c.contributor_identity}`
+                : "View contributor profile",
+              fallback:
+                c.contributor_identity?.slice(0, 2).toUpperCase() ?? "?",
+            };
+          })}
           maxCount={5}
           size="sm"
           overlapClass="-tw-space-x-1"
