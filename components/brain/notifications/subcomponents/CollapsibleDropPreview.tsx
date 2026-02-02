@@ -184,6 +184,18 @@ export default function CollapsibleDropPreview({
     return (
       <div ref={hostRef} className="tw-w-full tw-min-w-0">
         {children}
+        {hostWidth > 0 && (
+          <div
+            className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
+            style={{ width: hostWidth }}
+            aria-hidden
+            inert
+          >
+            <div ref={measureRef} className="tw-w-full tw-min-w-0" inert>
+              {children}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
