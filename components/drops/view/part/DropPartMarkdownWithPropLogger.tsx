@@ -20,6 +20,7 @@ function areEqual(
 ) {
   const propsToCheck: (keyof DropPartMarkdownProps)[] = [
     "mentionedUsers",
+    "mentionedWaves",
     "referencedNfts",
     "partContent",
     "textSize",

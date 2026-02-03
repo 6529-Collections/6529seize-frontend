@@ -2,18 +2,11 @@
 
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import type {
-  FC} from "react";
-import {
-  memo,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import type { FC } from "react";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -23,6 +16,7 @@ import CreateDropStormPart from "./CreateDropStormPart";
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
   mentionedUsers: ApiDropMentionedUser[];
+  mentionedWaves: ApiMentionedWave[];
   referencedNfts: ReferencedNft[];
   onRemovePart: (partIndex: number) => void;
 }
@@ -30,6 +24,7 @@ interface CreateDropStormPartsProps {
 const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   parts,
   mentionedUsers,
+  mentionedWaves,
   referencedNfts,
   onRemovePart,
 }) => {
@@ -75,30 +70,31 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
 
   return (
     <div className="tw-space-y-4 tw-pb-3">
-      <div className="tw-bg-transparent tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-py-2 tw-transition-colors tw-duration-300">
+      <div className="tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-bg-transparent tw-py-2 tw-transition-colors tw-duration-300">
         <div className="tw-flex tw-gap-x-3">
-          <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
+          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-900">
             {connectedProfile?.pfp ? (
               <img
                 src={connectedProfile.pfp}
                 alt={connectedProfile.handle ?? "user"}
-                className="tw-h-full tw-w-full tw-object-cover tw-rounded-lg"
+                className="tw-h-full tw-w-full tw-rounded-lg tw-object-cover"
               />
             ) : (
               <div className="tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-900" />
             )}
           </div>
-          <div className="tw-flex tw-flex-col tw-w-full">
+          <div className="tw-flex tw-w-full tw-flex-col">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <UserCICAndLevel
                   level={connectedProfile?.level ?? 0}
                   size={UserCICAndLevelSize.SMALL}
                 />
-                <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
                   <Link
                     href={`/${connectedProfile?.handle}`}
-                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
+                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                  >
                     {connectedProfile?.handle ?? "user"}
                   </Link>
                 </p>
@@ -113,11 +109,13 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}>
+                    transition={{ duration: 0.3 }}
+                  >
                     <CreateDropStormPart
                       partIndex={partIndex}
                       part={part}
                       mentionedUsers={mentionedUsers}
+                      mentionedWaves={mentionedWaves}
                       referencedNfts={referencedNfts}
                       onRemovePart={onRemovePart}
                     />

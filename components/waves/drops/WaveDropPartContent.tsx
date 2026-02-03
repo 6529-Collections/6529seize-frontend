@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import WaveDropPartContentMedias from "./WaveDropPartContentMedias";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ReferencedNft } from "@/entities/IDrop";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -12,6 +13,7 @@ import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
+  readonly mentionedWaves: ApiMentionedWave[];
   readonly referencedNfts: ReferencedNft[];
   readonly wave: ApiWaveMin;
   readonly activePart: ApiDropPart;
@@ -23,7 +25,13 @@ interface WaveDropPartContentProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
-  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onSave?:
+    | ((
+        newContent: string,
+        mentions?: ApiDropMentionedUser[],
+        mentionedWaves?: ApiMentionedWave[]
+      ) => void)
+    | undefined;
   readonly onCancel?: (() => void) | undefined;
   readonly drop?: ApiDrop | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
@@ -32,6 +40,7 @@ interface WaveDropPartContentProps {
 
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   mentionedUsers,
+  mentionedWaves,
   referencedNfts,
   wave,
   activePart,
@@ -55,6 +64,10 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
     () => mentionedUsers,
     [mentionedUsers]
   );
+  const memoizedMentionedWaves = useMemo(
+    () => mentionedWaves,
+    [mentionedWaves]
+  );
   const memoizedReferencedNfts = useMemo(
     () => referencedNfts,
     [referencedNfts]
@@ -71,9 +84,9 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
         disabled={isDisabled}
         className={`${
           isDisabled
-            ? "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
-            : "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
-        } tw-bg-transparent tw-flex-shrink-0 tw-size-8 sm:tw-size-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+            ? "tw-cursor-default tw-border-iron-700 tw-text-iron-700"
+            : "tw-border-primary-400 tw-text-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
+        } tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-transparent tw-transition tw-duration-300 tw-ease-out sm:tw-size-6`}
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -81,7 +94,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
         aria-label={`${isPrevious ? "Previous" : "Next"} part`}
       >
         <svg
-          className="tw-size-5 sm:tw-size-4 tw-flex-shrink-0"
+          className="tw-size-5 tw-flex-shrink-0 sm:tw-size-4"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           aria-hidden="true"
@@ -105,9 +118,9 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
 
   return (
     <div className="tw-w-full">
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-w-full tw-justify-between md:tw-gap-x-3">
+      <div className="tw-flex tw-w-full tw-flex-col tw-justify-between md:tw-flex-row md:tw-gap-x-3">
         {isStorm && (
-          <div className="tw-flex tw-justify-between tw-space-x-3 md:tw-hidden tw-mb-3">
+          <div className="tw-mb-3 tw-flex tw-justify-between tw-space-x-3 md:tw-hidden">
             {renderNavigationButton("previous")}
             {renderNavigationButton("next")}
           </div>
@@ -123,6 +136,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
           <div>
             <WaveDropPartContentMarkdown
               mentionedUsers={memoizedMentionedUsers}
+              mentionedWaves={memoizedMentionedWaves}
               referencedNfts={memoizedReferencedNfts}
               part={activePart}
               wave={wave}

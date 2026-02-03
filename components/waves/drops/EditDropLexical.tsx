@@ -1,12 +1,8 @@
 "use client";
 
 import { $convertFromMarkdownString } from "@lexical/markdown";
-import type {
-  InitialConfigType
-} from "@lexical/react/LexicalComposer";
-import {
-  LexicalComposer,
-} from "@lexical/react/LexicalComposer";
+import type { InitialConfigType } from "@lexical/react/LexicalComposer";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -47,20 +43,26 @@ import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
 import {
+  $createWaveMentionNode,
+  WaveMentionNode,
+} from "@/components/drops/create/lexical/nodes/WaveMentionNode";
+import {
   $createMentionNode,
   MentionNode,
 } from "@/components/drops/create/lexical/nodes/MentionNode";
 import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
-import type {
-  NewMentionsPluginHandles,
-} from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type { NewMentionsPluginHandles } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type { NewWaveMentionsPluginHandles } from "@/components/drops/create/lexical/plugins/waves/WaveMentionsPlugin";
+import NewWaveMentionsPlugin from "@/components/drops/create/lexical/plugins/waves/WaveMentionsPlugin";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
 import { SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
-import type { MentionedUser } from "@/entities/IDrop";
+import { WAVE_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/WaveMentionTransformer";
+import type { MentionedUser, MentionedWave } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import {
@@ -75,9 +77,14 @@ import {
 interface EditDropLexicalProps {
   readonly initialContent: string;
   readonly initialMentions: ApiDropMentionedUser[];
+  readonly initialWaveMentions: ApiMentionedWave[];
   readonly waveId: string | null;
   readonly isSaving: boolean;
-  readonly onSave: (content: string, mentions: ApiDropMentionedUser[]) => void;
+  readonly onSave: (
+    content: string,
+    mentions: ApiDropMentionedUser[],
+    mentionedWaves: ApiMentionedWave[]
+  ) => void;
   readonly onCancel: () => void;
 }
 
@@ -87,6 +94,7 @@ const EDIT_MARKDOWN_TRANSFORMERS = [
   ...SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE,
   MENTION_TRANSFORMER,
   HASHTAG_TRANSFORMER,
+  WAVE_MENTION_TRANSFORMER,
 ];
 
 const convertCodeNodesToFences = (root: RootNode) => {
@@ -166,6 +174,47 @@ function reconstructSplitMention(
   return true;
 }
 
+function reconstructSplitWaveMention(
+  currentNode: any,
+  nextNode: any,
+  mentionStart: RegExpMatchArray,
+  mentionEnd: RegExpMatchArray
+) {
+  const fullMention = mentionStart[0] + mentionEnd[0];
+  const mentionRegex = /#\[([^\]]+)\]/;
+  const mentionMatch = mentionRegex.exec(fullMention);
+
+  if (!mentionMatch) return false;
+
+  const waveName = mentionMatch[1];
+  const mentionNode = $createWaveMentionNode(`#${waveName}`);
+
+  const currentText = currentNode.getTextContent();
+  const nextText = nextNode.getTextContent();
+
+  const beforeMention = currentText.substring(
+    0,
+    currentText.length - mentionStart[0].length
+  );
+  const afterMention = nextText.substring(mentionEnd[0].length);
+
+  if (beforeMention) {
+    currentNode.setTextContent(beforeMention);
+    currentNode.insertAfter(mentionNode);
+  } else {
+    currentNode.remove();
+    nextNode.insertBefore(mentionNode);
+  }
+
+  if (afterMention) {
+    nextNode.setTextContent(afterMention);
+  } else {
+    nextNode.remove();
+  }
+
+  return true;
+}
+
 function processSplitMentions(textNodes: Array<TextNode>): boolean {
   for (let i = 0; i < textNodes.length - 1; i++) {
     const currentNode = textNodes[i];
@@ -192,6 +241,25 @@ function processSplitMentions(textNodes: Array<TextNode>): boolean {
         console.warn("Failed to reconstruct split mention", error);
       }
     }
+
+    const waveMentionStart = currentText?.match(/#\[[^\]]*$/);
+    const waveMentionEnd = nextText?.match(/^[^\]]*\]/);
+    if (waveMentionStart && waveMentionEnd) {
+      try {
+        if (
+          reconstructSplitWaveMention(
+            currentNode,
+            nextNode,
+            waveMentionStart,
+            waveMentionEnd
+          )
+        ) {
+          return true;
+        }
+      } catch (error) {
+        console.warn("Failed to reconstruct split wave mention", error);
+      }
+    }
   }
 
   return false;
@@ -216,9 +284,10 @@ function InitialContentPlugin({ initialContent }: { initialContent: string }) {
       ) {
         const textNodes = root.getAllTextNodes();
 
-        const hasUnprocessedMentions = textNodes.some((node) =>
-          /@\[\w+\]/.test(node.getTextContent())
-        );
+        const hasUnprocessedMentions = textNodes.some((node) => {
+          const text = node.getTextContent();
+          return /@\[\w+\]/.test(text) || /#\[[^\]]+\]/.test(text);
+        });
 
         if (hasUnprocessedMentions) {
           break;
@@ -281,12 +350,14 @@ function KeyboardPlugin({
   isSaving,
   initialContent,
   mentionsRef,
+  waveMentionsRef,
 }: {
   onSave: () => void;
   onCancel: () => void;
   isSaving: boolean;
   initialContent: string;
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
+  waveMentionsRef: React.RefObject<NewWaveMentionsPluginHandles | null>;
 }) {
   const [editor] = useLexicalComposerContext();
   const sanitizedInitialContent = removeBlankLinePlaceholders(initialContent);
@@ -304,7 +375,10 @@ function KeyboardPlugin({
     const removeEnterListener = editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        if (mentionsRef.current?.isMentionsOpen()) {
+        if (
+          mentionsRef.current?.isMentionsOpen() ||
+          waveMentionsRef.current?.isWaveMentionsOpen()
+        ) {
           return false;
         }
 
@@ -343,6 +417,7 @@ function KeyboardPlugin({
     isSaving,
     initialContent,
     mentionsRef,
+    waveMentionsRef,
     sanitizedInitialContent,
   ]);
 
@@ -352,6 +427,7 @@ function KeyboardPlugin({
 const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   initialContent,
   initialMentions,
+  initialWaveMentions,
   waveId,
   isSaving,
   onSave,
@@ -360,8 +436,11 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [mentionedUsers, setMentionedUsers] =
     useState<ApiDropMentionedUser[]>(initialMentions);
+  const [mentionedWaves, setMentionedWaves] =
+    useState<ApiMentionedWave[]>(initialWaveMentions);
   const editorRef = useRef<HTMLDivElement>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
+  const waveMentionsRef = useRef<NewWaveMentionsPluginHandles>(null);
   const { isApp } = useDeviceInfo();
   const normalizedInitialContent = useMemo(
     () => normalizeDropMarkdown(initialContent),
@@ -390,6 +469,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       LinkNode,
       MentionNode,
       HashtagNode,
+      WaveMentionNode,
       EmojiNode,
     ],
   };
@@ -419,6 +499,20 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     []
   );
 
+  const handleWaveMentionSelect = useCallback((wave: MentionedWave) => {
+    const newMention: ApiMentionedWave = {
+      wave_id: wave.wave_id,
+      wave_name_in_content: wave.wave_name_in_content,
+    };
+
+    setMentionedWaves((prev) => {
+      if (prev.some((m) => m.wave_id === newMention.wave_id)) {
+        return prev;
+      }
+      return [...prev, newMention];
+    });
+  }, []);
+
   const handleSave = useCallback(() => {
     if (!editorState) return;
 
@@ -434,8 +528,15 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       return;
     }
 
-    onSave(sanitizedMarkdown, mentionedUsers);
-  }, [editorState, mentionedUsers, onSave, normalizedInitialContent, onCancel]);
+    onSave(sanitizedMarkdown, mentionedUsers, mentionedWaves);
+  }, [
+    editorState,
+    mentionedUsers,
+    mentionedWaves,
+    onSave,
+    normalizedInitialContent,
+    onCancel,
+  ]);
 
   return (
     <div className="tw-w-full" data-editor-mode="true">
@@ -474,6 +575,10 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             waveId={waveId}
             onSelect={handleMentionSelect}
           />
+          <NewWaveMentionsPlugin
+            ref={waveMentionsRef}
+            onSelect={handleWaveMentionSelect}
+          />
           <EmojiPlugin />
           <InitialContentPlugin initialContent={editorInitialContent} />
           <FocusPlugin isApp={isApp} />
@@ -483,6 +588,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             isSaving={isSaving}
             initialContent={normalizedInitialContent}
             mentionsRef={mentionsRef}
+            waveMentionsRef={waveMentionsRef}
           />
         </div>
       </LexicalComposer>

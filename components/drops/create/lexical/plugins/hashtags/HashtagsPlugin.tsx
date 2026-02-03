@@ -130,7 +130,7 @@ const NewHashtagsPlugin = forwardRef<
       closeMenu: () => void
     ) => {
       editor.update(() => {
-        const hashtagNode = $createHashtagNode(`#${selectedOption.name}`);
+        const hashtagNode = $createHashtagNode(`$${selectedOption.name}`);
         if (nodeToReplace) {
           nodeToReplace.replace(hashtagNode);
         }

@@ -22,7 +22,7 @@ const CreateDropStormView = memo(
   ({ drop, profile, wave, removePart }: CreateDropStormViewProps) => {
     const now = Time.currentMillis();
     return (
-      <div className="tw-flex tw-flex-col tw-mb-4">
+      <div className="tw-mb-4 tw-flex tw-flex-col">
         {!!drop?.parts.length &&
           drop.parts.map((part, index) => (
             <CreateDropStormViewPart
@@ -31,6 +31,7 @@ const CreateDropStormView = memo(
               part={part}
               referencedNfts={drop.referenced_nfts}
               mentionedUsers={drop.mentioned_users}
+              mentionedWaves={drop.mentioned_waves ?? []}
               createdAt={now}
               partIndex={index}
               wave={wave}
