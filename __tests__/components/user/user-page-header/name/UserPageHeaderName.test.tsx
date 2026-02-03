@@ -40,7 +40,13 @@ const baseProfile: ApiIdentity = {
 function renderComponent(profile: Partial<ApiIdentity>, mainAddress = '0xabc') {
   const combined = { ...baseProfile, ...profile } as ApiIdentity;
   return render(
-    <UserPageHeaderName profile={combined} canEdit={false} mainAddress={mainAddress} />
+    <UserPageHeaderName
+      profile={combined}
+      canEdit={false}
+      mainAddress={mainAddress}
+      level={combined.level}
+      profileEnabledAt={null}
+    />
   );
 }
 

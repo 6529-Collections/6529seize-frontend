@@ -46,30 +46,44 @@ export default function UserPageHeaderAbout({
   return (
     <div>
       {view === AboutStatementView.STATEMENT && (
-        <div className="tw-max-w-full lg:tw-max-w-prose tw-mt-4">
-          <button
-            onClick={onEditClick}
-            disabled={!canEdit}
-            type="button"
-            aria-label={
-              statement ? "Edit About statement" : "Add About statement"
-            }
-            className="tw-flex tw-items-center tw-gap-x-2 tw-text-iron-500 hover:tw-text-iron-200 tw-text-left tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out">
-            <UserPageHeaderAboutStatement statement={statement} />
-            {canEdit && (
-              <div
-                className={`${
-                  statement ? "group-hover:tw-block tw-hidden" : "tw-block"
-                }  tw-text-iron-400`}>
-                <PencilIcon />
-              </div>
+        <div className="tw-max-w-3xl">
+          <div
+            className={`tw-inline-flex tw-items-start tw-gap-2${
+              canEdit ? " tw-group" : ""
+            }`}
+          >
+            {canEdit ? (
+              <button
+                type="button"
+                onClick={onEditClick}
+                aria-label={
+                  statement ? "Edit About statement" : "Add About statement"
+                }
+                className="tw-flex-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
+              >
+                <UserPageHeaderAboutStatement statement={statement} />
+              </button>
+            ) : (
+              <UserPageHeaderAboutStatement statement={statement} />
             )}
-          </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={onEditClick}
+                aria-label={
+                  statement ? "Edit About statement" : "Add About statement"
+                }
+                className="tw-pointer-events-none tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 group-focus-within:tw-pointer-events-auto group-focus-within:tw-opacity-100 group-hover:tw-pointer-events-auto group-hover:tw-opacity-100 hover:tw-text-iron-200"
+              >
+                <PencilIcon />
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {view === AboutStatementView.EDIT && (
-        <div className="tw-max-w-full tw-mt-4">
+        <div>
           <UserPageHeaderAboutEdit
             profile={profile}
             statement={statement}
