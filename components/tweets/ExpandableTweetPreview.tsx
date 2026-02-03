@@ -50,8 +50,7 @@ export default function ExpandableTweetPreview({
   const [isExpanded, setIsExpanded] = useState(false);
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
   const measureRef = useRef<HTMLDivElement | null>(null);
-  const compactModeRef = useRef<TweetPreviewMode>(compactMode ?? "auto");
-  const allowCompact = compactModeRef.current === "auto";
+  const allowCompact = (compactMode ?? "auto") === "auto";
 
   useLayoutEffect(() => {
     if (!allowCompact) {
@@ -69,11 +68,9 @@ export default function ExpandableTweetPreview({
     }
   }, [tweet, measuredHeight, allowCompact]);
 
-  const shouldCompact = allowCompact
-    ? measuredHeight === null
-      ? true
-      : measuredHeight > COMPACT_THRESHOLD_PX
-    : false;
+  const shouldCompact =
+    allowCompact &&
+    (measuredHeight === null || measuredHeight > COMPACT_THRESHOLD_PX);
 
   const heightClassName =
     !shouldCompact || isExpanded ? "" : compactHeightClassName;
