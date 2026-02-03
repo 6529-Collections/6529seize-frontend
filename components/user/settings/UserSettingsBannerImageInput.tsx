@@ -71,7 +71,7 @@ export default function UserSettingsBannerImageInput({
                   or drag and drop
                 </p>
                 <p className="tw-text-xs tw-font-normal tw-text-iron-400">
-                  JPEG, JPG, PNG, GIF — max 2MB
+                  JPEG, JPG, PNG, GIF, WEBP — max 2MB
                 </p>
               </div>
             </>
