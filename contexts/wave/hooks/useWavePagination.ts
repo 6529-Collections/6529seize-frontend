@@ -10,13 +10,13 @@ import {
   fetchAroundSerialNoWaveMessages,
 } from "../utils/wave-messages-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
+import type { ApiDropId } from "@/generated/models/ApiDropId";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 
 // Tracks which waves are currently loading next page
 interface PaginationState {
   isLoading: boolean;
-  promise: Promise<(ApiDrop | ApiLightDrop)[] | null> | null;
+  promise: Promise<(ApiDrop | ApiDropId)[] | null> | null;
 }
 
 export type NextPageProps = NextPageFullProps | NextPageLightProps;
@@ -130,7 +130,7 @@ export function useWavePagination({
    * Updates store with new paginated data
    */
   const updateWithPaginatedData = useCallback(
-    (waveId: string, newDrops: (ApiDrop | ApiLightDrop)[] | null) => {
+    (waveId: string, newDrops: (ApiDrop | ApiDropId)[] | null) => {
       // Clear the loading state
       if (paginationStates.current[waveId]) {
         paginationStates.current[waveId].isLoading = false;
@@ -159,12 +159,15 @@ export function useWavePagination({
         return null;
       }
 
+      const isFullDrop = (drop: ApiDrop | ApiDropId): drop is ApiDrop =>
+        "wave" in drop;
+
       updateData({
         key: waveId,
         isLoadingNextPage: false,
         hasNextPage: newDrops.length > 0,
         drops: newDrops.map((drop) => {
-          if ("part_1_text" in drop) {
+          if (!isFullDrop(drop)) {
             return {
               ...drop,
               waveId,
@@ -225,9 +228,7 @@ export function useWavePagination({
    * Fetches the next page of data for a wave
    */
   const fetchNextPage = useCallback(
-    async (
-      props: NextPageProps
-    ): Promise<(ApiDrop | ApiLightDrop)[] | null> => {
+    async (props: NextPageProps): Promise<(ApiDrop | ApiDropId)[] | null> => {
       // Get current state
       const currentData = getData(props.waveId);
       if (!currentData) {

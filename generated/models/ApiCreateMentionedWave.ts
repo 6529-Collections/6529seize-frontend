@@ -11,14 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiArtistItem } from '../models/ApiArtistItem';
 import { HttpFile } from '../http/http';
 
-export class ApiArtistsPage {
-    'data': Array<ApiArtistItem>;
-    'count': number;
-    'page': number;
-    'next': string | null;
+export class ApiCreateMentionedWave {
+    'wave_name_in_content': string;
+    'wave_id': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +23,20 @@ export class ApiArtistsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiArtistItem>",
+            "name": "wave_name_in_content",
+            "baseName": "wave_name_in_content",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "count",
-            "baseName": "count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
+            "name": "wave_id",
+            "baseName": "wave_id",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiArtistsPage.attributeTypeMap;
+        return ApiCreateMentionedWave.attributeTypeMap;
     }
 
     public constructor() {

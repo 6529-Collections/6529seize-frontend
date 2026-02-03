@@ -1,11 +1,11 @@
 "use client";
 
+import SpinnerLoader from "@/components/common/SpinnerLoader";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { ReactNode } from "react";
 import MyStreamNoItems from "../../my-stream/layout/MyStreamNoItems";
 import NotificationsWrapper from "../NotificationsWrapper";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import type { TypedNotification } from "@/types/feed.types";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import NotificationsStateMessage from "./NotificationsStateMessage";
 
 interface NotificationsContentProps {
@@ -20,10 +20,11 @@ interface NotificationsContentProps {
   readonly handleProxyDisable: () => void;
   readonly showLoader: boolean;
   readonly showNoItems: boolean;
-  readonly items: TypedNotification[];
+  readonly items: NotificationDisplayItem[];
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
+  readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
 }
 
 export default function NotificationsContent({
@@ -42,10 +43,11 @@ export default function NotificationsContent({
   loadingOlder,
   activeDrop,
   setActiveDrop,
+  markNotificationIdsAsRead,
 }: NotificationsContentProps): ReactNode {
   if (isLoadingProfile) {
     return (
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
+      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-py-8">
         <SpinnerLoader text="Loading profile..." />
       </div>
     );
@@ -73,7 +75,10 @@ export default function NotificationsContent({
     return (
       <NotificationsStateMessage
         message="Notifications are not available while you are using a profile proxy."
-        action={{ label: "Switch to primary profile", handler: handleProxyDisable }}
+        action={{
+          label: "Switch to primary profile",
+          handler: handleProxyDisable,
+        }}
       />
     );
   }
@@ -89,7 +94,7 @@ export default function NotificationsContent({
 
   if (showLoader) {
     return (
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-min-h-full tw-py-8">
+      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-py-8">
         <SpinnerLoader text="Loading notifications..." />
       </div>
     );
@@ -97,7 +102,7 @@ export default function NotificationsContent({
 
   if (showNoItems) {
     return (
-      <div className="tw-flex tw-flex-1 tw-flex-col tw-items-center tw-justify-start tw-min-h-full">
+      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-start">
         <MyStreamNoItems />
       </div>
     );
@@ -109,6 +114,9 @@ export default function NotificationsContent({
       loadingOlder={loadingOlder}
       activeDrop={activeDrop}
       setActiveDrop={setActiveDrop}
+      {...(markNotificationIdsAsRead !== undefined && {
+        markNotificationIdsAsRead,
+      })}
     />
   );
 }

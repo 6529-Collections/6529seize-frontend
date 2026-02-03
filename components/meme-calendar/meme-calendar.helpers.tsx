@@ -632,8 +632,7 @@ export const formatFullDateTime = (
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
-    ...(mode === "utc" ? { timeZone: "UTC" } : {}),
+    ...(mode === "utc" ? { timeZone: "UTC", hour12: false } : {}),
   });
   return mode === "utc" ? `${s} UTC` : s;
 };
