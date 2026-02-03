@@ -11,7 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
 import { HttpFile } from '../http/http';
@@ -19,7 +18,6 @@ import { HttpFile } from '../http/http';
 export class ApiCreateDropPart {
     'content'?: string | null;
     'quoted_drop'?: ApiQuotedDrop | null;
-    'mentioned_waves'?: Array<ApiCreateMentionedWave>;
     'media': Array<ApiDropMedia>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -37,12 +35,6 @@ export class ApiCreateDropPart {
             "name": "quoted_drop",
             "baseName": "quoted_drop",
             "type": "ApiQuotedDrop",
-            "format": ""
-        },
-        {
-            "name": "mentioned_waves",
-            "baseName": "mentioned_waves",
-            "type": "Array<ApiCreateMentionedWave>",
             "format": ""
         },
         {

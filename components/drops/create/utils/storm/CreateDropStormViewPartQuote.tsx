@@ -10,6 +10,7 @@ import DropPart from "@/components/drops/view/part/DropPart";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
@@ -22,6 +23,7 @@ interface PartConfigWave {
 interface PartConfig {
   readonly part: ApiDropPart;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly createdAt: number;
   readonly wave: PartConfigWave;
@@ -58,6 +60,7 @@ export default function CreateDropStormViewPartQuote({
     return {
       part,
       mentionedUsers: drop.mentioned_users,
+      mentionedWaves: drop.mentioned_waves,
       referencedNfts: drop.referenced_nfts,
       createdAt: drop.created_at,
       dropTitle: drop.title,
@@ -74,11 +77,12 @@ export default function CreateDropStormViewPartQuote({
   );
   useEffect(() => setPartConfig(getPartConfig()), [drop]);
   return (
-    <div className="tw-mt-2 tw-p-2 tw-border-iron-700 tw-rounded-lg tw-border tw-border-solid tw-w-full">
+    <div className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-2">
       {!!partConfig && (
         <DropPart
           profile={profile}
           mentionedUsers={partConfig.mentionedUsers}
+          mentionedWaves={partConfig.mentionedWaves}
           referencedNfts={partConfig.referencedNfts}
           smallMenuIsShown={false}
           partContent={partConfig.part.content ?? null}

@@ -1,12 +1,11 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
-export default function MentionsTypeaheadMenuItem({
+export default function WaveMentionsTypeaheadMenuItem({
   index,
   isSelected,
   onClick,
   onMouseEnter,
-  handle,
-  display,
+  name,
   picture,
   setRefElement,
 }: {
@@ -14,8 +13,7 @@ export default function MentionsTypeaheadMenuItem({
   readonly isSelected: boolean;
   readonly onClick: () => void;
   readonly onMouseEnter: () => void;
-  readonly handle: string;
-  readonly display: string | null;
+  readonly name: string;
   readonly picture: string | null;
   readonly setRefElement: (element: HTMLElement | null) => void;
 }) {
@@ -41,7 +39,7 @@ export default function MentionsTypeaheadMenuItem({
                   <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-center">
                     <Image
                       src={getScaledImageUri(picture, ImageScale.W_AUTO_H_50)}
-                      alt={`Profile for ${handle}`}
+                      alt={`Wave ${name}`}
                       width={24}
                       height={24}
                       className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
@@ -51,11 +49,8 @@ export default function MentionsTypeaheadMenuItem({
               </div>
             )}
             <div>
-              <div className="tw-w-[12rem] tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
-                {handle}
-              </div>
-              <div className="tw-w-[12rem] tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-                {display}
+              <div className="tw-w-[14rem] tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
+                {name}
               </div>
             </div>
           </div>

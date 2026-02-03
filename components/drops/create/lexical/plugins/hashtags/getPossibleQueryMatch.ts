@@ -11,7 +11,7 @@ const DocumentHashtagRegex = {
 
 const PUNC = DocumentHashtagRegex.PUNCTUATION;
 
-const TRIGGERS = ["#"].join("");
+const TRIGGERS = ["$"].join("");
 
 // Chars we expect to see in a hashtag (non-space, non-punctuation).
 const VALID_CHARS = "[^" + TRIGGERS + PUNC + "\\s]";

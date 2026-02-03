@@ -4,6 +4,7 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type {
   CreateDropConfig,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
@@ -41,6 +42,7 @@ interface CreateDropCompactProps {
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
+  readonly onMentionedWave: (newWave: MentionedWave) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileRemove: (file: File) => void;
   readonly setFiles: (files: File[]) => void;
@@ -71,6 +73,7 @@ const CreateDropCompact = forwardRef<
       onViewChange,
       onEditorState,
       onMentionedUser,
+      onMentionedWave,
       onReferencedNft,
       onFileRemove,
       setFiles,
@@ -130,6 +133,7 @@ const CreateDropCompact = forwardRef<
                 missingMetadata={missingMetadata}
                 onEditorState={onEditorState}
                 onMentionedUser={onMentionedUser}
+                onMentionedWave={onMentionedWave}
                 onReferencedNft={onReferencedNft}
                 onDrop={onDrop}
                 onViewClick={() => onViewChange(CreateDropViewType.FULL)}

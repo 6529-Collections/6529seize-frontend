@@ -127,9 +127,10 @@ export default function CreateDrop({
       return {
         ...prevDrop,
         parts: newParts,
-        referenced_nfts: prevDrop.referenced_nfts || [],
-        mentioned_users: prevDrop.mentioned_users || [],
-        metadata: prevDrop.metadata || [],
+        referenced_nfts: prevDrop.referenced_nfts,
+        mentioned_users: prevDrop.mentioned_users,
+        mentioned_waves: prevDrop.mentioned_waves ?? [],
+        metadata: prevDrop.metadata,
       };
     });
   }, []);
@@ -285,6 +286,7 @@ export default function CreateDrop({
             <CreateDropStormParts
               parts={drop?.parts ?? []}
               mentionedUsers={drop?.mentioned_users ?? []}
+              mentionedWaves={drop?.mentioned_waves ?? []}
               referencedNfts={drop?.referenced_nfts ?? []}
               onRemovePart={onRemovePart}
             />

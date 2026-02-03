@@ -2,18 +2,15 @@
 
 import type { EditorState } from "lexical";
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
-import type {
-  CreateDropFullDesktopHandles,
-} from "./desktop/CreateDropFullDesktop";
+import type { CreateDropFullDesktopHandles } from "./desktop/CreateDropFullDesktop";
 import CreateDropFullDesktop from "./desktop/CreateDropFullDesktop";
-import type {
-  CreateDropFullMobileHandles,
-} from "./mobile/CreateDropFullMobile";
+import type { CreateDropFullMobileHandles } from "./mobile/CreateDropFullMobile";
 import CreateDropFullMobile from "./mobile/CreateDropFullMobile";
 import type {
   CreateDropConfig,
   DropMetadata,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
 import type { CreateDropType, CreateDropViewType } from "../types";
@@ -50,6 +47,7 @@ interface CreateDropFullProps {
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
+  readonly onMentionedWave: (newWave: MentionedWave) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onFileRemove: (file: File) => void;
   readonly setFiles: (files: File[]) => void;
@@ -82,6 +80,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       onViewChange,
       onEditorState,
       onMentionedUser,
+      onMentionedWave,
       onReferencedNft,
       onFileRemove,
       setFiles,
@@ -124,6 +123,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onMetadataRemove={onMetadataRemove}
           onEditorState={onEditorState}
           onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
           onReferencedNft={onReferencedNft}
           setFiles={setFiles}
           onFileRemove={onFileRemove}
@@ -154,6 +154,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
           onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
           onReferencedNft={onReferencedNft}
           onTitle={onTitle}
           setFiles={setFiles}

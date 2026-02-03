@@ -44,10 +44,11 @@ export default function MentionsTypeaheadMenu({
   return (
     <div
       ref={menuRef}
-      className={`tailwind-scope tw-absolute tw-z-50 tw-w-[20rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5 tw-p-2 ${
+      className={`tailwind-scope tw-absolute tw-z-50 tw-w-[20rem] tw-rounded-lg tw-bg-iron-800 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 ${
         position === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1"
-      }`}>
-      <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+      }`}
+    >
+      <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-px-2">
         {options.map((option, i: number) => (
           <MentionsTypeaheadMenuItem
             index={i}
@@ -60,7 +61,10 @@ export default function MentionsTypeaheadMenu({
               setHighlightedIndex(i);
             }}
             key={option.key}
-            option={option}
+            handle={option.handle}
+            display={option.display}
+            picture={option.picture}
+            setRefElement={option.setRefElement}
           />
         ))}
       </ul>

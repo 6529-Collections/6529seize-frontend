@@ -2,6 +2,7 @@ import { memo } from "react";
 import type {
   CreateDropPart,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
 import DropPart from "@/components/drops/view/part/DropPart";
@@ -18,6 +19,7 @@ interface CreateDropStormViewPartProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly part: CreateDropPart;
   readonly mentionedUsers: Array<Omit<MentionedUser, "current_handle">>;
+  readonly mentionedWaves: MentionedWave[];
   readonly referencedNfts: Array<ReferencedNft>;
   readonly createdAt: number;
   readonly wave: CreateDropStormViewPartWaveProps | null;
@@ -31,6 +33,7 @@ const CreateDropStormViewPart = memo(
     profile,
     part,
     mentionedUsers,
+    mentionedWaves,
     referencedNfts,
     createdAt,
     wave,
@@ -38,21 +41,22 @@ const CreateDropStormViewPart = memo(
     partIndex,
     removePart,
   }: CreateDropStormViewPartProps) => {
-    const partMedias = part.media.map(media => ({
+    const partMedias = part.media.map((media) => ({
       mimeType: media.type,
       mediaSrc: URL.createObjectURL(media),
-    }))
+    }));
 
     const quotedDrop = part.quoted_drop;
 
     return (
-      <div className="tw-py-2 tw-px-3 tw-my-2 tw-bg-iron-800 tw-rounded-lg">
+      <div className="tw-my-2 tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2">
         <div className="tw-flex tw-w-full tw-justify-between tw-gap-x-3">
-          <div className="tw-flex tw-flex-col tw-w-full">
+          <div className="tw-flex tw-w-full tw-flex-col">
             <div className="tw-flex tw-flex-col tw-items-stretch">
               <DropPart
                 profile={profile}
                 mentionedUsers={mentionedUsers}
+                mentionedWaves={mentionedWaves}
                 referencedNfts={referencedNfts}
                 partContent={part.content}
                 partMedias={partMedias}
@@ -74,10 +78,10 @@ const CreateDropStormViewPart = memo(
             onClick={() => removePart(partIndex)}
             role="button"
             aria-label="Remove part"
-            className="tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full hover:tw-bg-iron-800 tw-text-iron-300 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-error"
           >
             <svg
-              className="tw-flex-shrink-0 tw-cursor-pointer tw-h-4 tw-w-4"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-cursor-pointer"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

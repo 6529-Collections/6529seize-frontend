@@ -6252,10 +6252,6 @@ components:
           anyOf:
             - $ref: "#/components/schemas/ApiQuotedDrop"
             - type: "null"
-        mentioned_waves:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiCreateMentionedWave"
         media:
           type: array
           items:
@@ -6327,6 +6323,9 @@ components:
                 type: string
           example:
             - "0x1234567890123456789012345678901234567890"
+        is_beneficiary_of_grant_id:
+          type: string
+          nullable: true
     ApiCreateMediaUploadUrlRequest:
       required:
         - content_type
@@ -6690,6 +6689,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMentionedUser"
+        mentioned_waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCreateMentionedWave"
         metadata:
           type: array
           items:
@@ -6751,6 +6754,7 @@ components:
         - updated_at
         - referenced_nfts
         - mentioned_users
+        - mentioned_waves
         - metadata
         - parts
         - parts_count
@@ -6821,6 +6825,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMentionedUser"
+        mentioned_waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMentionedWave"
         metadata:
           type: array
           items:
@@ -6962,11 +6970,13 @@ components:
       type: object
       required:
         - wave_name_in_content
-        - wave
+        - wave_id
       properties:
         wave_name_in_content:
           type: string
           minLength: 1
+        wave_id:
+          type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
     ApiCreateMentionedWave:
@@ -7001,7 +7011,6 @@ components:
         - media
         - quoted_drop
         - content
-        - mentioned_waves
       properties:
         part_id:
           description: Which drop in the storm is this drop
@@ -7019,10 +7028,6 @@ components:
           anyOf:
             - $ref: "#/components/schemas/ApiQuotedDropResponse"
             - type: "null"
-        mentioned_waves:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiMentionedWave"
     ApiDropRater:
       type: object
       required:
@@ -7178,6 +7183,7 @@ components:
         - updated_at
         - referenced_nfts
         - mentioned_users
+        - mentioned_waves
         - metadata
         - parts
         - parts_count
@@ -7246,6 +7252,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMentionedUser"
+        mentioned_waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMentionedWave"
         metadata:
           type: array
           items:
@@ -7372,6 +7382,8 @@ components:
         - identity_group_identities_count
         - excluded_identity_group_id
         - excluded_identity_group_identities_count
+        - is_beneficiary_of_grant_id
+        - is_beneficiary_of_grant
       properties:
         tdh:
           $ref: "#/components/schemas/ApiGroupTdhFilter"
@@ -7399,6 +7411,13 @@ components:
           type: number
           format: int64
           nullable: false
+        is_beneficiary_of_grant_id:
+          type: string
+          nullable: true
+        is_beneficiary_of_grant:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiXTdhGrant"
     ApiGroupFilterDirection:
       type: string
       enum:

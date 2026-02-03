@@ -12,6 +12,7 @@
  */
 
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
+import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
@@ -28,6 +29,7 @@ export class ApiCreateDropRequest {
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
     'mentioned_users': Array<ApiDropMentionedUser>;
+    'mentioned_waves'?: Array<ApiCreateMentionedWave>;
     'metadata': Array<ApiDropMetadata>;
     /**
     * If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature (+ wave.participation.terms if it exists))))
@@ -87,6 +89,12 @@ export class ApiCreateDropRequest {
             "name": "mentioned_users",
             "baseName": "mentioned_users",
             "type": "Array<ApiDropMentionedUser>",
+            "format": ""
+        },
+        {
+            "name": "mentioned_waves",
+            "baseName": "mentioned_waves",
+            "type": "Array<ApiCreateMentionedWave>",
             "format": ""
         },
         {
