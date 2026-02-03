@@ -1,17 +1,19 @@
-import React from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
-import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
+import Link from "next/link";
+import React, { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
+import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
+import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
@@ -29,6 +31,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   isResetting = false,
 }) => {
   const artWork = drop.parts.at(0)?.media.at(0);
+  const previewImageUrl = useMemo(
+    () => getDropPreviewImageUrl(drop.metadata),
+    [drop.metadata]
+  );
 
   const handleClick = () => {
     if (window.getSelection()?.toString()) {
@@ -47,24 +53,24 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   return (
     <div
       key={drop.id}
-      className={`tw-bg-iron-950 tw-rounded-xl tw-px-5 tw-py-4 tw-border tw-border-solid tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container ${
+      className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-px-5 tw-py-4 tw-shadow-md tw-transition-all tw-duration-300 tw-@container desktop-hover:hover:tw-shadow-lg ${
         isChecked
           ? "tw-border-primary-400"
           : "tw-border-iron-800 desktop-hover:hover:tw-border-iron-700"
       }`}
       onClick={handleClick}
     >
-      <div className="tw-flex @md:tw-flex-row @sm:tw-flex-col @xs:tw-flex-col tw-gap-4">
+      <div className="tw-flex tw-gap-4 @xs:tw-flex-col @sm:tw-flex-col @md:tw-flex-row">
         <div
-          className="tw-flex-shrink-0 tw-self-start tw-mr-1"
+          className="tw-mr-1 tw-flex-shrink-0 tw-self-start"
           onClick={handleCheckboxClick}
         >
           <div
-            className={`tw-size-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
+            className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
               isChecked
                 ? "tw-border-primary-400 tw-bg-primary-400/20"
                 : "tw-border-iron-600 tw-bg-iron-800"
-            } tw-cursor-pointer tw-shadow-sm hover:tw-shadow-md tw-transition-all tw-duration-200`}
+            } tw-cursor-pointer tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-shadow-md`}
           >
             {isChecked && (
               <svg
@@ -84,38 +90,46 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[106px] tw-min-w-[106px] @md:tw-size-[106px] @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2 tw-relative">
-          <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
+        <div className="tw-relative tw-min-h-[106px] tw-min-w-[106px] tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 @xs:tw-h-56 @xs:tw-w-full @sm:tw-mb-2 @sm:tw-h-56 @sm:tw-w-full @md:tw-size-[106px]">
+          <div className="tw-relative tw-flex tw-h-full tw-w-full tw-transform tw-items-center tw-justify-center tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-105">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
-                <DropListItemContentMedia
+                <MediaDisplay
                   media_mime_type={artWork.mime_type}
                   media_url={artWork.url}
                   imageScale={ImageScale.AUTOx450}
-                  isCompetitionDrop={true}
+                  previewImageUrl={previewImageUrl}
+                  disableMediaInteraction={true}
                 />
               )}
             </div>
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
-            <h3 className="tw-text-base tw-font-semibold tw-text-iron-50 tw-mb-0">
-              {drop.title}
-            </h3>
+            <div className="tw-flex tw-items-center tw-gap-x-2">
+              <MediaTypeBadge
+                mimeType={artWork?.mime_type}
+                dropId={drop.id}
+                size="sm"
+              />
+              <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+                {drop.title}
+              </h3>
+            </div>
             {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
           </div>
-          <div className="tw-flex tw-items-center tw-gap-2 tw-mt-4">
-            <div className="tw-size-6 tw-relative tw-flex-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
+          <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2">
+            <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
               {drop.author.pfp ? (
                 <img
                   src={drop.author.pfp}
                   alt="Profile"
-                  className="tw-h-full tw-w-full tw-object-contain tw-bg-iron-800"
+                  className="tw-h-full tw-w-full tw-bg-iron-800 tw-object-contain"
                 />
               ) : (
-                <div className="tw-h-full tw-w-full tw-bg-iron-800 tw-rounded-md tw-ring-1 tw-ring-white/10"></div>
+                <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10"></div>
               )}
             </div>
             <UserCICAndLevel
@@ -132,13 +146,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   e.preventDefault();
                   window.open(`/${drop.author.handle}`, "_blank");
                 }}
-                className="tw-text-md tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition-colors tw-duration-200 tw-no-underline desktop-hover:hover:tw-underline tw-font-medium tw-truncate"
+                className="tw-truncate tw-text-md tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
               >
                 {drop.author.handle}
               </Link>
             </UserProfileTooltipWrapper>
           </div>
-          <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-3.5 xl:tw-mt-3">
+          <div className="tw-mt-3.5 tw-flex tw-flex-col tw-justify-between tw-gap-4 @lg:tw-flex-col @[42rem]:tw-flex-row xl:tw-mt-3">
             <div className="tw-flex tw-items-center tw-gap-x-6">
               <div onClick={(e) => e.stopPropagation()}>
                 <MyStreamWaveMyVoteVotes drop={drop} />
@@ -154,12 +168,12 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                       >
                         {voter.profile.pfp ? (
                           <img
-                            className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                            className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
                             src={voter.profile.pfp}
                             alt="Recent voter"
                           />
                         ) : (
-                          <div className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                          <div className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
                         )}
                       </Link>
                       <Tooltip
@@ -185,9 +199,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                     </React.Fragment>
                   ))}
                 </div>
-                <span className="tw-text-iron-200 tw-font-semibold tw-text-sm">
+                <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
                   {formatNumberWithCommas(drop.raters_count)}{" "}
-                  <span className="tw-text-iron-500 tw-font-normal">
+                  <span className="tw-font-normal tw-text-iron-500">
                     {drop.raters_count === 1 ? "voter" : "voters"}
                   </span>
                 </span>

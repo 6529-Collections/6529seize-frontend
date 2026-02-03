@@ -140,17 +140,19 @@ export default function WaveDropActionsToggleLinkPreview({
 
   const hasLinks = useMemo(() => dropHasLinks(drop), [drop]);
 
+  const isTemporaryDrop = drop.id.startsWith("temp-");
   const isAuthor =
     connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
 
   const previewsHidden = drop.hide_link_preview;
+  const canToggle = !isTemporaryDrop;
 
   const labelText = previewsHidden
     ? "Show Link Previews"
     : "Hide Link Previews";
 
   const handleToggle = useCallback(async () => {
-    if (loading) return;
+    if (loading || !canToggle) return;
 
     setLoading(true);
     setTooltipOpen(false);
@@ -185,6 +187,7 @@ export default function WaveDropActionsToggleLinkPreview({
     }
   }, [
     loading,
+    canToggle,
     applyOptimisticDropUpdate,
     drop.wave.id,
     drop.id,
@@ -202,15 +205,16 @@ export default function WaveDropActionsToggleLinkPreview({
     handleToggle();
   };
 
-  const buttonClassName = loading
-    ? "tw-opacity-50 tw-cursor-default"
-    : "active:tw-bg-iron-800";
+  const buttonClassName =
+    loading || !canToggle
+      ? "tw-opacity-50 tw-cursor-default"
+      : "active:tw-bg-iron-800";
 
   if (isMobile) {
     return (
       <button
         onClick={handleClick}
-        disabled={loading}
+        disabled={loading || !canToggle}
         className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${buttonClassName} tw-transition-colors tw-duration-200`}
       >
         <ToggleIcon
@@ -230,12 +234,18 @@ export default function WaveDropActionsToggleLinkPreview({
       <button
         type="button"
         onClick={handleClick}
-        disabled={loading}
-        className="icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+        disabled={loading || !canToggle}
+        className={`icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+          !canToggle
+            ? "tw-cursor-default tw-opacity-50"
+            : "hover:tw-text-iron-300"
+        }`}
         aria-label={
           previewsHidden ? "Show link previews" : "Hide link previews"
         }
-        data-tooltip-id={`toggle-link-preview-${drop.id}`}
+        {...(!isTemporaryDrop
+          ? { "data-tooltip-id": `toggle-link-preview-${drop.id}` }
+          : {})}
       >
         <ToggleIcon
           loading={loading}
@@ -243,27 +253,29 @@ export default function WaveDropActionsToggleLinkPreview({
           isMobile={false}
         />
       </button>
-      <Tooltip
-        id={`toggle-link-preview-${drop.id}`}
-        place="top"
-        offset={8}
-        opacity={1}
-        isOpen={tooltipOpen}
-        setIsOpen={setTooltipOpen}
-        style={{
-          padding: "4px 8px",
-          background: "#37373E",
-          color: "white",
-          fontSize: "13px",
-          fontWeight: 500,
-          borderRadius: "6px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 99999,
-          pointerEvents: "none",
-        }}
-      >
-        <span className="tw-text-xs">{labelText}</span>
-      </Tooltip>
+      {!isTemporaryDrop && (
+        <Tooltip
+          id={`toggle-link-preview-${drop.id}`}
+          place="top"
+          offset={8}
+          opacity={1}
+          isOpen={tooltipOpen}
+          setIsOpen={setTooltipOpen}
+          style={{
+            padding: "4px 8px",
+            background: "#37373E",
+            color: "white",
+            fontSize: "13px",
+            fontWeight: 500,
+            borderRadius: "6px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            zIndex: 99999,
+            pointerEvents: "none",
+          }}
+        >
+          <span className="tw-text-xs">{labelText}</span>
+        </Tooltip>
+      )}
     </>
   );
 }

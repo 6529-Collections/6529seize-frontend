@@ -59,6 +59,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { useWave } from "@/hooks/useWave";
@@ -408,8 +409,8 @@ const getOptimisticDrop = (
         connectedProfile.active_main_stage_submission_ids,
       winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids,
       pfp: connectedProfile.pfp,
-      banner1_color: connectedProfile.banner1 ?? null,
-      banner2_color: connectedProfile.banner2 ?? null,
+      banner1_color: getBannerColorValue(connectedProfile.banner1),
+      banner2_color: getBannerColorValue(connectedProfile.banner2),
       cic: connectedProfile.cic,
       rep: connectedProfile.rep,
       tdh: connectedProfile.tdh,

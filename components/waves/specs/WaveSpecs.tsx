@@ -1,4 +1,5 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
@@ -12,6 +13,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
   const ringClasses = useRing
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "";
+  const isChatWave = wave.wave.type === ApiWaveType.Chat;
 
   return (
     <div
@@ -32,12 +34,14 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
             </div>
           </div>
 
-          <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-400">Voting</span>
-            <div className="tw-flex tw-flex-1 tw-justify-end">
-              <WaveRating wave={wave} />
+          {!isChatWave && (
+            <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-text-sm">
+              <span className="tw-font-medium tw-text-iron-400">Voting</span>
+              <div className="tw-flex tw-flex-1 tw-justify-end">
+                <WaveRating wave={wave} />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
             <span className="tw-font-medium tw-text-iron-400">Creator</span>
