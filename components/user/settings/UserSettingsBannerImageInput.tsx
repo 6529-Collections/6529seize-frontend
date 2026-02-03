@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useImageUpload } from "./useImageUpload";
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
+import { useImageUpload } from "./useImageUpload";
 
-export default function UserSettingsImgSelectFile({
+export default function UserSettingsBannerImageInput({
   imageToShow,
   setFile,
 }: {
@@ -33,18 +33,17 @@ export default function UserSettingsImgSelectFile({
           shake ? "tw-animate-shake" : ""
         } `}
       >
-        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pb-6 tw-pt-5">
-          {imageToShow && (
+        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4">
+          {imageToShow ? (
             <div className="tw-relative tw-h-40 tw-w-40">
               <Image
                 src={imageToShow}
-                alt="Profile image"
+                alt="Banner preview"
                 fill
                 className="tw-rounded-sm tw-object-contain"
               />
             </div>
-          )}
-          {!imageToShow && (
+          ) : (
             <>
               <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
                 <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
@@ -64,25 +63,25 @@ export default function UserSettingsImgSelectFile({
                   </svg>
                 </div>
               </div>
-              <p className="tw-mb-2 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-400">
-                <span className="tw-font-medium tw-text-white">
-                  Click to upload
-                </span>{" "}
-                or drag and drop
-              </p>
-              <p className="tw-text-xs tw-font-normal tw-text-iron-400">
-                JPEG, JPG, PNG, GIF, WEBP
-              </p>
+              <div className="tw-flex tw-flex-col tw-items-center tw-justify-center">
+                <p className="tw-mb-1 tw-text-sm tw-font-normal tw-text-iron-400">
+                  <span className="tw-font-medium tw-text-white">
+                    Click to upload
+                  </span>{" "}
+                  or drag and drop
+                </p>
+                <p className="tw-text-xs tw-font-normal tw-text-iron-400">
+                  JPEG, JPG, PNG, GIF — max 2MB
+                </p>
+              </div>
             </>
           )}
           {error && (
-            <p className="tw-absolute tw-bottom-2 tw-left-0 tw-w-full tw-text-center tw-text-xs tw-font-medium tw-text-red">
-              {error}
-            </p>
+            <p className="tw-text-xs tw-font-medium tw-text-red">{error}</p>
           )}
         </div>
         <input
-          id="pfp-upload-input"
+          id="banner-upload-input"
           type="file"
           className="tw-hidden"
           accept={ACCEPTED_FORMATS_DISPLAY}
