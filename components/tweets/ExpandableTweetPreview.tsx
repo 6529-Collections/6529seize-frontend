@@ -15,11 +15,13 @@ import CompactTweetContent from "./ExpandableTweetPreviewCompactContent";
 import ExpandedTweetContent from "./ExpandableTweetPreviewExpandedContent";
 import MeasurementShell from "./ExpandableTweetPreviewMeasurementShell";
 import type { EnrichedTweet } from "./ExpandableTweetPreview.types";
+import type { TweetPreviewMode } from "./TweetPreviewModeContext";
 
 interface ExpandableTweetPreviewProps {
   readonly href: string;
   readonly tweetId: string;
   readonly compactHeightClassName?: string | undefined;
+  readonly compactMode?: TweetPreviewMode | undefined;
   readonly renderFallback?: ((href: string) => ReactNode) | undefined;
 }
 
@@ -37,6 +39,7 @@ export default function ExpandableTweetPreview({
   href,
   tweetId,
   compactHeightClassName = "tw-h-64",
+  compactMode,
   renderFallback,
 }: ExpandableTweetPreviewProps) {
   const { data, isLoading } = useTweet(tweetId);
@@ -47,8 +50,13 @@ export default function ExpandableTweetPreview({
   const [isExpanded, setIsExpanded] = useState(false);
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
   const measureRef = useRef<HTMLDivElement | null>(null);
+  const compactModeRef = useRef<TweetPreviewMode>(compactMode ?? "auto");
+  const allowCompact = compactModeRef.current === "auto";
 
   useLayoutEffect(() => {
+    if (!allowCompact) {
+      return;
+    }
     if (!tweet || measuredHeight !== null) {
       return;
     }
@@ -59,10 +67,13 @@ export default function ExpandableTweetPreview({
     if (rect.height > 0) {
       setMeasuredHeight(rect.height);
     }
-  }, [tweet, measuredHeight]);
+  }, [tweet, measuredHeight, allowCompact]);
 
-  const shouldCompact =
-    measuredHeight === null ? true : measuredHeight > COMPACT_THRESHOLD_PX;
+  const shouldCompact = allowCompact
+    ? measuredHeight === null
+      ? true
+      : measuredHeight > COMPACT_THRESHOLD_PX
+    : false;
 
   const heightClassName =
     !shouldCompact || isExpanded ? "" : compactHeightClassName;
@@ -70,9 +81,9 @@ export default function ExpandableTweetPreview({
   const overflowClassName =
     isExpanded || !shouldCompact ? "tw-overflow-visible" : "tw-overflow-hidden";
   const rootClassName = `${styles["root"] ?? ""} ${modeClassName ?? ""} ${heightClassName} ${overflowClassName} tw-relative tw-w-full tw-min-w-0 tw-max-w-full`;
-  const showMeasure = measuredHeight === null;
+  const showMeasure = allowCompact && measuredHeight === null;
   const showExpanded = isExpanded || !shouldCompact;
-  const showCompactControls = !isExpanded && shouldCompact;
+  const showCompactControls = allowCompact && !isExpanded && shouldCompact;
 
   if (isLoading) {
     return (

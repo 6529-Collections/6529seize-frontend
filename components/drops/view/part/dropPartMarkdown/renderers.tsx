@@ -8,6 +8,7 @@ import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "@/components/waves/drops/WaveDropQuoteWithSerialNo";
 import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
+import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import { ensureTwitterLink } from "./twitter";
 
 const TweetFallback = ({ href }: { href: string }) => (
@@ -24,7 +25,10 @@ const TweetFallback = ({ href }: { href: string }) => (
   </a>
 );
 
-const renderTweetEmbed = (href: string) => {
+const renderTweetEmbed = (
+  href: string,
+  options?: { readonly tweetPreviewMode?: TweetPreviewMode }
+) => {
   const { tweetId, href: normalizedHref } = ensureTwitterLink(href);
   const renderFallback = () => <TweetFallback href={normalizedHref} />;
   return (
@@ -34,6 +38,7 @@ const renderTweetEmbed = (href: string) => {
           <ExpandableTweetPreview
             href={normalizedHref}
             tweetId={tweetId}
+            compactMode={options?.tweetPreviewMode}
             renderFallback={(fallbackHref) => (
               <TweetFallback href={fallbackHref} />
             )}
