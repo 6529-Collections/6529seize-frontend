@@ -60,7 +60,7 @@ export default function UserPageHeaderEditBanner({
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(
     initialBannerImageUrl
-      ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx1080)
+      ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx800)
       : null
   );
 
@@ -73,7 +73,7 @@ export default function UserPageHeaderEditBanner({
 
     setBannerPreviewUrl(
       initialBannerImageUrl
-        ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx1080)
+        ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx800)
         : null
     );
     return undefined;
