@@ -89,6 +89,10 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
 
       // For Memes wave - don't set default tab, let it use standard behavior
       if (isMemesWave) {
+        const getDefaultTab = (tabsToCheck: MyStreamWaveTab[]) =>
+          tabsToCheck.includes(MyStreamWaveTab.LEADERBOARD)
+            ? MyStreamWaveTab.LEADERBOARD
+            : MyStreamWaveTab.CHAT;
         const tabs: MyStreamWaveTab[] = [];
         if (votingState !== WaveVotingState.ENDED) {
           tabs.push(MyStreamWaveTab.LEADERBOARD);
@@ -105,18 +109,8 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
 
         const isNewWave = !!waveId && waveId !== lastWaveIdRef.current;
 
-        if (isNewWave) {
-          if (tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
-            setActiveContentTabRaw(MyStreamWaveTab.LEADERBOARD);
-          } else {
-            setActiveContentTabRaw(MyStreamWaveTab.CHAT);
-          }
-        } else if (!tabs.includes(activeContentTabRaw)) {
-          if (tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
-            setActiveContentTabRaw(MyStreamWaveTab.LEADERBOARD);
-          } else {
-            setActiveContentTabRaw(MyStreamWaveTab.CHAT);
-          }
+        if (isNewWave || !tabs.includes(activeContentTabRaw)) {
+          setActiveContentTabRaw(getDefaultTab(tabs));
         }
 
         lastWaveIdRef.current = waveId ?? null;
