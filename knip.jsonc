@@ -1,13 +1,13 @@
 {
     "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
-  
+
     // 1) Tell Knip where your code lives (project graph)
     "project": [
       "**/*.{ts,tsx,js,jsx,cjs,mjs}",
       "!{node_modules,.next,coverage,public}/**",
       "!{tmp_gen_outp}/**"
     ],
-  
+
     // 2) Optionally add entries Knip can't infer from scripts/configs
     //    (Next.js entries are auto-added by the Next plugin)
     "entry": [
@@ -21,17 +21,17 @@
       "playwright.config.ts",
       "services/**/index.{ts,tsx}"
     ],
-  
+
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
     //    but you can add manual aliases here if needed.
     // "paths": { "@/*": ["./src/*"] },
-  
+
     // 4) Report unused exports even in entry files (private repos benefit from this)
     "includeEntryExports": true,
 
     // Ignore exports explicitly tagged as API endpoints (e.g. /** @api */)
     "tags": ["-api"],
-  
+
     // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
     "ignoreIssues": {
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
@@ -71,17 +71,18 @@
       "nodemon",
       "ts-jest",
       "ts-morph",
-      "tsx"
+      "tsx",
+      "baseline-browser-mapping",
+      "yaml"
     ],
-  
+
     // Disable Jest and Playwright plugins so test-only usages are reported
     "jest": false,
     "playwright": false,
-  
+
     // 6) Make config mistakes visible in CI
     "treatConfigHintsAsErrors": true
-  
+
     // Plugins: usually automatic. Example to force-enable if needed:
     // "playwright": true
   }
-  
