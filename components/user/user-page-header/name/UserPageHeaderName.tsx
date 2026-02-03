@@ -1,6 +1,8 @@
 import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
+import UserLevel from "@/components/user/utils/level/UserLevel";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
@@ -8,10 +10,16 @@ export default function UserPageHeaderName({
   profile,
   canEdit,
   mainAddress,
+  level,
+  profileEnabledAt,
+  variant = "full",
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
   readonly mainAddress: string;
+  readonly level: number;
+  readonly profileEnabledAt: string | null;
+  readonly variant?: "full" | "title" | "meta";
 }) {
   const getDisplayName = (): string => {
     if (profile?.handle) {
@@ -30,27 +38,57 @@ export default function UserPageHeaderName({
   };
 
   const displayName = getDisplayName();
-  return (
-    <div className="tw-mt-2 sm:tw-mt-3">
-      <div className="tw-flex tw-items-center">
-        <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
-          <p className="tw-break-all tw-text-left tw-mb-0 tw-text-2xl sm:tw-text-3xl tw-font-semibold">
-            {displayName}
-          </p>
-        </UserPageHeaderNameWrapper>
-        {profile?.handle && (
-          <div className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-self-center tw-h-6 tw-w-6">
-            <UserCICTypeIconWrapper profile={profile} />
-          </div>
-        )}
-      </div>
+  const profileEnabledLabel = profileEnabledAt
+    ? formatTimestampToMonthYear(new Date(profileEnabledAt).getTime())
+    : null;
 
-      {profile?.classification && (
-        <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-          <div className="tw-block tw-text-iron-400 hover:tw-text-iron-300 tw-font-medium tw-text-sm tw-leading-3 tw-transition tw-duration-300 tw-ease-out">
-            {CLASSIFICATIONS[profile.classification].title}
-          </div>
-        </UserPageClassificationWrapper>
+  const showTitle = variant !== "meta";
+  const showMeta = variant !== "title";
+
+  return (
+    <div className={showTitle && showMeta ? "tw-space-y-2" : ""}>
+      {showTitle && (
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+          <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
+            <p className="tw-mb-0 tw-break-all tw-text-left tw-text-[1.75rem] tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-[2rem]">
+              {displayName}
+            </p>
+          </UserPageHeaderNameWrapper>
+          {profile?.handle && (
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center md:tw-h-6 md:tw-w-6">
+              <UserCICTypeIconWrapper profile={profile} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {showMeta && (
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+          {profile?.classification && (
+            <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
+              <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-zinc-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
+                {CLASSIFICATIONS[profile.classification].title}
+              </div>
+            </UserPageClassificationWrapper>
+          )}
+          {profile?.classification && (
+            <span className="tw-text-zinc-600 sm:tw-text-zinc-700">&bull;</span>
+          )}
+          <UserLevel level={level} size="xs" />
+          {profileEnabledLabel && (
+            <>
+              <span className="tw-text-zinc-600 sm:tw-text-zinc-700">
+                &bull;
+              </span>
+              <p
+                className="tw-mb-0 tw-text-sm tw-font-medium tw-text-zinc-500"
+                suppressHydrationWarning
+              >
+                Profile enabled: {profileEnabledLabel}
+              </p>
+            </>
+          )}
+        </div>
       )}
     </div>
   );

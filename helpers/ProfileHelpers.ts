@@ -1,6 +1,7 @@
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 import type { ProfileMinWithoutSubs } from "./ProfileTypes";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 export const getProfileConnectedStatus = ({
   profile,
   isProxy,
@@ -26,24 +27,26 @@ export const profileAndConsolidationsToProfileMin = ({
   readonly profile: ApiIdentity;
 }): ProfileMinWithoutSubs | null =>
   profile.id && profile.handle
-    ? {
-        id: profile.id,
-        active_main_stage_submission_ids:
-          profile.active_main_stage_submission_ids,
-        winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
-        handle: profile.handle,
-        pfp: profile.pfp ?? null,
-        banner1_color: profile.banner1 ?? null,
-        banner2_color: profile.banner2 ?? null,
-        cic: profile.cic,
-        rep: profile.rep,
-        tdh: profile.tdh,
-        xtdh: profile.xtdh,
-        tdh_rate: profile.tdh_rate,
-        xtdh_rate: profile.xtdh_rate,
-        level: profile.level,
-        archived: false,
-        primary_address: profile.primary_wallet,
-        is_wave_creator: profile.is_wave_creator,
-      }
+    ? (() => {
+        return {
+          id: profile.id,
+          active_main_stage_submission_ids:
+            profile.active_main_stage_submission_ids,
+          winner_main_stage_drop_ids: profile.winner_main_stage_drop_ids,
+          handle: profile.handle,
+          pfp: profile.pfp ?? null,
+          banner1_color: getBannerColorValue(profile.banner1),
+          banner2_color: getBannerColorValue(profile.banner2),
+          cic: profile.cic,
+          rep: profile.rep,
+          tdh: profile.tdh,
+          xtdh: profile.xtdh,
+          tdh_rate: profile.tdh_rate,
+          xtdh_rate: profile.xtdh_rate,
+          level: profile.level,
+          archived: false,
+          primary_address: profile.primary_wallet,
+          is_wave_creator: profile.is_wave_creator,
+        };
+      })()
     : null;
