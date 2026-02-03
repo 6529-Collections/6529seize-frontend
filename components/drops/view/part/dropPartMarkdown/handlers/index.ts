@@ -10,14 +10,17 @@ import { createTikTokHandler } from "./tiktok";
 import { createTwitterHandler } from "./twitter";
 import { createWikimediaHandler } from "./wikimedia";
 import { createYoutubeHandler } from "./youtube";
+import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
-export const createLinkHandlers = (): LinkHandler[] => [
+export const createLinkHandlers = (options?: {
+  readonly tweetPreviewMode?: TweetPreviewMode;
+}): LinkHandler[] => [
   createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
   createEnsHandler(),
   createCompoundHandler(),
-  createTwitterHandler(),
+  createTwitterHandler(options),
   createWikimediaHandler(),
   createGifHandler(),
   createArtBlocksHandler(),

@@ -2,7 +2,6 @@
 
 import { publicEnv } from "@/config/env";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useMyStreamOptional } from "./wave/MyStreamContext";
 import React, {
   createContext,
   useContext,
@@ -11,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useMyStreamOptional } from "./wave/MyStreamContext";
 
 type TitleContextType = {
   title: string;
@@ -98,12 +98,26 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [pathname]);
 
   useEffect(() => {
-    if (routeRef.current !== pathname) {
+    const pathnameChanged = routeRef.current !== pathname;
+    const waveInUrl = searchParams?.get("wave") ?? null;
+    const hadWaveInUrl = queryRef.current?.get("wave") ?? null;
+
+    if (pathnameChanged) {
       routeRef.current = pathname;
       queryRef.current = searchParams;
       const defaultTitle = getDefaultTitleForRoute(pathname);
       setTitle(defaultTitle);
       setWaveData(null);
+      return;
+    }
+
+    const isWavesRoute = pathname?.startsWith("/waves");
+    if (isWavesRoute && hadWaveInUrl && !waveInUrl) {
+      queryRef.current = searchParams;
+      setTitle(getDefaultTitleForRoute(pathname));
+      setWaveData(null);
+    } else {
+      queryRef.current = searchParams;
     }
   }, [pathname, searchParams]);
 

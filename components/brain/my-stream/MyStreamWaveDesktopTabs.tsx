@@ -59,12 +59,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = React.useMemo(() => {
     // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
-    const decisionsAsApiFormat = allDecisions.map(
-      (decision) =>
-        ({
-          decision_time: decision.timestamp,
-        } as any)
-    );
+    const decisionsAsApiFormat = allDecisions.map((decision) => ({
+      decision_time: decision.timestamp,
+    }));
 
     // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
@@ -125,11 +122,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     const votingState = isUpcoming
       ? WaveVotingState.NOT_STARTED
       : isCompleted
-      ? WaveVotingState.ENDED
-      : WaveVotingState.ONGOING;
+        ? WaveVotingState.ENDED
+        : WaveVotingState.ONGOING;
     updateAvailableTabs(
       wave
         ? {
+            waveId: wave.id,
             isMemesWave,
             isChatWave,
             votingState,
@@ -197,7 +195,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }
 
   return (
-    <div className="tw-@container/tabs tw-px-2 sm:tw-px-4 tw-flex tw-items-start tw-gap-4 tw-justify-between tw-w-full tw-overflow-x-auto tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-thin">
+    <div className="tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-4 tw-overflow-x-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 tw-@container/tabs hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4">
       <TabToggle
         options={options}
         activeKey={activeTab}

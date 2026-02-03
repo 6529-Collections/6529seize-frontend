@@ -1,13 +1,13 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
+import type { ReactNode } from "react";
 import React, {
   createContext,
   useState,
   useContext,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 
@@ -19,6 +19,7 @@ export enum WaveVotingState {
 
 // Define a type for the updateAvailableTabs parameters
 type WaveTabParams = {
+  waveId: string | null;
   isChatWave: boolean;
   isMemesWave: boolean;
   votingState: WaveVotingState;
@@ -49,6 +50,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([
     MyStreamWaveTab.CHAT,
   ]);
+  const lastWaveIdRef = useRef<string | null>(null);
 
   // Function to determine which tabs are available based on wave state
   // Now accepts a params object or null
@@ -56,6 +58,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
     (params: WaveTabParams | null) => {
       if (!params) {
         setAvailableTabs([MyStreamWaveTab.CHAT]);
+        lastWaveIdRef.current = null;
 
         // If current tab is not CHAT, switch to it
         if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
@@ -64,8 +67,13 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         return;
       }
 
-      const { isChatWave, isMemesWave, votingState, hasFirstDecisionPassed } =
-        params;
+      const {
+        waveId,
+        isChatWave,
+        isMemesWave,
+        votingState,
+        hasFirstDecisionPassed,
+      } = params;
 
       // Chat-type waves only show chat tab
       if (isChatWave) {
@@ -75,16 +83,21 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
           setActiveContentTabRaw(MyStreamWaveTab.CHAT);
         }
+        lastWaveIdRef.current = waveId ?? null;
         return;
       }
 
       // For Memes wave - don't set default tab, let it use standard behavior
       if (isMemesWave) {
-        const tabs = [MyStreamWaveTab.CHAT];
+        const getDefaultTab = (tabsToCheck: MyStreamWaveTab[]) =>
+          tabsToCheck.includes(MyStreamWaveTab.LEADERBOARD)
+            ? MyStreamWaveTab.LEADERBOARD
+            : MyStreamWaveTab.CHAT;
+        const tabs: MyStreamWaveTab[] = [];
         if (votingState !== WaveVotingState.ENDED) {
           tabs.push(MyStreamWaveTab.LEADERBOARD);
         }
-
+        tabs.push(MyStreamWaveTab.CHAT);
         if (hasFirstDecisionPassed) {
           tabs.push(MyStreamWaveTab.WINNERS);
         }
@@ -94,11 +107,13 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
 
         setAvailableTabs(tabs);
 
-        // Only switch if the current tab is not available
-        if (!tabs.includes(activeContentTabRaw)) {
-          setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        const isNewWave = !!waveId && waveId !== lastWaveIdRef.current;
+
+        if (isNewWave || !tabs.includes(activeContentTabRaw)) {
+          setActiveContentTabRaw(getDefaultTab(tabs));
         }
 
+        lastWaveIdRef.current = waveId ?? null;
         return;
       }
 
@@ -133,6 +148,8 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
           setActiveContentTabRaw(MyStreamWaveTab.CHAT);
         }
       }
+
+      lastWaveIdRef.current = waveId ?? null;
     },
     [activeContentTabRaw]
   );
