@@ -21,6 +21,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useTweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
 import {
   DropContentPartType,
@@ -240,6 +241,7 @@ function DropPartMarkdown({
 }: DropPartMarkdownProps) {
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
+  const tweetPreviewMode = useTweetPreviewMode();
 
   const textSizeClass = useMemo(() => {
     switch (textSize) {
@@ -256,8 +258,9 @@ function DropPartMarkdown({
         onQuoteClick,
         currentDropId,
         hideLinkPreviews,
+        tweetPreviewMode,
       }),
-    [onQuoteClick, currentDropId, hideLinkPreviews]
+    [onQuoteClick, currentDropId, hideLinkPreviews, tweetPreviewMode]
   );
 
   const { customRenderer, renderParagraph, processContent } = useMemo(
