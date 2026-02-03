@@ -52,6 +52,7 @@ export default function UserSettingsBannerImageInput({
   const handleDrop = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+    setDragging(false);
     if (e?.dataTransfer?.files?.length) {
       onFileChange(e.dataTransfer.files[0]);
     }

@@ -49,7 +49,7 @@ export default function UserPageHeaderAbout({
         <div className="tw-max-w-3xl">
           <div
             className={`tw-inline-flex tw-items-start tw-gap-2${
-              canEdit ? "tw-group" : ""
+              canEdit ? " tw-group" : ""
             }`}
           >
             {canEdit ? (
