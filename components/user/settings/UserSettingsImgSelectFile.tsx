@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useContext, useRef, useState } from "react";
+import { useRef } from "react";
 import Image from "next/image";
-import { AuthContext } from "@/components/auth/Auth";
 import { getFileExtension } from "@/components/waves/memes/file-upload/utils/formatHelpers";
+import { useImageUpload } from "./useImageUpload";
 
 const ACCEPTED_FORMATS = [
   "image/jpeg",
@@ -31,8 +31,6 @@ export const isValidImageType = (file: File): boolean => {
   return false;
 };
 
-const FILE_SIZE_LIMIT = 2097152;
-
 export default function UserSettingsImgSelectFile({
   imageToShow,
   setFile,
@@ -40,62 +38,18 @@ export default function UserSettingsImgSelectFile({
   readonly imageToShow: string | null;
   readonly setFile: (file: File) => void;
 }) {
-  const { setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [shake, setShake] = useState<boolean>(false);
-  const [dragging, setDragging] = useState(false);
-  const onFileChange = useCallback(
-    (file: File) => {
-      setError(null);
-      if (!isValidImageType(file)) {
-        setToast({
-          type: "error",
-          message: "Invalid file type",
-        });
-        return;
-      }
-      if (file.size > FILE_SIZE_LIMIT) {
-        setError("File size must be less than 2MB");
-        setShake(true);
-        setTimeout(() => setShake(false), 300);
-        return;
-      }
-      setFile(file);
-    },
-    [setFile, setToast]
-  );
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        onFileChange(file);
-      }
-    },
-    [onFileChange]
-  );
-
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragging(true);
-    } else if (e.type === "dragleave") {
-      setDragging(false);
+  const { error, shake, dragging, onFileChange, dragHandlers } = useImageUpload(
+    {
+      maxSizeBytes: 2097152,
+      maxSizeLabel: "2MB",
+      setFile,
     }
-  }, []);
-
+  );
 
   return (
     <div
-      onDrop={handleDrop}
-      onDragEnter={handleDrag}
-      onDragLeave={handleDrag}
-      onDragOver={handleDrag}
+      {...dragHandlers}
       className="tw-group tw-flex tw-w-full tw-items-center tw-justify-center"
     >
       <label

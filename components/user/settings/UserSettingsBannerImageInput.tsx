@@ -1,14 +1,10 @@
 "use client";
 
-import { useCallback, useContext, useRef, useState } from "react";
 import Image from "next/image";
-import { AuthContext } from "@/components/auth/Auth";
 import {
   ACCEPTED_FORMATS_DISPLAY,
-  isValidImageType,
 } from "./UserSettingsImgSelectFile";
-
-const FILE_SIZE_LIMIT = 10485760;
+import { useImageUpload } from "./useImageUpload";
 
 export default function UserSettingsBannerImageInput({
   imageToShow,
@@ -17,74 +13,17 @@ export default function UserSettingsBannerImageInput({
   readonly imageToShow: string | null;
   readonly setFile: (file: File) => void;
 }) {
-  const { setToast } = useContext(AuthContext);
-  const dragDepth = useRef(0);
-  const [error, setError] = useState<string | null>(null);
-  const [shake, setShake] = useState<boolean>(false);
-  const [dragging, setDragging] = useState(false);
-
-  const onFileChange = useCallback(
-    (file: File) => {
-      setError(null);
-      if (!isValidImageType(file)) {
-        setToast({
-          type: "error",
-          message: "Invalid file type",
-        });
-        return;
-      }
-
-      if (file.size > FILE_SIZE_LIMIT) {
-        setError("File size must be less than 10MB");
-        setShake(true);
-        setTimeout(() => setShake(false), 300);
-        return;
-      }
-
-      setFile(file);
-    },
-    [setFile, setToast]
-  );
-
-  const onDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dragDepth.current += 1;
-    setDragging(true);
-  }, []);
-
-  const onDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dragDepth.current -= 1;
-    if (dragDepth.current <= 0) {
-      dragDepth.current = 0;
-      setDragging(false);
+  const { error, shake, dragging, onFileChange, dragHandlers } = useImageUpload(
+    {
+      maxSizeBytes: 10485760,
+      maxSizeLabel: "10MB",
+      setFile,
     }
-  }, []);
-
-  const onDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      dragDepth.current = 0;
-      setDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        onFileChange(file);
-      }
-    },
-    [onFileChange]
   );
-
 
   return (
     <div
-      onDrop={handleDrop}
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
-      onDragOver={onDragOver}
+      {...dragHandlers}
       className="tw-group tw-flex tw-w-full tw-items-center tw-justify-center"
     >
       <label
