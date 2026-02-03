@@ -1,10 +1,9 @@
 "use client";
 
-import type {
-    DistributionPlanTokenPoolDownload} from "@/components/allowlist-tool/allowlist-tool.types";
+import type { DistributionPlanTokenPoolDownload } from "@/components/allowlist-tool/allowlist-tool.types";
 import {
-    AllowlistOperationCode,
-    DistributionPlanTokenPoolDownloadStatus,
+  AllowlistOperationCode,
+  DistributionPlanTokenPoolDownloadStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
@@ -14,8 +13,8 @@ import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
 import StepHeader from "../common/StepHeader";
 import {
-    DistributionPlanToolContext,
-    DistributionPlanToolStep,
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 import CreateSnapshotForm from "./form/CreateSnapshotForm";
 import CreateSnapshotTable from "./table/CreateSnapshotTable";
@@ -31,6 +30,8 @@ export interface CreateSnapshotSnapshot {
   blockNo: number | null;
   consolidateBlockNo: number | null;
   downloaderStatus: DistributionPlanTokenPoolDownloadStatus | null;
+  allowlistId: string;
+  order: number;
 }
 
 export default function CreateSnapshots() {
@@ -68,12 +69,13 @@ export default function CreateSnapshots() {
       return createTokenPoolOperations.map((createTokenPoolOperation) => {
         const tokenPool =
           tokenPools.find(
-            (tokenPool) => tokenPool.id === createTokenPoolOperation.params["id"]
+            (tp) => tp.id === createTokenPoolOperation.params["id"]
           ) ?? null;
 
         const tokenPoolDownload = tokenPoolDownloads.find(
           (tokenPoolDownload) =>
-            tokenPoolDownload.tokenPoolId === createTokenPoolOperation.params["id"]
+            tokenPoolDownload.tokenPoolId ===
+            createTokenPoolOperation.params["id"]
         );
         return {
           id: createTokenPoolOperation.params["id"],
@@ -87,6 +89,8 @@ export default function CreateSnapshots() {
           consolidateBlockNo:
             createTokenPoolOperation?.params["consolidateBlockNo"] ?? null,
           downloaderStatus: tokenPoolDownload?.status ?? null,
+          allowlistId: createTokenPoolOperation.allowlistId,
+          order: createTokenPoolOperation.order,
         };
       });
     };
@@ -119,9 +123,10 @@ export default function CreateSnapshots() {
   const fetchTokenPoolStatuses = async () => {
     if (!distributionPlan) return;
     const endpoint = `/allowlists/${distributionPlan.id}/token-pool-downloads`;
-    const { success, data } = await distributionPlanApiFetch<
-      DistributionPlanTokenPoolDownload[]
-    >(endpoint);
+    const { success, data } =
+      await distributionPlanApiFetch<DistributionPlanTokenPoolDownload[]>(
+        endpoint
+      );
     if (success && data) {
       setTokenPoolDownloads(data);
     }
@@ -141,7 +146,7 @@ export default function CreateSnapshots() {
   return (
     <div>
       <StepHeader step={DistributionPlanToolStep.CREATE_SNAPSHOTS} />
-      <p className="tw-mt-2 tw-block tw-font-semibold tw-text-sm tw-text-iron-100">
+      <p className="tw-mt-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
         * Please note: During this stage, some processes may take a moment to
         load.
       </p>
