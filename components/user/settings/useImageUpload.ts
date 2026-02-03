@@ -2,7 +2,7 @@
 
 import { useCallback, useContext, useRef, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import { isValidImageType } from "./UserSettingsImgSelectFile";
+import { isValidImageType } from "./imageValidation";
 
 interface UseImageUploadOptions {
   maxSizeBytes: number;

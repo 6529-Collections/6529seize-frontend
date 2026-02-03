@@ -40,17 +40,25 @@ export default function UserPageHeaderEditBanner({
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
-  useClickAway(modalRef, onClose);
-  useKeyPressEvent("Escape", onClose);
+  const isSavingRef = useRef(false);
+
+  const handleClose = () => {
+    if (!isSavingRef.current) {
+      onClose();
+    }
+  };
+
+  useClickAway(modalRef, handleClose);
+  useKeyPressEvent("Escape", handleClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
-  const initialBannerImageUrl = getBannerImageUrl(profile?.banner1);
+  const initialBannerImageUrl = getBannerImageUrl(profile.banner1);
   const initialBanner1Color =
-    getBannerColorValue(profile?.banner1) ?? defaultBanner1;
+    getBannerColorValue(profile.banner1) ?? defaultBanner1;
   const initialBanner2Color =
-    getBannerColorValue(profile?.banner2) ?? defaultBanner2;
+    getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   const [editMode, setEditMode] = useState<BannerEditMode>(
     initialBannerImageUrl ? "image" : "gradient"
@@ -114,6 +122,7 @@ export default function UserPageHeaderEditBanner({
   });
 
   const isSaving = isUploading || updateUser.isPending;
+  isSavingRef.current = isSaving;
 
   const uploadBannerImage = async (): Promise<string | null> => {
     if (!bannerFile) {
@@ -128,7 +137,9 @@ export default function UserPageHeaderEditBanner({
       return uploaded.url;
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to upload banner image";
+        error instanceof Error
+          ? error.message
+          : "Failed to upload banner image";
       setToast({ message, type: "error" });
       return null;
     } finally {
@@ -139,9 +150,6 @@ export default function UserPageHeaderEditBanner({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!profile.handle || !haveChanges) {
-      return;
-    }
-    if (!profile.primary_wallet || !profile.classification) {
       return;
     }
 
@@ -206,7 +214,7 @@ export default function UserPageHeaderEditBanner({
         type="button"
         aria-label="Close edit banner modal"
         className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
       />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
         <div
@@ -253,7 +261,7 @@ export default function UserPageHeaderEditBanner({
                 <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
                 <SecondaryButton
                   disabled={isSaving}
-                  onClicked={onClose}
+                  onClicked={handleClose}
                   className="tw-mt-3 tw-w-full sm:tw-mt-0 sm:tw-w-auto"
                 >
                   Cancel

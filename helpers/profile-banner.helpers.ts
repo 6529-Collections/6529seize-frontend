@@ -10,6 +10,11 @@ const isBannerImageUrl = (value?: string | null): value is string => {
   );
 };
 
+// Validates hex color format (backend only allows hex codes)
+const isValidHexColor = (value: string): boolean => {
+  return /^#[0-9a-fA-F]{6}$/.test(value);
+};
+
 export const getBannerImageUrl = (value?: string | null): string | null =>
   isBannerImageUrl(value) ? value : null;
 
@@ -18,5 +23,14 @@ export const getBannerColorValue = (value?: string | null): string | null => {
     return null;
   }
 
-  return isBannerImageUrl(value) ? null : value;
+  if (isBannerImageUrl(value)) {
+    return null;
+  }
+
+  // Validate hex color format to prevent CSS injection
+  if (!isValidHexColor(value)) {
+    return null;
+  }
+
+  return value;
 };
