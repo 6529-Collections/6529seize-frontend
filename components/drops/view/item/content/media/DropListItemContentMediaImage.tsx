@@ -287,7 +287,7 @@ function DropListItemContentMediaImage({
     <>
       <div
         ref={ref}
-        className={`tw-relative tw-mx-[1px] tw-flex tw-h-full tw-w-full tw-items-center ${
+        className={`tw-relative tw-flex tw-h-full tw-w-full tw-items-center ${
           isCompetitionDrop ? "tw-justify-center" : ""
         }`}
       >
