@@ -174,7 +174,7 @@ export default function UserPageHeaderEditBanner({
         return;
       }
 
-      banner2Value = getBannerColorValue(profile.banner2) ?? undefined;
+      banner2Value = undefined;
       const uploadedUrl = await uploadBannerImage();
       if (!uploadedUrl) {
         return;
