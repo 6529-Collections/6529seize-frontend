@@ -18,7 +18,7 @@ export default function WaveMentionsTypeaheadMenu({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const getPositionSnapshot = useCallback(() => {
-    if (typeof globalThis.window === "undefined") return "bottom";
+    if (globalThis.window === undefined) return "bottom";
     const win = globalThis.window;
     const element = menuRef.current;
     if (!element) return "bottom";
@@ -29,7 +29,7 @@ export default function WaveMentionsTypeaheadMenu({
   }, []);
 
   const subscribeToPosition = useCallback((onStoreChange: () => void) => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
       return () => {};
     }
     const win = globalThis.window;
