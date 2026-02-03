@@ -1,16 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import {
-  TweetBody,
-  TweetContainer,
-  TweetHeader,
-  TweetSkeleton,
-  enrichTweet,
-  useTweet,
-} from "react-tweet";
-
-import styles from "./BoostedTweetPreview.module.css";
+import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
 
 interface BoostedTweetPreviewProps {
   readonly href: string;
@@ -49,28 +39,11 @@ export default function BoostedTweetPreview({
   href,
   tweetId,
 }: BoostedTweetPreviewProps) {
-  const { data, isLoading } = useTweet(tweetId);
-
-  const tweet = useMemo(() => (data ? enrichTweet(data) : null), [data]);
-
-  if (isLoading) {
-    return (
-      <div className={styles["root"]} data-theme="dark">
-        <TweetSkeleton />
-      </div>
-    );
-  }
-
-  if (!tweet) {
-    return <TweetFallback href={href} />;
-  }
-
   return (
-    <div className={styles["root"]} data-theme="dark">
-      <TweetContainer className="tw-w-full tw-min-w-0 tw-max-w-full">
-        <TweetHeader tweet={tweet} />
-        <TweetBody tweet={tweet} />
-      </TweetContainer>
-    </div>
+    <ExpandableTweetPreview
+      href={href}
+      tweetId={tweetId}
+      renderFallback={(fallbackHref) => <TweetFallback href={fallbackHref} />}
+    />
   );
 }
