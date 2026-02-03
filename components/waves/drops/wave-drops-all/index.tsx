@@ -52,6 +52,7 @@ interface WaveDropsAllProps {
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
   readonly dividerSerialNo?: number | null | undefined;
+  readonly unreadCount?: number | undefined;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly bottomPaddingClassName?: string | undefined;
   readonly isMuted?: boolean | undefined;
@@ -65,6 +66,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   dividerSerialNo,
+  unreadCount,
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
@@ -78,6 +80,16 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
     useVirtualizedWaveDrops(waveId, dropId);
 
+  const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
+  const latestSerialNoRef = useRef<number | null>(null);
+  const [pinnedLatestSerial, setPinnedLatestSerial] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    latestSerialNoRef.current = latestSerialNo;
+  }, [latestSerialNo]);
+
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
   const typingMessage = useWaveIsTyping(
@@ -88,7 +100,30 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const { data: boostedDrops } = useWaveBoostedDrops({ waveId });
 
-  const scrollBehavior = useScrollBehavior();
+  const handlePinStateChange = useCallback(
+    (nextShouldPinToBottom: boolean) => {
+      if (!isAppleMobile) {
+        return;
+      }
+
+      if (nextShouldPinToBottom) {
+        setPinnedLatestSerial(null);
+        return;
+      }
+
+      const latestSerial = latestSerialNoRef.current;
+      if (latestSerial === null) {
+        return;
+      }
+
+      setPinnedLatestSerial((previous) => previous ?? latestSerial);
+    },
+    [isAppleMobile]
+  );
+
+  const scrollBehavior = useScrollBehavior({
+    onPinStateChange: handlePinStateChange,
+  });
   const {
     scrollContainerRef,
     bottomAnchorRef,
@@ -112,11 +147,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     drops: dropsForClipboard,
   });
 
-  const [visibleLatestSerial, setVisibleLatestSerial] = useState<number | null>(
-    null
-  );
-
-  const prevLatestSerialNoRef = useRef<number | null>(null);
   const initializedWaveRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -124,42 +154,17 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       return;
     }
     initializedWaveRef.current = waveId;
-    setVisibleLatestSerial(null);
-    prevLatestSerialNoRef.current = null;
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
   }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
-  const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
-
-  useEffect(() => {
-    if (latestSerialNo === null) {
-      return;
+  let visibleLatestSerial: number | null = null;
+  if (latestSerialNo !== null) {
+    if (!isAppleMobile || shouldPinToBottom) {
+      visibleLatestSerial = latestSerialNo;
+    } else {
+      visibleLatestSerial = pinnedLatestSerial ?? latestSerialNo;
     }
-
-    prevLatestSerialNoRef.current = latestSerialNo;
-  }, [latestSerialNo]);
-
-  useEffect(() => {
-    if (latestSerialNo === null) {
-      return;
-    }
-
-    setVisibleLatestSerial((current) => {
-      if (current === null) {
-        return latestSerialNo;
-      }
-
-      if (!isAppleMobile) {
-        return latestSerialNo;
-      }
-
-      if (shouldPinToBottom) {
-        return latestSerialNo;
-      }
-
-      return current;
-    });
-  }, [latestSerialNo, isAppleMobile, shouldPinToBottom]);
+  }
 
   const renderedWaveMessages = useMemo(() => {
     if (!waveMessages) {
@@ -202,7 +207,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       }
       return drop.serial_no > visibleLatestSerial ? count + 1 : count;
     }, 0);
-  }, [isAppleMobile, waveMessages?.drops, visibleLatestSerial]);
+  }, [isAppleMobile, waveMessages, visibleLatestSerial]);
 
   const {
     serialTarget,
@@ -267,8 +272,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       return;
     }
 
-    const newestSerial = waveMessages.drops[0]?.serial_no;
-    setVisibleLatestSerial(newestSerial!);
+    const newestSerial = waveMessages.drops[0]?.serial_no ?? null;
+    setPinnedLatestSerial(newestSerial);
     scrollToVisualBottom();
   }, [waveMessages, scrollToVisualBottom]);
 
@@ -358,6 +363,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           boostedDrops={boostedDrops}
           onBoostedDropClick={queueSerialTarget}
           onScrollToUnread={queueSerialTarget}
+          unreadCount={unreadCount}
           autoCollapseSerials={autoCollapseSerials}
         />
       </TweetPreviewModeProvider>
@@ -377,6 +383,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   activeDrop,
   initialDrop,
   dividerSerialNo,
+  unreadCount,
   onDropContentClick,
   bottomPaddingClassName,
   isMuted = false,
@@ -395,6 +402,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         activeDrop={activeDrop}
         initialDrop={initialDrop}
         dividerSerialNo={dividerSerialNo}
+        unreadCount={unreadCount}
         onDropContentClick={onDropContentClick}
         bottomPaddingClassName={bottomPaddingClassName}
         isMuted={isMuted}
