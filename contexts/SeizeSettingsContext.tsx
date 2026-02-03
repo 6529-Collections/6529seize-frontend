@@ -1,8 +1,11 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
-import type {
-  ReactNode} from "react";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import { fetchUrl } from "@/services/6529api";
+import type { ReactNode } from "react";
 import {
   createContext,
   useCallback,
@@ -12,17 +15,18 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
-import { fetchUrl } from "@/services/6529api";
 
 type SeizeSettingsContextType = {
   seizeSettings: ApiSeizeSettings;
   isMemesWave: (waveId: string | undefined | null) => boolean;
+  isMemesSubmission: (drop: ApiDrop | undefined | null) => boolean;
   // True once at least one fetch succeeds; stays true during background refreshes
   // unless callers opt into reset=true before reloading.
   isLoaded: boolean;
   loadError: Error | null;
-  loadSeizeSettings: (options?: { reset?: boolean | undefined }) => Promise<void>;
+  loadSeizeSettings: (options?: {
+    reset?: boolean | undefined;
+  }) => Promise<void>;
 };
 
 const SeizeSettingsContext = createContext<
@@ -98,15 +102,35 @@ export const SeizeSettingsProvider = ({
     [memes_wave_id]
   );
 
+  const isMemesSubmission = useCallback(
+    (drop: ApiDrop | undefined | null): boolean => {
+      if (!drop) return false;
+      return (
+        isMemesWave(drop?.wave?.id) &&
+        (drop.drop_type === ApiDropType.Participatory ||
+          drop.drop_type === ApiDropType.Winner)
+      );
+    },
+    [isMemesWave]
+  );
+
   const value: SeizeSettingsContextType = useMemo(
     () => ({
       seizeSettings,
       isMemesWave,
+      isMemesSubmission,
       isLoaded,
       loadError,
       loadSeizeSettings,
     }),
-    [seizeSettings, isMemesWave, isLoaded, loadError, loadSeizeSettings]
+    [
+      seizeSettings,
+      isMemesWave,
+      isMemesSubmission,
+      isLoaded,
+      loadError,
+      loadSeizeSettings,
+    ]
   );
 
   return (

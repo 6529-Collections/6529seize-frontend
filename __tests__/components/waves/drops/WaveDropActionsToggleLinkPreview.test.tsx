@@ -1,7 +1,13 @@
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
-import WaveDropActionsToggleLinkPreview from "@/components/waves/drops/WaveDropActionsToggleLinkPreview";
 import { AuthContext } from "@/components/auth/Auth";
+import WaveDropActionsToggleLinkPreview from "@/components/waves/drops/WaveDropActionsToggleLinkPreview";
 import { commonApiPost } from "@/services/api/common-api";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -9,7 +15,9 @@ jest.mock("@/services/api/common-api", () => ({
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
-    applyOptimisticDropUpdate: jest.fn().mockReturnValue({ rollback: jest.fn() }),
+    applyOptimisticDropUpdate: jest
+      .fn()
+      .mockReturnValue({ rollback: jest.fn() }),
   }),
 }));
 
@@ -45,7 +53,9 @@ const renderWithAuth = (
     <AuthContext.Provider
       value={
         {
-          connectedProfile: connectedHandle ? { handle: connectedHandle } : null,
+          connectedProfile: connectedHandle
+            ? { handle: connectedHandle }
+            : null,
           activeProfileProxy,
           setToast: jest.fn(),
         } as any
@@ -68,10 +78,7 @@ describe("WaveDropActionsToggleLinkPreview", () => {
 
   it("renders nothing when user is not the author", () => {
     const drop = createDrop("bob");
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice"
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
     expect(screen.queryByRole("button")).toBeNull();
   });
 
@@ -83,56 +90,47 @@ describe("WaveDropActionsToggleLinkPreview", () => {
 
   it("renders nothing when using proxy profile", () => {
     const drop = createDrop("alice");
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice",
-      { some: "proxy" }
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice", {
+      some: "proxy",
+    });
     expect(screen.queryByRole("button")).toBeNull();
   });
 
   it("renders nothing when drop has no links", () => {
     const drop = createDrop("alice", false);
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice"
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
     expect(screen.queryByRole("button")).toBeNull();
   });
 
   it("renders button when user is the author and drop has links", () => {
     const drop = createDrop("alice", true);
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice"
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("shows hide icon when previews are visible (hide_link_preview is false)", () => {
     const drop = createDrop("alice", true, false);
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice"
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
     expect(screen.getByLabelText("Hide link previews")).toBeInTheDocument();
   });
 
   it("shows show icon when previews are hidden (hide_link_preview is true)", () => {
     const drop = createDrop("alice", true, true);
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice"
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
     expect(screen.getByLabelText("Show link previews")).toBeInTheDocument();
+  });
+
+  it("disables button for temporary (optimistic) drop", () => {
+    const drop = { ...createDrop("alice"), id: "temp-123" };
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
+    const button = screen.getByRole("button");
+    expect(button).toBeDisabled();
+    expect(button).toHaveClass("tw-opacity-50");
   });
 
   it("calls API when clicked", async () => {
     const drop = createDrop("alice");
-    renderWithAuth(
-      <WaveDropActionsToggleLinkPreview drop={drop} />,
-      "alice"
-    );
+    renderWithAuth(<WaveDropActionsToggleLinkPreview drop={drop} />, "alice");
     fireEvent.click(screen.getByRole("button"));
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalledWith({
