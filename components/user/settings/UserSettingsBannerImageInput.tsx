@@ -1,19 +1,12 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useRef, useState } from "react";
+import Image from "next/image";
 import { AuthContext } from "@/components/auth/Auth";
-
-const ACCEPTED_FORMATS = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-];
-
-const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
-  (format) => `.${format.replace("image/", "")}`
-).join(", ");
+import {
+  ACCEPTED_FORMATS_DISPLAY,
+  isValidImageType,
+} from "./UserSettingsImgSelectFile";
 
 const FILE_SIZE_LIMIT = 10485760;
 
@@ -25,65 +18,73 @@ export default function UserSettingsBannerImageInput({
   readonly setFile: (file: File) => void;
 }) {
   const { setToast } = useContext(AuthContext);
+  const dragDepth = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState<boolean>(false);
   const [dragging, setDragging] = useState(false);
 
-  const onFileChange = (file: File) => {
-    setError(null);
-    if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
-      setToast({
-        type: "error",
-        message: "Invalid file type",
-      });
-      return;
-    }
+  const onFileChange = useCallback(
+    (file: File) => {
+      setError(null);
+      if (!isValidImageType(file)) {
+        setToast({
+          type: "error",
+          message: "Invalid file type",
+        });
+        return;
+      }
 
-    if (file.size > FILE_SIZE_LIMIT) {
-      setError("File size must be less than 10MB");
-      setShake(true);
-      return;
-    }
+      if (file.size > FILE_SIZE_LIMIT) {
+        setError("File size must be less than 10MB");
+        setShake(true);
+        setTimeout(() => setShake(false), 300);
+        return;
+      }
 
-    setError(null);
-    setFile(file);
-  };
+      setFile(file);
+    },
+    [setFile, setToast]
+  );
 
-  const handleDrop = (e: any) => {
+  const onDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    setDragging(false);
-    if (e?.dataTransfer?.files?.length) {
-      onFileChange(e.dataTransfer.files[0]);
-    }
-  };
+    dragDepth.current += 1;
+    setDragging(true);
+  }, []);
 
-  const handleDrag = (e: any) => {
+  const onDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragging(true);
-    } else if (e.type === "dragleave") {
-      setDragging(false);
-    } else if (e.type === "drop") {
+    dragDepth.current -= 1;
+    if (dragDepth.current <= 0) {
+      dragDepth.current = 0;
       setDragging(false);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (shake) {
-      const timeout = setTimeout(() => setShake(false), 300);
-      return () => clearTimeout(timeout);
-    }
-    return;
-  }, [shake]);
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      dragDepth.current = 0;
+      setDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        onFileChange(file);
+      }
+    },
+    [onFileChange]
+  );
+
 
   return (
     <div
       onDrop={handleDrop}
-      onDragEnter={handleDrag}
-      onDragLeave={handleDrag}
-      onDragOver={handleDrag}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDragOver={onDragOver}
       className="tw-group tw-flex tw-w-full tw-items-center tw-justify-center"
     >
       <label
@@ -97,11 +98,12 @@ export default function UserSettingsBannerImageInput({
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4">
           {imageToShow ? (
-            <div className="tw-h-40 tw-w-40">
-              <img
+            <div className="tw-relative tw-h-40 tw-w-40">
+              <Image
                 src={imageToShow}
                 alt="Banner preview"
-                className="tw-h-full tw-w-full tw-rounded-sm tw-object-contain"
+                fill
+                className="tw-rounded-sm tw-object-contain"
               />
             </div>
           ) : (
@@ -146,11 +148,10 @@ export default function UserSettingsBannerImageInput({
           type="file"
           className="tw-hidden"
           accept={ACCEPTED_FORMATS_DISPLAY}
-          onChange={(e: any) => {
-            if (e.target.files) {
-              const f = e.target.files[0];
-              onFileChange(f);
-            }
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const f = e.target.files?.[0];
+            if (f) onFileChange(f);
+            e.target.value = ""; // allow selecting same file again
           }}
         />
       </label>

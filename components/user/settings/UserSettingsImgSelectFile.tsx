@@ -1,7 +1,9 @@
 "use client";
 
-import { useContext, useRef, useState, useEffect } from "react";
+import { useCallback, useContext, useRef, useState } from "react";
+import Image from "next/image";
 import { AuthContext } from "@/components/auth/Auth";
+import { getFileExtension } from "@/components/waves/memes/file-upload/utils/formatHelpers";
 
 const ACCEPTED_FORMATS = [
   "image/jpeg",
@@ -11,9 +13,23 @@ const ACCEPTED_FORMATS = [
   "image/webp",
 ];
 
-const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
+export const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
   (format) => `.${format.replace("image/", "")}`
 ).join(", ");
+
+const ALLOWED_EXTENSIONS = ["JPG", "JPEG", "PNG", "GIF", "WEBP"];
+
+export const isValidImageType = (file: File): boolean => {
+  // Primary check: MIME type
+  if (ACCEPTED_FORMATS.includes(file.type)) {
+    return true;
+  }
+  // Fallback: extension check when MIME is empty (some OS/browser combos)
+  if (file.type === "") {
+    return ALLOWED_EXTENSIONS.includes(getFileExtension(file));
+  }
+  return false;
+};
 
 const FILE_SIZE_LIMIT = 2097152;
 
@@ -28,53 +44,51 @@ export default function UserSettingsImgSelectFile({
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState<boolean>(false);
-  const onFileChange = (file: File) => {
-    setError(null);
-    if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
-      setError(null);
-      setToast({
-        type: "error",
-        message: "Invalid file type",
-      });
-    } else if (file.size > FILE_SIZE_LIMIT) {
-      setError("File size must be less than 2MB");
-      setShake(true);
-    } else {
-      setError(null);
-      setFile(file);
-    }
-  };
-
-  const handleDrop = (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragging(false);
-    if (e?.dataTransfer?.files?.length) {
-      onFileChange(e.dataTransfer.files[0]);
-    }
-  };
-
   const [dragging, setDragging] = useState(false);
+  const onFileChange = useCallback(
+    (file: File) => {
+      setError(null);
+      if (!isValidImageType(file)) {
+        setToast({
+          type: "error",
+          message: "Invalid file type",
+        });
+        return;
+      }
+      if (file.size > FILE_SIZE_LIMIT) {
+        setError("File size must be less than 2MB");
+        setShake(true);
+        setTimeout(() => setShake(false), 300);
+        return;
+      }
+      setFile(file);
+    },
+    [setFile, setToast]
+  );
 
-  const handleDrag = (e: any) => {
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        onFileChange(file);
+      }
+    },
+    [onFileChange]
+  );
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
       setDragging(true);
     } else if (e.type === "dragleave") {
       setDragging(false);
-    } else if (e.type === "drop") {
-      setDragging(false);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (shake) {
-      const timeout = setTimeout(() => setShake(false), 300);
-      return () => clearTimeout(timeout);
-    }
-    return;
-  }, [shake]);
 
   return (
     <div
@@ -95,11 +109,12 @@ export default function UserSettingsImgSelectFile({
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pb-6 tw-pt-5">
           {imageToShow && (
-            <div className="tw-h-40 tw-w-40">
-              <img
+            <div className="tw-relative tw-h-40 tw-w-40">
+              <Image
                 src={imageToShow}
                 alt="Profile image"
-                className="tw-h-full tw-w-full tw-rounded-sm tw-object-contain"
+                fill
+                className="tw-rounded-sm tw-object-contain"
               />
             </div>
           )}
@@ -146,11 +161,10 @@ export default function UserSettingsImgSelectFile({
           type="file"
           className="tw-hidden"
           accept={ACCEPTED_FORMATS_DISPLAY}
-          onChange={(e: any) => {
-            if (e.target.files) {
-              const f = e.target.files[0];
-              onFileChange(f);
-            }
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const f = e.target.files?.[0];
+            if (f) onFileChange(f);
+            e.target.value = ""; // allow selecting same file again
           }}
         />
       </label>

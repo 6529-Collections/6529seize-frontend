@@ -50,7 +50,7 @@ export default function UserPageHeaderClient({
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const routeHandleOrWallet =
-    params?.["user"]?.toString().toLowerCase() ?? null;
+    params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
@@ -123,7 +123,7 @@ export default function UserPageHeaderClient({
   );
 
   const showAbout = useMemo(
-    () => !!(aboutStatement || canEdit),
+    () => aboutStatement !== null || canEdit,
     [aboutStatement, canEdit]
   );
 
@@ -170,8 +170,8 @@ export default function UserPageHeaderClient({
 
         <div className="tw-relative tw-bg-zinc-950">
           <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
-            <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-x-4 md:tw-pt-2">
-              <div className="tw-relative tw-order-1 -tw-mt-[3.125rem] tw-flex-shrink-0 sm:-tw-mt-[4.75rem]">
+            <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-4 md:tw-pt-2">
+              <div className="tw-relative tw-order-1 -tw-mt-[3.125rem] tw-flex-shrink-0 tw-self-end sm:-tw-mt-[4.75rem]">
                 <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
                   <UserPageHeaderPfp
                     profile={profile}
@@ -181,7 +181,7 @@ export default function UserPageHeaderClient({
                 </UserPageHeaderPfpWrapper>
               </div>
 
-              <div className="tw-order-3 tw-w-full tw-pb-1 tw-pt-2 sm:tw-order-2 sm:tw-w-auto sm:tw-flex-1">
+              <div className="tw-order-3 tw-w-full tw-pt-2 md:tw-order-2 md:tw-w-auto md:tw-flex-1">
                 <UserPageHeaderName
                   profile={profile}
                   canEdit={canEdit}
@@ -202,7 +202,7 @@ export default function UserPageHeaderClient({
                 </div>
               </div>
 
-              <div className="tw-order-2 tw-mb-2 tw-flex tw-items-center tw-gap-3 sm:tw-order-3 sm:tw-mb-0">
+              <div className="tw-order-2 tw-mb-2 tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-self-start md:tw-order-3 md:tw-mb-0">
                 {!isMyProfile && profile.handle && connectedProfile?.handle ? (
                   <UserFollowBtn
                     handle={profile.handle}
@@ -228,7 +228,7 @@ export default function UserPageHeaderClient({
               </div>
             ) : null}
 
-            <div className="tw-flex tw-items-center tw-gap-4 tw-overflow-x-auto tw-border-b tw-border-white/5 tw-pb-6 sm:tw-mt-4 sm:tw-overflow-visible sm:tw-border-b-0 sm:tw-pb-0">
+            <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4 tw-overflow-x-auto tw-border-b tw-border-white/5 sm:tw-overflow-visible sm:tw-border-b-0 sm:tw-pb-0">
               <UserPageHeaderStats
                 profile={profile}
                 handleOrWallet={normalizedHandleOrWallet}
