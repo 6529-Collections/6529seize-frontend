@@ -34,7 +34,7 @@ function MediaDisplayImage({ src, imageScale = ImageScale.AUTOx1080 }: Props) {
   return (
     <div
       ref={ref}
-      className="tw-relative tw-mx-[1px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
+      className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
     >
       {isLoading && (
         <div
