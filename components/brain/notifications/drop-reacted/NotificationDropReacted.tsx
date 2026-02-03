@@ -12,6 +12,7 @@ import type {
   INotificationDropReacted,
   INotificationDropVoted,
 } from "@/types/feed.types";
+import ReactionEmojiPreview from "./ReactionEmojiPreview";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";
@@ -87,38 +88,15 @@ export default function NotificationDropReacted({
     );
   } else if (isReacted) {
     const rawId = notification.additional_context.reaction.replaceAll(":", "");
-    let emojiNode: React.ReactNode = null;
-
-    const custom = findCustomEmoji(rawId);
-    if (custom) {
-      emojiNode = (
-        <img
-          src={custom.skins[0]?.src}
-          alt={rawId}
-          className="tw-max-h-5 tw-max-w-5 tw-object-contain"
-        />
-      );
-    } else {
-      const native = findNativeEmoji(rawId);
-      if (native) {
-        emojiNode = (
-          <span className="tw-flex tw-items-center tw-justify-center tw-text-[1.2rem]">
-            {native.skins[0]?.native}
-          </span>
-        );
-      }
-    }
-
-    if (!emojiNode) {
+    if (!findCustomEmoji(rawId) && !findNativeEmoji(rawId)) {
       return null;
     }
-
     actionElement = (
       <>
         <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           reacted
         </span>
-        {emojiNode}
+        <ReactionEmojiPreview rawId={rawId} />
         <NotificationTimestamp createdAt={notification.created_at} />
       </>
     );
