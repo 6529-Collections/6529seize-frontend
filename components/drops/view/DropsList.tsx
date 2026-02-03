@@ -3,6 +3,7 @@
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
+import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type {
   Drop as DropType,
@@ -46,6 +47,7 @@ interface DropsListProps {
   readonly unreadDividerSerialNo?: number | null | undefined;
   readonly boostedDrops?: ApiDrop[] | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
+  readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -70,6 +72,7 @@ const DropsList = memo(
     unreadDividerSerialNo,
     boostedDrops,
     onBoostedDropClick,
+    autoCollapseSerials,
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -218,6 +221,39 @@ const DropsList = memo(
         const boostCard = renderBoostCard(i);
         const unreadDivider = renderUnreadDivider(drop.serial_no);
 
+        const dropContent =
+          drop.type === DropSize.FULL ? (
+            <MemoizedDrop
+              dropViewDropId={getItemData.dropViewDropId}
+              onReplyClick={getItemData.handleReplyClick}
+              drop={drop}
+              previousDrop={previousDrop}
+              nextDrop={nextDrop}
+              showWaveInfo={getItemData.showWaveInfo}
+              activeDrop={getItemData.activeDrop}
+              onReply={getItemData.handleReply}
+              onQuote={getItemData.handleQuote}
+              location={location}
+              showReplyAndQuote={getItemData.showReplyAndQuote}
+              onQuoteClick={getItemData.onQuoteClick}
+              parentContainerRef={getItemData.parentContainerRef}
+              onDropContentClick={getItemData.onDropContentClick}
+            />
+          ) : (
+            <MemoizedLightDrop drop={drop} />
+          );
+
+        const dropContentWithPreviewMode =
+          drop.type === DropSize.FULL && autoCollapseSerials ? (
+            <TweetPreviewModeProvider
+              mode={autoCollapseSerials.has(drop.serial_no) ? "auto" : "never"}
+            >
+              {dropContent}
+            </TweetPreviewModeProvider>
+          ) : (
+            dropContent
+          );
+
         const dropElement = (
           <HighlightDropWrapper
             key={drop.stableKey}
@@ -242,26 +278,7 @@ const DropsList = memo(
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
             >
-              {drop.type === DropSize.FULL ? (
-                <MemoizedDrop
-                  dropViewDropId={getItemData.dropViewDropId}
-                  onReplyClick={getItemData.handleReplyClick}
-                  drop={drop}
-                  previousDrop={previousDrop}
-                  nextDrop={nextDrop}
-                  showWaveInfo={getItemData.showWaveInfo}
-                  activeDrop={getItemData.activeDrop}
-                  onReply={getItemData.handleReply}
-                  onQuote={getItemData.handleQuote}
-                  location={location}
-                  showReplyAndQuote={getItemData.showReplyAndQuote}
-                  onQuoteClick={getItemData.onQuoteClick}
-                  parentContainerRef={getItemData.parentContainerRef}
-                  onDropContentClick={getItemData.onDropContentClick}
-                />
-              ) : (
-                <MemoizedLightDrop drop={drop} />
-              )}
+              {dropContentWithPreviewMode}
             </VirtualScrollWrapper>
           </HighlightDropWrapper>
         );
@@ -274,6 +291,7 @@ const DropsList = memo(
       location,
       renderBoostCard,
       renderUnreadDivider,
+      autoCollapseSerials,
     ]);
   }
 );

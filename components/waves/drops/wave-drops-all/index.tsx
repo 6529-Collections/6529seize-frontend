@@ -115,6 +115,10 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const [visibleLatestSerial, setVisibleLatestSerial] = useState<number | null>(
     null
   );
+  const [autoCollapseSerials, setAutoCollapseSerials] = useState<Set<number>>(
+    () => new Set()
+  );
+  const [jumpBaseline, setJumpBaseline] = useState<Set<number> | null>(null);
 
   const prevLatestSerialNoRef = useRef<number | null>(null);
   const initializedWaveRef = useRef<string | null>(null);
@@ -126,6 +130,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     initializedWaveRef.current = waveId;
     setVisibleLatestSerial(null);
     prevLatestSerialNoRef.current = null;
+    setAutoCollapseSerials(new Set());
+    setJumpBaseline(null);
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
   }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
@@ -217,6 +223,38 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       scrollToVisualBottom,
     });
 
+  // Adjust state during render (React-recommended pattern for derived state).
+  if (isScrolling) {
+    const drops = renderedWaveMessages?.drops;
+    let baseline = jumpBaseline;
+    if (!baseline && drops && drops.length > 0) {
+      const baselineSerials = drops
+        .map((drop) => drop.serial_no)
+        .filter((serialNo): serialNo is number => typeof serialNo === "number");
+      baseline = new Set(baselineSerials);
+      setJumpBaseline(baseline);
+    }
+    if (baseline && drops && drops.length > 0) {
+      let didChange = false;
+      const next = new Set(autoCollapseSerials);
+      for (const drop of drops) {
+        const serialNo = drop.serial_no;
+        if (typeof serialNo !== "number") {
+          continue;
+        }
+        if (!baseline.has(serialNo) && !next.has(serialNo)) {
+          next.add(serialNo);
+          didChange = true;
+        }
+      }
+      if (didChange) {
+        setAutoCollapseSerials(next);
+      }
+    }
+  } else if (jumpBaseline) {
+    setJumpBaseline(null);
+  }
+
   const waveChatScroll = useWaveChatScrollOptional();
   useEffect(() => {
     if (!waveChatScroll) return;
@@ -291,8 +329,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     [router, waveId, queueSerialTarget]
   );
 
-  const tweetPreviewMode: TweetPreviewMode =
-    serialTarget !== null || isScrolling ? "auto" : "never";
+  const tweetPreviewMode: TweetPreviewMode = "never";
 
   return (
     <div
@@ -323,6 +360,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           boostedDrops={boostedDrops}
           onBoostedDropClick={queueSerialTarget}
           onScrollToUnread={queueSerialTarget}
+          autoCollapseSerials={autoCollapseSerials}
         />
       </TweetPreviewModeProvider>
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
