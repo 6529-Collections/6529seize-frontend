@@ -6,11 +6,13 @@ import type {
   CreateDropPart,
   CreateDropRequestPart,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -39,6 +41,7 @@ import { AuthContext } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateDropActions from "./CreateDropActions";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
@@ -204,7 +207,7 @@ const getPartNfts = (
   markdown: string | null,
   referencedNfts: ReferencedNft[]
 ) => {
-  return referencedNfts.filter((nft) => markdown?.includes(`#[${nft.name}]`));
+  return referencedNfts.filter((nft) => markdown?.includes(`$[${nft.name}]`));
 };
 
 const getUpdatedNfts = (
@@ -221,9 +224,29 @@ const getUpdatedNfts = (
   return [...existingNfts, ...notAddedNfts];
 };
 
+const getPartWaves = (
+  markdown: string | null,
+  mentionedWaves: MentionedWave[]
+) =>
+  mentionedWaves.filter((wave) =>
+    markdown?.includes(`#[${wave.wave_name_in_content}]`)
+  );
+
+const getUpdatedWaves = (
+  partWaves: MentionedWave[],
+  existingWaves: ApiMentionedWave[]
+) => {
+  const notAddedWaves = partWaves.filter(
+    (wave) =>
+      !existingWaves.some((existing) => existing.wave_id === wave.wave_id)
+  );
+  return [...existingWaves, ...notAddedWaves];
+};
+
 type HandleDropPartResult = {
   updatedMentions: ApiDropMentionedUser[];
   updatedNfts: ReferencedNft[];
+  updatedWaves: ApiMentionedWave[];
   updatedMarkdown: string;
 };
 
@@ -231,8 +254,10 @@ const handleDropPart = (
   markdown: string | null,
   existingMentions: ApiDropMentionedUser[],
   existingNfts: ReferencedNft[],
+  existingWaves: ApiMentionedWave[],
   mentionedUsers: Omit<MentionedUser, "current_handle">[],
-  referencedNfts: ReferencedNft[]
+  referencedNfts: ReferencedNft[],
+  mentionedWaves: MentionedWave[]
 ): HandleDropPartResult => {
   const partMentions = getPartMentions(markdown, mentionedUsers);
   const updatedMentions = getUpdatedMentions(partMentions, existingMentions);
@@ -240,11 +265,15 @@ const handleDropPart = (
   const partNfts = getPartNfts(markdown, referencedNfts);
   const updatedNfts = getUpdatedNfts(partNfts, existingNfts);
 
+  const partWaves = getPartWaves(markdown, mentionedWaves);
+  const updatedWaves = getUpdatedWaves(partWaves, existingWaves);
+
   const updatedMarkdown = markdown ?? "";
 
   return {
     updatedMentions,
     updatedNfts,
+    updatedWaves,
     updatedMarkdown,
   };
 };
@@ -412,12 +441,11 @@ const getOptimisticDrop = (
         : null,
       replies_count: 0,
       quotes_count: 0,
-      mentioned_waves: [],
     })),
     parts_count: dropRequest.parts.length,
     referenced_nfts: dropRequest.referenced_nfts,
     mentioned_users: dropRequest.mentioned_users,
-
+    mentioned_waves: dropRequest.mentioned_waves ?? [],
     metadata: dropRequest.metadata,
     rating: 0,
     top_raters: [],
@@ -502,6 +530,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             ...SAFE_MARKDOWN_TRANSFORMERS,
             MENTION_TRANSFORMER,
             HASHTAG_TRANSFORMER,
+            WAVE_MENTION_TRANSFORMER,
             IMAGE_TRANSFORMER,
             EMOJI_TRANSFORMER,
           ])
@@ -578,6 +607,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   };
 
+  const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
+
+  const onMentionedWave = (newWave: MentionedWave) => {
+    setMentionedWaves((curr) => {
+      return [...curr, newWave];
+    });
+  };
+
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
   const isInitialMountRef = useRef(true);
 
@@ -602,6 +639,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ...replyToObj,
         parts: ensurePartsWithFallback(baseParts, hasMetadata),
         mentioned_users: drop?.mentioned_users ?? [],
+        mentioned_waves: drop?.mentioned_waves ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: convertMetadataToDropMetadata(metadata),
         signature: null,
@@ -636,6 +674,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         },
       ],
       mentioned_users: [],
+      mentioned_waves: [],
       referenced_nfts: [],
       metadata: [],
       signature: null,
@@ -647,7 +686,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const createCurrentDrop = (
     markdown: string | null,
     allMentions: ApiDropMentionedUser[],
-    allNfts: ReferencedNft[]
+    allNfts: ReferencedNft[],
+    allWaves: ApiMentionedWave[]
   ): CreateDropConfig => {
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = !!(markdown?.trim().length || files.length);
@@ -679,6 +719,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       ...replyToObj,
       parts,
       mentioned_users: allMentions,
+      mentioned_waves: allWaves,
       referenced_nfts: allNfts,
       metadata: convertMetadataToDropMetadata(metadata),
       signature: null,
@@ -694,15 +735,23 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     const markdown = getMarkdown;
-    const { updatedMentions, updatedNfts, updatedMarkdown } = handleDropPart(
-      markdown,
-      drop?.mentioned_users ?? [],
-      drop?.referenced_nfts ?? [],
-      mentionedUsers,
-      referencedNfts
-    );
+    const { updatedMentions, updatedNfts, updatedWaves, updatedMarkdown } =
+      handleDropPart(
+        markdown,
+        drop?.mentioned_users ?? [],
+        drop?.referenced_nfts ?? [],
+        drop?.mentioned_waves ?? [],
+        mentionedUsers,
+        referencedNfts,
+        mentionedWaves
+      );
 
-    return createCurrentDrop(updatedMarkdown, updatedMentions, updatedNfts);
+    return createCurrentDrop(
+      updatedMarkdown,
+      updatedMentions,
+      updatedNfts,
+      updatedWaves
+    );
   };
 
   const updateDropStateAndClearInput = (newDrop: CreateDropConfig) => {
@@ -730,6 +779,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       )
     );
 
+  const filterMentionedWaves = ({
+    mentionedWaves: mentionedWavesList,
+    parts,
+  }: {
+    readonly mentionedWaves: ApiMentionedWave[];
+    readonly parts: CreateDropPart[];
+  }): ApiMentionedWave[] =>
+    mentionedWavesList.filter((w) =>
+      parts.some((part) =>
+        part.content?.includes(`#[${w.wave_name_in_content}]`)
+      )
+    );
+
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
 
   const refreshState = () => {
@@ -737,6 +799,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setEditorState(null);
     setMetadata(initialMetadata);
     setMentionedUsers([]);
+    setMentionedWaves([]);
     setReferencedNfts([]);
     setDrop(null);
     setUserShowOptions(false);
@@ -828,6 +891,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ...dropRequest,
         mentioned_users: filterMentionedUsers({
           mentionedUsers: dropRequest.mentioned_users,
+          parts: dropRequest.parts,
+        }),
+        mentioned_waves: filterMentionedWaves({
+          mentionedWaves: dropRequest.mentioned_waves ?? [],
           parts: dropRequest.parts,
         }),
         wave_id: wave.id,
@@ -1202,6 +1269,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               onEditorBlur={handleEditorBlur}
               onReferencedNft={onReferencedNft}
               onMentionedUser={onMentionedUser}
+              onMentionedWave={onMentionedWave}
               onDrop={onDrop}
             />
           </div>

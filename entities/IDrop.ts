@@ -12,6 +12,11 @@ export interface MentionedUser {
   readonly current_handle: string | null;
 }
 
+export interface MentionedWave {
+  readonly wave_id: string;
+  readonly wave_name_in_content: string;
+}
+
 export interface DropMetadata {
   readonly data_key: string;
   readonly data_value: string;
@@ -42,7 +47,9 @@ export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
   readonly media: Array<File>;
 }
 
-export interface CreateDropConfig
-  extends Omit<ApiCreateDropRequest, "parts" | "wave_id"> {
+export interface CreateDropConfig extends Omit<
+  ApiCreateDropRequest,
+  "parts" | "wave_id"
+> {
   readonly parts: Array<CreateDropPart>;
 }

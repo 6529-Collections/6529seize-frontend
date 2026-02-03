@@ -1,5 +1,7 @@
 import React from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import WaveDropPart from "./WaveDropPart";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -15,7 +17,13 @@ interface WaveDropContentProps {
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
-  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onSave?:
+    | ((
+        newContent: string,
+        mentions?: ApiDropMentionedUser[],
+        mentionedWaves?: ApiMentionedWave[]
+      ) => void)
+    | undefined;
   readonly onCancel?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;

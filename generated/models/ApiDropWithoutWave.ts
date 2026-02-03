@@ -21,6 +21,7 @@ import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
+import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { HttpFile } from '../http/http';
@@ -52,6 +53,7 @@ export class ApiDropWithoutWave {
     'parts_count': number;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
     'mentioned_users': Array<ApiDropMentionedUser>;
+    'mentioned_waves': Array<ApiMentionedWave>;
     'metadata': Array<ApiDropMetadata>;
     'rating': number;
     'realtime_rating': number;
@@ -152,6 +154,12 @@ export class ApiDropWithoutWave {
             "name": "mentioned_users",
             "baseName": "mentioned_users",
             "type": "Array<ApiDropMentionedUser>",
+            "format": ""
+        },
+        {
+            "name": "mentioned_waves",
+            "baseName": "mentioned_waves",
+            "type": "Array<ApiMentionedWave>",
             "format": ""
         },
         {

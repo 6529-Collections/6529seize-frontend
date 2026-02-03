@@ -45,11 +45,11 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         className="tw-relative tw-max-h-52 tw-cursor-pointer tw-space-y-3 tw-overflow-hidden"
       >
         {previewImageUrl ? (
-          <div className="tw-w-full tw-flex tw-justify-center">
+          <div className="tw-flex tw-w-full tw-justify-center">
             <img
               src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
               alt="Preview"
-              className="tw-max-w-full tw-max-h-48 tw-object-contain tw-rounded-lg"
+              className="tw-max-h-48 tw-max-w-full tw-rounded-lg tw-object-contain"
             />
           </div>
         ) : (
@@ -63,6 +63,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         )}
         <WaveDropPartContentMarkdown
           mentionedUsers={drop.mentioned_users}
+          mentionedWaves={drop.mentioned_waves}
           referencedNfts={drop.referenced_nfts}
           part={drop.parts[0]!}
           wave={drop.wave}

@@ -3,6 +3,7 @@
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -288,13 +289,23 @@ const WaveDrop = ({
   }, [dispatch, drop.id]);
 
   const handleEditSave = useCallback(
-    (newContent: string, mentions?: ApiDropMentionedUser[]) => {
+    (
+      newContent: string,
+      mentions?: ApiDropMentionedUser[],
+      mentionedWaves?: ApiMentionedWave[]
+    ) => {
       // Clean mentioned users to only include allowed fields for API
       const cleanedMentions = (mentions ?? drop.mentioned_users).map(
         (user) => ({
           mentioned_profile_id: user.mentioned_profile_id,
           handle_in_content: user.handle_in_content,
           // Exclude current_handle as it's not allowed in update requests
+        })
+      );
+      const cleanedWaves = (mentionedWaves ?? drop.mentioned_waves).map(
+        (wave) => ({
+          wave_id: wave.wave_id,
+          wave_name_in_content: wave.wave_name_in_content,
         })
       );
 
@@ -308,6 +319,7 @@ const WaveDrop = ({
         metadata: drop.metadata,
         referenced_nfts: drop.referenced_nfts,
         mentioned_users: cleanedMentions,
+        mentioned_waves: cleanedWaves,
         signature: null,
       };
 

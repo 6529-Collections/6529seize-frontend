@@ -1,12 +1,14 @@
 import React from "react";
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import DropPartMarkdown from "../drops/view/part/DropPartMarkdown";
 
 interface CreateDropStormPartProps {
   readonly partIndex: number;
   readonly part: CreateDropPart;
   readonly mentionedUsers: ApiDropMentionedUser[];
+  readonly mentionedWaves: ApiMentionedWave[];
   readonly referencedNfts: ReferencedNft[];
   readonly onRemovePart: (partIndex: number) => void;
 }
@@ -15,29 +17,31 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
   partIndex,
   part,
   mentionedUsers,
+  mentionedWaves,
   referencedNfts,
   onRemovePart,
 }) => {
   return (
-    <div className="tw-relative tw-group tw-flex tw-flex-col tw-gap-x-2">
-      <span className="tw-leading-5 tw-text-iron-400 tw-font-normal tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out tw-text-md">
+    <div className="tw-group tw-relative tw-flex tw-flex-col tw-gap-x-2">
+      <span className="tw-whitespace-nowrap tw-text-md tw-font-normal tw-leading-5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
         Part {partIndex + 1}
       </span>
       <div className="tw-pr-8">
         <DropPartMarkdown
           mentionedUsers={mentionedUsers}
+          mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           partContent={part.content ?? ""}
           onQuoteClick={() => {}}
         />
       </div>
-      <div className="tw-absolute tw-right-0 tw-top-1 group-hover:tw-block tw-hidden touch-visible tw-transition tw-duration-300 tw-ease-linear">
+      <div className="touch-visible tw-absolute tw-right-0 tw-top-1 tw-hidden tw-transition tw-duration-300 tw-ease-linear group-hover:tw-block">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
             type="button"
             onClick={() => onRemovePart(partIndex)}
             aria-label="Remove storm part"
-            className="tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-900 tw-ring-iron-700 active:tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-group tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-iron-900 tw-p-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out active:tw-ring-iron-650"
           >
             <svg
               className="tw-h-4 tw-w-4 tw-text-error tw-transition tw-duration-300 tw-ease-out"
