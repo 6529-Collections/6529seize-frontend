@@ -1,3 +1,5 @@
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import {
   useCallback,
   useEffect,
@@ -5,8 +7,6 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
-import { DropSize } from "@/helpers/waves/drop.helpers";
 import { delay } from "../utils/delay";
 
 type VirtualizedWaveDropsResult = ReturnType<typeof useVirtualizedWaveDrops>;
@@ -64,6 +64,7 @@ export const useWaveDropsSerialScroll = ({
 
   const latestWaveMessagesRef = useRef(waveMessages);
   const smallestSerialNo = useRef<number | null>(null);
+  const lastScrolledToSerialRef = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
   const queueSerialTarget = useCallback((serialNo: number) => {
@@ -205,6 +206,7 @@ export const useWaveDropsSerialScroll = ({
     scrollOperationAbortController.current = new AbortController();
     const signal = scrollOperationAbortController.current.signal;
 
+    let didSucceed = false;
     try {
       if (signal.aborted) {
         scrollOperationLockRef.current = false;
@@ -236,19 +238,24 @@ export const useWaveDropsSerialScroll = ({
       }
 
       const success = await smoothScrollWithRetries();
+      didSucceed = success;
 
       if (!signal.aborted) {
         setTimeout(() => {
           if (success && !signal.aborted) {
             setSerialTarget(null);
+            lastScrolledToSerialRef.current = null;
           }
-        }, 500);
+        }, 600);
       }
     } catch (error) {
       if (!signal.aborted) {
         console.warn("Scroll operation failed:", error);
       }
     } finally {
+      if (!didSucceed || signal.aborted) {
+        lastScrolledToSerialRef.current = null;
+      }
       scrollOperationLockRef.current = false;
       setIsScrolling(false);
     }
@@ -263,18 +270,24 @@ export const useWaveDropsSerialScroll = ({
   ]);
 
   useEffect(() => {
-    if (init && serialTarget && !isScrolling) {
-      const currentSmallestSerial = smallestSerialNo.current;
-      if (currentSmallestSerial && currentSmallestSerial <= serialTarget) {
-        const success = scrollToSerialNo("smooth");
-        if (success) {
+    if (!init || !serialTarget || isScrolling) return;
+    if (lastScrolledToSerialRef.current === serialTarget) return;
+    const currentSmallestSerial = smallestSerialNo.current;
+    if (currentSmallestSerial && currentSmallestSerial <= serialTarget) {
+      lastScrolledToSerialRef.current = serialTarget;
+      const success = scrollToSerialNo("smooth");
+      if (success) {
+        setTimeout(() => {
           setSerialTarget(null);
-        } else {
-          fetchAndScrollToDrop();
-        }
+          lastScrolledToSerialRef.current = null;
+        }, 600);
       } else {
+        lastScrolledToSerialRef.current = null;
         fetchAndScrollToDrop();
       }
+    } else {
+      lastScrolledToSerialRef.current = serialTarget;
+      fetchAndScrollToDrop();
     }
   }, [init, serialTarget, fetchAndScrollToDrop, scrollToSerialNo, isScrolling]);
 

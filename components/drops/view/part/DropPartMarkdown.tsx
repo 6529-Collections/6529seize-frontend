@@ -174,6 +174,7 @@ const createMarkdownComponents = ({
   const ListItemRenderer = ({
     children,
     className,
+    node: _node,
     ...props
   }: MarkdownRendererProps<"li">) => (
     <li

@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC, RefObject } from "react";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type UnreadPosition = "hidden" | "above" | "below";
 
@@ -25,6 +25,7 @@ export const WaveDropsScrollToUnreadButton: FC<
   const [unreadPosition, setUnreadPosition] =
     useState<UnreadPosition>("hidden");
   const [hasSeenDivider, setHasSeenDivider] = useState(false);
+  const [userDismissed, setUserDismissed] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const swipeOffsetRef = useRef(0);
   const touchStartXRef = useRef<number | null>(null);
@@ -34,6 +35,10 @@ export const WaveDropsScrollToUnreadButton: FC<
   const wasInViewRef = useRef<boolean | null>(null);
   const hasAutoDismissedRef = useRef(false);
   const lastSerialNoRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setUserDismissed(false);
+  }, [unreadDividerSerialNo]);
 
   const checkUnreadVisibility = useCallback(() => {
     if (lastSerialNoRef.current !== unreadDividerSerialNo) {
@@ -122,6 +127,25 @@ export const WaveDropsScrollToUnreadButton: FC<
     checkUnreadVisibility();
   }, [unreadDividerSerialNo, checkUnreadVisibility]);
 
+  const isButtonVisible =
+    unreadPosition !== "hidden" &&
+    unreadDividerSerialNo !== null &&
+    !hasSeenDivider &&
+    !userDismissed;
+
+  useEffect(() => {
+    if (!isButtonVisible) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const active = document.activeElement;
+      if (active?.closest('[role="dialog"]')) return;
+      setUserDismissed(true);
+      onDismiss();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isButtonVisible, onDismiss, userDismissed]);
+
   const handleDismiss = useCallback(
     (e: React.MouseEvent) => {
       if (suppressClickRef.current) {
@@ -131,6 +155,7 @@ export const WaveDropsScrollToUnreadButton: FC<
         return;
       }
       e.stopPropagation();
+      setUserDismissed(true);
       onDismiss();
     },
     [onDismiss]
@@ -151,6 +176,7 @@ export const WaveDropsScrollToUnreadButton: FC<
   const handleTouchEnd = useCallback(() => {
     if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
       suppressClickRef.current = true;
+      setUserDismissed(true);
       onDismiss();
     }
     swipeOffsetRef.current = 0;
@@ -174,6 +200,7 @@ export const WaveDropsScrollToUnreadButton: FC<
     if (!isDraggingRef.current) return;
     if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
       suppressClickRef.current = true;
+      setUserDismissed(true);
       onDismiss();
     }
     swipeOffsetRef.current = 0;
@@ -186,6 +213,7 @@ export const WaveDropsScrollToUnreadButton: FC<
     if (isDraggingRef.current) {
       if (swipeOffsetRef.current >= SWIPE_THRESHOLD) {
         suppressClickRef.current = true;
+        setUserDismissed(true);
         onDismiss();
       }
       swipeOffsetRef.current = 0;
@@ -198,7 +226,8 @@ export const WaveDropsScrollToUnreadButton: FC<
   if (
     unreadPosition === "hidden" ||
     unreadDividerSerialNo === null ||
-    hasSeenDivider
+    hasSeenDivider ||
+    userDismissed
   ) {
     return null;
   }
@@ -228,7 +257,7 @@ export const WaveDropsScrollToUnreadButton: FC<
       <div className="tw-group tw-relative">
         <button
           onClick={handleDismiss}
-          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50 tw-hidden tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-rose-500 tw-text-white tw-opacity-0 tw-transition-all tw-duration-200 group-hover:tw-opacity-100 hover:tw-bg-rose-600 lg:tw-flex"
+          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50 tw-hidden tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-indigo-500 tw-text-white tw-opacity-0 tw-transition-all tw-duration-200 group-hover:tw-opacity-50 hover:!tw-opacity-100 lg:tw-flex"
           aria-label="Dismiss"
         >
           <svg
@@ -254,7 +283,7 @@ export const WaveDropsScrollToUnreadButton: FC<
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
-          className="tw-flex tw-h-10 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-0 tw-bg-rose-500 tw-px-4 tw-text-white tw-opacity-75 tw-transition-all tw-duration-300 hover:tw-opacity-100 lg:tw-h-8"
+          className="tw-flex tw-h-10 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-0 tw-bg-indigo-500 tw-px-4 tw-text-white tw-opacity-50 tw-transition-all tw-duration-300 hover:tw-opacity-100 lg:tw-h-8"
           aria-label="Scroll to first unread message"
         >
           <svg
@@ -275,7 +304,7 @@ export const WaveDropsScrollToUnreadButton: FC<
               }
             />
           </svg>
-          <span className="tw-hidden tw-text-sm tw-font-medium lg:tw-inline">
+          <span className="tw-hidden tw-text-xs tw-font-medium lg:tw-inline">
             New messages
           </span>
         </button>

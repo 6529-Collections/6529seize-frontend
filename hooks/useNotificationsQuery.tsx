@@ -1,10 +1,18 @@
 "use client";
 
+import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { TypedNotificationsResponse } from "@/types/feed.types";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+  NotificationDisplayItem,
+  TypedNotificationsResponse,
+} from "@/types/feed.types";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 
 interface UseNotificationsQueryProps {
@@ -119,6 +127,7 @@ export function useNotificationsQuery({
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
     staleTime: 60000,
+    placeholderData: keepPreviousData,
     retry: (failureCount, error: unknown) => {
       const status =
         (error as any)?.status ??
@@ -134,24 +143,30 @@ export function useNotificationsQuery({
     },
   });
 
-  const items = useMemo(() => {
+  const rawItems = useMemo(() => {
     if (!query.data) {
       return [];
     }
-
     const data = (query.data.pages as TypedNotificationsResponse[]).flatMap(
       (page) => page.notifications
     );
-
     return reverse ? [...data].reverse() : data;
+  }, [query.data, reverse]);
+
+  const items = useMemo<NotificationDisplayItem[]>(() => {
+    if (!query.data) return [];
+    const grouped = (query.data.pages as TypedNotificationsResponse[]).flatMap(
+      (page) => groupReactionNotifications(page.notifications)
+    );
+    return reverse ? [...grouped].reverse() : grouped;
   }, [query.data, reverse]);
 
   const isInitialQueryDone = query.isSuccess || query.isError;
 
-  // Return everything the query provides, plus our flattened items & readiness indicator.
   return {
     ...query,
     items,
+    rawItems,
     isInitialQueryDone,
   };
 }
