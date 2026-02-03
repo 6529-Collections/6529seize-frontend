@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import Image from "next/image";
 import { getFileExtension } from "@/components/waves/memes/file-upload/utils/formatHelpers";
 import { useImageUpload } from "./useImageUpload";
@@ -38,7 +37,6 @@ export default function UserSettingsImgSelectFile({
   readonly imageToShow: string | null;
   readonly setFile: (file: File) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const { error, shake, dragging, onFileChange, dragHandlers } = useImageUpload(
     {
       maxSizeBytes: 2097152,
@@ -111,7 +109,6 @@ export default function UserSettingsImgSelectFile({
         </div>
         <input
           id="pfp-upload-input"
-          ref={inputRef}
           type="file"
           className="tw-hidden"
           accept={ACCEPTED_FORMATS_DISPLAY}
