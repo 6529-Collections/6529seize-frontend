@@ -5,12 +5,14 @@ import type { ExtraProps } from "react-markdown";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
   HASHTAG = "HASHTAG",
+  WAVE_MENTION = "WAVE_MENTION",
 }
 
 interface EmojiCategory {
@@ -26,6 +28,7 @@ type FindNativeEmoji = (emojiId: string) => { skins: NativeEmojiSkin[] } | null;
 interface MarkdownContentConfig {
   readonly textSizeClass: string;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly emojiMap: EmojiCategory[];
   readonly findNativeEmoji: FindNativeEmoji;
@@ -47,6 +50,7 @@ const emojiRegex = /(:\w+:)/g;
 export const createMarkdownContentRenderers = ({
   textSizeClass,
   mentionedUsers,
+  mentionedWaves,
   referencedNfts,
   emojiMap,
   findNativeEmoji,
@@ -98,13 +102,24 @@ export const createMarkdownContentRenderers = ({
         }),
         {}
       ),
+      ...mentionedWaves.reduce(
+        (acc, wave) => ({
+          ...acc,
+          [`#[${wave.wave_name_in_content}]`]: {
+            type: DropContentPartType.WAVE_MENTION,
+            value: wave,
+            match: `#[${wave.wave_name_in_content}]`,
+          },
+        }),
+        {}
+      ),
       ...referencedNfts.reduce(
         (acc, nft) => ({
           ...acc,
-          [`#[${nft.name}]`]: {
+          [`$[${nft.name}]`]: {
             type: DropContentPartType.HASHTAG,
             value: nft,
-            match: `#[${nft.name}]`,
+            match: `$[${nft.name}]`,
           },
         }),
         {}

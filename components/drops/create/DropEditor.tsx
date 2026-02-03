@@ -7,18 +7,17 @@ import {
   useRef,
   useState,
 } from "react";
-import type {
-  CreateDropWrapperHandles,
-} from "./utils/CreateDropWrapper";
+import type { CreateDropWrapperHandles } from "./utils/CreateDropWrapper";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
 import type {
   CreateDropConfig,
   CreateDropPart,
   DropMetadata,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
-import type { CreateDropType} from "./types";
+import type { CreateDropType } from "./types";
 import { CreateDropViewType } from "./types";
 import CreateDropStormView from "./utils/storm/CreateDropStormView";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
@@ -80,6 +79,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     const [mentionedUsers, setMentionedUsers] = useState<
       Omit<MentionedUser, "current_handle">[]
     >([]);
+    const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
     const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
     const [drop, setDrop] = useState<CreateDropConfig | null>(null);
     const [viewType, setViewType] = useState<CreateDropViewType>(
@@ -95,11 +95,17 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
         return [...curr, newUser];
       });
     };
+    const onMentionedWave = (newWave: MentionedWave) => {
+      setMentionedWaves((curr) => {
+        return [...curr, newWave];
+      });
+    };
 
     useEffect(() => {
       setTitle(null);
       setMetadata([]);
       setMentionedUsers([]);
+      setMentionedWaves([]);
       setReferencedNfts([]);
       setDrop(null);
       setViewType(CreateDropViewType.COMPACT);
@@ -141,6 +147,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           title={title}
           metadata={metadata}
           mentionedUsers={mentionedUsers}
+          mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           drop={drop}
           viewType={viewType}
@@ -151,6 +158,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setViewType={setViewType}
           setDrop={setDrop}
           onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
           setReferencedNfts={setReferencedNfts}
           setTitle={setTitle}
           setMetadata={setMetadata}

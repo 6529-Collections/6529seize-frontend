@@ -3,6 +3,7 @@ import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPar
 import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 import EditDropLexical from "./EditDropLexical";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
@@ -10,6 +11,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly part: ApiDropPart;
   readonly wave: ApiWaveMin;
@@ -17,7 +19,11 @@ interface WaveDropPartContentMarkdownProps {
   readonly isEditing?: boolean | undefined;
   readonly isSaving?: boolean | undefined;
   readonly onSave?:
-    | ((newContent: string, mentions?: ApiDropMentionedUser[]) => void)
+    | ((
+        newContent: string,
+        mentions?: ApiDropMentionedUser[],
+        mentionedWaves?: ApiMentionedWave[]
+      ) => void)
     | undefined;
   readonly onCancel?: (() => void) | undefined;
   readonly drop?: ApiDrop | undefined; // Add drop to check for edited status
@@ -27,6 +33,7 @@ const WaveDropPartContentMarkdown: React.FC<
   WaveDropPartContentMarkdownProps
 > = ({
   mentionedUsers,
+  mentionedWaves,
   referencedNfts,
   part,
   wave,
@@ -42,11 +49,16 @@ const WaveDropPartContentMarkdown: React.FC<
       <EditDropLexical
         initialContent={part.content ?? ""}
         initialMentions={mentionedUsers}
+        initialWaveMentions={mentionedWaves}
         waveId={wave.id}
         isSaving={isSaving}
-        onSave={(content: string, mentions: ApiDropMentionedUser[]) => {
+        onSave={(
+          content: string,
+          mentions: ApiDropMentionedUser[],
+          waves: ApiMentionedWave[]
+        ) => {
           if (onSave) {
-            onSave(content, mentions);
+            onSave(content, mentions, waves);
           }
         }}
         onCancel={() => {
@@ -63,6 +75,7 @@ const WaveDropPartContentMarkdown: React.FC<
       <div>
         <DropPartMarkdownWithPropLogger
           mentionedUsers={mentionedUsers}
+          mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
           partContent={part.content}
           onQuoteClick={onQuoteClick}
@@ -70,7 +83,7 @@ const WaveDropPartContentMarkdown: React.FC<
           hideLinkPreviews={drop?.hide_link_preview}
         />
         {drop?.updated_at && drop.updated_at !== drop.created_at && (
-          <div className="tw-text-[10px] tw-leading-none tw-text-iron-500 tw-font-normal tw-mt-0.5">
+          <div className="tw-mt-0.5 tw-text-[10px] tw-font-normal tw-leading-none tw-text-iron-500">
             (edited)
           </div>
         )}

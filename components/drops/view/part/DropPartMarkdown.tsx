@@ -19,6 +19,7 @@ import type { PluggableList } from "unified";
 import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 
@@ -221,6 +222,7 @@ const createMarkdownComponents = ({
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
+  readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly partContent: string | null;
   readonly onQuoteClick: (drop: ApiDrop) => void;
@@ -231,6 +233,7 @@ export interface DropPartMarkdownProps {
 
 function DropPartMarkdown({
   mentionedUsers,
+  mentionedWaves,
   referencedNfts,
   partContent,
   onQuoteClick,
@@ -265,6 +268,7 @@ function DropPartMarkdown({
       createMarkdownContentRenderers({
         textSizeClass,
         mentionedUsers,
+        mentionedWaves,
         referencedNfts,
         emojiMap,
         findNativeEmoji,
@@ -273,6 +277,7 @@ function DropPartMarkdown({
     [
       textSizeClass,
       mentionedUsers,
+      mentionedWaves,
       referencedNfts,
       emojiMap,
       findNativeEmoji,

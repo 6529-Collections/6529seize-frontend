@@ -16,7 +16,8 @@ import { HttpFile } from '../http/http';
 
 export class ApiMentionedWave {
     'wave_name_in_content': string;
-    'wave': ApiWaveMin;
+    'wave_id': string;
+    'wave'?: ApiWaveMin;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,6 +27,12 @@ export class ApiMentionedWave {
         {
             "name": "wave_name_in_content",
             "baseName": "wave_name_in_content",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wave_id",
+            "baseName": "wave_id",
             "type": "string",
             "format": ""
         },

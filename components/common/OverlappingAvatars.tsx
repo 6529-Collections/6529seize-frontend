@@ -8,7 +8,7 @@ import type { MouseEvent } from "react";
 import { useId } from "react";
 import { Tooltip } from "react-tooltip";
 
-export interface OverlappingAvatarItem {
+interface OverlappingAvatarItem {
   readonly key: string;
   readonly pfpUrl: string | null;
   readonly href?: string;

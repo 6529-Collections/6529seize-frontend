@@ -26,6 +26,7 @@ export class ApiCreateGroupDescription {
     'owns_nfts': Array<ApiGroupOwnsNft>;
     'identity_addresses': Array<string> | null;
     'excluded_identity_addresses': Array<string> | null;
+    'is_beneficiary_of_grant_id'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -72,6 +73,12 @@ export class ApiCreateGroupDescription {
             "name": "excluded_identity_addresses",
             "baseName": "excluded_identity_addresses",
             "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "is_beneficiary_of_grant_id",
+            "baseName": "is_beneficiary_of_grant_id",
+            "type": "string",
             "format": ""
         }    ];
 
