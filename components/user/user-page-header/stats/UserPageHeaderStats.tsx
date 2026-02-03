@@ -37,7 +37,7 @@ export default function UserPageHeaderStats({
   }
 
   return (
-    <div className="tw-mt-3">
+    <div className="tw-w-full">
       <UserStatsRow
         handle={routeHandle}
         tdh={profile.tdh}
