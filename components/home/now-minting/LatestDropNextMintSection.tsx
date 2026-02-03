@@ -10,8 +10,9 @@ import {
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ImageScale } from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import Image from "next/image";
 import Link from "next/link";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
@@ -142,14 +143,41 @@ export default function LatestDropNextMintSection({
               </div>
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
-                <NowMintingStatsItem label="Wave" value={drop.wave.name} />
-                <NowMintingStatsItem
-                  label="Rating"
-                  value={`${formatNumberWithCommas(drop.rating)} TDH`}
-                />
+                <div className="tw-col-span-2">
+                  <NowMintingStatsItem
+                    label="Wave"
+                    allowWrap
+                    value={
+                      <Link
+                        href={`/waves?wave=${drop.wave.id}`}
+                        className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-100 tw-no-underline desktop-hover:hover:tw-text-iron-200"
+                      >
+                        {drop.wave.picture && (
+                          <Image
+                            src={getScaledImageUri(
+                              drop.wave.picture,
+                              ImageScale.W_AUTO_H_50
+                            )}
+                            alt={drop.wave.name}
+                            width={20}
+                            height={20}
+                            className="tw-size-5 tw-shrink-0 tw-rounded-full tw-object-cover tw-ring-1 tw-ring-white/10"
+                          />
+                        )}
+                        <span className="tw-min-w-0 tw-break-words">
+                          {drop.wave.name}
+                        </span>
+                      </Link>
+                    }
+                  />
+                </div>
                 <NowMintingStatsItem
                   label="Submitted"
                   value={submittedAt ?? "—"}
+                />
+                <NowMintingStatsItem
+                  label="Rating"
+                  value={`${formatNumberWithCommas(drop.rating)} TDH`}
                 />
               </div>
             </div>
