@@ -1,5 +1,5 @@
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -8,8 +8,9 @@ import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPo
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
@@ -30,6 +31,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   isResetting = false,
 }) => {
   const artWork = drop.parts.at(0)?.media.at(0);
+  const previewImageUrl = useMemo(
+    () => getDropPreviewImageUrl(drop.metadata),
+    [drop.metadata]
+  );
 
   const handleClick = () => {
     if (window.getSelection()?.toString()) {
@@ -89,11 +94,12 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           <div className="tw-relative tw-flex tw-h-full tw-w-full tw-transform tw-items-center tw-justify-center tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-105">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
-                <DropListItemContentMedia
+                <MediaDisplay
                   media_mime_type={artWork.mime_type}
                   media_url={artWork.url}
                   imageScale={ImageScale.AUTOx450}
-                  isCompetitionDrop={true}
+                  previewImageUrl={previewImageUrl}
+                  disableMediaInteraction={true}
                 />
               )}
             </div>
