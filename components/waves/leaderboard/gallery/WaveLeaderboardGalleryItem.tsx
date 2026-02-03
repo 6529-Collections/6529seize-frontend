@@ -6,7 +6,6 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
@@ -110,7 +109,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const isZeroVote = userVote === 0;
     const voteStyle = getVoteStyle(isNegativeVote, isZeroVote, artFocused);
 
-    const votingCreditType = drop.wave.voting_credit_type as ApiWaveCreditType;
+    const votingCreditType = drop.wave.voting_credit_type;
     const votingCreditLabel =
       WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
 
@@ -128,9 +127,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       setIsVotingModalOpen(true);
     };
 
-    const transitionClasses = !hasTouchScreen
-      ? "tw-transition-all tw-duration-300 tw-ease-out"
-      : "";
+    const transitionClasses = hasTouchScreen
+      ? ""
+      : "tw-transition-all tw-duration-300 tw-ease-out";
     const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
     const containerClass = `${groupClasses} tw-relative tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 

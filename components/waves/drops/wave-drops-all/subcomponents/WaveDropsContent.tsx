@@ -76,7 +76,8 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onBoostedDropClick,
   onScrollToUnread,
 }) => {
-  const { unreadDividerSerialNo, setUnreadDividerSerialNo } = useUnreadDivider();
+  const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
+    useUnreadDivider();
 
   const handleDismissUnread = () => {
     setUnreadDividerSerialNo(null);

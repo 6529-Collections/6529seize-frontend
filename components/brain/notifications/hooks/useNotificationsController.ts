@@ -11,7 +11,7 @@ import {
 import type { CSSProperties } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import type { TypedNotification } from "@/types/feed.types";
+import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { NotificationFilter } from "../NotificationsCauseFilter";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AuthContext } from "@/components/auth/Auth";
@@ -54,11 +54,12 @@ interface UseNotificationsControllerResult {
   readonly setActiveFilter: (filter: NotificationFilter | null) => void;
   readonly isAuthenticated: boolean;
   readonly notificationsViewStyle: CSSProperties;
-  readonly items: TypedNotification[];
+  readonly items: NotificationDisplayItem[];
   readonly isFetchingNextPage: boolean;
   readonly pagination: NotificationsPagination;
   readonly contentState: NotificationsContentState;
   readonly handlers: NotificationsHandlers;
+  readonly markNotificationIdsAsRead: (ids: number[]) => Promise<void>;
 }
 
 export const useNotificationsController =
@@ -127,9 +128,12 @@ export const useNotificationsController =
       }
 
       hasMarkedAllAsReadRef.current = true;
-      markAllAsRead().catch((error) => {
-        console.error("Failed to mark notifications as read:", error);
-      });
+      const id = setTimeout(() => {
+        markAllAsRead().catch((error) => {
+          console.error("Failed to mark notifications as read:", error);
+        });
+      }, 0);
+      return () => clearTimeout(id);
     }, [isAuthenticated, markAllAsRead, reload]);
 
     useEffect(() => {
@@ -140,6 +144,7 @@ export const useNotificationsController =
 
     const {
       items,
+      rawItems: rawItemsFromQuery,
       isFetching,
       isFetchingNextPage,
       hasNextPage,
@@ -154,6 +159,33 @@ export const useNotificationsController =
       limit: "30",
       reverse: true,
       cause: activeFilter?.cause?.length ? activeFilter.cause : null,
+    });
+    const rawItems = rawItemsFromQuery ?? items;
+
+    const { mutateAsync: markNotificationIdsAsRead } = useMutation({
+      mutationFn: async (ids: number[]) => {
+        await Promise.all(
+          ids.map((id) =>
+            commonApiPostWithoutBodyAndResponse({
+              endpoint: `notifications/${id}/read`,
+            })
+          )
+        );
+      },
+      onSuccess: async () => {
+        try {
+          invalidateNotifications();
+          await removeAllDeliveredNotifications();
+        } catch (error) {
+          console.error("Failed to clear delivered notifications:", error);
+        }
+      },
+      onError: (error) => {
+        setToast({
+          message: error instanceof Error ? error.message : String(error),
+          type: "error",
+        });
+      },
     });
 
     useEffect(() => {
@@ -320,15 +352,16 @@ export const useNotificationsController =
       !hasTimedOut &&
       !errorMessage &&
       (!isInitialQueryDone || isFetching) &&
-      items.length === 0;
+      rawItems.length === 0;
     const showNoItems =
       isAuthenticated &&
       !errorMessage &&
       !hasTimedOut &&
       isInitialQueryDone &&
       !isFetching &&
-      items.length === 0;
-    const showErrorState = (!!errorMessage || hasTimedOut) && items.length === 0;
+      rawItems.length === 0;
+    const showErrorState =
+      (!!errorMessage || hasTimedOut) && rawItems.length === 0;
     const showProxyDisabledState = !!activeProfileProxy;
     const resolvedErrorMessage = hasTimedOut
       ? LOAD_TIMEOUT_MESSAGE
@@ -384,5 +417,7 @@ export const useNotificationsController =
       pagination,
       contentState,
       handlers,
+      markNotificationIdsAsRead: (ids: number[]) =>
+        markNotificationIdsAsRead(ids),
     };
   };
