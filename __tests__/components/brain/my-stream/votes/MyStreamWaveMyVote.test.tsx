@@ -42,7 +42,7 @@ describe("MyStreamWaveMyVote", () => {
 
   it("triggers onDropClick when no text selected", () => {
     const onDropClick = jest.fn();
-    (window.getSelection as any) = () => ({ toString: () => "" });
+    (globalThis.getSelection as any) = () => ({ toString: () => "" });
     const { container } = render(
       <MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />
     );
@@ -52,7 +52,7 @@ describe("MyStreamWaveMyVote", () => {
 
   it("does not trigger onDropClick when text selected", () => {
     const onDropClick = jest.fn();
-    (window.getSelection as any) = () => ({ toString: () => "sel" });
+    (globalThis.getSelection as any) = () => ({ toString: () => "sel" });
     const { container } = render(
       <MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />
     );
@@ -62,7 +62,7 @@ describe("MyStreamWaveMyVote", () => {
 
   it("calls onToggleCheck when checkbox clicked", () => {
     const onToggleCheck = jest.fn();
-    (window.getSelection as any) = () => ({ toString: () => "" });
+    (globalThis.getSelection as any) = () => ({ toString: () => "" });
     const { container } = render(
       <MyStreamWaveMyVote
         drop={drop}
