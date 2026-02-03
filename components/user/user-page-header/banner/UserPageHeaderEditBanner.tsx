@@ -115,13 +115,30 @@ export default function UserPageHeaderEditBanner({
 
   const isSaving = isUploading || updateUser.isPending;
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    if (!profile.handle) {
-      return;
+  const uploadBannerImage = async (): Promise<string | null> => {
+    if (!bannerFile) {
+      return initialBannerImageUrl;
     }
+    try {
+      setIsUploading(true);
+      const uploaded = await multiPartUpload({
+        file: bannerFile,
+        path: "drop",
+      });
+      return uploaded.url;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to upload banner image";
+      setToast({ message, type: "error" });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!haveChanges) {
+    if (!profile.handle || !haveChanges) {
       return;
     }
     if (!profile.primary_wallet || !profile.classification) {
@@ -150,32 +167,11 @@ export default function UserPageHeaderEditBanner({
       }
 
       banner2Value = getBannerColorValue(profile.banner2) ?? undefined;
-
-      if (bannerFile) {
-        try {
-          setIsUploading(true);
-          const uploaded = await multiPartUpload({
-            file: bannerFile,
-            path: "drop",
-          });
-          banner1Value = uploaded.url;
-        } catch (error) {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Failed to upload banner image";
-          setToast({
-            message,
-            type: "error",
-          });
-          setIsUploading(false);
-          return;
-        } finally {
-          setIsUploading(false);
-        }
-      } else if (initialBannerImageUrl) {
-        banner1Value = initialBannerImageUrl;
+      const uploadedUrl = await uploadBannerImage();
+      if (!uploadedUrl) {
+        return;
       }
+      banner1Value = uploadedUrl;
     }
 
     const body: ApiCreateOrUpdateProfileRequest = {

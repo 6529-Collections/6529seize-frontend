@@ -17,7 +17,7 @@ export const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
   (format) => `.${format.replace("image/", "")}`
 ).join(", ");
 
-const ALLOWED_EXTENSIONS = ["JPG", "JPEG", "PNG", "GIF", "WEBP"];
+const ALLOWED_EXTENSIONS = new Set(["JPG", "JPEG", "PNG", "GIF", "WEBP"]);
 
 export const isValidImageType = (file: File): boolean => {
   // Primary check: MIME type
@@ -26,7 +26,7 @@ export const isValidImageType = (file: File): boolean => {
   }
   // Fallback: extension check when MIME is empty (some OS/browser combos)
   if (file.type === "") {
-    return ALLOWED_EXTENSIONS.includes(getFileExtension(file));
+    return ALLOWED_EXTENSIONS.has(getFileExtension(file));
   }
   return false;
 };
