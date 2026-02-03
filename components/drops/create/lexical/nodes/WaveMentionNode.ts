@@ -81,7 +81,7 @@ export class WaveMentionNode extends TextNode {
 
   override exportDOM(): DOMExportOutput {
     const element = document.createElement("span");
-    element.setAttribute("data-lexical-wave-mention", "true");
+    element.dataset["lexicalWaveMention"] = "true";
     element.textContent = this.__text;
     return { element };
   }
@@ -89,7 +89,7 @@ export class WaveMentionNode extends TextNode {
   static override importDOM(): DOMConversionMap | null {
     return {
       span: (domNode: HTMLElement) => {
-        if (!domNode.hasAttribute("data-lexical-wave-mention")) {
+        if (domNode.dataset["lexicalWaveMention"] === undefined) {
           return null;
         }
         return {

@@ -24,8 +24,7 @@ import type { MentionedWave } from "@/entities/IDrop";
 import { useWavesSearch } from "@/hooks/useWavesSearch";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 
-const PUNCTUATION =
-  "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
+const PUNCTUATION = String.raw`\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\\/!%'"~=<>_:;`;
 
 const DocumentWaveMentionsRegex = {
   PUNCTUATION,
@@ -33,36 +32,17 @@ const DocumentWaveMentionsRegex = {
 
 const PUNC = DocumentWaveMentionsRegex.PUNCTUATION;
 const TRIGGERS = ["#"].join("");
-const VALID_CHARS = "[^" + TRIGGERS + PUNC + "\\s]";
-const VALID_JOINS = "(?:" + "\\.[ |$]|" + " |" + "[" + PUNC + "]|" + ")";
+const VALID_CHARS = String.raw`[^${TRIGGERS}${PUNC}\s]`;
+const VALID_JOINS = String.raw`(?:\.[ |$]| |[${PUNC}]|)`;
 const LENGTH_LIMIT = 75;
 
 const HashMentionsRegex = new RegExp(
-  "(^|\\s|\\()(" +
-    "[" +
-    TRIGGERS +
-    "]" +
-    "((?:" +
-    VALID_CHARS +
-    VALID_JOINS +
-    "){0," +
-    LENGTH_LIMIT +
-    "})" +
-    ")$"
+  String.raw`(^|\s|\()([${TRIGGERS}]((?:${VALID_CHARS}${VALID_JOINS}){0,${LENGTH_LIMIT}}))$`
 );
 
 const ALIAS_LENGTH_LIMIT = 50;
 const HashMentionsRegexAliasRegex = new RegExp(
-  "(^|\\s|\\()(" +
-    "[" +
-    TRIGGERS +
-    "]" +
-    "((?:" +
-    VALID_CHARS +
-    "){0," +
-    ALIAS_LENGTH_LIMIT +
-    "})" +
-    ")$"
+  String.raw`(^|\s|\()([${TRIGGERS}]((?:${VALID_CHARS}){0,${ALIAS_LENGTH_LIMIT}}))$`
 );
 
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;

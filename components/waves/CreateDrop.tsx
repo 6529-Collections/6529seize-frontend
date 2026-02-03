@@ -129,7 +129,7 @@ export default function CreateDrop({
         parts: newParts,
         referenced_nfts: prevDrop.referenced_nfts,
         mentioned_users: prevDrop.mentioned_users,
-        mentioned_waves: prevDrop.mentioned_waves,
+        mentioned_waves: prevDrop.mentioned_waves ?? [],
         metadata: prevDrop.metadata,
       };
     });

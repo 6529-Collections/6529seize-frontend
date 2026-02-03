@@ -18,21 +18,23 @@ export default function WaveMentionsTypeaheadMenu({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const getPositionSnapshot = useCallback(() => {
-    if (typeof window === "undefined") return "bottom";
+    if (typeof globalThis.window === "undefined") return "bottom";
+    const win = globalThis.window;
     const element = menuRef.current;
     if (!element) return "bottom";
     const rect = element.getBoundingClientRect();
     const spaceAbove = rect.top;
-    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceBelow = win.innerHeight - rect.bottom;
     return spaceBelow >= spaceAbove ? "bottom" : "top";
   }, []);
 
   const subscribeToPosition = useCallback((onStoreChange: () => void) => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis.window === "undefined") {
       return () => {};
     }
+    const win = globalThis.window;
     const handleChange = () => onStoreChange();
-    window.addEventListener("resize", handleChange);
+    win.addEventListener("resize", handleChange);
 
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && menuRef.current) {
@@ -43,7 +45,7 @@ export default function WaveMentionsTypeaheadMenu({
     handleChange();
 
     return () => {
-      window.removeEventListener("resize", handleChange);
+      win.removeEventListener("resize", handleChange);
       resizeObserver?.disconnect();
     };
   }, []);
