@@ -38,6 +38,25 @@ const LoadingPlaceholder = () => (
 export default function ExpandableTweetPreview({
   href,
   tweetId,
+  compactHeightClassName,
+  compactMode,
+  renderFallback,
+}: ExpandableTweetPreviewProps) {
+  return (
+    <ExpandableTweetPreviewInner
+      key={tweetId}
+      href={href}
+      tweetId={tweetId}
+      compactHeightClassName={compactHeightClassName}
+      compactMode={compactMode}
+      renderFallback={renderFallback}
+    />
+  );
+}
+
+function ExpandableTweetPreviewInner({
+  href,
+  tweetId,
   compactHeightClassName = "tw-h-64",
   compactMode,
   renderFallback,

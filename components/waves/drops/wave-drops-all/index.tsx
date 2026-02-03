@@ -115,10 +115,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const [visibleLatestSerial, setVisibleLatestSerial] = useState<number | null>(
     null
   );
-  const [autoCollapseSerials, setAutoCollapseSerials] = useState<Set<number>>(
-    () => new Set()
-  );
-  const [jumpBaseline, setJumpBaseline] = useState<Set<number> | null>(null);
 
   const prevLatestSerialNoRef = useRef<number | null>(null);
   const initializedWaveRef = useRef<string | null>(null);
@@ -130,8 +126,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     initializedWaveRef.current = waveId;
     setVisibleLatestSerial(null);
     prevLatestSerialNoRef.current = null;
-    setAutoCollapseSerials(new Set());
-    setJumpBaseline(null);
     setUnreadDividerSerialNo(dividerSerialNo ?? null);
   }, [waveId, dividerSerialNo, setUnreadDividerSerialNo]);
 
@@ -210,50 +204,54 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     }, 0);
   }, [isAppleMobile, waveMessages?.drops, visibleLatestSerial]);
 
-  const { serialTarget, queueSerialTarget, targetDropRef, isScrolling } =
-    useWaveDropsSerialScroll({
-      waveId,
-      dropId,
-      initialDrop,
-      waveMessages,
-      fetchNextPage,
-      waitAndRevealDrop,
-      scrollContainerRef,
-      shouldPinToBottom,
-      scrollToVisualBottom,
-    });
+  const {
+    serialTarget,
+    queueSerialTarget,
+    targetDropRef,
+    isScrolling,
+    scrollBaselineSerials,
+    frozenAutoCollapseSerials,
+  } = useWaveDropsSerialScroll({
+    waveId,
+    dropId,
+    initialDrop,
+    waveMessages,
+    renderedWaveMessages,
+    fetchNextPage,
+    waitAndRevealDrop,
+    scrollContainerRef,
+    shouldPinToBottom,
+    scrollToVisualBottom,
+  });
 
-  // Adjust state during render (React-recommended pattern for derived state).
-  if (isScrolling) {
+  const autoCollapseSerials = useMemo(() => {
+    if (!isScrolling || !scrollBaselineSerials) {
+      return frozenAutoCollapseSerials;
+    }
+
     const drops = renderedWaveMessages?.drops;
-    let baseline = jumpBaseline;
-    if (!baseline && drops && drops.length > 0) {
-      const baselineSerials = drops
-        .map((drop) => drop.serial_no)
-        .filter((serialNo): serialNo is number => typeof serialNo === "number");
-      baseline = new Set(baselineSerials);
-      setJumpBaseline(baseline);
+    if (!drops || drops.length === 0) {
+      return frozenAutoCollapseSerials;
     }
-    if (baseline && drops && drops.length > 0) {
-      let didChange = false;
-      const next = new Set(autoCollapseSerials);
-      for (const drop of drops) {
-        const serialNo = drop.serial_no;
-        if (typeof serialNo !== "number") {
-          continue;
-        }
-        if (!baseline.has(serialNo) && !next.has(serialNo)) {
-          next.add(serialNo);
-          didChange = true;
-        }
+
+    const next = new Set(frozenAutoCollapseSerials);
+    for (const drop of drops) {
+      const serialNo = drop.serial_no;
+      if (typeof serialNo !== "number") {
+        continue;
       }
-      if (didChange) {
-        setAutoCollapseSerials(next);
+      if (!scrollBaselineSerials.has(serialNo) && !next.has(serialNo)) {
+        next.add(serialNo);
       }
     }
-  } else if (jumpBaseline) {
-    setJumpBaseline(null);
-  }
+
+    return next;
+  }, [
+    isScrolling,
+    scrollBaselineSerials,
+    renderedWaveMessages?.drops,
+    frozenAutoCollapseSerials,
+  ]);
 
   const waveChatScroll = useWaveChatScrollOptional();
   useEffect(() => {
@@ -272,7 +270,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     const newestSerial = waveMessages.drops[0]?.serial_no;
     setVisibleLatestSerial(newestSerial!);
     scrollToVisualBottom();
-  }, [waveMessages?.drops, scrollToVisualBottom]);
+  }, [waveMessages, scrollToVisualBottom]);
 
   const handleTopIntersection = useCallback(async () => {
     if (
@@ -389,6 +387,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
       key={`unread-divider-${waveId}`}
     >
       <WaveDropsAllInner
+        key={waveId}
         waveId={waveId}
         dropId={dropId}
         onReply={onReply}
