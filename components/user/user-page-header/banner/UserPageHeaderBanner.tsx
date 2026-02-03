@@ -26,7 +26,7 @@ export default function UserPageHeaderBanner({
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const bannerImageUrl = getBannerImageUrl(profile.banner1);
   const scaledBannerUrl = bannerImageUrl
-    ? getScaledImageUri(bannerImageUrl, ImageScale.AUTOx450)
+    ? getScaledImageUri(bannerImageUrl, ImageScale.AUTOx1080)
     : null;
   const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;

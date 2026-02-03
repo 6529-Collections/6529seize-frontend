@@ -1,9 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import {
-  ACCEPTED_FORMATS_DISPLAY,
-} from "./UserSettingsImgSelectFile";
+import { ACCEPTED_FORMATS_DISPLAY } from "./UserSettingsImgSelectFile";
 import { useImageUpload } from "./useImageUpload";
 
 export default function UserSettingsBannerImageInput({
@@ -15,8 +13,8 @@ export default function UserSettingsBannerImageInput({
 }) {
   const { error, shake, dragging, onFileChange, dragHandlers } = useImageUpload(
     {
-      maxSizeBytes: 10485760,
-      maxSizeLabel: "10MB",
+      maxSizeBytes: 2097152,
+      maxSizeLabel: "2MB",
       setFile,
     }
   );
@@ -73,7 +71,7 @@ export default function UserSettingsBannerImageInput({
                   or drag and drop
                 </p>
                 <p className="tw-text-xs tw-font-normal tw-text-iron-400">
-                  JPEG, JPG, PNG, GIF, WEBP — max 10MB
+                  JPEG, JPG, PNG, GIF, WEBP — max 2MB
                 </p>
               </div>
             </>
