@@ -464,7 +464,7 @@ export default function UserPageCollected({
     queryKey: [QueryKey.PROFILE_COLLECTED_TRANSFER, filters, connectedAddress],
     queryFn: async () => {
       try {
-        const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?page_size=200&seized=${CollectionSeized.SEIZED}`;
+        const allPagesUrl = `${publicEnv.API_ENDPOINT}/api/profiles/${connectedAddress}/collected?page_size=200&seized=${CollectionSeized.SEIZED}&account_for_consolidations=false`;
         return await fetchAllPages<CollectedCard>(allPagesUrl);
       } catch (error) {
         console.error(
