@@ -12,6 +12,7 @@ import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import DropPartMarkdownImage from "../DropPartMarkdownImage";
+import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
@@ -26,6 +27,7 @@ interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
+  readonly tweetPreviewMode?: TweetPreviewMode | undefined;
 }
 
 interface LinkRenderer {
@@ -59,9 +61,12 @@ export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
   hideLinkPreviews = false,
+  tweetPreviewMode,
 }: LinkRendererConfig): LinkRenderer => {
   const seizeHandlers = createSeizeHandlers({ onQuoteClick, currentDropId });
-  const handlers = createLinkHandlers();
+  const handlers = createLinkHandlers(
+    tweetPreviewMode ? { tweetPreviewMode } : undefined
+  );
 
   const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
     if (typeof src !== "string") {
