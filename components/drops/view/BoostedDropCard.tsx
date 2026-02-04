@@ -120,7 +120,13 @@ const BoostedDropCard = memo(
               </div>
 
               <button
+                type="button"
                 onClick={handleBoostClick}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.stopPropagation();
+                  }
+                }}
                 disabled={!canBoost || isPending}
                 className={`tw-flex tw-h-6 tw-flex-shrink-0 tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-px-2.5 tw-transition-colors tw-duration-200 ${
                   canBoost
