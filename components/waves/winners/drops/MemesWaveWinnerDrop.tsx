@@ -83,20 +83,12 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     >
       <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_0_15px_rgba(251,191,36,0.08)] tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-[#fbbf24]/20">
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
-          {/* Header section with border */}
           <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <div className="tw-flex tw-gap-x-2">
                 <WaveWinnersDropHeaderAuthorPfp winner={winner} size="sm" />
                 <div className="tw-flex tw-items-center">
-                  {/* Top row: Handle + Timestamp */}
                   <div className="-tw-mt-0.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
-                    {winner.drop.author?.level && (
-                      <UserCICAndLevel
-                        level={winner.drop.author.level}
-                        size={UserCICAndLevelSize.LARGE}
-                      />
-                    )}
                     {winner.drop.author?.handle ? (
                       <UserProfileTooltipWrapper
                         user={
@@ -125,6 +117,12 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                           {winner.drop.author?.handle ?? winner.drop.author?.id}
                         </span>
                       </Link>
+                    )}
+                    {winner.drop.author?.level && (
+                      <UserCICAndLevel
+                        level={winner.drop.author.level}
+                        size={UserCICAndLevelSize.SMALL}
+                      />
                     )}
 
                     <span className="tw-text-sm tw-text-iron-500">•</span>

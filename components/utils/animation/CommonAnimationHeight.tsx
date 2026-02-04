@@ -8,11 +8,13 @@ export default function CommonAnimationHeight({
   children,
   onAnimationCompleted,
   onAnimationStart,
+  disableAnimation = false,
 }: {
   readonly children: React.ReactNode;
   readonly className?: string | undefined;
   readonly onAnimationCompleted?: (() => void) | undefined;
   readonly onAnimationStart?: (() => void) | undefined;
+  readonly disableAnimation?: boolean | undefined;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number | "auto">("auto");
@@ -39,7 +41,7 @@ export default function CommonAnimationHeight({
       className={`${className} tw-overflow-hidden`}
       style={{ height }}
       animate={{ height }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: disableAnimation ? 0 : 0.3 }}
       {...(onAnimationStart && { onAnimationStart })}
       {...(onAnimationCompleted && {
         onAnimationComplete: onAnimationCompleted,
