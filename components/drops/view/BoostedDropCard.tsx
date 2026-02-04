@@ -42,13 +42,11 @@ const BoostedDropCard = memo(
     }, [drop.parts]);
 
     const rankClasses =
-      rank === 1
-        ? "tw-text-yellow-400"
-        : rank === 2
-          ? "tw-text-iron-300"
-          : rank === 3
-            ? "tw-text-amber-500"
-            : "tw-text-iron-400";
+      {
+        1: "tw-text-yellow-400",
+        2: "tw-text-iron-300",
+        3: "tw-text-amber-500",
+      }[rank] ?? "tw-text-iron-400";
 
     const isBoosted = drop.context_profile_context?.boosted ?? false;
     const canBoost = !!connectedProfile && !drop.id.startsWith("temp-");
@@ -63,11 +61,11 @@ const BoostedDropCard = memo(
       [canBoost, isPending, toggleBoost, extendedDrop]
     );
 
-    const cardThemeClasses = highlightTopOnly
-      ? rank === 1
-        ? "tw-bg-gradient-to-r tw-from-amber-950/30 tw-to-iron-900/50 tw-ring-amber-700/30 hover:tw-ring-amber-600/50"
-        : "tw-bg-iron-900/40 tw-ring-iron-800/60 hover:tw-ring-iron-700/70"
-      : "tw-bg-gradient-to-r tw-from-amber-950/30 tw-to-iron-900/50 tw-ring-amber-700/30 hover:tw-ring-amber-600/50";
+    const isTopRank = rank === 1;
+    const cardThemeClasses =
+      highlightTopOnly && !isTopRank
+        ? "tw-bg-iron-900/40 tw-ring-iron-800/60 hover:tw-ring-iron-700/70"
+        : "tw-bg-gradient-to-r tw-from-amber-950/30 tw-to-iron-900/50 tw-ring-amber-700/30 hover:tw-ring-amber-600/50";
 
     return (
       <div
