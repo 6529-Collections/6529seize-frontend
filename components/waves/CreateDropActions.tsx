@@ -13,6 +13,7 @@ interface CreateDropActionsProps {
   readonly canAddPart: boolean;
   readonly submitting: boolean;
   readonly showOptions: boolean;
+  readonly animateOptions: boolean;
   readonly isRequiredMetadataMissing: boolean;
   readonly isRequiredMediaMissing: boolean;
   readonly handleFileChange: (files: File[]) => void;
@@ -28,6 +29,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     canAddPart,
     submitting,
     showOptions,
+    animateOptions,
     isRequiredMediaMissing,
     isRequiredMetadataMissing,
     handleFileChange,
@@ -66,6 +68,32 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [showGifPicker, gifPickerEnabled]);
 
+    const expandMotionProps = animateOptions
+      ? {
+          initial: { width: "32px" },
+          animate: { width: "auto" },
+          exit: { width: "32px" },
+          transition: { duration: 0.3, ease: "easeInOut" },
+        }
+      : {
+          initial: false,
+          animate: { width: "auto" },
+          transition: { duration: 0 },
+        };
+
+    const fadeMotionProps = animateOptions
+      ? {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0 },
+          transition: { duration: 0.2, delay: 0.1 },
+        }
+      : {
+          initial: false,
+          animate: { opacity: 1 },
+          transition: { duration: 0 },
+        };
+
     return (
       <LayoutGroup>
         <div className="tw-relative">
@@ -73,13 +101,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             {showOptions ? (
               <motion.div
                 key="default-buttons"
-                initial={{ width: "32px" }}
-                animate={{ width: "auto" }}
-                exit={{ width: "32px" }}
-                transition={{
-                  duration: 0.3,
-                  ease: "easeInOut",
-                }}
+                {...expandMotionProps}
                 className="tw-flex tw-items-center tw-gap-x-2 tw-overflow-hidden"
               >
                 <>
@@ -124,10 +146,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   )}
                 </>
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, delay: 0.1 }}
+                  {...fadeMotionProps}
                   className="tw-flex tw-items-center tw-gap-x-2"
                 >
                   <>
