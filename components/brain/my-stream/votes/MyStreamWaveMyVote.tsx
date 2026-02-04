@@ -147,10 +147,12 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 {drop.author.handle}
               </Link>
             </UserProfileTooltipWrapper>
-            <UserCICAndLevel
-              level={drop.author.level || 0}
-              size={UserCICAndLevelSize.SMALL}
-            />
+            {!!drop.author.level && (
+              <UserCICAndLevel
+                level={drop.author.level}
+                size={UserCICAndLevelSize.SMALL}
+              />
+            )}
           </div>
           <div className="tw-mt-3.5 tw-flex tw-flex-col tw-justify-between tw-gap-4 @lg:tw-flex-col @[42rem]:tw-flex-row xl:tw-mt-3">
             <div className="tw-flex tw-items-center tw-gap-x-6">
