@@ -100,7 +100,7 @@ const BoostedDropCard = memo(
                   src={resolvedPfp}
                   alt={`${drop.author.handle ?? drop.author.primary_address}'s profile picture`}
                   fill
-                  sizes="32px"
+                  sizes="(min-width: 360px) 40px, 32px"
                   className="tw-rounded-lg tw-bg-transparent tw-object-contain"
                 />
               ) : (
