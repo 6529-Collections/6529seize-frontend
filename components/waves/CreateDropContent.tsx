@@ -33,6 +33,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -481,6 +482,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
+  const hasUserToggledOptionsRef = useRef(false);
+  const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
   const editingDropId = useSelector(selectEditingDropId);
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -495,11 +498,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [userShowOptions, setUserShowOptions] = useState(false);
   const closeOnNextInputRef = useRef(false);
-  const showOptions = isWideContainer || userShowOptions;
+  const isWaveChanged = prevWaveIdRef.current !== wave.id;
+  if (isWaveChanged) {
+    prevWaveIdRef.current = wave.id;
+    hasUserToggledOptionsRef.current = false;
+  }
+  const showOptions = isWideContainer || (userShowOptions && !isWaveChanged);
 
   useEffect(() => {
+    setUserShowOptions(false);
+    closeOnNextInputRef.current = false;
+  }, [wave.id]);
+
+  useLayoutEffect(() => {
     const container = actionsContainerRef.current;
     if (!container) return;
+
+    const measureWidth = () => {
+      const width = container.getBoundingClientRect().width;
+      const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
+      setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+    };
+
+    measureWidth();
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -1068,6 +1089,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {
+      hasUserToggledOptionsRef.current = true;
       setUserShowOptions(next);
       if (isWideContainer) {
         closeOnNextInputRef.current = false;
@@ -1246,7 +1268,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             canAddPart={canAddPart}
             submitting={submitting}
             showOptions={showOptions}
-            animateOptions={!isWideContainer}
+            animateOptions={
+              !isWideContainer &&
+              hasUserToggledOptionsRef.current &&
+              !isWaveChanged
+            }
             isRequiredMetadataMissing={!!missingRequirements.metadata.length}
             isRequiredMediaMissing={!!missingRequirements.media.length}
             handleFileChange={handleFileChange}
