@@ -156,7 +156,14 @@ const CreateDropWrapper = forwardRef<
       }
     }, [breakpoint]);
 
-    const { data: wave } = useQuery<ApiWave>({
+    const prevWaveIdRef = useRef<string | null>(waveProps?.id ?? null);
+    const isWaveSwitch = prevWaveIdRef.current !== (waveProps?.id ?? null);
+
+    useEffect(() => {
+      prevWaveIdRef.current = waveProps?.id ?? null;
+    }, [waveProps?.id]);
+
+    const { data: wave, isFetching: isWaveFetching } = useQuery<ApiWave>({
       queryKey: [QueryKey.WAVE, { wave_id: waveProps?.id }],
       queryFn: async () =>
         await commonApiFetch<ApiWave>({
@@ -512,9 +519,16 @@ const CreateDropWrapper = forwardRef<
         </CreateDropFull>
       ),
     };
+
+    const disableHeightAnimation =
+      screenType === CreateDropScreenType.DESKTOP &&
+      (isWaveSwitch || isWaveFetching);
+
     return (
       <div>
-        <CommonAnimationHeight>{components[viewType]}</CommonAnimationHeight>
+        <CommonAnimationHeight disableAnimation={disableHeightAnimation}>
+          {components[viewType]}
+        </CommonAnimationHeight>
       </div>
     );
   }

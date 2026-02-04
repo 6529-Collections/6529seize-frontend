@@ -1246,6 +1246,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             canAddPart={canAddPart}
             submitting={submitting}
             showOptions={showOptions}
+            animateOptions={!isWideContainer}
             isRequiredMetadataMissing={!!missingRequirements.metadata.length}
             isRequiredMediaMissing={!!missingRequirements.media.length}
             handleFileChange={handleFileChange}
