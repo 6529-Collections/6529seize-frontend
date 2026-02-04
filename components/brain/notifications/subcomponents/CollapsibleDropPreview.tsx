@@ -187,7 +187,7 @@ export default function CollapsibleDropPreview({
         {children}
         {hostWidth > 0 && (
           <div
-            className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
+            className="tw-pointer-events-none tw-absolute tw-left-[-100000px] tw-top-0 tw-opacity-0"
             style={{ width: hostWidth }}
             aria-hidden
             inert
@@ -209,7 +209,7 @@ export default function CollapsibleDropPreview({
       <div ref={hostRef} className="tw-relative tw-w-full tw-min-w-0">
         {hostWidth > 0 && (
           <div
-            className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
+            className="tw-pointer-events-none tw-absolute tw-left-[-100000px] tw-top-0 tw-opacity-0"
             style={{ width: hostWidth }}
             aria-hidden
             inert
@@ -248,7 +248,7 @@ export default function CollapsibleDropPreview({
     <div ref={hostRef} className="tw-relative tw-w-full tw-min-w-0">
       {hostWidth > 0 && hasMeasured && (
         <div
-          className="tw-pointer-events-none tw-fixed tw-left-[-100000px] tw-top-0 tw-opacity-0"
+          className="tw-pointer-events-none tw-absolute tw-left-[-100000px] tw-top-0 tw-opacity-0"
           style={{ width: hostWidth }}
           aria-hidden
           inert
