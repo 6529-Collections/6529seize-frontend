@@ -28,7 +28,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="tw-h-full tw-bg-black tailwind-scope tw-relative">
+    <div className="tw-h-full tw-bg-black tailwind-scope tw-relative tw-overflow-hidden">
       {isDropOpen &&
         drop &&
         (isApp ? (

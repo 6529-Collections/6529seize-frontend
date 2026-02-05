@@ -197,6 +197,16 @@ const WaveDrop = ({
   };
 
   const groupingClass = getGroupingClass();
+  const replyTo = drop.reply_to;
+
+  const isGroupedReplyWithPrevious =
+    shouldGroupWithPreviousDrop &&
+    replyTo?.drop_id === previousDrop?.reply_to?.drop_id;
+
+  const shouldShowReplyHeader =
+    !!replyTo &&
+    replyTo.drop_id !== dropViewDropId &&
+    !isGroupedReplyWithPrevious;
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
@@ -383,21 +393,14 @@ const WaveDrop = ({
 
   const contentBlock = (
     <>
-      {drop.reply_to &&
-        (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
-          drop.author.handle !== previousDrop?.author?.handle) &&
-        drop.reply_to.drop_id !== dropViewDropId && (
-          <WaveDropReply
-            onReplyClick={onReplyClick}
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
+      {shouldShowReplyHeader && (
+        <WaveDropReply
+          onReplyClick={onReplyClick}
+          dropId={replyTo.drop_id}
+          dropPartId={replyTo.drop_part_id}
+          maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
+        />
+      )}
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
         {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
         <div

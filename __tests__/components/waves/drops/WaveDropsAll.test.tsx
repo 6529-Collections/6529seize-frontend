@@ -239,14 +239,29 @@ function setupMocks(options: MockSetupOptions = {}) {
   }));
 
   // Setup useScrollBehavior mock
-  require("@/hooks/useScrollBehavior").useScrollBehavior.mockReturnValue({
-    scrollContainerRef: mockScrollContainerRef,
-    bottomAnchorRef: mockBottomAnchorRef,
-    isAtBottom: options.scrollBehavior?.isAtBottom ?? true,
-    shouldPinToBottom: options.scrollBehavior?.shouldPinToBottom ?? true,
-    scrollIntent: options.scrollBehavior?.scrollIntent ?? "pinned",
-    scrollToVisualBottom: mockScrollToVisualBottom,
-  });
+  require("@/hooks/useScrollBehavior").useScrollBehavior.mockImplementation(
+    (hookOptions: {
+      onPinStateChange?: (next: boolean, prev: boolean) => void;
+    }) => {
+      const shouldPinToBottom =
+        options.scrollBehavior?.shouldPinToBottom ?? true;
+
+      if (hookOptions?.onPinStateChange && !shouldPinToBottom) {
+        setTimeout(() => {
+          hookOptions.onPinStateChange?.(shouldPinToBottom, true);
+        }, 0);
+      }
+
+      return {
+        scrollContainerRef: mockScrollContainerRef,
+        bottomAnchorRef: mockBottomAnchorRef,
+        isAtBottom: options.scrollBehavior?.isAtBottom ?? true,
+        shouldPinToBottom,
+        scrollIntent: options.scrollBehavior?.scrollIntent ?? "pinned",
+        scrollToVisualBottom: mockScrollToVisualBottom,
+      };
+    }
+  );
 
   // Setup router mock
   require("next/navigation").useRouter.mockReturnValue({
@@ -658,6 +673,10 @@ describe("WaveDropsAll", () => {
       expect(scrollButtonProps.newMessagesCount).toBe(0);
 
       expect(getWaveMessages()).toBeDefined();
+
+      act(() => {
+        jest.advanceTimersByTime(0);
+      });
 
       act(() => {
         const currentWaveMessages = getWaveMessages();

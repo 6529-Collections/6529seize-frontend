@@ -243,6 +243,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           activeDrop={activeDrop}
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}
+          unreadCount={wave.metrics.your_unread_drops_count}
           dropId={null}
           isMuted={wave.metrics.muted}
         />

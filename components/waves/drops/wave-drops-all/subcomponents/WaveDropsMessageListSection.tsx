@@ -1,7 +1,6 @@
 import DropsList from "@/components/drops/view/DropsList";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
-import { WaveDropsScrollBottomButton } from "@/components/waves/drops/WaveDropsScrollBottomButton";
-import { WaveDropsScrollToUnreadButton } from "@/components/waves/drops/WaveDropsScrollToUnreadButton";
+import { WaveDropsScrollControls } from "@/components/waves/drops/WaveDropsScrollControls";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
@@ -44,6 +43,7 @@ interface WaveDropsMessageListSectionProps {
   readonly onRevealPending: () => void;
   readonly bottomPaddingClassName?: string | undefined;
   readonly unreadDividerSerialNo?: number | null | undefined;
+  readonly unreadCount?: number | undefined;
   readonly boostedDrops?: ApiDrop[] | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
@@ -75,6 +75,7 @@ export const WaveDropsMessageListSection: React.FC<
   onRevealPending,
   bottomPaddingClassName,
   unreadDividerSerialNo,
+  unreadCount,
   boostedDrops,
   onBoostedDropClick,
   onScrollToUnread,
@@ -118,19 +119,18 @@ export const WaveDropsMessageListSection: React.FC<
         <div ref={bottomAnchorRef} style={{ height: "1px" }} />
       </WaveDropsReverseContainer>
       {onScrollToUnread && (
-        <WaveDropsScrollToUnreadButton
+        <WaveDropsScrollControls
           unreadDividerSerialNo={unreadDividerSerialNo ?? null}
+          unreadCount={unreadCount}
           scrollContainerRef={scrollContainerRef}
           onScrollToUnread={onScrollToUnread}
-          onDismiss={onDismissUnread}
+          onDismissUnread={onDismissUnread}
+          isAtBottom={isAtBottom}
+          scrollToBottom={scrollToBottom}
+          newMessagesCount={pendingCount}
+          onRevealNewMessages={onRevealPending}
         />
       )}
-      <WaveDropsScrollBottomButton
-        isAtBottom={isAtBottom}
-        scrollToBottom={scrollToBottom}
-        newMessagesCount={pendingCount}
-        onRevealNewMessages={onRevealPending}
-      />
     </>
   );
 };

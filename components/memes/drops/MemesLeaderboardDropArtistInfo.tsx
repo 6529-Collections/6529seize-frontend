@@ -34,14 +34,7 @@ const MemesLeaderboardDropArtistInfo = ({
     <div className="tw-flex tw-gap-x-3">
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-flex tw-flex-col tw-justify-between tw-h-12">
-        {/* Top row: Handle + Artist badge + Timestamp */}
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap -tw-mt-0.5">
-          {!!drop.author?.level && (
-            <UserCICAndLevel
-              level={drop.author.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
-          )}
           {drop.author?.handle ? (
             <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
               <Link
@@ -65,6 +58,13 @@ const MemesLeaderboardDropArtistInfo = ({
             </span>
           </Link>
         )}
+
+          {!!drop.author?.level && (
+            <UserCICAndLevel
+              level={drop.author.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          )}
 
           {hasActivityBadge && (
             <ArtistActivityBadge
