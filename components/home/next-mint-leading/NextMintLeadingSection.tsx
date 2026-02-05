@@ -7,6 +7,7 @@ import {
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
+import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { LeadingCard } from "./LeadingCard";
@@ -46,9 +47,12 @@ export function NextMintLeadingSection() {
     nowMinting.name.toLowerCase().trim() === nextMintTitle.toLowerCase().trim();
 
   // Determine what to show
-  const isNowMintingEnded = nowMintingStatus === ManifoldClaimStatus.ENDED;
+  const canShowNextMint = shouldShowNextWinnerInComingUp({
+    isMintEnded: nowMintingStatus === ManifoldClaimStatus.ENDED,
+    nextMintExists: !!nextMint,
+  });
   const showNextMint =
-    nextMint && !isNowMintingEnded && !isNextMintSameAsNowMinting;
+    canShowNextMint && !!nextMint && !isNextMintSameAsNowMinting;
   const leadingCount = showNextMint ? 2 : 3;
 
   // Get top drops from leaderboard
