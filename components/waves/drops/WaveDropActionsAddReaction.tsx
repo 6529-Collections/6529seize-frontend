@@ -300,7 +300,14 @@ const WaveDropActionsAddReaction: React.FC<{
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
         >
-          <div className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <div
+            className="tw-flex tw-w-full tw-justify-center tw-overflow-y-auto tw-max-h-[75dvh]"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y",
+              overscrollBehaviorY: "contain",
+            }}
+          >
             <Picker
               theme="dark"
               data={data}
