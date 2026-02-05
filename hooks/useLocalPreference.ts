@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 /**
  * A hook for managing user preferences stored in localStorage
@@ -69,24 +69,27 @@ function useLocalPreference<T>(
   }, [key, validator, setPreference]);
 
   // Renamed wrapper function that updates state and localStorage
-  const updatePreference = (newValue: T) => {
-    if (typeof window === "undefined") {
-      setPreference(newValue);
-      return;
-    }
+  const updatePreference = useCallback(
+    (newValue: T) => {
+      if (typeof window === "undefined") {
+        setPreference(newValue);
+        return;
+      }
 
-    try {
-      // Save to state
-      setPreference(newValue);
+      try {
+        // Save to state
+        setPreference(newValue);
 
-      // Save to localStorage
-      localStorage.setItem(key, JSON.stringify(newValue));
-    } catch (e) {
-      // If there's an error writing to localStorage, just update the state
-      console.warn(`Error writing ${key} to localStorage:`, e);
-      setPreference(newValue);
-    }
-  };
+        // Save to localStorage
+        localStorage.setItem(key, JSON.stringify(newValue));
+      } catch (e) {
+        // If there's an error writing to localStorage, just update the state
+        console.warn(`Error writing ${key} to localStorage:`, e);
+        setPreference(newValue);
+      }
+    },
+    [key, setPreference]
+  );
 
   return [preference, updatePreference];
 }
