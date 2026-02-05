@@ -5,7 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { RefObject } from "react";
+import type { RefObject, Ref } from "react";
 
 type WaveMessagesResult = ReturnType<
   typeof useVirtualizedWaveDrops
@@ -15,8 +15,11 @@ interface WaveDropsMessageListSectionProps {
   readonly waveMessages: WaveMessagesResult;
   readonly dropId: string | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
+  readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
+  readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly onTopIntersection: () => void;
+  readonly onScroll?: (() => void) | undefined;
   readonly onReply: ({
     drop,
     partId,
@@ -59,8 +62,11 @@ export const WaveDropsMessageListSection: React.FC<
   waveMessages,
   dropId,
   scrollContainerRef,
+  scrollContainerCallbackRef,
   bottomAnchorRef,
+  bottomAnchorCallbackRef,
   onTopIntersection,
+  onScroll,
   onReply,
   onQuote,
   queueSerialTarget,
@@ -86,14 +92,18 @@ export const WaveDropsMessageListSection: React.FC<
     !!waveMessages?.hasNextPage &&
     waveMessages.drops.length >= MIN_DROPS_FOR_PAGINATION;
 
+  const containerRef = scrollContainerCallbackRef ?? scrollContainerRef;
+  const anchorRef = bottomAnchorCallbackRef ?? bottomAnchorRef;
+
   return (
     <>
       <WaveDropsReverseContainer
-        ref={scrollContainerRef}
+        ref={containerRef}
         isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
         hasNextPage={hasNextPage}
         onTopIntersection={onTopIntersection}
         bottomPaddingClassName={bottomPaddingClassName}
+        onScroll={onScroll}
       >
         <DropsList
           scrollContainerRef={scrollContainerRef}
@@ -116,7 +126,7 @@ export const WaveDropsMessageListSection: React.FC<
           autoCollapseSerials={autoCollapseSerials}
           key="drops-list"
         />
-        <div ref={bottomAnchorRef} style={{ height: "1px" }} />
+        <div ref={anchorRef} style={{ height: "1px" }} />
       </WaveDropsReverseContainer>
       {onScrollToUnread && (
         <WaveDropsScrollControls
