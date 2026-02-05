@@ -123,7 +123,7 @@ const extractMediaFromMarkdown = (text: string): ProcessedContent => {
  * Removes @ square brackets from text (e.g., @[username] -> @username)
  */
 const removeSquareBrackets = (text: string): string => {
-  return text.replace(/@\[([^\]]+)\]/g, "@$1");
+  return text.replace(/@\[([^\]]+)\]/g, "@$1").replace(/#\[([^\]]+)\]/g, "#$1");
 };
 
 /**
