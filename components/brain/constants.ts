@@ -1,1 +1,0 @@
-export const NEAR_TOP_SCROLL_THRESHOLD_PX = 200;

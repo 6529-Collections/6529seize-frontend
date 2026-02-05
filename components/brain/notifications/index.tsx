@@ -7,6 +7,7 @@ import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
 import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
 import NotificationsContent from "./subcomponents/NotificationsContent";
+import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -54,13 +55,14 @@ export default function Notifications({
 
   const activeFilterKey = useMemo(
     () =>
-      activeFilter?.cause?.length
+      typeof activeFilter?.cause.length === "number" &&
+      activeFilter.cause.length > 0
         ? [...activeFilter.cause].sort(compareNotificationCause).join("|")
         : "notifications-filter-all",
     [activeFilter]
   );
 
-  const { scrollContainerRef, handleScroll } = useNotificationsScroll({
+  const { scrollContainerRef, handleTopIntersection } = useNotificationsScroll({
     items,
     isAuthenticated,
     isFetchingNextPage,
@@ -84,11 +86,11 @@ export default function Notifications({
             setActiveFilter={setActiveFilter}
           />
         ) : null}
-        <div
+        <WaveDropsReverseContainer
           ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="tw-flex tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-          style={{ WebkitOverflowScrolling: "touch" }}
+          onTopIntersection={handleTopIntersection}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={pagination.hasNextPage}
         >
           <NotificationsContent
             isLoadingProfile={contentState.isLoadingProfile}
@@ -108,7 +110,7 @@ export default function Notifications({
             setActiveDrop={setActiveDrop}
             markNotificationIdsAsRead={markNotificationIdsAsRead}
           />
-        </div>
+        </WaveDropsReverseContainer>
       </div>
     </div>
   );
