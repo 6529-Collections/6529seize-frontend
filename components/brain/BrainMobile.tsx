@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode} from "react";
+import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
@@ -63,7 +63,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   }, []);
 
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
-  const dropId = searchParams?.get('drop') ?? undefined;
+  const dropId = searchParams.get("drop") ?? undefined;
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: dropId }],
     queryFn: async () =>
@@ -75,12 +75,12 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   });
 
   // Use MyStreamContext for waveId to support client-side navigation via pushState
-  const waveId = myStream?.activeWave.id ?? searchParams?.get('wave') ?? null;
+  const waveId = myStream?.activeWave.id ?? searchParams.get("wave") ?? null;
   const { data: wave } = useWaveData({
     waveId: waveId,
     onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams?.toString() || '');
-      params.delete('wave');
+      const params = new URLSearchParams(searchParams.toString() || "");
+      params.delete("wave");
       const newUrl = params.toString()
         ? `${pathname}?${params.toString()}`
         : pathname || getHomeRoute();
@@ -96,31 +96,29 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   } = useWaveTimers(wave);
 
   const onDropClick = (drop: ExtendedDrop) => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.set('drop', drop.id);
+    const params = new URLSearchParams(searchParams.toString() || "");
+    params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const onDropClose = () => {
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.delete('drop');
+    const params = new URLSearchParams(searchParams.toString() || "");
+    params.delete("drop");
     const newUrl = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
     router.push(newUrl, { scroll: false });
   };
 
-  const isDropOpen =
-    drop &&
-    drop?.id?.toLowerCase() === dropId?.toLowerCase();
+  const isDropOpen = drop && drop.id.toLowerCase() === dropId?.toLowerCase();
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
 
   const hasWave = Boolean(waveId);
 
   useEffect(() => {
-    const viewParam = searchParams?.get("view");
-    const createParam = searchParams?.get("create");
+    const viewParam = searchParams.get("view");
+    const createParam = searchParams.get("create");
 
     if (createParam && isApp) {
       setActiveView(BrainView.DEFAULT);
@@ -201,10 +199,19 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     if (waveId && nonWaveViews.has(activeView)) {
       setActiveView(BrainView.DEFAULT);
     }
-  }, [hasWave, wave, isCompleted, firstDecisionDone, activeView, isMemesWave, waveId, pathname]);
+  }, [
+    hasWave,
+    wave,
+    isCompleted,
+    firstDecisionDone,
+    activeView,
+    isMemesWave,
+    waveId,
+    pathname,
+  ]);
 
   const closeCreateOverlay = useCallback(() => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
+    const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("create");
     const base = pathname ?? "/";
     const next = params.toString() ? `${base}?${params.toString()}` : base;
@@ -213,7 +220,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const createOverlay = useMemo(() => {
     if (!isApp) return null;
-    const createParam = searchParams?.get("create");
+    const createParam = searchParams.get("create");
     if (!createParam) return null;
     if (!connectedProfile) return null;
 
@@ -241,9 +248,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   }, [isApp, searchParams, connectedProfile, closeCreateOverlay]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
-    [BrainView.ABOUT]: (
-      <BrainMobileAbout activeWaveId={waveId} />
-    ),
+    [BrainView.ABOUT]: <BrainMobileAbout activeWaveId={waveId} />,
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:
       isRankWave && !!wave ? (
@@ -275,7 +280,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     : "tw-absolute tw-inset-0 tw-z-[1010]";
 
   return (
-    <div className="tw-relative tw-flex tw-flex-col tw-h-full">
+    <div className="tw-relative tw-flex tw-h-full tw-flex-col">
       {createOverlay}
       {isDropOpen && (
         <div className={dropOverlayClass}>
@@ -308,7 +313,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="tw-flex-1">
+          className="tw-flex-1"
+        >
           {viewComponents[activeView]}
         </motion.div>
       </AnimatePresence>
