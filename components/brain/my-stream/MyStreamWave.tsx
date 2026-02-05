@@ -1,6 +1,7 @@
 "use client";
 
 import React, { type JSX, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSetWaveData } from "@/contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -19,6 +20,8 @@ import { createBreakpoint } from "react-use";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -33,6 +36,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { waves, directMessages } = useMyStream();
   const { data: wave } = useWaveData({
     waveId,
@@ -82,6 +86,10 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
+    queryClient.setQueryData<ApiDrop>(
+      [QueryKey.DROP, { drop_id: drop.id }],
+      drop as ApiDrop
+    );
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });

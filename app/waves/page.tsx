@@ -1,4 +1,9 @@
-import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import {
+  QueryClient,
+  dehydrate,
+  HydrationBoundary,
+} from "@tanstack/react-query";
+import { cache } from "react";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchWavesOverview } from "@/helpers/stream.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -21,25 +26,45 @@ type WaveRequestContext = {
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 
+const fetchWaveCached = cache(
+  async (
+    waveId: string | null,
+    headersKey: string
+  ): Promise<ApiWave | null> => {
+    if (waveId === null) return null;
+    let headers: Record<string, string> = {};
+    try {
+      headers = headersKey
+        ? (JSON.parse(headersKey) as Record<string, string>)
+        : {};
+    } catch {
+      headers = {};
+    }
+    try {
+      return await commonApiFetch<ApiWave>({
+        endpoint: `waves/${waveId}`,
+        headers,
+      });
+    } catch (error) {
+      console.warn("Failed to fetch wave", { waveId, error });
+      return null;
+    }
+  }
+);
+
 async function fetchWaveContext(
   waveId: string | null,
   providedCookies?: CookieStore
 ): Promise<WaveRequestContext> {
   const cookieStore = providedCookies ?? (await cookies());
   const headers = await getAppCommonHeaders();
-  const feedItemsFetchedRaw = cookieStore.get(String(QueryKey.FEED_ITEMS))?.value;
+  const headersKey = JSON.stringify(headers);
+  const feedItemsFetchedRaw = cookieStore.get(
+    String(QueryKey.FEED_ITEMS)
+  )?.value;
   const feedItemsFetchedAt = Number.parseInt(feedItemsFetchedRaw ?? "", 10);
 
-  const wave =
-    waveId === null
-      ? null
-      : await commonApiFetch<ApiWave>({
-          endpoint: `waves/${waveId}`,
-          headers,
-        }).catch((error) => {
-          console.warn("Failed to fetch wave", { waveId, error });
-          return null;
-        });
+  const wave = await fetchWaveCached(waveId, headersKey);
 
   return {
     waveId,
@@ -54,21 +79,33 @@ async function fetchWaveContext(
 export default async function WavesPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ wave?: string | undefined; drop?: string | undefined }>;
+  readonly searchParams: Promise<{
+    wave?: string | undefined;
+    drop?: string | undefined;
+  }>;
 }) {
   const resolvedParams = await searchParams;
   const cookieStore = await cookies();
-  const context = await fetchWaveContext(resolvedParams.wave ?? null, cookieStore);
+  const context = await fetchWaveContext(
+    resolvedParams.wave ?? null,
+    cookieStore
+  );
   const queryClient = new QueryClient();
 
   if (context.waveId && context.wave) {
-    queryClient.setQueryData([QueryKey.WAVE, { wave_id: context.waveId }], context.wave);
+    queryClient.setQueryData(
+      [QueryKey.WAVE, { wave_id: context.waveId }],
+      context.wave
+    );
   }
 
-  if (
-    context.feedItemsFetchedAt === null ||
-    context.feedItemsFetchedAt < Time.now().toMillis() - 60000
-  ) {
+  const hasDrop = Boolean(resolvedParams.drop);
+  const shouldPrefetch =
+    !hasDrop &&
+    (context.feedItemsFetchedAt === null ||
+      context.feedItemsFetchedAt < Time.now().toMillis() - 60000);
+
+  if (shouldPrefetch) {
     try {
       await prefetchWavesOverview({
         queryClient,
@@ -93,7 +130,10 @@ export default async function WavesPage({
 export async function generateMetadata({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ wave?: string | undefined }>;
+  readonly searchParams: Promise<{
+    wave?: string | undefined;
+    drop?: string | undefined;
+  }>;
 }): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const waveId = resolvedParams.wave ?? null;
@@ -107,7 +147,9 @@ export async function generateMetadata({
 
   const shortUuid =
     waveId.length > 12 ? `${waveId.slice(0, 8)}...${waveId.slice(-4)}` : waveId;
-  const { wave } = await fetchWaveContext(waveId);
+  const metadataHeaders = await getAppCommonHeaders();
+  const metadataHeadersKey = JSON.stringify(metadataHeaders);
+  const wave = await fetchWaveCached(waveId, metadataHeadersKey);
 
   if (wave === null) {
     return getAppMetadata({
@@ -133,9 +175,7 @@ export async function generateMetadata({
   const descriptionParts = [
     authorHandle && `Created by ${authorHandle}`,
     subscribers &&
-      `${subscribers} ${
-        subscribersCount === 1 ? "subscriber" : "subscribers"
-      }`,
+      `${subscribers} ${subscribersCount === 1 ? "subscriber" : "subscribers"}`,
     drops && `${drops} ${dropsCount === 1 ? "drop" : "drops"} shared`,
   ].filter((part): part is string => typeof part === "string");
 
