@@ -25,8 +25,9 @@ import {
 const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
+  readonly onOpenPicker?: (() => void) | undefined;
   readonly onAddReaction?: (() => void) | undefined;
-}> = ({ drop, isMobile = false, onAddReaction }) => {
+}> = ({ drop, isMobile = false, onOpenPicker, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReact = !isTemporaryDrop;
   const [showPicker, setShowPicker] = useState(false);
@@ -181,6 +182,11 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const onReact = () => {
     if (!canReact) return;
+
+    if (isMobile && !showPicker) {
+      onOpenPicker?.();
+    }
+
     setShowPicker(!showPicker);
   };
 
@@ -300,7 +306,7 @@ const WaveDropActionsAddReaction: React.FC<{
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
         >
-          <div className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <div className="tw-flex tw-size-full tw-justify-center tw-overflow-y-auto">
             <Picker
               theme="dark"
               data={data}

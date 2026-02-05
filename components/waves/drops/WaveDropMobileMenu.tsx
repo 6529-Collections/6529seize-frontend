@@ -158,6 +158,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         <WaveDropActionsAddReaction
           drop={extendedDrop}
           isMobile={true}
+          onOpenPicker={closeMenu}
           onAddReaction={onAddReaction}
         />
         {showReplyAndQuote && (
