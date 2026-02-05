@@ -8,8 +8,20 @@ import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
 
 export default function LatestDropSection() {
-  const { nft, isFetching, status } = useNowMintingStatus();
-  const { nextMint } = useNextMintDrop();
+  const { nft, isFetching, status, isStatusLoading } = useNowMintingStatus();
+  const {
+    nextMint,
+    waveId,
+    isFetching: isNextMintFetching,
+    isSettingsLoaded,
+  } = useNextMintDrop();
+
+  const isNextMintReady = isSettingsLoaded && (!waveId || !isNextMintFetching);
+  const isDecisionReady = !isFetching && !isStatusLoading && isNextMintReady;
+
+  if (!isDecisionReady) {
+    return <NowMintingSection nft={undefined} isFetching />;
+  }
 
   const shouldShowNextMint = shouldShowNextMintInLatestDrop({
     isMintEnded: status === ManifoldClaimStatus.ENDED,

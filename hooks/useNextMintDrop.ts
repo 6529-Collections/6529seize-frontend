@@ -7,6 +7,7 @@ type NextMintDropState = {
   readonly nextMintTitle: string | null;
   readonly waveId: string | null;
   readonly isReady: boolean;
+  readonly isSettingsLoaded: boolean;
   readonly isFetching: boolean;
 };
 
@@ -32,6 +33,7 @@ export const useNextMintDrop = (): NextMintDropState => {
     nextMintTitle,
     waveId,
     isReady: isLoaded && !!waveId,
+    isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
   };
 };
