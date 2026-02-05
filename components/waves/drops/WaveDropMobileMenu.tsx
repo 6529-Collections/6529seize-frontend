@@ -66,6 +66,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   );
 
   const [copied, setCopied] = useState(false);
+  const [emojiPickerOpenSignal, setEmojiPickerOpenSignal] = useState(0);
 
   const copyToClipboard = () => {
     if (longPressTriggered) return;
@@ -141,13 +142,19 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
 
+  const openEmojiPicker = () => {
+    setOpen(false);
+    setEmojiPickerOpenSignal((current) => current + 1);
+  };
+
   return createPortal(
-    <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
-      <div
-        className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
-          longPressTriggered && "tw-select-none"
-        }`}
-      >
+    <>
+      <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
+        <div
+          className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
+            longPressTriggered && "tw-select-none"
+          }`}
+        >
         {showOptions && (
           <WaveDropActionsToggleLinkPreview
             drop={extendedDrop}
@@ -155,12 +162,12 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             onToggle={closeMenu}
           />
         )}
-        <WaveDropActionsAddReaction
-          drop={extendedDrop}
-          isMobile={true}
-          onOpenPicker={closeMenu}
-          onAddReaction={onAddReaction}
-        />
+          <WaveDropActionsAddReaction
+            drop={extendedDrop}
+            isMobile={true}
+            onOpenPicker={openEmojiPicker}
+            onAddReaction={onAddReaction}
+          />
         {showReplyAndQuote && (
           <>
             <button
@@ -308,8 +315,17 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         {showOptions && (
           <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
         )}
-      </div>
-    </CommonDropdownItemsMobileWrapper>,
+        </div>
+      </CommonDropdownItemsMobileWrapper>
+
+      <WaveDropActionsAddReaction
+        drop={extendedDrop}
+        isMobile={true}
+        hideTrigger={true}
+        externalOpenSignal={emojiPickerOpenSignal}
+        onAddReaction={onAddReaction}
+      />
+    </>,
     document.body
   );
 };

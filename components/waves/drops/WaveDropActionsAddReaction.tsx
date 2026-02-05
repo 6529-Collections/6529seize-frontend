@@ -26,8 +26,17 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
   readonly onOpenPicker?: (() => void) | undefined;
+  readonly externalOpenSignal?: number | undefined;
+  readonly hideTrigger?: boolean | undefined;
   readonly onAddReaction?: (() => void) | undefined;
-}> = ({ drop, isMobile = false, onOpenPicker, onAddReaction }) => {
+}> = ({
+  drop,
+  isMobile = false,
+  onOpenPicker,
+  externalOpenSignal,
+  hideTrigger = false,
+  onAddReaction,
+}) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReact = !isTemporaryDrop;
   const [showPicker, setShowPicker] = useState(false);
@@ -150,6 +159,14 @@ const WaveDropActionsAddReaction: React.FC<{
   };
 
   useEffect(() => {
+    if (!isMobile || externalOpenSignal === undefined) {
+      return;
+    }
+
+    setShowPicker(true);
+  }, [externalOpenSignal, isMobile]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       if (
@@ -183,8 +200,9 @@ const WaveDropActionsAddReaction: React.FC<{
   const onReact = () => {
     if (!canReact) return;
 
-    if (isMobile && !showPicker) {
+    if (isMobile && !showPicker && onOpenPicker) {
       onOpenPicker?.();
+      return;
     }
 
     setShowPicker(!showPicker);
@@ -277,7 +295,7 @@ const WaveDropActionsAddReaction: React.FC<{
 
   return (
     <>
-      {isMobile ? mobileContent : desktopContent}
+      {!hideTrigger && (isMobile ? mobileContent : desktopContent)}
       {/* Desktop Picker */}
       {!isMobile &&
         showPicker &&
