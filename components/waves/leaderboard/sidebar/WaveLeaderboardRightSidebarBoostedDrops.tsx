@@ -105,6 +105,7 @@ export const WaveLeaderboardRightSidebarBoostedDrops =
               key={drop.id}
               drop={drop}
               rank={index + 1}
+              highlightTopOnly
               onClick={() => handleDropClick(drop.serial_no)}
             />
           ))}

@@ -5,9 +5,7 @@ import {
   CreateDropType,
   CreateDropViewType,
 } from "@/components/drops/create/types";
-import type {
-  CreateDropContentHandles,
-} from "@/components/drops/create/utils/CreateDropContent";
+import type { CreateDropContentHandles } from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropContent from "@/components/drops/create/utils/CreateDropContent";
 import CreateDropSelectedFileIcon from "@/components/drops/create/utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
@@ -15,6 +13,7 @@ import type {
   CreateDropConfig,
   DropMetadata,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
@@ -55,6 +54,7 @@ interface CreateDropFullMobileProps {
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
+  readonly onMentionedWave: (newWave: MentionedWave) => void;
   readonly onReferencedNft: (newNft: ReferencedNft) => void;
   readonly onTitle: (newV: string | null) => void;
   readonly setFiles: (files: File[]) => void;
@@ -88,6 +88,7 @@ const CreateDropFullMobile = forwardRef<
       onMetadataEdit,
       onMetadataRemove,
       onMentionedUser,
+      onMentionedWave,
       onReferencedNft,
       onTitle,
       onFileRemove,
@@ -132,19 +133,18 @@ const CreateDropFullMobile = forwardRef<
         onClose={onClose}
         onViewClick={onViewClick}
       >
-        <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-y tw-divide-iron-800 tw-divide-x-0 tw-divide-solid">
+        <div className="tw-relative tw-flex-1 tw-space-y-4 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
           {children}
-          <div className="tw-relative tw-px-4 sm:tw-px-6 tw-space-y-4">
-            <div className="tw-flex tw-justify-end -tw-mb-2">
+          <div className="tw-relative tw-space-y-4 tw-px-4 sm:tw-px-6">
+            <div className="-tw-mb-2 tw-flex tw-justify-end">
               {titleState === TITLE_STATE.BUTTON && (
                 <button
                   onClick={() => setTitleState(TITLE_STATE.INPUT)}
                   type="button"
-                  className="tw-text-xs tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 
-              tw-px-2.5 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
                 >
                   <svg
-                    className="tw-w-4 tw-h-4 tw-mr-1 -tw-ml-1"
+                    className="-tw-ml-1 tw-mr-1 tw-h-4 tw-w-4"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
@@ -169,7 +169,7 @@ const CreateDropFullMobile = forwardRef<
                 value={title ?? ""}
                 onChange={(e) => onTitle(e.target.value)}
                 maxLength={250}
-                className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pr-3 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset hover:tw-ring-iron-700 focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-2.5 tw-pr-3 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
               />
             )}
             <CreateDropContent
@@ -186,6 +186,7 @@ const CreateDropFullMobile = forwardRef<
               onEditorState={onEditorState}
               onDrop={onDrop}
               onMentionedUser={onMentionedUser}
+              onMentionedWave={onMentionedWave}
               onReferencedNft={onReferencedNft}
               onViewClick={onViewClick}
               setFiles={setFiles}
@@ -194,10 +195,10 @@ const CreateDropFullMobile = forwardRef<
             {files.map((file, i) => (
               <div className="tw-mt-3" key={`full-mobile-file-${i}`}>
                 <div className="tw-w-full">
-                  <div className="tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-650 hover:tw-ring-iron-600 tw-bg-iron-900 tw-rounded-lg tw-flex tw-items-center tw-gap-x-1 tw-justify-between tw-transition tw-duration-300 tw-ease-out">
+                  <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600">
                     <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
                       <CreateDropSelectedFileIcon file={file} />
-                      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
+                      <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-50">
                         {file.name}
                       </p>
                     </div>
@@ -205,10 +206,10 @@ const CreateDropFullMobile = forwardRef<
                       onClick={() => onFileRemove(file)}
                       type="button"
                       aria-label="Remove file"
-                      className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                      className="-tw-mb-0.5 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
                     >
                       <svg
-                        className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+                        className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-red"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"
@@ -235,7 +236,7 @@ const CreateDropFullMobile = forwardRef<
             />
           </div>
           {showSubmit && (
-            <div className="tw-px-4 sm:tw-px-6 tw-pt-4">
+            <div className="tw-px-4 tw-pt-4 sm:tw-px-6">
               <div className="tw-flex tw-gap-x-3">
                 <button
                   type="button"
@@ -243,9 +244,9 @@ const CreateDropFullMobile = forwardRef<
                   onClick={onDrop}
                   className={`${
                     !canSubmit
-                      ? "tw-opacity-50 tw-text-iron-200"
-                      : "tw-text-white hover:tw-ring-primary-600 hover:tw-bg-primary-600"
-                  } tw-relative tw-w-full tw-items-center tw-justify-center tw-inline-flex tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold  tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm  tw-transition tw-duration-300 tw-ease-out`}
+                      ? "tw-text-iron-200 tw-opacity-50"
+                      : "tw-text-white hover:tw-bg-primary-600 hover:tw-ring-primary-600"
+                  } tw-relative tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset`}
                 >
                   <div className={loading ? "tw-opacity-0" : ""}>
                     {getSubmitText()}

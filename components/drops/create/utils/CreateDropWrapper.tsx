@@ -8,9 +8,7 @@ import {
   useState,
   type JSX,
 } from "react";
-import type {
-  CreateDropCompactHandles,
-} from "../compact/CreateDropCompact";
+import type { CreateDropCompactHandles } from "../compact/CreateDropCompact";
 import CreateDropCompact from "../compact/CreateDropCompact";
 
 import type { CreateDropFullHandles } from "../full/CreateDropFull";
@@ -20,13 +18,15 @@ import type {
   CreateDropConfig,
   DropMetadata,
   MentionedUser,
+  MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
 import { createBreakpoint } from "react-use";
-import type { CreateDropType} from "../types";
+import type { CreateDropType } from "../types";
 import { CreateDropViewType } from "../types";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
+import { WAVE_MENTION_TRANSFORMER } from "../lexical/transformers/WaveMentionTransformer";
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -66,6 +66,7 @@ interface CreateDropWrapperProps {
   readonly title: string | null;
   readonly metadata: DropMetadata[];
   readonly mentionedUsers: Omit<MentionedUser, "current_handle">[];
+  readonly mentionedWaves: MentionedWave[];
   readonly referencedNfts: ReferencedNft[];
   readonly drop: CreateDropConfig | null;
   readonly viewType: CreateDropViewType;
@@ -80,6 +81,7 @@ interface CreateDropWrapperProps {
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
+  readonly onMentionedWave: (newWave: MentionedWave) => void;
   readonly setReferencedNfts: (newV: ReferencedNft[]) => void;
   readonly setTitle: (newV: string | null) => void;
   readonly setMetadata: (newV: DropMetadata[]) => void;
@@ -104,6 +106,7 @@ const CreateDropWrapper = forwardRef<
       title,
       metadata,
       mentionedUsers,
+      mentionedWaves,
       referencedNfts,
       drop,
       viewType,
@@ -117,6 +120,7 @@ const CreateDropWrapper = forwardRef<
       setDrop,
       setReferencedNfts,
       onMentionedUser,
+      onMentionedWave,
       setTitle,
       setMetadata,
       onSubmitDrop,
@@ -152,7 +156,14 @@ const CreateDropWrapper = forwardRef<
       }
     }, [breakpoint]);
 
-    const { data: wave } = useQuery<ApiWave>({
+    const prevWaveIdRef = useRef<string | null>(waveProps?.id ?? null);
+    const isWaveSwitch = prevWaveIdRef.current !== (waveProps?.id ?? null);
+
+    useEffect(() => {
+      prevWaveIdRef.current = waveProps?.id ?? null;
+    }, [waveProps?.id]);
+
+    const { data: wave, isFetching: isWaveFetching } = useQuery<ApiWave>({
       queryKey: [QueryKey.WAVE, { wave_id: waveProps?.id }],
       queryFn: async () =>
         await commonApiFetch<ApiWave>({
@@ -196,6 +207,7 @@ const CreateDropWrapper = forwardRef<
             ...SAFE_MARKDOWN_TRANSFORMERS,
             MENTION_TRANSFORMER,
             HASHTAG_TRANSFORMER,
+            WAVE_MENTION_TRANSFORMER,
             IMAGE_TRANSFORMER,
           ])
         : null;
@@ -351,6 +363,7 @@ const CreateDropWrapper = forwardRef<
           title,
           parts: drop?.parts.length ? drop.parts : [],
           mentioned_users: drop?.mentioned_users ?? [],
+          mentioned_waves: drop?.mentioned_waves ?? [],
           referenced_nfts: drop?.referenced_nfts ?? [],
           metadata,
           signature: null,
@@ -379,7 +392,7 @@ const CreateDropWrapper = forwardRef<
         ...notAddedMentions,
       ];
       const partNfts = referencedNfts.filter((nft) =>
-        markdown?.includes(`#[${nft.name}]`)
+        markdown?.includes(`$[${nft.name}]`)
       );
       const notAddedNfts = partNfts.filter(
         (nft) =>
@@ -389,10 +402,21 @@ const CreateDropWrapper = forwardRef<
           )
       );
       const allNfts = [...(drop?.referenced_nfts ?? []), ...notAddedNfts];
+      const partWaves = mentionedWaves.filter((w) =>
+        markdown?.includes(`#[${w.wave_name_in_content}]`)
+      );
+      const notAddedWaves = partWaves.filter(
+        (w) =>
+          !drop?.mentioned_waves?.some(
+            (existing) => existing.wave_id === w.wave_id
+          )
+      );
+      const allWaves = [...(drop?.mentioned_waves ?? []), ...notAddedWaves];
       const currentDrop: CreateDropConfig = {
         title,
         parts: drop?.parts.length ? drop.parts : [],
         mentioned_users: allMentions,
+        mentioned_waves: allWaves,
         referenced_nfts: allNfts,
         metadata,
         signature: null,
@@ -450,6 +474,7 @@ const CreateDropWrapper = forwardRef<
           onViewChange={setViewType}
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
           onReferencedNft={onReferencedNft}
           setFiles={setFiles}
           onFileRemove={onFileRemove}
@@ -483,6 +508,7 @@ const CreateDropWrapper = forwardRef<
           onViewChange={setViewType}
           onEditorState={setEditorState}
           onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
           onReferencedNft={onReferencedNft}
           setFiles={setFiles}
           onFileRemove={onFileRemove}
@@ -493,9 +519,16 @@ const CreateDropWrapper = forwardRef<
         </CreateDropFull>
       ),
     };
+
+    const disableHeightAnimation =
+      screenType === CreateDropScreenType.DESKTOP &&
+      (isWaveSwitch || isWaveFetching);
+
     return (
       <div>
-        <CommonAnimationHeight>{components[viewType]}</CommonAnimationHeight>
+        <CommonAnimationHeight disableAnimation={disableHeightAnimation}>
+          {components[viewType]}
+        </CommonAnimationHeight>
       </div>
     );
   }

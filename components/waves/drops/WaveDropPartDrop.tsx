@@ -1,6 +1,8 @@
 import React from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -16,7 +18,13 @@ interface WaveDropPartDropProps {
   onQuoteClick: (drop: ApiDrop) => void;
   isEditing?: boolean | undefined;
   isSaving?: boolean | undefined;
-  readonly onSave?: ((newContent: string) => void) | undefined;
+  readonly onSave?:
+    | ((
+        newContent: string,
+        mentions?: ApiDropMentionedUser[],
+        mentionedWaves?: ApiMentionedWave[]
+      ) => void)
+    | undefined;
   readonly onCancel?: (() => void) | undefined;
   isCompetitionDrop?: boolean | undefined;
   mediaImageScale?: ImageScale | undefined;
@@ -39,12 +47,13 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   mediaImageScale = ImageScale.AUTOx450,
 }) => {
   return (
-    <div className="tw-flex tw-gap-x-3 tw-h-full tw-relative">
-      <div className="tw-flex tw-flex-col tw-w-full tw-h-full tw-self-center sm:tw-self-start">
+    <div className="tw-relative tw-flex tw-h-full tw-gap-x-3">
+      <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
         <div>
           <WaveDropPartTitle title={drop.title} />
           <WaveDropPartContent
             mentionedUsers={drop.mentioned_users}
+            mentionedWaves={drop.mentioned_waves}
             referencedNfts={drop.referenced_nfts}
             wave={drop.wave}
             activePart={activePart}

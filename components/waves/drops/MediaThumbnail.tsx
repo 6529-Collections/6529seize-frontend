@@ -1,3 +1,4 @@
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { MediaItem } from "./media-utils";
 
 interface MediaThumbnailProps {
@@ -10,9 +11,11 @@ interface MediaThumbnailProps {
 export default function MediaThumbnail({ media }: MediaThumbnailProps) {
   return media.type === "image" ? (
     <img
-      src={media.url}
+      src={getScaledImageUri(media.url, ImageScale.W_AUTO_H_50)}
       alt={media.alt}
-      className="tw-inline tw-h-4 tw-w-4 tw-object-cover tw-rounded"
+      loading="lazy"
+      decoding="async"
+      className="tw-inline tw-flex-shrink-0 tw-h-4 tw-w-4 tw-object-cover tw-rounded"
     />
   ) : (
     <span

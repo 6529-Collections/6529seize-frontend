@@ -178,6 +178,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -194,6 +195,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -215,6 +217,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -236,6 +239,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -254,6 +258,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -276,6 +281,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -297,6 +303,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -327,6 +334,7 @@ describe("DropPartMarkdown", () => {
       render(
         <DropPartMarkdown
           mentionedUsers={[]}
+          mentionedWaves={[]}
           referencedNfts={[]}
           partContent={content}
           onQuoteClick={jest.fn()}
@@ -359,6 +367,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}
@@ -396,6 +405,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={`Watch ${url}`}
         onQuoteClick={jest.fn()}
@@ -428,6 +438,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={`Watch ${url}`}
         onQuoteClick={jest.fn()}
@@ -449,6 +460,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={`Check ${url}`}
         onQuoteClick={jest.fn()}
@@ -466,6 +478,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={`Check ${url}`}
         onQuoteClick={jest.fn()}
@@ -483,6 +496,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={`Check ${url}`}
         onQuoteClick={jest.fn()}
@@ -502,6 +516,7 @@ describe("DropPartMarkdown", () => {
       render(
         <DropPartMarkdown
           mentionedUsers={[]}
+          mentionedWaves={[]}
           referencedNfts={[]}
           partContent={content}
           onQuoteClick={jest.fn()}
@@ -527,6 +542,7 @@ describe("DropPartMarkdown", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
+        mentionedWaves={[]}
         referencedNfts={[]}
         partContent={content}
         onQuoteClick={jest.fn()}

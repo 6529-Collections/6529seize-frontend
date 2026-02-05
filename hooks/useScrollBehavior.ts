@@ -2,16 +2,50 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type ScrollIntent = 'pinned' | 'reading' | 'auto';
+type ScrollIntent = "pinned" | "reading" | "auto";
 
-export const useScrollBehavior = () => {
+type UseScrollBehaviorOptions = {
+  onScrollIntentChange?: (next: ScrollIntent, prev: ScrollIntent) => void;
+  onPinStateChange?: (shouldPinToBottom: boolean, prev: boolean) => void;
+};
+
+export const useScrollBehavior = (options: UseScrollBehaviorOptions = {}) => {
+  const { onScrollIntentChange, onPinStateChange } = options;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isAtTop, setIsAtTop] = useState(false);
-  const [scrollIntent, setScrollIntent] = useState<ScrollIntent>('pinned');
-  
+  const [scrollIntent, setScrollIntent] = useState<ScrollIntent>("pinned");
+
   const lastScrollTopRef = useRef(0);
   const bottomAnchorRef = useRef<HTMLDivElement>(null);
+  const scrollIntentRef = useRef<ScrollIntent>("pinned");
+  const shouldPinToBottomRef = useRef(true);
+
+  const setScrollIntentSafely = useCallback(
+    (nextIntent: ScrollIntent) => {
+      setScrollIntent((previous) => {
+        if (previous === nextIntent) {
+          return previous;
+        }
+        scrollIntentRef.current = nextIntent;
+        onScrollIntentChange?.(nextIntent, previous);
+        return nextIntent;
+      });
+    },
+    [onScrollIntentChange]
+  );
+
+  const updateShouldPinState = useCallback(
+    (nextShouldPin: boolean) => {
+      const previous = shouldPinToBottomRef.current;
+      if (previous === nextShouldPin) {
+        return;
+      }
+      shouldPinToBottomRef.current = nextShouldPin;
+      onPinStateChange?.(nextShouldPin, previous);
+    },
+    [onPinStateChange]
+  );
 
   // scrollToVisualBottom scrolls to the newest messages (visually at the bottom)
   const scrollToVisualBottom = useCallback(() => {
@@ -22,9 +56,9 @@ export const useScrollBehavior = () => {
         behavior: "smooth",
       });
       // Reset to pinned when user manually scrolls to bottom
-      setScrollIntent('pinned');
+      setScrollIntentSafely("pinned");
     }
-  }, []);
+  }, [setScrollIntentSafely]);
 
   // scrollToVisualTop scrolls to the oldest messages (visually at the top)
   const scrollToVisualTop = useCallback(() => {
@@ -63,18 +97,26 @@ export const useScrollBehavior = () => {
 
     // Intent detection - filter out small/accidental scrolls
     const scrollDelta = Math.abs(scrollTop - lastScrollTopRef.current);
-    
+
+    let nextIntent: ScrollIntent | null = null;
+
     if (scrollDelta > 20 && !newIsAtBottom) {
       // Significant scroll away from bottom = user is reading
-      setScrollIntent('reading');
+      nextIntent = "reading";
     } else if (newIsAtBottom) {
       // User scrolled back to bottom
-      setScrollIntent('pinned');
+      nextIntent = "pinned";
     }
 
-    lastScrollTopRef.current = scrollTop;
-  }, []);
+    if (nextIntent) {
+      setScrollIntentSafely(nextIntent);
+    }
 
+    const effectiveIntent = nextIntent ?? scrollIntentRef.current;
+    updateShouldPinState(newIsAtBottom && effectiveIntent === "pinned");
+
+    lastScrollTopRef.current = scrollTop;
+  }, [setScrollIntentSafely, updateShouldPinState]);
 
   // Intersection Observer for robust bottom detection
   useEffect(() => {
@@ -92,18 +134,19 @@ export const useScrollBehavior = () => {
 
       observer = new IntersectionObserver(
         ([entry]) => {
-          const isIntersecting = entry?.isIntersecting;
-          setIsAtBottom(isIntersecting!);
+          const isIntersecting = Boolean(entry?.isIntersecting);
+          setIsAtBottom(isIntersecting);
+          updateShouldPinState(isIntersecting);
 
           // If anchor comes into view, we're definitely at bottom
           if (isIntersecting) {
-            setScrollIntent('pinned');
+            setScrollIntentSafely("pinned");
           }
         },
         {
           root: container,
           threshold: 0,
-          rootMargin: '50px', // Handle layout shifts
+          rootMargin: "50px", // Handle layout shifts
         }
       );
 
@@ -118,7 +161,7 @@ export const useScrollBehavior = () => {
       }
       observer?.disconnect();
     };
-  }, []);
+  }, [setScrollIntentSafely, updateShouldPinState]);
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -151,7 +194,7 @@ export const useScrollBehavior = () => {
   }, [handleScroll]);
 
   // Should pin when user intends to stay at bottom AND is actually at bottom
-  const shouldPinToBottom = scrollIntent === 'pinned' && isAtBottom;
+  const shouldPinToBottom = scrollIntent === "pinned" && isAtBottom;
 
   return {
     scrollContainerRef,

@@ -3,6 +3,7 @@
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -196,6 +197,16 @@ const WaveDrop = ({
   };
 
   const groupingClass = getGroupingClass();
+  const replyTo = drop.reply_to;
+
+  const isGroupedReplyWithPrevious =
+    shouldGroupWithPreviousDrop &&
+    replyTo?.drop_id === previousDrop?.reply_to?.drop_id;
+
+  const shouldShowReplyHeader =
+    !!replyTo &&
+    replyTo.drop_id !== dropViewDropId &&
+    !isGroupedReplyWithPrevious;
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
@@ -288,13 +299,23 @@ const WaveDrop = ({
   }, [dispatch, drop.id]);
 
   const handleEditSave = useCallback(
-    (newContent: string, mentions?: ApiDropMentionedUser[]) => {
+    (
+      newContent: string,
+      mentions?: ApiDropMentionedUser[],
+      mentionedWaves?: ApiMentionedWave[]
+    ) => {
       // Clean mentioned users to only include allowed fields for API
       const cleanedMentions = (mentions ?? drop.mentioned_users).map(
         (user) => ({
           mentioned_profile_id: user.mentioned_profile_id,
           handle_in_content: user.handle_in_content,
           // Exclude current_handle as it's not allowed in update requests
+        })
+      );
+      const cleanedWaves = (mentionedWaves ?? drop.mentioned_waves).map(
+        (wave) => ({
+          wave_id: wave.wave_id,
+          wave_name_in_content: wave.wave_name_in_content,
         })
       );
 
@@ -308,6 +329,7 @@ const WaveDrop = ({
         metadata: drop.metadata,
         referenced_nfts: drop.referenced_nfts,
         mentioned_users: cleanedMentions,
+        mentioned_waves: cleanedWaves,
         signature: null,
       };
 
@@ -371,21 +393,14 @@ const WaveDrop = ({
 
   const contentBlock = (
     <>
-      {drop.reply_to &&
-        (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
-          drop.author.handle !== previousDrop?.author?.handle) &&
-        drop.reply_to.drop_id !== dropViewDropId && (
-          <WaveDropReply
-            onReplyClick={onReplyClick}
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
+      {shouldShowReplyHeader && (
+        <WaveDropReply
+          onReplyClick={onReplyClick}
+          dropId={replyTo.drop_id}
+          dropPartId={replyTo.drop_part_id}
+          maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
+        />
+      )}
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
         {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
         <div

@@ -50,6 +50,7 @@ interface WaveDropsContentProps {
   readonly boostedDrops?: ApiDrop[] | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
+  readonly unreadCount?: number | undefined;
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
 }
 
@@ -76,6 +77,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   boostedDrops,
   onBoostedDropClick,
   onScrollToUnread,
+  unreadCount,
   autoCollapseSerials,
 }) => {
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
@@ -126,6 +128,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onRevealPending={onRevealPending}
         bottomPaddingClassName={bottomPaddingClassName}
         unreadDividerSerialNo={unreadDividerSerialNo}
+        unreadCount={unreadCount}
         boostedDrops={boostedDrops}
         onBoostedDropClick={onBoostedDropClick}
         onScrollToUnread={onScrollToUnread}
