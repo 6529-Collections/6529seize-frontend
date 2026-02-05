@@ -91,6 +91,7 @@ export default function Notifications({
           onTopIntersection={handleTopIntersection}
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={pagination.hasNextPage}
+          containerClassName="tw-bg-transparent"
         >
           <NotificationsContent
             isLoadingProfile={contentState.isLoadingProfile}
