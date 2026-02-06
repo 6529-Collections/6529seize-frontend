@@ -7,13 +7,13 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ReactNode } from "react";
-import CollapsibleDropPreview from "./CollapsibleDropPreview";
+import CompactDropPreview from "./CompactDropPreview";
 
-function wrapDropContentInCollapsible(content: ReactNode) {
+function wrapDropContentInCompact(content: ReactNode) {
   return (
-    <CollapsibleDropPreview>
+    <CompactDropPreview>
       <div className="tw-w-full tw-min-w-0">{content}</div>
-    </CollapsibleDropPreview>
+    </CompactDropPreview>
   );
 }
 
@@ -53,7 +53,7 @@ export default function NotificationDrop({
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
       onDropContentClick={onDropContentClick}
-      wrapContentOnly={wrapDropContentInCollapsible}
+      wrapContentOnly={wrapDropContentInCompact}
     />
   );
 }
