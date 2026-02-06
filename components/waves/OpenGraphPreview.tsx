@@ -256,8 +256,8 @@ export function LinkPreviewCardLayout({
   }
 
   return (
-    <div className="tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
+    <div className="tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-stretch tw-gap-x-1">
+      <div className="tw-h-full tw-min-h-0 tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
         {children}
       </div>
       <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
@@ -313,12 +313,12 @@ export default function OpenGraphPreview({
 
     return (
       <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
-        <div className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
+        <div className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div
-            className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-3"
+            className="tw-flex tw-h-full tw-min-h-0 tw-animate-pulse tw-flex-col tw-justify-end tw-gap-y-3"
             data-testid="og-preview-skeleton"
           >
-            <div className="tw-w-full tw-rounded-lg tw-bg-iron-800/60" />
+            <div className="tw-h-16 tw-w-full tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800/60" />
             <div className="tw-h-4 tw-w-3/4 tw-rounded tw-bg-iron-800/40" />
             <div className="tw-h-3 tw-w-full tw-rounded tw-bg-iron-800/30" />
             <div className="tw-h-3 tw-w-2/3 tw-rounded tw-bg-iron-800/20" />
@@ -363,10 +363,10 @@ export default function OpenGraphPreview({
     return (
       <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
         <div
-          className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
+          className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
           data-testid="og-preview-unavailable"
         >
-          <div className="tw-space-y-2 tw-text-center">
+          <div className="tw-max-h-full tw-space-y-2 tw-overflow-y-auto tw-text-center">
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
               Link unavailable
             </p>
@@ -374,7 +374,7 @@ export default function OpenGraphPreview({
               href={effectiveHref}
               target={linkTarget}
               rel={linkRel}
-              className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
             >
               {wrapLongUnbrokenSegments(domain ?? href)}
             </Link>
@@ -392,7 +392,7 @@ export default function OpenGraphPreview({
           target={linkTarget}
           rel={linkRel}
           onClick={(e) => e.stopPropagation()}
-          className="tw-relative tw-block tw-h-full tw-w-full tw-min-h-0 tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
+          className="tw-relative tw-block tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
           data-testid="og-preview-card"
         >
           {imageUrl && (
@@ -427,18 +427,18 @@ export default function OpenGraphPreview({
         </Link>
       ) : (
         <div
-          className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
           data-testid="og-preview-card"
         >
-          <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
+          <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-gap-3 md:tw-flex-row">
             {imageUrl && (
               <Link
                 href={effectiveHref}
                 target={linkTarget}
                 rel={linkRel}
-                className="tw-block md:tw-w-60 md:tw-flex-shrink-0"
+                className="tw-block tw-w-full tw-flex-shrink-0 md:tw-h-full md:tw-w-44"
               >
-                <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
+                <div className="tw-aspect-[16/9] tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60 md:tw-aspect-auto">
                   <Image
                     src={imageUrl}
                     alt={title ?? domain ?? "Link preview"}
@@ -452,9 +452,9 @@ export default function OpenGraphPreview({
                 </div>
               </Link>
             )}
-            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-y-2">
+            <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-y-1.5 tw-overflow-hidden">
               {domain && (
-                <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+                <span className="tw-line-clamp-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
                   {wrapLongUnbrokenSegments(domain)}
                 </span>
               )}
@@ -462,12 +462,12 @@ export default function OpenGraphPreview({
                 href={effectiveHref}
                 target={linkTarget}
                 rel={linkRel}
-                className="tw-[overflow-wrap:anywhere] tw-break-words tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+                className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
               >
                 {wrapLongUnbrokenSegments(title ?? domain ?? href)}
               </Link>
               {description && (
-                <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-3 tw-whitespace-pre-line tw-break-words tw-text-sm tw-text-iron-300">
+                <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-whitespace-pre-line tw-break-words tw-text-xs tw-text-iron-300">
                   {wrapLongUnbrokenSegments(description)}
                 </p>
               )}

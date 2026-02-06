@@ -1,21 +1,24 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
+import { render, screen } from "@testing-library/react";
+import React from "react";
 
-import OpenGraphPreview from '@/components/waves/OpenGraphPreview';
+import OpenGraphPreview from "@/components/waves/OpenGraphPreview";
 
-jest.mock('next/link', () => ({
+jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children, ...rest }: any) => (
-    <a href={typeof href === 'string' ? href : href?.pathname ?? ''} {...rest}>
+    <a
+      href={typeof href === "string" ? href : (href?.pathname ?? "")}
+      {...rest}
+    >
       {children}
     </a>
   ),
 }));
 
-jest.mock('next/image', () => ({
+jest.mock("next/image", () => ({
   __esModule: true,
   default: function MockNextImage({
-    alt = '',
+    alt = "",
     unoptimized: _unoptimized,
     fill: _fill,
     ...rest
@@ -24,125 +27,144 @@ jest.mock('next/image', () => ({
   },
 }));
 
-jest.mock('@/helpers/Helpers', () => ({
-  removeBaseEndpoint: jest.fn((url: string) => url.replace('https://example.com', '')),
+jest.mock("@/helpers/Helpers", () => ({
+  removeBaseEndpoint: jest.fn((url: string) =>
+    url.replace("https://example.com", "")
+  ),
 }));
 
-jest.mock('@/components/waves/ChatItemHrefButtons', () => ({
+jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   __esModule: true,
   default: function MockChatItemHrefButtons(props: any) {
     return (
-      <div data-testid="href-buttons">{props.relativeHref ?? 'undefined'}</div>
+      <div data-testid="href-buttons">{props.relativeHref ?? "undefined"}</div>
     );
   },
 }));
 
-const { removeBaseEndpoint } = require('@/helpers/Helpers');
+const { removeBaseEndpoint } = require("@/helpers/Helpers");
 
-describe('OpenGraphPreview', () => {
+describe("OpenGraphPreview", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders loading skeleton when preview is undefined', () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+  it("renders loading skeleton when preview is undefined", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
 
     render(<OpenGraphPreview href="https://example.com/article" />);
 
-    expect(screen.getByTestId('og-preview-skeleton')).toBeInTheDocument();
-    expect(screen.getByTestId('href-buttons')).toHaveTextContent('/article');
-    expect(removeBaseEndpoint).toHaveBeenCalledWith('https://example.com/article');
+    const skeleton = screen.getByTestId("og-preview-skeleton");
+    expect(skeleton).toBeInTheDocument();
+    expect(skeleton.parentElement).toHaveClass("tw-h-full");
+    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
+    expect(removeBaseEndpoint).toHaveBeenCalledWith(
+      "https://example.com/article"
+    );
   });
 
-  it('renders fallback when preview is unavailable', () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+  it("renders fallback when preview is unavailable", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
 
-    render(<OpenGraphPreview href="https://example.com/article" preview={null} />);
+    render(
+      <OpenGraphPreview href="https://example.com/article" preview={null} />
+    );
 
-    expect(screen.getByTestId('og-preview-unavailable')).toBeInTheDocument();
-    const link = screen.getByRole('link', { name: 'example.com' });
-    expect(link).toHaveAttribute('href', '/article');
-    expect(link).not.toHaveAttribute('target');
-    expect(screen.getByTestId('href-buttons')).toHaveTextContent('/article');
+    const unavailable = screen.getByTestId("og-preview-unavailable");
+    expect(unavailable).toBeInTheDocument();
+    expect(unavailable).toHaveClass("tw-h-full");
+    const link = screen.getByRole("link", { name: "example.com" });
+    expect(link).toHaveAttribute("href", "/article");
+    expect(link).not.toHaveAttribute("target");
+    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
   });
 
-  it('renders preview details when data is provided', () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+  it("renders preview details when data is provided", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
 
     render(
       <OpenGraphPreview
         href="https://example.com/article"
         preview={{
-          title: 'Example Title',
-          description: 'An example description',
-          siteName: 'Example.com',
-          image: 'https://cdn.example.com/preview.png',
+          title: "Example Title",
+          description: "An example description",
+          siteName: "Example.com",
+          image: "https://cdn.example.com/preview.png",
         }}
       />
     );
 
-    expect(screen.getByTestId('og-preview-card')).toBeInTheDocument();
-    expect(screen.getByText('Example.com')).toBeInTheDocument();
-    const titleLinks = screen.getAllByRole('link', { name: 'Example Title' });
+    const card = screen.getByTestId("og-preview-card");
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveClass("tw-h-full");
+    expect(screen.getByText("Example.com")).toBeInTheDocument();
+    const titleLinks = screen.getAllByRole("link", { name: "Example Title" });
     expect(titleLinks).toHaveLength(2);
     const titleLink = titleLinks[1];
-    expect(titleLink).toHaveAttribute('href', '/article');
-    expect(titleLink).not.toHaveAttribute('target');
-    expect(screen.getByAltText('Example Title')).toHaveAttribute('src', 'https://cdn.example.com/preview.png');
-    expect(screen.getByText('An example description')).toBeInTheDocument();
-    expect(screen.getByTestId('href-buttons')).toHaveTextContent('/article');
+    expect(titleLink).toHaveAttribute("href", "/article");
+    expect(titleLink).not.toHaveAttribute("target");
+    const image = screen.getByAltText("Example Title");
+    expect(image).toHaveAttribute("src", "https://cdn.example.com/preview.png");
+    expect(image.parentElement).toHaveClass("tw-aspect-[16/9]");
+    expect(screen.getByText("An example description")).toBeInTheDocument();
+    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
   });
 
-  it('handles external links and image arrays', () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue('https://othersite.com/post');
+  it("handles external links and image arrays", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "https://othersite.com/post"
+    );
 
     render(
       <OpenGraphPreview
         href="https://othersite.com/post"
         preview={{
-          images: [{ url: 'https://cdn.othersite.com/img.jpg' }],
-          description: 'External link description',
+          images: [{ url: "https://cdn.othersite.com/img.jpg" }],
+          description: "External link description",
         }}
       />
     );
 
-    const card = screen.getByTestId('og-preview-card');
+    const card = screen.getByTestId("og-preview-card");
     expect(card).toBeInTheDocument();
 
-    const links = screen.getAllByRole('link');
+    const links = screen.getAllByRole("link");
     links.forEach((link) => {
-      expect(link).toHaveAttribute('href', 'https://othersite.com/post');
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(link).toHaveAttribute("href", "https://othersite.com/post");
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
     });
 
-    expect(screen.getByAltText('othersite.com')).toHaveAttribute('src', 'https://cdn.othersite.com/img.jpg');
-    expect(screen.getByTestId('href-buttons')).toHaveTextContent('undefined');
+    expect(screen.getByAltText("othersite.com")).toHaveAttribute(
+      "src",
+      "https://cdn.othersite.com/img.jpg"
+    );
+    expect(screen.getByTestId("href-buttons")).toHaveTextContent("undefined");
   });
 
-  it('uses secureUrl fields when provided', () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+  it("uses secureUrl fields when provided", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
 
     render(
       <OpenGraphPreview
         href="https://example.com/article"
         preview={{
-          title: 'Secure Image',
-          image: { secureUrl: 'https://cdn.example.com/secure.png' },
+          title: "Secure Image",
+          image: { secureUrl: "https://cdn.example.com/secure.png" },
         }}
       />
     );
 
-    expect(screen.getByAltText('Secure Image')).toHaveAttribute(
-      'src',
-      'https://cdn.example.com/secure.png'
+    expect(screen.getByAltText("Secure Image")).toHaveAttribute(
+      "src",
+      "https://cdn.example.com/secure.png"
     );
   });
 
-  it('wraps long unbroken segments to keep layout consistent', () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue('/article');
+  it("wraps long unbroken segments to keep layout consistent", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
 
-    const longUrl = `https://example.com/${'a'.repeat(48)}`;
+    const longUrl = `https://example.com/${"a".repeat(48)}`;
 
     render(
       <OpenGraphPreview
@@ -154,8 +176,7 @@ describe('OpenGraphPreview', () => {
     );
 
     const wrappedSegment = screen.getByText(longUrl);
-    expect(wrappedSegment.tagName).toBe('SPAN');
-    expect(wrappedSegment).toHaveClass('tw-break-all');
+    expect(wrappedSegment.tagName).toBe("SPAN");
+    expect(wrappedSegment).toHaveClass("tw-break-all");
   });
-
 });

@@ -4,7 +4,11 @@ import React from "react";
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 
 const mockOpenGraphPreview = jest.fn(({ href, preview }: any) => (
-  <div data-testid="open-graph" data-href={href} data-preview={preview ? "ready" : "loading"} />
+  <div
+    data-testid="open-graph"
+    data-href={href}
+    data-preview={preview ? "ready" : "loading"}
+  />
 ));
 
 const mockEnsPreviewCard = jest.fn(({ preview }: any) => (
@@ -12,7 +16,9 @@ const mockEnsPreviewCard = jest.fn(({ preview }: any) => (
 ));
 
 jest.mock("@/components/waves/OpenGraphPreview", () => {
-  const actual = jest.requireActual("../../../components/waves/OpenGraphPreview");
+  const actual = jest.requireActual(
+    "../../../components/waves/OpenGraphPreview"
+  );
   return {
     __esModule: true,
     ...actual,
@@ -31,6 +37,18 @@ jest.mock("@/services/api/link-preview-api", () => ({
 
 describe("LinkPreviewCard", () => {
   const { fetchLinkPreview } = require("@/services/api/link-preview-api");
+  const assertStableFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[10rem]",
+      "tw-min-h-[10rem]",
+      "tw-max-h-[10rem]",
+      "md:tw-h-[11rem]",
+      "md:tw-min-h-[11rem]",
+      "md:tw-max-h-[11rem]"
+    );
+    return frame;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,8 +68,12 @@ describe("LinkPreviewCard", () => {
       />
     );
 
+    assertStableFrame();
     expect(mockOpenGraphPreview).toHaveBeenCalledWith(
-      expect.objectContaining({ href: "https://example.com/article", preview: undefined })
+      expect.objectContaining({
+        href: "https://example.com/article",
+        preview: undefined,
+      })
     );
 
     await waitFor(() =>
@@ -63,8 +85,11 @@ describe("LinkPreviewCard", () => {
       )
     );
 
-    expect(fetchLinkPreview).toHaveBeenCalledWith("https://example.com/article");
+    expect(fetchLinkPreview).toHaveBeenCalledWith(
+      "https://example.com/article"
+    );
     expect(screen.queryByTestId("fallback")).toBeNull();
+    assertStableFrame();
   });
 
   it("renders fallback when preview lacks useful content", async () => {
@@ -80,6 +105,7 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
+    assertStableFrame();
   });
 
   it("renders fallback when request fails", async () => {
@@ -95,10 +121,14 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
+    assertStableFrame();
   });
 
   it("renders ENS previews when ENS data is returned", async () => {
-    fetchLinkPreview.mockResolvedValue({ type: "ens.name", name: "vitalik.eth" });
+    fetchLinkPreview.mockResolvedValue({
+      type: "ens.name",
+      name: "vitalik.eth",
+    });
 
     render(
       <LinkPreviewCard
@@ -109,10 +139,31 @@ describe("LinkPreviewCard", () => {
 
     await waitFor(() => {
       expect(mockEnsPreviewCard).toHaveBeenCalledWith(
-        expect.objectContaining({ preview: expect.objectContaining({ type: "ens.name" }) })
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "ens.name" }),
+        })
       );
     });
 
     expect(screen.queryByTestId("fallback")).toBeNull();
+    assertStableFrame();
+  });
+
+  it("does not enforce chat stable frame for home variant", async () => {
+    fetchLinkPreview.mockResolvedValue({});
+
+    render(
+      <LinkPreviewCard
+        href="https://example.com/article"
+        variant="home"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("fallback")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId("link-preview-card-stable-frame")).toBeNull();
   });
 });
