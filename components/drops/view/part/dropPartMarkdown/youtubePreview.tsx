@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import Image from "next/image";
 import type { YoutubeOEmbedResponse } from "@/services/api/youtube";
 import { fetchYoutubePreview } from "@/services/api/youtube";
@@ -221,12 +221,23 @@ interface YoutubePreviewProps {
   readonly href: string;
 }
 
+type PreviewStatus = "loading" | "success" | "error" | "empty";
+
 type PreviewState = {
   readonly href: string;
+  readonly status: PreviewStatus;
   readonly preview: YoutubeOEmbedResponse | null;
-  readonly hasError: boolean;
   readonly showEmbed: boolean;
 };
+
+const YOUTUBE_STABLE_FRAME_CLASSES =
+  "tw-h-[13rem] tw-min-h-[13rem] tw-max-h-[13rem] tw-w-full md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
+
+const YOUTUBE_CARD_CLASSES =
+  "tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg";
+
+const YOUTUBE_META_CLASSES =
+  "tw-flex tw-h-11 tw-shrink-0 tw-flex-col tw-justify-center tw-gap-y-0.5 tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-900/95 tw-px-3";
 
 const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   const linkInfo = useMemo(() => parseYoutubeLink(href), [href]);
@@ -238,21 +249,23 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   const { hideActions } = useLinkPreviewContext();
   const [state, setState] = useState<PreviewState>(() => ({
     href,
+    status: "loading",
     preview: null,
-    hasError: false,
     showEmbed: false,
   }));
 
   const isCurrent = state.href === href;
+  const status: PreviewStatus = isCurrent ? state.status : "loading";
   const preview = isCurrent ? state.preview : null;
-  const hasError = isCurrent ? state.hasError : false;
   const showEmbed = isCurrent ? state.showEmbed : false;
+  const hasPreview = status === "success" && preview !== null;
+  const isLoading = status === "loading";
 
   const handleShowEmbed = () => {
     setState((prev) =>
       prev.href === href
         ? { ...prev, showEmbed: true }
-        : { href, preview: null, hasError: false, showEmbed: true }
+        : { href, status: "loading", preview: null, showEmbed: false }
     );
   };
 
@@ -277,8 +290,13 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
           if (!sanitizedHtml) {
             setState((prev) =>
               prev.href === href
-                ? { ...prev, preview: null, hasError: true, showEmbed: false }
-                : { href, preview: null, hasError: true, showEmbed: false }
+                ? {
+                    ...prev,
+                    status: "error",
+                    preview: null,
+                    showEmbed: false,
+                  }
+                : { href, status: "error", preview: null, showEmbed: false }
             );
             return;
           }
@@ -290,11 +308,11 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
           setState((prev) =>
             prev.href === href
-              ? { ...prev, preview: normalizedPreview, hasError: false }
+              ? { ...prev, status: "success", preview: normalizedPreview }
               : {
                   href,
+                  status: "success",
                   preview: normalizedPreview,
-                  hasError: false,
                   showEmbed: false,
                 }
           );
@@ -303,8 +321,13 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
         setState((prev) =>
           prev.href === href
-            ? { ...prev, preview: null, hasError: true, showEmbed: false }
-            : { href, preview: null, hasError: true, showEmbed: false }
+            ? {
+                ...prev,
+                status: "empty",
+                preview: null,
+                showEmbed: false,
+              }
+            : { href, status: "empty", preview: null, showEmbed: false }
         );
       } catch (error) {
         if (!isActive) {
@@ -317,8 +340,13 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
         setState((prev) =>
           prev.href === href
-            ? { ...prev, preview: null, hasError: true, showEmbed: false }
-            : { href, preview: null, hasError: true, showEmbed: false }
+            ? {
+                ...prev,
+                status: "error",
+                preview: null,
+                showEmbed: false,
+              }
+            : { href, status: "error", preview: null, showEmbed: false }
         );
       }
     };
@@ -331,79 +359,114 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
     };
   }, [href, videoId]);
 
-  if (hasError) {
-    throw new Error("Failed to load YouTube preview");
-  }
-
-  if (!preview) {
-    return (
-      <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-aspect-video tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800" />
+  const card = (): ReactElement => {
+    if (isLoading) {
+      return (
+        <div className={`${YOUTUBE_CARD_CLASSES} tw-bg-iron-900`}>
+          <div className="tw-h-full tw-w-full tw-animate-pulse tw-bg-iron-800" />
+          <div className={YOUTUBE_META_CLASSES}>
+            <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded tw-bg-iron-700" />
+            <div className="tw-h-2.5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-iron-700/80" />
+          </div>
         </div>
-        {!hideActions && <ChatItemHrefButtons href={href} />}
-      </div>
-    );
-  }
+      );
+    }
 
-  const ariaLabel = preview.title
-    ? `Play YouTube video ${preview.title}`
-    : `Play YouTube video ${videoId}`;
+    if (hasPreview) {
+      const ariaLabel = preview.title
+        ? `Play YouTube video ${preview.title}`
+        : `Play YouTube video ${videoId}`;
+
+      return (
+        <div className={`${YOUTUBE_CARD_CLASSES} tw-bg-iron-900`}>
+          <div className="tw-relative tw-min-h-0 tw-flex-1 tw-overflow-hidden tw-bg-black">
+            {showEmbed ? (
+              <div
+                className="tw-h-full tw-w-full tw-bg-black"
+                data-testid="youtube-embed"
+                dangerouslySetInnerHTML={{ __html: preview.html }}
+              />
+            ) : (
+              <button
+                type="button"
+                className="tw-relative tw-h-full tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+                onClick={handleShowEmbed}
+                aria-label={ariaLabel}
+              >
+                <Image
+                  src={preview.thumbnail_url}
+                  alt={
+                    preview.title
+                      ? `YouTube thumbnail for ${preview.title}`
+                      : "YouTube video thumbnail"
+                  }
+                  fill
+                  sizes="100vw"
+                  className="tw-object-cover"
+                />
+                <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black/40">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="tw-h-12 tw-w-12 tw-text-white tw-opacity-90"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </button>
+            )}
+          </div>
+          <div className={YOUTUBE_META_CLASSES}>
+            <p className="tw-mb-0 tw-line-clamp-2 tw-text-sm tw-font-semibold tw-text-iron-100">
+              {preview.title || "YouTube video"}
+            </p>
+            <p className="tw-mb-0 tw-line-clamp-1 tw-text-xs tw-text-iron-400">
+              {preview.author_name ?? "YouTube"}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    const fallbackMessage =
+      status === "error"
+        ? "Failed to load YouTube preview"
+        : "YouTube preview unavailable";
+
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        data-testid="youtube-preview-fallback-link"
+        className={`${YOUTUBE_CARD_CLASSES} tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+      >
+        <div className="tw-flex tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 tw-text-center">
+          <span className="tw-line-clamp-2 tw-text-sm tw-font-medium tw-text-iron-100">
+            {fallbackMessage}
+          </span>
+        </div>
+        <div className={YOUTUBE_META_CLASSES}>
+          <span className="tw-line-clamp-1 tw-text-xs tw-font-medium tw-text-iron-300">
+            Open on YouTube
+          </span>
+          <span className="tw-line-clamp-1 tw-text-xs tw-text-iron-500">
+            {href}
+          </span>
+        </div>
+      </a>
+    );
+  };
 
   return (
     <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
-      <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-black">
-          {showEmbed ? (
-            <div
-              className="tw-relative tw-aspect-video tw-w-full tw-bg-black"
-              data-testid="youtube-embed"
-              dangerouslySetInnerHTML={{ __html: preview.html }}
-            />
-          ) : (
-            <button
-              type="button"
-              className="tw-relative tw-aspect-video tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-              onClick={handleShowEmbed}
-              aria-label={ariaLabel}
-            >
-              <Image
-                src={preview.thumbnail_url}
-                alt={
-                  preview.title
-                    ? `YouTube thumbnail for ${preview.title}`
-                    : "YouTube video thumbnail"
-                }
-                fill
-                sizes="100vw"
-                className="tw-object-cover"
-              />
-              <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-black/40">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="tw-h-12 tw-w-12 tw-text-white tw-opacity-90"
-                  aria-hidden="true"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </button>
-          )}
-        </div>
-        <div className="tw-mt-2 tw-space-y-1">
-          {preview.title && (
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-              {preview.title}
-            </p>
-          )}
-          {preview.author_name && (
-            <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-              {preview.author_name}
-            </p>
-          )}
-        </div>
+      <div
+        className={`tw-min-w-0 tw-flex-1 ${YOUTUBE_STABLE_FRAME_CLASSES}`}
+        data-testid="youtube-preview-stable-frame"
+      >
+        {card()}
       </div>
       {!hideActions && <ChatItemHrefButtons href={href} />}
     </div>
