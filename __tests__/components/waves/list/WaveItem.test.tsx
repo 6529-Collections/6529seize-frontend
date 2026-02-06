@@ -19,11 +19,7 @@ jest.mock("@/components/waves/list/WaveItemDropped", () => () => (
 ));
 
 jest.mock("@/components/waves/list/WaveItemFollow", () => () => (
-  <button
-    data-testid="follow"
-    data-wave-item-interactive="true"
-    type="button"
-  >
+  <button data-testid="follow" data-wave-item-interactive="true" type="button">
     Follow
   </button>
 ));
@@ -60,7 +56,10 @@ describe("WaveItem", () => {
 
   it("renders placeholders when no wave is provided", () => {
     render(
-      <WaveItem userPlaceholder="user-placeholder" titlePlaceholder="title-placeholder" />,
+      <WaveItem
+        userPlaceholder="user-placeholder"
+        titlePlaceholder="title-placeholder"
+      />
     );
 
     expect(screen.getByText("user-placeholder")).toBeInTheDocument();
@@ -73,7 +72,7 @@ describe("WaveItem", () => {
     const card = screen.getByRole("link", { name: "View wave My Wave" });
     fireEvent.click(card);
 
-    expect(pushMock).toHaveBeenCalledWith("/waves?wave=w1");
+    expect(pushMock).toHaveBeenCalledWith("/waves/w1");
   });
 
   it("does not navigate when clicking an interactive child element", () => {

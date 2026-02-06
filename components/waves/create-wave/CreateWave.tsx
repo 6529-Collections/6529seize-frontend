@@ -12,9 +12,7 @@ import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveActions from "./utils/CreateWaveActions";
-import type {
-  CreateWaveDescriptionHandles,
-} from "./description/CreateWaveDescription";
+import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import CreateWaveDescription from "./description/CreateWaveDescription";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { AuthContext } from "@/components/auth/Auth";
@@ -89,16 +87,15 @@ export default function CreateWave({
       waitAndInvalidateDrops();
       onWaveCreated();
       onSuccess?.();
+      const createdWaveRoute = getWaveRoute({
+        waveId: response.id,
+        isDirectMessage: false,
+        isApp,
+      });
       if (isApp) {
-        router.replace(
-          getWaveRoute({
-            waveId: response.id,
-            isDirectMessage: false,
-            isApp: true,
-          })
-        );
+        router.replace(createdWaveRoute);
       } else {
-        router.push(`/waves?wave=${response.id}`);
+        router.push(createdWaveRoute);
       }
     },
     onError: (error) => {
@@ -290,7 +287,7 @@ export default function CreateWave({
       }`}
       onBack={onBack}
     >
-      <div className="tw-mt-4 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
+      <div className="tw-mx-auto tw-mt-4 tw-h-full tw-w-full tw-justify-between tw-gap-x-16 lg:tw-flex xl:tw-max-w-[60rem]">
         <div className="tw-1/4">
           <CreateWavesMainSteps
             activeStep={step}
@@ -301,10 +298,10 @@ export default function CreateWave({
         <div
           className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
         >
-          <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
+          <div className="tw-relative tw-w-full tw-rounded-xl tw-bg-iron-900 tw-p-4 lg:tw-p-8">
             <div className="tw-relative tw-h-full">
-              <div className="tw-flex tw-flex-col tw-h-full">
-                <div className="tw-flex-1 tw-w-full">{stepComponent[step]}</div>
+              <div className="tw-flex tw-h-full tw-flex-col">
+                <div className="tw-w-full tw-flex-1">{stepComponent[step]}</div>
                 {!selectedOutcomeType && (
                   <div className="tw-mt-auto">
                     <CreateWaveActions

@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
@@ -82,7 +83,9 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const routeRef = useRef(pathname);
   const queryRef = useRef(searchParams);
   const waveParam =
-    myStream?.activeWave.id ?? searchParams?.get("wave") ?? null;
+    myStream?.activeWave.id ??
+    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+    null;
   const isWaveRoute =
     pathname?.startsWith("/waves") ||
     pathname?.startsWith("/messages") ||
@@ -99,8 +102,11 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const pathnameChanged = routeRef.current !== pathname;
-    const waveInUrl = searchParams?.get("wave") ?? null;
-    const hadWaveInUrl = queryRef.current?.get("wave") ?? null;
+    const waveInUrl = getActiveWaveIdFromUrl({ pathname, searchParams });
+    const hadWaveInUrl = getActiveWaveIdFromUrl({
+      pathname: routeRef.current,
+      searchParams: queryRef.current,
+    });
 
     if (pathnameChanged) {
       routeRef.current = pathname;

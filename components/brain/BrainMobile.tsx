@@ -26,7 +26,11 @@ import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import BrainNotifications from "./notifications/NotificationsContainer";
-import { getHomeRoute } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getHomeRoute,
+  getWaveHomeRoute,
+} from "@/helpers/navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "@/components/auth/Auth";
@@ -75,15 +79,22 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   });
 
   // Use MyStreamContext for waveId to support client-side navigation via pushState
-  const waveId = myStream?.activeWave.id ?? searchParams.get("wave") ?? null;
+  const waveId =
+    myStream?.activeWave.id ??
+    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+    null;
   const { data: wave } = useWaveData({
     waveId: waveId,
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams.toString() || "");
       params.delete("wave");
+      const basePath = getWaveHomeRoute({
+        isDirectMessage: pathname.startsWith("/messages"),
+        isApp,
+      });
       const newUrl = params.toString()
-        ? `${pathname}?${params.toString()}`
-        : pathname || getHomeRoute();
+        ? `${basePath}?${params.toString()}`
+        : basePath || getHomeRoute();
       router.push(newUrl, { scroll: false });
     },
   });

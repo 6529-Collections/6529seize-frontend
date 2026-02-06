@@ -1,10 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 const addId = jest.fn();
 const removeId = jest.fn();
 
-jest.mock('@/hooks/usePinnedWaves', () => ({
+jest.mock("@/hooks/usePinnedWaves", () => ({
   usePinnedWaves: () => ({ pinnedIds: mockPinnedIds, addId, removeId }),
 }));
 
@@ -12,61 +12,76 @@ let mockPinnedIds: string[] = [];
 
 const replace = jest.fn();
 const searchParams = new URLSearchParams();
+let pathname = "/waves";
 
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
+  usePathname: () => pathname,
   useSearchParams: () => searchParams,
 }));
 
-jest.mock('@/components/brain/content/BrainContentPinnedWave', () => ({
+jest.mock("@/components/brain/content/BrainContentPinnedWave", () => ({
   __esModule: true,
   default: ({ waveId, onRemove }: any) => (
-    <div data-testid={`wave-${waveId}`} onClick={() => onRemove(waveId)}>wave {waveId}</div>
+    <div data-testid={`wave-${waveId}`} onClick={() => onRemove(waveId)}>
+      wave {waveId}
+    </div>
   ),
 }));
 
-jest.mock('@/contexts/wave/MyStreamContext', () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(),
 }));
 
-import BrainContentPinnedWaves from '@/components/brain/content/BrainContentPinnedWaves';
-import { useMyStream } from '@/contexts/wave/MyStreamContext';
+import BrainContentPinnedWaves from "@/components/brain/content/BrainContentPinnedWaves";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 const mockUseMyStream = useMyStream as jest.Mock;
 
 beforeAll(() => {
-  (window as any).matchMedia = (window as any).matchMedia || (() => ({ matches: false, addListener: jest.fn(), removeListener: jest.fn() }));
-  (global as any).ResizeObserver = class { observe() {}; unobserve() {}; disconnect() {}; };
+  (window as any).matchMedia =
+    (window as any).matchMedia ||
+    (() => ({
+      matches: false,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    }));
+  (global as any).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 });
 
-
-describe('BrainContentPinnedWaves', () => {
+describe("BrainContentPinnedWaves", () => {
   beforeEach(() => {
     addId.mockClear();
     removeId.mockClear();
     replace.mockClear();
     mockPinnedIds = [];
-    searchParams.delete('wave');
+    pathname = "/waves";
+    searchParams.delete("wave");
     mockUseMyStream.mockReturnValue({ directMessages: { list: [] } });
   });
 
-  it('returns null when no pinned waves', () => {
+  it("returns null when no pinned waves", () => {
     const { container } = render(<BrainContentPinnedWaves />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders pinned waves and handles removal', async () => {
-    mockPinnedIds = ['1', '2'];
-    searchParams.set('wave', '1');
+  it("renders pinned waves and handles removal", async () => {
+    mockPinnedIds = ["1", "2"];
+    pathname = "/waves/1";
+    searchParams.set("wave", "1");
     const user = userEvent.setup();
     render(<BrainContentPinnedWaves />);
-    await waitFor(() => expect(addId).toHaveBeenCalledWith('1'));
-    const wave1 = screen.getByTestId('wave-1');
-    const wave2 = screen.getByTestId('wave-2');
+    await waitFor(() => expect(addId).toHaveBeenCalledWith("1"));
+    const wave1 = screen.getByTestId("wave-1");
+    const wave2 = screen.getByTestId("wave-2");
     expect(wave1).toBeInTheDocument();
     expect(wave2).toBeInTheDocument();
     await user.click(wave1);
-    expect(removeId).toHaveBeenCalledWith('1');
-    expect(replace).toHaveBeenCalledWith('/waves');
+    expect(removeId).toHaveBeenCalledWith("1");
+    expect(replace).toHaveBeenCalledWith("/waves");
   });
 });

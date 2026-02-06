@@ -95,7 +95,7 @@ export default function AboutMemes() {
           </p>
           <p>
             The Memes chat on Brain:{" "}
-            <Link href="https://6529.io/waves?wave=0849642f-1770-4de2-9cbc-70aae59c17ff">
+            <Link href="https://6529.io/waves/0849642f-1770-4de2-9cbc-70aae59c17ff">
               Memes-Chat
             </Link>
           </p>

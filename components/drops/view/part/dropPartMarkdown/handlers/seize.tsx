@@ -4,6 +4,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   getSeizeBaseOrigin,
   parseSeizeQueryLink,
+  parseSeizeWaveLink,
   parseSeizeQuoteLink,
   type SeizeQuoteLinkInfo,
 } from "@/helpers/SeizeLinkParser";
@@ -33,7 +34,11 @@ const createSeizeQuoteHandler = (
 ): LinkHandler => ({
   match: (href) => Boolean(parseSeizeQuoteLink(href)),
   render: (href) => {
-    const content = renderSeizeQuote(ensureSeizeQuote(href), onQuoteClick, href);
+    const content = renderSeizeQuote(
+      ensureSeizeQuote(href),
+      onQuoteClick,
+      href
+    );
     if (!content) {
       throw new Error("Unable to render seize quote link");
     }
@@ -76,14 +81,7 @@ const createSeizeGroupHandler = (): LinkHandler =>
     (groupId, href) => <GroupCardChat href={href} groupId={groupId} />
   );
 
-const getWaveId = (href: string): string | null => {
-  const result = parseSeizeQueryLink(href, "/waves", ["wave"], true);
-  if (!result || typeof result["wave"] !== "string") {
-    return null;
-  }
-
-  return result["wave"];
-};
+const getWaveId = (href: string): string | null => parseSeizeWaveLink(href);
 
 const createSeizeWaveHandler = (): LinkHandler =>
   createSeizeQueryHandler(

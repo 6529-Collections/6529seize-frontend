@@ -7,6 +7,7 @@ import {
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { LeadingCard } from "./LeadingCard";
@@ -78,7 +79,11 @@ export function NextMintLeadingSection() {
         </p>
       </div>
       <Link
-        href={`/waves?wave=${waveId}`}
+        href={getWaveRoute({
+          waveId,
+          isDirectMessage: false,
+          isApp: false,
+        })}
         className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
       >
         <span>View all</span>
