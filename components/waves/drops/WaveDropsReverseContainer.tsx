@@ -15,6 +15,7 @@ interface WaveDropsReverseContainerProps {
     isAtBottom: boolean
   ) => void | undefined;
   readonly bottomPaddingClassName?: string | undefined;
+  readonly containerClassName?: string | undefined;
 }
 
 export const WaveDropsReverseContainer = forwardRef<
@@ -29,6 +30,7 @@ export const WaveDropsReverseContainer = forwardRef<
       hasNextPage,
       onUserScroll,
       bottomPaddingClassName,
+      containerClassName,
     },
     ref
   ) => {
@@ -89,14 +91,14 @@ export const WaveDropsReverseContainer = forwardRef<
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className={`tw-flex-1 tw-min-h-0 ${
+        className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
-        } tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
+        } no-scrollbar tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-bg-iron-950 tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
       >
         <div className="tw-flex tw-flex-col">
           {hasNextPage && isFetchingNextPage && (
-            <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-              <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+            <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
+              <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400"></div>
             </div>
           )}
           {children}
