@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
-import type { MinimalWave } from '@/contexts/wave/hooks/useEnhancedWavesList';
-import { usePrefetchWaveData } from '@/hooks/usePrefetchWaveData';
-import useDeviceInfo from '@/hooks/useDeviceInfo';
-import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import { CollapsedWave } from './subcomponents/CollapsedWave';
-import { ExpandedWave } from './subcomponents/ExpandedWave';
-import { useWaveNavigation } from './hooks/useWaveNavigation';
-import { useWaveNameTruncation } from './hooks/useWaveNameTruncation';
-import { formatWaveName } from './utils/formatWaveName';
-import { useMyStream } from '@/contexts/wave/MyStreamContext';
+import { useMemo } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CollapsedWave } from "./subcomponents/CollapsedWave";
+import { ExpandedWave } from "./subcomponents/ExpandedWave";
+import { useWaveNavigation } from "./hooks/useWaveNavigation";
+import { useWaveNameTruncation } from "./hooks/useWaveNameTruncation";
+import { formatWaveName } from "./utils/formatWaveName";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -21,16 +21,17 @@ interface WebBrainLeftSidebarWaveProps {
   readonly collapsed?: boolean | undefined;
 }
 
-const TOOLTIP_PLACEMENT = 'right' as const;
+const TOOLTIP_PLACEMENT = "right" as const;
 
 const WebBrainLeftSidebarWave = ({
   wave,
   onHover,
   showPin = true,
-  basePath = '/waves',
+  basePath = "/waves",
   collapsed = false,
 }: WebBrainLeftSidebarWaveProps) => {
   const { activeWave } = useMyStream();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
@@ -41,6 +42,7 @@ const WebBrainLeftSidebarWave = ({
     setActiveWave: activeWave.set,
     onHover,
     prefetchWaveData,
+    pathname,
     searchParams,
     waveId: wave.id,
     hasTouchScreen,
@@ -53,7 +55,7 @@ const WebBrainLeftSidebarWave = ({
         name: wave.name,
         type: wave.type,
       }),
-    [wave.name, wave.type],
+    [wave.name, wave.type]
   );
 
   const { nameRef, isNameTruncated } = useWaveNameTruncation({

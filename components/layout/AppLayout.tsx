@@ -18,6 +18,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -37,14 +38,17 @@ export default function AppLayout({ children }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSingleDropOpen = searchParams?.get("drop") !== null;
-  const waveParam = searchParams?.get("wave");
+  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const viewParam = searchParams?.get("view");
   const hasWaveParam = Boolean(waveParam);
   const isViewingWavesOrMessages =
     viewParam === "waves" || viewParam === "messages";
+  const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
+  const isMessagesRoute =
+    pathname === "/messages" || pathname.startsWith("/messages/");
   const isStreamRoute =
-    pathname === "/waves" ||
-    pathname === "/messages" ||
+    isWavesRoute ||
+    isMessagesRoute ||
     pathname === "/notifications" ||
     (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
   const editingDropId = useSelector(selectEditingDropId);
@@ -54,8 +58,7 @@ export default function AppLayout({ children }: Props) {
   const { isIos, keyboardVisible: isIosKeyboardVisible } = useCapacitor();
   const isEditingOnMobile = isApp && editingDropId !== null;
   const isKeyboardVisible =
-    (isAndroid && isAndroidKeyboardVisible) ||
-    (isIos && isIosKeyboardVisible);
+    (isAndroid && isAndroidKeyboardVisible) || (isIos && isIosKeyboardVisible);
   const shouldHideBottomNav = isKeyboardVisible;
 
   const headerWrapperRef = useCallback(
@@ -75,11 +78,7 @@ export default function AppLayout({ children }: Props) {
       : "";
 
   return (
-    <div
-      className={`${safeAreaClass} ${
-        "tw-overflow-auto"
-      }`}
-    >
+    <div className={`${safeAreaClass} ${"tw-overflow-auto"}`}>
       <PullToRefresh triggerZoneRef={headerRef} />
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />

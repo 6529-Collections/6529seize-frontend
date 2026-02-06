@@ -9,11 +9,8 @@ import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 import { useWave } from "../../../../hooks/useWave";
 import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
 import { Time } from "../../../../helpers/time";
-import type {
-  TimeLeft} from "../../../../helpers/waves/time.utils";
-import {
-  calculateTimeLeft
-} from "../../../../helpers/waves/time.utils";
+import type { TimeLeft } from "../../../../helpers/waves/time.utils";
+import { calculateTimeLeft } from "../../../../helpers/waves/time.utils";
 import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import {
@@ -27,6 +24,8 @@ import { createBreakpoint } from "react-use";
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
@@ -44,6 +43,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { isApp } = useDeviceInfo();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "S";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -105,9 +105,16 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const handleMobileBack = () => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("wave");
+    params.delete("serialNo");
+    params.delete("divider");
+    params.delete("drop");
+    const basePath = getWaveHomeRoute({
+      isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
+      isApp,
+    });
     const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || "/waves";
+      ? `${basePath}?${params.toString()}`
+      : basePath;
     router.push(newUrl, { scroll: false });
   };
 

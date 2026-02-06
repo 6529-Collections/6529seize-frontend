@@ -15,7 +15,11 @@ import {
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
-import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -165,7 +169,8 @@ export default function HeaderSearchModalItem({
       return getPage().href;
     } else {
       const wave = getWave();
-      const currentWaveId = searchParams?.get("wave") ?? undefined;
+      const currentWaveId =
+        getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
       const isDirectMessage =
         wave.chat?.scope?.group?.is_direct_message ?? false;
 

@@ -92,8 +92,9 @@ export default function AppHeader() {
   const { isRankWave, isMemesWave, isDm } = useWave(wave);
   const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
 
-  const isWavesRoute = pathname === "/waves";
-  const isMessagesRoute = pathname === "/messages";
+  const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
+  const isMessagesRoute =
+    pathname === "/messages" || pathname.startsWith("/messages/");
 
   const isCreateRoute =
     pathname === "/waves/create" || pathname === "/messages/create";

@@ -1,6 +1,10 @@
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import type React from "react";
 import { useCallback, useMemo } from "react";
+import {
+  getActiveWaveIdFromUrl,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 
 interface UseWaveNavigationOptions {
   readonly basePath: string;
@@ -15,6 +19,7 @@ interface UseWaveNavigationOptions {
   ) => void;
   readonly onHover: (waveId: string) => void;
   readonly prefetchWaveData: (waveId: string) => void;
+  readonly pathname: string | null;
   readonly searchParams: ReadonlyURLSearchParams | null;
   readonly waveId: string;
   readonly hasTouchScreen: boolean;
@@ -34,26 +39,38 @@ export const useWaveNavigation = ({
   setActiveWave,
   onHover,
   prefetchWaveData,
+  pathname,
   searchParams,
   waveId,
   hasTouchScreen,
   firstUnreadDropSerialNo,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
-  const currentWaveId = activeWaveId ?? searchParams?.get("wave") ?? undefined;
+  const currentWaveId =
+    activeWaveId ??
+    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+    undefined;
   const isDirectMessage = basePath === "/messages";
 
   const href = useMemo(() => {
     if (currentWaveId === waveId) {
       return basePath;
     }
-
-    const params = new URLSearchParams();
-    params.set("wave", waveId);
-    if (firstUnreadDropSerialNo) {
-      params.set("divider", String(firstUnreadDropSerialNo));
-    }
-    return `${basePath}?${params.toString()}`;
-  }, [basePath, currentWaveId, waveId, firstUnreadDropSerialNo]);
+    return getWaveRoute({
+      waveId,
+      extraParams:
+        typeof firstUnreadDropSerialNo === "number"
+          ? { divider: String(firstUnreadDropSerialNo) }
+          : undefined,
+      isDirectMessage,
+      isApp: false,
+    });
+  }, [
+    basePath,
+    currentWaveId,
+    waveId,
+    firstUnreadDropSerialNo,
+    isDirectMessage,
+  ]);
 
   const isActive = waveId === currentWaveId;
 

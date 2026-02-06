@@ -230,7 +230,7 @@ describe("createLinkRenderer", () => {
   it("renders seize quote previews when matching internal links", () => {
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({
-      href: "https://6529.io/waves?wave=123e4567-e89b-12d3-a456-426614174000&serialNo=5",
+      href: "https://6529.io/waves/123e4567-e89b-12d3-a456-426614174000?serialNo=5",
     } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("seize-quote")).toBeInTheDocument();
@@ -251,7 +251,7 @@ describe("createLinkRenderer", () => {
   it("renders seize drop previews", () => {
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({
-      href: "https://6529.io/waves?wave=abc&drop=def",
+      href: "https://6529.io/waves/abc?drop=def",
     } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("drop-card")).toHaveAttribute("data-drop", "def");
@@ -263,13 +263,13 @@ describe("createLinkRenderer", () => {
       currentDropId: "def",
     });
     const element = renderAnchor({
-      href: "https://6529.io/waves?wave=abc&drop=def",
+      href: "https://6529.io/waves/abc?drop=def",
     } as any);
     const { container } = render(<>{element}</>);
 
     expect(screen.queryByTestId("drop-card")).toBeNull();
     expect(
-      container.querySelector('a[href="/waves?wave=abc&drop=def"]')
+      container.querySelector('a[href="/waves/abc?drop=def"]')
     ).not.toBeNull();
   });
 
@@ -297,7 +297,7 @@ describe("createLinkRenderer", () => {
 
     const { renderAnchor } = baseRenderer();
     const element = renderAnchor({
-      href: "https://6529.io/waves?wave=other-wave&drop=drop-456",
+      href: "https://6529.io/waves/other-wave?drop=drop-456",
     } as any);
     render(<>{element}</>);
 
@@ -449,7 +449,9 @@ describe("createLinkRenderer", () => {
       } as any);
       const { container } = render(<>{element}</>);
       expect(screen.queryByTestId("opengraph")).toBeNull();
-      expect(container.querySelector('a[href="https://example.org/post"]')).not.toBeNull();
+      expect(
+        container.querySelector('a[href="https://example.org/post"]')
+      ).not.toBeNull();
     });
 
     it("isSmartLink returns false when hideLinkPreviews is true", () => {
@@ -472,7 +474,9 @@ describe("createLinkRenderer", () => {
       } as any);
       const { container } = render(<>{element}</>);
       expect(screen.queryByTestId("youtube-preview")).toBeNull();
-      expect(container.querySelector('a[href="https://youtu.be/video123"]')).not.toBeNull();
+      expect(
+        container.querySelector('a[href="https://youtu.be/video123"]')
+      ).not.toBeNull();
     });
 
     it("renders normal preview when hideLinkPreviews is false", () => {

@@ -10,6 +10,7 @@ import type { PushNotificationSchema } from "@capacitor/push-notifications";
 import { PushNotifications } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import React, {
   createContext,
   useCallback,
@@ -90,8 +91,12 @@ const redirectConfig = {
   "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
   "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
   waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
-    const base = `/waves?wave=${wave_id}`;
-    return drop_id ? `${base}&serialNo=${drop_id}` : base;
+    return getWaveRoute({
+      waveId: wave_id,
+      serialNo: drop_id || undefined,
+      isDirectMessage: false,
+      isApp: false,
+    });
   },
 };
 

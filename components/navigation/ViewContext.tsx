@@ -13,9 +13,10 @@ import React, {
 import type { ViewKey, NavItem } from "./navTypes";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
+  getActiveWaveIdFromUrl,
   getHomeRoute,
   getMessagesBaseRoute,
   getWaveRoute,
@@ -35,11 +36,12 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isApp } = useDeviceInfo();
   const [lastVisitedWave, setLastVisitedWave] = useState<string | null>(null);
   const [lastVisitedDm, setLastVisitedDm] = useState<string | null>(null);
-  const waveParam = searchParams.get("wave");
+  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const viewParam = searchParams.get("view");
   const lastFetchedWaveIdRef = useRef<string | null>(null);
 
@@ -87,7 +89,10 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
           router.push(item.href);
         }
       } else if (item.viewKey === "waves") {
-        const currentWaveId = searchParams.get("wave");
+        const currentWaveId = getActiveWaveIdFromUrl({
+          pathname,
+          searchParams,
+        });
 
         if (currentWaveId) {
           setLastVisitedWave(null);
@@ -105,7 +110,10 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         }
       } else {
         // item.viewKey === "messages" (only remaining case)
-        const currentWaveId = searchParams.get("wave");
+        const currentWaveId = getActiveWaveIdFromUrl({
+          pathname,
+          searchParams,
+        });
 
         if (currentWaveId) {
           setLastVisitedDm(null);
@@ -123,7 +131,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         }
       }
     },
-    [router, lastVisitedWave, lastVisitedDm, isApp, searchParams]
+    [router, lastVisitedWave, lastVisitedDm, isApp, pathname, searchParams]
   );
 
   const hardBack = useCallback(

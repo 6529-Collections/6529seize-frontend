@@ -52,7 +52,12 @@ const {
 } = require("@/contexts/NavigationHistoryContext");
 const { useAuth } = require("@/components/auth/Auth");
 const { useIdentity } = require("@/hooks/useIdentity");
-const { useRouter, usePathname, useSearchParams, useParams } = require("next/navigation");
+const {
+  useRouter,
+  usePathname,
+  useSearchParams,
+  useParams,
+} = require("next/navigation");
 const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 const { useWaveById } = require("@/hooks/useWaveById");
 
@@ -92,7 +97,9 @@ describe("AppHeader", () => {
   it("shows menu icon on root page even with history", () => {
     setup({ address: null, asPath: "/notifications", canGoBack: true });
     expect(screen.queryByTestId("back")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open menu" })
+    ).toBeInTheDocument();
   });
 
   it("shows back button on profile page when canGoBack is true", () => {
@@ -113,7 +120,9 @@ describe("AppHeader", () => {
       canGoBack: false,
     });
     expect(screen.queryByTestId("back")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open menu" })
+    ).toBeInTheDocument();
   });
 
   it("shows back button inside wave regardless of canGoBack", () => {
@@ -122,7 +131,7 @@ describe("AppHeader", () => {
       address: "0xabc",
       wave,
       query: { wave: "w1" },
-      asPath: "/waves?wave=w1",
+      asPath: "/waves/w1",
       canGoBack: false,
     });
     expect(screen.getByTestId("back")).toBeInTheDocument();

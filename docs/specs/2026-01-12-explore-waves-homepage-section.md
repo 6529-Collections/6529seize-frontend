@@ -40,7 +40,7 @@ As a visitor, I want to see relevant information about each wave so that I can d
 As a visitor, I want to click a wave card to view the full conversation so that I can participate in the discussion.
 
 **Acceptance Criteria:**
-- Given I am viewing a wave card, when I click anywhere on the card, then I navigate to the wave detail page (`/waves?wave={id}`)
+- Given I am viewing a wave card, when I click anywhere on the card, then I navigate to the wave detail page (`/waves/{id}`)
 - Given I am viewing a wave card, when I middle-click or Cmd/Ctrl+click, then the wave opens in a new tab
 
 ### US-004: Navigate to Full Discovery Page

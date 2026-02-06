@@ -1,7 +1,6 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
+import type { ReactNode } from "react";
 import {
   createContext,
   useContext,
@@ -14,7 +13,12 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
-import { mainSegment, sameMainPath } from "@/helpers/navigation.helpers";
+import {
+  getWaveIdFromPathname,
+  getWavePathRoute,
+  mainSegment,
+  sameMainPath,
+} from "@/helpers/navigation.helpers";
 
 interface StackRoute {
   type: "route";
@@ -95,9 +99,11 @@ export const NavigationHistoryProvider: React.FC<{
 
     const isProfile = pathname?.startsWith("/[user]");
     const [pathOnly, searchOnly = ""] = url.split("?");
-    const hasWaveParam = searchOnly.includes("wave=");
+    const waveIdFromPath = getWaveIdFromPathname(pathOnly);
+    const waveIdFromQuery = new URLSearchParams(searchOnly).get("wave");
+    const activeWaveId = waveIdFromPath ?? waveIdFromQuery;
     const isWaveRoute =
-      hasWaveParam &&
+      Boolean(activeWaveId) &&
       (pathOnly === "/" ||
         pathOnly?.startsWith("/waves") ||
         pathOnly?.startsWith("/messages"));
@@ -105,8 +111,11 @@ export const NavigationHistoryProvider: React.FC<{
     let pathKey: string;
     if (isProfile) {
       pathKey = mainSegment(url);
-    } else if (isWaveRoute) {
-      pathKey = url.split("&")[0]!;
+    } else if (isWaveRoute && activeWaveId) {
+      const isMessagesRoute = pathOnly?.startsWith("/messages");
+      pathKey = isMessagesRoute
+        ? `/messages?wave=${encodeURIComponent(activeWaveId)}`
+        : getWavePathRoute(activeWaveId);
     } else {
       pathKey = url.split(/[?#]/)[0]!;
     }

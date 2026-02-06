@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
@@ -31,14 +32,37 @@ export function BoostedSection() {
 
   const handleDropClick = useCallback(
     (drop: ApiDrop) => {
-      router.push(`/waves?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
+      const isDirectMessage =
+        (
+          drop.wave as {
+            chat?:
+              | {
+                  scope?:
+                    | {
+                        group?:
+                          | { is_direct_message?: boolean | undefined }
+                          | undefined;
+                      }
+                    | undefined;
+                }
+              | undefined;
+          }
+        ).chat?.scope?.group?.is_direct_message ?? false;
+      router.push(
+        getWaveRoute({
+          waveId: drop.wave.id,
+          serialNo: drop.serial_no,
+          isDirectMessage,
+          isApp: false,
+        })
+      );
     },
     [router]
   );
 
   if (isLoading) {
     return (
-      <section className="-tw-mx-8 tw-relative tw-bg-iron-950 tw-px-4 tw-py-16 md:tw-px-6 lg:tw-px-8">
+      <section className="tw-relative -tw-mx-8 tw-bg-iron-950 tw-px-4 tw-py-16 md:tw-px-6 lg:tw-px-8">
         <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.08)_15%,rgba(255,255,255,0.08)_85%,transparent_100%)]" />
         <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.08)_15%,rgba(255,255,255,0.08)_85%,transparent_100%)]" />
         <div className="tw-relative tw-px-8">
