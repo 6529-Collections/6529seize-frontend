@@ -126,10 +126,13 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   });
   const {
     scrollContainerRef,
+    scrollContainerCallbackRef,
     bottomAnchorRef,
+    bottomAnchorCallbackRef,
     isAtBottom,
     shouldPinToBottom,
     scrollToVisualBottom,
+    forcePinToBottom,
   } = scrollBehavior;
 
   useWaveDropsNotificationRead({
@@ -272,10 +275,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       return;
     }
 
-    const newestSerial = waveMessages.drops[0]?.serial_no ?? null;
-    setPinnedLatestSerial(newestSerial);
-    scrollToVisualBottom();
-  }, [waveMessages, scrollToVisualBottom]);
+    forcePinToBottom();
+  }, [waveMessages, forcePinToBottom]);
 
   const handleTopIntersection = useCallback(async () => {
     if (
@@ -344,7 +345,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           waveMessages={renderedWaveMessages}
           dropId={dropId}
           scrollContainerRef={scrollContainerRef}
+          scrollContainerCallbackRef={scrollContainerCallbackRef}
           bottomAnchorRef={bottomAnchorRef}
+          bottomAnchorCallbackRef={bottomAnchorCallbackRef}
           onTopIntersection={handleTopIntersection}
           onReply={onReply}
           onQuote={onQuote}
@@ -354,7 +357,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           targetDropRef={targetDropRef}
           onQuoteClick={handleQuoteClick}
           isAtBottom={isAtBottom}
-          scrollToBottom={scrollToVisualBottom}
+          scrollToBottom={forcePinToBottom}
+          onScroll={scrollBehavior.handleScroll}
           typingMessage={typingMessage}
           onDropContentClick={onDropContentClick}
           pendingCount={pendingDropsCount}
