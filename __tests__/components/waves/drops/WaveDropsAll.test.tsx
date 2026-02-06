@@ -120,8 +120,13 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 // Mock implementations
 const mockPush = jest.fn();
 const mockScrollToVisualBottom = jest.fn();
+const mockForcePinToBottom = jest.fn();
+const mockRecomputePinState = jest.fn();
+const mockHandleScroll = jest.fn();
 const mockScrollContainerRef = { current: document.createElement("div") };
+const mockScrollContainerCallbackRef = jest.fn();
 const mockBottomAnchorRef = { current: document.createElement("div") };
+const mockBottomAnchorCallbackRef = jest.fn();
 const mockFetchNextPage = jest.fn();
 const mockWaitAndRevealDrop = jest.fn();
 const mockRemoveNotifications = jest.fn();
@@ -240,25 +245,22 @@ function setupMocks(options: MockSetupOptions = {}) {
 
   // Setup useScrollBehavior mock
   require("@/hooks/useScrollBehavior").useScrollBehavior.mockImplementation(
-    (hookOptions: {
-      onPinStateChange?: (next: boolean, prev: boolean) => void;
-    }) => {
+    () => {
       const shouldPinToBottom =
         options.scrollBehavior?.shouldPinToBottom ?? true;
 
-      if (hookOptions?.onPinStateChange && !shouldPinToBottom) {
-        setTimeout(() => {
-          hookOptions.onPinStateChange?.(shouldPinToBottom, true);
-        }, 0);
-      }
-
       return {
         scrollContainerRef: mockScrollContainerRef,
+        scrollContainerCallbackRef: mockScrollContainerCallbackRef,
         bottomAnchorRef: mockBottomAnchorRef,
+        bottomAnchorCallbackRef: mockBottomAnchorCallbackRef,
         isAtBottom: options.scrollBehavior?.isAtBottom ?? true,
         shouldPinToBottom,
         scrollIntent: options.scrollBehavior?.scrollIntent ?? "pinned",
         scrollToVisualBottom: mockScrollToVisualBottom,
+        forcePinToBottom: mockForcePinToBottom,
+        recomputePinState: mockRecomputePinState,
+        handleScroll: mockHandleScroll,
       };
     }
   );
@@ -540,10 +542,10 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       expect(scrollButtonProps.isAtBottom).toBe(false);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockScrollToVisualBottom);
+      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
     });
 
-    it("calls scrollToVisualBottom when scroll button is clicked", async () => {
+    it("calls forcePinToBottom when scroll button is clicked", async () => {
       setupMocks({
         waveMessages: { drops: [createMockDrop()] },
         scrollBehavior: { isAtBottom: false },
@@ -559,7 +561,7 @@ describe("WaveDropsAll", () => {
       const scrollButton = screen.getByTestId("scroll-bottom-btn");
       scrollButton.click();
 
-      expect(mockScrollToVisualBottom).toHaveBeenCalled();
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     }, 15000);
 
     it("scrolls to bottom for temp drops when shouldPinToBottom is true", () => {
@@ -622,7 +624,7 @@ describe("WaveDropsAll", () => {
 
       // Verify scroll button receives isAtBottom state
       expect(scrollButtonProps.isAtBottom).toBe(true);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockScrollToVisualBottom);
+      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
     });
 
     it("integrates with useScrollBehavior hook for scroll intent detection", async () => {
