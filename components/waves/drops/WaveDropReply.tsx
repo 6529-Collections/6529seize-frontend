@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -8,6 +9,7 @@ import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";
 import ContentDisplay from "./ContentDisplay";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { parseStandaloneMediaUrl } from "./media-utils";
 
 interface WaveDropReplyProps {
   readonly dropId: string;
@@ -30,6 +32,26 @@ export default function WaveDropReply({
     dropPartId,
     maybeDrop
   );
+  const replyPreviewContent = useMemo(() => {
+    if (content.apiMedia.length > 0 || content.segments.length !== 1) {
+      return content;
+    }
+
+    const [segment] = content.segments;
+    if (segment?.type !== "text") {
+      return content;
+    }
+
+    const standaloneMedia = parseStandaloneMediaUrl(segment.content);
+    if (!standaloneMedia) {
+      return content;
+    }
+
+    return {
+      segments: [],
+      apiMedia: [standaloneMedia],
+    };
+  }, [content]);
 
   const renderDropContent = () => {
     if (isLoading) {
@@ -64,7 +86,7 @@ export default function WaveDropReply({
               {drop.author.handle}
             </Link>
             <ContentDisplay
-              content={content}
+              content={replyPreviewContent}
               onClick={() => onReplyClick(drop.serial_no)}
             />
           </p>
