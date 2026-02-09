@@ -97,12 +97,6 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
     return <ArrowDownTrayIcon className={`tw-flex-shrink-0 ${iconClass}`} />;
   };
 
-  const getLabel = () => {
-    if (isCompleted) return "Downloaded!";
-    if (isInProgress && showProgress) return `Downloading ${percentage}%`;
-    return "Download";
-  };
-
   if (isDropdownItem) {
     return (
       <button
@@ -120,7 +114,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         type="button"
       >
         {renderIcon("sm")}
-        <span className="tw-text-sm tw-font-medium">{getLabel()}</span>
+        <span className="tw-text-sm tw-font-medium">{getTooltipText()}</span>
       </button>
     );
   }

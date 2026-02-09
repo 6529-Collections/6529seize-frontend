@@ -8,7 +8,7 @@ import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropCon
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useCallback, useRef } from "react";
 import {
   cloneReactionEntries,
@@ -37,7 +37,7 @@ export function useDropReaction(
   const contextProfileContext = drop.context_profile_context;
 
   const applyOptimisticReaction = useCallback(
-    (reactionCode: string) => {
+    (reactionCode: string | null) => {
       const profileMin = toProfileMin(connectedProfile);
       if (!profileMin) {
         return null;
@@ -59,22 +59,25 @@ export function useDropReaction(
             userId
           );
 
-          const targetIndex = findReactionIndex(
-            reactionsWithoutUser,
-            reactionCode
-          );
+          if (reactionCode !== null) {
+            const targetIndex = findReactionIndex(
+              reactionsWithoutUser,
+              reactionCode
+            );
 
-          if (targetIndex >= 0) {
-            const profiles = reactionsWithoutUser[targetIndex]?.profiles ?? [];
-            reactionsWithoutUser[targetIndex] = {
-              ...reactionsWithoutUser[targetIndex]!,
-              profiles: [...profiles, profileMin],
-            };
-          } else {
-            reactionsWithoutUser.push({
-              reaction: reactionCode,
-              profiles: [profileMin],
-            });
+            if (targetIndex >= 0) {
+              const profiles =
+                reactionsWithoutUser[targetIndex]?.profiles ?? [];
+              reactionsWithoutUser[targetIndex] = {
+                ...reactionsWithoutUser[targetIndex]!,
+                profiles: [...profiles, profileMin],
+              };
+            } else {
+              reactionsWithoutUser.push({
+                reaction: reactionCode,
+                profiles: [profileMin],
+              });
+            }
           }
 
           draft.reactions = reactionsWithoutUser;
@@ -114,19 +117,33 @@ export function useDropReaction(
     async (reactionCode: string) => {
       if (!canReact) return;
 
+      const isRemoving = reactionCode === contextProfileContext?.reaction;
+
       rollbackRef.current?.();
-      rollbackRef.current = applyOptimisticReaction(reactionCode);
-      recordReaction(reactionCode);
+      rollbackRef.current = applyOptimisticReaction(
+        isRemoving ? null : reactionCode
+      );
+
+      if (!isRemoving) {
+        recordReaction(reactionCode);
+      }
 
       try {
-        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-          endpoint: `drops/${drop.id}/reaction`,
-          body: { reaction: reactionCode },
-        });
+        const endpoint = `drops/${drop.id}/reaction`;
+        if (isRemoving) {
+          await commonApiDelete({ endpoint });
+        } else {
+          await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+            endpoint,
+            body: { reaction: reactionCode },
+          });
+        }
         rollbackRef.current = null;
         onSuccess?.();
       } catch (error) {
-        let errorMessage = "Error adding reaction";
+        let errorMessage = isRemoving
+          ? "Error removing reaction"
+          : "Error adding reaction";
         if (typeof error === "string") {
           errorMessage = error;
         }
@@ -135,7 +152,14 @@ export function useDropReaction(
         rollbackRef.current = null;
       }
     },
-    [canReact, applyOptimisticReaction, drop.id, setToast, onSuccess]
+    [
+      canReact,
+      applyOptimisticReaction,
+      contextProfileContext?.reaction,
+      drop.id,
+      setToast,
+      onSuccess,
+    ]
   );
 
   return { react, canReact };
