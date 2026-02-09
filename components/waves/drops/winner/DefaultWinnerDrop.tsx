@@ -80,7 +80,8 @@ interface DefautWinnerDropProps {
   readonly location: DropLocation;
   readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
+  /** @deprecated Quote functionality has been removed - this prop is ignored */
+  readonly onQuote?: ((param: DropInteractionParams) => void) | undefined;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
@@ -93,7 +94,6 @@ const DefaultWinnerDrop = ({
   location,
   dropViewDropId,
   onReply,
-  onQuote,
   onReplyClick,
   onQuoteClick,
   onDropContentClick,
@@ -130,11 +130,6 @@ const DefaultWinnerDrop = ({
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onReply, drop, activePartIndex]);
-
-  const handleOnQuote = useCallback(() => {
-    setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onQuote, drop, activePartIndex]);
 
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
@@ -239,7 +234,6 @@ const DefaultWinnerDrop = ({
               drop={drop}
               activePartIndex={activePartIndex}
               onReply={handleOnReply}
-              onQuote={handleOnQuote}
             />
           </div>
         )}
@@ -260,7 +254,6 @@ const DefaultWinnerDrop = ({
         showReplyAndQuote={showReplyAndQuote}
         setOpen={setIsSlideUp}
         onReply={handleOnReply}
-        onQuote={handleOnQuote}
         onAddReaction={handleOnAddReaction}
       />
     </div>

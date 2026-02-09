@@ -8,9 +8,13 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface WaveDropActionsOpenProps {
   readonly drop: ExtendedDrop;
+  readonly isDropdownItem?: boolean | undefined;
 }
 
-const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
+const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
+  drop,
+  isDropdownItem = false,
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams()!;
@@ -26,19 +30,47 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
     return null;
   }
 
-  return (
-    <>
+  if (isDropdownItem) {
+    return (
       <button
-        className="tw-text-iron-400 desktop-hover:hover:tw-text-white tw-cursor-pointer tw-transition-colors tw-bg-transparent tw-border-0 tw-px-2"
         onClick={() => onDropClick(drop)}
-        aria-label="Open drop"
-        data-tooltip-id={`open-${drop.id}`}>
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+      >
         <svg
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          className="tw-w-5 tw-h-5"
-          xmlns="http://www.w3.org/2000/svg">
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21 9L21 3M21 3H15M21 3L13 11M10 5H7.8C6.11984 5 5.27976 5 4.63803 5.32698C4.07354 5.6146 3.6146 6.07354 3.32698 6.63803C3 7.27976 3 8.11984 3 9.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H14.2C15.8802 21 16.7202 21 17.362 20.673C17.9265 20.3854 18.3854 19.9265 18.673 19.362C19 18.7202 19 17.8802 19 16.2V14"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="tw-text-sm tw-font-medium">Open</span>
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <button
+        className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2 tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-white"
+        onClick={() => onDropClick(drop)}
+        aria-label="Open drop"
+        data-tooltip-id={`open-${drop.id}`}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          className="tw-h-5 tw-w-5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M21 9L21 3M21 3H15M21 3L13 11M10 5H7.8C6.11984 5 5.27976 5 4.63803 5.32698C4.07354 5.6146 3.6146 6.07354 3.32698 6.63803C3 7.27976 3 8.11984 3 9.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H14.2C15.8802 21 16.7202 21 17.362 20.673C17.9265 20.3854 18.3854 19.9265 18.673 19.362C19 18.7202 19 17.8802 19 16.2V14"
             stroke="currentColor"
@@ -63,7 +95,8 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           zIndex: 99999,
           pointerEvents: "none",
-        }}>
+        }}
+      >
         <span className="tw-text-xs">Open</span>
       </Tooltip>
     </>

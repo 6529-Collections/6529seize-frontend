@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
@@ -9,11 +9,13 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 interface WaveDropActionsEditProps {
   readonly drop: ExtendedDrop;
   readonly onEdit: () => void;
+  readonly isDropdownItem?: boolean | undefined;
 }
 
 export default function WaveDropActionsEdit({
   drop,
   onEdit,
+  isDropdownItem = false,
 }: WaveDropActionsEditProps) {
   const { connectedProfile } = useContext(AuthContext);
 
@@ -22,16 +24,29 @@ export default function WaveDropActionsEdit({
     return null;
   }
 
+  if (isDropdownItem) {
+    return (
+      <button
+        type="button"
+        onClick={onEdit}
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+      >
+        <PencilIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        <span className="tw-text-sm tw-font-medium">Edit</span>
+      </button>
+    );
+  }
+
   return (
     <>
       <button
         type="button"
-        className="tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
+        className="icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
         onClick={onEdit}
         aria-label="Edit"
         data-tooltip-id={`edit-drop-${drop.id}`}
       >
-        <PencilIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300" />
+        <PencilIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
       </button>
       <Tooltip
         id={`edit-drop-${drop.id}`}

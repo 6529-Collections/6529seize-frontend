@@ -2,11 +2,8 @@
 
 import { useCallback } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type {
-  DropInteractionParams} from "@/components/waves/drops/Drop";
-import {
-  DropLocation,
-} from "@/components/waves/drops/Drop";
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { DropLocation } from "@/components/waves/drops/Drop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
@@ -21,14 +18,14 @@ interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
   readonly showReplyAndQuote: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
+  /** @deprecated Quote functionality has been removed - this prop is ignored */
+  readonly onQuote?: ((param: DropInteractionParams) => void) | undefined;
 }
 
 export default function MemeWinnerDrop({
   drop,
   showReplyAndQuote,
   onReply,
-  onQuote,
 }: MemeWinnerDropProps) {
   const isMobile = useIsMobileDevice();
   const { location } = useDropContext();
@@ -48,23 +45,19 @@ export default function MemeWinnerDrop({
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
-  const handleOnQuote = useCallback(() => {
-    onQuote({ drop, partId: drop.parts[0]?.part_id! });
-  }, [onQuote, drop]);
-
   // First place shadow class from DefaultWaveWinnerDrop
   const firstPlaceShadow =
     "tw-shadow-[inset_1px_0_0_rgba(251,191,36,0.5),inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
 
   return (
-    <div className="tw-w-full tw-mb-3">
+    <div className="tw-mb-3 tw-w-full">
       <div
         className={`tw-w-full ${
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-        } tw-relative tw-group`}
+        } tw-group tw-relative`}
       >
         <div
-          className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${
+          className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-l tw-border-solid tw-border-transparent tw-transition-all tw-duration-200 tw-ease-out ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-900/80"
               : "tw-bg-iron-950"
@@ -74,14 +67,13 @@ export default function MemeWinnerDrop({
             drop={drop}
             showReplyAndQuote={showReplyAndQuote}
             onReply={handleOnReply}
-            onQuote={handleOnQuote}
           >
             <>
-              <div className="tw-p-4 tw-pb-3 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/5 tw-bg-iron-900/30">
+              <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
                 <MemeWinnerArtistInfo drop={drop} />
               </div>
 
-              <div className="tw-px-4 tw-pt-4 tw-pb-4">
+              <div className="tw-px-4 tw-pb-4 tw-pt-4">
                 <div className="tw-space-y-1">
                   <MemeWinnerHeader title={title} />
                   <MemeWinnerDescription description={description} />
@@ -89,7 +81,7 @@ export default function MemeWinnerDrop({
               </div>
 
               {artworkMedia && (
-                <div className="tw-flex tw-justify-center tw-h-96 tw-mx-0.5 tw-bg-iron-950">
+                <div className="tw-mx-0.5 tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
@@ -98,7 +90,7 @@ export default function MemeWinnerDrop({
                 </div>
               )}
 
-              <div className="tw-hidden lg:tw-block tw-p-4 tw-mt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-white/5 tw-bg-iron-900/30">
+              <div className="tw-mt-4 tw-hidden tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 lg:tw-block">
                 <MemeDropTraits drop={drop} />
               </div>
             </>
@@ -109,7 +101,6 @@ export default function MemeWinnerDrop({
                 drop={drop}
                 activePartIndex={0}
                 onReply={handleOnReply}
-                onQuote={handleOnQuote}
               />
             </div>
           )}

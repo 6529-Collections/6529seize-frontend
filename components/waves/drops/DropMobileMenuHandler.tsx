@@ -11,7 +11,8 @@ interface DropMobileMenuHandlerProps {
   readonly children: React.ReactNode;
   readonly showReplyAndQuote: boolean;
   readonly onReply: () => void;
-  readonly onQuote: () => void;
+  /** @deprecated Quote functionality has been removed - this prop is ignored */
+  readonly onQuote?: (() => void) | undefined;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds
@@ -22,7 +23,6 @@ export default function DropMobileMenuHandler({
   children,
   showReplyAndQuote,
   onReply,
-  onQuote,
 }: DropMobileMenuHandlerProps) {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -91,11 +91,6 @@ export default function DropMobileMenuHandler({
     onReply();
   }, [onReply]);
 
-  const handleOnQuote = useCallback(() => {
-    setIsSlideUp(false);
-    onQuote();
-  }, [onQuote]);
-
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
   }, []);
@@ -115,7 +110,6 @@ export default function DropMobileMenuHandler({
         showReplyAndQuote={showReplyAndQuote}
         setOpen={setIsSlideUp}
         onReply={handleOnReply}
-        onQuote={handleOnQuote}
         onAddReaction={handleOnAddReaction}
       />
     </div>

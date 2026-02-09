@@ -8,6 +8,7 @@ import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReact
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import data from "@emoji-mart/data";
@@ -124,6 +125,7 @@ const WaveDropActionsAddReaction: React.FC<{
 
     rollbackRef.current?.();
     rollbackRef.current = applyOptimisticReaction(emojiText);
+    recordReaction(emojiText);
 
     try {
       await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({

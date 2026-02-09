@@ -29,7 +29,8 @@ interface EndedParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
+  /** @deprecated Quote functionality has been removed - this prop is ignored */
+  readonly onQuote?: ((param: DropInteractionParams) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
@@ -41,7 +42,6 @@ export default function EndedParticipationDrop({
   showReplyAndQuote,
   location,
   onReply,
-  onQuote,
   onQuoteClick,
   onDropContentClick,
 }: EndedParticipationDropProps) {
@@ -70,11 +70,6 @@ export default function EndedParticipationDrop({
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onReply, drop, activePartIndex]);
-
-  const handleOnQuote = useCallback(() => {
-    setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onQuote, drop, activePartIndex]);
 
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
@@ -106,7 +101,6 @@ export default function EndedParticipationDrop({
             activePartIndex={activePartIndex}
             showVoting={false}
             onReply={handleOnReply}
-            onQuote={handleOnQuote}
           />
         )}
 
@@ -212,7 +206,6 @@ export default function EndedParticipationDrop({
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
-          onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
         />
       </div>
