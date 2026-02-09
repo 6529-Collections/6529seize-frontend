@@ -125,7 +125,7 @@ describe("NotificationPriorityAlert", () => {
         serial_no: 6,
       });
     }
-    expect(mockRouter.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=5");
-    expect(mockRouter.push).toHaveBeenCalledWith("/waves?wave=w&serialNo=6");
+    expect(mockRouter.push).toHaveBeenCalledWith("/waves/w?serialNo=5");
+    expect(mockRouter.push).toHaveBeenCalledWith("/waves/w?serialNo=6");
   });
 });

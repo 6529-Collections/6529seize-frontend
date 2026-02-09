@@ -17,6 +17,8 @@ import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearc
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -38,6 +40,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { isApp } = useDeviceInfo();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "S";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -46,9 +49,16 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const handleMobileBack = () => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("wave");
+    params.delete("serialNo");
+    params.delete("divider");
+    params.delete("drop");
+    const basePath = getWaveHomeRoute({
+      isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
+      isApp,
+    });
     const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || "/waves";
+      ? `${basePath}?${params.toString()}`
+      : basePath;
     router.push(newUrl, { scroll: false });
   };
 

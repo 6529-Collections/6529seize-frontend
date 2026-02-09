@@ -12,6 +12,7 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -49,12 +50,12 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
               <UserProfileTooltipWrapper
                 user={drop.author.handle ?? drop.author.id}
               >
-                <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                <span className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
                   {drop.author?.handle}
                 </span>
               </UserProfileTooltipWrapper>
             ) : (
-              <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+              <span className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
                 {drop.author?.handle}
               </span>
             )}
@@ -67,7 +68,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
               tooltipId={`meme-activity-badge-${drop.id}`}
             />
           )}
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
           <WaveDropTime timestamp={drop.created_at} />
           <div className="tw-ml-2">
             <WinnerDropBadge
@@ -79,8 +80,12 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
         {drop.wave && (
           <Link
             onClick={(e) => e.stopPropagation()}
-            href={`/waves?wave=${drop.wave.id}`}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+            href={getWaveRoute({
+              waveId: drop.wave.id,
+              isDirectMessage: false,
+              isApp: false,
+            })}
+            className="tw-leading-0 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
           >
             {drop.wave.name}
           </Link>

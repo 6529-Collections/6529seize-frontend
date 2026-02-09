@@ -7,6 +7,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -31,7 +32,7 @@ export default function MemeWinnerArtistInfo({
               size={UserCICAndLevelSize.SMALL}
             />
           )}
-          <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+          <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
             {drop.author?.handle ? (
               <UserProfileTooltipWrapper
                 user={drop.author.handle ?? drop.author.id}
@@ -39,7 +40,7 @@ export default function MemeWinnerArtistInfo({
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   href={`/${drop.author?.handle}`}
-                  className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out"
+                  className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                 >
                   {drop.author?.handle}
                 </Link>
@@ -48,15 +49,15 @@ export default function MemeWinnerArtistInfo({
               <Link
                 onClick={(e) => e.stopPropagation()}
                 href={`/${drop.author?.handle ?? drop.author?.id}`}
-                className="tw-no-underline desktop-hover:hover:tw-underline tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
               >
                 {drop.author?.handle ?? drop.author?.id}
               </Link>
             )}
           </p>
 
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+          <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
             {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
@@ -65,8 +66,12 @@ export default function MemeWinnerArtistInfo({
         {showWaveInfo && drop.wave && (
           <Link
             onClick={(e) => e.stopPropagation()}
-            href={`/waves?wave=${drop.wave.id}`}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+            href={getWaveRoute({
+              waveId: drop.wave.id,
+              isDirectMessage: false,
+              isApp: false,
+            })}
+            className="tw-leading-0 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
           >
             {drop.wave.name}
           </Link>

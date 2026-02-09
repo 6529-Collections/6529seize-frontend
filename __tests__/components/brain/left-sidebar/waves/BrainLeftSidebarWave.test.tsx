@@ -93,7 +93,7 @@ describe("BrainLeftSidebarWave", () => {
     const { rerender } = render(
       <BrainLeftSidebarWave wave={baseWave} onHover={onHover} />
     );
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/waves?wave=1");
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/waves/1");
     activeWaveId = "1";
     mockedUseMyStream.mockImplementation(() => ({
       activeWave: { id: activeWaveId, set: setActiveWave },
@@ -127,7 +127,7 @@ describe("BrainLeftSidebarWave", () => {
     render(<BrainLeftSidebarWave wave={waveWithUnread} onHover={onHover} />);
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "/waves?divider=42&wave=3"
+      "/waves/3?divider=42"
     );
   });
 
@@ -138,7 +138,7 @@ describe("BrainLeftSidebarWave", () => {
       firstUnreadDropSerialNo: null,
     };
     render(<BrainLeftSidebarWave wave={waveWithoutUnread} onHover={onHover} />);
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/waves?wave=4");
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/waves/4");
   });
 
   it("shows muted indicator when wave is muted", () => {

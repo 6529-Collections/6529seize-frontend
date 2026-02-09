@@ -1,5 +1,6 @@
 describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
   let parseSeizeQuoteLink: any;
+  let parseSeizeWaveLink: any;
   let parseSeizeQueryLink: any;
   let ensureStableSeizeLink: any;
 
@@ -13,6 +14,7 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     // Now import the module under test AFTER the mock is in place
     ({
       parseSeizeQuoteLink,
+      parseSeizeWaveLink,
       parseSeizeQueryLink,
       ensureStableSeizeLink,
     } = require("@/helpers/SeizeLinkParser"));
@@ -22,22 +24,27 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     const uuid = "123e4567-e89b-12d3-a456-426614174000";
 
     it("parses valid link", () => {
+      const res = parseSeizeQuoteLink(`/waves/${uuid}?serialNo=10`);
+      expect(res).toEqual({ waveId: uuid, serialNo: "10" });
+    });
+
+    it("parses legacy query-based wave links", () => {
       const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&serialNo=10`);
       expect(res).toEqual({ waveId: uuid, serialNo: "10" });
     });
 
     it("parses serial link with trailing slash", () => {
-      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&serialNo=10/`);
+      const res = parseSeizeQuoteLink(`/waves/${uuid}?serialNo=10/`);
       expect(res).toEqual({ waveId: uuid, serialNo: "10" });
     });
 
     it("returns null for drop-based quote link", () => {
-      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&drop=drop-123`);
+      const res = parseSeizeQuoteLink(`/waves/${uuid}?drop=drop-123`);
       expect(res).toBeNull();
     });
 
     it("returns null for drop-based quote link with trailing slash", () => {
-      const res = parseSeizeQuoteLink(`/waves?wave=${uuid}&drop=drop-123/`);
+      const res = parseSeizeQuoteLink(`/waves/${uuid}?drop=drop-123/`);
       expect(res).toBeNull();
     });
 
@@ -47,11 +54,11 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     });
 
     it("returns null for invalid wave id", () => {
-      expect(parseSeizeQuoteLink("/waves?wave=not-a-uuid&serialNo=10")).toBeNull();
+      expect(parseSeizeQuoteLink("/waves/not-a-uuid?serialNo=10")).toBeNull();
     });
 
     it("returns null when neither serial nor drop provided", () => {
-      expect(parseSeizeQuoteLink(`/waves?wave=${uuid}`)).toBeNull();
+      expect(parseSeizeQuoteLink(`/waves/${uuid}`)).toBeNull();
     });
 
     it("returns null for invalid link", () => {
@@ -86,11 +93,9 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     });
 
     it("requires exact path match", () => {
-      const res = parseSeizeQueryLink(
-        "https://site.com/alias?foo=1",
-        "/path",
-        ["foo"]
-      );
+      const res = parseSeizeQueryLink("https://site.com/alias?foo=1", "/path", [
+        "foo",
+      ]);
       expect(res).toBeNull();
     });
 
@@ -102,6 +107,26 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
         true
       );
       expect(res).toBeNull();
+    });
+  });
+
+  describe("parseSeizeWaveLink", () => {
+    const uuid = "123e4567-e89b-12d3-a456-426614174000";
+
+    it("parses canonical wave path", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}`)).toBe(uuid);
+    });
+
+    it("parses legacy wave query path", () => {
+      expect(parseSeizeWaveLink(`/waves?wave=${uuid}`)).toBe(uuid);
+    });
+
+    it("returns null when wave links include drop query", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}?drop=drop-1`)).toBeNull();
+    });
+
+    it("returns null when wave links include serial query", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}?serialNo=1`)).toBeNull();
     });
   });
 
@@ -143,7 +168,7 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
     });
 
     it("rebases drop links from other paths onto current location", () => {
-      const incoming = "https://site.com/waves?wave=abc&drop=def";
+      const incoming = "https://site.com/waves/abc?drop=def";
       const current = "https://site.com/messages?wave=xyz";
       expect(ensureStableSeizeLink(incoming, current)).toBe(
         "https://site.com/messages?wave=xyz&drop=def"

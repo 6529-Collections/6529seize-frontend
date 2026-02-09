@@ -3,14 +3,14 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
-    faArrowRight,
-    faBook,
-    faChartLine,
-    faCrown,
-    faCubes,
-    faTools,
-    faUser,
-    faVoteYea,
+  faArrowRight,
+  faBook,
+  faChartLine,
+  faCrown,
+  faCubes,
+  faTools,
+  faUser,
+  faVoteYea,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -35,75 +35,75 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
 
   return (
     <div className={containerClassName} style={faqViewStyle}>
-      <div className="tw-space-y-4 md:tw-space-y-6 tw-mb-4 tw-px-2 sm:tw-px-4">
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <p className="tw-text-iron-50 tw-font-semibold tw-text-xl sm:tw-text-2xl tw-mb-0">
+      <div className="tw-mb-4 tw-space-y-4 tw-px-2 sm:tw-px-4 md:tw-space-y-6">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
             The Memes - Main Stage FAQ
           </p>
-          <h3 className="tw-mt-6 sm:tw-mt-8 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex tw-items-center">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+          <h3 className="tw-mb-5 tw-mt-6 tw-flex tw-items-center tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-mt-8 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faBook}
-                className="tw-text-primary-400 tw-size-4 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0 tw-text-primary-400"
               />
             </div>
             Intro
           </h3>
-          <div className="tw-flex tw-flex-col tw-space-y-4 md:tw-space-y-6 tw-mb-0">
+          <div className="tw-mb-0 tw-flex tw-flex-col tw-space-y-4 md:tw-space-y-6">
             <div className="tw-border-b tw-border-iron-800">
-              <div className="tw-text-sm tw-text-iron-400 tw-font-medium">
+              <div className="tw-text-sm tw-font-medium tw-text-iron-400">
                 What are we doing here?
               </div>
-              <div className="tw-text-iron-50 tw-mt-1 tw-text-base">
+              <div className="tw-mt-1 tw-text-base tw-text-iron-50">
                 Voting for the next The Memes card to be minted
               </div>
             </div>
             <div className="tw-border-b tw-border-iron-800">
-              <div className="tw-text-sm tw-text-iron-400 tw-font-medium">
+              <div className="tw-text-sm tw-font-medium tw-text-iron-400">
                 Who is voting?
               </div>
-              <div className="tw-text-iron-50 tw-mt-1 tw-text-base">
+              <div className="tw-mt-1 tw-text-base tw-text-iron-50">
                 Everyone with TDH
               </div>
             </div>
             <div className="tw-border-b tw-border-iron-800">
-              <div className="tw-text-sm tw-text-iron-400 tw-font-medium">
+              <div className="tw-text-sm tw-font-medium tw-text-iron-400">
                 What are we voting with?
               </div>
-              <div className="tw-text-iron-50 tw-mt-1 tw-text-base">TDH</div>
+              <div className="tw-mt-1 tw-text-base tw-text-iron-50">TDH</div>
             </div>
             <div className="tw-border-b tw-border-iron-800">
-              <div className="tw-text-sm tw-text-iron-400 tw-font-medium">
+              <div className="tw-text-sm tw-font-medium tw-text-iron-400">
                 How do I learn more?
               </div>
-              <div className="tw-text-iron-50 tw-mt-1 tw-text-base">
+              <div className="tw-mt-1 tw-text-base tw-text-iron-50">
                 Keep reading
               </div>
             </div>
           </div>
         </section>
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <h3 className="tw-mb-5 tw-flex tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faCrown}
-                className="tw-text-indigo-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0 tw-text-indigo-500"
               />
             </div>
             <div className="tw-mt-0.5">What are the goals of the voting?</div>
           </h3>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             We are engaging in decentralized, networked curation of an important
             NFT art collection focused on decentralization.
           </p>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             The goal is excellence, defined as a collection that will age well
             over decades.
           </p>
-          <p className="tw-text-iron-300 tw-mb-3 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-3 tw-text-base tw-leading-relaxed tw-text-iron-300">
             Excellence can come in many formats:
           </p>
-          <ul className="tw-space-y-2 tw-text-iron-300 tw-mb-5 tw-pl-1 tw-text-base">
+          <ul className="tw-mb-5 tw-space-y-2 tw-pl-1 tw-text-base tw-text-iron-300">
             {[
               "Artistic excellence",
               "Memetic excellence",
@@ -111,16 +111,16 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
               "Several of the above",
             ].map((item, idx) => (
               <li key={idx} className="tw-flex tw-items-center">
-                <div className="tw-h-0.5 tw-w-3 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400 tw-mr-3"></div>
+                <div className="tw-mr-3 tw-h-0.5 tw-w-3 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400"></div>
                 {item}
               </li>
             ))}
           </ul>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             There is a long artist brief here that both artists and first-time
             voters should read.
           </p>
-          <p className="tw-text-iron-300 tw-mb-5 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-5 tw-text-base tw-leading-relaxed tw-text-iron-300">
             It is a much more detailed FAQ than this one and if you want to be
             seriously engaged with this effort, you must read it! Otherwise you
             will bother everyone with basic questions that you could have
@@ -131,39 +131,40 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
             href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
+            className="tw-group tw-flex tw-items-center tw-text-base tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+          >
             Read Artist Brief
             <FontAwesomeIcon
               icon={faArrowRight}
               className="tw-ml-2 tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
           </a>
-          <p className="tw-text-iron-500 tw-mt-4 tw-text-sm">
+          <p className="tw-mt-4 tw-text-sm tw-text-iron-500">
             These FAQs are a summary of this presentation but not a substitute
             for reading it.
           </p>
         </section>
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <h3 className="tw-mb-5 tw-flex tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faUser}
-                className="tw-text-red tw-size-4 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0 tw-text-red"
               />
             </div>
             <span className="tw-mt-0.5">
               What Are Not The Goals Of The Voting
             </span>
           </h3>
-          <ul className="tw-space-y-3 tw-text-iron-300 tw-pl-0">
+          <ul className="tw-space-y-3 tw-pl-0 tw-text-iron-300">
             <li className="tw-flex tw-items-start tw-pb-3 tw-text-base">
-              <span className="tw-text-red tw-mr-2">✕</span>
+              <span className="tw-mr-2 tw-text-red">✕</span>
               <span>
                 We should not vandalize the collection for joke value.
               </span>
             </li>
             <li className="tw-flex tw-items-start tw-pb-3 tw-text-base">
-              <span className="tw-text-red tw-mr-2">✕</span>
+              <span className="tw-mr-2 tw-text-red">✕</span>
               <span>
                 The Memes are not a sandbox for goofing around among friends –
                 they are, arguably, the most important large NFT art collection
@@ -171,7 +172,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
               </span>
             </li>
             <li className="tw-flex tw-items-start tw-pb-3 tw-text-base">
-              <span className="tw-text-emerald-500 tw-mr-2">✓</span>
+              <span className="tw-mr-2 tw-text-emerald-500">✓</span>
               <span>
                 Our decisions should stand the test of time – "{" "}
                 <span className="tw-italic">
@@ -181,84 +182,84 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
                 " is a pretty good test.
               </span>
             </li>
-            <li className="tw-flex tw-items-start  tw-pb-3 tw-text-base">
-              <span className="tw-text-emerald-500 tw-mr-2">✓</span>
+            <li className="tw-flex tw-items-start tw-pb-3 tw-text-base">
+              <span className="tw-mr-2 tw-text-emerald-500">✓</span>
               <span>
                 Should we do weird things in The Memes? Sure, so long as they
                 are also excellent.
               </span>
             </li>
             <li className="tw-flex tw-items-start tw-text-base">
-              <span className="tw-text-red tw-mr-2">✕</span>
+              <span className="tw-mr-2 tw-text-red">✕</span>
               <span>
                 Should we do weird casual things that are not excellent? No.
               </span>
             </li>
           </ul>
         </section>
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <h3 className="tw-mb-5 tw-flex tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faVoteYea}
-                className="tw-text-purple-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0 tw-text-purple-500"
               />
             </div>
             <span className="tw-mt-0.5">How Does Voting Work?</span>
           </h3>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             Voting is a continuous leaderboard – art is submitted and it stays
             on the leaderboard until it is removed by the artist who submitted
             it.
           </p>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             Three times a week, the top submission on the leaderboard is
             selected to be the next card minted.
           </p>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             The checkpoint times are Monday / Wednesday / Friday at 17:00 GMT.
             The card will be minted at the next The Memes mint (e.g. Wednesday /
             Friday / Monday).
           </p>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             The metric that determines the winner is 24-Hour Vote (24HV).
             <br />
             24HV is a weighted average of how much TDH was voted at any point in
             time ("Current Vote") during the last 24 hours before the
             checkpoint.
           </p>
-          <p className="tw-text-iron-300 tw-mb-5 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-5 tw-text-base tw-leading-relaxed tw-text-iron-300">
             The purpose of using 24HV is to avoid last second gaming of the
             vote. You can sort by 24HV and Current Vote. 24HV converges to
             Current Vote over a 24 hour period (noting that Current Vote is
             constantly changing).
           </p>
 
-          <div className="tw-bg-iron-950 tw-p-4 sm:tw-p-5 tw-rounded-md tw-mb-6">
-            <p className="tw-text-iron-50 tw-font-medium tw-mb-4 tw-text-base">
+          <div className="tw-mb-6 tw-rounded-md tw-bg-iron-950 tw-p-4 sm:tw-p-5">
+            <p className="tw-mb-4 tw-text-base tw-font-medium tw-text-iron-50">
               You can think of the voting in three phases:
             </p>
             <div className="tw-grid tw-grid-cols-1 tw-gap-4">
-              <div className="tw-bg-iron-900 tw-p-4 tw-rounded-md tw-border-l-4 tw-border-primary-500 tw-border-solid tw-border-r-0 tw-border-y-0">
-                <p className="tw-font-semibold tw-text-iron-50 tw-text-base">
+              <div className="tw-rounded-md tw-border-y-0 tw-border-l-4 tw-border-r-0 tw-border-solid tw-border-primary-500 tw-bg-iron-900 tw-p-4">
+                <p className="tw-text-base tw-font-semibold tw-text-iron-50">
                   Pre-voting
                 </p>
-                <p className="tw-text-sm tw-text-iron-400 tw-mt-1">
+                <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
                   &gt;24h before
                 </p>
-                <p className="tw-text-iron-300 tw-mt-2">
+                <p className="tw-mt-2 tw-text-iron-300">
                   You can add and remove TDH (Current Vote) to one or more
                   submissions but it does not impact the final decision.
                 </p>
               </div>
-              <div className="tw-bg-iron-900 tw-p-4 tw-rounded-md tw-border-l-4 tw-border-purple-600 tw-border-solid tw-border-r-0 tw-border-y-0">
-                <p className="tw-font-semibold tw-text-iron-50 tw-text-base">
+              <div className="tw-rounded-md tw-border-y-0 tw-border-l-4 tw-border-r-0 tw-border-solid tw-border-purple-600 tw-bg-iron-900 tw-p-4">
+                <p className="tw-text-base tw-font-semibold tw-text-iron-50">
                   Voting
                 </p>
-                <p className="tw-text-sm tw-text-iron-400 tw-mt-1">
+                <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
                   0-24h before
                 </p>
-                <p className="tw-text-iron-300 tw-mt-2">
+                <p className="tw-mt-2 tw-text-iron-300">
                   You can add and remove TDH (Current Vote) to one more
                   submissions, but it does impact the final decision as it
                   starts counting towards the final 24HV. If you vote 100 TDH
@@ -267,14 +268,14 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
                   it contributes 50 to the final vote.
                 </p>
               </div>
-              <div className="tw-bg-iron-900 tw-p-4 tw-rounded-md tw-border-l-4 tw-border-emerald-500 tw-border-solid tw-border-r-0 tw-border-y-0">
-                <p className="tw-font-semibold tw-text-iron-50 tw-text-base">
+              <div className="tw-rounded-md tw-border-y-0 tw-border-l-4 tw-border-r-0 tw-border-solid tw-border-emerald-500 tw-bg-iron-900 tw-p-4">
+                <p className="tw-text-base tw-font-semibold tw-text-iron-50">
                   Selection
                 </p>
-                <p className="tw-text-sm tw-text-iron-400 tw-mt-1">
+                <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
                   Checkpoint
                 </p>
-                <p className="tw-text-iron-300 tw-mt-2">
+                <p className="tw-mt-2 tw-text-iron-300">
                   The 24HV value at checkpoint time
                 </p>
               </div>
@@ -299,42 +300,40 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
                 a: "You get Current Vote TDH instantly but 24HV TDH decays and accrues over 24 hours",
               },
             ].map((item, idx) => (
-              <div
-                key={idx}
-                className="tw-border-b tw-border-iron-800 tw-pb-3  ">
+              <div key={idx} className="tw-border-b tw-border-iron-800 tw-pb-3">
                 <dt className="tw-text-sm tw-font-medium tw-text-primary-400">
                   {item.q}
                 </dt>
-                <dd className="tw-text-iron-50 tw-mt-1 tw-text-base">
+                <dd className="tw-mt-1 tw-text-base tw-text-iron-50">
                   {item.a}
                 </dd>
               </div>
             ))}
           </div>
         </section>
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <h3 className="tw-mb-5 tw-flex tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faTools}
-                className="tw-text-emerald-500-500 tw-size-4"
+                className="tw-size-4 tw-text-emerald-500"
               />
             </div>
             <span className="tw-mt-0.5">How Does Submission Work?</span>
           </h3>
-          <div className="tw-bg-iron-950 tw-p-5 tw-rounded-md tw-mb-5">
-            <p className="tw-text-iron-50 tw-font-medium tw-mb-3 tw-text-base">
+          <div className="tw-mb-5 tw-rounded-md tw-bg-iron-950 tw-p-5">
+            <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
               There are two ways you can be eligible to submit:
             </p>
-            <ul className="tw-space-y-3 tw-text-iron-300 tw-pl-0">
+            <ul className="tw-space-y-3 tw-pl-0 tw-text-iron-300">
               <li className="tw-flex tw-text-base">
-                <span className="tw-text-emerald-500 tw-size-4 tw-flex-shrink-0 tw-mr-2">
+                <span className="tw-mr-2 tw-size-4 tw-flex-shrink-0 tw-text-emerald-500">
                   ✓
                 </span>
                 You have previously dropped a Meme Card
               </li>
               <li className="tw-flex tw-text-base">
-                <span className="tw-text-emerald-500 tw-size-4 tw-flex-shrink-0 tw-mr-2">
+                <span className="tw-mr-2 tw-size-4 tw-flex-shrink-0 tw-text-emerald-500">
                   ✓
                 </span>
                 You have been nominated in a decentralized way by one or more
@@ -343,82 +342,84 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
             </ul>
           </div>
 
-          <p className="tw-text-iron-300 tw-mb-2 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-2 tw-text-base tw-leading-relaxed tw-text-iron-300">
             What if I do not know how to get nominated?
           </p>
-          <p className="tw-text-iron-300 tw-mb-3 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-3 tw-text-base tw-leading-relaxed tw-text-iron-300">
             Go to the The Memes - Seeking Nomination wave and share your
             existing work and story and someone may nominate you:
           </p>
           <Link
-            href="https://6529.io/waves?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
+            href="https://6529.io/waves/0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-flex tw-text-base tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-mb-4">
+            className="tw-group tw-mb-4 tw-flex tw-items-center tw-text-base tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+          >
             Nomination Wave
             <FontAwesomeIcon
               icon={faArrowRight}
               className="tw-ml-2 tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
           </Link>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             Once you are eligible, you can submit up to 3 cards at a time. If
             you remove a submission or one of your submissions is selected to be
             minted, you can submit another card to fill that spot.
           </p>
-          <p className="tw-text-iron-300 tw-mb-3 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-3 tw-text-base tw-leading-relaxed tw-text-iron-300">
             It is very important to read the artist brief so that you don't
             waste your time:
           </p>
-          <ul className="tw-space-y-2 tw-text-iron-300 tw-mb-5 tw-pl-1 tw-text-base">
+          <ul className="tw-mb-5 tw-space-y-2 tw-pl-1 tw-text-base tw-text-iron-300">
             <li className="tw-flex">
-              <div className="tw-h-0.5 tw-w-3 tw-mt-2.5 tw-rounded-full tw-flex-shrink-0 tw-bg-primary-400 tw-mr-3"></div>
+              <div className="tw-mr-3 tw-mt-2.5 tw-h-0.5 tw-w-3 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400"></div>
               High quality submissions, in line with the collection mission,
               will do very well
             </li>
             <li className="tw-flex">
-              <div className="tw-h-0.5 tw-w-3 tw-mt-2.5 tw-rounded-full tw-flex-shrink-0 tw-bg-primary-400 tw-mr-3"></div>
+              <div className="tw-mr-3 tw-mt-2.5 tw-h-0.5 tw-w-3 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400"></div>
               Low effort submissions will not get selected
             </li>
           </ul>
-          <div className="tw-bg-iron-950 tw-p-5 tw-rounded-md tw-border tw-border-iron-800 tw-mb-5">
-            <p className="tw-text-iron-300 tw-mb-2 tw-leading-relaxed tw-text-base">
+          <div className="tw-mb-5 tw-rounded-md tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-5">
+            <p className="tw-mb-2 tw-text-base tw-leading-relaxed tw-text-iron-300">
               How do I get some artistic feedback as in the past?
             </p>
-            <p className="tw-text-iron-50 tw-text-base">
+            <p className="tw-text-base tw-text-iron-50">
               DM @6529er, @teexels and @darrensrs into a group chat
             </p>
           </div>
-          <p className="tw-text-iron-300 tw-mb-3 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-3 tw-text-base tw-leading-relaxed tw-text-iron-300">
             What if I have general questions? Go to the The Memes - FAQ wave
             (after you have read the artist brief)
           </p>
           <Link
-            href="https://6529.io/waves?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
+            href="https://6529.io/waves/e2dae377-d27d-4a69-8b77-38d88fad4d01"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
+            className="tw-group tw-flex tw-items-center tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+          >
             FAQ Wave
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="tw-ml-2 tw-text-base tw-size-3 tw-flex-shrink-0 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
+              className="tw-ml-2 tw-size-3 tw-flex-shrink-0 tw-text-base tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
           </Link>
         </section>
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex tw-items-center">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <h3 className="tw-mb-5 tw-flex tw-items-center tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faChartLine}
-                className="tw-text-[#FEDF89] tw-size-4 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0 tw-text-[#FEDF89]"
               />
             </div>
             What is TDH?
           </h3>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             TDH is the central metric of 6529 ecosystem.
           </p>
-          <p className="tw-text-iron-300 tw-mb-5 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-5 tw-text-base tw-leading-relaxed tw-text-iron-300">
             It is a quantitative metric reflecting how long you have held a 6529
             NFT, how many you have held and how diverse your holdings are. It
             primarily rewards longevity.
@@ -428,7 +429,8 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
               href="https://x.com/punk6529/status/1906753171751412006"
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
+              className="tw-group tw-flex tw-items-center tw-text-base tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+            >
               Theory
               <FontAwesomeIcon
                 icon={faArrowRight}
@@ -439,7 +441,8 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
               href="https://6529.io/network/tdh"
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
+              className="tw-group tw-flex tw-items-center tw-text-base tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+            >
               Formula
               <FontAwesomeIcon
                 icon={faArrowRight}
@@ -448,42 +451,42 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
             </Link>
           </div>
         </section>
-        <section className="tw-bg-iron-900 tw-rounded-lg tw-px-4 tw-py-5 sm:tw-p-6 tw-border tw-border-iron-800 tw-border-solid tw-shadow-sm">
-          <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-mb-5 tw-flex tw-items-center">
-            <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
+        <section className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-5 tw-shadow-sm sm:tw-p-6">
+          <h3 className="tw-mb-5 tw-flex tw-items-center tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faCubes}
-                className="tw-text-orange-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0 tw-text-orange-500"
               />
             </div>
             Minting a Meme Card
           </h3>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             Everything about minting a Meme Card stays unchanged.
           </p>
 
-          <div className="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 tw-mb-5">
-            <div className="tw-bg-iron-950 tw-p-4 tw-rounded-md">
-              <p className="tw-text-iron-400 tw-text-sm tw-uppercase tw-tracking-wider tw-mb-1">
+          <div className="tw-mb-5 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+            <div className="tw-rounded-md tw-bg-iron-950 tw-p-4">
+              <p className="tw-mb-1 tw-text-sm tw-uppercase tw-tracking-wider tw-text-iron-400">
                 Mint price
               </p>
-              <p className="tw-text-iron-50 tw-text-base">0.06529 ETH</p>
+              <p className="tw-text-base tw-text-iron-50">0.06529 ETH</p>
             </div>
-            <div className="tw-bg-iron-950 tw-p-4 tw-rounded-md">
-              <p className="tw-text-iron-400 tw-text-sm tw-uppercase tw-tracking-wider tw-mb-1">
+            <div className="tw-rounded-md tw-bg-iron-950 tw-p-4">
+              <p className="tw-mb-1 tw-text-sm tw-uppercase tw-tracking-wider tw-text-iron-400">
                 Edition sizes
               </p>
-              <p className="tw-text-iron-50 tw-text-base">
+              <p className="tw-text-base tw-text-iron-50">
                 In the 300s right now
               </p>
             </div>
           </div>
 
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             You can mint based on the Allowlist Phase you are in based on your
             TDH (P0, P1, P2) or public (if it goes to public).
           </p>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
+          <p className="tw-mb-4 tw-text-base tw-leading-relaxed tw-text-iron-300">
             You can get priority within your Phase by subscribing in advance
             from your profile page. Details are here:
           </p>
@@ -491,16 +494,17 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
             href="https://6529.io/about/subscriptions"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
+            className="tw-group tw-flex tw-items-center tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+          >
             Subscriptions
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="tw-ml-2 tw-text-base tw-size-3 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
+              className="tw-ml-2 tw-size-3 tw-text-base tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
           </Link>
         </section>
-        <div className="tw-text-center tw-p-5 tw-rounded-lg">
-          <p className="tw-text-iron-200 tw-text-base tw-font-medium tw-mb-0">
+        <div className="tw-rounded-lg tw-p-5 tw-text-center">
+          <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-200">
             Welcome aboard!
           </p>
         </div>

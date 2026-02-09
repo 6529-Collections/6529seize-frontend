@@ -10,6 +10,7 @@ import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Image from "next/image";
 import Link from "next/link";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -71,6 +72,11 @@ const BoostedDropCardHome = memo(
       : false;
 
     const { author, wave, boosts } = drop;
+    const waveHref = getWaveRoute({
+      waveId: wave.id,
+      isDirectMessage: false,
+      isApp: false,
+    });
     const MAX_FIRE_ICONS = 5;
     const fireIconsToShow = Math.min(boosts, MAX_FIRE_ICONS);
     const remainingBoosts = boosts - MAX_FIRE_ICONS;
@@ -304,7 +310,7 @@ const BoostedDropCardHome = memo(
           </Link>
 
           <Link
-            href={`/waves?wave=${wave.id}`}
+            href={waveHref}
             onClick={(event) => event.stopPropagation()}
             className="tw-group/wave tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-full tw-bg-white/5 tw-py-1 tw-pl-2.5 tw-pr-1 tw-no-underline tw-transition-all active:tw-scale-95 desktop-hover:hover:tw-bg-white/10"
           >

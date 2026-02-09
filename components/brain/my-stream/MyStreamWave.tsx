@@ -17,11 +17,12 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createBreakpoint } from "react-use";
-import { getHomeRoute } from "@/helpers/navigation.helpers";
+import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -36,6 +37,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { isApp } = useDeviceInfo();
   const queryClient = useQueryClient();
   const { waves, directMessages } = useMyStream();
   const { data: wave } = useWaveData({
@@ -43,9 +45,13 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     onWaveNotFound: () => {
       const params = new URLSearchParams(searchParams.toString() || "");
       params.delete("wave");
+      const basePath = getWaveHomeRoute({
+        isDirectMessage: pathname.startsWith("/messages"),
+        isApp,
+      });
       const newUrl = params.toString()
-        ? `${pathname}?${params.toString()}`
-        : pathname || getHomeRoute();
+        ? `${basePath}?${params.toString()}`
+        : basePath || getHomeRoute();
       router.push(newUrl, { scroll: false });
     },
   });
