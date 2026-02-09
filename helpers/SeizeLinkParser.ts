@@ -288,7 +288,7 @@ export const ensureStableSeizeLink = (
       ).window;
     }
 
-    const resolvedCurrentHref = currentHref ?? globalWindow?.location?.href;
+    const resolvedCurrentHref = currentHref ?? globalWindow?.location.href;
     if (resolvedCurrentHref === undefined || resolvedCurrentHref === "") {
       return href;
     }
@@ -307,7 +307,7 @@ export const ensureStableSeizeLink = (
     const params = new URLSearchParams(currentUrl.search);
     params.set("drop", dropId);
     const query = params.toString();
-    const hash = currentUrl.hash ?? "";
+    const hash = currentUrl.hash;
 
     const path = currentUrl.pathname || "/";
 

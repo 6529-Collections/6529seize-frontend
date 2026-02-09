@@ -316,7 +316,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
             <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800">
               <FontAwesomeIcon
                 icon={faTools}
-                className="tw-text-emerald-500-500 tw-size-4"
+                className="tw-size-4 tw-text-emerald-500"
               />
             </div>
             <span className="tw-mt-0.5">How Does Submission Work?</span>

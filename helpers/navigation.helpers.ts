@@ -81,7 +81,7 @@ export const getWaveRoute = ({
 
   if (extraParams) {
     for (const [key, value] of Object.entries(extraParams)) {
-      if (value !== undefined && value !== null) {
+      if (value !== undefined) {
         queryEntries.push([key, value]);
       }
     }
