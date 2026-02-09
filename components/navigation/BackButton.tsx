@@ -14,13 +14,16 @@ import {
   getWavesBaseRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
+import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import { useViewContext } from "./ViewContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { useClosingDropId } from "@/hooks/useClosingDropId";
 
 export default function BackButton() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const searchParamsString = searchParams.toString();
   const [loading, setLoading] = useState(false);
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
@@ -31,7 +34,9 @@ export default function BackButton() {
     myStream?.activeWave.id ??
     getActiveWaveIdFromUrl({ pathname, searchParams }) ??
     null;
-  const dropId = searchParams?.get("drop") ?? null;
+  const dropIdFromUrl = searchParams.get("drop") ?? undefined;
+  const { effectiveDropId: dropId, beginClosingDrop } =
+    useClosingDropId(dropIdFromUrl);
 
   const isInMessagesContext = pathname.startsWith("/messages");
 
@@ -40,7 +45,7 @@ export default function BackButton() {
     waveId: waveId,
     onWaveNotFound: () => {
       myStream?.activeWave.set(null);
-      const params = new URLSearchParams(searchParams?.toString() || "");
+      const params = new URLSearchParams(searchParamsString || "");
       params.delete("wave");
       const basePath = getWaveHomeRoute({
         isDirectMessage: isInMessagesContext,
@@ -58,7 +63,7 @@ export default function BackButton() {
   // Reset loading when URL changes
   useEffect(() => {
     setLoading(false);
-  }, [pathname, searchParams?.toString()]);
+  }, [pathname, searchParamsString]);
 
   const handleClick = () => {
     if (loading) return;
@@ -76,11 +81,12 @@ export default function BackButton() {
 
     // Drop open → close drop (remove ?drop param)
     if (dropId) {
-      setLoading(true);
-      const params = new URLSearchParams(searchParams?.toString() || "");
+      beginClosingDrop(dropId);
+      markDropCloseNavigation();
+      const params = new URLSearchParams(searchParamsString || "");
       params.delete("drop");
       const basePath =
-        pathname ??
+        pathname ||
         getWaveHomeRoute({
           isDirectMessage: isInMessagesContext || isDm,
           isApp,

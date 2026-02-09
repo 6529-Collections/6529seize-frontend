@@ -17,6 +17,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
 import { formatAddress } from "@/helpers/Helpers";
 import { formatCount } from "@/helpers/format.helpers";
+import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
 
 export type WavesSearchParams = Record<string, string | string[] | undefined>;
 
@@ -109,8 +110,11 @@ export async function renderWavesPageContent({
   }
 
   const hasDrop = Boolean(getFirstSearchParamValue(searchParams, "drop"));
+  const hasRecentDropCloseNavigation =
+    cookieStore.get(DROP_CLOSE_COOKIE_NAME)?.value === "1";
   const shouldPrefetch =
     !hasDrop &&
+    !hasRecentDropCloseNavigation &&
     (context.feedItemsFetchedAt === null ||
       context.feedItemsFetchedAt < Time.now().toMillis() - 60000);
 
