@@ -4,34 +4,46 @@ import { useEffect, useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
+import { useClosingDropId } from "@/hooks/useClosingDropId";
 
 export function useDropModal() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
-  const dropId = searchParams?.get("drop") ?? undefined;
+  const dropId = searchParams.get("drop") ?? undefined;
+  const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
 
   const { data: drop, isLoading } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: dropId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-      }),
+    queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
+    queryFn: async () => {
+      if (!effectiveDropId) {
+        throw new Error("Cannot fetch drop without a drop id");
+      }
+
+      return await commonApiFetch<ApiDrop>({
+        endpoint: `drops/${effectiveDropId}`,
+      });
+    },
     placeholderData: keepPreviousData,
-    enabled: !!dropId,
+    enabled: !!effectiveDropId,
   });
 
   const onDropClose = useCallback(() => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
+    if (dropId) {
+      beginClosingDrop(dropId);
+    }
+    markDropCloseNavigation();
+    const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");
     const newUrl = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || "/";
     router.replace(newUrl, { scroll: false });
-  }, [searchParams, pathname, router]);
+  }, [dropId, beginClosingDrop, searchParams, pathname, router]);
 
-  const isDropOpen = !!dropId && !!drop;
+  const isDropOpen = !!effectiveDropId && !!drop;
 
   // Handle escape key for drop modal
   useEffect(() => {
