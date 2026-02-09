@@ -13,7 +13,6 @@ jest.mock('@/components/brain/notifications/NotificationItems', () => (props: an
   return (
     <div data-testid="items" onClick={() => {
       props.onReply({ drop: { id: 'd' }, partId: 'p' });
-      props.onQuote({ drop: { id: 'd2' }, partId: 'q' });
       props.onDropContentClick({ wave: { id: 'w' }, serial_no: 1 } as any);
     }} />
   );
@@ -47,7 +46,7 @@ describe('NotificationsWrapper', () => {
       />
     );
     screen.getByTestId('items').click();
-    expect(setActive).toHaveBeenCalledTimes(2);
+    expect(setActive).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=1');
   });
 });

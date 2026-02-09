@@ -6,8 +6,6 @@ interface MemeDropActionsProps {
   readonly isMobile: boolean;
   readonly showReplyAndQuote: boolean;
   readonly onReply: () => void;
-  /** @deprecated Quote functionality has been removed - this prop is ignored */
-  readonly onQuote?: (() => void) | undefined;
 }
 
 export default function MemeDropActions({

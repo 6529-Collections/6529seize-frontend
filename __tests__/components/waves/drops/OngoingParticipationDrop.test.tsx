@@ -42,7 +42,6 @@ const drop: ExtendedDrop = {
 
 const renderComp = (mobile = false) => {
   const onReply = jest.fn();
-  const onQuote = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
   render(
     <OngoingParticipationDrop
@@ -52,11 +51,10 @@ const renderComp = (mobile = false) => {
       showReplyAndQuote={true}
       location="wave"
       onReply={onReply}
-      onQuote={onQuote}
       onQuoteClick={jest.fn()}
     />
   );
-  return { onReply, onQuote };
+  return { onReply };
 };
 
 describe('OngoingParticipationDrop', () => {

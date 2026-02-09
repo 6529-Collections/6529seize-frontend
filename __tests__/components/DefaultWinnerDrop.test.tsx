@@ -46,7 +46,6 @@ describe("DefaultWinnerDrop", () => {
         dropViewDropId={null}
         location={0 as any}
         onReply={onReply}
-        onQuote={jest.fn()}
         onReplyClick={jest.fn()}
         onQuoteClick={jest.fn()}
       />
@@ -71,7 +70,6 @@ describe("DefaultWinnerDrop", () => {
         dropViewDropId={null}
         location={0 as any}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onReplyClick={jest.fn()}
         onQuoteClick={jest.fn()}
       />

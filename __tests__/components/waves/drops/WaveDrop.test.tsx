@@ -117,7 +117,6 @@ describe("WaveDrop", () => {
         location={0 as any}
         dropViewDropId={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onReplyClick={jest.fn()}
         onQuoteClick={jest.fn()}
       />
@@ -138,7 +137,6 @@ describe("WaveDrop", () => {
         location={0 as any}
         dropViewDropId={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onReplyClick={jest.fn()}
         onQuoteClick={jest.fn()}
       />

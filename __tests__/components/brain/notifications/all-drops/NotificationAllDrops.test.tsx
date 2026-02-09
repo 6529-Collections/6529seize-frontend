@@ -75,7 +75,6 @@ describe("NotificationAllDrops", () => {
         notification={n}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(screen.getByText("+2")).toBeInTheDocument();
@@ -88,7 +87,6 @@ describe("NotificationAllDrops", () => {
         notification={baseNotification}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     const lastCall = DropMock.mock.calls.at(-1);

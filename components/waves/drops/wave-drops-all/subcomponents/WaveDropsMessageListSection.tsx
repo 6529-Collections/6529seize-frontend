@@ -27,13 +27,6 @@ interface WaveDropsMessageListSectionProps {
     drop: ApiDrop;
     partId: number;
   }) => void;
-  readonly onQuote: ({
-    drop,
-    partId,
-  }: {
-    drop: ApiDrop;
-    partId: number;
-  }) => void;
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly serialTarget: number | null;
@@ -68,7 +61,6 @@ export const WaveDropsMessageListSection: React.FC<
   onTopIntersection,
   onScroll,
   onReply,
-  onQuote,
   queueSerialTarget,
   activeDrop,
   serialTarget,
@@ -111,7 +103,6 @@ export const WaveDropsMessageListSection: React.FC<
           drops={waveMessages?.drops ?? []}
           showWaveInfo={false}
           onReply={onReply}
-          onQuote={onQuote}
           showReplyAndQuote={true}
           activeDrop={activeDrop}
           serialNo={serialTarget}

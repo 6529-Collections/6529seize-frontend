@@ -16,7 +16,7 @@ jest.mock('@/components/memes/drops/meme-participation-drop/MemeDropVoteStats', 
 jest.mock('@/components/memes/drops/meme-participation-drop/MemeDropArtistInfo', () => () => <div data-testid="artist" />);
 jest.mock('@/components/memes/drops/meme-participation-drop/MemeDropActions', () => () => <div data-testid="actions" />);
 jest.mock('@/components/memes/drops/MemeDropTraits', () => () => <div data-testid="traits" />);
-jest.mock('@/components/waves/drops/DropMobileMenuHandler', () => (props:any) => <div data-testid="handler" onClick={() => {props.onReply({}); props.onQuote({});}}>{props.children}</div>);
+jest.mock('@/components/waves/drops/DropMobileMenuHandler', () => (props:any) => <div data-testid="handler" onClick={() => {props.onReply({});}}>{props.children}</div>);
 jest.mock('@/components/voting', () => ({ VotingModal: () => <div data-testid="modal" />, MobileVotingModal: () => <div data-testid="mobile" /> }));
 jest.mock('@/components/voting/VotingModalButton', () => (props:any) => <button data-testid="vote" onClick={props.onClick} />);
 
@@ -30,12 +30,12 @@ describe('MemeParticipationDrop', () => {
   it('renders voting modal variant based on screen size', () => {
     rules.mockReturnValue({ canShowVote:true });
     const { rerender } = render(
-      <MemeParticipationDrop drop={drop} activeDrop={null} showReplyAndQuote location={DropLocation.FEED} onReply={jest.fn()} onQuote={jest.fn()} />
+      <MemeParticipationDrop drop={drop} activeDrop={null} showReplyAndQuote location={DropLocation.FEED} onReply={jest.fn()} />
     );
     expect(screen.getByTestId('modal')).toBeInTheDocument();
     (useIsMobileScreen as jest.Mock).mockReturnValue(true);
     rerender(
-      <MemeParticipationDrop drop={drop} activeDrop={null} showReplyAndQuote location={DropLocation.FEED} onReply={jest.fn()} onQuote={jest.fn()} />
+      <MemeParticipationDrop drop={drop} activeDrop={null} showReplyAndQuote location={DropLocation.FEED} onReply={jest.fn()} />
     );
     expect(screen.getByTestId('mobile')).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe('MemeParticipationDrop', () => {
   it('adds active border class when active', () => {
     rules.mockReturnValue({ canShowVote:false });
     const { container } = render(
-      <MemeParticipationDrop drop={drop} activeDrop={{ drop }} showReplyAndQuote location={DropLocation.FEED} onReply={jest.fn()} onQuote={jest.fn()} />
+      <MemeParticipationDrop drop={drop} activeDrop={{ drop }} showReplyAndQuote location={DropLocation.FEED} onReply={jest.fn()} />
     );
     expect(container.querySelector('[class*="tw-bg-[#3CCB7F]/5"]')).toBeTruthy();
   });

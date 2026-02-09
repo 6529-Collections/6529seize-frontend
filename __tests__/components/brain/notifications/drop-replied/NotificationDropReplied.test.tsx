@@ -71,7 +71,6 @@ describe('NotificationDropReplied', () => {
         notification={notification}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(screen.getByText('user')).toBeInTheDocument();

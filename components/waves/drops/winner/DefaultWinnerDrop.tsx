@@ -80,8 +80,6 @@ interface DefautWinnerDropProps {
   readonly location: DropLocation;
   readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  /** @deprecated Quote functionality has been removed - this prop is ignored */
-  readonly onQuote?: ((param: DropInteractionParams) => void) | undefined;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;

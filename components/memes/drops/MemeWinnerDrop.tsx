@@ -18,8 +18,6 @@ interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
   readonly showReplyAndQuote: boolean;
   readonly onReply: (param: DropInteractionParams) => void;
-  /** @deprecated Quote functionality has been removed - this prop is ignored */
-  readonly onQuote?: ((param: DropInteractionParams) => void) | undefined;
 }
 
 export default function MemeWinnerDrop({

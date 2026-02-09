@@ -237,7 +237,7 @@ export default function WaveDropsSearchModal({
                                   location={DropLocation.WAVE}
                                   dropViewDropId={null}
                                   onReply={() => {}}
-                                  onQuote={() => {}}
+
                                   onReplyClick={() => {}}
                                   onQuoteClick={() => {}}
                                 />

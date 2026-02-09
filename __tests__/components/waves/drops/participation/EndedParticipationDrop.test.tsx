@@ -28,7 +28,6 @@ describe('EndedParticipationDrop', () => {
         showReplyAndQuote={false}
         location={0 as any}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onQuoteClick={jest.fn()}
       />
     );
@@ -48,7 +47,6 @@ describe('EndedParticipationDrop', () => {
         showReplyAndQuote={false}
         location={0 as any}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onQuoteClick={jest.fn()}
       />
     );

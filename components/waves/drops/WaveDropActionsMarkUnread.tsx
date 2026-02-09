@@ -127,7 +127,7 @@ export default function WaveDropActionsMarkUnread({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          void handleMarkUnread();
+          handleMarkUnread();
         }}
         disabled={loading}
         className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
@@ -147,7 +147,7 @@ export default function WaveDropActionsMarkUnread({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          void handleMarkUnread();
+          handleMarkUnread();
         }}
         disabled={loading}
         className="tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-50"

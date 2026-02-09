@@ -84,17 +84,6 @@ export default function NotificationsWrapper({
     [setActiveDrop]
   );
 
-  const onQuote = useCallback(
-    (param: DropInteractionParams) => {
-      setActiveDrop({
-        action: ActiveDropAction.QUOTE,
-        drop: param.drop,
-        partId: param.partId,
-      });
-    },
-    [setActiveDrop]
-  );
-
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-gap-3">
       {loadingOlder && (
@@ -109,7 +98,6 @@ export default function NotificationsWrapper({
         items={items}
         activeDrop={activeDrop}
         onReply={onReply}
-        onQuote={onQuote}
         onDropContentClick={onDropContentClick}
         onMarkGroupAsRead={markNotificationIdsAsRead}
       />

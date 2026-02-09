@@ -93,7 +93,6 @@ test("copies link and shows feedback", async () => {
         longPressTriggered={false}
         setOpen={jest.fn()}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onAddReaction={jest.fn()}
       />
     </AuthContext.Provider>
@@ -125,7 +124,6 @@ test("hides follow and clap when author and memes wave", () => {
         longPressTriggered={false}
         setOpen={jest.fn()}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
         onAddReaction={jest.fn()}
       />
     </AuthContext.Provider>

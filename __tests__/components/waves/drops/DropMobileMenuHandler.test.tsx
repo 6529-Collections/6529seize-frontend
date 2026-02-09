@@ -31,7 +31,6 @@ test("opens menu on long press", () => {
       drop={drop}
       showReplyAndQuote
       onReply={jest.fn()}
-      onQuote={jest.fn()}
     >
       <div data-testid="child" />
     </DropMobileMenuHandler>

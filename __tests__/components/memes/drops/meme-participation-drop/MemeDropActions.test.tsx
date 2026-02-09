@@ -8,7 +8,7 @@ jest.mock('@/components/waves/drops/WaveDropActions', () => (props: any) => (
 
 describe('MemeDropActions', () => {
   const drop = { id: 'd1' } as any;
-  const callbacks = { onReply: jest.fn(), onQuote: jest.fn() };
+  const callbacks = { onReply: jest.fn() };
 
   it('returns null on mobile or when hidden', () => {
     const { rerender } = render(

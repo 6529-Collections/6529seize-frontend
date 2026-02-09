@@ -31,13 +31,6 @@ interface WaveDropsContentProps {
     drop: ApiDrop;
     partId: number;
   }) => void;
-  readonly onQuote: ({
-    drop,
-    partId,
-  }: {
-    drop: ApiDrop;
-    partId: number;
-  }) => void;
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly serialTarget: number | null;
@@ -67,7 +60,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   onTopIntersection,
   onScroll,
   onReply,
-  onQuote,
   queueSerialTarget,
   activeDrop,
   serialTarget,
@@ -124,7 +116,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         onTopIntersection={onTopIntersection}
         onScroll={onScroll}
         onReply={onReply}
-        onQuote={onQuote}
         queueSerialTarget={queueSerialTarget}
         activeDrop={activeDrop}
         serialTarget={serialTarget}

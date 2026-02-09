@@ -11,27 +11,27 @@ jest.mock('@/components/brain/notifications/identity-rating/NotificationIdentity
 describe('NotificationItem', () => {
   const base = { id: '1' } as any;
   it('renders quoted component', () => {
-    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.DropQuoted }} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />);
+    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.DropQuoted }} activeDrop={null} onReply={jest.fn()} />);
     expect(screen.getByTestId('quoted')).toBeInTheDocument();
   });
 
   it('renders replied component', () => {
-    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.DropReplied }} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />);
+    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.DropReplied }} activeDrop={null} onReply={jest.fn()} />);
     expect(screen.getByTestId('replied')).toBeInTheDocument();
   });
 
   it('renders priority alert component', () => {
-    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.PriorityAlert }} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />);
+    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.PriorityAlert }} activeDrop={null} onReply={jest.fn()} />);
     expect(screen.getByTestId('priority-alert')).toBeInTheDocument();
   });
 
   it('renders identity rating component for IdentityRep', () => {
-    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.IdentityRep }} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />);
+    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.IdentityRep }} activeDrop={null} onReply={jest.fn()} />);
     expect(screen.getByTestId('identity-rating')).toBeInTheDocument();
   });
 
   it('renders identity rating component for IdentityNic', () => {
-    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.IdentityNic }} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />);
+    render(<NotificationItem notification={{ ...base, cause: ApiNotificationCause.IdentityNic }} activeDrop={null} onReply={jest.fn()} />);
     expect(screen.getByTestId('identity-rating')).toBeInTheDocument();
   });
 });

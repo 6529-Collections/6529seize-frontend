@@ -23,8 +23,6 @@ interface OngoingParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
-  /** @deprecated Quote functionality has been removed - this prop is ignored */
-  readonly onQuote?: ((param: DropInteractionParams) => void) | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }

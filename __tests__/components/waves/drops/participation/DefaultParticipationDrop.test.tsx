@@ -20,7 +20,6 @@ describe('DefaultParticipationDrop', () => {
     showReplyAndQuote: true,
     location: DropLocation.MY_STREAM,
     onReply: jest.fn(),
-    onQuote: jest.fn(),
     onQuoteClick: jest.fn()
   };
 

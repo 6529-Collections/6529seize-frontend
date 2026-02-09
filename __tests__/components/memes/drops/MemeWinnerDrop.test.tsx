@@ -19,7 +19,7 @@ const drop: any = { parts: [{ part_id:1, media:[{ url:'u', mime_type:'image/png'
 
 test('renders actions on desktop', () => {
   const onReply = jest.fn();
-  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={onReply} onQuote={jest.fn()} />);
+  render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={onReply} />);
   fireEvent.click(screen.getByTestId('reply'));
   expect(onReply).toHaveBeenCalled();
 });
@@ -27,6 +27,6 @@ test('renders actions on desktop', () => {
 test('hides actions when mobile', () => {
   const useMobile = require('@/hooks/isMobileDevice');
   (useMobile as jest.Mock).mockReturnValue(true);
-  const { queryByTestId } = render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} onQuote={jest.fn()} />);
+  const { queryByTestId } = render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={jest.fn()} />);
   expect(queryByTestId('reply')).toBeNull();
 });

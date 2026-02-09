@@ -25,7 +25,6 @@ describe('ParticipationDrop', () => {
     showReplyAndQuote: true,
     location: DropLocation.FEED,
     onReply: jest.fn(),
-    onQuote: jest.fn(),
     onQuoteClick: jest.fn()
   };
 

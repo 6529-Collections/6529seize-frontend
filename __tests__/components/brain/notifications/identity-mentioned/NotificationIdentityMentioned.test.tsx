@@ -51,7 +51,7 @@ describe('NotificationIdentityMentioned', () => {
     const push = jest.fn();
     (mockUseRouter as jest.Mock).mockReturnValue({ push });
     render(
-      <NotificationIdentityMentioned notification={notification as any} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
+      <NotificationIdentityMentioned notification={notification as any} activeDrop={null} onReply={jest.fn()} />
     );
     expect(push).toHaveBeenCalledWith('/waves?wave=wave&serialNo=1');
     expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=2');

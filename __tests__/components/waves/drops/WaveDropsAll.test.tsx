@@ -311,7 +311,6 @@ interface RenderOptions {
   waveId?: string | undefined;
   dropId?: string | null | undefined;
   onReply?: jest.Mock | undefined;
-  onQuote?: jest.Mock | undefined;
   activeDrop?: ActiveDropState | null | undefined;
   initialDrop?: number | null | undefined;
   onDropContentClick?: jest.Mock | undefined;
@@ -322,7 +321,6 @@ function renderComponent(options: RenderOptions = {}) {
     waveId: "test-wave-1",
     dropId: null,
     onReply: jest.fn(),
-    onQuote: jest.fn(),
     activeDrop: null,
     initialDrop: null,
     onDropContentClick: jest.fn(),
@@ -450,7 +448,6 @@ describe("WaveDropsAll", () => {
         activeDrop: mockActiveDrop,
         dropViewDropId: "target-drop",
         onReply: props.onReply,
-        onQuote: props.onQuote,
       });
     });
   });
@@ -972,7 +969,6 @@ describe("WaveDropsAll", () => {
           waveId="test-wave"
           dropId={null}
           onReply={jest.fn()}
-          onQuote={jest.fn()}
           activeDrop={null}
           initialDrop={null}
           onDropContentClick={jest.fn()}
@@ -1055,7 +1051,6 @@ describe("WaveDropsAll", () => {
           waveId="test-wave"
           dropId={null}
           onReply={jest.fn()}
-          onQuote={jest.fn()}
           activeDrop={null}
           initialDrop={null}
           onDropContentClick={jest.fn()}

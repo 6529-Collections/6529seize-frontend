@@ -10,7 +10,7 @@ jest.mock('@/contexts/SeizeSettingsContext', () => ({
 }));
 
 describe('WinnerDrop', () => {
-  const baseProps: any = { drop: { wave: { id: 'wave' } }, previousDrop: null, nextDrop: null, showWaveInfo: false, activeDrop: null, showReplyAndQuote: false, location: 'feed', dropViewDropId: null, onReply: jest.fn(), onQuote: jest.fn(), onReplyClick: jest.fn(), onQuoteClick: jest.fn() };
+  const baseProps: any = { drop: { wave: { id: 'wave' } }, previousDrop: null, nextDrop: null, showWaveInfo: false, activeDrop: null, showReplyAndQuote: false, location: 'feed', dropViewDropId: null, onReply: jest.fn(), onReplyClick: jest.fn(), onQuoteClick: jest.fn() };
 
   it('renders meme winner when wave is memes', () => {
     const { getByTestId } = render(<WinnerDrop {...baseProps} drop={{ wave:{ id:'meme'}}} />);

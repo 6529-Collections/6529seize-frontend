@@ -56,7 +56,7 @@ describe('NotificationDropQuoted', () => {
   it('navigates on reply click', async () => {
     const user = userEvent.setup();
     render(
-      <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
+      <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} />
     );
     await user.click(screen.getByText('reply'));
     expect(push).toHaveBeenCalledWith('/waves?wave=w&serialNo=11');
@@ -65,7 +65,7 @@ describe('NotificationDropQuoted', () => {
   it('navigates on quote click', async () => {
     const user = userEvent.setup();
     render(
-      <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} onQuote={jest.fn()} />
+      <NotificationDropQuoted notification={notification} activeDrop={null} onReply={jest.fn()} />
     );
     await user.click(screen.getByText('quote'));
     expect(push).toHaveBeenCalledWith('/waves?wave=q&serialNo=22');

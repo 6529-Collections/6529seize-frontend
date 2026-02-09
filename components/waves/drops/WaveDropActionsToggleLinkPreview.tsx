@@ -237,7 +237,7 @@ export default function WaveDropActionsToggleLinkPreview({
         onClick={handleClick}
         disabled={loading || !canToggle}
         className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800 ${
-          !canToggle ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
+          canToggle ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
         }`}
       >
         {loading && <Spinner dimension={16} />}

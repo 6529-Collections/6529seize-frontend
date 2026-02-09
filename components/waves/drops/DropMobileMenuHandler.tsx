@@ -11,8 +11,6 @@ interface DropMobileMenuHandlerProps {
   readonly children: React.ReactNode;
   readonly showReplyAndQuote: boolean;
   readonly onReply: () => void;
-  /** @deprecated Quote functionality has been removed - this prop is ignored */
-  readonly onQuote?: (() => void) | undefined;
 }
 
 const LONG_PRESS_DURATION = 500; // milliseconds

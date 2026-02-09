@@ -192,20 +192,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     });
   };
 
-  const onQuote = (drop: ApiDrop, partId: number) => {
-    setActiveDropForWave({
-      action: ActiveDropAction.QUOTE,
-      drop,
-      partId,
-    });
-  };
-
   const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
     onReply(drop, partId);
-  };
-
-  const handleQuote = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
-    onQuote(drop, partId);
   };
 
   const onCancelReplyQuote = () => {
@@ -239,7 +227,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           key={wave.id}
           waveId={wave.id}
           onReply={handleReply}
-          onQuote={handleQuote}
+
           activeDrop={activeDrop}
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}

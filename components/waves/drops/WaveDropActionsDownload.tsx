@@ -27,7 +27,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  async function startDownload() {
+  function startDownload() {
     const filename = props.extension
       ? `${props.name}.${props.extension}`
       : props.name;
@@ -108,11 +108,11 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
       <button
         onClick={(e) => {
           e.stopPropagation();
-          if (!isInProgress) {
-            void startDownload();
-            props.onDownload?.();
-          } else {
+          if (isInProgress) {
             cancel();
+          } else {
+            startDownload();
+            props.onDownload?.();
           }
         }}
         disabled={isCompleted}
@@ -131,10 +131,10 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         className="tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-50"
         onClick={(e) => {
           e.stopPropagation();
-          if (!isInProgress) {
-            void startDownload();
-          } else {
+          if (isInProgress) {
             cancel();
+          } else {
+            startDownload();
           }
         }}
         disabled={isCompleted}

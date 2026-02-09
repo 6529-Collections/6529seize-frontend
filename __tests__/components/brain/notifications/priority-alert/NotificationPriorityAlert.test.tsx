@@ -77,7 +77,6 @@ describe("NotificationPriorityAlert", () => {
         notification={baseNotification}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(screen.getByText("alice")).toBeInTheDocument();
@@ -95,7 +94,6 @@ describe("NotificationPriorityAlert", () => {
         notification={notificationWithoutDrops}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(screen.getByText("alice")).toBeInTheDocument();
@@ -110,7 +108,6 @@ describe("NotificationPriorityAlert", () => {
         notification={baseNotification}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(DropMock).toHaveBeenCalled();

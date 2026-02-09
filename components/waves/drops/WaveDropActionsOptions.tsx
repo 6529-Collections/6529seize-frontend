@@ -30,6 +30,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
   if (isDropdownItem) {
     return (
       <button
+        type="button"
         onClick={handleOpenModal}
         className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-rose-400"
       >

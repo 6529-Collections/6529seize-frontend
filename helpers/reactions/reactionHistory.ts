@@ -50,7 +50,7 @@ export function getTopReactions(limit: number): string[] {
   if (entries.length === 0) return [DEFAULT_REACTION];
 
   const sorted = entries
-    .sort(([, a], [, b]) => b - a)
+    .toSorted(([, a], [, b]) => b - a)
     .slice(0, limit)
     .map(([emoji]) => emoji);
 
@@ -70,10 +70,10 @@ export function subscribeToReactionStore(
   const handler = (e: StorageEvent) => {
     if (e.key === STORAGE_KEY) onStoreChange();
   };
-  window.addEventListener("storage", handler);
+  globalThis.addEventListener("storage", handler);
   return () => {
     listeners.delete(onStoreChange);
-    window.removeEventListener("storage", handler);
+    globalThis.removeEventListener("storage", handler);
   };
 }
 

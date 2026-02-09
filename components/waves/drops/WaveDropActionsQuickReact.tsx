@@ -156,7 +156,7 @@ const QuickReactButton: React.FC<{
       >
         <div
           className={`tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out ${
-            !canReact ? "tw-opacity-50" : ""
+            canReact ? "" : "tw-opacity-50"
           }`}
         >
           {emojiNode}

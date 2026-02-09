@@ -26,7 +26,6 @@ interface MemeParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
 }
 
 // Border styling based on rank
@@ -55,7 +54,6 @@ export default function MemeParticipationDrop({
   showReplyAndQuote,
   location,
   onReply,
-  onQuote,
 }: MemeParticipationDropProps) {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote } = useDropInteractionRules(drop);
@@ -80,10 +78,6 @@ export default function MemeParticipationDrop({
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
-  const handleOnQuote = useCallback(() => {
-    onQuote({ drop, partId: drop.parts[0]?.part_id! });
-  }, [onQuote, drop]);
-
   return (
     <div className="tw-w-full tw-@container">
       <div
@@ -99,8 +93,7 @@ export default function MemeParticipationDrop({
           <DropMobileMenuHandler
             drop={drop}
             showReplyAndQuote={showReplyAndQuote}
-            onReply={handleOnReply}
-            onQuote={handleOnQuote}>
+            onReply={handleOnReply}>
             <>
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
@@ -163,7 +156,6 @@ export default function MemeParticipationDrop({
               isMobile={isMobile}
               showReplyAndQuote={showReplyAndQuote}
               onReply={handleOnReply}
-              onQuote={handleOnQuote}
             />
           </div>
         </div>
