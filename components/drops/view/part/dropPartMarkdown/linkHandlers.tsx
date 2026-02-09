@@ -64,9 +64,10 @@ export const createLinkRenderer = ({
   tweetPreviewMode,
 }: LinkRendererConfig): LinkRenderer => {
   const seizeHandlers = createSeizeHandlers({ onQuoteClick, currentDropId });
-  const handlers = createLinkHandlers(
-    tweetPreviewMode ? { tweetPreviewMode } : undefined
-  );
+  const handlers = createLinkHandlers({
+    tweetPreviewMode,
+    linkPreviewVariant: "chat",
+  });
 
   const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
     if (typeof src !== "string") {

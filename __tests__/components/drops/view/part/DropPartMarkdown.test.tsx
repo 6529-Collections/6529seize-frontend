@@ -325,7 +325,7 @@ describe("DropPartMarkdown", () => {
     if (!tweetWrapper) {
       throw new Error("Expected tweet fallback wrapper");
     }
-    expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[520px]");
+    expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[480px]");
   });
 
   it("renders a fallback link when the tweet embed throws", async () => {
@@ -358,7 +358,7 @@ describe("DropPartMarkdown", () => {
       if (!tweetWrapper) {
         throw new Error("Expected tweet fallback wrapper");
       }
-      expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[520px]");
+      expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[480px]");
     } finally {
       consoleErrorSpy.mockRestore();
     }

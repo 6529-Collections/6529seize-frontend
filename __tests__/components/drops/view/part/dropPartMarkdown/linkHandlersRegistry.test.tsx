@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 
 import { createLinkRenderer } from "@/components/drops/view/part/dropPartMarkdown/linkHandlers";
+import { renderGifEmbed } from "@/components/drops/view/part/dropPartMarkdown/renderers";
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { publicEnv } from "@/config/env";
 
@@ -28,8 +29,12 @@ jest.mock("@/components/drops/view/part/DropPartMarkdownImage", () => ({
 }));
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/renderers", () => ({
-  renderGifEmbed: jest.fn((url: string) => (
-    <div data-testid="gif" data-url={url} />
+  renderGifEmbed: jest.fn((url: string, options?: { fixedSize?: boolean }) => (
+    <div
+      data-testid="gif"
+      data-url={url}
+      data-fixed-size={options?.fixedSize ? "true" : "false"}
+    />
   )),
   renderSeizeQuote: jest.fn(() => <div data-testid="seize-quote" />),
   renderTweetEmbed: jest.fn((href: string) => (
@@ -152,6 +157,9 @@ jest.mock("@/helpers/SeizeLinkParser", () => {
 });
 
 const onQuoteClick = jest.fn();
+const mockRenderGifEmbed = renderGifEmbed as jest.MockedFunction<
+  typeof renderGifEmbed
+>;
 
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
 
@@ -343,9 +351,14 @@ describe("createLinkRenderer", () => {
       href: "https://media.tenor.com/test.gif",
     } as any);
     render(<>{element}</>);
-    expect(screen.getByTestId("gif")).toHaveAttribute(
-      "data-url",
-      "https://media.tenor.com/test.gif"
+    const gif = screen.getByTestId("gif");
+    expect(gif).toHaveAttribute("data-url", "https://media.tenor.com/test.gif");
+    expect(gif).toHaveAttribute("data-fixed-size", "true");
+    expect(mockRenderGifEmbed).toHaveBeenCalledWith(
+      "https://media.tenor.com/test.gif",
+      {
+        fixedSize: true,
+      }
     );
   });
 

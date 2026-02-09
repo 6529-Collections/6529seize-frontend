@@ -34,7 +34,7 @@ const renderTweetEmbed = (
   const renderFallback = () => <TweetFallback href={normalizedHref} />;
   return (
     <LinkHandlerFrame href={normalizedHref}>
-      <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[520px]">
+      <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]">
         <ErrorBoundary fallbackRender={() => renderFallback()}>
           <ExpandableTweetPreview
             href={normalizedHref}
@@ -50,13 +50,39 @@ const renderTweetEmbed = (
   );
 };
 
-const renderGifEmbed = (url: string): ReactElement => (
-  <img
-    src={url}
-    alt={url}
-    className="tw-h-auto tw-max-h-[25rem] tw-max-w-[100%]"
-  />
-);
+const CHAT_GIF_HEIGHT = 180;
+
+interface GifEmbedOptions {
+  readonly fixedSize?: boolean | undefined;
+}
+
+const renderGifEmbed = (
+  url: string,
+  options?: GifEmbedOptions
+): ReactElement => {
+  if (options?.fixedSize) {
+    return (
+      // Use fixed height to prevent vertical layout shift while preserving GIF aspect ratio.
+      <img
+        src={url}
+        alt="Embedded GIF"
+        className="tw-block tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
+        style={{ height: `${CHAT_GIF_HEIGHT}px` }}
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    // Markdown-style GIF embeds intentionally keep <img> for animation support.
+    <img
+      src={url}
+      alt="Embedded GIF"
+      className="tw-h-auto tw-max-h-[25rem] tw-max-w-[100%]"
+      loading="lazy"
+    />
+  );
+};
 
 const renderSeizeQuote = (
   quoteLinkInfo: SeizeQuoteLinkInfo,

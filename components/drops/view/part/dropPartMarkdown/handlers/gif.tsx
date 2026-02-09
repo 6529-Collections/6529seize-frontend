@@ -1,5 +1,6 @@
 import { renderGifEmbed } from "../renderers";
 import type { LinkHandler } from "../linkTypes";
+import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 
 const TENOR_HOST = "media.tenor.com";
 
@@ -18,8 +19,13 @@ const isTenorGif = (href: string): boolean => {
   }
 };
 
-export const createGifHandler = (): LinkHandler => ({
+export const createGifHandler = (options?: {
+  readonly linkPreviewVariant?: LinkPreviewVariant;
+}): LinkHandler => ({
   match: isTenorGif,
-  render: (href) => renderGifEmbed(href),
+  render: (href) =>
+    renderGifEmbed(href, {
+      fixedSize: options?.linkPreviewVariant !== "home",
+    }),
   display: "block",
 });
