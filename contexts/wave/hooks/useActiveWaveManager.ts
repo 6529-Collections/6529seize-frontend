@@ -1,9 +1,13 @@
 "use client";
 
-import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
@@ -16,8 +20,10 @@ const getWaveFromWindow = (): string | null => {
   if (globalThis.window === undefined) return null;
 
   const url = new URL(globalThis.window.location.href);
-  const wave = url.searchParams.get("wave");
-  return typeof wave === "string" ? wave : null;
+  return getActiveWaveIdFromUrl({
+    pathname: url.pathname,
+    searchParams: url.searchParams,
+  });
 };
 
 const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
@@ -33,13 +39,18 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
 };
 
 export function useActiveWaveManager() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isApp } = useDeviceInfo();
 
-  const waveFromSearchParams = useMemo(() => {
-    const waveId = searchParams?.get("wave");
-    return typeof waveId === "string" ? waveId : null;
-  }, [searchParams]);
+  const waveFromLocation = useMemo(
+    () =>
+      getActiveWaveIdFromUrl({
+        pathname,
+        searchParams,
+      }),
+    [pathname, searchParams]
+  );
 
   const buildUrl = useCallback(
     (waveId: string | null, options?: WaveNavigationOptions) => {
@@ -79,7 +90,7 @@ export function useActiveWaveManager() {
     string | null,
     WaveNavigationOptions
   >({
-    initialState: waveFromSearchParams,
+    initialState: waveFromLocation,
     buildUrl,
     parseUrl: getWaveFromWindow,
     canUsePushState,

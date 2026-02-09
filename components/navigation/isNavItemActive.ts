@@ -1,4 +1,5 @@
 import type { NavItem as NavItemData, ViewKey } from "./navTypes";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 export const isNavItemActive = (
   item: NavItemData,
@@ -36,15 +37,15 @@ export const isNavItemActive = (
     return relatedHrefs.some((href) => pathname.startsWith(href));
   }
 
-  const waveParam = searchParams?.get("wave");
-  const hasWaveParam = typeof waveParam === "string";
-  const isWavesPath = pathname === "/waves";
-  const isMessagesPath = pathname === "/messages";
-  const isWaveSubRoute =
-    hasWaveParam && (isWavesPath || isMessagesPath);
+  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const hasWaveParam = typeof waveParam === "string" && waveParam.length > 0;
+  const isWavesPath = pathname === "/waves" || pathname.startsWith("/waves/");
+  const isMessagesPath =
+    pathname === "/messages" || pathname.startsWith("/messages/");
+  const isWaveSubRoute = hasWaveParam && (isWavesPath || isMessagesPath);
   const viewParam = searchParams?.get("view");
-  const isWavesView = pathname === "/waves" || viewParam === "waves";
-  const isMessagesView = pathname === "/messages" || viewParam === "messages";
+  const isWavesView = isWavesPath || viewParam === "waves";
+  const isMessagesView = isMessagesPath || viewParam === "messages";
 
   if (item.kind === "route") {
     if (item.name === "Home") {
@@ -57,7 +58,10 @@ export const isNavItemActive = (
       );
     }
     if (item.name === "Discover") {
-      return (pathname === "/discover" || pathname.startsWith("/discover/")) && activeView === null;
+      return (
+        (pathname === "/discover" || pathname.startsWith("/discover/")) &&
+        activeView === null
+      );
     }
     return pathname === item.href && activeView === null;
   }

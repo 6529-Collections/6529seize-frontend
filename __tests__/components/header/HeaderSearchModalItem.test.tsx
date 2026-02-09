@@ -150,7 +150,7 @@ describe("HeaderSearchModalItem", () => {
     };
     renderComponent(wave, "wave", false);
     const link = screen.getByTestId("link");
-    expect(link).toHaveAttribute("href", "/waves?wave=wave1");
+    expect(link).toHaveAttribute("href", "/waves/wave1");
     expect(link.textContent).toContain("Wave 1");
     expect(link.textContent).toContain("Wave #2");
     expect(screen.getByTestId("media").textContent).toContain("pic.png");

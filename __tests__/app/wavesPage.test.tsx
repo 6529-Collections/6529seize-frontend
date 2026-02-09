@@ -1,44 +1,70 @@
-import WavesPage from "@/app/waves/page";
-import { AuthContext } from "@/components/auth/Auth";
-import { render } from "@testing-library/react";
-import React from "react";
+import WavesPage, { generateMetadata } from "@/app/waves/page";
+import { redirect } from "next/navigation";
+import {
+  buildWavesMetadata,
+  renderWavesPageContent,
+} from "@/app/waves/waves-page.shared";
 
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  useSearchParams: jest.fn(),
+  redirect: jest.fn(),
 }));
 
-jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
-
-// Mock TitleContext
-jest.mock("@/contexts/TitleContext", () => ({
-  useTitle: () => ({
-    title: "Test Title",
-    setTitle: jest.fn(),
-    notificationCount: 0,
-    setNotificationCount: jest.fn(),
-    setWaveData: jest.fn(),
-  }),
-  useSetTitle: jest.fn(),
-  useSetNotificationCount: jest.fn(),
-  useSetWaveData: jest.fn(),
-  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
-
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({
-    seizeConnect: jest.fn(),
-  })),
+jest.mock("@/app/waves/waves-page.shared", () => ({
+  buildWavesMetadata: jest.fn(),
+  getFirstSearchParamValue: jest.requireActual("@/app/waves/waves-page.shared")
+    .getFirstSearchParamValue,
+  renderWavesPageContent: jest.fn(),
 }));
 
 describe("Waves page", () => {
-  it("sets title on mount", () => {
-    const setTitle = jest.fn();
-    render(
-      <AuthContext.Provider value={{ setTitle } as any}>
-        <WavesPage />
-      </AuthContext.Provider>
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("redirects legacy wave query routes to canonical wave paths", async () => {
+    (redirect as jest.Mock).mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
+
+    await expect(
+      WavesPage({
+        searchParams: Promise.resolve({
+          wave: "test-wave-123",
+          serialNo: "42",
+          divider: "7",
+        }),
+      } as any)
+    ).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(redirect).toHaveBeenCalledWith(
+      "/waves/test-wave-123?serialNo=42&divider=7"
     );
-    // Component renders successfully
+    expect(renderWavesPageContent).not.toHaveBeenCalled();
+  });
+
+  it("renders waves list when no legacy wave query exists", async () => {
+    (renderWavesPageContent as jest.Mock).mockResolvedValue("waves-content");
+
+    const result = await WavesPage({
+      searchParams: Promise.resolve({ drop: "drop-1" }),
+    } as any);
+
+    expect(renderWavesPageContent).toHaveBeenCalledWith({
+      waveId: null,
+      searchParams: { drop: "drop-1" },
+    });
+    expect(result).toBe("waves-content");
+  });
+
+  it("builds metadata from the legacy wave query when present", async () => {
+    const metadata = { title: "Wave title" };
+    (buildWavesMetadata as jest.Mock).mockResolvedValue(metadata);
+
+    const result = await generateMetadata({
+      searchParams: Promise.resolve({ wave: "w-1" }),
+    } as any);
+
+    expect(buildWavesMetadata).toHaveBeenCalledWith("w-1");
+    expect(result).toEqual(metadata);
   });
 });

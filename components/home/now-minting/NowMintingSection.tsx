@@ -1,12 +1,18 @@
 "use client";
 
-import { useNowMinting } from "@/hooks/useNowMinting";
+import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import NowMintingArtwork from "./NowMintingArtwork";
 import NowMintingDetails from "./NowMintingDetails";
 
-export default function NowMintingSection() {
-  const { nft, isFetching } = useNowMinting();
+interface NowMintingSectionProps {
+  readonly nft: NFTWithMemesExtendedData | undefined;
+  readonly isFetching: boolean;
+}
 
+export default function NowMintingSection({
+  nft,
+  isFetching,
+}: NowMintingSectionProps) {
   if (isFetching && !nft) {
     return (
       <section className="tw-px-4 tw-pb-4 tw-pt-6 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">

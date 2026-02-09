@@ -10,6 +10,7 @@ interface WaveDropsReverseContainerProps {
   readonly onTopIntersection: () => void;
   readonly isFetchingNextPage: boolean;
   readonly hasNextPage: boolean;
+  readonly onScroll?: (() => void) | undefined;
   readonly onUserScroll?: (
     direction: "up" | "down",
     isAtBottom: boolean
@@ -28,6 +29,7 @@ export const WaveDropsReverseContainer = forwardRef<
       onTopIntersection,
       isFetchingNextPage,
       hasNextPage,
+      onScroll,
       onUserScroll,
       bottomPaddingClassName,
       containerClassName,
@@ -72,10 +74,11 @@ export const WaveDropsReverseContainer = forwardRef<
         isAtBottom.current = currentIsAtBottom;
         const direction = scrollTop < lastScrollTop.current ? "up" : "down";
         onUserScroll?.(direction, currentIsAtBottom);
+        onScroll?.();
         lastScrollTop.current = scrollTop;
         scrollRafId.current = null;
       });
-    }, [onUserScroll]);
+    }, [onUserScroll, onScroll]);
 
     useEffect(() => {
       return () => {

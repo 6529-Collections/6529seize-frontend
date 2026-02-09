@@ -12,7 +12,11 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
-import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getWaveHomeRoute,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLocalPreference from "@/hooks/useLocalPreference";
@@ -450,7 +454,6 @@ export default function HeaderSearchModal({
     [shouldSearchDefault, waves]
   );
 
-
   const charactersRemaining = Math.max(
     MIN_SEARCH_LENGTH - searchInputLength,
     0
@@ -636,7 +639,8 @@ export default function HeaderSearchModal({
     }
 
     if (isWaveResult(item)) {
-      const currentWaveId = searchParams?.get("wave") ?? undefined;
+      const currentWaveId =
+        getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
       const isDirectMessage =
         item.chat?.scope?.group?.is_direct_message ?? false;
       const target =
@@ -1102,46 +1106,48 @@ export default function HeaderSearchModal({
                         </p>
                       </div>
                     )}
-                  {searchMode === SEARCH_MODE.SITE && derivedState === STATE.ERROR && (
-                    <div
-                      ref={resultsPanelRef}
-                      id={HEADER_SEARCH_RESULTS_PANEL_ID}
-                      role="tabpanel"
-                      className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center md:tw-px-0"
-                    >
-                      <p
-                        className="tw-text-sm tw-font-normal tw-text-iron-300"
-                        aria-live="polite"
+                  {searchMode === SEARCH_MODE.SITE &&
+                    derivedState === STATE.ERROR && (
+                      <div
+                        ref={resultsPanelRef}
+                        id={HEADER_SEARCH_RESULTS_PANEL_ID}
+                        role="tabpanel"
+                        className="tw-flex tw-h-0 tw-min-h-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center md:tw-px-0"
                       >
-                        Something went wrong while searching. Please try again.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleRetry}
-                        disabled={
-                          (selectedCategory === CATEGORY.NFTS &&
-                            isFetchingNfts) ||
-                          (selectedCategory === CATEGORY.PROFILES &&
-                            isFetchingProfiles) ||
-                          (selectedCategory === CATEGORY.WAVES &&
-                            isFetchingWaves)
-                        }
-                        aria-busy={
-                          (selectedCategory === CATEGORY.NFTS &&
-                            isFetchingNfts) ||
-                          (selectedCategory === CATEGORY.PROFILES &&
-                            isFetchingProfiles) ||
-                          (selectedCategory === CATEGORY.WAVES &&
-                            isFetchingWaves)
-                            ? true
-                            : undefined
-                        }
-                        className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-200"
-                      >
-                        Try Again
-                      </button>
-                    </div>
-                  )}
+                        <p
+                          className="tw-text-sm tw-font-normal tw-text-iron-300"
+                          aria-live="polite"
+                        >
+                          Something went wrong while searching. Please try
+                          again.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleRetry}
+                          disabled={
+                            (selectedCategory === CATEGORY.NFTS &&
+                              isFetchingNfts) ||
+                            (selectedCategory === CATEGORY.PROFILES &&
+                              isFetchingProfiles) ||
+                            (selectedCategory === CATEGORY.WAVES &&
+                              isFetchingWaves)
+                          }
+                          aria-busy={
+                            (selectedCategory === CATEGORY.NFTS &&
+                              isFetchingNfts) ||
+                            (selectedCategory === CATEGORY.PROFILES &&
+                              isFetchingProfiles) ||
+                            (selectedCategory === CATEGORY.WAVES &&
+                              isFetchingWaves)
+                              ? true
+                              : undefined
+                          }
+                          className="tw-items-center tw-rounded-full tw-border tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-1.5 tw-font-medium tw-text-iron-800 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-200"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    )}
                   {searchMode === SEARCH_MODE.SITE &&
                     derivedState === STATE.INITIAL && (
                       <div

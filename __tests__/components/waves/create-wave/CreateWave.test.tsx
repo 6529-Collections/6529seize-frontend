@@ -32,80 +32,56 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: jest.fn(() => ({ isIos: false, keyboardVisible: false })),
 }));
 
-jest.mock(
-  "@/components/waves/create-wave/hooks/useWaveConfig",
-  () => ({
-    useWaveConfig: jest.fn(),
-  })
-);
+jest.mock("@/components/waves/create-wave/hooks/useWaveConfig", () => ({
+  useWaveConfig: jest.fn(),
+}));
 
-jest.mock(
-  "@/components/waves/create-wave/services/waveApiService",
-  () => ({
-    useAddWaveMutation: jest.fn(),
-  })
-);
+jest.mock("@/components/waves/create-wave/services/waveApiService", () => ({
+  useAddWaveMutation: jest.fn(),
+}));
 
 jest.mock("@/helpers/waves/create-wave.helpers", () => ({
   getCreateNewWaveBody: jest.fn(),
 }));
 
-jest.mock(
-  "@/components/waves/create-wave/services/waveMediaService",
-  () => ({
-    generateDropPart: jest.fn(),
-  })
-);
+jest.mock("@/components/waves/create-wave/services/waveMediaService", () => ({
+  generateDropPart: jest.fn(),
+}));
 
-jest.mock(
-  "@/components/waves/create-wave/services/waveGroupService",
-  () => ({
-    getAdminGroupId: jest.fn(),
-  })
-);
+jest.mock("@/components/waves/create-wave/services/waveGroupService", () => ({
+  getAdminGroupId: jest.fn(),
+}));
 
-jest.mock(
-  "@/components/waves/create-wave/services/multiPartUpload",
-  () => ({
-    multiPartUpload: jest.fn(),
-  })
-);
+jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
+  multiPartUpload: jest.fn(),
+}));
 
 // Mock step components
-jest.mock(
-  "@/components/waves/create-wave/overview/CreateWaveOverview",
-  () => {
-    return function MockCreateWaveOverview() {
-      return <div data-testid="create-wave-overview">Overview Step</div>;
-    };
-  }
-);
+jest.mock("@/components/waves/create-wave/overview/CreateWaveOverview", () => {
+  return function MockCreateWaveOverview() {
+    return <div data-testid="create-wave-overview">Overview Step</div>;
+  };
+});
 
-jest.mock(
-  "@/components/waves/create-wave/groups/CreateWaveGroups",
-  () => {
-    return function MockCreateWaveGroups() {
-      return <div data-testid="create-wave-groups">Groups Step</div>;
-    };
-  }
-);
+jest.mock("@/components/waves/create-wave/groups/CreateWaveGroups", () => {
+  return function MockCreateWaveGroups() {
+    return <div data-testid="create-wave-groups">Groups Step</div>;
+  };
+});
 
-jest.mock(
-  "@/components/waves/create-wave/utils/CreateWaveActions",
-  () => {
-    return function MockCreateWaveActions({
-      onComplete,
-    }: {
-      onComplete: () => void;
-    }) {
-      return (
-        <div data-testid="create-wave-actions">
-          <button onClick={onComplete}>Complete</button>
-        </div>
-      );
-    };
-  }
-);
+jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => {
+  return function MockCreateWaveActions({
+    onComplete,
+  }: {
+    onComplete: () => void;
+  }) {
+    return (
+      <div data-testid="create-wave-actions">
+        <button onClick={onComplete}>Complete</button>
+      </div>
+    );
+  };
+});
 
 jest.mock(
   "@/components/waves/create-wave/description/CreateWaveDescription",
@@ -127,7 +103,8 @@ jest.mock(
       return (
         <div
           data-testid="create-wave-description"
-          data-show-drop-error={showDropError}>
+          data-show-drop-error={showDropError}
+        >
           Description Step
           <input onChange={() => onHaveDropToSubmitChange(true)} />
         </div>
@@ -398,7 +375,8 @@ describe("CreateWave", () => {
             return (
               <div
                 data-testid="create-wave-description"
-                data-show-drop-error={showDropError}>
+                data-show-drop-error={showDropError}
+              >
                 Description Step
               </div>
             );
@@ -497,9 +475,7 @@ describe("CreateWave", () => {
       fireEvent.click(completeButton);
 
       await waitFor(() => {
-        expect(mockRouter.push).toHaveBeenCalledWith(
-          "/waves?wave=new-wave-id"
-        );
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
         expect(mockQueryContext.waitAndInvalidateDrops).toHaveBeenCalled();
         expect(mockQueryContext.onWaveCreated).toHaveBeenCalled();
       });

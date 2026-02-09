@@ -1,12 +1,14 @@
 "use client";
 
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { useNowMinting } from "@/hooks/useNowMinting";
+import { useNextMintDrop } from "@/hooks/useNextMintDrop";
+import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
-import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
+import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { LeadingCard } from "./LeadingCard";
@@ -19,30 +21,24 @@ const SKELETON_KEYS = [
 ];
 
 export function NextMintLeadingSection() {
-  const { seizeSettings, isLoaded } = useSeizeSettings();
-  const { nft: nowMinting, isFetching: isNowMintingFetching } = useNowMinting();
-
-  const waveId = seizeSettings.memes_wave_id;
-
-  const { decisionPoints, isFetching: isWinnersFetching } = useWaveDecisions({
-    waveId: waveId ?? "",
-    enabled: !!waveId,
-  });
+  const {
+    nft: nowMinting,
+    isFetching: isNowMintingFetching,
+    status: nowMintingStatus,
+  } = useNowMintingStatus();
+  const {
+    nextMint,
+    nextMintTitle,
+    waveId,
+    isReady,
+    isFetching: isWinnersFetching,
+  } = useNextMintDrop();
 
   const { drops, isFetching: isLeaderboardFetching } = useWaveDropsLeaderboard({
     waveId: waveId ?? "",
     sort: WaveDropsLeaderboardSort.RATING_PREDICTION,
     pausePolling: !waveId,
   });
-
-  // Get latest winner (last decision, first place)
-  const latestDecision = decisionPoints[decisionPoints.length - 1];
-  const nextMint = latestDecision?.winners[0]?.drop ?? null;
-
-  // Get nextMint title
-  const nextMintTitle =
-    nextMint?.title ??
-    nextMint?.metadata.find((m) => m.data_key === "title")?.data_value;
 
   // Compare with nowMinting name (case-insensitive, trimmed)
   // Only treat as same when both values exist; otherwise treat as not equal
@@ -52,7 +48,12 @@ export function NextMintLeadingSection() {
     nowMinting.name.toLowerCase().trim() === nextMintTitle.toLowerCase().trim();
 
   // Determine what to show
-  const showNextMint = nextMint && !isNextMintSameAsNowMinting;
+  const canShowNextMint = shouldShowNextWinnerInComingUp({
+    isMintEnded: nowMintingStatus === ManifoldClaimStatus.ENDED,
+    nextMintExists: !!nextMint,
+  });
+  const showNextMint =
+    canShowNextMint && !!nextMint && !isNextMintSameAsNowMinting;
   const leadingCount = showNextMint ? 2 : 3;
 
   // Get top drops from leaderboard
@@ -61,7 +62,7 @@ export function NextMintLeadingSection() {
   const isFetching =
     isNowMintingFetching || isWinnersFetching || isLeaderboardFetching;
 
-  if (!isLoaded || !waveId) {
+  if (!isReady || !waveId) {
     return null;
   }
 
@@ -78,7 +79,11 @@ export function NextMintLeadingSection() {
         </p>
       </div>
       <Link
-        href={`/waves?wave=${waveId}`}
+        href={getWaveRoute({
+          waveId,
+          isDirectMessage: false,
+          isApp: false,
+        })}
         className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
       >
         <span>View all</span>

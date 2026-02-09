@@ -8,6 +8,7 @@ import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -105,7 +106,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
           </span>
         </div>
         <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105 tw-[&>div]:tw-mx-0">
+          <div className="tw-[&>div]:tw-mx-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-transition-transform tw-duration-700 tw-ease-out group-hover:tw-scale-105">
             {mediaContent}
           </div>
         </div>
@@ -117,7 +118,12 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
               size="sm"
             />
             <Link
-              href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
+              href={getWaveRoute({
+                waveId: drop.wave.id,
+                extraParams: { drop: drop.id },
+                isDirectMessage: false,
+                isApp: false,
+              })}
               className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-200 tw-no-underline tw-transition-colors group-hover:tw-text-white @lg:tw-line-clamp-1"
             >
               {title}

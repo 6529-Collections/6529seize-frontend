@@ -8,6 +8,7 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
 
@@ -81,7 +82,12 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               size="sm"
             />
             <Link
-              href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
+              href={getWaveRoute({
+                waveId: drop.wave.id,
+                extraParams: { drop: drop.id },
+                isDirectMessage: false,
+                isApp: false,
+              })}
               className="tw-m-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
             >
               {title}
