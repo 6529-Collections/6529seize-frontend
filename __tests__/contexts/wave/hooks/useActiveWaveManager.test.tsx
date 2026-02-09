@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -17,6 +17,7 @@ jest.mock("next/navigation", () => ({
     push: jest.fn(),
     replace: jest.fn(),
   })),
+  usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
 
@@ -26,11 +27,10 @@ describe("useActiveWaveManager", () => {
     globalThis.history.replaceState(null, "", "http://localhost/");
   });
 
-  it("reads wave from query and updates via setActiveWave", async () => {
-    globalThis.history.replaceState(null, "", "http://localhost/waves?wave=abc");
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams({ wave: "abc" })
-    );
+  it("reads wave from pathname and updates via setActiveWave", async () => {
+    globalThis.history.replaceState(null, "", "http://localhost/waves/abc");
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams({}));
 
     const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
     const replaceStateSpy = jest.spyOn(globalThis.history, "replaceState");
@@ -42,12 +42,11 @@ describe("useActiveWaveManager", () => {
     act(() => {
       result.current.setActiveWave("def");
     });
-    expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves?wave=def");
+    expect(pushStateSpy).toHaveBeenLastCalledWith(null, "", "/waves/def");
 
-    globalThis.history.replaceState(null, "", "http://localhost/waves?wave=def");
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams({ wave: "def" })
-    );
+    globalThis.history.replaceState(null, "", "http://localhost/waves/def");
+    (usePathname as jest.Mock).mockReturnValue("/waves/def");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams({}));
     rerender();
     await waitFor(() => expect(result.current.activeWaveId).toBe("def"));
 
@@ -60,6 +59,7 @@ describe("useActiveWaveManager", () => {
 
   it("includes serialNo when provided via options", async () => {
     globalThis.history.replaceState(null, "", "http://localhost/waves");
+    (usePathname as jest.Mock).mockReturnValue("/waves");
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams({}));
 
     const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
@@ -72,12 +72,13 @@ describe("useActiveWaveManager", () => {
     expect(pushStateSpy).toHaveBeenLastCalledWith(
       null,
       "",
-      "/waves?wave=wave-123&serialNo=42"
+      "/waves/wave-123?serialNo=42"
     );
   });
 
   it("includes serialNo as string in URL", async () => {
     globalThis.history.replaceState(null, "", "http://localhost/waves");
+    (usePathname as jest.Mock).mockReturnValue("/waves");
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams({}));
 
     const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
@@ -90,7 +91,7 @@ describe("useActiveWaveManager", () => {
     expect(pushStateSpy).toHaveBeenLastCalledWith(
       null,
       "",
-      "/waves?wave=wave-xyz&serialNo=99"
+      "/waves/wave-xyz?serialNo=99"
     );
   });
 });

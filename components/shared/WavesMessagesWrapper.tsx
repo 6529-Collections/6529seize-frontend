@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
@@ -50,7 +51,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
   const rawDropId = searchParams.get("drop") ?? undefined;
-  const waveId = searchParams.get("wave") ?? undefined;
+  const waveId =
+    getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
 
   // Validate drop ID format (assuming alphanumeric + hyphens)
   const dropId =

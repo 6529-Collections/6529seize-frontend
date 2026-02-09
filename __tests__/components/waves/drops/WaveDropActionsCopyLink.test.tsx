@@ -20,9 +20,7 @@ describe("WaveDropActionsCopyLink", () => {
     const drop: any = { id: "d1", wave: { id: "w1" }, serial_no: 5 };
     const { getByRole } = render(<WaveDropActionsCopyLink drop={drop} />);
     fireEvent.click(getByRole("button"));
-    expect(writeText).toHaveBeenCalledWith(
-      'https://base/waves?wave=w1&serialNo=5'
-    );
+    expect(writeText).toHaveBeenCalledWith("https://base/waves/w1?serialNo=5");
   });
 
   it("disables button for temporary drop", () => {

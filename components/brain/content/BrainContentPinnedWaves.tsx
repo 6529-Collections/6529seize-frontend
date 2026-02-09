@@ -3,13 +3,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import BrainContentPinnedWave from "./BrainContentPinnedWave";
 import { usePinnedWaves } from "@/hooks/usePinnedWaves";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getWaveHomeRoute,
+} from "@/helpers/navigation.helpers";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const { isApp } = useDeviceInfo();
@@ -93,18 +97,20 @@ const BrainContentPinnedWaves: React.FC = () => {
   }, [pinnedIds]);
 
   useEffect(() => {
-    const wave = searchParams?.get("wave") ?? undefined;
+    const wave =
+      getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
     if (wave && typeof wave === "string") {
       addId(wave);
     }
-  }, [searchParams, addId]);
+  }, [pathname, searchParams, addId]);
 
   if (!pinnedIds.length) {
     return null;
   }
 
   const onRemove = async (waveId: string) => {
-    const currentWaveId = searchParams?.get("wave") ?? undefined;
+    const currentWaveId =
+      getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
     if (currentWaveId === waveId) {
       const isDirectMessage = directMessagesList.some((w) => w.id === waveId);
       router.replace(getWaveHomeRoute({ isDirectMessage, isApp }));
@@ -170,8 +176,8 @@ const BrainContentPinnedWaves: React.FC = () => {
               key={id}
               waveId={id}
               active={
-                (searchParams?.get("wave") ?? undefined) === id ||
-                onHoverWaveId === id
+                (getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+                  undefined) === id || onHoverWaveId === id
               }
               onMouseEnter={setOnHoverWaveId}
               onMouseLeave={() => setOnHoverWaveId(null)}
