@@ -18,7 +18,7 @@ export function useClosingDropId(dropId: DropId): UseClosingDropIdResult {
 
   const stopWatchingUrl = useCallback(() => {
     if (frameRef.current !== undefined) {
-      window.cancelAnimationFrame(frameRef.current);
+      globalThis.cancelAnimationFrame(frameRef.current);
       frameRef.current = undefined;
     }
   }, []);
@@ -32,7 +32,8 @@ export function useClosingDropId(dropId: DropId): UseClosingDropIdResult {
       const waitForUrlToSettle = () => {
         frames += 1;
         const urlDropId =
-          new URLSearchParams(window.location.search).get("drop") ?? undefined;
+          new URLSearchParams(globalThis.location.search).get("drop") ??
+          undefined;
 
         if (urlDropId !== dropIdToClose || frames >= MAX_URL_SETTLE_FRAMES) {
           setClosingDropId(undefined);
@@ -40,10 +41,10 @@ export function useClosingDropId(dropId: DropId): UseClosingDropIdResult {
           return;
         }
 
-        frameRef.current = window.requestAnimationFrame(waitForUrlToSettle);
+        frameRef.current = globalThis.requestAnimationFrame(waitForUrlToSettle);
       };
 
-      frameRef.current = window.requestAnimationFrame(waitForUrlToSettle);
+      frameRef.current = globalThis.requestAnimationFrame(waitForUrlToSettle);
     },
     [stopWatchingUrl]
   );

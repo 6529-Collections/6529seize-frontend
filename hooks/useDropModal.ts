@@ -33,8 +33,8 @@ export function useDropModal() {
   const onDropClose = useCallback(() => {
     if (dropId) {
       beginClosingDrop(dropId);
+      markDropCloseNavigation();
     }
-    markDropCloseNavigation();
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");
     const newUrl = params.toString()
