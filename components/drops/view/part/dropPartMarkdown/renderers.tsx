@@ -34,7 +34,7 @@ const renderTweetEmbed = (
   const renderFallback = () => <TweetFallback href={normalizedHref} />;
   return (
     <LinkHandlerFrame href={normalizedHref}>
-      <div className="tw-min-w-0 tw-flex-1">
+      <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[520px]">
         <ErrorBoundary fallbackRender={() => renderFallback()}>
           <ExpandableTweetPreview
             href={normalizedHref}
