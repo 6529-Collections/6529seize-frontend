@@ -2,25 +2,27 @@
  * Utility functions for handling media in wave drops
  */
 
+const STANDALONE_URL_REGEX = /^https?:\/\/[^\s<]+$/i;
+const IMAGE_EXTENSIONS = [".gif", ".png", ".jpg", ".jpeg", ".webp", ".avif"];
+const VIDEO_EXTENSIONS = [
+  ".mp4",
+  ".webm",
+  ".ogg",
+  ".mov",
+  ".avi",
+  ".wmv",
+  ".flv",
+  ".mkv",
+];
+
 /**
  * Determines if a URL is pointing to a video based on extension or source
  */
 const isVideoUrl = (url: string): boolean => {
-  // Check file extension
-  const videoExtensions = [
-    ".mp4",
-    ".webm",
-    ".ogg",
-    ".mov",
-    ".avi",
-    ".wmv",
-    ".flv",
-    ".mkv",
-  ];
   const lowercaseUrl = url.toLowerCase();
 
   // Check if URL ends with a video extension
-  if (videoExtensions.some((ext) => lowercaseUrl.endsWith(ext))) {
+  if (VIDEO_EXTENSIONS.some((ext) => lowercaseUrl.endsWith(ext))) {
     return true;
   }
 
@@ -137,6 +139,46 @@ const processContent = (
   const result = extractMediaFromMarkdown(withoutBrackets);
   result.apiMedia = apiMedia;
   return result;
+};
+
+/**
+ * Converts a single-URL text segment into media preview metadata when possible.
+ */
+export const parseStandaloneMediaUrl = (text: string): MediaItem | null => {
+  const trimmed = text.trim();
+
+  if (!STANDALONE_URL_REGEX.test(trimmed)) {
+    return null;
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(trimmed);
+  } catch {
+    return null;
+  }
+
+  const host = parsedUrl.hostname.toLowerCase();
+  const pathname = parsedUrl.pathname.toLowerCase();
+  const isGifHost = host === "media.tenor.com" || host.endsWith(".giphy.com");
+
+  if (isGifHost || IMAGE_EXTENSIONS.some((ext) => pathname.endsWith(ext))) {
+    return {
+      alt: "Media",
+      url: trimmed,
+      type: "image",
+    };
+  }
+
+  if (VIDEO_EXTENSIONS.some((ext) => pathname.endsWith(ext))) {
+    return {
+      alt: "Media",
+      url: trimmed,
+      type: "video",
+    };
+  }
+
+  return null;
 };
 
 export const buildProcessedContent = (
