@@ -16,6 +16,7 @@ interface Props {
   className?: string | undefined;
   tooltipId?: string | undefined;
   isDropdownItem?: boolean | undefined;
+  onDownload?: (() => void) | undefined;
 }
 
 export default function WaveDropActionsDownload(props: Readonly<Props>) {
@@ -109,6 +110,7 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
           e.stopPropagation();
           if (!isInProgress) {
             void startDownload();
+            props.onDownload?.();
           } else {
             cancel();
           }

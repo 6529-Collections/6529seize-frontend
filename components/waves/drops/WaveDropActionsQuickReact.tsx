@@ -1,35 +1,22 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
 import { useEmoji } from "@/contexts/EmojiContext";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import {
   getReactionSnapshot,
   getReactionSnapshotServer,
   getTopReactions,
-  recordReaction,
   subscribeToReactionStore,
 } from "@/helpers/reactions/reactionHistory";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import { commonApiPost } from "@/services/api/common-api";
+import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import Image from "next/image";
 import React, {
   useCallback,
   useMemo,
-  useRef,
   useSyncExternalStore,
 } from "react";
 import { Tooltip } from "react-tooltip";
-import {
-  cloneReactionEntries,
-  findReactionIndex,
-  removeUserFromReactions,
-  toProfileMin,
-} from "./reaction-utils";
 
 const MAX_QUICK_REACTIONS = 3;
 
@@ -38,15 +25,7 @@ const WaveDropActionsQuickReact: React.FC<{
   readonly isMobile?: boolean;
   readonly onReacted?: () => void;
 }> = ({ drop, isMobile = false, onReacted }) => {
-  const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canReact = !isTemporaryDrop;
-  const { setToast, connectedProfile } = useAuth();
-  const { applyOptimisticDropUpdate } = useMyStream();
-  const rollbackRef = useRef<(() => void) | null>(null);
-
-  const waveId = drop.wave.id;
-  const dropId = drop.id;
-  const contextProfileContext = drop.context_profile_context;
+  const { react, canReact } = useDropReaction(drop, onReacted);
 
   // Subscribe to localStorage changes (hydration-safe)
   const reactionSnapshot = useSyncExternalStore(
@@ -61,115 +40,13 @@ const WaveDropActionsQuickReact: React.FC<{
     [reactionSnapshot]
   );
 
-  const applyOptimisticReaction = useCallback(
-    (reactionCode: string) => {
-      const profileMin = toProfileMin(connectedProfile);
-      if (!profileMin) {
-        return null;
-      }
-
-      const userId = profileMin.id;
-
-      const handle = applyOptimisticDropUpdate({
-        waveId: waveId,
-        dropId: dropId,
-        update: (draft) => {
-          if (draft.type !== DropSize.FULL) {
-            return draft;
-          }
-
-          const reactions = cloneReactionEntries(draft.reactions);
-          const reactionsWithoutUser = removeUserFromReactions(
-            reactions,
-            userId
-          );
-
-          const targetIndex = findReactionIndex(
-            reactionsWithoutUser,
-            reactionCode
-          );
-
-          if (targetIndex >= 0) {
-            const profiles = reactionsWithoutUser[targetIndex]?.profiles ?? [];
-            reactionsWithoutUser[targetIndex] = {
-              ...reactionsWithoutUser[targetIndex]!,
-              profiles: [...profiles, profileMin],
-            };
-          } else {
-            reactionsWithoutUser.push({
-              reaction: reactionCode,
-              profiles: [profileMin],
-            });
-          }
-
-          draft.reactions = reactionsWithoutUser;
-
-          const baseContext: ApiDropContextProfileContext =
-            draft.context_profile_context ??
-              contextProfileContext ?? {
-                rating: 0,
-                min_rating: 0,
-                max_rating: 0,
-                reaction: null,
-                boosted: false,
-                bookmarked: false,
-              };
-
-          draft.context_profile_context = {
-            ...baseContext,
-            reaction: reactionCode,
-          };
-
-          return draft;
-        },
-      });
-
-      return handle?.rollback ?? null;
-    },
-    [
-      applyOptimisticDropUpdate,
-      connectedProfile,
-      contextProfileContext,
-      dropId,
-      waveId,
-    ]
-  );
-
-  const handleReact = useCallback(
-    async (reactionCode: string) => {
-      if (!canReact) return;
-
-      rollbackRef.current?.();
-      rollbackRef.current = applyOptimisticReaction(reactionCode);
-      recordReaction(reactionCode);
-
-      try {
-        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-          endpoint: `drops/${drop.id}/reaction`,
-          body: { reaction: reactionCode },
-        });
-        rollbackRef.current = null;
-        onReacted?.();
-      } catch (error) {
-        let errorMessage = "Error adding reaction";
-        if (typeof error === "string") {
-          errorMessage = error;
-        }
-        setToast({ message: errorMessage, type: "error" });
-        rollbackRef.current?.();
-        rollbackRef.current = null;
-      }
-    },
-    [canReact, applyOptimisticReaction, drop.id, setToast, onReacted]
-  );
-
   const buttons = topReactionCodes.map((code) => (
     <QuickReactButton
       key={code}
       reactionCode={code}
       dropId={drop.id}
       canReact={canReact}
-      onReact={handleReact}
+      onReact={react}
       isMobile={isMobile}
     />
   ));
@@ -279,7 +156,7 @@ const QuickReactButton: React.FC<{
       >
         <div
           className={`tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out ${
-            !canReact && "tw-opacity-50"
+            !canReact ? "tw-opacity-50" : ""
           }`}
         >
           {emojiNode}
@@ -292,17 +169,7 @@ const QuickReactButton: React.FC<{
           positionStrategy="fixed"
           offset={8}
           opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
-          }}
+          style={TOOLTIP_STYLES}
         >
           <span className="tw-text-xs">Click to react</span>
         </Tooltip>

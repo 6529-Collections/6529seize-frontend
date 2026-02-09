@@ -6,7 +6,7 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import { useContext, useRef, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsDownload from "./WaveDropActionsDownload";
@@ -24,21 +24,20 @@ export default function WaveDropActionsMore({
 }: WaveDropActionsMoreProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
 
-  const isAuthor = connectedProfile?.handle === drop.author.handle;
+  const isAuthor =
+    connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
 
   const closeDropdown = () => setIsOpen(false);
 
-  const getMediaInfo = () => {
+  const mediaInfo = useMemo(() => {
     const media = drop.parts.at(0)?.media.at(0);
     const url = media?.url;
     if (!url) return null;
     return getFileInfoFromUrl(url);
-  };
-
-  const mediaInfo = getMediaInfo();
+  }, [drop.parts]);
 
   return (
     <>
@@ -87,7 +86,7 @@ export default function WaveDropActionsMore({
               onMarkUnread={closeDropdown}
             />
             <WaveDropActionsCopyLink drop={drop} isDropdownItem={true} onCopy={closeDropdown} />
-            <WaveDropActionsOpen drop={drop} isDropdownItem={true} />
+            <WaveDropActionsOpen drop={drop} isDropdownItem={true} onOpen={closeDropdown} />
             {mediaInfo && (
               <WaveDropActionsDownload
                 href={drop.parts.at(0)?.media.at(0)?.url ?? ""}
@@ -95,6 +94,7 @@ export default function WaveDropActionsMore({
                 extension={mediaInfo.extension}
                 tooltipId={`download-media-${drop.id}`}
                 isDropdownItem={true}
+                onDownload={closeDropdown}
               />
             )}
             {canDelete && (
