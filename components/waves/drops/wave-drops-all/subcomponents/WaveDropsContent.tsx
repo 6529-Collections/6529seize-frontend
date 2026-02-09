@@ -7,7 +7,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { RefObject } from "react";
+import type { RefObject, Ref } from "react";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
 
@@ -19,8 +19,11 @@ interface WaveDropsContentProps {
   readonly waveMessages: WaveMessagesResult;
   readonly dropId: string | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
+  readonly scrollContainerCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly bottomAnchorRef: RefObject<HTMLDivElement | null>;
+  readonly bottomAnchorCallbackRef?: Ref<HTMLDivElement> | undefined;
   readonly onTopIntersection: () => void;
+  readonly onScroll?: (() => void) | undefined;
   readonly onReply: ({
     drop,
     partId,
@@ -58,8 +61,11 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   waveMessages,
   dropId,
   scrollContainerRef,
+  scrollContainerCallbackRef,
   bottomAnchorRef,
+  bottomAnchorCallbackRef,
   onTopIntersection,
+  onScroll,
   onReply,
   onQuote,
   queueSerialTarget,
@@ -112,8 +118,11 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         waveMessages={waveMessages}
         dropId={dropId}
         scrollContainerRef={scrollContainerRef}
+        scrollContainerCallbackRef={scrollContainerCallbackRef}
         bottomAnchorRef={bottomAnchorRef}
+        bottomAnchorCallbackRef={bottomAnchorCallbackRef}
         onTopIntersection={onTopIntersection}
+        onScroll={onScroll}
         onReply={onReply}
         onQuote={onQuote}
         queueSerialTarget={queueSerialTarget}
