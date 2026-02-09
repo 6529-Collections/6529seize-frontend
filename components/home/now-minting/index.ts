@@ -1,1 +1,1 @@
-export { default as NowMintingSection } from "./NowMintingSection";
+export { default as LatestDropSection } from "./LatestDropSection";
