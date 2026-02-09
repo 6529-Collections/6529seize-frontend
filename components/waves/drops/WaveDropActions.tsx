@@ -44,7 +44,7 @@ export default function WaveDropActions({
       } tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-flex tw-h-8 tw-items-center tw-rounded-lg tw-bg-iron-950 tw-shadow tw-ring-1 tw-ring-inset tw-ring-iron-800">
+        <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-full tw-bg-iron-950 tw-px-1 tw-shadow-lg tw-shadow-black/40 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
           <WaveDropActionsQuickReact drop={drop} />
           <WaveDropActionsAddReaction drop={drop} />
           <WaveDropActionsReply

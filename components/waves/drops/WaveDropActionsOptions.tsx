@@ -29,30 +29,13 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
 
   if (isDropdownItem) {
     return (
-      <>
-        <button
-          onClick={handleOpenModal}
-          className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-rose-400"
-        >
-          <TrashIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-          <span className="tw-text-sm tw-font-medium">Delete</span>
-        </button>
-        <CommonAnimationWrapper mode="sync" initial={true}>
-          {isDeleteModalOpen && (
-            <CommonAnimationOpacity
-              key="modal"
-              elementClasses="tw-absolute tw-z-50"
-              elementRole="dialog"
-              onClicked={(e) => e.stopPropagation()}
-            >
-              <DropsListItemDeleteDropModal
-                drop={drop}
-                closeModal={() => setIsDeleteModalOpen(false)}
-              />
-            </CommonAnimationOpacity>
-          )}
-        </CommonAnimationWrapper>
-      </>
+      <button
+        onClick={handleOpenModal}
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-rose-400"
+      >
+        <TrashIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        <span className="tw-text-sm tw-font-medium">Delete</span>
+      </button>
     );
   }
 

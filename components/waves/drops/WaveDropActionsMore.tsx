@@ -1,6 +1,9 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -23,6 +26,7 @@ export default function WaveDropActionsMore({
   drop,
 }: WaveDropActionsMoreProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
@@ -31,6 +35,11 @@ export default function WaveDropActionsMore({
     connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
 
   const closeDropdown = () => setIsOpen(false);
+
+  const handleDeleteClick = () => {
+    setIsOpen(false);
+    setIsDeleteModalOpen(true);
+  };
 
   const mediaInfo = useMemo(() => {
     const media = drop.parts.at(0)?.media.at(0);
@@ -43,7 +52,7 @@ export default function WaveDropActionsMore({
     <>
       <button
         ref={buttonRef}
-        className="icon tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-300"
+        className="tw-flex tw-h-7 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="More actions"
         aria-haspopup="true"
@@ -101,7 +110,7 @@ export default function WaveDropActionsMore({
               <WaveDropActionsOptions
                 drop={drop}
                 isDropdownItem={true}
-                onDelete={closeDropdown}
+                onDelete={handleDeleteClick}
               />
             )}
             {isAuthor && (
@@ -114,6 +123,21 @@ export default function WaveDropActionsMore({
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>
+      <CommonAnimationWrapper mode="sync" initial={true}>
+        {isDeleteModalOpen && (
+          <CommonAnimationOpacity
+            key="modal"
+            elementClasses="tw-absolute tw-z-50"
+            elementRole="dialog"
+            onClicked={(e) => e.stopPropagation()}
+          >
+            <DropsListItemDeleteDropModal
+              drop={drop}
+              closeModal={() => setIsDeleteModalOpen(false)}
+            />
+          </CommonAnimationOpacity>
+        )}
+      </CommonAnimationWrapper>
     </>
   );
 }

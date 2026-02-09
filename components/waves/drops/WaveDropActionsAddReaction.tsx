@@ -1,153 +1,33 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useEmoji } from "@/contexts/EmojiContext";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import { commonApiPost } from "@/services/api/common-api";
+import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
-import {
-  cloneReactionEntries,
-  findReactionIndex,
-  removeUserFromReactions,
-  toProfileMin,
-} from "./reaction-utils";
 
 const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
   readonly onAddReaction?: (() => void) | undefined;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
-  const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canReact = !isTemporaryDrop;
+  const { react, canReact } = useDropReaction(drop, onAddReaction);
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
+  const pickerContainerRef = useRef<HTMLDivElement | null>(null);
   const { emojiMap, categories, categoryIcons } = useEmoji();
-  const { setToast, connectedProfile } = useAuth();
-  const { applyOptimisticDropUpdate } = useMyStream();
-  const rollbackRef = useRef<(() => void) | null>(null);
 
-  const waveId = drop.wave.id;
-  const dropId = drop.id;
-  const contextProfileContext = drop.context_profile_context;
-
-  const applyOptimisticReaction = useCallback(
-    (reactionCode: string) => {
-      const profileMin = toProfileMin(connectedProfile);
-      if (!profileMin) {
-        return null;
-      }
-
-      const userId = profileMin.id;
-
-      const handle = applyOptimisticDropUpdate({
-        waveId: waveId,
-        dropId: dropId,
-        update: (draft) => {
-          if (draft.type !== DropSize.FULL) {
-            return draft;
-          }
-
-          const reactions = cloneReactionEntries(draft.reactions);
-          const reactionsWithoutUser = removeUserFromReactions(
-            reactions,
-            userId
-          );
-
-          const targetIndex = findReactionIndex(
-            reactionsWithoutUser,
-            reactionCode
-          );
-
-          if (targetIndex >= 0) {
-            const profiles = reactionsWithoutUser[targetIndex]?.profiles ?? [];
-            reactionsWithoutUser[targetIndex] = {
-              ...reactionsWithoutUser[targetIndex]!,
-              profiles: [...profiles, profileMin],
-            };
-          } else {
-            reactionsWithoutUser.push({
-              reaction: reactionCode,
-              profiles: [profileMin],
-            });
-          }
-
-          draft.reactions = reactionsWithoutUser;
-
-          const baseContext: ApiDropContextProfileContext =
-            draft.context_profile_context ??
-              contextProfileContext ?? {
-                rating: 0,
-                min_rating: 0,
-                max_rating: 0,
-                reaction: null,
-                boosted: false,
-                bookmarked: false,
-              };
-
-          draft.context_profile_context = {
-            ...baseContext,
-            reaction: reactionCode,
-          };
-
-          return draft;
-        },
-      });
-
-      return handle?.rollback ?? null;
-    },
-    [
-      applyOptimisticDropUpdate,
-      connectedProfile,
-      contextProfileContext,
-      dropId,
-      waveId,
-    ]
-  );
-
-  const handleEmojiSelect = async (emoji: {
+  const handleEmojiSelect = (emoji: {
     native?: string | undefined;
     id?: string | undefined;
   }) => {
     const emojiText = `:${emoji.id ?? ""}:`;
     setShowPicker(false);
-
-    rollbackRef.current?.();
-    rollbackRef.current = applyOptimisticReaction(emojiText);
-    recordReaction(emojiText);
-
-    try {
-      await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-        endpoint: `drops/${drop.id}/reaction`,
-        body: {
-          reaction: emojiText,
-        },
-      });
-      rollbackRef.current = null;
-      onAddReaction?.();
-    } catch (error) {
-      let errorMessage = "Error adding reaction";
-      if (typeof error === "string") {
-        errorMessage = error;
-      }
-      setToast({
-        message: errorMessage,
-        type: "error",
-      });
-      rollbackRef.current?.();
-      rollbackRef.current = null;
-    }
+    react(emojiText);
   };
 
   useEffect(() => {
@@ -219,9 +99,9 @@ const WaveDropActionsAddReaction: React.FC<{
     <>
       <button
         ref={buttonRef}
-        className={`picker-button icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+        className={`picker-button tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
           canReact ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
-        } hover:tw-text-[#FFCC22]`}
+        }`}
         onClick={onReact}
         disabled={!canReact}
         aria-label="Add reaction to drop"

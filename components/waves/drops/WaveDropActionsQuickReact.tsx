@@ -146,9 +146,9 @@ const QuickReactButton: React.FC<{
   return (
     <>
       <button
-        className={`tw-group tw-flex tw-h-full tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-xs tw-px-1 tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
           canReact ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
-        } hover:tw-text-[#FFCC22]`}
+        }`}
         onClick={handleClick}
         disabled={!canReact}
         aria-label="Click to react"
