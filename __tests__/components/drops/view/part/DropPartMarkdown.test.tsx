@@ -355,13 +355,21 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders YouTube previews with thumbnail and iframe interaction", async () => {
+    let resolvePreview:
+      | ((value: YoutubeOEmbedResponse | null) => void)
+      | undefined;
+    const previewPromise = new Promise<YoutubeOEmbedResponse | null>(
+      (resolve) => {
+        resolvePreview = resolve;
+      }
+    );
     const preview: YoutubeOEmbedResponse = {
       title: "Sample Video",
       author_name: "Sample Creator",
       thumbnail_url: "https://img.youtube.com/vi/sample/hqdefault.jpg",
       html: '<iframe title="Sample Video" src="https://www.youtube.com/embed/sample"></iframe>',
     };
-    mockFetchYoutubePreview.mockResolvedValue(preview);
+    mockFetchYoutubePreview.mockReturnValue(previewPromise);
 
     const content = "Watch this https://youtu.be/sample";
     render(
@@ -374,12 +382,22 @@ describe("DropPartMarkdown", () => {
       />
     );
 
+    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
+    expect(stableFrame).toBeInTheDocument();
+    expect(stableFrame.className).toContain("tw-h-[13rem]");
+    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+
+    resolvePreview?.(preview);
+
     const previewButton = await screen.findByRole("button", {
       name: /sample video/i,
     });
-    expect(
-      await screen.findByRole("img", { name: /sample video/i })
-    ).toHaveAttribute("src", preview.thumbnail_url);
+    const thumbnailImage = await screen.findByRole("img", {
+      name: /sample video/i,
+    });
+    expect(thumbnailImage.getAttribute("src")).toContain(
+      encodeURIComponent(preview.thumbnail_url)
+    );
 
     await userEvent.click(previewButton);
 
@@ -388,6 +406,11 @@ describe("DropPartMarkdown", () => {
     expect(mockFetchYoutubePreview.mock.calls[0]?.[0]).toBe(
       "https://www.youtube.com/watch?v=sample"
     );
+
+    const title = screen.getByText("Sample Video");
+    const author = screen.getByText("Sample Creator");
+    expect(title.className).toContain("tw-line-clamp-2");
+    expect(author.className).toContain("tw-line-clamp-1");
   });
 
   it("normalizes YouTube URLs before fetching preview data", async () => {
@@ -467,8 +490,15 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const fallbackLink = await screen.findByRole("link", { name: url });
+    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
+    expect(stableFrame.className).toContain("tw-h-[13rem]");
+    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+
+    const fallbackLink = await screen.findByTestId(
+      "youtube-preview-fallback-link"
+    );
     expect(fallbackLink).toHaveAttribute("href", url);
+    expect(fallbackLink).toHaveTextContent(/failed to load youtube preview/i);
   });
 
   it("falls back to a link when YouTube preview rejects", async () => {
@@ -485,8 +515,15 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const fallbackLink = await screen.findByRole("link", { name: url });
+    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
+    expect(stableFrame.className).toContain("tw-h-[13rem]");
+    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+
+    const fallbackLink = await screen.findByTestId(
+      "youtube-preview-fallback-link"
+    );
     expect(fallbackLink).toHaveAttribute("href", url);
+    expect(fallbackLink).toHaveTextContent(/failed to load youtube preview/i);
   });
 
   it("falls back to a link when YouTube preview returns null", async () => {
@@ -503,8 +540,15 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const fallbackLink = await screen.findByRole("link", { name: url });
+    const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
+    expect(stableFrame.className).toContain("tw-h-[13rem]");
+    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+
+    const fallbackLink = await screen.findByTestId(
+      "youtube-preview-fallback-link"
+    );
     expect(fallbackLink).toHaveAttribute("href", url);
+    expect(fallbackLink).toHaveTextContent(/youtube preview unavailable/i);
   });
 
   it("lazy loads tweet embeds with a loading skeleton", async () => {
