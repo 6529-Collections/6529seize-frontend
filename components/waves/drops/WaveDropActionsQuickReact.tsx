@@ -7,8 +7,9 @@ import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReact
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import {
-  getMostUsedReaction,
-  getMostUsedReactionServer,
+  getReactionSnapshot,
+  getReactionSnapshotServer,
+  getTopReactions,
   recordReaction,
   subscribeToReactionStore,
 } from "@/helpers/reactions/reactionHistory";
@@ -30,12 +31,15 @@ import {
   toProfileMin,
 } from "./reaction-utils";
 
+const MAX_QUICK_REACTIONS = 3;
+
 const WaveDropActionsQuickReact: React.FC<{
   readonly drop: ExtendedDrop;
-}> = ({ drop }) => {
+  readonly isMobile?: boolean;
+  readonly onReacted?: () => void;
+}> = ({ drop, isMobile = false, onReacted }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReact = !isTemporaryDrop;
-  const { emojiMap, findNativeEmoji } = useEmoji();
   const { setToast, connectedProfile } = useAuth();
   const { applyOptimisticDropUpdate } = useMyStream();
   const rollbackRef = useRef<(() => void) | null>(null);
@@ -44,59 +48,18 @@ const WaveDropActionsQuickReact: React.FC<{
   const dropId = drop.id;
   const contextProfileContext = drop.context_profile_context;
 
-  // Use useSyncExternalStore for hydration-safe localStorage access
-  const quickReactionCode = useSyncExternalStore(
+  // Subscribe to localStorage changes (hydration-safe)
+  const reactionSnapshot = useSyncExternalStore(
     subscribeToReactionStore,
-    getMostUsedReaction,
-    getMostUsedReactionServer
+    getReactionSnapshot,
+    getReactionSnapshotServer
   );
 
-  const emojiId = useMemo(
-    () => quickReactionCode.replaceAll(":", ""),
-    [quickReactionCode]
+  // Derive top reactions; re-computes when the store changes
+  const topReactionCodes = useMemo(
+    () => getTopReactions(MAX_QUICK_REACTIONS),
+    [reactionSnapshot]
   );
-
-  const emojiNode = useMemo(() => {
-    // Default fallback if emoji context isn't ready
-    const fallback = (
-      <span className="tw-flex tw-items-center tw-justify-center tw-text-[1.25rem] tw-leading-none">
-        👍
-      </span>
-    );
-
-    if (!emojiMap.length) {
-      return fallback;
-    }
-
-    const custom = emojiMap
-      .flatMap((cat) => cat.emojis)
-      .find((e) => e.id === emojiId);
-
-    const customSrc = custom?.skins[0]?.src;
-    if (customSrc) {
-      return (
-        <div className="tw-relative tw-size-5">
-          <Image
-            src={customSrc}
-            alt={emojiId}
-            fill
-            className="tw-object-contain"
-          />
-        </div>
-      );
-    }
-
-    const native = findNativeEmoji(emojiId);
-    if (native?.skins[0]?.native) {
-      return (
-        <span className="tw-flex tw-items-center tw-justify-center tw-text-[1.25rem] tw-leading-none">
-          {native.skins[0].native}
-        </span>
-      );
-    }
-
-    return fallback;
-  }, [emojiId, emojiMap, findNativeEmoji]);
 
   const applyOptimisticReaction = useCallback(
     (reactionCode: string) => {
@@ -172,45 +135,147 @@ const WaveDropActionsQuickReact: React.FC<{
     ]
   );
 
-  const handleQuickReact = useCallback(async () => {
-    if (!canReact) return;
+  const handleReact = useCallback(
+    async (reactionCode: string) => {
+      if (!canReact) return;
 
-    rollbackRef.current?.();
-    rollbackRef.current = applyOptimisticReaction(quickReactionCode);
-    recordReaction(quickReactionCode);
-
-    try {
-      await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-        endpoint: `drops/${drop.id}/reaction`,
-        body: {
-          reaction: quickReactionCode,
-        },
-      });
-      rollbackRef.current = null;
-    } catch (error) {
-      let errorMessage = "Error adding reaction";
-      if (typeof error === "string") {
-        errorMessage = error;
-      }
-      setToast({
-        message: errorMessage,
-        type: "error",
-      });
       rollbackRef.current?.();
-      rollbackRef.current = null;
+      rollbackRef.current = applyOptimisticReaction(reactionCode);
+      recordReaction(reactionCode);
+
+      try {
+        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+          endpoint: `drops/${drop.id}/reaction`,
+          body: { reaction: reactionCode },
+        });
+        rollbackRef.current = null;
+        onReacted?.();
+      } catch (error) {
+        let errorMessage = "Error adding reaction";
+        if (typeof error === "string") {
+          errorMessage = error;
+        }
+        setToast({ message: errorMessage, type: "error" });
+        rollbackRef.current?.();
+        rollbackRef.current = null;
+      }
+    },
+    [canReact, applyOptimisticReaction, drop.id, setToast, onReacted]
+  );
+
+  const buttons = topReactionCodes.map((code) => (
+    <QuickReactButton
+      key={code}
+      reactionCode={code}
+      dropId={drop.id}
+      canReact={canReact}
+      onReact={handleReact}
+      isMobile={isMobile}
+    />
+  ));
+
+  if (isMobile) {
+    return (
+      <div className="tw-flex tw-items-center tw-justify-start tw-gap-x-2 tw-rounded-xl tw-bg-iron-950 tw-p-3">
+        {buttons}
+      </div>
+    );
+  }
+
+  return <>{buttons}</>;
+};
+
+const QuickReactButton: React.FC<{
+  readonly reactionCode: string;
+  readonly dropId: string;
+  readonly canReact: boolean;
+  readonly onReact: (code: string) => void;
+  readonly isMobile?: boolean;
+}> = ({ reactionCode, dropId, canReact, onReact, isMobile = false }) => {
+  const { emojiMap, findNativeEmoji } = useEmoji();
+
+  const emojiId = useMemo(
+    () => reactionCode.replaceAll(":", ""),
+    [reactionCode]
+  );
+
+  const emojiSize = isMobile ? "tw-size-7" : "tw-size-5";
+  const textSize = isMobile ? "tw-text-[1.625rem]" : "tw-text-[1.25rem]";
+
+  const emojiNode = useMemo(() => {
+    const fallback = (
+      <span
+        className={`tw-flex tw-items-center tw-justify-center ${textSize} tw-leading-none`}
+      >
+        👍
+      </span>
+    );
+
+    if (!emojiMap.length) return fallback;
+
+    const custom = emojiMap
+      .flatMap((cat) => cat.emojis)
+      .find((e) => e.id === emojiId);
+
+    const customSrc = custom?.skins[0]?.src;
+    if (customSrc) {
+      return (
+        <div className={`tw-relative ${emojiSize}`}>
+          <Image
+            src={customSrc}
+            alt={emojiId}
+            fill
+            className="tw-object-contain"
+          />
+        </div>
+      );
     }
-  }, [canReact, applyOptimisticReaction, quickReactionCode, drop.id, setToast]);
+
+    const native = findNativeEmoji(emojiId);
+    if (native?.skins[0]?.native) {
+      return (
+        <span
+          className={`tw-flex tw-items-center tw-justify-center ${textSize} tw-leading-none`}
+        >
+          {native.skins[0].native}
+        </span>
+      );
+    }
+
+    return fallback;
+  }, [emojiId, emojiMap, findNativeEmoji, emojiSize, textSize]);
+
+  const handleClick = useCallback(() => {
+    onReact(reactionCode);
+  }, [onReact, reactionCode]);
+
+  const tooltipId = `quick-react-${dropId}-${emojiId}`;
+
+  if (isMobile) {
+    return (
+      <button
+        className={`tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-transition-colors tw-duration-200 ${
+          canReact ? "active:tw-bg-iron-700" : "tw-cursor-default tw-opacity-50"
+        }`}
+        onClick={handleClick}
+        disabled={!canReact}
+        aria-label="Click to react"
+      >
+        {emojiNode}
+      </button>
+    );
+  }
 
   return (
     <>
       <button
-        className={`tw-group tw-flex tw-h-full tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-group tw-flex tw-h-full tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-xs tw-px-1 tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
           canReact ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
         } hover:tw-text-[#FFCC22]`}
-        onClick={handleQuickReact}
+        onClick={handleClick}
         disabled={!canReact}
-        aria-label="Quick react"
-        {...(canReact ? { "data-tooltip-id": `quick-react-${drop.id}` } : {})}
+        aria-label="Click to react"
+        {...(canReact ? { "data-tooltip-id": tooltipId } : {})}
       >
         <div
           className={`tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out ${
@@ -222,7 +287,7 @@ const WaveDropActionsQuickReact: React.FC<{
       </button>
       {canReact && (
         <Tooltip
-          id={`quick-react-${drop.id}`}
+          id={tooltipId}
           place="top"
           positionStrategy="fixed"
           offset={8}
@@ -239,7 +304,7 @@ const WaveDropActionsQuickReact: React.FC<{
             pointerEvents: "none",
           }}
         >
-          <span className="tw-text-xs">Quick react</span>
+          <span className="tw-text-xs">Click to react</span>
         </Tooltip>
       )}
     </>

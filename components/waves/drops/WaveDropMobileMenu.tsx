@@ -18,6 +18,7 @@ import WaveDropMobileMenuBoost from "./WaveDropMobileMenuBoost";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
+import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview";
 
 interface WaveDropMobileMenuProps {
@@ -63,7 +64,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
-    if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
     const waveDetails =
@@ -106,6 +106,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+    closeMenu();
   };
 
   const getIsAuthor = () =>
@@ -150,6 +151,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             onToggle={closeMenu}
           />
         )}
+        <WaveDropActionsQuickReact
+          drop={extendedDrop}
+          isMobile
+          onReacted={closeMenu}
+        />
         <WaveDropActionsAddReaction
           drop={extendedDrop}
           isMobile={true}

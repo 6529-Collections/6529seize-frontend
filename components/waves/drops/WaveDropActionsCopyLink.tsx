@@ -11,11 +11,13 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;
   readonly isDropdownItem?: boolean | undefined;
+  readonly onCopy?: (() => void) | undefined;
 }
 
 const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   drop,
   isDropdownItem = false,
+  onCopy,
 }) => {
   const [copied, setCopied] = useState(false);
   const myStream = useMyStreamOptional();
@@ -56,6 +58,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      onCopy?.();
     });
   };
 
