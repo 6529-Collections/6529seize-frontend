@@ -135,7 +135,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
       <div
-        className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
+        className={`tw-grid tw-grid-cols-1 ${
           longPressTriggered && "tw-select-none"
         }`}
       >
