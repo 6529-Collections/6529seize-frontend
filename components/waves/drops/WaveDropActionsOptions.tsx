@@ -45,6 +45,7 @@ const WaveDropActionsOptions: React.FC<WaveDropActionsOptionsProps> = ({
   return (
     <>
       <button
+        type="button"
         onClick={handleOpenModal}
         className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2 tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-rose-400"
         aria-label="Delete drop"
