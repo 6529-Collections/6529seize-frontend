@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiMintMetrics } from "@/generated/models/ApiMintMetrics";
+import type { ReactNode } from "react";
 import { formatNumberWithCommas } from "../utils/formatNumbers";
 
 interface MintMetricsCardProps {
@@ -169,7 +169,7 @@ export default function MintMetricsCard({ data, icon }: MintMetricsCardProps) {
           <p className="tw-mb-3 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-emerald-400">
             Last {data.length} Mints
           </p>
-          <MintBarChart data={data} />
+          <MintBarChart data={data.toReversed()} />
         </div>
       </div>
     </div>

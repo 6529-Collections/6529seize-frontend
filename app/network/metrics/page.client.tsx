@@ -65,7 +65,7 @@ export default function MetricsPageClient() {
                 icon={<MintIcon />}
               />
               <MetricCard
-                title="Distinct Droppers"
+                title="Posters"
                 dailyData={dailyQuery.data.distinctDroppers}
                 weeklyData={weeklyQuery.data.distinctDroppers}
                 icon={<DroppersIcon />}
@@ -76,7 +76,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
-                title="Drops Created"
+                title="Posts"
                 dailyData={dailyQuery.data.dropsCreated}
                 weeklyData={weeklyQuery.data.dropsCreated}
                 icon={<DropsIcon />}
@@ -121,7 +121,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
-                title="Voting Power"
+                title="Active Votes"
                 dailyData={dailyQuery.data.tdhOnMainStageSubmissions}
                 weeklyData={weeklyQuery.data.tdhOnMainStageSubmissions}
                 icon={<TdhIcon />}
@@ -170,7 +170,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
-                title="Profile Count"
+                title="Identities"
                 dailyData={dailyQuery.data.profileCount}
                 weeklyData={weeklyQuery.data.profileCount}
                 icon={<ProfileIcon />}
