@@ -23,7 +23,7 @@ export default function UserPageHeaderPfp({
           alt="Profile picture"
           width="144"
           height="144"
-          className="tw-h-24 tw-w-auto tw-max-w-24 tw-rounded-xl tw-bg-iron-800 tw-object-contain sm:tw-h-36 sm:tw-max-w-36"
+          className="tw-h-20 tw-w-auto tw-max-w-20 tw-rounded-xl tw-bg-iron-800 tw-object-contain sm:tw-h-28 sm:tw-max-w-28"
         />
       </div>
     );
@@ -32,7 +32,7 @@ export default function UserPageHeaderPfp({
   return (
     <div className={glassWrapperClass}>
       <div
-        className="tw-h-24 tw-w-24 tw-rounded-xl sm:tw-h-36 sm:tw-w-36"
+        className="tw-h-20 tw-w-20 tw-rounded-xl sm:tw-h-28 sm:tw-w-28"
         style={{
           background: `linear-gradient(45deg, ${defaultBanner1} 0%, ${defaultBanner2} 100%)`,
         }}
