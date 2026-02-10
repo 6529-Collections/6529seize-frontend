@@ -61,11 +61,6 @@ export default function Footer() {
           "@6529Collections"
         )}
         {printSeparator()}
-        {printLinkWithImage(
-          "https://discord.gg/join-om",
-          "/discord.png",
-          "OM Discord"
-        )}
         {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",

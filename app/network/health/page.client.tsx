@@ -26,7 +26,7 @@ import MetricsSkeleton from "./components/MetricsSkeleton";
 import MintMetricsCard from "./components/MintMetricsCard";
 
 export default function MetricsPageClient() {
-  useSetTitle("Metrics");
+  useSetTitle("Health");
 
   const dailyQuery = useCommunityMetrics("DAY");
   const weeklyQuery = useCommunityMetrics("WEEK");
@@ -42,7 +42,7 @@ export default function MetricsPageClient() {
     <div className="tailwind-scope tw-min-h-screen tw-bg-black">
       <div className="tw-mx-auto tw-max-w-6xl tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-8">
         <header className="tw-mb-8">
-          <h1 className="tw-text-2xl tw-font-bold tw-text-white">Metrics</h1>
+          <h1 className="tw-text-2xl tw-font-bold tw-text-white">Health</h1>
           <p className="tw-mt-1 tw-text-sm tw-text-neutral-400">
             Activity overview across different time periods
           </p>
@@ -65,7 +65,7 @@ export default function MetricsPageClient() {
                 icon={<MintIcon />}
               />
               <MetricCard
-                title="Distinct Droppers"
+                title="Posters"
                 dailyData={dailyQuery.data.distinctDroppers}
                 weeklyData={weeklyQuery.data.distinctDroppers}
                 icon={<DroppersIcon />}
@@ -76,7 +76,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
-                title="Drops Created"
+                title="Posts"
                 dailyData={dailyQuery.data.dropsCreated}
                 weeklyData={weeklyQuery.data.dropsCreated}
                 icon={<DropsIcon />}
@@ -98,7 +98,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <MetricCard
-                title="Distinct Voters"
+                title="Voters"
                 dailyData={dailyQuery.data.mainStageDistinctVoters}
                 weeklyData={weeklyQuery.data.mainStageDistinctVoters}
                 icon={<VotersIcon />}
@@ -121,7 +121,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
-                title="Voting Power"
+                title="Active Votes"
                 dailyData={dailyQuery.data.tdhOnMainStageSubmissions}
                 weeklyData={weeklyQuery.data.tdhOnMainStageSubmissions}
                 icon={<TdhIcon />}
@@ -140,7 +140,7 @@ export default function MetricsPageClient() {
                 iconBgColor="tw-bg-teal-500"
                 accentColor="tw-text-teal-400"
                 unit="TDH"
-                href="/network/metrics/network-tdh"
+                href="/network/health/network-tdh"
                 sparklineData={series?.networkTdh}
                 sparklineColor="tw-bg-teal-500"
                 sparklineDates={series?.stepsStartTimes}
@@ -170,7 +170,7 @@ export default function MetricsPageClient() {
                 sparklineDates={series?.stepsStartTimes}
               />
               <CumulativeMetricCard
-                title="Profile Count"
+                title="Identities"
                 dailyData={dailyQuery.data.profileCount}
                 weeklyData={weeklyQuery.data.profileCount}
                 icon={<ProfileIcon />}

@@ -2,7 +2,7 @@ import { expect, test } from "../testHelpers";
 
 test.describe("Network Stats Page", () => {
   test.beforeEach(async ({ page }, testInfo) => {
-    await page.goto("/network/metrics/network-tdh");
+    await page.goto("/network/health/network-tdh");
   });
 
   test("should load with correct title and heading", async ({ page }) => {

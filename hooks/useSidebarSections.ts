@@ -32,10 +32,10 @@ export function useSidebarSections(
           {
             name: "Metrics",
             items: [
-              { name: "Metrics", href: "/network/metrics" },
+              { name: "Health", href: "/network/health" },
               { name: "Definitions", href: "/network/definitions" },
               { name: "Levels", href: "/network/levels" },
-              { name: "Network Stats", href: "/network/metrics/network-tdh" },
+              { name: "Network Stats", href: "/network/health/network-tdh" },
             ],
           },
         ],
