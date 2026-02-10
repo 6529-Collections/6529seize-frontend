@@ -321,6 +321,11 @@ describe("DropPartMarkdown", () => {
     expect(fallbackLink).toHaveAttribute("target", "_blank");
     expect(fallbackLink).toHaveTextContent(/Tweet unavailable/i);
     expect(fallbackLink).toHaveTextContent(/Open on X/i);
+    const tweetWrapper = fallbackLink.parentElement;
+    if (!tweetWrapper) {
+      throw new Error("Expected tweet fallback wrapper");
+    }
+    expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[480px]");
   });
 
   it("renders a fallback link when the tweet embed throws", async () => {
@@ -349,6 +354,11 @@ describe("DropPartMarkdown", () => {
         "href",
         "https://twitter.com/foo/status/1111111111"
       );
+      const tweetWrapper = fallbackLink.parentElement;
+      if (!tweetWrapper) {
+        throw new Error("Expected tweet fallback wrapper");
+      }
+      expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[480px]");
     } finally {
       consoleErrorSpy.mockRestore();
     }

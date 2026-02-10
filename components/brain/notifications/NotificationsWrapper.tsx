@@ -3,11 +3,8 @@
 import { useCallback } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { NotificationDisplayItem } from "@/types/feed.types";
-import type {
-  ActiveDropState} from "@/types/dropInteractionTypes";
-import {
-  ActiveDropAction
-} from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/navigation";
@@ -58,7 +55,7 @@ export default function NotificationsWrapper({
       }
 
       const isDirectMessage = hasChatScope(drop.wave)
-        ? drop.wave.chat?.scope?.group?.is_direct_message ?? false
+        ? (drop.wave.chat?.scope?.group?.is_direct_message ?? false)
         : false;
 
       const href = getWaveRoute({

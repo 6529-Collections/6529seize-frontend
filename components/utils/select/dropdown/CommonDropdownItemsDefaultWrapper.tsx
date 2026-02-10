@@ -2,9 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import type {
-  ReactNode,
-  RefObject} from "react";
+import type { ReactNode, RefObject } from "react";
 import {
   useCallback,
   useEffect,
@@ -116,7 +114,7 @@ export default function CommonDropdownItemsDefaultWrapper({
             transition={{ duration: 0.2 }}
           >
             <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden">
-              <ul className="tw-flex tw-flex-col tw-gap-0.5 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+              <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2">
                 {children}
               </ul>
             </div>

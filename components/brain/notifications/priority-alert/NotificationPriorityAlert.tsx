@@ -47,8 +47,8 @@ export default function NotificationPriorityAlert({
 
   if (!notification.related_drops || notification.related_drops.length === 0) {
     return (
-      <div className="tw-w-full tw-flex tw-gap-x-3">
-        <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+      <div className="tw-flex tw-w-full tw-gap-x-3">
+        <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
           {headerSection}
         </div>
       </div>
@@ -62,8 +62,8 @@ export default function NotificationPriorityAlert({
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
-    <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-gap-x-3">
+      <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
         {headerSection}
 
         <NotificationDrop

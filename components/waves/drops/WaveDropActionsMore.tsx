@@ -101,8 +101,16 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onMarkUnread={closeDropdown}
             />
-            <WaveDropActionsCopyLink drop={drop} isDropdownItem={true} onCopy={closeDropdown} />
-            <WaveDropActionsOpen drop={drop} isDropdownItem={true} onOpen={closeDropdown} />
+            <WaveDropActionsCopyLink
+              drop={drop}
+              isDropdownItem={true}
+              onCopy={closeDropdown}
+            />
+            <WaveDropActionsOpen
+              drop={drop}
+              isDropdownItem={true}
+              onOpen={closeDropdown}
+            />
             {mediaInfo && (
               <WaveDropActionsDownload
                 href={drop.parts.at(0)?.media.at(0)?.url ?? ""}

@@ -51,7 +51,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
         {...(!isTemporaryDrop ? { "data-tooltip-id": `reply-${drop.id}` } : {})}
       >
         <svg
-          className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
+          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${
             canReply ? "" : "tw-opacity-50"
           }`}
           xmlns="http://www.w3.org/2000/svg"

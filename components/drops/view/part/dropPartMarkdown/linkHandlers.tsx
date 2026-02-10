@@ -67,7 +67,7 @@ export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
   hideLinkPreviews = false,
-  tweetPreviewMode,
+  tweetPreviewMode = "auto",
   embedPath,
   quotePath,
   embedDepth = 0,
@@ -81,9 +81,10 @@ export const createLinkRenderer = ({
     embedDepth,
     maxEmbedDepth,
   });
-  const handlers = createLinkHandlers(
-    tweetPreviewMode ? { tweetPreviewMode } : undefined
-  );
+  const handlers = createLinkHandlers({
+    tweetPreviewMode,
+    linkPreviewVariant: "chat",
+  });
 
   const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
     if (typeof src !== "string") {
@@ -124,10 +125,7 @@ export const createLinkRenderer = ({
 
     const tryRenderOpenGraph = () => {
       try {
-        const ogContent = renderOpenGraph();
-        if (ogContent) {
-          return ogContent;
-        }
+        return renderOpenGraph();
       } catch {
         // swallow and fall back to default anchor
       }
@@ -152,9 +150,6 @@ export const createLinkRenderer = ({
     const renderFromHandler = (handler: LinkHandler): ReactElement | null => {
       try {
         const rendered = handler.render(stableHref);
-        if (rendered === null || rendered === undefined) {
-          throw new Error("Link handler returned no content");
-        }
         return renderHandlerContent(rendered);
       } catch {
         const ogContent = tryRenderOpenGraph();

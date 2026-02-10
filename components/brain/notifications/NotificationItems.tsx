@@ -29,7 +29,7 @@ function NotificationItemsComponent({
       items.map((item, index) => {
         const keySuffix = isGroupedReactionsItem(item)
           ? `group-${item.drop.id}`
-          : item.id ?? `fallback-${index}`;
+          : (item.id ?? `fallback-${index}`);
         return {
           item,
           key: `notification-${keySuffix}`,

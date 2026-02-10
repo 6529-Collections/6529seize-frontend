@@ -36,7 +36,7 @@ export default function NotificationWithDrop({
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
       <NotificationHeader
         author={drop.author}
         actions={
@@ -46,7 +46,7 @@ export default function NotificationWithDrop({
           />
         }
       >
-        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           {actionText}
         </span>
         <NotificationTimestamp createdAt={createdAt} />
