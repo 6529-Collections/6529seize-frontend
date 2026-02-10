@@ -14,4 +14,16 @@ test.describe("Home Page", () => {
     const memeTitle = page.locator('h3 a[href^="/the-memes/"]');
     await expect(memeTitle).toBeVisible();
   });
+
+  test("should navigate to network health from the hero heart link", async ({
+    page,
+  }) => {
+    const healthLink = page.getByRole("link", {
+      name: "Open network health dashboard",
+    });
+
+    await expect(healthLink).toBeVisible();
+    await healthLink.click();
+    await expect(page).toHaveURL(/\/network\/health\/?$/);
+  });
 });
