@@ -12,6 +12,13 @@ import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import { ensureTwitterLink } from "./twitter";
 
+interface SeizeQuoteRenderOptions {
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
+}
+
 const TweetFallback = ({ href }: { href: string }) => (
   <a
     href={href}
@@ -87,7 +94,8 @@ const renderGifEmbed = (
 const renderSeizeQuote = (
   quoteLinkInfo: SeizeQuoteLinkInfo,
   onQuoteClick: (drop: ApiDrop) => void,
-  href: string
+  href: string,
+  options?: SeizeQuoteRenderOptions
 ): ReactElement | null => {
   const { waveId, serialNo, dropId } = quoteLinkInfo;
   if (serialNo) {
@@ -97,6 +105,10 @@ const renderSeizeQuote = (
           serialNo={Number.parseInt(serialNo, 10)}
           waveId={waveId}
           onQuoteClick={onQuoteClick}
+          embedPath={options?.embedPath}
+          quotePath={options?.quotePath}
+          embedDepth={options?.embedDepth}
+          maxEmbedDepth={options?.maxEmbedDepth}
         />
       </LinkHandlerFrame>
     );
@@ -118,6 +130,10 @@ const renderSeizeQuote = (
           partId={1}
           maybeDrop={null}
           onQuoteClick={onQuoteClick}
+          embedPath={options?.embedPath}
+          quotePath={options?.quotePath}
+          embedDepth={options?.embedDepth}
+          maxEmbedDepth={options?.maxEmbedDepth}
         />
       </LinkHandlerFrame>
     );

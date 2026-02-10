@@ -10,13 +10,11 @@ export default function NotificationDropQuoted({
   notification,
   activeDrop,
   onReply,
-  onQuote,
   onDropContentClick,
 }: {
   readonly notification: INotificationDropQuoted;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   return (
@@ -26,7 +24,6 @@ export default function NotificationDropQuoted({
       createdAt={notification.created_at}
       activeDrop={activeDrop}
       onReply={onReply}
-      onQuote={onQuote}
       onDropContentClick={onDropContentClick}
     />
   );

@@ -6,7 +6,6 @@ interface MemeDropActionsProps {
   readonly isMobile: boolean;
   readonly showReplyAndQuote: boolean;
   readonly onReply: () => void;
-  readonly onQuote: () => void;
 }
 
 export default function MemeDropActions({
@@ -14,7 +13,6 @@ export default function MemeDropActions({
   isMobile,
   showReplyAndQuote,
   onReply,
-  onQuote,
 }: MemeDropActionsProps) {
   if (isMobile || !showReplyAndQuote) {
     return null;
@@ -25,7 +23,6 @@ export default function MemeDropActions({
       drop={drop}
       activePartIndex={0}
       onReply={onReply}
-      onQuote={onQuote}
       // No need to set showVoting=false here as WaveDropActions already has logic
       // to hide voting for memes participation drops
     />

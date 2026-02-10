@@ -17,7 +17,6 @@ interface WinnerDropProps {
   readonly location: DropLocation;
   readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;

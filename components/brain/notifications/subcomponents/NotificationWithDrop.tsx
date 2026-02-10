@@ -20,7 +20,6 @@ interface NotificationWithDropProps {
   readonly createdAt: number;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
@@ -30,7 +29,6 @@ export default function NotificationWithDrop({
   createdAt,
   activeDrop,
   onReply,
-  onQuote,
   onDropContentClick,
 }: NotificationWithDropProps) {
   const { createReplyClickHandler, createQuoteClickHandler } =
@@ -38,7 +36,7 @@ export default function NotificationWithDrop({
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
       <NotificationHeader
         author={drop.author}
         actions={
@@ -48,7 +46,7 @@ export default function NotificationWithDrop({
           />
         }
       >
-        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           {actionText}
         </span>
         <NotificationTimestamp createdAt={createdAt} />
@@ -58,7 +56,6 @@ export default function NotificationWithDrop({
         drop={drop}
         activeDrop={activeDrop}
         onReply={onReply}
-        onQuote={onQuote}
         onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
         onQuoteClick={createQuoteClickHandler(isDirectMessage)}
         onDropContentClick={onDropContentClick}

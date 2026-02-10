@@ -1041,7 +1041,6 @@ export default function HeaderSearchModal({
                                         location={DropLocation.WAVE}
                                         dropViewDropId={null}
                                         onReply={() => {}}
-                                        onQuote={() => {}}
                                         onReplyClick={() => {}}
                                         onQuoteClick={() => {}}
                                       />

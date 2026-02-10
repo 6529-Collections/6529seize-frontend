@@ -20,13 +20,11 @@ export default function NotificationAllDrops({
   notification,
   activeDrop,
   onReply,
-  onQuote,
   onDropContentClick,
 }: {
   readonly notification: INotificationAllDrops;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const { createReplyClickHandler, createQuoteClickHandler } =
@@ -66,7 +64,7 @@ export default function NotificationAllDrops({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
       <NotificationHeader
         author={notification.related_identity}
         actions={
@@ -86,7 +84,6 @@ export default function NotificationAllDrops({
         drop={drop}
         activeDrop={activeDrop}
         onReply={onReply}
-        onQuote={onQuote}
         onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
         onQuoteClick={createQuoteClickHandler(isDirectMessage)}
         onDropContentClick={onDropContentClick}

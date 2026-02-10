@@ -61,12 +61,12 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   return (
     <>
       <button
-        className={`tw-group/boost tw-flex tw-h-full tw-items-center tw-gap-x-1 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-group/boost tw-flex tw-h-7 tw-min-w-7 tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 ${
           canBoost ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
         } ${
           isBoosted
-            ? "tw-text-orange-400 hover:tw-text-orange-300"
-            : "tw-text-iron-500 hover:tw-text-orange-400"
+            ? "tw-text-orange-400 desktop-hover:hover:tw-text-orange-300"
+            : "tw-text-iron-400 desktop-hover:hover:tw-text-orange-400"
         }`}
         onClick={handleClick}
         disabled={!canBoost || isPending}

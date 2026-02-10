@@ -8,6 +8,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
+import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -326,6 +327,10 @@ function WaveDropReaction({
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
 
     applyOptimisticReactionChange(!selected);
+
+    if (!selected) {
+      recordReaction(reaction.reaction);
+    }
 
     try {
       const body = { reaction: reaction.reaction };

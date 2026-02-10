@@ -31,10 +31,12 @@ import {
   getHomeRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
+import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useClosingDropId } from "@/hooks/useClosingDropId";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -68,14 +70,20 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const dropId = searchParams.get("drop") ?? undefined;
+  const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
   const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: dropId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiDrop>({
-        endpoint: `drops/${dropId}`,
-      }),
+    queryKey: [QueryKey.DROP, { drop_id: effectiveDropId }],
+    queryFn: async () => {
+      if (!effectiveDropId) {
+        throw new Error("Cannot fetch drop without a drop id");
+      }
+
+      return await commonApiFetch<ApiDrop>({
+        endpoint: `drops/${effectiveDropId}`,
+      });
+    },
     placeholderData: keepPreviousData,
-    enabled: !!dropId,
+    enabled: !!effectiveDropId,
   });
 
   // Use MyStreamContext for waveId to support client-side navigation via pushState
@@ -113,15 +121,22 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   };
 
   const onDropClose = () => {
+    if (dropId) {
+      beginClosingDrop(dropId);
+    }
+    markDropCloseNavigation();
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");
     const newUrl = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
-    router.push(newUrl, { scroll: false });
+    router.replace(newUrl, { scroll: false });
   };
 
-  const isDropOpen = drop && drop.id.toLowerCase() === dropId?.toLowerCase();
+  const isDropOpen =
+    !!effectiveDropId &&
+    !!drop &&
+    drop.id.toLowerCase() === effectiveDropId.toLowerCase();
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
 

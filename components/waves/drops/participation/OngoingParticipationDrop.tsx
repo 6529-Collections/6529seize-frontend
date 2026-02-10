@@ -23,7 +23,6 @@ interface OngoingParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
@@ -35,7 +34,6 @@ export default function OngoingParticipationDrop({
   showReplyAndQuote,
   location,
   onReply,
-  onQuote,
   onQuoteClick,
   onDropContentClick,
 }: OngoingParticipationDropProps) {
@@ -58,11 +56,6 @@ export default function OngoingParticipationDrop({
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
   }, [onReply, drop, activePartIndex]);
 
-  const handleOnQuote = useCallback(() => {
-    setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onQuote, drop, activePartIndex]);
-
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
   }, []);
@@ -79,7 +72,6 @@ export default function OngoingParticipationDrop({
           activePartIndex={activePartIndex}
           showVoting={false}
           onReply={handleOnReply}
-          onQuote={handleOnQuote}
         />
       )}
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left">
@@ -115,7 +107,6 @@ export default function OngoingParticipationDrop({
         showReplyAndQuote={showReplyAndQuote}
         setOpen={setIsSlideUp}
         onReply={handleOnReply}
-        onQuote={handleOnQuote}
         onAddReaction={handleOnAddReaction}
       />
     </ParticipationDropContainer>

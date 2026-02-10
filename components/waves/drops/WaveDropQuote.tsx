@@ -17,12 +17,20 @@ interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
   readonly partId: number;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   drop,
   partId,
   onQuoteClick,
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const [quotedPart, setQuotedPart] = useState<ApiDropPart | null>(null);
   useEffect(() => {
@@ -99,6 +107,18 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     });
   }, [drop]);
 
+  const effectiveQuotePath = useMemo(() => {
+    const path = quotePath ? [...quotePath] : [];
+    if (drop?.wave.id) {
+      const currentQuoteKey = `${drop.wave.id}:${drop.serial_no}`;
+      if (!path.includes(currentQuoteKey)) {
+        path.push(currentQuoteKey);
+      }
+    }
+
+    return path;
+  }, [drop, quotePath]);
+
   return (
     <div
       className="tw-mt-1 tw-cursor-pointer tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800"
@@ -169,6 +189,10 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 textSize="sm"
                 onQuoteClick={onQuoteClick}
                 currentDropId={drop?.id}
+                embedPath={embedPath}
+                quotePath={effectiveQuotePath}
+                embedDepth={embedDepth}
+                maxEmbedDepth={maxEmbedDepth}
               />
             </div>
           </div>

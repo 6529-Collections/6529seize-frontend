@@ -10,10 +10,14 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 
 interface WaveDropActionsCopyLinkProps {
   readonly drop: ApiDrop;
+  readonly isDropdownItem?: boolean | undefined;
+  readonly onCopy?: (() => void) | undefined;
 }
 
 const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   drop,
+  isDropdownItem = false,
+  onCopy,
 }) => {
   const [copied, setCopied] = useState(false);
   const myStream = useMyStreamOptional();
@@ -54,6 +58,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      onCopy?.();
     });
   };
 
@@ -65,11 +70,41 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
     return "Copy link";
   };
 
+  if (isDropdownItem) {
+    return (
+      <button
+        onClick={copyToClipboard}
+        disabled={isDisabled}
+        className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-transition-colors tw-duration-200 ${
+          isDisabled
+            ? "tw-cursor-default tw-text-iron-500 tw-opacity-50"
+            : "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800"
+        }`}
+      >
+        <svg
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+          />
+        </svg>
+        <span className="tw-text-sm tw-font-medium">{getLinkText()}</span>
+      </button>
+    );
+  }
+
   return (
     <>
       <button
-        className={`tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
-          isDisabled ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
+        className={`icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+          isDisabled ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
         }`}
         onClick={copyToClipboard}
         disabled={isDisabled}
@@ -77,7 +112,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
         {...(!isDisabled ? { "data-tooltip-id": `copy-link-${drop.id}` } : {})}
       >
         <svg
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
+          className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

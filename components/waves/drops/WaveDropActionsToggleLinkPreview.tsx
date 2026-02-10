@@ -124,12 +124,14 @@ function ToggleIcon({
 interface WaveDropActionsToggleLinkPreviewProps {
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
+  readonly isDropdownItem?: boolean | undefined;
   readonly onToggle?: (() => void) | undefined;
 }
 
 export default function WaveDropActionsToggleLinkPreview({
   drop,
   isMobile = false,
+  isDropdownItem = false,
   onToggle,
 }: WaveDropActionsToggleLinkPreviewProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -225,6 +227,27 @@ export default function WaveDropActionsToggleLinkPreview({
         <span className="tw-text-base tw-font-semibold tw-text-iron-300">
           {labelText}
         </span>
+      </button>
+    );
+  }
+
+  if (isDropdownItem) {
+    return (
+      <button
+        onClick={handleClick}
+        disabled={loading || !canToggle}
+        className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800 ${
+          canToggle ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
+        }`}
+      >
+        {loading && <Spinner dimension={16} />}
+        {!loading && previewsHidden && (
+          <ShowLinkPreviewIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        )}
+        {!loading && !previewsHidden && (
+          <HideLinkPreviewIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        )}
+        <span className="tw-text-sm tw-font-medium">{labelText}</span>
       </button>
     );
   }
