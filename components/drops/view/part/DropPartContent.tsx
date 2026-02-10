@@ -11,6 +11,7 @@ interface DropPartContentProps {
   readonly referencedNfts: ApiDropReferencedNFT[];
   readonly partContent: string | null;
   readonly onQuoteClick: (drop: any) => void;
+  readonly currentDropId?: string | undefined;
   readonly partMedias: Array<{
     mimeType: string;
     mediaSrc: string;
@@ -24,6 +25,7 @@ const DropPartContent: React.FC<DropPartContentProps> = ({
   referencedNfts,
   partContent,
   onQuoteClick,
+  currentDropId,
   partMedias,
   currentPartCount,
 }) => {
@@ -36,6 +38,7 @@ const DropPartContent: React.FC<DropPartContentProps> = ({
           referencedNfts={referencedNfts}
           partContent={partContent}
           onQuoteClick={onQuoteClick}
+          currentDropId={currentDropId}
         />
       </div>
       {!!partMedias.length && (

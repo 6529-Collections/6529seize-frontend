@@ -28,6 +28,10 @@ interface LinkRendererConfig {
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
   readonly tweetPreviewMode?: TweetPreviewMode | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 interface LinkRenderer {
@@ -43,6 +47,8 @@ interface LinkRenderer {
       ExtraProps
   ) => ReactElement | null;
 }
+
+export const DEFAULT_MAX_EMBED_DEPTH = 4;
 
 const findMatch = (
   handlers: readonly LinkHandler[],
@@ -62,8 +68,19 @@ export const createLinkRenderer = ({
   currentDropId,
   hideLinkPreviews = false,
   tweetPreviewMode,
+  embedPath,
+  quotePath,
+  embedDepth = 0,
+  maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
 }: LinkRendererConfig): LinkRenderer => {
-  const seizeHandlers = createSeizeHandlers({ onQuoteClick, currentDropId });
+  const seizeHandlers = createSeizeHandlers({
+    onQuoteClick,
+    currentDropId,
+    embedPath: embedPath ?? [],
+    quotePath: quotePath ?? [],
+    embedDepth,
+    maxEmbedDepth,
+  });
   const handlers = createLinkHandlers(
     tweetPreviewMode ? { tweetPreviewMode } : undefined
   );

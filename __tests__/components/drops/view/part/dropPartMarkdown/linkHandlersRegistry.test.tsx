@@ -152,6 +152,10 @@ jest.mock("@/helpers/SeizeLinkParser", () => {
 });
 
 const onQuoteClick = jest.fn();
+const QUOTE_WAVE_ID = "123e4567-e89b-12d3-a456-426614174000";
+const QUOTE_SERIAL_NO = "5";
+const QUOTE_HREF = `https://6529.io/waves/${QUOTE_WAVE_ID}?serialNo=${QUOTE_SERIAL_NO}`;
+const QUOTE_CYCLE_KEY = `${QUOTE_WAVE_ID}:${QUOTE_SERIAL_NO}`;
 
 const baseRenderer = () => createLinkRenderer({ onQuoteClick });
 
@@ -229,9 +233,7 @@ describe("createLinkRenderer", () => {
 
   it("renders seize quote previews when matching internal links", () => {
     const { renderAnchor } = baseRenderer();
-    const element = renderAnchor({
-      href: "https://6529.io/waves/123e4567-e89b-12d3-a456-426614174000?serialNo=5",
-    } as any);
+    const element = renderAnchor({ href: QUOTE_HREF } as any);
     render(<>{element}</>);
     expect(screen.getByTestId("seize-quote")).toBeInTheDocument();
   });
@@ -261,6 +263,51 @@ describe("createLinkRenderer", () => {
     const { renderAnchor } = createLinkRenderer({
       onQuoteClick,
       currentDropId: "def",
+    });
+    const element = renderAnchor({
+      href: "https://6529.io/waves/abc?drop=def",
+    } as any);
+    const { container } = render(<>{element}</>);
+
+    expect(screen.queryByTestId("drop-card")).toBeNull();
+    expect(
+      container.querySelector('a[href="/waves/abc?drop=def"]')
+    ).not.toBeNull();
+  });
+
+  it("falls back to a simple anchor when quote link exceeds max embed depth", () => {
+    const { renderAnchor } = createLinkRenderer({
+      onQuoteClick,
+      embedDepth: 4,
+      maxEmbedDepth: 4,
+    });
+    const element = renderAnchor({ href: QUOTE_HREF } as any);
+    const { container } = render(<>{element}</>);
+
+    expect(screen.queryByTestId("seize-quote")).toBeNull();
+    expect(
+      container.querySelector(`a[href="/waves/${QUOTE_WAVE_ID}?serialNo=5"]`)
+    ).not.toBeNull();
+  });
+
+  it("falls back to a simple anchor when quote link creates a cycle", () => {
+    const { renderAnchor } = createLinkRenderer({
+      onQuoteClick,
+      quotePath: [QUOTE_CYCLE_KEY],
+    });
+    const element = renderAnchor({ href: QUOTE_HREF } as any);
+    const { container } = render(<>{element}</>);
+
+    expect(screen.queryByTestId("seize-quote")).toBeNull();
+    expect(
+      container.querySelector(`a[href="/waves/${QUOTE_WAVE_ID}?serialNo=5"]`)
+    ).not.toBeNull();
+  });
+
+  it("falls back to a simple anchor when drop link matches embed path", () => {
+    const { renderAnchor } = createLinkRenderer({
+      onQuoteClick,
+      embedPath: ["def"],
     });
     const element = renderAnchor({
       href: "https://6529.io/waves/abc?drop=def",

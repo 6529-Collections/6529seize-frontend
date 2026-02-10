@@ -26,6 +26,10 @@ function areEqual(
     "textSize",
     "currentDropId",
     "hideLinkPreviews",
+    "embedPath",
+    "quotePath",
+    "embedDepth",
+    "maxEmbedDepth",
   ];
 
   for (const key of propsToCheck) {
