@@ -186,7 +186,6 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({
                 showReplyAndQuote={false}
                 location={DropLocation.WAVE}
                 onReply={() => {}}
-
                 previousDrop={null}
                 nextDrop={null}
                 onQuoteClick={() => {}}

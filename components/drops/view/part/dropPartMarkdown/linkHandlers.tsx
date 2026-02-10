@@ -28,6 +28,10 @@ interface LinkRendererConfig {
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
   readonly tweetPreviewMode?: TweetPreviewMode | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 interface LinkRenderer {
@@ -43,6 +47,8 @@ interface LinkRenderer {
       ExtraProps
   ) => ReactElement | null;
 }
+
+export const DEFAULT_MAX_EMBED_DEPTH = 4;
 
 const findMatch = (
   handlers: readonly LinkHandler[],
@@ -61,12 +67,24 @@ export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
   hideLinkPreviews = false,
-  tweetPreviewMode,
+  tweetPreviewMode = "auto",
+  embedPath,
+  quotePath,
+  embedDepth = 0,
+  maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
 }: LinkRendererConfig): LinkRenderer => {
-  const seizeHandlers = createSeizeHandlers({ onQuoteClick, currentDropId });
-  const handlers = createLinkHandlers(
-    tweetPreviewMode ? { tweetPreviewMode } : undefined
-  );
+  const seizeHandlers = createSeizeHandlers({
+    onQuoteClick,
+    currentDropId,
+    embedPath: embedPath ?? [],
+    quotePath: quotePath ?? [],
+    embedDepth,
+    maxEmbedDepth,
+  });
+  const handlers = createLinkHandlers({
+    tweetPreviewMode,
+    linkPreviewVariant: "chat",
+  });
 
   const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
     if (typeof src !== "string") {
@@ -107,10 +125,7 @@ export const createLinkRenderer = ({
 
     const tryRenderOpenGraph = () => {
       try {
-        const ogContent = renderOpenGraph();
-        if (ogContent) {
-          return ogContent;
-        }
+        return renderOpenGraph();
       } catch {
         // swallow and fall back to default anchor
       }
@@ -135,9 +150,6 @@ export const createLinkRenderer = ({
     const renderFromHandler = (handler: LinkHandler): ReactElement | null => {
       try {
         const rendered = handler.render(stableHref);
-        if (rendered === null || rendered === undefined) {
-          throw new Error("Link handler returned no content");
-        }
         return renderHandlerContent(rendered);
       } catch {
         const ogContent = tryRenderOpenGraph();

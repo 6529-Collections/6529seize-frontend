@@ -21,6 +21,7 @@ interface PartConfigWave {
 }
 
 interface PartConfig {
+  readonly dropId: string;
   readonly part: ApiDropPart;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
   readonly mentionedWaves: Array<ApiMentionedWave>;
@@ -58,6 +59,7 @@ export default function CreateDropStormViewPartQuote({
       return null;
     }
     return {
+      dropId: drop.id,
       part,
       mentionedUsers: drop.mentioned_users,
       mentionedWaves: drop.mentioned_waves,
@@ -80,6 +82,7 @@ export default function CreateDropStormViewPartQuote({
     <div className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-2">
       {!!partConfig && (
         <DropPart
+          dropId={partConfig.dropId}
           profile={profile}
           mentionedUsers={partConfig.mentionedUsers}
           mentionedWaves={partConfig.mentionedWaves}

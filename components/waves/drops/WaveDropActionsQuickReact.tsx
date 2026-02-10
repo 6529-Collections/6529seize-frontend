@@ -11,11 +11,7 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import Image from "next/image";
-import React, {
-  useCallback,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import React, { useCallback, useMemo, useSyncExternalStore } from "react";
 import { Tooltip } from "react-tooltip";
 
 const MAX_QUICK_REACTIONS = 3;

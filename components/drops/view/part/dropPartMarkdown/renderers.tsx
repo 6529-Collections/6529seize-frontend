@@ -12,6 +12,13 @@ import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import { ensureTwitterLink } from "./twitter";
 
+interface SeizeQuoteRenderOptions {
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
+}
+
 const TweetFallback = ({ href }: { href: string }) => (
   <a
     href={href}
@@ -34,7 +41,7 @@ const renderTweetEmbed = (
   const renderFallback = () => <TweetFallback href={normalizedHref} />;
   return (
     <LinkHandlerFrame href={normalizedHref}>
-      <div className="tw-min-w-0 tw-flex-1">
+      <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]">
         <ErrorBoundary fallbackRender={() => renderFallback()}>
           <ExpandableTweetPreview
             href={normalizedHref}
@@ -50,18 +57,45 @@ const renderTweetEmbed = (
   );
 };
 
-const renderGifEmbed = (url: string): ReactElement => (
-  <img
-    src={url}
-    alt={url}
-    className="tw-h-auto tw-max-h-[25rem] tw-max-w-[100%]"
-  />
-);
+const CHAT_GIF_HEIGHT = 180;
+
+interface GifEmbedOptions {
+  readonly fixedSize?: boolean | undefined;
+}
+
+const renderGifEmbed = (
+  url: string,
+  options?: GifEmbedOptions
+): ReactElement => {
+  if (options?.fixedSize) {
+    return (
+      // Use fixed height to prevent vertical layout shift while preserving GIF aspect ratio.
+      <img
+        src={url}
+        alt="Embedded GIF"
+        className="tw-block tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
+        style={{ height: `${CHAT_GIF_HEIGHT}px` }}
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    // Markdown-style GIF embeds intentionally keep <img> for animation support.
+    <img
+      src={url}
+      alt="Embedded GIF"
+      className="tw-h-auto tw-max-h-[25rem] tw-max-w-[100%]"
+      loading="lazy"
+    />
+  );
+};
 
 const renderSeizeQuote = (
   quoteLinkInfo: SeizeQuoteLinkInfo,
   onQuoteClick: (drop: ApiDrop) => void,
-  href: string
+  href: string,
+  options?: SeizeQuoteRenderOptions
 ): ReactElement | null => {
   const { waveId, serialNo, dropId } = quoteLinkInfo;
   if (serialNo) {
@@ -71,6 +105,10 @@ const renderSeizeQuote = (
           serialNo={Number.parseInt(serialNo, 10)}
           waveId={waveId}
           onQuoteClick={onQuoteClick}
+          embedPath={options?.embedPath}
+          quotePath={options?.quotePath}
+          embedDepth={options?.embedDepth}
+          maxEmbedDepth={options?.maxEmbedDepth}
         />
       </LinkHandlerFrame>
     );
@@ -92,6 +130,10 @@ const renderSeizeQuote = (
           partId={1}
           maybeDrop={null}
           onQuoteClick={onQuoteClick}
+          embedPath={options?.embedPath}
+          quotePath={options?.quotePath}
+          embedDepth={options?.embedDepth}
+          maxEmbedDepth={options?.maxEmbedDepth}
         />
       </LinkHandlerFrame>
     );

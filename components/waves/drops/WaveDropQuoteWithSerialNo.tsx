@@ -13,12 +13,20 @@ interface WaveDropQuoteWithSerialNoProps {
   readonly serialNo: number;
   readonly waveId: string;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
   serialNo,
   waveId,
   onQuoteClick,
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }) => {
   const { data } = useQuery<ApiWaveDropsFeed>({
     queryKey: [
@@ -53,7 +61,17 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
       setDrop({ ...targetDrop, wave: data.wave });
     }
   }, [data]);
-  return <WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />;
+  return (
+    <WaveDropQuote
+      drop={drop}
+      partId={1}
+      onQuoteClick={onQuoteClick}
+      embedPath={embedPath}
+      quotePath={quotePath}
+      embedDepth={embedDepth}
+      maxEmbedDepth={maxEmbedDepth}
+    />
+  );
 };
 
 export default WaveDropQuoteWithSerialNo;

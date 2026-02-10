@@ -64,7 +64,7 @@ export default function NotificationAllDrops({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
       <NotificationHeader
         author={notification.related_identity}
         actions={

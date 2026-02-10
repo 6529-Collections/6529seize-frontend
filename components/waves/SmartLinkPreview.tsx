@@ -84,7 +84,13 @@ export default function SmartLinkPreview({
   const { variant: contextVariant } = useLinkPreviewContext();
   const resolvedVariant = variant ?? contextVariant;
   const stableHref = ensureStableSeizeLink(href);
-  const handlers = useMemo(() => createLinkHandlers(), []);
+  const handlers = useMemo(
+    () =>
+      createLinkHandlers({
+        linkPreviewVariant: resolvedVariant,
+      }),
+    [resolvedVariant]
+  );
   const parsedUrl = parseUrl(stableHref);
   const fallbackRenderer =
     renderFallback ?? (() => <DefaultFallback href={stableHref} />);

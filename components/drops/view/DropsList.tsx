@@ -223,7 +223,6 @@ const DropsList = memo(
               showWaveInfo={getItemData.showWaveInfo}
               activeDrop={getItemData.activeDrop}
               onReply={getItemData.handleReply}
-
               location={location}
               showReplyAndQuote={getItemData.showReplyAndQuote}
               onQuoteClick={getItemData.onQuoteClick}
