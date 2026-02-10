@@ -132,7 +132,6 @@ interface WaveDropProps {
   readonly location: DropLocation;
   readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
@@ -150,7 +149,6 @@ const WaveDrop = ({
   location,
   dropViewDropId,
   onReply,
-  onQuote,
   onReplyClick,
   onQuoteClick,
   onDropContentClick,
@@ -266,15 +264,6 @@ const WaveDrop = ({
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]!.part_id });
   }, [onReply, drop, activePartIndex, editingDropId, dispatch]);
-
-  const handleOnQuote = useCallback(() => {
-    // Cancel any active edit mode first
-    if (editingDropId) {
-      dispatch(setEditingDropId(null));
-    }
-    setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex]!.part_id });
-  }, [onQuote, drop, activePartIndex, editingDropId, dispatch]);
 
   const handleOnAddReaction = useCallback(() => {
     // Cancel any active edit mode first
@@ -449,7 +438,6 @@ const WaveDrop = ({
           drop={drop}
           activePartIndex={activePartIndex}
           onReply={handleOnReply}
-          onQuote={handleOnQuote}
           onEdit={handleOnEdit}
         />
       )}
@@ -496,7 +484,6 @@ const WaveDrop = ({
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
-          onQuote={handleOnQuote}
           onAddReaction={handleOnAddReaction}
           onEdit={handleOnEdit}
           onBoostAnimation={handleMobileBoostAnimation}

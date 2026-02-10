@@ -42,13 +42,6 @@ interface WaveDropsAllProps {
     drop: ApiDrop;
     partId: number;
   }) => void;
-  readonly onQuote: ({
-    drop,
-    partId,
-  }: {
-    drop: ApiDrop;
-    partId: number;
-  }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
   readonly dividerSerialNo?: number | null | undefined;
@@ -62,7 +55,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   waveId,
   dropId,
   onReply,
-  onQuote,
   activeDrop,
   initialDrop,
   dividerSerialNo,
@@ -350,7 +342,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           bottomAnchorCallbackRef={bottomAnchorCallbackRef}
           onTopIntersection={handleTopIntersection}
           onReply={onReply}
-          onQuote={onQuote}
           queueSerialTarget={queueSerialTarget}
           activeDrop={activeDrop}
           serialTarget={serialTarget}
@@ -383,7 +374,6 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   waveId,
   dropId,
   onReply,
-  onQuote,
   activeDrop,
   initialDrop,
   dividerSerialNo,
@@ -402,7 +392,6 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         waveId={waveId}
         dropId={dropId}
         onReply={onReply}
-        onQuote={onQuote}
         activeDrop={activeDrop}
         initialDrop={initialDrop}
         dividerSerialNo={dividerSerialNo}

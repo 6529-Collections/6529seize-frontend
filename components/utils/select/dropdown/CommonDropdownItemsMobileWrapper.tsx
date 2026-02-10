@@ -95,7 +95,7 @@ export default function CommonDropdownItemsMobileWrapper({
                     </div>
                   </TransitionChild>
                   <div
-                    className="tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 tw-pt-6"
+                    className="tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 tw-pt-4"
                     style={{
                       maxHeight: "calc(100vh - 8rem)",
                       paddingBottom: "env(safe-area-inset-bottom,0px)",

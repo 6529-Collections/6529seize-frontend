@@ -70,7 +70,6 @@ interface NotificationDropReactedGroupProps {
   readonly group: GroupedReactionsItem;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onMarkAsRead?: ((notificationIds: number[]) => void) | undefined;
 }
@@ -79,7 +78,6 @@ export default function NotificationDropReactedGroup({
   group,
   activeDrop,
   onReply,
-  onQuote,
   onDropContentClick,
   onMarkAsRead,
 }: NotificationDropReactedGroupProps) {
@@ -178,7 +176,6 @@ export default function NotificationDropReactedGroup({
         drop={drop}
         activeDrop={activeDrop}
         onReply={onReply}
-        onQuote={onQuote}
         onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
         onQuoteClick={createQuoteClickHandler(isDirectMessage)}
         onDropContentClick={handleDropContentClick}

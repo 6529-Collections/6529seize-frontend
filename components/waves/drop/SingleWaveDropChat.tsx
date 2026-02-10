@@ -82,19 +82,6 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                       action: ActiveDropAction.REPLY,
                     })
                   }
-                  onQuote={({
-                    drop,
-                    partId,
-                  }: {
-                    drop: ApiDrop;
-                    partId: number;
-                  }) =>
-                    handleDropAction({
-                      drop,
-                      partId,
-                      action: ActiveDropAction.QUOTE,
-                    })
-                  }
                   activeDrop={activeDrop}
                   initialDrop={null}
                   unreadCount={wave.metrics.your_unread_drops_count}
