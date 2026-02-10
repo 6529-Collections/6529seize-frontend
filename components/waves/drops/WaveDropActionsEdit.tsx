@@ -46,7 +46,7 @@ export default function WaveDropActionsEdit({
         aria-label="Edit"
         data-tooltip-id={`edit-drop-${drop.id}`}
       >
-        <PencilIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
+        <PencilIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-p-[1px] tw-transition tw-duration-300 tw-ease-out" />
       </button>
       <Tooltip
         id={`edit-drop-${drop.id}`}

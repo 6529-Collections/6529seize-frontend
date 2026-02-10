@@ -20,10 +20,12 @@ import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
+  readonly onOpenChange?: (isOpen: boolean) => void;
 }
 
 export default function WaveDropActionsMore({
   drop,
+  onOpenChange,
 }: WaveDropActionsMoreProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -34,10 +36,15 @@ export default function WaveDropActionsMore({
   const isAuthor =
     connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
 
-  const closeDropdown = () => setIsOpen(false);
+  const handleOpenChange = (newIsOpen: boolean) => {
+    setIsOpen(newIsOpen);
+    onOpenChange?.(newIsOpen);
+  };
+
+  const closeDropdown = () => handleOpenChange(false);
 
   const handleDeleteClick = () => {
-    setIsOpen(false);
+    handleOpenChange(false);
     setIsDeleteModalOpen(true);
   };
 
@@ -53,7 +60,7 @@ export default function WaveDropActionsMore({
       <button
         ref={buttonRef}
         className="tw-flex tw-h-7 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => handleOpenChange(!isOpen)}
         aria-label="More actions"
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -84,7 +91,7 @@ export default function WaveDropActionsMore({
       )}
       <CommonDropdownItemsDefaultWrapper
         isOpen={isOpen}
-        setOpen={setIsOpen}
+        setOpen={handleOpenChange}
         buttonRef={buttonRef}
       >
         <li className="tw-list-none">

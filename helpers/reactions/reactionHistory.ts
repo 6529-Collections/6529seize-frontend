@@ -1,9 +1,9 @@
-import { safeLocalStorage } from "../safeLocalStorage";
+import { FrequentlyUsed, Store } from "emoji-mart";
 
-const STORAGE_KEY = "seize-reaction-counts";
+const STORAGE_KEY = "emoji-mart.frequently";
 const DEFAULT_REACTION = ":+1:";
 
-let listeners = new Set<() => void>();
+const listeners = new Set<() => void>();
 
 function emitChange() {
   for (const listener of listeners) {
@@ -11,55 +11,22 @@ function emitChange() {
   }
 }
 
-type ReactionCounts = Record<string, number>;
-
-function getReactionCounts(): ReactionCounts {
-  const stored = safeLocalStorage.getItem(STORAGE_KEY);
-  if (!stored) return {};
-  try {
-    return JSON.parse(stored) as ReactionCounts;
-  } catch {
-    return {};
-  }
-}
-
 export function recordReaction(emoji: string): void {
-  const DECAY_FACTOR = 0.95;
-  const counts = getReactionCounts();
-  // Decay all existing scores
-  for (const key of Object.keys(counts)) {
-    counts[key] = counts[key]! * DECAY_FACTOR;
-  }
-  // Boost the used emoji
-  counts[emoji] = (counts[emoji] ?? 0) + 1;
-  // Prune near-zero entries to keep storage clean
-  for (const key of Object.keys(counts)) {
-    if (counts[key]! < 0.01) delete counts[key];
-  }
-  safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
+  const id = emoji.replaceAll(":", "");
+  FrequentlyUsed.add({ id });
   emitChange();
 }
 
-export function getMostUsedReaction(): string {
-  return getTopReactions(1)[0]!;
-}
-
 export function getTopReactions(limit: number): string[] {
-  const counts = getReactionCounts();
-  const entries = Object.entries(counts);
-  if (entries.length === 0) return [DEFAULT_REACTION];
+  const freq = Store.get("frequently") as Record<string, number> | null;
+  if (!freq) return [DEFAULT_REACTION];
 
-  const sorted = entries
+  const sorted = Object.entries(freq)
     .toSorted(([, a], [, b]) => b - a)
     .slice(0, limit)
-    .map(([emoji]) => emoji);
+    .map(([id]) => `:${id}:`);
 
   return sorted.length > 0 ? sorted : [DEFAULT_REACTION];
-}
-
-// For useSyncExternalStore - returns default on server
-export function getMostUsedReactionServer(): string {
-  return DEFAULT_REACTION;
 }
 
 // Subscribe to storage changes (for useSyncExternalStore)
@@ -78,7 +45,7 @@ export function subscribeToReactionStore(
 }
 
 export function getReactionSnapshot(): string {
-  return safeLocalStorage.getItem(STORAGE_KEY) ?? "";
+  return localStorage.getItem(STORAGE_KEY) ?? "";
 }
 
 export function getReactionSnapshotServer(): string {

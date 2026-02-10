@@ -4,6 +4,7 @@ import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useState } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
@@ -29,6 +30,7 @@ export default function WaveDropActions({
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
   const compact = useCompactMode();
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
 
   // Hide voting for participation drops in memes waves
   const shouldShowVoting =
@@ -41,7 +43,11 @@ export default function WaveDropActions({
     <div
       className={`tw-absolute tw-right-2 tw-z-20 ${
         compact ? "-tw-top-4" : "tw-top-0"
-      } tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out desktop-hover:group-hover:tw-opacity-100`}
+      } tw-transition-opacity tw-duration-200 tw-ease-in-out ${
+        isMoreDropdownOpen
+          ? "tw-opacity-100"
+          : "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-opacity-100"
+      }`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
@@ -56,7 +62,10 @@ export default function WaveDropActions({
           {onEdit && drop.drop_type !== ApiDropType.Participatory && (
             <WaveDropActionsEdit drop={drop} onEdit={onEdit} />
           )}
-          <WaveDropActionsMore drop={drop} />
+          <WaveDropActionsMore
+            drop={drop}
+            onOpenChange={setIsMoreDropdownOpen}
+          />
         </div>
         {shouldShowVoting && <WaveDropActionsRate drop={drop} />}
       </div>

@@ -9,7 +9,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { FC } from "react";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
@@ -66,22 +66,21 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   const copyToClipboard = () => {
     if (isTemporaryDrop) return;
 
-    const waveDetails =
-      (drop.wave as unknown as {
-        chat?:
-          | {
-              scope?:
-                | {
-                    group?:
-                      | { is_direct_message?: boolean | undefined }
-                      | undefined;
-                  }
-                | undefined;
-            }
-          | undefined;
-      }) ?? undefined;
+    const waveDetails = drop.wave as unknown as {
+      chat?:
+        | {
+            scope?:
+              | {
+                  group?:
+                    | { is_direct_message?: boolean | undefined }
+                    | undefined;
+                }
+              | undefined;
+          }
+        | undefined;
+    };
     const isDirectMessage =
-      waveDetails?.chat?.scope?.group?.is_direct_message ?? false;
+      waveDetails.chat?.scope?.group?.is_direct_message ?? false;
     const dropLink = `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
       waveId: drop.wave.id,
       serialNo: drop.serial_no,
@@ -89,8 +88,8 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       isApp: false,
     })}`;
 
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(dropLink).then(() => {
+    if (typeof navigator.clipboard.writeText === "function") {
+      void navigator.clipboard.writeText(dropLink).then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       });
@@ -101,6 +100,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       textArea.style.left = "-9999px";
       document.body.appendChild(textArea);
       textArea.select();
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Fallback for older browsers
       document.execCommand("copy");
       document.body.removeChild(textArea);
       setCopied(true);
@@ -109,12 +109,13 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     closeMenu();
   };
 
-  const getIsAuthor = () =>
-    connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
-  const [isAuthor, setIsAuthor] = useState(getIsAuthor());
-  useEffect(() => setIsAuthor(getIsAuthor()), [connectedProfile]);
+  const isAuthor = useMemo(
+    () =>
+      connectedProfile?.handle === drop.author.handle && !activeProfileProxy,
+    [connectedProfile, activeProfileProxy, drop.author.handle]
+  );
 
-  const getShowOptions = () => {
+  const showOptions = useMemo(() => {
     if (!connectedProfile?.handle) {
       return false;
     }
@@ -127,13 +128,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     }
 
     return connectedProfile.handle === drop.author.handle;
-  };
-
-  const [showOptions, setShowOptions] = useState(getShowOptions());
-  useEffect(
-    () => setShowOptions(getShowOptions()),
-    [connectedProfile, activeProfileProxy]
-  );
+  }, [connectedProfile, activeProfileProxy, drop.id, drop.author.handle]);
 
   const closeMenu = () => setOpen(false);
 
@@ -144,13 +139,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           longPressTriggered && "tw-select-none"
         }`}
       >
-        {showOptions && (
-          <WaveDropActionsToggleLinkPreview
-            drop={extendedDrop}
-            isMobile={true}
-            onToggle={closeMenu}
-          />
-        )}
         <WaveDropActionsQuickReact
           drop={extendedDrop}
           isMobile
@@ -257,6 +245,13 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             drop={drop}
             isMobile={true}
             onRated={closeMenu}
+          />
+        )}
+        {showOptions && (
+          <WaveDropActionsToggleLinkPreview
+            drop={extendedDrop}
+            isMobile={true}
+            onToggle={closeMenu}
           />
         )}
         {showOptions &&
