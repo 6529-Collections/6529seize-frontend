@@ -7,5 +7,5 @@ export default function MetricsPage() {
 }
 
 export function generateMetadata(): Metadata {
-  return getAppMetadata({ title: "Metrics", description: "Metrics dashboard" });
+  return getAppMetadata({ title: "Health", description: "Metrics dashboard" });
 }
