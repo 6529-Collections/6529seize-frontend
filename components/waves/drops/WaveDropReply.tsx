@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -8,6 +9,7 @@ import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";
 import ContentDisplay from "./ContentDisplay";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { parseStandaloneMediaUrl } from "./media-utils";
 
 interface WaveDropReplyProps {
   readonly dropId: string;
@@ -25,11 +27,32 @@ export default function WaveDropReply({
   maybeDrop,
   onReplyClick,
 }: WaveDropReplyProps) {
+  const fixedReplyHeightClasses = "tw-h-[24px] tw-min-h-[24px] tw-max-h-[24px]";
   const { drop, content, isLoading } = useDropContent(
     dropId,
     dropPartId,
     maybeDrop
   );
+  const replyPreviewContent = useMemo(() => {
+    if (content.apiMedia.length > 0 || content.segments.length !== 1) {
+      return content;
+    }
+
+    const [segment] = content.segments;
+    if (segment?.type !== "text") {
+      return content;
+    }
+
+    const standaloneMedia = parseStandaloneMediaUrl(segment.content);
+    if (!standaloneMedia) {
+      return content;
+    }
+
+    return {
+      segments: [],
+      apiMedia: [standaloneMedia],
+    };
+  }, [content]);
 
   const renderDropContent = () => {
     if (isLoading) {
@@ -41,7 +64,7 @@ export default function WaveDropReply({
     }
 
     return (
-      <div className="tw-flex tw-gap-x-1.5">
+      <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
         <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
           {drop.author.pfp ? (
             <Image
@@ -55,17 +78,19 @@ export default function WaveDropReply({
             <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
           )}
         </div>
-        <div className="tw-flex-1">
-          <p className="tw-mb-0 tw-flex xl:tw-pr-24">
+        <div className="tw-min-w-0 tw-flex-1">
+          <p className="tw-mb-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
             <Link
               href={`/${drop.author.handle}`}
-              className="tw-mr-1 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+              className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
             >
               {drop.author.handle}
             </Link>
             <ContentDisplay
-              content={content}
+              content={replyPreviewContent}
               onClick={() => onReplyClick(drop.serial_no)}
+              className="tw-min-w-0 tw-flex-1 tw-overflow-hidden"
+              textClassName="tw-min-w-0 tw-overflow-hidden"
             />
           </p>
         </div>
@@ -80,7 +105,12 @@ export default function WaveDropReply({
         style={{ height: "calc(100% - 3px)" }}
       ></div>
       <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
-        {renderDropContent()}
+        <div
+          data-testid="wave-drop-reply-fixed-container"
+          className={`${fixedReplyHeightClasses} tw-flex tw-w-full tw-items-center tw-overflow-hidden`}
+        >
+          {renderDropContent()}
+        </div>
       </div>
     </div>
   );
