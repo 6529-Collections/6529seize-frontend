@@ -135,8 +135,12 @@ export default function ManifoldMintingWidget(
   const getSelectedMerkleProofs = () => {
     const selectedMerkleProofs: ManifoldMerkleProof[] = [];
     for (let i = 0; i < merkleProofsMints.length; i++) {
+      const proof = merkleProofs[i];
+      if (!proof) {
+        continue;
+      }
       if (!merkleProofsMints[i]) {
-        selectedMerkleProofs.push(merkleProofs[i]!);
+        selectedMerkleProofs.push(proof);
       }
       if (selectedMerkleProofs.length === mintCount) {
         break;
@@ -254,6 +258,15 @@ export default function ManifoldMintingWidget(
   const onMint = () => {
     setMintError("");
     setMintStatus(<></>);
+
+    if (props.claim.phase === ManifoldPhase.ALLOWLIST) {
+      const selectedProofs = getSelectedMerkleProofs();
+      if (selectedProofs.length < mintCount) {
+        setMintError("No allowlist spots in current phase for this address");
+        return;
+      }
+    }
+
     const value = getValue();
     const args = getMintArgs();
     mintWrite.writeContract({
