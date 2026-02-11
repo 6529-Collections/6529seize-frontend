@@ -293,7 +293,7 @@ function ClaimCardContent({
           {mediaTypeLabel}
         </div>
         {imageMissing && (
-          <span className="tw-text-[11px] tw-leading-tight tw-text-amber-500/90">
+          <span className="tw-text-xs tw-leading-tight tw-text-amber-500/90">
             *image missing
           </span>
         )}

@@ -623,7 +623,7 @@ export default function DropControlLaunchClaimPageClient({
           ))}
 
           <LaunchAccordionSection
-            title="Research Airdrop"
+            title="Airdrop to Research"
             subtitle={
               !isInitialized
                 ? "Waiting for Initialization"
