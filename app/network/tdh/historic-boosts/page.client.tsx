@@ -121,7 +121,7 @@ function IntroLine(props: PropsWithChildren) {
 const NAV_LINKS = [
   { href: "/network/tdh", label: "TDH" },
   { href: "/network/definitions", label: "Definitions" },
-  { href: "/network/metrics/network-tdh", label: "Network Stats" },
+  { href: "/network/health/network-tdh", label: "Network Stats" },
   { href: "/network/levels", label: "Levels" },
 ] as const;
 
