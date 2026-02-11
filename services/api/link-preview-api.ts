@@ -68,12 +68,24 @@ export type GoogleWorkspaceLinkPreview =
   | GoogleSheetsLinkPreview
   | GoogleSlidesLinkPreview;
 
+interface ManifoldListingDetails {
+  readonly listingId: string;
+  readonly creatorHandle?: string | null | undefined;
+  readonly priceEth?: string | null | undefined;
+}
+
+export interface ManifoldListingLinkPreview extends LinkPreviewBase {
+  readonly type: "manifold.listing";
+  readonly manifold: ManifoldListingDetails;
+}
+
 interface GenericLinkPreviewResponse extends LinkPreviewBase {
   readonly type?: string | null | undefined;
 }
 
 export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
+  | ManifoldListingLinkPreview
   | GoogleWorkspaceLinkPreview;
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -86,13 +98,27 @@ const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
 
 const normalizeUrl = (url: string): string => url.trim();
 
+interface OpenGraphErrorBody {
+  readonly error: string;
+}
+
+const hasErrorMessage = (value: unknown): value is OpenGraphErrorBody => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const maybeError = (value as Record<string, unknown>)["error"];
+
+  return typeof maybeError === "string" && maybeError.length > 0;
+};
+
 export const fetchLinkPreview = async (
   url: string
 ): Promise<LinkPreviewResponse> => {
   const normalizedUrl = normalizeUrl(url);
 
   if (!normalizedUrl) {
-    throw new Error('A valid URL is required to fetch link preview metadata.');
+    throw new Error("A valid URL is required to fetch link preview metadata.");
   }
 
   const cachedResponse = linkPreviewCache.get(normalizedUrl);
@@ -103,14 +129,14 @@ export const fetchLinkPreview = async (
   const params = new URLSearchParams({ url: normalizedUrl });
 
   const requestPromise = fetch(`/api/open-graph?${params.toString()}`, {
-    headers: { Accept: 'application/json' },
+    headers: { Accept: "application/json" },
   })
     .then(async (response) => {
       if (!response.ok) {
-        let errorMessage = 'Failed to fetch link preview metadata.';
+        let errorMessage = "Failed to fetch link preview metadata.";
         try {
-          const body = await response.json();
-          if (body && typeof body.error === 'string' && body.error) {
+          const body: unknown = await response.json();
+          if (hasErrorMessage(body)) {
             errorMessage = body.error;
           }
         } catch {

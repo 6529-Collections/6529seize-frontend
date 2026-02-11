@@ -44,6 +44,10 @@ jest.mock("@/app/api/open-graph/compound/service", () => ({
   createCompoundPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/manifold/service", () => ({
+  createManifoldPlan: jest.fn(() => null),
+}));
+
 jest.mock("@/app/api/open-graph/ens", () => ({
   detectEnsTarget: jest.fn(),
   fetchEnsPreview: jest.fn(),
@@ -63,6 +67,9 @@ let guard: {
 };
 let compound: {
   createCompoundPlan: jest.Mock;
+};
+let manifold: {
+  createManifoldPlan: jest.Mock;
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 let ensRouteModule: {
@@ -94,6 +101,11 @@ async function loadRoute(): Promise<void> {
   ) as {
     createCompoundPlan: jest.Mock;
   };
+  manifold = jest.requireMock(
+    "../../../app/api/open-graph/manifold/service"
+  ) as {
+    createManifoldPlan: jest.Mock;
+  };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
     detectEnsTarget: jest.Mock;
     fetchEnsPreview: jest.Mock;
@@ -110,6 +122,7 @@ describe("open-graph API route", () => {
     await loadRoute();
     guard.assertPublicUrl.mockResolvedValue(undefined);
     mockFetchPublicUrl.mockReset();
+    manifold.createManifoldPlan.mockReturnValue(null);
     compound.createCompoundPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
@@ -133,7 +146,11 @@ describe("open-graph API route", () => {
 
   const createResponse = (
     status: number,
-    options: { headers?: Record<string, string> | undefined; body?: string | undefined; url?: string | undefined } = {}
+    options: {
+      headers?: Record<string, string> | undefined;
+      body?: string | undefined;
+      url?: string | undefined;
+    } = {}
   ) => {
     const headerEntries = Object.entries(options.headers ?? {}).reduce(
       (map, [key, value]) => map.set(key.toLowerCase(), value),
@@ -163,7 +180,10 @@ describe("open-graph API route", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(400);
-    expect(nextResponseJson).toHaveBeenCalledWith({ error: "missing" }, { status: 400 });
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      { error: "missing" },
+      { status: 400 }
+    );
   });
 
   it("returns preview data and caches successive requests", async () => {
@@ -189,14 +209,16 @@ describe("open-graph API route", () => {
     });
 
     mockFetch.mockResolvedValueOnce(fetchResponse);
-    mockFetchPublicUrl.mockImplementationOnce(async (url, init = {}, options = {}) => {
-      expect(url).toEqual(new URL("http://safe.example/article"));
-      expect(options).toEqual(
-        expect.objectContaining({ fetchImpl: expect.any(Function) })
-      );
-      const result = await options.fetchImpl?.(url, init);
-      return (result ?? fetchResponse) as any;
-    });
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(new URL("http://safe.example/article"));
+        expect(options).toEqual(
+          expect.objectContaining({ fetchImpl: expect.any(Function) })
+        );
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
     utils.buildResponse.mockReturnValue(responsePayload);
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
@@ -211,6 +233,13 @@ describe("open-graph API route", () => {
 
     expect(compound.createCompoundPlan).toHaveBeenCalledWith(
       new URL("http://safe.example/article")
+    );
+    expect(manifold.createManifoldPlan).toHaveBeenCalledWith(
+      new URL("http://safe.example/article"),
+      expect.objectContaining({
+        fetchHtml: expect.any(Function),
+        assertPublicUrl: expect.any(Function),
+      })
     );
     expect(first.status).toBe(200);
     expect(await first.json()).toEqual(responsePayload);
@@ -247,15 +276,17 @@ describe("open-graph API route", () => {
     });
 
     mockFetch.mockResolvedValueOnce(fetchResponse);
-    mockFetchPublicUrl.mockImplementationOnce(async (url, init = {}, options = {}) => {
-      expect(url).toEqual(
-        new URL(
-          "https://www.facebook.com/20531316728/posts/10154009990506729/"
-        )
-      );
-      const result = await options.fetchImpl?.(url, init);
-      return (result ?? fetchResponse) as any;
-    });
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(
+          new URL(
+            "https://www.facebook.com/20531316728/posts/10154009990506729/"
+          )
+        );
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
     utils.buildResponse.mockReturnValue(responsePayload);
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
@@ -317,10 +348,12 @@ describe("open-graph API route", () => {
     });
 
     mockFetch.mockResolvedValueOnce(fetchResponse);
-    mockFetchPublicUrl.mockImplementationOnce(async (url, init = {}, options = {}) => {
-      const result = await options.fetchImpl?.(url, init);
-      return (result ?? fetchResponse) as any;
-    });
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(googlePayload);
 
     const request = {
@@ -346,7 +379,9 @@ describe("open-graph API route", () => {
     });
 
     const request = {
-      nextUrl: new URL("https://app.local/api/open-graph?url=https://compound.finance"),
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://compound.finance"
+      ),
     } as any;
 
     const first = await GET(request);
@@ -360,6 +395,44 @@ describe("open-graph API route", () => {
     expect(mockFetchPublicUrl).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
     expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("uses manifold plan before compound when available", async () => {
+    const manifoldData = {
+      type: "manifold.listing",
+      title: "The Big Bang",
+    } as any;
+    const manifoldExecute = jest.fn(async () => ({
+      data: manifoldData,
+      ttl: 45_000,
+    }));
+
+    manifold.createManifoldPlan.mockReturnValue({
+      cacheKey: "manifold:test",
+      execute: manifoldExecute,
+    });
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:test",
+      execute: jest.fn(async () => ({
+        data: { kind: "compound" },
+        ttl: 45_000,
+      })),
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://manifold.xyz/@artist/id/123"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(manifoldData);
+    expect(manifoldExecute).toHaveBeenCalledTimes(1);
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("returns 502 when fetch fails unexpectedly", async () => {
@@ -392,7 +465,9 @@ describe("open-graph API route", () => {
     });
 
     const request = {
-      nextUrl: new URL("https://app.local/api/open-graph?url=https://compound.finance"),
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://compound.finance"
+      ),
     } as any;
 
     const response = await GET(request);

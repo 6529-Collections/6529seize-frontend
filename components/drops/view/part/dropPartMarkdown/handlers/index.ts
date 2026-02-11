@@ -5,6 +5,7 @@ import { createEnsHandler } from "./ens";
 import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
 import { createGoogleWorkspaceHandler } from "./googleWorkspace";
+import { createManifoldHandler } from "./manifold";
 import { createPepeHandler } from "./pepe";
 import { createTikTokHandler } from "./tiktok";
 import { createTwitterHandler } from "./twitter";
@@ -20,6 +21,7 @@ export const createLinkHandlers = (options?: {
   createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
+  createManifoldHandler(),
   createEnsHandler(),
   createCompoundHandler(),
   createTwitterHandler(options),
