@@ -51,4 +51,21 @@ describe("ManifoldItemPreviewCard", () => {
     expect(screen.getByText(title)).toBeInTheDocument();
     expect(container.querySelector('[class*="bg-gradient"]')).toBeNull();
   });
+
+  it("hides title row in image-only mode", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <ManifoldItemPreviewCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          title="The Big Bang"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          imageOnly={true}
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.getByTestId("manifold-item-media")).toBeInTheDocument();
+    expect(screen.queryByTestId("manifold-item-title")).toBeNull();
+  });
 });

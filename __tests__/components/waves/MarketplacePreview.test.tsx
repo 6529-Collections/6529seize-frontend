@@ -1,7 +1,7 @@
 import { render, waitFor } from "@testing-library/react";
 import React from "react";
 
-import NftMarketplacePreview from "@/components/waves/NftMarketplacePreview";
+import MarketplacePreview from "@/components/waves/MarketplacePreview";
 
 const mockOpenGraphPreview = jest.fn(() => <div data-testid="placeholder" />);
 const mockManifoldItemPreviewCard = jest.fn((props: any) => (
@@ -22,11 +22,38 @@ jest.mock("@/services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
 
-describe("NftMarketplacePreview", () => {
+describe("MarketplacePreview", () => {
   const { fetchLinkPreview } = require("@/services/api/link-preview-api");
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("renders marketplace card for manifold listing and forwards imageOnly", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    fetchLinkPreview.mockResolvedValue({
+      type: "manifold.listing",
+      title: "The Big Bang",
+      image: { url: "https://arweave.net/test-image.webp", type: "image/webp" },
+      manifold: {
+        listingId: "123",
+      },
+    });
+
+    render(<MarketplacePreview href={href} imageOnly={true} />);
+
+    await waitFor(() =>
+      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href,
+          title: "The Big Bang",
+          mediaUrl: "https://arweave.net/test-image.webp",
+          mediaMimeType: "image/webp",
+          imageOnly: true,
+        })
+      )
+    );
   });
 
   it("uses OpenSea opengraph overlay image as last resort when no alternative exists", async () => {
@@ -40,7 +67,7 @@ describe("NftMarketplacePreview", () => {
       },
     });
 
-    render(<NftMarketplacePreview href={href} />);
+    render(<MarketplacePreview href={href} />);
 
     await waitFor(() =>
       expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
@@ -75,7 +102,7 @@ describe("NftMarketplacePreview", () => {
       ],
     });
 
-    render(<NftMarketplacePreview href={href} />);
+    render(<MarketplacePreview href={href} />);
 
     await waitFor(() =>
       expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
@@ -99,7 +126,7 @@ describe("NftMarketplacePreview", () => {
       },
     });
 
-    render(<NftMarketplacePreview href={href} />);
+    render(<MarketplacePreview href={href} />);
 
     await waitFor(() =>
       expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
@@ -122,7 +149,7 @@ describe("NftMarketplacePreview", () => {
       description: "Beauty is the thread we use to sew our secrets shut.",
     });
 
-    render(<NftMarketplacePreview href={href} />);
+    render(<MarketplacePreview href={href} />);
 
     await waitFor(() =>
       expect(mockOpenGraphPreview).toHaveBeenCalledWith(
@@ -134,5 +161,10 @@ describe("NftMarketplacePreview", () => {
         })
       )
     );
+    const lastCall =
+      mockOpenGraphPreview.mock.calls[
+        mockOpenGraphPreview.mock.calls.length - 1
+      ]?.[0];
+    expect(lastCall).not.toHaveProperty("imageOnly");
   });
 });

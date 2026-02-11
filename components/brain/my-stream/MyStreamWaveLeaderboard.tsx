@@ -9,19 +9,21 @@ import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/Wav
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import { WaveLeaderboardDrops } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrops";
 import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery";
+import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
+import {
+  isLeaderboardViewMode,
+  type LeaderboardViewMode,
+} from "@/components/waves/leaderboard/types";
 import { useWave } from "@/hooks/useWave";
 import { useLayout } from "./layout/LayoutContext";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
-import { createBreakpoint } from "react-use";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
-
-const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
@@ -29,7 +31,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 }) => {
   const { isMemesWave } = useWave(wave);
   const { leaderboardViewStyle } = useLayout(); // Get pre-calculated style from context
-  const breakpoint = useBreakpoint();
 
   // Track mount status
   const mountedRef = useRef(true);
@@ -49,13 +50,13 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const viewPreferenceKey = `waveViewMode_${wave.id}`;
 
   // Determine the default view mode based on wave type
-  const defaultViewMode = isMemesWave ? "grid" : "list";
+  const defaultViewMode: LeaderboardViewMode = isMemesWave ? "grid" : "list";
 
   // Use our custom hook to manage view mode preference
-  const [viewMode, setViewMode] = useLocalPreference<"list" | "grid">(
+  const [viewMode, setViewMode] = useLocalPreference<LeaderboardViewMode>(
     viewPreferenceKey,
     defaultViewMode,
-    (value) => value === "list" || value === "grid"
+    isLeaderboardViewMode
   );
 
   // Use our custom hook for sort preference too
@@ -66,17 +67,48 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     (value) => Object.values(WaveDropsLeaderboardSort).includes(value)
   );
 
-  // MOBILE OPTIMIZATION: Force list view on small screens while preserving user preference
-  // On mobile (S breakpoint): always show list view regardless of user choice
-  // On desktop (MD breakpoint): respect user's chosen view mode
-  const effectiveViewMode: "list" | "grid" = useMemo(() => {
-    if (breakpoint === "S") {
-      // Mobile: always list view (but don't overwrite user preference)
-      return "list";
+  const effectiveViewMode = useMemo<LeaderboardViewMode>(() => {
+    if (!isMemesWave) {
+      return viewMode;
     }
-    // Desktop: use user's preference
+    // Preserve existing meme wave behavior (list/grid only).
+    if (viewMode === "grid_content_only") {
+      return "grid";
+    }
     return viewMode;
-  }, [breakpoint, viewMode]);
+  }, [isMemesWave, viewMode]);
+
+  let leaderboardContent: React.ReactNode;
+  if (effectiveViewMode === "list") {
+    leaderboardContent = (
+      <WaveLeaderboardDrops
+        wave={wave}
+        sort={sort}
+        onCreateDrop={() => {
+          if (mountedRef.current) {
+            setIsCreatingDrop(true);
+          }
+        }}
+      />
+    );
+  } else if (!isMemesWave) {
+    leaderboardContent = (
+      <WaveLeaderboardGrid
+        wave={wave}
+        sort={sort}
+        mode={effectiveViewMode === "grid" ? "compact" : "content_only"}
+        onDropClick={onDropClick}
+      />
+    );
+  } else {
+    leaderboardContent = (
+      <WaveLeaderboardGallery
+        wave={wave}
+        sort={sort}
+        onDropClick={onDropClick}
+      />
+    );
+  }
 
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
@@ -136,23 +168,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           />
         )}
 
-        {effectiveViewMode === "list" ? (
-          <WaveLeaderboardDrops
-            wave={wave}
-            sort={sort}
-            onCreateDrop={() => {
-              if (mountedRef.current) {
-                setIsCreatingDrop(true);
-              }
-            }}
-          />
-        ) : (
-          <WaveLeaderboardGallery
-            wave={wave}
-            sort={sort}
-            onDropClick={onDropClick}
-          />
-        )}
+        {leaderboardContent}
       </div>
     </div>
   );

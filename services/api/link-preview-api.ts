@@ -75,7 +75,7 @@ interface ManifoldListingDetails {
   readonly priceEth?: string | null | undefined;
 }
 
-export interface ManifoldListingLinkPreview extends LinkPreviewBase {
+interface ManifoldListingLinkPreview extends LinkPreviewBase {
   readonly type: "manifold.listing";
   readonly manifold: ManifoldListingDetails;
 }

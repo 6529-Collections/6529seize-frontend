@@ -1,8 +1,9 @@
-import NftMarketplacePreview from "@/components/waves/NftMarketplacePreview";
+import MarketplacePreview from "@/components/waves/MarketplacePreview";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import type { LinkHandler } from "../linkTypes";
 
+const MANIFOLD_LISTING_PATH_PATTERN = /^\/@[^/]+\/id\/[^/?#]+\/?$/i;
 const SUPER_RARE_ARTWORK_PATH_PATTERN =
   /^\/artwork\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const SUPER_RARE_ARTWORK_V2_PATH_PATTERN = /^\/artwork-v2\/[^/?#]+\/?$/i;
@@ -29,11 +30,18 @@ const isOpenSeaItemPath = (pathname: string): boolean =>
 const isTransientItemPath = (pathname: string): boolean =>
   TRANSIENT_NFT_PATH_PATTERN.test(pathname);
 
+const isManifoldListingPath = (pathname: string): boolean =>
+  MANIFOLD_LISTING_PATH_PATTERN.test(pathname);
+
 const isNftMarketplaceLink = (href: string): boolean => {
   try {
     const url = new URL(href);
     const hostname = url.hostname.toLowerCase();
     const pathname = url.pathname;
+
+    if (matchesDomainOrSubdomain(hostname, "manifold.xyz")) {
+      return isManifoldListingPath(pathname);
+    }
 
     if (matchesDomainOrSubdomain(hostname, "superrare.com")) {
       return isSuperRareArtworkPath(pathname);
@@ -57,8 +65,12 @@ const isNftMarketplaceLink = (href: string): boolean => {
   }
 };
 
-export const createNftMarketplacesHandler = (): LinkHandler => ({
+export const createNftMarketplacesHandler = (options?: {
+  readonly marketplaceImageOnly?: boolean;
+}): LinkHandler => ({
   match: isNftMarketplaceLink,
-  render: (href) => <NftMarketplacePreview href={href} />,
+  render: (href) => (
+    <MarketplacePreview href={href} imageOnly={options?.marketplaceImageOnly} />
+  ),
   display: "block",
 });

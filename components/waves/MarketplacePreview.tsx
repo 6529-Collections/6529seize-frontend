@@ -6,22 +6,23 @@ import OpenGraphPreview, {
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
 import ManifoldItemPreviewCard from "./ManifoldItemPreviewCard";
-import { fetchLinkPreview } from "@/services/api/link-preview-api";
+import {
+  fetchLinkPreview,
+  type LinkPreviewResponse,
+} from "@/services/api/link-preview-api";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
-interface NftMarketplacePreviewProps {
+interface MarketplacePreviewProps {
   readonly href: string;
+  readonly imageOnly?: boolean | undefined;
 }
-
-type LinkPreviewResult = Awaited<ReturnType<typeof fetchLinkPreview>>;
-const OPENSEA_HOST = "opensea.io";
 
 type PreviewState =
   | { readonly type: "loading"; readonly href: string }
   | {
       readonly type: "success";
       readonly href: string;
-      readonly data: LinkPreviewResult;
+      readonly data: LinkPreviewResponse;
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
 
@@ -29,6 +30,8 @@ type PickedMedia = {
   readonly url: string;
   readonly mimeType: string;
 };
+
+const OPENSEA_HOST = "opensea.io";
 
 const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   avif: "image/avif",
@@ -47,6 +50,18 @@ const asNonEmptyString = (value: unknown): string | undefined => {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const toPreviewData = (response: LinkPreviewResponse): OpenGraphPreviewData => {
+  return {
+    ...response,
+    image: response.image ?? undefined,
+    images: response.images ?? undefined,
+    url: response.url ?? response.requestUrl ?? undefined,
+    siteName: response.siteName ?? undefined,
+    description: response.description ?? undefined,
+    title: response.title ?? undefined,
+  };
 };
 
 const isOpenSeaHref = (href: string): boolean => {
@@ -75,18 +90,6 @@ const isBlockedOpenSeaOverlayUrl = (url: string): boolean => {
   } catch {
     return false;
   }
-};
-
-const toPreviewData = (response: LinkPreviewResult): OpenGraphPreviewData => {
-  return {
-    ...response,
-    image: response.image ?? undefined,
-    images: response.images ?? undefined,
-    url: response.url ?? response.requestUrl ?? undefined,
-    siteName: response.siteName ?? undefined,
-    description: response.description ?? undefined,
-    title: response.title ?? undefined,
-  };
 };
 
 const inferMimeTypeFromUrl = (url: string): string | undefined => {
@@ -140,7 +143,7 @@ const toPickedMedia = (
   };
 };
 
-const pickMedia = (data: LinkPreviewResult): PickedMedia | undefined => {
+const pickMedia = (data: LinkPreviewResponse): PickedMedia | undefined => {
   const primary = toPickedMedia(data.image);
   if (primary) {
     return primary;
@@ -163,8 +166,8 @@ const pickMedia = (data: LinkPreviewResult): PickedMedia | undefined => {
 
 const sanitizeOpenSeaOverlayMedia = (
   href: string,
-  data: LinkPreviewResult
-): LinkPreviewResult => {
+  data: LinkPreviewResponse
+): LinkPreviewResponse => {
   if (!isOpenSeaHref(href)) {
     return data;
   }
@@ -208,9 +211,10 @@ const sanitizeOpenSeaOverlayMedia = (
   };
 };
 
-export default function NftMarketplacePreview({
+export default function MarketplacePreview({
   href,
-}: NftMarketplacePreviewProps) {
+  imageOnly = false,
+}: MarketplacePreviewProps) {
   const [state, setState] = useState<PreviewState>({ type: "loading", href });
 
   useEffect(() => {
@@ -222,6 +226,7 @@ export default function NftMarketplacePreview({
           href,
           await fetchLinkPreview(href)
         );
+
         if (!active) {
           return;
         }
@@ -266,6 +271,7 @@ export default function NftMarketplacePreview({
         title={title}
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
+        imageOnly={imageOnly}
       />
     );
   }

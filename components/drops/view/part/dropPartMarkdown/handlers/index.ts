@@ -5,7 +5,6 @@ import { createEnsHandler } from "./ens";
 import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
 import { createGoogleWorkspaceHandler } from "./googleWorkspace";
-import { createManifoldHandler } from "./manifold";
 import { createNftMarketplacesHandler } from "./nftMarketplaces";
 import { createPepeHandler } from "./pepe";
 import { createTikTokHandler } from "./tiktok";
@@ -18,12 +17,14 @@ import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 export const createLinkHandlers = (options?: {
   readonly tweetPreviewMode?: TweetPreviewMode;
   readonly linkPreviewVariant?: LinkPreviewVariant;
+  readonly marketplaceImageOnly?: boolean;
 }): LinkHandler[] => [
   createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
-  createManifoldHandler(),
-  createNftMarketplacesHandler(),
+  createNftMarketplacesHandler({
+    marketplaceImageOnly: options?.marketplaceImageOnly ?? false,
+  }),
   createEnsHandler(),
   createCompoundHandler(),
   createTwitterHandler(options),

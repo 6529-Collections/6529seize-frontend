@@ -14,6 +14,7 @@ interface ManifoldItemPreviewCardProps {
   readonly title: string;
   readonly mediaUrl: string;
   readonly mediaMimeType: string;
+  readonly imageOnly?: boolean | undefined;
 }
 
 function getContainerClass(variant: LinkPreviewVariant): string {
@@ -37,6 +38,7 @@ export default function ManifoldItemPreviewCard({
   title,
   mediaUrl,
   mediaMimeType,
+  imageOnly = false,
 }: ManifoldItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
 
@@ -63,14 +65,16 @@ export default function ManifoldItemPreviewCard({
               disableMediaInteraction={true}
             />
           </div>
-          <div className={getTitleRowClass(variant)}>
-            <h3
-              className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50"
-              data-testid="manifold-item-title"
-            >
-              {title}
-            </h3>
-          </div>
+          {!imageOnly && (
+            <div className={getTitleRowClass(variant)}>
+              <h3
+                className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50"
+                data-testid="manifold-item-title"
+              >
+                {title}
+              </h3>
+            </div>
+          )}
         </Link>
       </div>
     </LinkPreviewCardLayout>
