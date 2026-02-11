@@ -4,7 +4,7 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -13,11 +13,14 @@ import { useCookieConsent } from "../cookies/CookieConsentContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
+const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
+
 export default function ManifoldMintingConnect(
   props: Readonly<{
     onMintFor: (address: string) => void;
   }>
 ) {
+  const { onMintFor } = props;
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isIos } = useCapacitor();
@@ -52,15 +55,15 @@ export default function ManifoldMintingConnect(
     };
   }, [connectedProfile, account.address]);
 
-  function resetFren() {
+  const resetFren = useCallback(() => {
     setSelectedFrenProfile(null);
     setSelectedFrenWallet(null);
-  }
+  }, []);
 
   useEffect(() => {
     resetFren();
     setMintForFren(false);
-  }, [account.address]);
+  }, [account.address, resetFren]);
 
   useEffect(() => {
     if (!account.address || mintForFren) {
@@ -71,18 +74,22 @@ export default function ManifoldMintingConnect(
 
   useEffect(() => {
     if (mintForFren && selectedFrenWallet) {
-      props.onMintFor(selectedFrenWallet);
-    } else {
-      props.onMintFor(
-        (selectedMintForMeWallet ?? account.address) as string
-      );
+      onMintFor(selectedFrenWallet);
+      return;
     }
+
+    const mintDestination = selectedMintForMeWallet ?? account.address;
+    if (!mintDestination) {
+      return;
+    }
+
+    onMintFor(mintDestination);
   }, [
     selectedFrenWallet,
     selectedMintForMeWallet,
     mintForFren,
     account.address,
-    props,
+    onMintFor,
   ]);
 
   function printMintForFren() {
@@ -105,9 +112,6 @@ export default function ManifoldMintingConnect(
     if (!connectedRecipientProfile) {
       return <></>;
     }
-
-    const noopProfileSelection = (_: CommunityMemberMinimal | null) =>
-      undefined;
 
     return (
       <div className="tw-pt-2 tw-pb-1">
