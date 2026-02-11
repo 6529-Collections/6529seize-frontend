@@ -17,7 +17,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface DropControlLaunchClaimPageClientProps {
   memeId: number;
@@ -27,6 +27,8 @@ const SECTION_CARD_CLASS =
   "tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-5";
 const BTN_INITIALIZE =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
+const BTN_AIRDROP =
+  "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 
 type SectionTone = "neutral" | "success" | "warning" | "danger";
 
@@ -35,6 +37,8 @@ interface LaunchAccordionSectionProps {
   subtitle: string;
   tone: SectionTone;
   defaultOpen?: boolean;
+  disabled?: boolean;
+  onOpen?: () => void;
   children: React.ReactNode;
 }
 
@@ -131,6 +135,8 @@ function LaunchAccordionSection({
   subtitle,
   tone,
   defaultOpen = false,
+  disabled = false,
+  onOpen,
   children,
 }: LaunchAccordionSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -139,11 +145,26 @@ function LaunchAccordionSection({
     setIsOpen(defaultOpen);
   }, [defaultOpen]);
 
+  useEffect(() => {
+    if (disabled) {
+      setIsOpen(false);
+    }
+  }, [disabled]);
+
   return (
     <div className={SECTION_CARD_CLASS}>
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (disabled) return;
+          setIsOpen((prev) => {
+            const next = !prev;
+            if (next) {
+              onOpen?.();
+            }
+            return next;
+          });
+        }}
         className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-bg-transparent tw-p-0 tw-text-left tw-border-0"
       >
         <span className="tw-inline-flex tw-items-center tw-gap-2">
@@ -169,7 +190,7 @@ function LaunchAccordionSection({
         </span>
         {subtitle ? (
           <span
-            className={`tw-inline-flex tw-items-center tw-rounded-full tw-px-3 tw-py-1 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset ${toneClass(tone)}`}
+            className={`tw-inline-flex tw-items-center tw-rounded-full tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-ring-1 tw-ring-inset ${toneClass(tone)}`}
           >
             {subtitle}
           </span>
@@ -201,6 +222,8 @@ export default function DropControlLaunchClaimPageClient({
   const [rootsError, setRootsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [researchGuaranteeTarget, setResearchGuaranteeTarget] = useState(310);
+  const minimumEditionSizeInputRef = useRef<HTMLInputElement | null>(null);
 
   const permissionFallback = DropControlPermissionFallback({
     title: DROP_CONTROL_SECTIONS.LAUNCH.title,
@@ -267,6 +290,8 @@ export default function DropControlLaunchClaimPageClient({
       manifoldClaim?.location &&
       manifoldClaim.location === claim.metadata_location
   );
+  const mintedCount = Number(manifoldClaim?.total ?? 0);
+  const researchShortfall = Math.max(researchGuaranteeTarget - mintedCount, 0);
 
   const mintTimeline = useMemo(
     () => (memeId > 0 ? getMintTimelineDetails(memeId) : null),
@@ -311,6 +336,14 @@ export default function DropControlLaunchClaimPageClient({
     },
     [mintTimeline, roots]
   );
+  const publicPhaseSchedule = phaseData.find(
+    (phase) => phase.key === "publicphase"
+  )?.schedule;
+  const publicPhaseEnded = Boolean(
+    publicPhaseSchedule &&
+      publicPhaseSchedule.end.toDate().getTime() <= Date.now()
+  );
+  const canOpenResearchAirdrop = isInitialized && publicPhaseEnded;
 
   if (permissionFallback) {
     return permissionFallback;
@@ -588,6 +621,84 @@ export default function DropControlLaunchClaimPageClient({
               )}
             </LaunchAccordionSection>
           ))}
+
+          <LaunchAccordionSection
+            title="Research Airdrop"
+            subtitle={
+              !isInitialized
+                ? "Waiting for Initialization"
+                : !publicPhaseEnded
+                  ? "Available After Public Phase"
+                : researchShortfall > 0
+                  ? `x${researchShortfall} Needed`
+                  : "No Airdrop Needed"
+            }
+            tone={
+              !isInitialized
+                ? "neutral"
+                : !publicPhaseEnded
+                  ? "neutral"
+                : researchShortfall > 0
+                  ? "warning"
+                  : "success"
+            }
+            disabled={!canOpenResearchAirdrop}
+            onOpen={() => {
+              setTimeout(() => {
+                minimumEditionSizeInputRef.current?.focus();
+                minimumEditionSizeInputRef.current?.select();
+              }, 0);
+            }}
+          >
+            <div className="tw-space-y-5">
+              {!isInitialized ? (
+                <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+                  Waiting for initialization.
+                </p>
+              ) : !publicPhaseEnded ? (
+                <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+                  Waiting for Public Phase to end.
+                </p>
+              ) : null}
+              <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2">
+                <div className="tw-rounded-md tw-bg-iron-900/50 tw-p-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+                  <div className="tw-text-sm tw-text-iron-400">Minted</div>
+                  <div className="tw-mt-1 tw-text-white">{mintedCount}</div>
+                </div>
+                <div className="tw-rounded-md tw-bg-iron-900/50 tw-p-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+                  <div className="tw-text-sm tw-text-iron-400">
+                    Minimum Edition Size
+                  </div>
+                  <input
+                    ref={minimumEditionSizeInputRef}
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={researchGuaranteeTarget}
+                    onChange={(e) => {
+                      const parsed = Number(e.target.value);
+                      setResearchGuaranteeTarget(
+                        Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+                      );
+                    }}
+                    className="tw-mt-1 tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white focus:tw-outline-none focus:tw-ring-0"
+                  />
+                </div>
+              </div>
+              <div className="tw-flex tw-justify-center">
+                <button
+                  type="button"
+                  disabled={!canOpenResearchAirdrop || researchShortfall <= 0}
+                  onClick={() => alert("call airdrop")}
+                  className={`${BTN_AIRDROP} tw-w-fit`}
+                >
+                  {researchShortfall > 0
+                    ? `Airdrop x${researchShortfall} to Research`
+                    : "Airdrop to Research"}
+                </button>
+              </div>
+            </div>
+          </LaunchAccordionSection>
         </div>
       )}
     </div>

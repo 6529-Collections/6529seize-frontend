@@ -313,7 +313,7 @@ function StatusPill({
 }) {
   return (
     <span
-      className={`tw-static tw-mb-3 tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-px-3 tw-py-2 tw-text-[11px] sm:tw-text-xs tw-font-medium tw-leading-tight tw-ring-1 tw-ring-inset sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 ${className}`}
+      className={`tw-static tw-mb-3 tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-leading-tight tw-ring-1 tw-ring-inset sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 ${className}`}
     >
       {showLoader ? (
         <CircleLoader size={CircleLoaderSize.SMALL} />
