@@ -16,6 +16,11 @@ jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   ),
 }));
 
+jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
+  __esModule: true,
+  default: () => <div data-testid="href-buttons" />,
+}));
+
 describe("ManifoldItemPreviewCard", () => {
   it("renders uncropped media and keeps title outside media", () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
@@ -67,5 +72,22 @@ describe("ManifoldItemPreviewCard", () => {
 
     expect(screen.getByTestId("manifold-item-media")).toBeInTheDocument();
     expect(screen.queryByTestId("manifold-item-title")).toBeNull();
+  });
+
+  it("hides action buttons when requested in chat variant", () => {
+    const props = {
+      href: "https://manifold.xyz/@andrew-hooker/id/4098474224",
+      title: "The Big Bang",
+      mediaUrl: "https://arweave.net/test-image",
+      mediaMimeType: "image/*",
+    };
+
+    const { rerender } = render(
+      <ManifoldItemPreviewCard {...props} hideActions={false} />
+    );
+    expect(screen.getByTestId("href-buttons")).toBeInTheDocument();
+
+    rerender(<ManifoldItemPreviewCard {...props} hideActions={true} />);
+    expect(screen.queryByTestId("href-buttons")).toBeNull();
   });
 });

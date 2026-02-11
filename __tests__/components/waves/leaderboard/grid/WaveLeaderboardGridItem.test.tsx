@@ -72,6 +72,19 @@ describe("WaveLeaderboardGridItem", () => {
     expect(
       screen.getByTestId("wave-leaderboard-grid-item-footer-d1")
     ).toBeInTheDocument();
+
+    const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
+    const viewport = card.firstElementChild as HTMLElement;
+    const content = viewport.firstElementChild as HTMLElement;
+    expect(card).toHaveClass("tw-h-[26rem]");
+    expect(card).toHaveClass("tw-p-3");
+    expect(card).toHaveClass("tw-border");
+    expect(card).toHaveClass("tw-bg-iron-950");
+    expect(viewport).toHaveClass("tw-h-[19rem]");
+    expect(viewport).toHaveClass("tw-p-3");
+    expect(viewport).toHaveClass("tw-rounded-lg");
+    expect(viewport).toHaveClass("tw-bg-iron-900/50");
+    expect(content).toHaveClass("tw-space-y-3");
   });
 
   it("hides compact footer in content-only mode", () => {
@@ -89,6 +102,24 @@ describe("WaveLeaderboardGridItem", () => {
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
+
+    const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
+    const viewport = card.firstElementChild as HTMLElement;
+    const content = viewport.firstElementChild as HTMLElement;
+    expect(card).not.toHaveClass("tw-h-[26rem]");
+    expect(card).not.toHaveClass("tw-h-[23rem]");
+    expect(card).toHaveClass("tw-p-0");
+    expect(card).not.toHaveClass("tw-p-3");
+    expect(card).not.toHaveClass("tw-border");
+    expect(card).not.toHaveClass("tw-bg-iron-950");
+    expect(viewport).toHaveClass("tw-max-h-[20rem]");
+    expect(viewport).not.toHaveClass("tw-h-[20rem]");
+    expect(viewport).not.toHaveClass("tw-p-2");
+    expect(viewport).not.toHaveClass("tw-p-3");
+    expect(viewport).not.toHaveClass("tw-rounded-lg");
+    expect(viewport).not.toHaveClass("tw-bg-iron-900/50");
+    expect(content).toHaveClass("tw-space-y-1");
+    expect(content).not.toHaveClass("tw-space-y-3");
   });
 
   it("opens drop on click", () => {

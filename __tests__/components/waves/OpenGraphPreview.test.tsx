@@ -63,6 +63,21 @@ describe("OpenGraphPreview", () => {
     );
   });
 
+  it("hides action buttons when hideActions is true", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
+
+    render(
+      <OpenGraphPreview
+        href="https://example.com/article"
+        preview={undefined}
+        hideActions={true}
+      />
+    );
+
+    expect(screen.getByTestId("og-preview-skeleton")).toBeInTheDocument();
+    expect(screen.queryByTestId("href-buttons")).toBeNull();
+  });
+
   it("renders fallback when preview is unavailable", () => {
     (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
 

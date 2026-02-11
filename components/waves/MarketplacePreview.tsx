@@ -254,7 +254,13 @@ export default function MarketplacePreview({
   }, [href]);
 
   if (state.href !== href || state.type === "loading") {
-    return <OpenGraphPreview href={href} preview={undefined} />;
+    return (
+      <OpenGraphPreview
+        href={href}
+        preview={undefined}
+        hideActions={imageOnly}
+      />
+    );
   }
 
   if (state.type === "error") {
@@ -272,9 +278,16 @@ export default function MarketplacePreview({
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
         imageOnly={imageOnly}
+        hideActions={imageOnly}
       />
     );
   }
 
-  return <OpenGraphPreview href={href} preview={toPreviewData(state.data)} />;
+  return (
+    <OpenGraphPreview
+      href={href}
+      preview={toPreviewData(state.data)}
+      hideActions={imageOnly}
+    />
+  );
 }

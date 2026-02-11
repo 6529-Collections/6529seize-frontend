@@ -44,6 +44,16 @@ describe("MarketplacePreview", () => {
     render(<MarketplacePreview href={href} imageOnly={true} />);
 
     await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href,
+          preview: undefined,
+          hideActions: true,
+        })
+      )
+    );
+
+    await waitFor(() =>
       expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
@@ -51,6 +61,7 @@ describe("MarketplacePreview", () => {
           mediaUrl: "https://arweave.net/test-image.webp",
           mediaMimeType: "image/webp",
           imageOnly: true,
+          hideActions: true,
         })
       )
     );
@@ -158,6 +169,7 @@ describe("MarketplacePreview", () => {
           preview: expect.objectContaining({
             title: "Stitched by @graffitiongrave | Transient Labs",
           }),
+          hideActions: false,
         })
       )
     );

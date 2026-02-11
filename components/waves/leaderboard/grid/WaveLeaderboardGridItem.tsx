@@ -26,6 +26,17 @@ interface WaveLeaderboardGridItemProps {
 export const WaveLeaderboardGridItem: React.FC<
   WaveLeaderboardGridItemProps
 > = ({ drop, mode, onDropClick }) => {
+  const isCompactMode = mode === "compact";
+  const cardClassName = isCompactMode
+    ? "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-transition desktop-hover:hover:tw-border-iron-700 tw-h-[26rem]"
+    : "tw-cursor-pointer tw-p-0 tw-transition";
+  const viewportClassName = isCompactMode
+    ? "tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/50 tw-p-3 tw-h-[19rem]"
+    : "tw-relative tw-overflow-hidden tw-max-h-[20rem]";
+  const contentSpacingClass = isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
+  const mediaWrapperClass = isCompactMode
+    ? "tw-overflow-hidden tw-rounded-lg tw-bg-iron-900"
+    : "tw-overflow-hidden";
   const isMobileScreen = useIsMobileScreen();
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [innerEl, setInnerEl] = useState<HTMLDivElement | null>(null);
@@ -113,19 +124,12 @@ export const WaveLeaderboardGridItem: React.FC<
       data-testid={`wave-leaderboard-grid-item-${drop.id}`}
       onClick={onCardClick}
       onKeyDown={onCardKeyDown}
-      className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-transition desktop-hover:hover:tw-border-iron-700 ${
-        mode === "compact" ? "tw-h-[26rem]" : "tw-h-[23rem]"
-      }`}
+      className={cardClassName}
     >
-      <div
-        ref={setViewportEl}
-        className={`tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/50 tw-p-3 ${
-          mode === "compact" ? "tw-h-[19rem]" : "tw-h-[20rem]"
-        }`}
-      >
-        <div ref={setInnerEl} className="tw-space-y-3">
+      <div ref={setViewportEl} className={viewportClassName}>
+        <div ref={setInnerEl} className={contentSpacingClass}>
           {mediaUrl && (
-            <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-900">
+            <div className={mediaWrapperClass}>
               <MediaDisplay
                 media_mime_type={mediaMimeType}
                 media_url={mediaUrl}
@@ -152,7 +156,7 @@ export const WaveLeaderboardGridItem: React.FC<
         )}
       </div>
 
-      {mode === "compact" && (
+      {isCompactMode && (
         <div
           data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
           className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"

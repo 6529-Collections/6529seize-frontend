@@ -15,6 +15,7 @@ interface ManifoldItemPreviewCardProps {
   readonly mediaUrl: string;
   readonly mediaMimeType: string;
   readonly imageOnly?: boolean | undefined;
+  readonly hideActions?: boolean | undefined;
 }
 
 function getContainerClass(variant: LinkPreviewVariant): string {
@@ -39,11 +40,16 @@ export default function ManifoldItemPreviewCard({
   mediaUrl,
   mediaMimeType,
   imageOnly = false,
+  hideActions = false,
 }: ManifoldItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
 
   return (
-    <LinkPreviewCardLayout href={href} variant={variant}>
+    <LinkPreviewCardLayout
+      href={href}
+      variant={variant}
+      hideActions={hideActions}
+    >
       <div
         className={getContainerClass(variant)}
         data-testid="manifold-item-card"
