@@ -2,6 +2,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ReactNode } from "react";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import UserPageClientHydrator from "./UserPageClientHydrator";
+import UserPageDropModal from "./UserPageDropModal";
 import UserPageTabs from "./UserPageTabs";
 
 export default function UserPageLayout({
@@ -19,6 +20,7 @@ export default function UserPageLayout({
 
   return (
     <main className="tw-flex tw-flex-col tw-min-h-[100dvh] tailwind-scope">
+      <UserPageDropModal />
       <UserPageClientHydrator
         profile={initialProfile}
         handleOrWallet={normalizedHandleOrWallet}
