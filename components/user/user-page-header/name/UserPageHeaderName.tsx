@@ -62,12 +62,12 @@ export default function UserPageHeaderName({
               {displayName}
             </p>
           </UserPageHeaderNameWrapper>
-          <UserLevel level={level} size="xs" />
-          {/* {profile?.handle && (
+          {profile?.handle && (
             <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center tw-mt-0.5">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
-          )} */}
+          )}
+          <UserLevel level={level} size="xs" />
           {onBadgeClick && (submissionCount > 0 || winnerCount > 0) && (
             <ArtistActivityBadge
               submissionCount={submissionCount}
