@@ -11,9 +11,11 @@ import { createTwitterHandler } from "./twitter";
 import { createWikimediaHandler } from "./wikimedia";
 import { createYoutubeHandler } from "./youtube";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 
 export const createLinkHandlers = (options?: {
   readonly tweetPreviewMode?: TweetPreviewMode;
+  readonly linkPreviewVariant?: LinkPreviewVariant;
 }): LinkHandler[] => [
   createYoutubeHandler(),
   createTikTokHandler(),
@@ -22,7 +24,7 @@ export const createLinkHandlers = (options?: {
   createCompoundHandler(),
   createTwitterHandler(options),
   createWikimediaHandler(),
-  createGifHandler(),
+  createGifHandler(options),
   createArtBlocksHandler(),
   createPepeHandler(),
   createFarcasterHandler(),

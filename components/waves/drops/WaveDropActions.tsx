@@ -1,33 +1,23 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { useContext } from "react";
+import { useState } from "react";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
-import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
-import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
-import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
-import WaveDropActionsOpen from "./WaveDropActionsOpen";
-import WaveDropActionsOptions from "./WaveDropActionsOptions";
-import WaveDropActionsQuote from "./WaveDropActionsQuote";
+import WaveDropActionsMore from "./WaveDropActionsMore";
+import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
-import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview";
-import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly showVoting?: boolean | undefined;
   readonly onReply: () => void;
-  readonly onQuote: () => void;
   readonly onEdit?: (() => void) | undefined;
 }
 
@@ -36,13 +26,11 @@ export default function WaveDropActions({
   activePartIndex,
   showVoting = true,
   onReply,
-  onQuote,
   onEdit,
 }: WaveDropActionsProps) {
-  const { connectedProfile } = useContext(AuthContext);
-  const { canDelete } = useDropInteractionRules(drop);
   const { isMemesWave } = useSeizeSettings();
   const compact = useCompactMode();
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
 
   // Hide voting for participation drops in memes waves
   const shouldShowVoting =
@@ -55,47 +43,29 @@ export default function WaveDropActions({
     <div
       className={`tw-absolute tw-right-2 tw-z-20 ${
         compact ? "-tw-top-4" : "tw-top-0"
-      } tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out desktop-hover:group-hover:tw-opacity-100 focus-within:tw-opacity-100`}
+      } tw-transition-opacity tw-duration-200 tw-ease-in-out ${
+        isMoreDropdownOpen
+          ? "tw-opacity-100"
+          : "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-opacity-100"
+      }`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-flex tw-h-8 tw-items-center tw-rounded-lg tw-bg-iron-950 tw-shadow tw-ring-1 tw-ring-inset tw-ring-iron-800">
-          <WaveDropActionsToggleLinkPreview drop={drop} />
-          {connectedProfile?.handle !== drop.author.handle &&
-            !activePartIndex && <WaveDropFollowAuthor drop={drop} />}
-          <WaveDropActionsMarkUnread drop={drop} />
+        <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
+          <WaveDropActionsQuickReact drop={drop} />
+          <WaveDropActionsAddReaction drop={drop} />
           <WaveDropActionsReply
             onReply={onReply}
             drop={drop}
             activePartIndex={activePartIndex}
           />
-          <WaveDropActionsQuote
-            onQuote={onQuote}
-            drop={drop}
-            activePartIndex={activePartIndex}
-          />
-          <WaveDropActionsCopyLink drop={drop} />
-          <WaveDropActionsOpen drop={drop} />
-          {(() => {
-            const media = drop.parts.at(0)?.media.at(0);
-            const url = media?.url;
-            if (!url) return null;
-            const info = getFileInfoFromUrl(url);
-            if (!info) return null;
-            return (
-              <WaveDropActionsDownload
-                href={url}
-                name={info.name}
-                extension={info.extension}
-                tooltipId={`download-media-${drop.id}`}
-              />
-            );
-          })()}
+          <WaveDropActionsBoost drop={drop} />
           {onEdit && drop.drop_type !== ApiDropType.Participatory && (
             <WaveDropActionsEdit drop={drop} onEdit={onEdit} />
           )}
-          {canDelete && <WaveDropActionsOptions drop={drop} />}
-          <WaveDropActionsAddReaction drop={drop} />
-          <WaveDropActionsBoost drop={drop} />
+          <WaveDropActionsMore
+            drop={drop}
+            onOpenChange={setIsMoreDropdownOpen}
+          />
         </div>
         {shouldShowVoting && <WaveDropActionsRate drop={drop} />}
       </div>

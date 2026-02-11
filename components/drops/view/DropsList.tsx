@@ -35,7 +35,6 @@ interface DropsListProps {
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly onReply: DropActionHandler;
-  readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
@@ -60,7 +59,6 @@ const DropsList = memo(
     activeDrop,
     showReplyAndQuote,
     onReply,
-    onQuote,
     onReplyClick,
     serialNo,
     targetDropRef,
@@ -77,11 +75,6 @@ const DropsList = memo(
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
       [onReply]
-    );
-
-    const handleQuote = useCallback<DropActionHandler>(
-      ({ drop, partId }) => onQuote({ drop, partId }),
-      [onQuote]
     );
 
     const handleReplyClick = useCallback(
@@ -103,7 +96,6 @@ const DropsList = memo(
         showWaveInfo,
         activeDrop,
         handleReply,
-        handleQuote,
         showReplyAndQuote,
         serialNo,
         targetDropRef,
@@ -118,7 +110,6 @@ const DropsList = memo(
       showWaveInfo,
       activeDrop,
       handleReply,
-      handleQuote,
       showReplyAndQuote,
       serialNo,
       targetDropRef,
@@ -232,7 +223,6 @@ const DropsList = memo(
               showWaveInfo={getItemData.showWaveInfo}
               activeDrop={getItemData.activeDrop}
               onReply={getItemData.handleReply}
-              onQuote={getItemData.handleQuote}
               location={location}
               showReplyAndQuote={getItemData.showReplyAndQuote}
               onQuoteClick={getItemData.onQuoteClick}

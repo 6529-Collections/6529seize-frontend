@@ -16,12 +16,14 @@ import { Tooltip } from "react-tooltip";
 interface WaveDropActionsMarkUnreadProps {
   readonly drop: ApiDrop;
   readonly isMobile?: boolean | undefined;
+  readonly isDropdownItem?: boolean | undefined;
   readonly onMarkUnread?: (() => void) | undefined;
 }
 
 export default function WaveDropActionsMarkUnread({
   drop,
   isMobile = false,
+  isDropdownItem = false,
   onMarkUnread,
 }: WaveDropActionsMarkUnreadProps) {
   const queryClient = useQueryClient();
@@ -104,8 +106,8 @@ export default function WaveDropActionsMarkUnread({
       <button
         onClick={handleMarkUnread}
         disabled={loading}
-        className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
-          loading ? "tw-opacity-50 tw-cursor-default" : "active:tw-bg-iron-800"
+        className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
+          loading ? "tw-cursor-default tw-opacity-50" : "active:tw-bg-iron-800"
         } tw-transition-colors tw-duration-200`}
       >
         {loading ? (
@@ -113,9 +115,29 @@ export default function WaveDropActionsMarkUnread({
         ) : (
           <MailUnreadIcon className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300" />
         )}
-        <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
+        <span className="tw-text-base tw-font-semibold tw-text-iron-300">
           Mark as unread
         </span>
+      </button>
+    );
+  }
+
+  if (isDropdownItem) {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleMarkUnread();
+        }}
+        disabled={loading}
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+      >
+        {loading ? (
+          <Spinner dimension={16} />
+        ) : (
+          <MailUnreadIcon className="tw-size-4 tw-flex-shrink-0" />
+        )}
+        <span className="tw-text-sm tw-font-medium">Mark as unread</span>
       </button>
     );
   }
@@ -128,14 +150,14 @@ export default function WaveDropActionsMarkUnread({
           handleMarkUnread();
         }}
         disabled={loading}
-        className="tw-text-iron-500 desktop-hover:hover:tw-text-iron-50 tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 tw-cursor-pointer"
+        className="tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-50"
         aria-label="Mark as unread"
         data-tooltip-id={`mark-unread-${drop.id}`}
       >
         {loading ? (
           <Spinner dimension={20} />
         ) : (
-          <MailUnreadIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300" />
+          <MailUnreadIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
         )}
       </button>
       <Tooltip

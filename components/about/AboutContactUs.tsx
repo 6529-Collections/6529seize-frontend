@@ -6,9 +6,7 @@ export default function AboutContactUs() {
     <Container>
       <Row>
         <Col>
-          <h1>
-            Contact Us
-          </h1>
+          <h1>Contact Us</h1>
         </Col>
       </Row>
       <Row className="pt-3 pb-3">
@@ -18,7 +16,8 @@ export default function AboutContactUs() {
             <Link
               href="https://x.com/6529collections"
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               https://x.com/6529collections
             </Link>
           </p>
@@ -33,21 +32,24 @@ export default function AboutContactUs() {
               <Link
                 href="https://x.com/punk6529"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 punk6529
               </Link>{" "}
               or &#64;
               <Link
                 href="https://x.com/6529er"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 6529er
               </Link>{" "}
               or &#64;
               <Link
                 href="https://x.com/teexels"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 teexels
               </Link>{" "}
               on Twitter
@@ -58,32 +60,26 @@ export default function AboutContactUs() {
               <Link
                 href="https://x.com/punk6529"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 punk6529
               </Link>
               , &#64;
               <Link
                 href="https://x.com/6529er"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 6529er
               </Link>{" "}
               or &#64;
               <Link
                 href="https://x.com/teexels"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 teexels
               </Link>{" "}
-              in the OM Discord (
-              <Link
-                href="https://discord.gg/join-om"
-                target="_blank"
-                rel="noopener noreferrer">
-                https://discord.gg/join-om
-              </Link>
-              ). We don&apos;t answer Discord DMs from people we don&apos;t
-              already know.
             </li>
           </ul>
           <br />

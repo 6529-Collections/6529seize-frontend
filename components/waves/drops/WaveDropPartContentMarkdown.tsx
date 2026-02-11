@@ -44,6 +44,9 @@ const WaveDropPartContentMarkdown: React.FC<
   onCancel,
   drop,
 }) => {
+  const currentQuotePath =
+    drop?.serial_no === undefined ? [] : [`${wave.id}:${drop.serial_no}`];
+
   if (isEditing) {
     return (
       <EditDropLexical
@@ -81,6 +84,7 @@ const WaveDropPartContentMarkdown: React.FC<
           onQuoteClick={onQuoteClick}
           currentDropId={drop?.id}
           hideLinkPreviews={drop?.hide_link_preview}
+          quotePath={currentQuotePath}
         />
         {drop?.updated_at && drop.updated_at !== drop.created_at && (
           <div className="tw-mt-0.5 tw-text-[10px] tw-font-normal tw-leading-none tw-text-iron-500">
@@ -99,6 +103,9 @@ const WaveDropPartContentMarkdown: React.FC<
                 : null
             }
             onQuoteClick={onQuoteClick}
+            embedPath={drop?.id ? [drop.id] : []}
+            quotePath={currentQuotePath}
+            embedDepth={1}
           />
         </div>
       )}

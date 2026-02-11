@@ -179,7 +179,6 @@ export default function Drops() {
         drops={drops}
         showWaveInfo={true}
         onReply={() => {}}
-        onQuote={() => {}}
         onReplyClick={() => {}}
         serialNo={null}
         targetDropRef={null}

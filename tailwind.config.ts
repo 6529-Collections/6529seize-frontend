@@ -145,6 +145,24 @@ export default {
           "0%": { opacity: "0.8" },
           "100%": { opacity: "0.4" },
         },
+        "heart-beat-soft": {
+          "0%, 100%": {
+            transform: "scale(1)",
+            opacity: "0.86",
+          },
+          "18%": {
+            transform: "scale(1.08)",
+            opacity: "1",
+          },
+          "32%": {
+            transform: "scale(1.01)",
+            opacity: "0.94",
+          },
+          "52%": {
+            transform: "scale(1.05)",
+            opacity: "0.98",
+          },
+        },
       },
       animation: {
         "loading-bar": "loading-bar 1.5s infinite",
@@ -159,6 +177,7 @@ export default {
         "gallery-reveal":
           "gallery-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards",
         "fade-in-out": "fade-in-out 2s ease-in-out infinite alternate",
+        "heart-beat-soft": "heart-beat-soft 2.8s ease-in-out infinite",
       },
       backgroundSize: {
         "gradient-pos": "200% 200%",

@@ -9,4 +9,4 @@ export interface ActiveDropState {
   action: ActiveDropAction;
   drop: ApiDrop;
   partId: number;
-} 
+}

@@ -225,7 +225,7 @@ export default function TDHMainPage() {
                 metrics across the network.
               </p>
               <Link
-                href="/network/metrics/network-tdh"
+                href="/network/health/network-tdh"
                 className={BUTTON_LINK_CLASSES}
               >
                 View Network Stats

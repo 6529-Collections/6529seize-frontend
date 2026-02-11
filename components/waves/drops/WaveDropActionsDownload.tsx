@@ -15,16 +15,19 @@ interface Props {
   showProgress?: boolean | undefined;
   className?: string | undefined;
   tooltipId?: string | undefined;
+  isDropdownItem?: boolean | undefined;
+  onDownload?: (() => void) | undefined;
 }
 
 export default function WaveDropActionsDownload(props: Readonly<Props>) {
   const { percentage, download, cancel, isInProgress } = useDownloader();
   const showProgress = props.showProgress ?? true;
+  const isDropdownItem = props.isDropdownItem ?? false;
 
   const [isCompleted, setIsCompleted] = useState(false);
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  async function startDownload() {
+  function startDownload() {
     const filename = props.extension
       ? `${props.name}.${props.extension}`
       : props.name;
@@ -58,16 +61,19 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
     return "Download media";
   };
 
-  const renderIcon = () => {
+  const renderIcon = (size: "sm" | "md" = "md") => {
+    const iconClass = size === "sm" ? "tw-w-4 tw-h-4" : "tw-w-5 tw-h-5";
     if (isCompleted) {
       return (
-        <CheckCircleIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-emerald-500" />
+        <CheckCircleIcon
+          className={`tw-flex-shrink-0 ${iconClass} tw-text-emerald-500`}
+        />
       );
     }
     if (isInProgress && showProgress) {
       return (
         <svg
-          className="tw-w-5 tw-h-5 tw-text-iron-500 tw-animate-spin tw-flex-shrink-0"
+          className={`${iconClass} tw-flex-shrink-0 tw-animate-spin tw-text-iron-500`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -88,19 +94,41 @@ export default function WaveDropActionsDownload(props: Readonly<Props>) {
         </svg>
       );
     }
-    return <ArrowDownTrayIcon className="tw-flex-shrink-0 tw-w-5 tw-h-5" />;
+    return <ArrowDownTrayIcon className={`tw-flex-shrink-0 ${iconClass}`} />;
   };
+
+  if (isDropdownItem) {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isInProgress) {
+            cancel();
+          } else {
+            startDownload();
+            props.onDownload?.();
+          }
+        }}
+        disabled={isCompleted}
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+        type="button"
+      >
+        {renderIcon("sm")}
+        <span className="tw-text-sm tw-font-medium">{getTooltipText()}</span>
+      </button>
+    );
+  }
 
   return (
     <>
       <button
-        className="tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 tw-cursor-pointer"
+        className="tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-50"
         onClick={(e) => {
           e.stopPropagation();
-          if (!isInProgress) {
-            startDownload();
-          } else {
+          if (isInProgress) {
             cancel();
+          } else {
+            startDownload();
           }
         }}
         disabled={isCompleted}

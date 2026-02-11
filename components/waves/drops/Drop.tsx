@@ -35,7 +35,6 @@ interface DropProps {
   readonly location: DropLocation;
   readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
@@ -52,7 +51,6 @@ export default function Drop({
   location,
   dropViewDropId,
   onReply,
-  onQuote,
   onReplyClick,
   onQuoteClick,
   onDropContentClick,
@@ -68,7 +66,6 @@ export default function Drop({
         activeDrop={activeDrop}
         location={location}
         onReply={onReply}
-        onQuote={onQuote}
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
@@ -85,7 +82,6 @@ export default function Drop({
         location={location}
         dropViewDropId={dropViewDropId}
         onReply={onReply}
-        onQuote={onQuote}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}
@@ -105,7 +101,6 @@ export default function Drop({
         location={location}
         dropViewDropId={dropViewDropId}
         onReply={onReply}
-        onQuote={onQuote}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}

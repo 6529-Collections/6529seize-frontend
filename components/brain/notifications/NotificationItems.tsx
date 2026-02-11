@@ -13,7 +13,6 @@ interface NotificationItemsProps {
   readonly items: NotificationDisplayItem[];
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onMarkGroupAsRead?: ((ids: number[]) => Promise<void>) | undefined;
 }
@@ -22,7 +21,6 @@ function NotificationItemsComponent({
   items,
   activeDrop,
   onReply,
-  onQuote,
   onDropContentClick,
   onMarkGroupAsRead,
 }: NotificationItemsProps) {
@@ -31,7 +29,7 @@ function NotificationItemsComponent({
       items.map((item, index) => {
         const keySuffix = isGroupedReactionsItem(item)
           ? `group-${item.drop.id}`
-          : item.id ?? `fallback-${index}`;
+          : (item.id ?? `fallback-${index}`);
         return {
           item,
           key: `notification-${keySuffix}`,
@@ -55,7 +53,6 @@ function NotificationItemsComponent({
                   group={item}
                   activeDrop={activeDrop}
                   onReply={onReply}
-                  onQuote={onQuote}
                   onDropContentClick={onDropContentClick}
                   onMarkAsRead={
                     onMarkGroupAsRead
@@ -70,7 +67,6 @@ function NotificationItemsComponent({
               notification={item}
               activeDrop={activeDrop}
               onReply={onReply}
-              onQuote={onQuote}
               onDropContentClick={onDropContentClick}
             />
           )}
@@ -87,7 +83,6 @@ const NotificationItems = memo(
       prevProps.items === nextProps.items &&
       prevProps.activeDrop === nextProps.activeDrop &&
       prevProps.onReply === nextProps.onReply &&
-      prevProps.onQuote === nextProps.onQuote &&
       prevProps.onDropContentClick === nextProps.onDropContentClick &&
       prevProps.onMarkGroupAsRead === nextProps.onMarkGroupAsRead
     );

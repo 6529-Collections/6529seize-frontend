@@ -3,11 +3,8 @@
 import { useCallback } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { NotificationDisplayItem } from "@/types/feed.types";
-import type {
-  ActiveDropState} from "@/types/dropInteractionTypes";
-import {
-  ActiveDropAction
-} from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/navigation";
@@ -58,7 +55,7 @@ export default function NotificationsWrapper({
       }
 
       const isDirectMessage = hasChatScope(drop.wave)
-        ? drop.wave.chat?.scope?.group?.is_direct_message ?? false
+        ? (drop.wave.chat?.scope?.group?.is_direct_message ?? false)
         : false;
 
       const href = getWaveRoute({
@@ -84,17 +81,6 @@ export default function NotificationsWrapper({
     [setActiveDrop]
   );
 
-  const onQuote = useCallback(
-    (param: DropInteractionParams) => {
-      setActiveDrop({
-        action: ActiveDropAction.QUOTE,
-        drop: param.drop,
-        partId: param.partId,
-      });
-    },
-    [setActiveDrop]
-  );
-
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-gap-3">
       {loadingOlder && (
@@ -109,7 +95,6 @@ export default function NotificationsWrapper({
         items={items}
         activeDrop={activeDrop}
         onReply={onReply}
-        onQuote={onQuote}
         onDropContentClick={onDropContentClick}
         onMarkGroupAsRead={markNotificationIdsAsRead}
       />

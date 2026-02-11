@@ -27,6 +27,7 @@ interface DropPartPropsWave {
 }
 
 interface DropPartProps {
+  readonly dropId?: string | undefined;
   readonly profile: ProfileMinWithoutSubs;
   readonly dropTitle: string | null;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -52,6 +53,7 @@ interface DropPartProps {
 
 const DropPart = memo(
   ({
+    dropId,
     profile,
     mentionedUsers,
     mentionedWaves,
@@ -223,6 +225,7 @@ const DropPart = memo(
                   referencedNfts={referencedNfts}
                   partContent={partContent}
                   onQuoteClick={onQuoteClick}
+                  currentDropId={dropId}
                   partMedias={partMedias}
                   currentPartCount={currentPartCount ?? 0}
                 />

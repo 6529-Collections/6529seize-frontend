@@ -18,7 +18,13 @@ import { renderSeizeQuote } from "../renderers";
 interface CreateSeizeHandlersConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string | undefined;
+  readonly embedPath: readonly string[];
+  readonly quotePath: readonly string[];
+  readonly embedDepth: number;
+  readonly maxEmbedDepth: number;
 }
+
+type SeizeGuardConfig = Omit<CreateSeizeHandlersConfig, "onQuoteClick">;
 
 const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {
   const info = parseSeizeQuoteLink(href);
@@ -29,16 +35,48 @@ const ensureSeizeQuote = (href: string): SeizeQuoteLinkInfo => {
   return info;
 };
 
+const getQuoteCycleKey = (info: SeizeQuoteLinkInfo): string | null => {
+  if (!info.serialNo) {
+    return null;
+  }
+
+  return `${info.waveId}:${info.serialNo}`;
+};
+
 const createSeizeQuoteHandler = (
-  onQuoteClick: (drop: ApiDrop) => void
+  onQuoteClick: (drop: ApiDrop) => void,
+  config: SeizeGuardConfig
 ): LinkHandler => ({
   match: (href) => Boolean(parseSeizeQuoteLink(href)),
   render: (href) => {
-    const content = renderSeizeQuote(
-      ensureSeizeQuote(href),
-      onQuoteClick,
-      href
-    );
+    if (config.embedDepth >= config.maxEmbedDepth) {
+      throw new Error("Seize quote link exceeded max embed depth");
+    }
+
+    const quoteInfo = ensureSeizeQuote(href);
+    const quoteCycleKey = getQuoteCycleKey(quoteInfo);
+    if (quoteCycleKey && config.quotePath.includes(quoteCycleKey)) {
+      throw new Error("Seize quote link creates a cycle");
+    }
+
+    if (
+      quoteInfo.dropId &&
+      (quoteInfo.dropId === config.currentDropId ||
+        config.embedPath.includes(quoteInfo.dropId))
+    ) {
+      throw new Error("Seize quote link matches current embed path");
+    }
+
+    const nextQuotePath = quoteCycleKey
+      ? [...config.quotePath, quoteCycleKey]
+      : config.quotePath;
+
+    const content = renderSeizeQuote(quoteInfo, onQuoteClick, href, {
+      embedPath: config.embedPath,
+      quotePath: nextQuotePath,
+      embedDepth: config.embedDepth + 1,
+      maxEmbedDepth: config.maxEmbedDepth,
+    });
     if (!content) {
       throw new Error("Unable to render seize quote link");
     }
@@ -108,12 +146,19 @@ const getDropId = (href: string): string | null => {
   }
 };
 
-const createSeizeDropHandler = (currentDropId?: string): LinkHandler =>
+const createSeizeDropHandler = (config: SeizeGuardConfig): LinkHandler =>
   createSeizeQueryHandler(
     getDropId,
     "Invalid seize drop link",
     (dropId, href) => {
-      if (currentDropId && dropId === currentDropId) {
+      if (config.embedDepth >= config.maxEmbedDepth) {
+        throw new Error("Seize drop link exceeded max embed depth");
+      }
+
+      if (
+        dropId === config.currentDropId ||
+        config.embedPath.includes(dropId)
+      ) {
         throw new Error("Seize drop link matches current drop");
       }
 
@@ -123,10 +168,10 @@ const createSeizeDropHandler = (currentDropId?: string): LinkHandler =>
 
 export const createSeizeHandlers = ({
   onQuoteClick,
-  currentDropId,
+  ...config
 }: CreateSeizeHandlersConfig): LinkHandler[] => [
-  createSeizeQuoteHandler(onQuoteClick),
+  createSeizeQuoteHandler(onQuoteClick, config),
   createSeizeGroupHandler(),
   createSeizeWaveHandler(),
-  createSeizeDropHandler(currentDropId),
+  createSeizeDropHandler(config),
 ];

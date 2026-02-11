@@ -18,13 +18,11 @@ export default function NotificationPriorityAlert({
   notification,
   activeDrop,
   onReply,
-  onQuote,
   onDropContentClick,
 }: {
   readonly notification: INotificationPriorityAlert;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
   const { createReplyClickHandler, createQuoteClickHandler } =
@@ -49,8 +47,8 @@ export default function NotificationPriorityAlert({
 
   if (!notification.related_drops || notification.related_drops.length === 0) {
     return (
-      <div className="tw-w-full tw-flex tw-gap-x-3">
-        <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+      <div className="tw-flex tw-w-full tw-gap-x-3">
+        <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
           {headerSection}
         </div>
       </div>
@@ -64,15 +62,14 @@ export default function NotificationPriorityAlert({
   const isDirectMessage = getIsDirectMessage(drop.wave);
 
   return (
-    <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-w-full tw-gap-x-3">
+      <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
         {headerSection}
 
         <NotificationDrop
           drop={drop}
           activeDrop={activeDrop}
           onReply={onReply}
-          onQuote={onQuote}
           onReplyClick={createReplyClickHandler(drop.wave.id, isDirectMessage)}
           onQuoteClick={createQuoteClickHandler(isDirectMessage)}
           onDropContentClick={onDropContentClick}
