@@ -19,6 +19,7 @@ import {
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
+import { createOpenSeaPlan } from "./opensea/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -366,9 +367,14 @@ export async function GET(request: NextRequest) {
     fetchHtml,
     assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
   });
+  const openSeaPlan = createOpenSeaPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
   const plan =
     manifoldPlan ??
     foundationPlan ??
+    openSeaPlan ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 

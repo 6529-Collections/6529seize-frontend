@@ -7,12 +7,14 @@ import OpenGraphPreview, {
 } from "./OpenGraphPreview";
 import ManifoldItemPreviewCard from "./ManifoldItemPreviewCard";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 interface NftMarketplacePreviewProps {
   readonly href: string;
 }
 
 type LinkPreviewResult = Awaited<ReturnType<typeof fetchLinkPreview>>;
+const OPENSEA_HOST = "opensea.io";
 
 type PreviewState =
   | { readonly type: "loading"; readonly href: string }
@@ -45,6 +47,34 @@ const asNonEmptyString = (value: unknown): string | undefined => {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const isOpenSeaHref = (href: string): boolean => {
+  try {
+    const parsed = new URL(href);
+    return matchesDomainOrSubdomain(
+      parsed.hostname.toLowerCase(),
+      OPENSEA_HOST
+    );
+  } catch {
+    return false;
+  }
+};
+
+const isBlockedOpenSeaOverlayUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+
+    if (!matchesDomainOrSubdomain(host, OPENSEA_HOST)) {
+      return false;
+    }
+
+    return path.includes("opengraph");
+  } catch {
+    return false;
+  }
 };
 
 const toPreviewData = (response: LinkPreviewResult): OpenGraphPreviewData => {
@@ -131,6 +161,36 @@ const pickMedia = (data: LinkPreviewResult): PickedMedia | undefined => {
   return undefined;
 };
 
+const sanitizeOpenSeaOverlayMedia = (
+  href: string,
+  data: LinkPreviewResult
+): LinkPreviewResult => {
+  if (!isOpenSeaHref(href)) {
+    return data;
+  }
+
+  const primary = toPickedMedia(data.image);
+  const hasBlockedPrimary =
+    primary !== undefined && isBlockedOpenSeaOverlayUrl(primary.url);
+
+  const images = data.images ?? [];
+  const sanitizedImages = images.filter((image) => {
+    const candidate = toPickedMedia(image);
+    return !(candidate && isBlockedOpenSeaOverlayUrl(candidate.url));
+  });
+
+  const didChangeImages = sanitizedImages.length !== images.length;
+  if (!hasBlockedPrimary && !didChangeImages) {
+    return data;
+  }
+
+  return {
+    ...data,
+    image: hasBlockedPrimary ? null : data.image,
+    images: sanitizedImages,
+  };
+};
+
 export default function NftMarketplacePreview({
   href,
 }: NftMarketplacePreviewProps) {
@@ -141,7 +201,10 @@ export default function NftMarketplacePreview({
 
     const loadPreview = async (): Promise<void> => {
       try {
-        const response = await fetchLinkPreview(href);
+        const response = sanitizeOpenSeaOverlayMedia(
+          href,
+          await fetchLinkPreview(href)
+        );
         if (!active) {
           return;
         }

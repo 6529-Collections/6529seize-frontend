@@ -1,4 +1,5 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 interface LinkPreviewMedia {
   readonly url?: string | null | undefined;
@@ -90,6 +91,7 @@ export type LinkPreviewResponse =
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
+const OPENSEA_CACHE_KEY_SUFFIX = "|opensea-v3-token-uri-fallback";
 
 const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
   max: LINK_PREVIEW_CACHE_MAX_ITEMS,
@@ -97,6 +99,19 @@ const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
 });
 
 const normalizeUrl = (url: string): string => url.trim();
+
+const buildCacheKey = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    if (matchesDomainOrSubdomain(parsed.hostname.toLowerCase(), "opensea.io")) {
+      return `${url}${OPENSEA_CACHE_KEY_SUFFIX}`;
+    }
+  } catch {
+    // fall through to default key
+  }
+
+  return url;
+};
 
 interface OpenGraphErrorBody {
   readonly error: string;
@@ -116,12 +131,13 @@ export const fetchLinkPreview = async (
   url: string
 ): Promise<LinkPreviewResponse> => {
   const normalizedUrl = normalizeUrl(url);
+  const cacheKey = buildCacheKey(normalizedUrl);
 
   if (!normalizedUrl) {
     throw new Error("A valid URL is required to fetch link preview metadata.");
   }
 
-  const cachedResponse = linkPreviewCache.get(normalizedUrl);
+  const cachedResponse = linkPreviewCache.get(cacheKey);
   if (cachedResponse) {
     return cachedResponse;
   }
@@ -147,11 +163,11 @@ export const fetchLinkPreview = async (
       return response.json() as Promise<LinkPreviewResponse>;
     })
     .catch((error) => {
-      linkPreviewCache.delete(normalizedUrl);
+      linkPreviewCache.delete(cacheKey);
       throw error;
     });
 
-  linkPreviewCache.set(normalizedUrl, requestPromise);
+  linkPreviewCache.set(cacheKey, requestPromise);
 
   return requestPromise;
 };

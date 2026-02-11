@@ -29,7 +29,7 @@ describe("NftMarketplacePreview", () => {
     jest.clearAllMocks();
   });
 
-  it("renders image+title card when marketplace preview has title and image", async () => {
+  it("ignores OpenSea opengraph overlay images", async () => {
     const href =
       "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729";
     fetchLinkPreview.mockResolvedValue({
@@ -43,15 +43,18 @@ describe("NftMarketplacePreview", () => {
     render(<NftMarketplacePreview href={href} />);
 
     await waitFor(() =>
-      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
+      expect(mockOpenGraphPreview).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
-          title: "Radar dome - Earth Spaces | OpenSea",
-          mediaUrl: "https://opensea.io/item/test/opengraph-image?ts=1",
-          mediaMimeType: "image/png",
+          preview: expect.objectContaining({
+            title: "Radar dome - Earth Spaces | OpenSea",
+            image: null,
+            images: [],
+          }),
         })
       )
     );
+    expect(mockManifoldItemPreviewCard).not.toHaveBeenCalled();
   });
 
   it("defaults media mime type when image type is missing", async () => {

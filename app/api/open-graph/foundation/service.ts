@@ -192,7 +192,7 @@ const buildFoundationPreview = (
     typeof chainId === "number" && contractAddress && tokenId
       ? buildFoundationOgImageUrl(chainId, contractAddress, tokenId)
       : undefined;
-  const imageUrl = ogImageUrl ?? mediaUrl ?? sourceUrl;
+  const imageUrl = mediaUrl ?? sourceUrl ?? ogImageUrl;
   const imageMimeType = normalizeFoundationImageMimeType(
     token.media?.imageMimeType
   );

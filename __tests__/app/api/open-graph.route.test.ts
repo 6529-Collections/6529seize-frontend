@@ -52,6 +52,10 @@ jest.mock("@/app/api/open-graph/foundation/service", () => ({
   createFoundationPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/opensea/service", () => ({
+  createOpenSeaPlan: jest.fn(() => null),
+}));
+
 jest.mock("@/app/api/open-graph/ens", () => ({
   detectEnsTarget: jest.fn(),
   fetchEnsPreview: jest.fn(),
@@ -77,6 +81,9 @@ let manifold: {
 };
 let foundation: {
   createFoundationPlan: jest.Mock;
+};
+let opensea: {
+  createOpenSeaPlan: jest.Mock;
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 let ensRouteModule: {
@@ -118,6 +125,9 @@ async function loadRoute(): Promise<void> {
   ) as {
     createFoundationPlan: jest.Mock;
   };
+  opensea = jest.requireMock("../../../app/api/open-graph/opensea/service") as {
+    createOpenSeaPlan: jest.Mock;
+  };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
     detectEnsTarget: jest.Mock;
     fetchEnsPreview: jest.Mock;
@@ -136,6 +146,7 @@ describe("open-graph API route", () => {
     mockFetchPublicUrl.mockReset();
     manifold.createManifoldPlan.mockReturnValue(null);
     foundation.createFoundationPlan.mockReturnValue(null);
+    opensea.createOpenSeaPlan.mockReturnValue(null);
     compound.createCompoundPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
@@ -255,6 +266,13 @@ describe("open-graph API route", () => {
       })
     );
     expect(foundation.createFoundationPlan).toHaveBeenCalledWith(
+      new URL("http://safe.example/article"),
+      expect.objectContaining({
+        fetchHtml: expect.any(Function),
+        assertPublicUrl: expect.any(Function),
+      })
+    );
+    expect(opensea.createOpenSeaPlan).toHaveBeenCalledWith(
       new URL("http://safe.example/article"),
       expect.objectContaining({
         fetchHtml: expect.any(Function),
@@ -450,6 +468,44 @@ describe("open-graph API route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(foundationData);
     expect(foundationExecute).toHaveBeenCalledTimes(1);
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("uses OpenSea plan before compound when available", async () => {
+    const openSeaData = {
+      type: "opensea.nft",
+      title: "Radar dome",
+    } as any;
+    const openSeaExecute = jest.fn(async () => ({
+      data: openSeaData,
+      ttl: 45_000,
+    }));
+
+    opensea.createOpenSeaPlan.mockReturnValue({
+      cacheKey: "opensea:test",
+      execute: openSeaExecute,
+    });
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:test",
+      execute: jest.fn(async () => ({
+        data: { kind: "compound" },
+        ttl: 45_000,
+      })),
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(openSeaData);
+    expect(openSeaExecute).toHaveBeenCalledTimes(1);
     expect(compound.createCompoundPlan).not.toHaveBeenCalled();
     expect(mockFetchPublicUrl).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
