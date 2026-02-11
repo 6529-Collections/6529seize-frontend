@@ -4,6 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -310,6 +311,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
+  const { seizeSettings } = useSeizeSettings();
 
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
   const [showAutomaticAirdrops, setShowAutomaticAirdrops] = useState(false);
@@ -352,7 +354,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   );
 
   useEffect(() => {
-    if (!distributionPlan || !isSubscriptionsAdmin(connectedProfile)) {
+    if (
+      !distributionPlan ||
+      !isSubscriptionsAdmin(
+        connectedProfile,
+        seizeSettings.distribution_admin_wallets
+      )
+    ) {
       return;
     }
 
@@ -363,7 +371,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
     const contract = MEMES_CONTRACT;
     refreshOverview(contract, confirmedTokenId);
-  }, [distributionPlan, connectedProfile, confirmedTokenId, refreshOverview]);
+  }, [
+    distributionPlan,
+    connectedProfile,
+    confirmedTokenId,
+    refreshOverview,
+    seizeSettings.distribution_admin_wallets,
+  ]);
 
   const handleConfirmTokenId = (tokenId: string) => {
     setConfirmedTokenId(tokenId);
@@ -521,7 +535,12 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     [setToast, refreshOverview]
   );
 
-  if (!isSubscriptionsAdmin(connectedProfile)) {
+  if (
+    !isSubscriptionsAdmin(
+      connectedProfile,
+      seizeSettings.distribution_admin_wallets
+    )
+  ) {
     return <></>;
   }
 

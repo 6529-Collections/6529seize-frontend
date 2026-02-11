@@ -13,12 +13,12 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSeizeSettings {
-    'rememes_submission_tdh_threshold': number;
-    'all_drops_notifications_subscribers_limit': number;
-    'memes_wave_id': string | null;
-    'distribution_admin_wallets': Array<string>;
-    'claims_admin_wallets': Array<string>;
+export class MemeClaimImageDetails {
+    'bytes': number;
+    'format': string;
+    'sha256': string;
+    'width': number;
+    'height': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,38 +26,38 @@ export class ApiSeizeSettings {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "rememes_submission_tdh_threshold",
-            "baseName": "rememes_submission_tdh_threshold",
+            "name": "bytes",
+            "baseName": "bytes",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "all_drops_notifications_subscribers_limit",
-            "baseName": "all_drops_notifications_subscribers_limit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "memes_wave_id",
-            "baseName": "memes_wave_id",
+            "name": "format",
+            "baseName": "format",
             "type": "string",
             "format": ""
         },
         {
-            "name": "distribution_admin_wallets",
-            "baseName": "distribution_admin_wallets",
-            "type": "Array<string>",
+            "name": "sha256",
+            "baseName": "sha256",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "claims_admin_wallets",
-            "baseName": "claims_admin_wallets",
-            "type": "Array<string>",
-            "format": ""
+            "name": "width",
+            "baseName": "width",
+            "type": "number",
+            "format": "int32"
+        },
+        {
+            "name": "height",
+            "baseName": "height",
+            "type": "number",
+            "format": "int32"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSeizeSettings.attributeTypeMap;
+        return MemeClaimImageDetails.attributeTypeMap;
     }
 
     public constructor() {

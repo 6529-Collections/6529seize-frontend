@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useTitle } from "@/contexts/TitleContext";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import { useWave } from "@/hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useViewContext } from "./ViewContext";
-import type { NavItem as NavItemData } from "./navTypes";
-import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { useAuth } from "../auth/Auth";
-import { useTitle } from "@/contexts/TitleContext";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
+import { useViewContext } from "./ViewContext";
 import { isNavItemActive } from "./isNavItemActive";
-import { useWaveData } from "@/hooks/useWaveData";
-import { useWave } from "@/hooks/useWave";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;

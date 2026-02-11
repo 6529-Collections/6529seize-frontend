@@ -164,14 +164,10 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
       setCurrentInputValue(String(traitValue));
     }, [traits, field]);
 
-    // Check if field is filled (non-zero value)
     const isFieldFilled = useMemo(() => {
-      const traitValue = (traits[field] as number) ?? 0;
-      const inputValue = parseFloat(currentInputValue) || 0;
-
-      // Return true if either the trait value or current input value is > 0
-      return traitValue > 0 || inputValue > 0;
-    }, [traits, field, currentInputValue]);
+      const n = parseFloat(currentInputValue);
+      return Number.isFinite(n) && n > 0;
+    }, [currentInputValue]);
 
     // Determine input state styling
     let stateClassName: string;

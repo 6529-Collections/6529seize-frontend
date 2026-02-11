@@ -102,6 +102,7 @@ export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
 
 export interface ManifoldClaim {
   instanceId: number;
+  location: string;
   total: number;
   totalMax: number;
   remaining: number;
@@ -187,6 +188,7 @@ export function useManifoldClaim(
       const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,
+        location: String(claimData.location ?? ""),
         total: Number(claimData.total),
         totalMax: Number(claimData.totalMax),
         remaining: remaining,

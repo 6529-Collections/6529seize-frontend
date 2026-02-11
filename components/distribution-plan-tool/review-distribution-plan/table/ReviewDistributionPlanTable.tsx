@@ -4,6 +4,7 @@ import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool
 import { AuthContext } from "@/components/auth/Auth";
 import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useContext, useEffect, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";
@@ -44,6 +45,7 @@ export interface FullResultWallet extends AllowlistResult {
 export default function ReviewDistributionPlanTable() {
   const { phases } = useContext(DistributionPlanToolContext);
   const { connectedProfile } = useContext(AuthContext);
+  const { seizeSettings } = useSeizeSettings();
 
   const [rows, setRows] = useState<ReviewDistributionPlanTablePhase[]>([]);
 
@@ -87,7 +89,12 @@ export default function ReviewDistributionPlanTable() {
 
     const allRows: ReviewDistributionPlanTablePhase[] = [...phaseRows];
 
-    if (isSubscriptionsAdmin(connectedProfile)) {
+    if (
+      isSubscriptionsAdmin(
+        connectedProfile,
+        seizeSettings.distribution_admin_wallets
+      )
+    ) {
       const publicRow: ReviewDistributionPlanTablePhase = {
         phase: {
           id: PUBLIC_SUBSCRIPTIONS_PHASE_ID,
@@ -105,7 +112,7 @@ export default function ReviewDistributionPlanTable() {
     }
 
     setRows(allRows);
-  }, [phases, connectedProfile]);
+  }, [phases, connectedProfile, seizeSettings.distribution_admin_wallets]);
   return (
     <>
       <DistributionPlanTableWrapper>

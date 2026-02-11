@@ -4,10 +4,8 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import {
-  MEMES_CONTRACT,
-  SUBSCRIPTIONS_ADMIN_WALLETS,
-} from "@/constants/constants";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -35,11 +33,15 @@ export function SubscriptionLinks(
 ) {
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { confirmedTokenId } = useContext(DistributionPlanToolContext);
+  const { seizeSettings } = useSeizeSettings();
 
   const [downloading, setDownloading] = useState(false);
 
   if (
-    !isSubscriptionsAdmin(connectedProfile) ||
+    !isSubscriptionsAdmin(
+      connectedProfile,
+      seizeSettings.distribution_admin_wallets
+    ) ||
     props.phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
     !confirmedTokenId
   ) {
@@ -93,11 +95,14 @@ export function SubscriptionLinks(
   );
 }
 
-export const isSubscriptionsAdmin = (connectedProfile: ApiIdentity | null) => {
+export const isSubscriptionsAdmin = (
+  connectedProfile: ApiIdentity | null,
+  distributionAdminWallets: string[] = []
+) => {
   const connectedWallets =
     connectedProfile?.wallets?.map((wallet) => wallet.wallet) ?? [];
   return connectedWallets.some((w) =>
-    SUBSCRIPTIONS_ADMIN_WALLETS.some((a) => areEqualAddresses(a, w))
+    distributionAdminWallets.some((a) => areEqualAddresses(a, w))
   );
 };
 

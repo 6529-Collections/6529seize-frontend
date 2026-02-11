@@ -1,0 +1,100 @@
+import { publicEnv } from "@/config/env";
+import type { MemeClaim } from "@/generated/models/MemeClaim";
+import type { MemeClaimUpdateRequest } from "@/generated/models/MemeClaimUpdateRequest";
+import type { MemesMintingClaimsPageResponse } from "@/generated/models/MemesMintingClaimsPageResponse";
+import type { MemesMintingRootItem } from "@/generated/models/MemesMintingRootItem";
+import { commonApiFetch, commonApiPatch } from "@/services/api/common-api";
+import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
+import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
+
+const CLAIMS_BASE = "memes-minting/claims";
+
+function getHeaders(): Record<string, string> {
+  const apiAuth = getStagingAuth();
+  const walletAuth = getAuthJwt();
+  return {
+    "Content-Type": "application/json",
+    ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
+    ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
+  };
+}
+
+export async function getClaimsPage(
+  page: number,
+  pageSize: number
+): Promise<MemesMintingClaimsPageResponse> {
+  return commonApiFetch<MemesMintingClaimsPageResponse>({
+    endpoint: CLAIMS_BASE,
+    params: {
+      page: String(page),
+      page_size: String(pageSize),
+    },
+  });
+}
+
+export async function getClaim(memeId: number): Promise<MemeClaim> {
+  return commonApiFetch<MemeClaim>({
+    endpoint: `${CLAIMS_BASE}/${memeId}`,
+  });
+}
+
+export async function getMemesMintingRoots(
+  contract: string,
+  cardId: number
+): Promise<MemesMintingRootItem[]> {
+  return commonApiFetch<MemesMintingRootItem[]>({
+    endpoint: `memes-minting/roots/${contract}/${cardId}`,
+  });
+}
+
+export async function patchClaim(
+  memeId: number,
+  body: MemeClaimUpdateRequest
+): Promise<MemeClaim> {
+  return commonApiPatch<MemeClaimUpdateRequest, MemeClaim>({
+    endpoint: `${CLAIMS_BASE}/${memeId}`,
+    body,
+  });
+}
+
+export async function postArweaveUpload(memeId: number): Promise<void> {
+  const url = `${publicEnv.API_ENDPOINT}/api/${CLAIMS_BASE}/${memeId}/arweave-upload`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: getHeaders(),
+    body: "",
+  });
+  if (res.status === 409) {
+    throw new Error("Already synced");
+  }
+  if (res.status === 403) {
+    throw new Error("Not authorized");
+  }
+  if (!res.ok) {
+    let errorMessage: string;
+    try {
+      const body = await res.json();
+      errorMessage = (body as { error?: string })?.error ?? res.statusText ?? "Request failed";
+    } catch {
+      errorMessage = res.statusText ?? "Request failed";
+    }
+    throw new Error(errorMessage);
+  }
+}
+
+export type ClaimMediaField = "image_url" | "animation_url";
+
+export async function uploadClaimMedia(
+  _memeId: number,
+  _field: ClaimMediaField,
+  file: File
+): Promise<string> {
+  return multipartUploadCore({
+    file,
+    endpoints: {
+      start: "drop-media/multipart-upload",
+      part: "drop-media/multipart-upload/part",
+      complete: "drop-media/multipart-upload/completion",
+    },
+  });
+}

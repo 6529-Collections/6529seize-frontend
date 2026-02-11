@@ -60,7 +60,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
       <div className="tw-relative">
         <label
           htmlFor={fieldId}
-          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${labelClassName}`}
+          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-transition-all ${labelClassName}`}
         >
           {label}
         </label>

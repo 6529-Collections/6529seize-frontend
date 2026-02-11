@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/Auth";
 interface MemesArtSubmissionTraitsProps {
   readonly traits: TraitsData;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
+  readonly showTitle?: boolean | undefined;
   readonly validationErrors?:
     | Record<keyof TraitsData, string | null>
     | undefined;
@@ -16,6 +17,7 @@ interface MemesArtSubmissionTraitsProps {
     | ((field: keyof TraitsData) => void)
     | undefined
     | undefined;
+  readonly readOnlyOverrides?: Partial<Record<keyof TraitsData, boolean>>;
 }
 
 /**
@@ -26,8 +28,10 @@ interface MemesArtSubmissionTraitsProps {
 const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   traits,
   setTraits,
+  showTitle = true,
   validationErrors = {},
   onFieldBlur,
+  readOnlyOverrides,
 }) => {
   const { connectedProfile } = useAuth();
 
@@ -56,26 +60,35 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
     [setTraits]
   );
 
-  // Use memoization to prevent unnecessary rebuilding of form sections
   const formSections = React.useMemo(
-    () => getFormSections(userProfile),
-    [userProfile]
+    () => getFormSections(userProfile, readOnlyOverrides),
+    [userProfile, readOnlyOverrides]
   );
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1">
-      <h2 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4">
-        Artwork Traits
-      </h2>
+      {showTitle && (
+        <h2 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4">
+          Artwork Traits
+        </h2>
+      )}
 
       <div className="tw-flex tw-flex-col tw-gap-y-8">
         {formSections.map((section, sectionIndex) => (
           <Section key={`section-${sectionIndex}`} title={section.title}>
             <div className="tw-flex tw-flex-col tw-gap-6">
-              {section.fields.map((field, fieldIndex) => (
+              {section.fields.map((field, fieldIndex) => {
+                const effectiveReadOnly =
+                  readOnlyOverrides?.[field.field] ?? field.readOnly;
+                return (
                 <TraitField
                   key={`field-${field.field}-${fieldIndex}`}
-                  definition={field}
+                  definition={{ ...field, readOnly: effectiveReadOnly }}
+                  readOnlyOverride={
+                    readOnlyOverrides?.[field.field] !== undefined
+                      ? effectiveReadOnly
+                      : undefined
+                  }
                   traits={traits}
                   updateText={updateText}
                   updateNumber={updateNumber}
@@ -85,7 +98,8 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                     onFieldBlur ? () => onFieldBlur(field.field) : undefined
                   }
                 />
-              ))}
+              );
+              })}
             </div>
           </Section>
         ))}

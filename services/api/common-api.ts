@@ -38,14 +38,18 @@ const buildUrl = (
 
 const handleApiError = async (res: Response): Promise<never> => {
   let errorMessage: string;
-  let rawContent: string = "";
 
   try {
     const body: any = await res.json();
-    errorMessage = body?.error ?? res.statusText ?? "Something went wrong";
+    errorMessage =
+      body?.error ??
+      body?.message ??
+      body?.details?.[0]?.message ??
+      res.statusText ??
+      "Something went wrong";
   } catch {
     try {
-      rawContent = await res.text();
+      const rawContent = await res.text();
       errorMessage = rawContent || res.statusText || "Something went wrong";
     } catch {
       errorMessage = res.statusText || "Something went wrong";
@@ -350,6 +354,27 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
     "PUT",
     getHeaders(param.headers, true),
     JSON.stringify(param.body)
+  );
+};
+
+export const commonApiPatch = async <T, U, Z = Record<string, string>>(param: {
+  endpoint: string;
+  body: T;
+  headers?: Record<string, string> | undefined;
+  params?: Z | undefined;
+  signal?: AbortSignal | undefined;
+}): Promise<U> => {
+  const url = buildUrl(
+    param.endpoint,
+    param.params as Record<string, string> | undefined
+  );
+
+  return executeApiRequest<U>(
+    url,
+    "PATCH",
+    getHeaders(param.headers, true),
+    JSON.stringify(param.body),
+    param.signal
   );
 };
 

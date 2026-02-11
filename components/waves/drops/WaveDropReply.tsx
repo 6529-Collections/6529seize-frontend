@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useDropContent } from "./useDropContent";
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo } from "react";
+import ContentDisplay from "./ContentDisplay";
 import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";
-import ContentDisplay from "./ContentDisplay";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { parseStandaloneMediaUrl } from "./media-utils";
+import { useDropContent } from "./useDropContent";
 
 interface WaveDropReplyProps {
   readonly dropId: string;

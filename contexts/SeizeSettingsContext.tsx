@@ -42,6 +42,8 @@ export const SeizeSettingsProvider = ({
     rememes_submission_tdh_threshold: 0,
     all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
+    distribution_admin_wallets: [],
+    claims_admin_wallets: [],
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);

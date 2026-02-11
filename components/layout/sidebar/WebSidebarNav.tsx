@@ -2,20 +2,24 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useIsMemesAdmin } from "@/hooks/useIsMemesAdmin";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { CommandLineIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -31,17 +35,21 @@ import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
+  readonly isMobile?: boolean;
 }
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
->(({ isCollapsed = false }, ref) => {
+>(({ isCollapsed = false, isMobile: _isMobile = false }, ref) => {
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
+  const { address } = useSeizeConnectContext();
+  const { seizeSettings } = useSeizeSettings();
   const { appWalletsSupported } = useAppWallets();
+  const isMemesAdmin = useIsMemesAdmin();
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );
@@ -68,11 +76,29 @@ const WebSidebarNav = React.forwardRef<
     { event: "keydown" }
   );
 
-  const sections = useSidebarSections(
+  const showDropControl = useMemo(() => {
+    if (!address) return false;
+    if (
+      seizeSettings.distribution_admin_wallets.some((w) =>
+        areEqualAddresses(w, address)
+      )
+    )
+      return true;
+    if (
+      seizeSettings.claims_admin_wallets.some((w) =>
+        areEqualAddresses(w, address)
+      )
+    )
+      return true;
+    return isMemesAdmin;
+  }, [address, isMemesAdmin, seizeSettings]);
+
+  const allSections = useSidebarSections(
     appWalletsSupported,
     capacitor.isIos,
     country
   );
+  const sections = useMemo(() => allSections, [allSections]);
   const sectionMap = useSectionMap(sections);
   const networkSection = sectionMap.get("network");
   const collectionsSection = sectionMap.get("collections");
@@ -327,21 +353,37 @@ const WebSidebarNav = React.forwardRef<
                 section.key !== "network" && section.key !== "collections"
             )
             .map((section) => (
-              <li
-                key={section.key}
-                className={isCollapsed ? "tw-relative" : undefined}
-              >
-                <WebSidebarExpandable
-                  section={section}
-                  expanded={expandedKeys.includes(section.key)}
-                  onToggle={(event) => handleSectionToggle(section.key, event)}
-                  collapsed={isCollapsed}
-                  pathname={pathname}
-                  data-section={section.key}
-                />
-                {renderCollapsedSubmenu(section.key)}
-              </li>
+              <React.Fragment key={section.key}>
+                <li className={isCollapsed ? "tw-relative" : undefined}>
+                  <WebSidebarExpandable
+                    section={section}
+                    expanded={expandedKeys.includes(section.key)}
+                    onToggle={(event) =>
+                      handleSectionToggle(section.key, event)
+                    }
+                    collapsed={isCollapsed}
+                    pathname={pathname}
+                    data-section={section.key}
+                  />
+                  {renderCollapsedSubmenu(section.key)}
+                </li>
+                {section.key === "about" && showDropControl && (
+                  <li>
+                    <WebSidebarNavItem
+                      href="/drop-control"
+                      icon={CommandLineIcon}
+                      active={
+                        pathname === "/drop-control" ||
+                        pathname?.startsWith("/drop-control/")
+                      }
+                      collapsed={isCollapsed}
+                      label="Drop Control"
+                    />
+                  </li>
+                )}
+              </React.Fragment>
             ))}
+
         </ul>
       </nav>
 
