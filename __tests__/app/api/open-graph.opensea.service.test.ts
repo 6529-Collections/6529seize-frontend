@@ -284,12 +284,25 @@ describe("createOpenSeaPlan", () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("returns image-less OpenSea preview when Alchemy image is missing", async () => {
+  it("falls back to OpenGraph image and title when Alchemy image is missing", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({
         name: "Token without image",
       }),
+    });
+    fetchHtml.mockResolvedValue({
+      html: `
+        <html>
+          <head>
+            <meta property="og:title" content="OpenGraph token name" />
+            <meta property="og:image" content="https://i.seadn.io/s/raw/files/opengraph-token.png" />
+          </head>
+        </html>
+      `,
+      contentType: "text/html; charset=utf-8",
+      finalUrl:
+        "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/1",
     });
 
     const plan = createOpenSeaPlan(
@@ -306,19 +319,41 @@ describe("createOpenSeaPlan", () => {
     expect(result?.data).toEqual(
       expect.objectContaining({
         type: "opensea.nft",
-        title: "Token without image",
-        image: null,
-        images: [],
+        title: "OpenGraph token name",
+        image: expect.objectContaining({
+          url: "https://i.seadn.io/s/raw/files/opengraph-token.png",
+        }),
+        images: [
+          expect.objectContaining({
+            url: "https://i.seadn.io/s/raw/files/opengraph-token.png",
+          }),
+        ],
       })
     );
-    expect(fetchHtml).not.toHaveBeenCalled();
-    expect(assertPublicUrl).not.toHaveBeenCalled();
+    expect(fetchHtml).toHaveBeenCalledTimes(1);
+    expect(assertPublicUrl).toHaveBeenCalledTimes(1);
+    expect(assertPublicUrl.mock.calls[0]?.[0]?.toString()).toBe(
+      "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/1"
+    );
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("returns minimal OpenSea preview when API key is unavailable", async () => {
+  it("falls back to OpenGraph preview when API key is unavailable", async () => {
     mockedGetAlchemyApiKey.mockImplementation(() => {
       throw new Error("ALCHEMY_API_KEY missing");
+    });
+    fetchHtml.mockResolvedValue({
+      html: `
+        <html>
+          <head>
+            <meta property="og:title" content="Missing key fallback title" />
+            <meta property="og:image" content="https://i.seadn.io/s/raw/files/missing-key-fallback.png" />
+          </head>
+        </html>
+      `,
+      contentType: "text/html",
+      finalUrl:
+        "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/2",
     });
 
     const plan = createOpenSeaPlan(
@@ -335,13 +370,20 @@ describe("createOpenSeaPlan", () => {
     expect(result?.data).toEqual(
       expect.objectContaining({
         type: "opensea.nft",
-        title: "NFT #2",
-        image: null,
-        images: [],
+        title: "Missing key fallback title",
+        image: expect.objectContaining({
+          url: "https://i.seadn.io/s/raw/files/missing-key-fallback.png",
+        }),
+        images: [
+          expect.objectContaining({
+            url: "https://i.seadn.io/s/raw/files/missing-key-fallback.png",
+          }),
+        ],
       })
     );
     expect(mockFetch).not.toHaveBeenCalled();
-    expect(fetchHtml).not.toHaveBeenCalled();
+    expect(fetchHtml).toHaveBeenCalledTimes(1);
+    expect(assertPublicUrl).toHaveBeenCalledTimes(1);
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining(
         "Unable to resolve OpenSea media (missing_api_key)"
@@ -380,7 +422,7 @@ describe("createOpenSeaPlan", () => {
         images: [],
       })
     );
-    expect(fetchHtml).not.toHaveBeenCalled();
+    expect(fetchHtml).toHaveBeenCalledTimes(1);
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining(
         "Unable to resolve OpenSea media (alchemy_http_error)"
@@ -428,7 +470,7 @@ describe("createOpenSeaPlan", () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("rejects OpenSea opengraph-like image URLs and returns image-less preview", async () => {
+  it("falls back to OpenGraph image when Alchemy image resolves to blocked OpenSea overlay", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -439,6 +481,19 @@ describe("createOpenSeaPlan", () => {
           contentType: "image/png",
         },
       }),
+    });
+    fetchHtml.mockResolvedValue({
+      html: `
+        <html>
+          <head>
+            <meta property="og:title" content="Overlay fallback token" />
+            <meta property="og:image" content="https://i.seadn.io/s/raw/files/overlay-fallback.png" />
+          </head>
+        </html>
+      `,
+      contentType: "text/html",
+      finalUrl:
+        "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/8",
     });
 
     const url =
@@ -453,11 +508,19 @@ describe("createOpenSeaPlan", () => {
     expect(result?.data).toEqual(
       expect.objectContaining({
         type: "opensea.nft",
-        title: "Overlay-like token",
-        image: null,
-        images: [],
+        title: "Overlay fallback token",
+        image: expect.objectContaining({
+          url: "https://i.seadn.io/s/raw/files/overlay-fallback.png",
+        }),
+        images: [
+          expect.objectContaining({
+            url: "https://i.seadn.io/s/raw/files/overlay-fallback.png",
+          }),
+        ],
       })
     );
+    expect(fetchHtml).toHaveBeenCalledTimes(1);
+    expect(assertPublicUrl).toHaveBeenCalledTimes(1);
     expect(warnSpy).not.toHaveBeenCalled();
   });
 });

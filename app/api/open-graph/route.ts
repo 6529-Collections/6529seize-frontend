@@ -20,6 +20,7 @@ import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
 import { createOpenSeaPlan } from "./opensea/service";
+import { createTransientPlan } from "./transient/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -371,10 +372,15 @@ export async function GET(request: NextRequest) {
     fetchHtml,
     assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
   });
+  const transientPlan = createTransientPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
   const plan =
     manifoldPlan ??
     foundationPlan ??
     openSeaPlan ??
+    transientPlan ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 

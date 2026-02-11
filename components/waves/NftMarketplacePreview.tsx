@@ -172,12 +172,29 @@ const sanitizeOpenSeaOverlayMedia = (
   const primary = toPickedMedia(data.image);
   const hasBlockedPrimary =
     primary !== undefined && isBlockedOpenSeaOverlayUrl(primary.url);
+  const hasNonBlockedPrimary = primary !== undefined && !hasBlockedPrimary;
 
   const images = data.images ?? [];
+  let hasNonBlockedImageCandidate = false;
   const sanitizedImages = images.filter((image) => {
     const candidate = toPickedMedia(image);
-    return !(candidate && isBlockedOpenSeaOverlayUrl(candidate.url));
+    if (!candidate) {
+      return true;
+    }
+
+    if (isBlockedOpenSeaOverlayUrl(candidate.url)) {
+      return false;
+    }
+
+    hasNonBlockedImageCandidate = true;
+    return true;
   });
+
+  const hasAnyNonBlockedCandidate =
+    hasNonBlockedPrimary || hasNonBlockedImageCandidate;
+  if (!hasAnyNonBlockedCandidate) {
+    return data;
+  }
 
   const didChangeImages = sanitizedImages.length !== images.length;
   if (!hasBlockedPrimary && !didChangeImages) {

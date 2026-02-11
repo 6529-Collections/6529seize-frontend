@@ -56,6 +56,10 @@ jest.mock("@/app/api/open-graph/opensea/service", () => ({
   createOpenSeaPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/transient/service", () => ({
+  createTransientPlan: jest.fn(() => null),
+}));
+
 jest.mock("@/app/api/open-graph/ens", () => ({
   detectEnsTarget: jest.fn(),
   fetchEnsPreview: jest.fn(),
@@ -84,6 +88,9 @@ let foundation: {
 };
 let opensea: {
   createOpenSeaPlan: jest.Mock;
+};
+let transient: {
+  createTransientPlan: jest.Mock;
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 let ensRouteModule: {
@@ -128,6 +135,11 @@ async function loadRoute(): Promise<void> {
   opensea = jest.requireMock("../../../app/api/open-graph/opensea/service") as {
     createOpenSeaPlan: jest.Mock;
   };
+  transient = jest.requireMock(
+    "../../../app/api/open-graph/transient/service"
+  ) as {
+    createTransientPlan: jest.Mock;
+  };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
     detectEnsTarget: jest.Mock;
     fetchEnsPreview: jest.Mock;
@@ -147,6 +159,7 @@ describe("open-graph API route", () => {
     manifold.createManifoldPlan.mockReturnValue(null);
     foundation.createFoundationPlan.mockReturnValue(null);
     opensea.createOpenSeaPlan.mockReturnValue(null);
+    transient.createTransientPlan.mockReturnValue(null);
     compound.createCompoundPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
@@ -273,6 +286,13 @@ describe("open-graph API route", () => {
       })
     );
     expect(opensea.createOpenSeaPlan).toHaveBeenCalledWith(
+      new URL("http://safe.example/article"),
+      expect.objectContaining({
+        fetchHtml: expect.any(Function),
+        assertPublicUrl: expect.any(Function),
+      })
+    );
+    expect(transient.createTransientPlan).toHaveBeenCalledWith(
       new URL("http://safe.example/article"),
       expect.objectContaining({
         fetchHtml: expect.any(Function),
@@ -506,6 +526,44 @@ describe("open-graph API route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(openSeaData);
     expect(openSeaExecute).toHaveBeenCalledTimes(1);
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("uses transient plan before compound when available", async () => {
+    const transientData = {
+      type: "transient.nft",
+      title: "Stitched",
+    } as any;
+    const transientExecute = jest.fn(async () => ({
+      data: transientData,
+      ttl: 45_000,
+    }));
+
+    transient.createTransientPlan.mockReturnValue({
+      cacheKey: "transient:test",
+      execute: transientExecute,
+    });
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:test",
+      execute: jest.fn(async () => ({
+        data: { kind: "compound" },
+        ttl: 45_000,
+      })),
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/7"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(transientData);
+    expect(transientExecute).toHaveBeenCalledTimes(1);
     expect(compound.createCompoundPlan).not.toHaveBeenCalled();
     expect(mockFetchPublicUrl).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();

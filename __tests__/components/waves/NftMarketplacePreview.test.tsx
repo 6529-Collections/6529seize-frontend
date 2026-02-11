@@ -29,7 +29,7 @@ describe("NftMarketplacePreview", () => {
     jest.clearAllMocks();
   });
 
-  it("ignores OpenSea opengraph overlay images", async () => {
+  it("uses OpenSea opengraph overlay image as last resort when no alternative exists", async () => {
     const href =
       "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729";
     fetchLinkPreview.mockResolvedValue({
@@ -43,18 +43,50 @@ describe("NftMarketplacePreview", () => {
     render(<NftMarketplacePreview href={href} />);
 
     await waitFor(() =>
-      expect(mockOpenGraphPreview).toHaveBeenCalledWith(
+      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
-          preview: expect.objectContaining({
-            title: "Radar dome - Earth Spaces | OpenSea",
-            image: null,
-            images: [],
-          }),
+          title: "Radar dome - Earth Spaces | OpenSea",
+          mediaUrl: "https://opensea.io/item/test/opengraph-image?ts=1",
+          mediaMimeType: "image/png",
         })
       )
     );
-    expect(mockManifoldItemPreviewCard).not.toHaveBeenCalled();
+  });
+
+  it("prefers non-overlay image when blocked OpenSea overlay and non-overlay candidates both exist", async () => {
+    const href =
+      "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729";
+    fetchLinkPreview.mockResolvedValue({
+      title: "Radar dome - Earth Spaces | OpenSea",
+      image: {
+        url: "https://opensea.io/item/test/opengraph-image?ts=1",
+        type: "image/png",
+      },
+      images: [
+        {
+          url: "https://opensea.io/item/test/opengraph-image?ts=1",
+          type: "image/png",
+        },
+        {
+          url: "https://i.seadn.io/s/raw/files/radar-dome.png",
+          type: "image/png",
+        },
+      ],
+    });
+
+    render(<NftMarketplacePreview href={href} />);
+
+    await waitFor(() =>
+      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href,
+          title: "Radar dome - Earth Spaces | OpenSea",
+          mediaUrl: "https://i.seadn.io/s/raw/files/radar-dome.png",
+          mediaMimeType: "image/png",
+        })
+      )
+    );
   });
 
   it("defaults media mime type when image type is missing", async () => {

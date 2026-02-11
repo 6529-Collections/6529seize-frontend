@@ -3,6 +3,7 @@ import { buildResponse } from "@/app/api/open-graph/utils";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { fetchAlchemyMetadataCandidate } from "../opensea/alchemy";
 import {
   OPEN_SEA_IMAGE_CANDIDATE_SOURCES,
   OPEN_SEA_IMAGE_SOURCE_READERS,
@@ -10,31 +11,17 @@ import {
   createRequestId,
   getObjectKeys,
   toObjectRecord,
-  truncateForLog,
-} from "./shared";
-import { fetchAlchemyMetadataCandidate } from "./alchemy";
-import type {
-  AlchemyNftMetadata,
-  CreateOpenSeaPlanDeps,
-  OpenSeaContext,
-  OpenSeaFallbackReason,
-  OpenSeaMetadataFetchResult,
-  OpenSeaPreviewBuildResult,
-  OpenSeaTokenUriImageSource,
-  ResolvedOpenSeaImage,
-  TokenUriMetadata,
-} from "./shared";
+} from "../opensea/shared";
+import type { AlchemyNftMetadata, TokenUriMetadata } from "../opensea/shared";
 
-const OPENSEA_CACHE_TTL_MS = 5 * 60 * 1000;
-const OPENSEA_HOST = "opensea.io";
-const OPENSEA_ITEM_PATH_PATTERN =
-  /^\/item\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const OPENSEA_ASSET_PATH_PATTERN =
-  /^\/assets\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
+const TRANSIENT_CACHE_TTL_MS = 5 * 60 * 1000;
+const TRANSIENT_HOST = "transient.xyz";
+const TRANSIENT_NFT_PATH_PATTERN =
+  /^\/nfts\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
 const DEFAULT_IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
 
-const ALCHEMY_NETWORK_BY_OPENSEA_CHAIN: Record<string, string> = {
+const ALCHEMY_NETWORK_BY_TRANSIENT_CHAIN: Record<string, string> = {
   arbitrum: "arb-mainnet",
   base: "base-mainnet",
   ethereum: "eth-mainnet",
@@ -44,6 +31,62 @@ const ALCHEMY_NETWORK_BY_OPENSEA_CHAIN: Record<string, string> = {
   polygon: "polygon-mainnet",
   zora: "zora-mainnet",
 };
+
+type FetchHtmlResult = {
+  readonly html: string;
+  readonly contentType: string | null;
+  readonly finalUrl: string;
+};
+
+interface CreateTransientPlanDeps {
+  readonly fetchHtml: (url: URL) => Promise<FetchHtmlResult>;
+  readonly assertPublicUrl: (url: URL) => Promise<void>;
+}
+
+type TransientContext = {
+  readonly chainSegment: string;
+  readonly contractAddress: string;
+  readonly tokenId: string;
+};
+
+type TransientFallbackReason =
+  | "unsupported_chain"
+  | "missing_api_key"
+  | "alchemy_http_error"
+  | "alchemy_json_error"
+  | "no_image_candidate"
+  | "unexpected_error";
+
+type ResolvedTransientImage = {
+  readonly source: string;
+  readonly url: string;
+};
+
+type TransientMetadataFetchResult =
+  | {
+      readonly kind: "success";
+      readonly metadata: AlchemyNftMetadata;
+      readonly network: string;
+      readonly requestedTokenId: string;
+      readonly payloadTopLevelKeys: readonly string[];
+    }
+  | {
+      readonly kind: "fallback";
+      readonly reason: TransientFallbackReason;
+      readonly network?: string | undefined;
+      readonly status?: number | undefined;
+      readonly requestedTokenId?: string | undefined;
+      readonly errorMessage?: string | undefined;
+    };
+
+type TransientPreviewBuildResult =
+  | { readonly kind: "success"; readonly preview: LinkPreviewResponse }
+  | {
+      readonly kind: "fallback";
+      readonly reason: TransientFallbackReason;
+      readonly details?: Record<string, unknown> | undefined;
+      readonly preview?: LinkPreviewResponse | undefined;
+    };
 
 const normalizeTokenIdCandidate = (tokenId: string): string => {
   const trimmed = tokenId.trim();
@@ -112,7 +155,7 @@ const replaceTokenIdPlaceholders = (tokenUri: string, value: string): string =>
 const logFallback = (
   requestId: string,
   requestUrl: URL,
-  reason: OpenSeaFallbackReason,
+  reason: TransientFallbackReason,
   details?: Record<string, unknown>
 ): void => {
   if (reason === "no_image_candidate") {
@@ -120,7 +163,7 @@ const logFallback = (
   }
 
   console.warn(
-    `[open-graph:opensea:${requestId}] Unable to resolve OpenSea media (${reason}); returning non-OG preview`,
+    `[open-graph:transient:${requestId}] Unable to resolve Transient media (${reason}); returning fallback preview`,
     {
       requestUrl: requestUrl.toString(),
       reason,
@@ -129,36 +172,19 @@ const logFallback = (
   );
 };
 
-const extractOpenSeaContext = (url: URL): OpenSeaContext | null => {
-  if (!matchesDomainOrSubdomain(url.hostname.toLowerCase(), OPENSEA_HOST)) {
+const extractTransientContext = (url: URL): TransientContext | null => {
+  if (!matchesDomainOrSubdomain(url.hostname.toLowerCase(), TRANSIENT_HOST)) {
     return null;
   }
 
-  const itemMatch = OPENSEA_ITEM_PATH_PATTERN.exec(url.pathname);
-  if (itemMatch) {
-    const chainSegment = itemMatch[1]?.trim().toLowerCase();
-    const contractAddress = itemMatch[2]?.trim();
-    const tokenId = itemMatch[3]?.trim();
-
-    if (!chainSegment || !contractAddress || !tokenId) {
-      return null;
-    }
-
-    return {
-      chainSegment,
-      contractAddress,
-      tokenId,
-    };
-  }
-
-  const assetMatch = OPENSEA_ASSET_PATH_PATTERN.exec(url.pathname);
-  if (!assetMatch) {
+  const match = TRANSIENT_NFT_PATH_PATTERN.exec(url.pathname);
+  if (!match) {
     return null;
   }
 
-  const chainSegment = assetMatch[1]?.trim().toLowerCase();
-  const contractAddress = assetMatch[2]?.trim();
-  const tokenId = assetMatch[3]?.trim();
+  const chainSegment = match[1]?.trim().toLowerCase();
+  const contractAddress = match[2]?.trim();
+  const tokenId = match[3]?.trim();
 
   if (!chainSegment || !contractAddress || !tokenId) {
     return null;
@@ -189,24 +215,9 @@ const normalizeMediaUrl = (value: string): string => {
   return trimmed;
 };
 
-const isBlockedMarketplaceOverlayUrl = (value: string): boolean => {
-  try {
-    const parsed = new URL(value);
-    const host = parsed.hostname.toLowerCase();
-    const path = parsed.pathname.toLowerCase();
-
-    const isOpenSeaWebHost =
-      matchesDomainOrSubdomain(host, "opensea.io") ||
-      matchesDomainOrSubdomain(host, "testnets.opensea.io");
-    return isOpenSeaWebHost && path.includes("opengraph");
-  } catch {
-    return false;
-  }
-};
-
-const resolveOpenSeaImage = (
+const resolveAlchemyImage = (
   metadata: AlchemyNftMetadata
-): ResolvedOpenSeaImage | null => {
+): ResolvedTransientImage | null => {
   for (const source of OPEN_SEA_IMAGE_CANDIDATE_SOURCES) {
     const value = OPEN_SEA_IMAGE_SOURCE_READERS[source](metadata);
     if (!value) {
@@ -224,7 +235,7 @@ const resolveOpenSeaImage = (
 
 const buildTokenUriCandidates = (
   metadata: AlchemyNftMetadata,
-  context: OpenSeaContext
+  context: TransientContext
 ): string[] => {
   const tokenUri =
     asNonEmptyString(metadata.tokenUri) ??
@@ -288,11 +299,8 @@ const extractTokenUriMetadata = (
 
 const resolveTokenUriImage = (
   metadata: TokenUriMetadata
-): ResolvedOpenSeaImage | null => {
-  const sourceAndValue: Array<{
-    source: OpenSeaTokenUriImageSource;
-    value: unknown;
-  }> = [
+): ResolvedTransientImage | null => {
+  const sourceAndValue: Array<{ source: string; value: unknown }> = [
     {
       source: "tokenUri.image_original_url",
       value: metadata.image_original_url,
@@ -340,7 +348,7 @@ const tryParseUrl = (value: string): URL | null => {
 
 const fetchTokenUriMetadataCandidate = async (
   candidateUrl: URL,
-  deps: CreateOpenSeaPlanDeps
+  deps: CreateTransientPlanDeps
 ): Promise<TokenUriMetadata | null> => {
   try {
     await deps.assertPublicUrl(candidateUrl);
@@ -373,9 +381,12 @@ const fetchTokenUriMetadataCandidate = async (
 
 async function resolveTokenUriFallbackImage(
   metadata: AlchemyNftMetadata,
-  context: OpenSeaContext,
-  deps: CreateOpenSeaPlanDeps
-): Promise<{ image: ResolvedOpenSeaImage; metadata: TokenUriMetadata } | null> {
+  context: TransientContext,
+  deps: CreateTransientPlanDeps
+): Promise<{
+  image: ResolvedTransientImage;
+  metadata: TokenUriMetadata;
+} | null> {
   const tokenUriCandidates = buildTokenUriCandidates(metadata, context);
   if (tokenUriCandidates.length === 0) {
     return null;
@@ -396,7 +407,7 @@ async function resolveTokenUriFallbackImage(
     }
 
     const resolvedImage = resolveTokenUriImage(tokenUriMetadata);
-    if (!resolvedImage || isBlockedMarketplaceOverlayUrl(resolvedImage.url)) {
+    if (!resolvedImage) {
       continue;
     }
 
@@ -409,9 +420,9 @@ async function resolveTokenUriFallbackImage(
   return null;
 }
 
-const resolveOpenSeaTitle = (
+const resolveTransientTitle = (
   metadata: AlchemyNftMetadata,
-  context: OpenSeaContext
+  context: TransientContext
 ): string => {
   const tokenName =
     asNonEmptyString(metadata.raw?.metadata?.name) ??
@@ -432,7 +443,7 @@ const resolveOpenSeaTitle = (
   return `NFT #${context.tokenId}`;
 };
 
-const resolveOpenSeaDescription = (
+const resolveTransientDescription = (
   metadata: AlchemyNftMetadata
 ): string | undefined =>
   asNonEmptyString(metadata.metadata?.description) ??
@@ -454,27 +465,27 @@ const buildPreviewImageEntry = (
   return { url: image.url };
 };
 
-const buildOpenSeaPreviewPayload = (
+const buildTransientPreviewPayload = (
   requestUrl: URL,
-  context: OpenSeaContext,
+  context: TransientContext,
   metadata: AlchemyNftMetadata | undefined,
   image: { url: string; type?: string | undefined } | null
 ): LinkPreviewResponse => {
   const title = metadata
-    ? resolveOpenSeaTitle(metadata, context)
+    ? resolveTransientTitle(metadata, context)
     : `NFT #${context.tokenId}`;
   const description = metadata
-    ? resolveOpenSeaDescription(metadata)
+    ? resolveTransientDescription(metadata)
     : undefined;
   const imageEntry = buildPreviewImageEntry(image);
 
   return {
-    type: "opensea.nft",
+    type: "transient.nft",
     requestUrl: requestUrl.toString(),
     url: requestUrl.toString(),
     title,
     description,
-    siteName: "OpenSea",
+    siteName: "Transient Labs",
     mediaType: "website",
     contentType: null,
     image: imageEntry,
@@ -512,13 +523,13 @@ const resolveOpenGraphImage = (
   };
 };
 
-async function buildOpenSeaOpenGraphFallbackPreview(
+async function buildTransientOpenGraphFallbackPreview(
   requestUrl: URL,
-  context: OpenSeaContext,
-  deps: CreateOpenSeaPlanDeps,
+  context: TransientContext,
+  deps: CreateTransientPlanDeps,
   metadata?: AlchemyNftMetadata
 ): Promise<LinkPreviewResponse | null> {
-  let htmlResult: Awaited<ReturnType<CreateOpenSeaPlanDeps["fetchHtml"]>>;
+  let htmlResult: Awaited<ReturnType<CreateTransientPlanDeps["fetchHtml"]>>;
   try {
     htmlResult = await deps.fetchHtml(requestUrl);
   } catch {
@@ -549,28 +560,33 @@ async function buildOpenSeaOpenGraphFallbackPreview(
     return null;
   }
 
-  const basePreview = buildOpenSeaPreviewPayload(
+  const basePreview = buildTransientPreviewPayload(
     requestUrl,
     context,
     metadata,
     null
   );
+  const preferAlchemyText = metadata !== undefined;
 
   return {
     ...basePreview,
     url: asNonEmptyString(openGraphPreview.url) ?? basePreview.url,
-    title: openGraphTitle ?? basePreview.title,
-    description: openGraphDescription ?? basePreview.description,
+    title: preferAlchemyText
+      ? basePreview.title
+      : (openGraphTitle ?? basePreview.title),
+    description: preferAlchemyText
+      ? (basePreview.description ?? openGraphDescription)
+      : (openGraphDescription ?? basePreview.description),
     contentType: openGraphPreview.contentType ?? basePreview.contentType,
     image: openGraphImageEntry ?? basePreview.image,
     images: openGraphImageEntry ? [openGraphImageEntry] : basePreview.images,
   };
 }
 
-async function fetchOpenSeaNftMetadata(
-  context: OpenSeaContext
-): Promise<OpenSeaMetadataFetchResult> {
-  const network = ALCHEMY_NETWORK_BY_OPENSEA_CHAIN[context.chainSegment];
+async function fetchTransientNftMetadata(
+  context: TransientContext
+): Promise<TransientMetadataFetchResult> {
+  const network = ALCHEMY_NETWORK_BY_TRANSIENT_CHAIN[context.chainSegment];
   if (!network) {
     return {
       kind: "fallback",
@@ -671,16 +687,16 @@ async function fetchOpenSeaNftMetadata(
   };
 }
 
-async function buildOpenSeaPreview(
+async function buildTransientPreview(
   requestUrl: URL,
-  context: OpenSeaContext,
-  deps: CreateOpenSeaPlanDeps
-): Promise<OpenSeaPreviewBuildResult> {
+  context: TransientContext,
+  deps: CreateTransientPlanDeps
+): Promise<TransientPreviewBuildResult> {
   try {
-    const metadataResult = await fetchOpenSeaNftMetadata(context);
+    const metadataResult = await fetchTransientNftMetadata(context);
     if (metadataResult.kind === "fallback") {
       const openGraphFallbackPreview =
-        await buildOpenSeaOpenGraphFallbackPreview(requestUrl, context, deps);
+        await buildTransientOpenGraphFallbackPreview(requestUrl, context, deps);
 
       return {
         kind: "fallback",
@@ -696,7 +712,7 @@ async function buildOpenSeaPreview(
     }
 
     const metadata = metadataResult.metadata;
-    const resolvedImage = resolveOpenSeaImage(metadata);
+    const resolvedImage = resolveAlchemyImage(metadata);
     if (!resolvedImage) {
       const tokenUriFallback = await resolveTokenUriFallbackImage(
         metadata,
@@ -706,14 +722,14 @@ async function buildOpenSeaPreview(
       if (tokenUriFallback) {
         return {
           kind: "success",
-          preview: buildOpenSeaPreviewPayload(requestUrl, context, metadata, {
+          preview: buildTransientPreviewPayload(requestUrl, context, metadata, {
             url: tokenUriFallback.image.url,
           }),
         };
       }
 
       const openGraphFallbackPreview =
-        await buildOpenSeaOpenGraphFallbackPreview(
+        await buildTransientOpenGraphFallbackPreview(
           requestUrl,
           context,
           deps,
@@ -730,36 +746,14 @@ async function buildOpenSeaPreview(
         },
         preview:
           openGraphFallbackPreview ??
-          buildOpenSeaPreviewPayload(requestUrl, context, metadata, null),
-      };
-    }
-
-    if (isBlockedMarketplaceOverlayUrl(resolvedImage.url)) {
-      const openGraphFallbackPreview =
-        await buildOpenSeaOpenGraphFallbackPreview(
-          requestUrl,
-          context,
-          deps,
-          metadata
-        );
-
-      return {
-        kind: "fallback",
-        reason: "no_image_candidate",
-        details: {
-          blockedImageUrl: truncateForLog(resolvedImage.url),
-          blockedImageSource: resolvedImage.source,
-        },
-        preview:
-          openGraphFallbackPreview ??
-          buildOpenSeaPreviewPayload(requestUrl, context, metadata, null),
+          buildTransientPreviewPayload(requestUrl, context, metadata, null),
       };
     }
 
     const imageType = asNonEmptyString(metadata.image?.contentType);
     return {
       kind: "success",
-      preview: buildOpenSeaPreviewPayload(requestUrl, context, metadata, {
+      preview: buildTransientPreviewPayload(requestUrl, context, metadata, {
         url: resolvedImage.url,
         type: imageType,
       }),
@@ -775,44 +769,44 @@ async function buildOpenSeaPreview(
   }
 }
 
-export function createOpenSeaPlan(
+export function createTransientPlan(
   url: URL,
-  deps: CreateOpenSeaPlanDeps
+  deps: CreateTransientPlanDeps
 ): PreviewPlan | null {
-  const requestContext = extractOpenSeaContext(url);
+  const requestContext = extractTransientContext(url);
   if (!requestContext) {
     return null;
   }
 
   return {
-    cacheKey: `opensea:nft:v3:${url.toString()}`,
+    cacheKey: `transient:nft:v1:${url.toString()}`,
     execute: async () => {
       const requestId = createRequestId();
-      const openSeaPreview = await buildOpenSeaPreview(
+      const transientPreview = await buildTransientPreview(
         url,
         requestContext,
         deps
       );
-      if (openSeaPreview.kind === "success") {
-        return { data: openSeaPreview.preview, ttl: OPENSEA_CACHE_TTL_MS };
+      if (transientPreview.kind === "success") {
+        return { data: transientPreview.preview, ttl: TRANSIENT_CACHE_TTL_MS };
       }
 
       logFallback(
         requestId,
         url,
-        openSeaPreview.reason,
-        openSeaPreview.details
+        transientPreview.reason,
+        transientPreview.details
       );
-      if (openSeaPreview.preview) {
-        return { data: openSeaPreview.preview, ttl: OPENSEA_CACHE_TTL_MS };
+      if (transientPreview.preview) {
+        return { data: transientPreview.preview, ttl: TRANSIENT_CACHE_TTL_MS };
       }
-      const fallbackPreview = buildOpenSeaPreviewPayload(
+      const fallbackPreview = buildTransientPreviewPayload(
         url,
         requestContext,
         undefined,
         null
       );
-      return { data: fallbackPreview, ttl: OPENSEA_CACHE_TTL_MS };
+      return { data: fallbackPreview, ttl: TRANSIENT_CACHE_TTL_MS };
     },
   };
 }
