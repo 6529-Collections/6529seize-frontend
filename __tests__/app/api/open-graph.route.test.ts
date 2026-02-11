@@ -48,6 +48,10 @@ jest.mock("@/app/api/open-graph/manifold/service", () => ({
   createManifoldPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/foundation/service", () => ({
+  createFoundationPlan: jest.fn(() => null),
+}));
+
 jest.mock("@/app/api/open-graph/ens", () => ({
   detectEnsTarget: jest.fn(),
   fetchEnsPreview: jest.fn(),
@@ -70,6 +74,9 @@ let compound: {
 };
 let manifold: {
   createManifoldPlan: jest.Mock;
+};
+let foundation: {
+  createFoundationPlan: jest.Mock;
 };
 let UrlGuardError: typeof import("@/lib/security/urlGuard").UrlGuardError;
 let ensRouteModule: {
@@ -106,6 +113,11 @@ async function loadRoute(): Promise<void> {
   ) as {
     createManifoldPlan: jest.Mock;
   };
+  foundation = jest.requireMock(
+    "../../../app/api/open-graph/foundation/service"
+  ) as {
+    createFoundationPlan: jest.Mock;
+  };
   ensRouteModule = jest.requireMock("@/app/api/open-graph/ens") as {
     detectEnsTarget: jest.Mock;
     fetchEnsPreview: jest.Mock;
@@ -123,6 +135,7 @@ describe("open-graph API route", () => {
     guard.assertPublicUrl.mockResolvedValue(undefined);
     mockFetchPublicUrl.mockReset();
     manifold.createManifoldPlan.mockReturnValue(null);
+    foundation.createFoundationPlan.mockReturnValue(null);
     compound.createCompoundPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
@@ -235,6 +248,13 @@ describe("open-graph API route", () => {
       new URL("http://safe.example/article")
     );
     expect(manifold.createManifoldPlan).toHaveBeenCalledWith(
+      new URL("http://safe.example/article"),
+      expect.objectContaining({
+        fetchHtml: expect.any(Function),
+        assertPublicUrl: expect.any(Function),
+      })
+    );
+    expect(foundation.createFoundationPlan).toHaveBeenCalledWith(
       new URL("http://safe.example/article"),
       expect.objectContaining({
         fetchHtml: expect.any(Function),
@@ -395,6 +415,44 @@ describe("open-graph API route", () => {
     expect(mockFetchPublicUrl).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
     expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("uses foundation plan before compound when available", async () => {
+    const foundationData = {
+      type: "foundation.nft",
+      title: "ALONE | Foundation",
+    } as any;
+    const foundationExecute = jest.fn(async () => ({
+      data: foundationData,
+      ttl: 45_000,
+    }));
+
+    foundation.createFoundationPlan.mockReturnValue({
+      cacheKey: "foundation:test",
+      execute: foundationExecute,
+    });
+    compound.createCompoundPlan.mockReturnValue({
+      cacheKey: "compound:test",
+      execute: jest.fn(async () => ({
+        data: { kind: "compound" },
+        ttl: 45_000,
+      })),
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://foundation.app/mint/eth/0x5847Eaef547F1B01C0a23d8af615AB2f0bB235A4/8"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(foundationData);
+    expect(foundationExecute).toHaveBeenCalledTimes(1);
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("uses manifold plan before compound when available", async () => {

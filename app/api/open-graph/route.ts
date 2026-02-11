@@ -17,6 +17,7 @@ import {
   buildResponse,
 } from "./utils";
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
+import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
@@ -361,8 +362,13 @@ export async function GET(request: NextRequest) {
     fetchHtml,
     assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
   });
+  const foundationPlan = createFoundationPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
   const plan =
     manifoldPlan ??
+    foundationPlan ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 
