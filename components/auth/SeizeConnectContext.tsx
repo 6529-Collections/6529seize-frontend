@@ -369,7 +369,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const isDevLikeEnv =
     nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "local";
   const isLocalHost =
-    typeof globalThis.window !== "undefined" &&
+    globalThis.window !== undefined &&
     (globalThis.window.location.hostname === "localhost" ||
       globalThis.window.location.hostname === "127.0.0.1" ||
       globalThis.window.location.hostname === "::1" ||
