@@ -6,6 +6,7 @@ import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
 import { createGoogleWorkspaceHandler } from "./googleWorkspace";
 import { createManifoldHandler } from "./manifold";
+import { createNftMarketplacesHandler } from "./nftMarketplaces";
 import { createPepeHandler } from "./pepe";
 import { createTikTokHandler } from "./tiktok";
 import { createTwitterHandler } from "./twitter";
@@ -22,6 +23,7 @@ export const createLinkHandlers = (options?: {
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
   createManifoldHandler(),
+  createNftMarketplacesHandler(),
   createEnsHandler(),
   createCompoundHandler(),
   createTwitterHandler(options),
