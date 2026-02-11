@@ -73,7 +73,12 @@ export default function ManifoldMintingConnect(
   }, [account.address, mintForFren]);
 
   useEffect(() => {
-    if (mintForFren && selectedFrenWallet) {
+    if (mintForFren) {
+      if (!selectedFrenWallet) {
+        onMintFor("");
+        return;
+      }
+
       onMintFor(selectedFrenWallet);
       return;
     }
