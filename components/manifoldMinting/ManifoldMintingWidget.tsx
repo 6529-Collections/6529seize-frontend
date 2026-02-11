@@ -9,6 +9,7 @@ import {
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import {
@@ -35,7 +36,9 @@ export default function ManifoldMintingWidget(
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
+  const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string>("");
+  const [copyStatus, setCopyStatus] = useState<"" | "copied" | "failed">("");
 
   const [isError, setIsError] = useState<boolean>(false);
   const [fetchingMerkle, setFetchingMerkle] = useState<boolean>(false);
@@ -192,6 +195,59 @@ export default function ManifoldMintingWidget(
       return "mintBatch";
     } else {
       return "mint";
+    }
+  };
+
+  const isMintDebugEnabled = searchParams?.get("mintdebug") === "1";
+
+  const buildMintDiagnostics = () => {
+    const connectedWallet = connectedAddress.address ?? "";
+    const recipientWallet = mintForAddress;
+    const isProxy =
+      !!connectedWallet &&
+      !!recipientWallet &&
+      !areEqualAddresses(connectedWallet, recipientWallet);
+    const selectedProofs = getSelectedMerkleProofs();
+    const argsPreview =
+      recipientWallet && mintCount > 0
+        ? getMintArgs()
+        : {
+            functionName: "n/a",
+            args: [],
+          };
+
+    return {
+      timestamp: new Date().toISOString(),
+      chainId: MANIFOLD_NETWORK.id,
+      claimStatus: props.claim.status,
+      phase: props.claim.phase,
+      connectedWallet,
+      recipientWallet,
+      isProxy,
+      mintFunction: argsPreview.functionName,
+      mintCount,
+      valueWei: getValue().toString(),
+      feeWei: fee.toString(),
+      claimCostWei: props.claim.cost.toString(),
+      availableMerkleProofs: merkleProofs.length,
+      selectedMerkleProofs: selectedProofs.length,
+      mintedProofs: merkleProofsMints.filter(Boolean).length,
+      mintError: mintError || null,
+      txHash: mintWrite.data ?? null,
+      txPending: waitMintWritePending,
+      txSuccess: waitMintWriteSuccess,
+    };
+  };
+
+  const onCopyMintDiagnostics = async () => {
+    try {
+      const diagnostics = buildMintDiagnostics();
+      await navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("failed");
+    } finally {
+      setTimeout(() => setCopyStatus(""), 2000);
     }
   };
 
@@ -481,6 +537,47 @@ export default function ManifoldMintingWidget(
     );
   }
 
+  function printMintDebug() {
+    if (!isMintDebugEnabled) {
+      return <></>;
+    }
+
+    const diagnostics = buildMintDiagnostics();
+
+    return (
+      <Row className="pt-3">
+        <Col>
+          <div className="tw-rounded-lg tw-border tw-border-white/15 tw-bg-white/5 tw-p-3 tw-text-xs tw-text-white/80">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+              <b className="tw-text-sm tw-text-white">Mint diagnostics</b>
+              <button
+                type="button"
+                onClick={onCopyMintDiagnostics}
+                disabled={copyStatus === "copied" || copyStatus === "failed"}
+                className={`tw-w-[170px] tw-rounded-md tw-border tw-px-2 tw-py-1 !tw-text-sm tw-font-medium tw-text-white disabled:tw-cursor-default ${
+                  copyStatus === "copied"
+                    ? "tw-border-emerald-400/60 tw-bg-emerald-500/20"
+                    : copyStatus === "failed"
+                      ? "tw-border-red-400/60 tw-bg-red-500/20"
+                      : "tw-border-white/20 tw-bg-white/10 hover:tw-bg-white/15"
+                }`}
+              >
+                {copyStatus === "copied"
+                  ? "Copied!"
+                  : copyStatus === "failed"
+                    ? "Copy Failed"
+                    : "Copy"}
+              </button>
+            </div>
+            <pre className="tw-mb-0 tw-mt-2 tw-max-h-36 tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-md tw-bg-black/40 tw-p-2 tw-text-[10px] tw-text-white/80">
+              {JSON.stringify(diagnostics, null, 2)}
+            </pre>
+          </div>
+        </Col>
+      </Row>
+    );
+  }
+
   useEffect(() => {
     props.setMintForAddress(mintForAddress);
   }, [mintForAddress]);
@@ -498,6 +595,7 @@ export default function ManifoldMintingWidget(
       <Row>
         <Col>{printContent()}</Col>
       </Row>
+      {printMintDebug()}
     </Container>
   );
 }
