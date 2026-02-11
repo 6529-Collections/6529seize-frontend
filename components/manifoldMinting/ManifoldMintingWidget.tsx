@@ -543,6 +543,24 @@ export default function ManifoldMintingWidget(
     }
 
     const diagnostics = buildMintDiagnostics();
+    const getCopyButtonStyle = () => {
+      if (copyStatus === "copied") {
+        return "tw-border-emerald-400/60 tw-bg-emerald-500/20";
+      }
+      if (copyStatus === "failed") {
+        return "tw-border-red-400/60 tw-bg-red-500/20";
+      }
+      return "tw-border-white/20 tw-bg-white/10 hover:tw-bg-white/15";
+    };
+    const getCopyButtonText = () => {
+      if (copyStatus === "copied") {
+        return "Copied!";
+      }
+      if (copyStatus === "failed") {
+        return "Copy Failed";
+      }
+      return "Copy";
+    };
 
     return (
       <Row className="pt-3">
@@ -554,19 +572,9 @@ export default function ManifoldMintingWidget(
                 type="button"
                 onClick={onCopyMintDiagnostics}
                 disabled={copyStatus === "copied" || copyStatus === "failed"}
-                className={`tw-w-[170px] tw-rounded-md tw-border tw-px-2 tw-py-1 !tw-text-sm tw-font-medium tw-text-white disabled:tw-cursor-default ${
-                  copyStatus === "copied"
-                    ? "tw-border-emerald-400/60 tw-bg-emerald-500/20"
-                    : copyStatus === "failed"
-                      ? "tw-border-red-400/60 tw-bg-red-500/20"
-                      : "tw-border-white/20 tw-bg-white/10 hover:tw-bg-white/15"
-                }`}
+                className={`tw-w-[170px] tw-rounded-md tw-border tw-px-2 tw-py-1 !tw-text-sm tw-font-medium tw-text-white disabled:tw-cursor-default ${getCopyButtonStyle()}`}
               >
-                {copyStatus === "copied"
-                  ? "Copied!"
-                  : copyStatus === "failed"
-                    ? "Copy Failed"
-                    : "Copy"}
+                {getCopyButtonText()}
               </button>
             </div>
             <pre className="tw-mb-0 tw-mt-2 tw-max-h-36 tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-md tw-bg-black/40 tw-p-2 tw-text-[10px] tw-text-white/80">

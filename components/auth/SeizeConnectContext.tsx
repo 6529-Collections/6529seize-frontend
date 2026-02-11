@@ -369,11 +369,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const isDevLikeEnv =
     nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "local";
   const isLocalHost =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      window.location.hostname === "::1" ||
-      window.location.hostname.endsWith(".local"));
+    typeof globalThis.window !== "undefined" &&
+    (globalThis.window.location.hostname === "localhost" ||
+      globalThis.window.location.hostname === "127.0.0.1" ||
+      globalThis.window.location.hostname === "::1" ||
+      globalThis.window.location.hostname.endsWith(".local"));
   const impersonatedAddress =
     isDevLikeEnv &&
     isLocalHost &&
