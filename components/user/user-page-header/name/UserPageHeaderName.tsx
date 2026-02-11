@@ -2,7 +2,9 @@ import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
-import UserLevel from "@/components/user/utils/level/UserLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
@@ -63,11 +65,11 @@ export default function UserPageHeaderName({
             </p>
           </UserPageHeaderNameWrapper>
           {profile?.handle && (
-            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center tw-mt-0.5">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center md:-tw-mt-0.5">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
           )}
-          <UserLevel level={level} size="xs" />
+          <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
           {onBadgeClick && (submissionCount > 0 || winnerCount > 0) && (
             <ArtistActivityBadge
               submissionCount={submissionCount}
