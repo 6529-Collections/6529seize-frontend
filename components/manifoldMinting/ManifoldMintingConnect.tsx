@@ -4,16 +4,14 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import RecipientSelector from "../common/RecipientSelector";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
-import UserCICAndLevel, {
-    UserCICAndLevelSize,
-} from "../user/utils/UserCICAndLevel";
+import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
@@ -26,39 +24,103 @@ export default function ManifoldMintingConnect(
   const { country } = useCookieConsent();
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);
-  const [selectedProfile, setSelectedProfile] =
+  const [selectedFrenProfile, setSelectedFrenProfile] =
     useState<CommunityMemberMinimal | null>(null);
-  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
+  const [selectedFrenWallet, setSelectedFrenWallet] = useState<string | null>(
+    null
+  );
+  const [selectedMintForMeWallet, setSelectedMintForMeWallet] = useState<
+    string | null
+  >(null);
 
-  function reset() {
-    setSelectedProfile(null);
-    setSelectedWallet(null);
+  const connectedRecipientProfile = useMemo<CommunityMemberMinimal | null>(() => {
+    if (!account.address) {
+      return null;
+    }
+
+    return {
+      profile_id: connectedProfile?.id ?? null,
+      handle: connectedProfile?.handle ?? null,
+      normalised_handle: connectedProfile?.normalised_handle ?? null,
+      primary_wallet: connectedProfile?.primary_wallet ?? account.address,
+      display: connectedProfile?.display ?? account.address,
+      tdh: connectedProfile?.tdh ?? 0,
+      level: connectedProfile?.level ?? 0,
+      cic_rating: connectedProfile?.cic ?? 0,
+      wallet: account.address,
+      pfp: connectedProfile?.pfp ?? null,
+    };
+  }, [connectedProfile, account.address]);
+
+  function resetFren() {
+    setSelectedFrenProfile(null);
+    setSelectedFrenWallet(null);
   }
 
   useEffect(() => {
-    reset();
+    resetFren();
     setMintForFren(false);
   }, [account.address]);
 
   useEffect(() => {
-    if (mintForFren && selectedWallet) {
-      props.onMintFor(selectedWallet);
-    } else {
-      props.onMintFor(account.address as string);
+    if (!account.address || mintForFren) {
+      return;
     }
-  }, [selectedWallet, mintForFren, account.address, props]);
+    setSelectedMintForMeWallet(account.address);
+  }, [account.address, mintForFren]);
 
-  function printMintFor() {
+  useEffect(() => {
+    if (mintForFren && selectedFrenWallet) {
+      props.onMintFor(selectedFrenWallet);
+    } else {
+      props.onMintFor(
+        (selectedMintForMeWallet ?? account.address) as string
+      );
+    }
+  }, [
+    selectedFrenWallet,
+    selectedMintForMeWallet,
+    mintForFren,
+    account.address,
+    props,
+  ]);
+
+  function printMintForFren() {
     return (
       <div className="tw-pt-2 tw-pb-1">
         <RecipientSelector
           open={mintForFren}
-          selectedProfile={selectedProfile}
-          selectedWallet={selectedWallet}
-          onProfileSelect={setSelectedProfile}
-          onWalletSelect={setSelectedWallet}
+          selectedProfile={selectedFrenProfile}
+          selectedWallet={selectedFrenWallet}
+          onProfileSelect={setSelectedFrenProfile}
+          onWalletSelect={setSelectedFrenWallet}
           label="Mint For"
           placeholder="Search by handle, ens or wallet"
+        />
+      </div>
+    );
+  }
+
+  function printMintForMe() {
+    if (!connectedRecipientProfile) {
+      return <></>;
+    }
+
+    const noopProfileSelection = (_: CommunityMemberMinimal | null) =>
+      undefined;
+
+    return (
+      <div className="tw-pt-2 tw-pb-1">
+        <RecipientSelector
+          open={!mintForFren}
+          selectedProfile={connectedRecipientProfile}
+          selectedWallet={selectedMintForMeWallet}
+          onProfileSelect={noopProfileSelection}
+          onWalletSelect={setSelectedMintForMeWallet}
+          showLabel={false}
+          allowProfileChange={false}
+          disableSingleWalletSelection={true}
+          showSelectedProfileCard={false}
         />
       </div>
     );
@@ -71,26 +133,33 @@ export default function ManifoldMintingConnect(
     return (
       <div className="d-flex flex-column pt-1 pb-1">
         <span className="font-smaller font-lighter">Connected Profile</span>
-        <span className="pt-1 d-flex align-items-center gap-3">
-          <UserCICAndLevel
-            size={UserCICAndLevelSize.XLARGE}
+        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
+          <TransferModalPfp
+            src={connectedProfile?.pfp ?? null}
+            alt={profileHandle ?? ""}
             level={connectedProfile?.level ?? 0}
           />
-          <span className="d-flex flex-column">
-            <b>{profileHandle}</b>
+          <div className="tw-min-w-0">
+            <div className="tw-truncate tw-text-sm tw-font-medium">
+              {profileHandle}
+            </div>
+            <div className="tw-truncate tw-text-[11px] tw-opacity-60">
+              TDH: {(connectedProfile?.tdh ?? 0).toLocaleString()} - Level:{" "}
+              {connectedProfile?.level ?? 0}
+            </div>
             {showAddress && (
-              <span className="font-lightest font-smaller">
+              <div className="tw-truncate tw-text-[11px] tw-opacity-60">
                 {account.address}
-              </span>
+              </div>
             )}
-          </span>
-        </span>
+          </div>
+        </div>
       </div>
     );
   }
 
   function printContent() {
-    return <>{mintForFren && printMintFor()}</>;
+    return <>{mintForFren ? printMintForFren() : printMintForMe()}</>;
   }
 
   if (isIos) {
@@ -129,7 +198,7 @@ export default function ManifoldMintingConnect(
             className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
             style={{ width: "50%" }}
             onClick={() => {
-              reset();
+              resetFren();
               setMintForFren(false);
             }}>
             Mint for me
