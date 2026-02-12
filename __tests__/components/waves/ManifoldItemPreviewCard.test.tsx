@@ -58,7 +58,7 @@ describe("ManifoldItemPreviewCard", () => {
   });
 
   it("hides title row in image-only mode", () => {
-    render(
+    const { container } = render(
       <LinkPreviewProvider variant="home">
         <ManifoldItemPreviewCard
           href="https://manifold.xyz/@andrew-hooker/id/4098474224"
@@ -72,6 +72,10 @@ describe("ManifoldItemPreviewCard", () => {
 
     expect(screen.getByTestId("manifold-item-media")).toBeInTheDocument();
     expect(screen.queryByTestId("manifold-item-title")).toBeNull();
+    expect(screen.getByTestId("manifold-item-card")).not.toHaveClass(
+      "tw-border"
+    );
+    expect(container.querySelector('[class*="tw-border-white/10"]')).toBeNull();
   });
 
   it("hides action buttons when requested in chat variant", () => {

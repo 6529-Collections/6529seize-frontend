@@ -7,6 +7,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import React, {
   useCallback,
@@ -23,13 +24,96 @@ interface WaveLeaderboardGridItemProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
+const MANIFOLD_LISTING_PATH_PATTERN = /^\/@[^/]+\/id\/[^/?#]+\/?$/i;
+const SUPER_RARE_ARTWORK_PATH_PATTERN =
+  /^\/artwork\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+const SUPER_RARE_ARTWORK_V2_PATH_PATTERN = /^\/artwork-v2\/[^/?#]+\/?$/i;
+const FOUNDATION_MINT_PATH_PATTERN =
+  /^\/mint\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+const OPENSEA_ITEM_PATH_PATTERN =
+  /^\/item\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+const OPENSEA_ASSET_PATH_PATTERN =
+  /^\/assets\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+const TRANSIENT_NFT_PATH_PATTERN =
+  /^\/nfts\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+
+const getStandaloneHttpUrl = (content: string | null | undefined): string => {
+  if (!content) {
+    return "";
+  }
+
+  const trimmed = content.trim();
+  const match = trimmed.match(/^<?(https?:\/\/[^\s<>]+)>?$/i);
+  return match?.[1] ?? "";
+};
+
+const isMarketplaceLink = (href: string): boolean => {
+  try {
+    const url = new URL(href);
+    const hostname = url.hostname.toLowerCase();
+    const pathname = url.pathname;
+
+    if (matchesDomainOrSubdomain(hostname, "manifold.xyz")) {
+      return MANIFOLD_LISTING_PATH_PATTERN.test(pathname);
+    }
+
+    if (matchesDomainOrSubdomain(hostname, "superrare.com")) {
+      return (
+        SUPER_RARE_ARTWORK_PATH_PATTERN.test(pathname) ||
+        SUPER_RARE_ARTWORK_V2_PATH_PATTERN.test(pathname)
+      );
+    }
+
+    if (matchesDomainOrSubdomain(hostname, "foundation.app")) {
+      return FOUNDATION_MINT_PATH_PATTERN.test(pathname);
+    }
+
+    if (matchesDomainOrSubdomain(hostname, "opensea.io")) {
+      return (
+        OPENSEA_ITEM_PATH_PATTERN.test(pathname) ||
+        OPENSEA_ASSET_PATH_PATTERN.test(pathname)
+      );
+    }
+
+    if (matchesDomainOrSubdomain(hostname, "transient.xyz")) {
+      return TRANSIENT_NFT_PATH_PATTERN.test(pathname);
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 export const WaveLeaderboardGridItem: React.FC<
   WaveLeaderboardGridItemProps
 > = ({ drop, mode, onDropClick }) => {
   const isCompactMode = mode === "compact";
-  const cardClassName = isCompactMode
-    ? "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-transition desktop-hover:hover:tw-border-iron-700 tw-h-[26rem]"
-    : "tw-cursor-pointer tw-p-0 tw-transition";
+  const activePart = drop.parts[0];
+  const primaryMedia = activePart?.media[0];
+  const isMarketplaceImageOnlyCard = useMemo(() => {
+    if (mode !== "content_only" || !!primaryMedia) {
+      return false;
+    }
+
+    const standaloneUrl = getStandaloneHttpUrl(activePart?.content);
+    if (!standaloneUrl) {
+      return false;
+    }
+
+    return isMarketplaceLink(standaloneUrl);
+  }, [activePart?.content, mode, primaryMedia]);
+  const cardClassName = (() => {
+    if (isCompactMode) {
+      return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-transition desktop-hover:hover:tw-border-iron-700 tw-h-[26rem]";
+    }
+
+    if (isMarketplaceImageOnlyCard) {
+      return "tw-cursor-pointer tw-rounded-xl tw-p-0 tw-transition";
+    }
+
+    return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";
+  })();
   const viewportClassName = isCompactMode
     ? "tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/50 tw-p-3 tw-h-[19rem]"
     : "tw-relative tw-overflow-hidden tw-max-h-[20rem]";
@@ -45,9 +129,6 @@ export const WaveLeaderboardGridItem: React.FC<
     () => getDropPreviewImageUrl(drop.metadata),
     [drop.metadata]
   );
-
-  const activePart = drop.parts[0];
-  const primaryMedia = activePart?.media[0];
 
   const mediaUrl = primaryMedia?.url ?? previewImageUrl ?? null;
   const mediaMimeType = primaryMedia?.mime_type ?? "image/jpeg";

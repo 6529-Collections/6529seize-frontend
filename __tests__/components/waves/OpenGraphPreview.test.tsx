@@ -194,4 +194,33 @@ describe("OpenGraphPreview", () => {
     expect(wrappedSegment.tagName).toBe("SPAN");
     expect(wrappedSegment).toHaveClass("tw-break-all");
   });
+
+  it("renders borderless image-only card when imageOnly is enabled", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
+
+    render(
+      <OpenGraphPreview
+        href="https://example.com/article"
+        imageOnly={true}
+        hideActions={true}
+        preview={{
+          title: "Example Title",
+          description: "An example description",
+          siteName: "Example.com",
+          image: "https://cdn.example.com/preview.png",
+        }}
+      />
+    );
+
+    const card = screen.getByTestId("og-preview-card");
+    expect(card).toBeInTheDocument();
+    expect(card).not.toHaveClass("tw-border");
+    expect(screen.queryByText("Example.com")).toBeNull();
+    expect(screen.queryByText("An example description")).toBeNull();
+    expect(screen.queryByTestId("href-buttons")).toBeNull();
+    expect(screen.getByAltText("Example Title")).toHaveAttribute(
+      "src",
+      "https://cdn.example.com/preview.png"
+    );
+  });
 });

@@ -35,6 +35,7 @@ interface OpenGraphPreviewProps {
   readonly href: string;
   readonly preview?: OpenGraphPreviewData | null | undefined;
   readonly variant?: LinkPreviewVariant | undefined;
+  readonly imageOnly?: boolean | undefined;
   readonly hideActions?: boolean | undefined;
 }
 
@@ -288,6 +289,7 @@ export default function OpenGraphPreview({
   href,
   preview,
   variant,
+  imageOnly = false,
   hideActions = false,
 }: OpenGraphPreviewProps) {
   const contextVariant = useLinkPreviewVariant();
@@ -347,6 +349,37 @@ export default function OpenGraphPreview({
   const imageUrl = extractImageUrl(preview);
   const domain = deriveDomain(href, preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
+
+  if (imageOnly && imageUrl) {
+    return (
+      <LinkPreviewCardLayout
+        href={href}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+      >
+        <Link
+          href={effectiveHref}
+          target={linkTarget}
+          rel={linkRel}
+          onClick={(e) => e.stopPropagation()}
+          className="tw-block tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-no-underline"
+          data-testid="og-preview-card"
+        >
+          <div className="tw-relative tw-aspect-[16/9] tw-w-full tw-overflow-hidden tw-bg-iron-900/60">
+            <Image
+              src={imageUrl}
+              alt={title ?? domain ?? "Link preview"}
+              fill
+              className="tw-object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 480px"
+              unoptimized
+            />
+          </div>
+        </Link>
+      </LinkPreviewCardLayout>
+    );
+  }
 
   if (!hasContent) {
     if (resolvedVariant === "home") {

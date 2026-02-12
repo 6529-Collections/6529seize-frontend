@@ -48,6 +48,7 @@ describe("MarketplacePreview", () => {
         expect.objectContaining({
           href,
           preview: undefined,
+          imageOnly: true,
           hideActions: true,
         })
       )
@@ -177,6 +178,6 @@ describe("MarketplacePreview", () => {
       mockOpenGraphPreview.mock.calls[
         mockOpenGraphPreview.mock.calls.length - 1
       ]?.[0];
-    expect(lastCall).not.toHaveProperty("imageOnly");
+    expect(lastCall).toHaveProperty("imageOnly", false);
   });
 });

@@ -18,7 +18,18 @@ interface ManifoldItemPreviewCardProps {
   readonly hideActions?: boolean | undefined;
 }
 
-function getContainerClass(variant: LinkPreviewVariant): string {
+function getContainerClass(
+  variant: LinkPreviewVariant,
+  imageOnly: boolean
+): string {
+  if (imageOnly) {
+    if (variant === "home") {
+      return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black/30";
+    }
+
+    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40";
+  }
+
   if (variant === "home") {
     return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30";
   }
@@ -51,7 +62,7 @@ export default function ManifoldItemPreviewCard({
       hideActions={hideActions}
     >
       <div
-        className={getContainerClass(variant)}
+        className={getContainerClass(variant, imageOnly)}
         data-testid="manifold-item-card"
       >
         <Link

@@ -108,9 +108,10 @@ describe("WaveLeaderboardGridItem", () => {
     const content = viewport.firstElementChild as HTMLElement;
     expect(card).not.toHaveClass("tw-h-[26rem]");
     expect(card).not.toHaveClass("tw-h-[23rem]");
-    expect(card).toHaveClass("tw-p-0");
+    expect(card).toHaveClass("tw-p-2");
+    expect(card).not.toHaveClass("tw-p-0");
     expect(card).not.toHaveClass("tw-p-3");
-    expect(card).not.toHaveClass("tw-border");
+    expect(card).toHaveClass("tw-border");
     expect(card).not.toHaveClass("tw-bg-iron-950");
     expect(viewport).toHaveClass("tw-max-h-[20rem]");
     expect(viewport).not.toHaveClass("tw-h-[20rem]");
@@ -120,6 +121,34 @@ describe("WaveLeaderboardGridItem", () => {
     expect(viewport).not.toHaveClass("tw-bg-iron-900/50");
     expect(content).toHaveClass("tw-space-y-1");
     expect(content).not.toHaveClass("tw-space-y-3");
+  });
+
+  it("removes outer card border for marketplace-only image mode", () => {
+    const marketplaceOnlyDrop = {
+      ...baseDrop,
+      parts: [
+        {
+          media: [],
+          content:
+            "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/1",
+        },
+      ],
+    };
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={marketplaceOnlyDrop}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
+    expect(card).toHaveClass("tw-p-0");
+    expect(card).not.toHaveClass("tw-p-2");
+    expect(card).not.toHaveClass("tw-border");
+    expect(markdownProps.marketplaceImageOnly).toBe(true);
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   });
 
   it("opens drop on click", () => {

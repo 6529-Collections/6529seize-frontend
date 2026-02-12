@@ -258,6 +258,7 @@ export default function MarketplacePreview({
       <OpenGraphPreview
         href={href}
         preview={undefined}
+        imageOnly={imageOnly}
         hideActions={imageOnly}
       />
     );
@@ -287,6 +288,7 @@ export default function MarketplacePreview({
     <OpenGraphPreview
       href={href}
       preview={toPreviewData(state.data)}
+      imageOnly={imageOnly}
       hideActions={imageOnly}
     />
   );
