@@ -60,7 +60,7 @@ export default function DropCurationButton({
         <Tooltip
           id={tooltipId}
           place="top"
-          positionStrategy="fixed"
+          positionStrategy="absolute"
           offset={8}
           opacity={1}
           style={{
