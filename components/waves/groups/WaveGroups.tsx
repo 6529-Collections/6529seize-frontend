@@ -21,7 +21,7 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
           <div className="tw-pb-4">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
               <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
-                Eligible
+                General
               </p>
             </div>
             <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">
@@ -56,7 +56,16 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
                 type={WaveGroupType.ADMIN}
                 wave={wave}
               />
+            </div>
 
+            <div className="tw-mx-4 tw-mt-4 tw-border-t tw-border-solid tw-border-iron-800/80" />
+
+            <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
+              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+                Curation Groups
+              </p>
+            </div>
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">
               <WaveCurationGroupsSection wave={wave} />
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import WaveGroups from "@/components/waves/groups/WaveGroups";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
@@ -52,6 +52,8 @@ describe("WaveGroups", () => {
     const { getAllByTestId, getByTestId, container } = render(
       <WaveGroups wave={baseWave} />
     );
+    expect(screen.getByText("General")).toBeInTheDocument();
+    expect(screen.getByText("Curation Groups")).toBeInTheDocument();
     expect(getAllByTestId(/group-/)).toHaveLength(5);
     expect(getByTestId("curation-section")).toBeInTheDocument();
     expect(capturedCuration).toHaveLength(1);

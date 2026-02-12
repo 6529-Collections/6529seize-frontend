@@ -8,9 +8,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
+import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -28,6 +29,7 @@ import WaveGroupManageIdentitiesModal, {
   type WaveGroupManageIdentitiesConfirmEvent,
 } from "@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal";
 import WaveGroupRemoveModal from "@/components/waves/specs/groups/group/edit/WaveGroupRemoveModal";
+import WaveGroupScope from "@/components/waves/specs/groups/group/WaveGroupScope";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import {
@@ -45,9 +47,7 @@ const curationGroupsQueryKey = (waveId: string) =>
   [QueryKey.WAVE_CURATION_GROUPS, { wave_id: waveId }] as const;
 
 interface WaveCurationGroupMenuProps {
-  readonly hasGroup: boolean;
   readonly disabled: boolean;
-  readonly onAddGroup: () => void;
   readonly onIncludeIdentity?: () => void;
   readonly onExcludeIdentity?: () => void;
   readonly onChangeGroup?: () => void;
@@ -55,26 +55,14 @@ interface WaveCurationGroupMenuProps {
 }
 
 function WaveCurationGroupMenu({
-  hasGroup,
   disabled,
-  onAddGroup,
   onIncludeIdentity,
   onExcludeIdentity,
   onChangeGroup,
   onRemoveGroup,
 }: WaveCurationGroupMenuProps) {
   const menuItems = useMemo<CompactMenuItem[]>(() => {
-    const items: CompactMenuItem[] = [
-      {
-        id: "add",
-        label: "Add group",
-        onSelect: onAddGroup,
-      },
-    ];
-
-    if (!hasGroup) {
-      return items;
-    }
+    const items: CompactMenuItem[] = [];
 
     if (onIncludeIdentity) {
       items.push({
@@ -110,14 +98,7 @@ function WaveCurationGroupMenu({
     }
 
     return items;
-  }, [
-    hasGroup,
-    onAddGroup,
-    onIncludeIdentity,
-    onExcludeIdentity,
-    onChangeGroup,
-    onRemoveGroup,
-  ]);
+  }, [onIncludeIdentity, onExcludeIdentity, onChangeGroup, onRemoveGroup]);
 
   return (
     <CompactMenu
@@ -137,6 +118,50 @@ function WaveCurationGroupMenu({
     />
   );
 }
+
+interface WaveCurationGroupAddButtonProps {
+  readonly disabled: boolean;
+  readonly onAddGroup: () => void;
+}
+
+function WaveCurationGroupAddButton({
+  disabled,
+  onAddGroup,
+}: WaveCurationGroupAddButtonProps) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onAddGroup}
+      className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="tw-size-4 tw-flex-shrink-0"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 5V19M5 12H19"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>Add group</span>
+    </button>
+  );
+}
+
+const mapGroupToScopeGroup = (group: ApiGroupFull): ApiGroup => ({
+  id: group.id,
+  name: group.name,
+  author: group.created_by,
+  is_hidden: !group.visible,
+  is_direct_message: group.is_direct_message ?? false,
+});
 
 export default function WaveCurationGroupsSection({
   wave,
@@ -194,6 +219,31 @@ export default function WaveCurationGroupsSection({
       }),
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
+
+  const curationGroupDetailsQueries = useQueries({
+    queries: curationGroups.map((curationGroup) => ({
+      queryKey: [QueryKey.GROUP, curationGroup.group_id],
+      queryFn: async () =>
+        await commonApiFetch<ApiGroupFull>({
+          endpoint: `groups/${curationGroup.group_id}`,
+        }),
+      enabled: Boolean(curationGroup.group_id),
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const curationRows = useMemo(
+    () =>
+      curationGroups.map((curationGroup, index) => {
+        const query = curationGroupDetailsQueries[index];
+        const group = query?.data ? mapGroupToScopeGroup(query.data) : null;
+        return {
+          curationGroup,
+          group,
+        };
+      }),
+    [curationGroupDetailsQueries, curationGroups]
+  );
 
   const refreshCurationGroups = useCallback(async () => {
     await queryClient.invalidateQueries({
@@ -399,11 +449,10 @@ export default function WaveCurationGroupsSection({
 
   if (isLoading) {
     return (
-      <div className="tw-group tw-relative tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-text-sm">
-        <span className="tw-font-medium tw-text-iron-500">Curation</span>
+      <div className="tw-group tw-relative tw-flex tw-h-6 tw-w-full tw-items-center tw-text-sm">
         <span className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-300">
           <CircleLoader />
-          <span>Loading</span>
+          <span>Loading groups</span>
         </span>
       </div>
     );
@@ -411,32 +460,15 @@ export default function WaveCurationGroupsSection({
 
   if (isError) {
     return (
-      <div className="tw-group tw-relative tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-text-sm">
-        <span className="tw-font-medium tw-text-iron-500">Curation</span>
+      <div className="tw-group tw-relative tw-flex tw-h-6 tw-w-full tw-items-center tw-text-sm">
         <span className="tw-font-medium tw-text-red">Unavailable</span>
       </div>
     );
   }
 
-  const rows =
-    curationGroups.length > 0
-      ? curationGroups
-      : [
-          {
-            id: "__empty__",
-            name: "None",
-            wave_id: wave.id,
-            group_id: "",
-            created_at: 0,
-            updated_at: 0,
-          } satisfies ApiWaveCurationGroup,
-        ];
-
   return (
     <>
-      {rows.map((curationGroup) => {
-        const isPlaceholder = curationGroup.id === "__empty__";
-
+      {curationRows.map(({ curationGroup, group }) => {
         return (
           <div
             key={curationGroup.id}
@@ -446,35 +478,36 @@ export default function WaveCurationGroupsSection({
               <span className="tw-font-medium tw-text-iron-500">Curation</span>
             </div>
             <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
-                {curationGroup.name}
-              </span>
+              {group ? (
+                <WaveGroupScope group={group} />
+              ) : (
+                <span className="tw-max-w-40 tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
+                  {curationGroup.name}
+                </span>
+              )}
               {canManageCurationGroups && (
                 <div className="tw-ml-1">
                   <WaveCurationGroupMenu
-                    hasGroup={!isPlaceholder}
                     disabled={mutating}
-                    onAddGroup={() => setGroupPickerState({ mode: "add" })}
-                    {...(isPlaceholder
-                      ? {}
-                      : {
-                          onIncludeIdentity: () =>
-                            setIdentityModalState({
-                              curationGroup,
-                              mode: WaveGroupManageIdentitiesMode.INCLUDE,
-                            }),
-                          onExcludeIdentity: () =>
-                            setIdentityModalState({
-                              curationGroup,
-                              mode: WaveGroupManageIdentitiesMode.EXCLUDE,
-                            }),
-                          onChangeGroup: () =>
-                            setGroupPickerState({
-                              mode: "change",
-                              curationGroup,
-                            }),
-                          onRemoveGroup: () => setRemoveTarget(curationGroup),
-                        })}
+                    onIncludeIdentity={() =>
+                      setIdentityModalState({
+                        curationGroup,
+                        mode: WaveGroupManageIdentitiesMode.INCLUDE,
+                      })
+                    }
+                    onExcludeIdentity={() =>
+                      setIdentityModalState({
+                        curationGroup,
+                        mode: WaveGroupManageIdentitiesMode.EXCLUDE,
+                      })
+                    }
+                    onChangeGroup={() =>
+                      setGroupPickerState({
+                        mode: "change",
+                        curationGroup,
+                      })
+                    }
+                    onRemoveGroup={() => setRemoveTarget(curationGroup)}
                   />
                 </div>
               )}
@@ -482,6 +515,15 @@ export default function WaveCurationGroupsSection({
           </div>
         );
       })}
+
+      {canManageCurationGroups && (
+        <div className="tw-pt-1">
+          <WaveCurationGroupAddButton
+            disabled={mutating}
+            onAddGroup={() => setGroupPickerState({ mode: "add" })}
+          />
+        </div>
+      )}
 
       <SelectGroupModalWrapper
         isOpen={groupPickerState !== null}

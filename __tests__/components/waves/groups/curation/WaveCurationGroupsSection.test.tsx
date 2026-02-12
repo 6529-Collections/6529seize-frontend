@@ -7,11 +7,12 @@ import {
   QueryKey,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { createPublishedGroupForIdentityChange } from "@/components/waves/specs/groups/group/edit/buttons/utils/identityGroupWorkflow";
 
 jest.mock("@tanstack/react-query", () => ({
+  useQueries: jest.fn(),
   useQuery: jest.fn(),
   useQueryClient: jest.fn(),
 }));
@@ -114,6 +115,7 @@ jest.mock(
 );
 
 const mockUseQuery = useQuery as jest.Mock;
+const mockUseQueries = useQueries as jest.Mock;
 const mockUseQueryClient = useQueryClient as jest.Mock;
 const mockCommonApiPost = commonApiPost as jest.Mock;
 const mockCommonApiDelete = commonApiDelete as jest.Mock;
@@ -196,6 +198,7 @@ beforeEach(() => {
     isLoading: false,
     isError: false,
   });
+  mockUseQueries.mockReturnValue([]);
   mockCommonApiPost.mockResolvedValue({});
   mockCommonApiDelete.mockResolvedValue(undefined);
   mockCreatePublishedGroupForIdentityChange.mockResolvedValue("group-new");
@@ -215,6 +218,8 @@ describe("WaveCurationGroupsSection", () => {
   it("creates curation group from Add group action", async () => {
     const user = userEvent.setup();
     renderSection();
+
+    expect(screen.queryByText("None")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add group" }));
     await user.click(screen.getByRole("button", { name: "Select group" }));
@@ -236,6 +241,94 @@ describe("WaveCurationGroupsSection", () => {
       queryKey: [QueryKey.WAVE_CURATION_GROUPS, { wave_id: "wave-1" }],
     });
     expect(onWaveCreated).toHaveBeenCalled();
+  });
+
+  it("keeps add action as bottom button only", () => {
+    mockUseQuery.mockReturnValue({
+      data: [
+        {
+          id: "curation-1",
+          name: "Curators One",
+          wave_id: "wave-1",
+          group_id: "group-1",
+          created_at: 1,
+          updated_at: 1,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderSection();
+
+    expect(screen.getAllByRole("button", { name: "Add group" })).toHaveLength(
+      1
+    );
+  });
+
+  it("renders curation group as clickable link when group details are available", () => {
+    mockUseQuery.mockReturnValue({
+      data: [
+        {
+          id: "curation-1",
+          name: "Curators One",
+          wave_id: "wave-1",
+          group_id: "group-1",
+          created_at: 1,
+          updated_at: 1,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    mockUseQueries.mockReturnValue([
+      {
+        data: {
+          id: "group-1",
+          name: "Curators One",
+          group: {},
+          created_at: 1,
+          created_by: { handle: "simo", pfp: "https://example.com/pfp.png" },
+          visible: true,
+          is_private: false,
+        },
+      },
+    ]);
+
+    renderSection();
+
+    expect(
+      screen.getByRole("link", { name: /Curators One/i })
+    ).toBeInTheDocument();
+  });
+
+  it("renders plain curation text when group details are unavailable", () => {
+    mockUseQuery.mockReturnValue({
+      data: [
+        {
+          id: "curation-1",
+          name: "Curators One",
+          wave_id: "wave-1",
+          group_id: "group-1",
+          created_at: 1,
+          updated_at: 1,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    mockUseQueries.mockReturnValue([
+      {
+        isError: true,
+      },
+    ]);
+
+    renderSection();
+
+    expect(screen.getByText("Curators One")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Curators One/i })
+    ).not.toBeInTheDocument();
   });
 
   it("removes an existing curation group", async () => {
