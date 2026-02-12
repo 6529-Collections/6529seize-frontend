@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -9,7 +10,7 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useRef } from "react";
+import { useCallback, useContext, useRef } from "react";
 
 export interface DropCurationTarget {
   readonly dropId: string;
@@ -43,6 +44,7 @@ const FALLBACK_DROP_CONTEXT: ApiDropContextProfileContext = {
 
 export const useDropCurationMutation = (): UseDropCurationMutationReturn => {
   const { connectedProfile, setToast } = useAuth();
+  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const myStreamContext = useMyStreamOptional();
   const rollbackRef = useRef<(() => void) | null>(null);
   const pendingDropIdRef = useRef<string | null>(null);
@@ -105,6 +107,7 @@ export const useDropCurationMutation = (): UseDropCurationMutationReturn => {
     onSuccess: () => {
       rollbackRef.current = null;
       pendingDropIdRef.current = null;
+      invalidateDrops();
     },
     onError: (error, { action }) => {
       rollbackRef.current?.();

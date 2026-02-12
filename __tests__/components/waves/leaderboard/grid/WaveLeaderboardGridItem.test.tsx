@@ -4,6 +4,7 @@ import { WaveLeaderboardGridItem } from "@/components/waves/leaderboard/grid/Wav
 
 const startDropOpen = jest.fn();
 let markdownProps: any;
+const toggleCuration = jest.fn();
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplay",
@@ -14,7 +15,13 @@ jest.mock(
   "@/components/waves/drops/WaveDropPartContentMarkdown",
   () => (props: any) => {
     markdownProps = props;
-    return <div data-testid="markdown" />;
+    return (
+      <div data-testid="markdown">
+        <a data-testid="markdown-link" href="https://example.com">
+          external
+        </a>
+      </div>
+    );
   }
 );
 
@@ -27,20 +34,83 @@ jest.mock(
   () => () => <div data-testid="votes" />
 );
 
-jest.mock("@/components/waves/drops/DropCurationButton", () => () => (
-  <div data-testid="curate" />
-));
+jest.mock("@/components/waves/drops/DropCurationButton", () => ({
+  __esModule: true,
+  default: () => <button data-testid="curate-action">Curate</button>,
+}));
 
 jest.mock("@/hooks/isMobileScreen", () => () => false);
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/useLongPressInteraction", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
+  useDropInteractionRules: jest.fn(),
+}));
+
+jest.mock("@/hooks/drops/useDropCurationMutation", () => ({
+  useDropCurationMutation: jest.fn(),
+}));
+
+jest.mock("@/components/voting", () => ({
+  VotingModal: ({ isOpen }: any) =>
+    isOpen ? <div data-testid="modal" /> : null,
+  MobileVotingModal: ({ isOpen }: any) =>
+    isOpen ? <div data-testid="mobile-modal" /> : null,
+}));
+
+jest.mock("@/components/voting/VotingModalButton", () => ({
+  __esModule: true,
+  default: ({ onClick }: any) => (
+    <button data-testid="vote-button" onClick={onClick}>
+      Vote
+    </button>
+  ),
+}));
+
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
+  __esModule: true,
+  default: () => <button data-testid="open-action">Open</button>,
+}));
+
+jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
+  __esModule: true,
+  default: () => <button data-testid="mobile-open-action">Open drop</button>,
+}));
+
+jest.mock(
+  "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
+  () => ({
+    __esModule: true,
+    default: ({ isOpen, children }: any) =>
+      isOpen ? <div data-testid="mobile-wrapper">{children}</div> : null,
+  })
+);
 
 jest.mock("@/utils/monitoring/dropOpenTiming", () => ({
   startDropOpen: (...args: any[]) => startDropOpen(...args),
 }));
 
+const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
+const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
+  .default as jest.Mock;
+const useDropInteractionRules = require("@/hooks/drops/useDropInteractionRules")
+  .useDropInteractionRules as jest.Mock;
+const useDropCurationMutation = require("@/hooks/drops/useDropCurationMutation")
+  .useDropCurationMutation as jest.Mock;
+
 describe("WaveLeaderboardGridItem", () => {
   const baseDrop: any = {
     id: "d1",
     rank: 1,
+    drop_type: "PARTICIPATORY",
     metadata: [],
     parts: [
       {
@@ -58,6 +128,18 @@ describe("WaveLeaderboardGridItem", () => {
 
   beforeEach(() => {
     markdownProps = undefined;
+    toggleCuration.mockReset();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+    useLongPressInteraction.mockReturnValue({
+      isActive: false,
+      setIsActive: jest.fn(),
+      touchHandlers: {},
+    });
+    useDropInteractionRules.mockReturnValue({ canShowVote: true });
+    useDropCurationMutation.mockReturnValue({
+      toggleCuration,
+      isPending: false,
+    });
   });
 
   it("renders compact footer with rank and votes", () => {
@@ -73,7 +155,8 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
-    expect(screen.getByTestId("curate")).toBeInTheDocument();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+    expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     expect(markdownProps.marketplaceImageOnly).toBe(false);
     expect(
       screen.getByTestId("wave-leaderboard-grid-item-footer-d1")
@@ -104,11 +187,16 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.queryByTestId("rank")).not.toBeInTheDocument();
     expect(screen.queryByTestId("votes")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("curate")).not.toBeInTheDocument();
     expect(markdownProps.marketplaceImageOnly).toBe(true);
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("open-action")).toBeInTheDocument();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+    expect(screen.getByTestId("vote-button")).toBeInTheDocument();
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
@@ -178,5 +266,61 @@ describe("WaveLeaderboardGridItem", () => {
         source: "leaderboard_grid",
       })
     );
+  });
+
+  it("does not open drop when clicking links or action buttons", () => {
+    const onDropClick = jest.fn();
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="content_only"
+        onDropClick={onDropClick}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("markdown-link"));
+    fireEvent.click(screen.getByTestId("open-action"));
+    fireEvent.click(screen.getByTestId("curate-action"));
+    fireEvent.click(screen.getByTestId("vote-button"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
+  });
+
+  it("shows long-press action sheet on touch devices for content-only mode", () => {
+    const setIsActive = jest.fn();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+    useLongPressInteraction.mockReturnValue({
+      isActive: true,
+      setIsActive,
+      touchHandlers: {},
+    });
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("mobile-wrapper")).toBeInTheDocument();
+    expect(screen.getByTestId("mobile-open-action")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Curate drop" })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Curate drop" }));
+
+    expect(toggleCuration).toHaveBeenCalledWith({
+      dropId: "d1",
+      waveId: "w1",
+      isCuratable: true,
+      isCurated: false,
+    });
+    expect(setIsActive).toHaveBeenCalledWith(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Vote" }));
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
   });
 });
