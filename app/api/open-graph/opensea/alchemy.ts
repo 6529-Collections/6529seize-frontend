@@ -1,6 +1,8 @@
 import { extractAlchemyMetadata } from "./shared";
 import type { AlchemyNftMetadata } from "./shared";
 
+const FETCH_TIMEOUT_MS = 8000;
+
 type AlchemyMetadataCandidateResult =
   | {
       readonly kind: "success";
@@ -24,12 +26,18 @@ export const fetchAlchemyMetadataCandidate = async (
   endpoint.searchParams.set("contractAddress", contractAddress);
   endpoint.searchParams.set("tokenId", tokenIdCandidate);
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
   let response: Response;
   try {
     response = await fetch(endpoint.toString(), {
       headers: { Accept: "application/json" },
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
   } catch (error) {
+    clearTimeout(timeout);
     return {
       kind: "unexpected_error",
       errorMessage: error instanceof Error ? error.message : "unknown",

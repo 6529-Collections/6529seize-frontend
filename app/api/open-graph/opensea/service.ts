@@ -33,6 +33,7 @@ const OPENSEA_ASSET_PATH_PATTERN =
   /^\/assets\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
 const DEFAULT_IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
+const TOKEN_URI_FETCH_TIMEOUT_MS = 4000;
 
 const ALCHEMY_NETWORK_BY_OPENSEA_CHAIN: Record<string, string> = {
   arbitrum: "arb-mainnet",
@@ -348,13 +349,25 @@ const fetchTokenUriMetadataCandidate = async (
     return null;
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    TOKEN_URI_FETCH_TIMEOUT_MS
+  );
+
   let response: Response;
   try {
     response = await fetch(candidateUrl.toString(), {
       headers: { Accept: "application/json" },
+      signal: controller.signal,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return null;
+    }
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {

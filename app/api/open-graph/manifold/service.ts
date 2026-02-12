@@ -131,8 +131,8 @@ const parseManifoldListing = (
       title,
       description,
       siteName: "Manifold",
-      image: imageUrl ? { url: imageUrl } : undefined,
-      images: imageUrl ? [{ url: imageUrl }] : undefined,
+      image: imageUrl ? { url: imageUrl, secureUrl: imageUrl } : undefined,
+      images: imageUrl ? [{ url: imageUrl, secureUrl: imageUrl }] : undefined,
       manifold: {
         listingId: identifier,
         creatorHandle: context.creatorHandle,
@@ -157,7 +157,17 @@ export function createManifoldPlan(
     cacheKey: `manifold:listing:${url.toString()}`,
     execute: async () => {
       const { html, contentType, finalUrl } = await deps.fetchHtml(url);
-      const finalUrlInstance = new URL(finalUrl);
+      let finalUrlInstance: URL;
+      try {
+        finalUrlInstance = new URL(finalUrl);
+      } catch (error) {
+        const parseError =
+          error instanceof Error ? error.message : "Unknown URL parse error";
+        throw new Error(
+          `Invalid finalUrl returned from deps.fetchHtml in execute: "${finalUrl}" (requestUrl="${url.toString()}", parseError="${parseError}")`
+        );
+      }
+
       await deps.assertPublicUrl(finalUrlInstance);
 
       const manifoldPreview = parseManifoldListing(html, url, finalUrlInstance);
