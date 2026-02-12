@@ -2,7 +2,11 @@ import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
-import UserLevel from "@/components/user/utils/level/UserLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
+import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
+import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
@@ -13,6 +17,9 @@ export default function UserPageHeaderName({
   level,
   profileEnabledAt,
   variant = "full",
+  submissionCount = 0,
+  winnerCount = 0,
+  onBadgeClick,
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
@@ -20,6 +27,9 @@ export default function UserPageHeaderName({
   readonly level: number;
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
+  readonly submissionCount?: number;
+  readonly winnerCount?: number;
+  readonly onBadgeClick?: (tab: ArtistPreviewTab) => void;
 }) {
   const getDisplayName = (): string => {
     if (profile?.handle) {
@@ -50,14 +60,23 @@ export default function UserPageHeaderName({
       {showTitle && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <UserPageHeaderNameWrapper profile={profile} canEdit={canEdit}>
-            <p className="tw-mb-0 tw-break-all tw-text-left tw-text-[1.75rem] tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-[2rem]">
+            <p className="tw-mb-0 tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-2xl">
               {displayName}
             </p>
           </UserPageHeaderNameWrapper>
           {profile?.handle && (
-            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center md:tw-h-6 md:tw-w-6">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center md:-tw-mt-0.5">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
+          )}
+          <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
+          {onBadgeClick && (submissionCount > 0 || winnerCount > 0) && (
+            <ArtistActivityBadge
+              submissionCount={submissionCount}
+              winCount={winnerCount}
+              onBadgeClick={onBadgeClick}
+              tooltipId="profile-artist-activity-badge"
+            />
           )}
         </div>
       )}
@@ -71,22 +90,16 @@ export default function UserPageHeaderName({
               </div>
             </UserPageClassificationWrapper>
           )}
-          {profile?.classification && (
+          {profileEnabledLabel && (
             <span className="tw-text-zinc-600 sm:tw-text-zinc-700">&bull;</span>
           )}
-          <UserLevel level={level} size="xs" />
           {profileEnabledLabel && (
-            <>
-              <span className="tw-text-zinc-600 sm:tw-text-zinc-700">
-                &bull;
-              </span>
-              <p
-                className="tw-mb-0 tw-text-sm tw-font-medium tw-text-zinc-500"
-                suppressHydrationWarning
-              >
-                Profile enabled: {profileEnabledLabel}
-              </p>
-            </>
+            <p
+              className="tw-mb-0 tw-text-sm tw-font-medium tw-text-zinc-500"
+              suppressHydrationWarning
+            >
+              Profile enabled: {profileEnabledLabel}
+            </p>
           )}
         </div>
       )}

@@ -10,6 +10,7 @@ import React, {
   useState,
 } from "react";
 
+import { getNodeEnv, publicEnv } from "@/config/env";
 import { getWalletAddress, removeAuthJwt } from "@/services/auth/auth.utils";
 import { WalletInitializationError } from "@/src/errors/wallet";
 import { SecurityEventType } from "@/src/types/security";
@@ -364,6 +365,23 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isInitialized,
   } = useConsolidatedWalletState();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const nodeEnv = getNodeEnv();
+  const isDevLikeEnv =
+    nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "local";
+  const isLocalHost =
+    globalThis.window !== undefined &&
+    (globalThis.window.location.hostname === "localhost" ||
+      globalThis.window.location.hostname === "127.0.0.1" ||
+      globalThis.window.location.hostname === "::1" ||
+      globalThis.window.location.hostname.endsWith(".local"));
+  const impersonatedAddress =
+    isDevLikeEnv &&
+    isLocalHost &&
+    publicEnv.USE_DEV_AUTH === "true" &&
+    publicEnv.DEV_MODE_WALLET_ADDRESS &&
+    isAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
+      ? getAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
+      : undefined;
 
   useEffect(() => {
     // Wait for initialization to complete before processing account changes
@@ -378,6 +396,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Use debounced state update to prevent race conditions
     debounceTimeoutRef.current = setTimeout(() => {
+      if (impersonatedAddress) {
+        const isAlreadyConnected =
+          walletState.status === "connected" &&
+          walletState.address === impersonatedAddress;
+        if (!isAlreadyConnected) {
+          setConnected(impersonatedAddress);
+        }
+        return;
+      }
+
       if (account.address && account.isConnected) {
         // Validate and normalize address to checksummed format
         if (isAddress(account.address)) {
@@ -442,6 +470,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setConnected,
     setDisconnected,
     setConnecting,
+    impersonatedAddress,
   ]);
 
   const seizeConnect = useCallback((): void => {
@@ -584,7 +613,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
-      address: connectedAddress,
+      address: impersonatedAddress ?? connectedAddress,
       walletName: walletInfo?.name,
       walletIcon: walletInfo?.icon,
       isSafeWallet: isSafeWalletInfo(walletInfo),
@@ -593,8 +622,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeDisconnectAndLogout,
       seizeAcceptConnection,
       seizeConnectOpen: state.open,
-      isConnected: account.isConnected,
-      isAuthenticated: !!connectedAddress,
+      isConnected: impersonatedAddress ? true : account.isConnected,
+      isAuthenticated: !!(impersonatedAddress ?? connectedAddress),
       connectionState: walletState.status, // Unified state machine
       walletState, // Expose unified state for advanced consumers
       hasInitializationError,
@@ -602,6 +631,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [
       connectedAddress,
+      impersonatedAddress,
       walletInfo?.name,
       walletInfo?.icon,
       walletInfo?.type,

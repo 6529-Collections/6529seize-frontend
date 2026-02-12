@@ -1,54 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 
-const runNextAnimationFrame = (
-  callbacks: Map<number, FrameRequestCallback>
-): void => {
-  const next = callbacks.entries().next().value as
-    | [number, FrameRequestCallback]
-    | undefined;
-  if (!next) {
-    return;
-  }
-
-  const [id, callback] = next;
-  callbacks.delete(id);
-  callback(performance.now());
-};
-
 describe("useClosingDropId", () => {
-  let frameCallbacks: Map<number, FrameRequestCallback>;
-  let nextFrameId: number;
-  let requestAnimationFrameSpy: jest.SpyInstance;
-  let cancelAnimationFrameSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    window.history.replaceState({}, "", "/waves?drop=drop-1");
-    frameCallbacks = new Map<number, FrameRequestCallback>();
-    nextFrameId = 1;
-
-    requestAnimationFrameSpy = jest
-      .spyOn(window, "requestAnimationFrame")
-      .mockImplementation((callback: FrameRequestCallback) => {
-        const frameId = nextFrameId;
-        nextFrameId += 1;
-        frameCallbacks.set(frameId, callback);
-        return frameId;
-      });
-
-    cancelAnimationFrameSpy = jest
-      .spyOn(window, "cancelAnimationFrame")
-      .mockImplementation((frameId: number) => {
-        frameCallbacks.delete(frameId);
-      });
-  });
-
-  afterEach(() => {
-    requestAnimationFrameSpy.mockRestore();
-    cancelAnimationFrameSpy.mockRestore();
-  });
-
-  it("hides immediately and allows reopening when URL settles", () => {
+  it("hides immediately and allows reopening after searchParams catches up", () => {
     const { result, rerender } = renderHook(
       ({ dropId }: { readonly dropId: string | undefined }) =>
         useClosingDropId(dropId),
@@ -59,44 +13,93 @@ describe("useClosingDropId", () => {
 
     expect(result.current.effectiveDropId).toBe("drop-1");
 
+    // Begin closing — modal should hide immediately
     act(() => {
       result.current.beginClosingDrop("drop-1");
     });
     expect(result.current.effectiveDropId).toBeUndefined();
 
+    // React searchParams catches up (dropId becomes undefined)
     act(() => {
-      runNextAnimationFrame(frameCallbacks);
+      rerender({ dropId: undefined });
     });
+    // closingDropId cleared, effectiveDropId still undefined (no drop in URL)
     expect(result.current.effectiveDropId).toBeUndefined();
 
+    // Drop re-opened via URL
     act(() => {
-      window.history.replaceState({}, "", "/waves");
-      rerender({ dropId: undefined });
-      runNextAnimationFrame(frameCallbacks);
-    });
-
-    act(() => {
-      window.history.replaceState({}, "", "/waves?drop=drop-1");
       rerender({ dropId: "drop-1" });
     });
-
     expect(result.current.effectiveDropId).toBe("drop-1");
   });
 
-  it("falls back to reopening after max settle frames when URL does not update", () => {
-    const { result } = renderHook(() => useClosingDropId("drop-1"));
+  it("stays hidden while searchParams hasn't caught up yet", () => {
+    const { result, rerender } = renderHook(
+      ({ dropId }: { readonly dropId: string | undefined }) =>
+        useClosingDropId(dropId),
+      {
+        initialProps: { dropId: "drop-1" },
+      }
+    );
 
     act(() => {
       result.current.beginClosingDrop("drop-1");
     });
     expect(result.current.effectiveDropId).toBeUndefined();
 
+    // Re-render without URL change — must stay hidden.
     act(() => {
-      for (let frameIndex = 0; frameIndex < 60; frameIndex += 1) {
-        runNextAnimationFrame(frameCallbacks);
+      rerender({ dropId: "drop-1" });
+    });
+    expect(result.current.effectiveDropId).toBeUndefined();
+  });
+
+  it("keeps hidden if URL never updates", () => {
+    const { result, rerender } = renderHook(
+      ({ dropId }: { readonly dropId: string | undefined }) =>
+        useClosingDropId(dropId),
+      {
+        initialProps: { dropId: "drop-1" },
       }
+    );
+
+    act(() => {
+      result.current.beginClosingDrop("drop-1");
+    });
+    expect(result.current.effectiveDropId).toBeUndefined();
+
+    // Keep rendering with same URL drop id; should remain hidden.
+    act(() => {
+      rerender({ dropId: "drop-1" });
+      rerender({ dropId: "drop-1" });
+    });
+    expect(result.current.effectiveDropId).toBeUndefined();
+  });
+
+  it("handles rapid close-reopen correctly", () => {
+    const { result, rerender } = renderHook(
+      ({ dropId }: { readonly dropId: string | undefined }) =>
+        useClosingDropId(dropId),
+      {
+        initialProps: { dropId: "drop-1" },
+      }
+    );
+
+    // Close
+    act(() => {
+      result.current.beginClosingDrop("drop-1");
+    });
+    expect(result.current.effectiveDropId).toBeUndefined();
+
+    // React catches up
+    act(() => {
+      rerender({ dropId: undefined });
     });
 
-    expect(result.current.effectiveDropId).toBe("drop-1");
+    // Immediately reopen with different drop
+    act(() => {
+      rerender({ dropId: "drop-2" });
+    });
+    expect(result.current.effectiveDropId).toBe("drop-2");
   });
 });

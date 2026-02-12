@@ -32,7 +32,7 @@ export default function UserPageHeaderBanner({
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-32 tw-w-full tw-overflow-hidden sm:tw-h-48">
+    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40">
       {scaledBannerUrl ? (
         <div
           className="tw-absolute tw-inset-0"

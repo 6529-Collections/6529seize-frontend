@@ -16,7 +16,10 @@ import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import { commonApiFetch } from "@/services/api/common-api";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
@@ -49,8 +52,7 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const routeHandleOrWallet =
-    params["user"]?.toString().toLowerCase() ?? null;
+  const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
@@ -127,6 +129,16 @@ export default function UserPageHeaderClient({
     [aboutStatement, canEdit]
   );
 
+  const submissionCount = profile.active_main_stage_submission_ids?.length ?? 0;
+  const winnerCount = profile.winner_main_stage_drop_ids?.length ?? 0;
+
+  const {
+    isModalOpen: isArtistPreviewOpen,
+    modalInitialTab,
+    handleBadgeClick: handleArtistBadgeClick,
+    handleModalClose: handleArtistModalClose,
+  } = useArtistPreviewModal();
+
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
   ) => {
@@ -171,7 +183,7 @@ export default function UserPageHeaderClient({
         <div className="tw-relative tw-bg-zinc-950">
           <div className="tw-relative tw-z-10 tw-px-6 md:tw-px-9">
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-4 md:tw-pt-2">
-              <div className="tw-relative tw-order-1 -tw-mt-[3.125rem] tw-flex-shrink-0 tw-self-end sm:-tw-mt-[4.75rem]">
+              <div className="tw-relative tw-order-1 -tw-mt-10 tw-flex-shrink-0 tw-self-start sm:-tw-mt-[58px]">
                 <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
                   <UserPageHeaderPfp
                     profile={profile}
@@ -181,7 +193,7 @@ export default function UserPageHeaderClient({
                 </UserPageHeaderPfpWrapper>
               </div>
 
-              <div className="tw-order-3 tw-w-full tw-pt-2 md:tw-order-2 md:tw-w-auto md:tw-flex-1">
+              <div className="tw-order-3 tw-w-full tw-pt-2 md:tw-order-2 md:tw-w-auto md:tw-flex-1 md:tw-pt-1">
                 <UserPageHeaderName
                   profile={profile}
                   canEdit={canEdit}
@@ -189,8 +201,11 @@ export default function UserPageHeaderClient({
                   level={profile.level}
                   profileEnabledAt={profileEnabledAt}
                   variant="title"
+                  submissionCount={submissionCount}
+                  winnerCount={winnerCount}
+                  onBadgeClick={handleArtistBadgeClick}
                 />
-                <div className="tw-mt-2">
+                <div className="tw-mt-2 sm:tw-mt-0.5">
                   <UserPageHeaderName
                     profile={profile}
                     canEdit={canEdit}
@@ -238,6 +253,15 @@ export default function UserPageHeaderClient({
           </div>
         </div>
       </section>
+
+      {(submissionCount > 0 || winnerCount > 0) && (
+        <ArtistPreviewModal
+          isOpen={isArtistPreviewOpen}
+          onClose={handleArtistModalClose}
+          user={profile as unknown as ApiProfileMin}
+          initialTab={modalInitialTab}
+        />
+      )}
     </div>
   );
 }

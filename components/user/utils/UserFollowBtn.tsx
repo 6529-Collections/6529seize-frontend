@@ -28,12 +28,13 @@ export enum UserFollowBtnSize {
 
 export const FOLLOW_BTN_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
   [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-3 tw-py-2 tw-text-xs",
-  [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
+  [UserFollowBtnSize.MEDIUM]:
+    "tw-gap-x-2 tw-px-3 md:tw-px-3.5 tw-py-2 md:tw-py-2.5 tw-text-sm",
 };
 
 export const FOLLOW_BTN_SVG_CLASSES: Record<UserFollowBtnSize, string> = {
-  [UserFollowBtnSize.SMALL]: "tw-h-4 tw-w-4",
-  [UserFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
+  [UserFollowBtnSize.SMALL]: "tw-h-3 tw-w-3 md:tw-h-4 md:tw-w-4",
+  [UserFollowBtnSize.MEDIUM]: "tw-h-4 tw-w-4 md:tw-h-5 md:tw-w-5",
 };
 
 export const FOLLOW_BTN_LOADER_SIZES: Record<
@@ -155,7 +156,7 @@ export default function UserFollowBtn({
           <button
             onClick={onDirectMessage}
             aria-label="Send direct message"
-            className="tw-px-3 tw-py-3 tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
+            className="tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-3 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-ring-iron-700"
             data-tooltip-id={`dm-${handle}`}
           >
             {directMessageLoading ? (
@@ -185,9 +186,9 @@ export default function UserFollowBtn({
         aria-label={following ? "Unfollow" : "Follow"}
         className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
           following
-            ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
+            ? "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
             : "tw-bg-iron-200 tw-text-iron-950 tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300"
-        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+        } tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
       >
         {mutating || isFetching ? (
           <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
