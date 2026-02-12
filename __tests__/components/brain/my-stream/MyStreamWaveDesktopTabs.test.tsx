@@ -1,15 +1,17 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { MyStreamWaveTab } from '@/types/waves.types';
-import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import { Time } from '@/helpers/time';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { Time } from "@/helpers/time";
 
 const setActiveTab = jest.fn();
 const setActiveContentTab = jest.fn();
 const updateAvailableTabs = jest.fn();
 
-jest.mock('@/components/brain/ContentTabContext', () => {
-  const actual = jest.requireActual('../../../../components/brain/ContentTabContext');
+jest.mock("@/components/brain/ContentTabContext", () => {
+  const actual = jest.requireActual(
+    "../../../../components/brain/ContentTabContext"
+  );
   return {
     __esModule: true,
     ...actual,
@@ -21,7 +23,7 @@ jest.mock('@/components/brain/ContentTabContext', () => {
   };
 });
 
-jest.mock('@/hooks/useWave', () => ({
+jest.mock("@/hooks/useWave", () => ({
   useWave: () => ({
     ...mockWaveInfo,
     pauses: {
@@ -36,14 +38,14 @@ jest.mock('@/hooks/useWave', () => ({
   }),
 }));
 
-jest.mock('@/hooks/useWaveTimers', () => ({
+jest.mock("@/hooks/useWaveTimers", () => ({
   useWaveTimers: () => ({
     voting: mockVoting,
     decisions: { firstDecisionDone: false },
   }),
 }));
 
-jest.mock('@/hooks/waves/useDecisionPoints', () => ({
+jest.mock("@/hooks/waves/useDecisionPoints", () => ({
   useDecisionPoints: () => ({
     allDecisions: mockDecisions,
     hasMoreFuture: false,
@@ -51,17 +53,22 @@ jest.mock('@/hooks/waves/useDecisionPoints', () => ({
   }),
 }));
 
-jest.mock('@/components/waves/leaderboard/time/CompactTimeCountdown', () => ({
+jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
   __esModule: true,
   CompactTimeCountdown: ({ timeLeft }: any) => (
     <div data-testid="countdown">{timeLeft.seconds}</div>
   ),
 }));
 
-import MyStreamWaveDesktopTabs from '@/components/brain/my-stream/MyStreamWaveDesktopTabs';
+import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
 
 let mockAvailableTabs: MyStreamWaveTab[] = [];
-let mockWaveInfo: any = { isChatWave: false, isMemesWave: false, isRankWave: false };
+let mockWaveInfo: any = {
+  isChatWave: false,
+  isMemesWave: false,
+  isCurationWave: false,
+  isRankWave: false,
+};
 let mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
 let mockDecisions: { timestamp: number }[] = [];
 
@@ -78,19 +85,29 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
-  mockWaveInfo = { isChatWave: false, isMemesWave: false, isRankWave: false };
+  mockWaveInfo = {
+    isChatWave: false,
+    isMemesWave: false,
+    isCurationWave: false,
+    isRankWave: false,
+  };
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
 });
 
-describe('MyStreamWaveDesktopTabs', () => {
-  it('returns null for chat waves', () => {
-    mockWaveInfo = { isChatWave: true, isMemesWave: false, isRankWave: false };
+describe("MyStreamWaveDesktopTabs", () => {
+  it("returns null for chat waves", () => {
+    mockWaveInfo = {
+      isChatWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
     const { container } = renderComponent();
     expect(container.firstChild).toBeNull();
   });
 
-  it('filters options and corrects invalid active tab', () => {
+  it("filters options and corrects invalid active tab", () => {
     mockAvailableTabs = [
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.MY_VOTES,
@@ -98,18 +115,43 @@ describe('MyStreamWaveDesktopTabs', () => {
     ];
     renderComponent(MyStreamWaveTab.MY_VOTES);
     expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT);
-    expect(screen.getByText('Chat')).toBeInTheDocument();
-    expect(screen.getByText('Leaderboard')).toBeInTheDocument();
-    expect(screen.queryByText('My Votes')).toBeNull();
+    expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    expect(screen.queryByText("My Votes")).toBeNull();
   });
 
-  it('does not render countdown; parent header handles it', () => {
-    const spy = jest.spyOn(Time, 'currentMillis').mockReturnValue(0);
-    mockWaveInfo = { isChatWave: false, isMemesWave: true, isRankWave: false };
+  it("does not render countdown; parent header handles it", () => {
+    const spy = jest.spyOn(Time, "currentMillis").mockReturnValue(0);
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: true,
+      isCurationWave: false,
+      isRankWave: false,
+    };
     mockAvailableTabs = [MyStreamWaveTab.CHAT];
     mockDecisions = [{ timestamp: 10000 }];
     renderComponent(MyStreamWaveTab.CHAT);
-    expect(screen.queryByTestId('countdown')).toBeNull();
+    expect(screen.queryByTestId("countdown")).toBeNull();
     spy.mockRestore();
+  });
+
+  it("passes curation flag into tab availability update", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: false,
+    };
+
+    renderComponent(MyStreamWaveTab.CHAT);
+
+    expect(updateAvailableTabs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        waveId: expect.anything(),
+        isChatWave: false,
+        isMemesWave: false,
+        isCurationWave: true,
+      })
+    );
   });
 });

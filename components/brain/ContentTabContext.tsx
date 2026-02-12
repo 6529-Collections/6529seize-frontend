@@ -24,6 +24,7 @@ type WaveTabParams = {
   waveId: string | null;
   isChatWave: boolean;
   isMemesWave: boolean;
+  isCurationWave: boolean;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
 };
@@ -70,7 +71,8 @@ const buildMemesTabs = (
 
 const buildDefaultTabs = (
   votingState: WaveVotingState,
-  hasFirstDecisionPassed: boolean
+  hasFirstDecisionPassed: boolean,
+  isCurationWave: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState !== WaveVotingState.ENDED) {
@@ -79,7 +81,9 @@ const buildDefaultTabs = (
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
-  tabs.push(MyStreamWaveTab.OUTCOME);
+  if (!isCurationWave) {
+    tabs.push(MyStreamWaveTab.OUTCOME);
+  }
   tabs.push(MyStreamWaveTab.MY_VOTES);
   return tabs;
 };
@@ -136,6 +140,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         waveId,
         isChatWave,
         isMemesWave,
+        isCurationWave,
         votingState,
         hasFirstDecisionPassed,
       } = params;
@@ -146,7 +151,11 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       } else if (isMemesWave) {
         tabs = buildMemesTabs(votingState, hasFirstDecisionPassed);
       } else {
-        tabs = buildDefaultTabs(votingState, hasFirstDecisionPassed);
+        tabs = buildDefaultTabs(
+          votingState,
+          hasFirstDecisionPassed,
+          isCurationWave
+        );
       }
 
       setAvailableTabs(tabs);

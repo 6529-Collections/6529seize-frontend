@@ -29,6 +29,7 @@ describe("ContentTabContext", () => {
         waveId: "chat-wave",
         isChatWave: true,
         isMemesWave: false,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -44,6 +45,7 @@ describe("ContentTabContext", () => {
         waveId: "meme-wave",
         isChatWave: false,
         isMemesWave: true,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -64,6 +66,7 @@ describe("ContentTabContext", () => {
         waveId: "meme-wave",
         isChatWave: false,
         isMemesWave: true,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -78,11 +81,32 @@ describe("ContentTabContext", () => {
         waveId: "default-wave",
         isChatWave: false,
         isMemesWave: false,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
     );
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+  });
+
+  it("omits OUTCOME for curation waves", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "curation-wave",
+        isChatWave: false,
+        isMemesWave: false,
+        isCurationWave: true,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.MY_VOTES,
+    ]);
   });
 
   it("restores stored tab for memes wave even when it is CHAT", () => {
@@ -92,6 +116,7 @@ describe("ContentTabContext", () => {
         waveId: "meme-wave",
         isChatWave: false,
         isMemesWave: true,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -102,6 +127,7 @@ describe("ContentTabContext", () => {
         waveId: "default-wave",
         isChatWave: false,
         isMemesWave: false,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -111,6 +137,7 @@ describe("ContentTabContext", () => {
         waveId: "meme-wave",
         isChatWave: false,
         isMemesWave: true,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -125,6 +152,7 @@ describe("ContentTabContext", () => {
         waveId: "default-wave",
         isChatWave: false,
         isMemesWave: false,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: true,
       })
@@ -135,10 +163,41 @@ describe("ContentTabContext", () => {
         waveId: "default-wave",
         isChatWave: false,
         isMemesWave: false,
+        isCurationWave: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
     );
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+  });
+
+  it("falls back to CHAT when stored OUTCOME becomes unavailable for curation wave", () => {
+    const { result } = setup();
+
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "wave-1",
+        isChatWave: false,
+        isMemesWave: false,
+        isCurationWave: false,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.OUTCOME));
+
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "wave-1",
+        isChatWave: false,
+        isMemesWave: false,
+        isCurationWave: true,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    expect(result.current.availableTabs).not.toContain(MyStreamWaveTab.OUTCOME);
   });
 });

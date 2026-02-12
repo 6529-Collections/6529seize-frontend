@@ -34,6 +34,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   });
   const {
     decisions: { multiDecision },
+    isCurationWave,
     pauses: { showPause, filterDecisionsDuringPauses },
   } = useWave(wave);
 
@@ -130,7 +131,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   return (
     <div>
       {multiDecision ? (
-        <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
+        <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-950">
           {(() => {
             const currentPause = showPause(nextDecisionTime);
 
@@ -152,7 +153,9 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 decisions={filteredDecisions}
                 nextDecisionTime={nextDecisionTime}
                 onLoadMorePast={hasMorePast ? handleLoadMorePast : undefined}
-                onLoadMoreFuture={hasMoreFuture ? handleLoadMoreFuture : undefined}
+                onLoadMoreFuture={
+                  hasMoreFuture ? handleLoadMoreFuture : undefined
+                }
                 hasMorePast={hasMorePast}
                 hasMoreFuture={hasMoreFuture}
                 remainingPastCount={remainingPastCount}
@@ -164,12 +167,14 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           </AnimatePresence>
         </div>
       ) : (
-        <div className="tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2 tw-overflow-hidden">
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <CompactDroppingPhaseCard wave={wave} />
-            <CompactVotingPhaseCard wave={wave} />
+        !isCurationWave && (
+          <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2">
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <CompactDroppingPhaseCard wave={wave} />
+              <CompactVotingPhaseCard wave={wave} />
+            </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );
