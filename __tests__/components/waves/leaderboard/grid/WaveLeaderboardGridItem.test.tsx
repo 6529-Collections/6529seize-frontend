@@ -191,9 +191,11 @@ describe("WaveLeaderboardGridItem", () => {
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
-    ).toBeInTheDocument();
+    const contentOnlyActions = screen.getByTestId(
+      "wave-leaderboard-grid-item-content-only-actions-d1"
+    );
+    expect(contentOnlyActions).toBeInTheDocument();
+    expect(contentOnlyActions).toHaveClass("tw-z-0");
     expect(screen.getByTestId("open-action")).toBeInTheDocument();
     expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();

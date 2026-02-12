@@ -110,6 +110,9 @@ describe("MyStreamWaveLeaderboard", () => {
     ]); // sort
     render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
 
+    const stickyHeader = screen.getByTestId("header").parentElement;
+    expect(stickyHeader).toHaveClass("tw-sticky");
+    expect(stickyHeader).toHaveClass("tw-z-30");
     expect(headerProps.viewMode).toBe("list");
     await user.click(screen.getByTestId("header"));
     expect(screen.getByTestId("create-drop")).toBeInTheDocument();

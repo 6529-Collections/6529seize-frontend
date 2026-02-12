@@ -189,7 +189,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       </div>
 
       {/* Sticky tabs/filters section */}
-      <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black">
+      <div className="tw-sticky tw-top-0 tw-z-30 tw-bg-black">
         <WaveLeaderboardHeader
           wave={wave}
           viewMode={effectiveViewMode}

@@ -321,7 +321,7 @@ export const WaveLeaderboardGridItem: React.FC<
         {showDesktopContentOnlyActions && (
           <div
             data-testid={`wave-leaderboard-grid-item-content-only-actions-${drop.id}`}
-            className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-10 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/65 tw-to-transparent tw-p-2 tw-opacity-0 tw-transition-opacity tw-duration-200 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100"
+            className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-0 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/65 tw-to-transparent tw-p-2 tw-opacity-0 tw-transition-opacity tw-duration-200 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100"
           >
             <div className="tw-pointer-events-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
               {canOpenDrop && (
