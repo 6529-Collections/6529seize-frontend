@@ -7,6 +7,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { format } from "date-fns";
 import { useState } from "react";
+import DropCurationButton from "../DropCurationButton";
 import WaveDropReactions from "../WaveDropReactions";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
@@ -25,16 +26,17 @@ export default function ParticipationDropFooter({
     <>
       {canShowVote && (
         <div
-          className="tw-@container sm:tw-ml-[3.25rem] tw-mt-4"
-          onClick={(e) => e.stopPropagation()}>
-          <div className="tw-flex @[700px]:tw-justify-between tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-gap-x-4 tw-gap-y-3">
+          className="tw-mt-4 tw-@container sm:tw-ml-[3.25rem]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between">
             <div className="tw-px-4">
               {!!drop.raters_count && (
                 <ParticipationDropRatings drop={drop} rank={drop.rank} />
               )}
             </div>
 
-            <div className="@[700px]:tw-ml-auto tw-pt-4 tw-px-6 @[700px]:tw-px-4 tw-flex tw-justify-center @[700px]:tw-pt-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0">
+            <div className="tw-flex tw-w-full tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0">
               <VotingModalButton
                 drop={drop}
                 onClick={() => setIsVotingModalOpen(true)}
@@ -60,16 +62,22 @@ export default function ParticipationDropFooter({
 
       {/* Show ratings if no vote button */}
       {!canShowVote && !!drop.raters_count && (
-        <div className="tw-mt-4 tw-px-4 tw-ml-[3.25rem]">
+        <div className="tw-ml-[3.25rem] tw-mt-4 tw-px-4">
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}
 
-      <div className="tw-mt-4 tw-px-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+      <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4">
+        <DropCurationButton
+          dropId={drop.id}
+          waveId={drop.wave.id}
+          isCuratable={drop.context_profile_context?.curatable ?? false}
+          isCurated={drop.context_profile_context?.curated ?? false}
+        />
         <WaveDropReactions drop={drop} />
       </div>
 
-      <div className="tw-mt-4 tw-px-4 sm:tw-ml-[3.25rem] tw-pb-3 tw-text-[11px] tw-text-iron-500 tw-border-t tw-border-iron-800/30">
+      <div className="tw-mt-4 tw-border-t tw-border-iron-800/30 tw-px-4 tw-pb-3 tw-text-[11px] tw-text-iron-500 sm:tw-ml-[3.25rem]">
         {format(new Date(drop.created_at), "h:mm a · MMM d, yyyy")}
       </div>
     </>

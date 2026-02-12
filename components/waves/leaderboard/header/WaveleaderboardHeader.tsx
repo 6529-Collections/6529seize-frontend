@@ -4,11 +4,13 @@ import React, { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
 import { useWave } from "@/hooks/useWave";
 import { WaveleaderboardSort } from "./WaveleaderboardSort";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import type { LeaderboardViewMode } from "../types";
 import { Tooltip } from "react-tooltip";
+import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
   readonly onCreateDrop: () => void;
@@ -16,6 +18,11 @@ interface WaveLeaderboardHeaderProps {
   readonly onViewModeChange: (mode: LeaderboardViewMode) => void;
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
+  readonly curationGroups?: readonly ApiWaveCurationGroup[] | undefined;
+  readonly curatedByGroupId?: string | null | undefined;
+  readonly onCurationGroupChange?:
+    | ((groupId: string | null) => void)
+    | undefined;
 }
 
 export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
@@ -25,6 +32,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   onViewModeChange,
   sort,
   onSortChange,
+  curationGroups = [],
+  curatedByGroupId = null,
+  onCurationGroupChange,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { isMemesWave, participation } = useWave(wave);
@@ -158,7 +168,15 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               sort={sort}
               onSortChange={onSortChange}
               waveId={wave.id}
+              curatedByGroupId={curatedByGroupId ?? undefined}
             />
+            {onCurationGroupChange && (
+              <WaveLeaderboardCurationGroupSelect
+                groups={curationGroups}
+                selectedGroupId={curatedByGroupId}
+                onChange={onCurationGroupChange}
+              />
+            )}
           </div>
         </div>
         {connectedProfile && participation.isEligible && (

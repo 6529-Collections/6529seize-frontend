@@ -8,6 +8,10 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 const useWave = jest.fn();
 const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
+const useWaveCurationGroups = jest.fn();
+const replace = jest.fn();
+let searchParamsString = "";
+let dropsProps: any;
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -21,6 +25,17 @@ jest.mock(
     (...args: any[]) =>
       useLocalPreference(...args)
 );
+jest.mock("@/hooks/waves/useWaveCurationGroups", () => ({
+  useWaveCurationGroups: (...args: any[]) => useWaveCurationGroups(...args),
+}));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ replace }),
+  usePathname: () => "/waves",
+  useSearchParams: () => ({
+    get: (key: string) => new URLSearchParams(searchParamsString).get(key),
+    toString: () => searchParamsString,
+  }),
+}));
 
 jest.mock("@/components/waves/leaderboard/WaveLeaderboardTime", () => ({
   WaveLeaderboardTime: () => <div data-testid="time" />,
@@ -43,9 +58,10 @@ jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
   ),
 }));
 jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrops", () => ({
-  WaveLeaderboardDrops: (props: any) => (
-    <div data-testid="drops" onClick={() => props.onCreateDrop()} />
-  ),
+  WaveLeaderboardDrops: (props: any) => {
+    dropsProps = props;
+    return <div data-testid="drops" onClick={() => props.onCreateDrop()} />;
+  },
 }));
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery",
@@ -61,12 +77,23 @@ jest.mock(
   () => (props: any) => (props.isOpen ? <div data-testid="memes" /> : null)
 );
 
-const wave = { id: "1", participation: {} } as ApiWave;
+const wave = {
+  id: "1",
+  participation: {},
+  wave: { type: "RANK" },
+} as ApiWave;
 
 describe("MyStreamWaveLeaderboard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    searchParamsString = "";
+    dropsProps = null;
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
+    useWaveCurationGroups.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    });
     useLocalPreference.mockImplementation((_: any, def: any) => [
       def,
       jest.fn(),
@@ -117,5 +144,49 @@ describe("MyStreamWaveLeaderboard", () => {
       "data-mode",
       "content_only"
     );
+  });
+
+  it("reads curation filter from URL and passes it to leaderboard data views", () => {
+    searchParamsString = "curated_by_group=group-1";
+    useWave.mockReturnValue({ isMemesWave: false });
+    useWaveCurationGroups.mockReturnValue({
+      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
+      isLoading: false,
+      isError: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+
+    expect(headerProps.curatedByGroupId).toBe("group-1");
+    expect(dropsProps.curatedByGroupId).toBe("group-1");
+  });
+
+  it("updates URL when curation filter changes", () => {
+    useWave.mockReturnValue({ isMemesWave: false });
+    useWaveCurationGroups.mockReturnValue({
+      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
+      isLoading: false,
+      isError: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+
+    headerProps.onCurationGroupChange("group-1");
+    expect(replace).toHaveBeenCalledWith("/waves?curated_by_group=group-1", {
+      scroll: false,
+    });
+
+    headerProps.onCurationGroupChange(null);
+    expect(replace).toHaveBeenCalledWith("/waves", { scroll: false });
   });
 });

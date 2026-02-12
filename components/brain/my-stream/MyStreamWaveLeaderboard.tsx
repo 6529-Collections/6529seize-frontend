@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
@@ -19,6 +26,8 @@ import { useLayout } from "./layout/LayoutContext";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -29,6 +38,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isMemesWave } = useWave(wave);
   const { leaderboardViewStyle } = useLayout(); // Get pre-calculated style from context
 
@@ -67,6 +79,62 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     (value) => Object.values(WaveDropsLeaderboardSort).includes(value)
   );
 
+  const {
+    data: curationGroups = [],
+    isLoading: isLoadingCurationGroups,
+    isError: isCurationGroupsError,
+  } = useWaveCurationGroups({
+    waveId: wave.id,
+    enabled: wave.wave.type !== ApiWaveType.Chat,
+  });
+
+  const rawCuratedByGroupId = searchParams.get("curated_by_group");
+
+  const curationGroupIdSet = useMemo(
+    () => new Set(curationGroups.map((group) => group.id)),
+    [curationGroups]
+  );
+
+  const curatedByGroupId = useMemo(() => {
+    if (!rawCuratedByGroupId) {
+      return undefined;
+    }
+
+    if (isCurationGroupsError) {
+      return undefined;
+    }
+
+    if (isLoadingCurationGroups) {
+      return rawCuratedByGroupId;
+    }
+
+    return curationGroupIdSet.has(rawCuratedByGroupId)
+      ? rawCuratedByGroupId
+      : undefined;
+  }, [
+    rawCuratedByGroupId,
+    isCurationGroupsError,
+    isLoadingCurationGroups,
+    curationGroupIdSet,
+  ]);
+
+  const updateCurationGroupInUrl = useCallback(
+    (groupId: string | null) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      if (groupId) {
+        nextParams.set("curated_by_group", groupId);
+      } else {
+        nextParams.delete("curated_by_group");
+      }
+
+      const nextQuery = nextParams.toString();
+      const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+      router.replace(nextUrl, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
   const effectiveViewMode = useMemo<LeaderboardViewMode>(() => {
     if (!isMemesWave) {
       return viewMode;
@@ -84,6 +152,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardDrops
         wave={wave}
         sort={sort}
+        curatedByGroupId={curatedByGroupId}
         onCreateDrop={() => {
           if (mountedRef.current) {
             setIsCreatingDrop(true);
@@ -96,6 +165,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGrid
         wave={wave}
         sort={sort}
+        curatedByGroupId={curatedByGroupId}
         mode={effectiveViewMode === "grid" ? "compact" : "content_only"}
         onDropClick={onDropClick}
       />
@@ -105,6 +175,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <WaveLeaderboardGallery
         wave={wave}
         sort={sort}
+        curatedByGroupId={curatedByGroupId}
         onDropClick={onDropClick}
       />
     );
@@ -130,6 +201,11 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             }
           }}
           onSortChange={(s) => setSort(s)}
+          curationGroups={curationGroups}
+          curatedByGroupId={curatedByGroupId ?? null}
+          onCurationGroupChange={
+            curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
+          }
         />
       </div>
 

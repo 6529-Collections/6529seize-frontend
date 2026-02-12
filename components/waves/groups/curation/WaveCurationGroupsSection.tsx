@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
@@ -37,14 +37,15 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
+import {
+  getWaveCurationGroupsQueryKey,
+  useWaveCurationGroups,
+} from "@/hooks/waves/useWaveCurationGroups";
 import { toErrorMessage } from "@/services/groups/groupMutations";
 import {
   createPublishedGroupForIdentityChange,
   IdentityGroupWorkflowMode,
 } from "@/components/waves/specs/groups/group/edit/buttons/utils/identityGroupWorkflow";
-
-const curationGroupsQueryKey = (waveId: string) =>
-  [QueryKey.WAVE_CURATION_GROUPS, { wave_id: waveId }] as const;
 
 interface WaveCurationGroupMenuProps {
   readonly disabled: boolean;
@@ -211,12 +212,8 @@ export default function WaveCurationGroupsSection({
     data: curationGroups = [],
     isLoading,
     isError,
-  } = useQuery<ApiWaveCurationGroup[]>({
-    queryKey: curationGroupsQueryKey(wave.id),
-    queryFn: async () =>
-      await commonApiFetch<ApiWaveCurationGroup[]>({
-        endpoint: `waves/${wave.id}/curation-groups`,
-      }),
+  } = useWaveCurationGroups({
+    waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
 
@@ -247,7 +244,7 @@ export default function WaveCurationGroupsSection({
 
   const refreshCurationGroups = useCallback(async () => {
     await queryClient.invalidateQueries({
-      queryKey: curationGroupsQueryKey(wave.id),
+      queryKey: getWaveCurationGroupsQueryKey(wave.id),
     });
     onWaveCreated();
   }, [queryClient, wave.id, onWaveCreated]);

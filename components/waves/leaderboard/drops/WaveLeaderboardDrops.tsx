@@ -16,12 +16,14 @@ interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly onCreateDrop: () => void;
+  readonly curatedByGroupId?: string | undefined;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
   sort,
   onCreateDrop,
+  curatedByGroupId,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -30,6 +32,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort,
+      curatedByGroupId,
     });
 
   const intersectionElementRef = useIntersectionObserver(async () => {

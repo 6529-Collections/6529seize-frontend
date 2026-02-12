@@ -93,3 +93,37 @@ it("renders three view toggles and sort for non-meme waves", async () => {
   await user.click(screen.getByRole("button", { name: "Content only" }));
   expect(onViewModeChange).toHaveBeenCalledWith("grid_content_only");
 });
+
+it("renders curation selector and handles curation filter changes", async () => {
+  const user = userEvent.setup();
+  const onCurationGroupChange = jest.fn();
+
+  render(
+    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        curationGroups={[
+          {
+            id: "cg-1",
+            name: "Curators One",
+            wave_id: "w",
+            group_id: "g-1",
+            created_at: 1,
+            updated_at: 1,
+          },
+        ]}
+        curatedByGroupId={null}
+        onCurationGroupChange={onCurationGroupChange}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("curation-group-select")).toBeInTheDocument();
+  await user.selectOptions(screen.getByTestId("curation-group-select"), "cg-1");
+  expect(onCurationGroupChange).toHaveBeenCalledWith("cg-1");
+});

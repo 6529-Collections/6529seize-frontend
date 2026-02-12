@@ -14,6 +14,7 @@ interface WaveLeaderboardGridProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly mode: WaveLeaderboardGridMode;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly curatedByGroupId?: string | undefined;
 }
 
 export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
@@ -21,11 +22,13 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   sort,
   mode,
   onDropClick,
+  curatedByGroupId,
 }) => {
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort,
+      curatedByGroupId,
     });
 
   if (isFetching && drops.length === 0) {
