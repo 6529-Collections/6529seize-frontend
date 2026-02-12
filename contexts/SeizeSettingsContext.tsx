@@ -19,6 +19,7 @@ import {
 type SeizeSettingsContextType = {
   seizeSettings: ApiSeizeSettings;
   isMemesWave: (waveId: string | undefined | null) => boolean;
+  isCurationWave: (waveId: string | undefined | null) => boolean;
   isMemesSubmission: (drop: ApiDrop | undefined | null) => boolean;
   // True once at least one fetch succeeds; stays true during background refreshes
   // unless callers opt into reset=true before reloading.
@@ -42,6 +43,7 @@ export const SeizeSettingsProvider = ({
     rememes_submission_tdh_threshold: 0,
     all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
+    curation_wave_id: null,
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
@@ -65,6 +67,8 @@ export const SeizeSettingsProvider = ({
           ...settings,
           memes_wave_id:
             publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
+          curation_wave_id:
+            publicEnv.DEV_MODE_CURATION_WAVE_ID ?? settings.curation_wave_id,
         });
         setLoadError(null);
         setIsLoaded(true);
@@ -92,7 +96,7 @@ export const SeizeSettingsProvider = ({
     };
   }, [loadSeizeSettings]);
 
-  const { memes_wave_id } = seizeSettings;
+  const { memes_wave_id, curation_wave_id } = seizeSettings;
 
   const isMemesWave = useCallback(
     (waveId: string | undefined | null): boolean => {
@@ -100,6 +104,14 @@ export const SeizeSettingsProvider = ({
       return memes_wave_id === waveId;
     },
     [memes_wave_id]
+  );
+
+  const isCurationWave = useCallback(
+    (waveId: string | undefined | null): boolean => {
+      if (!waveId) return false;
+      return curation_wave_id === waveId;
+    },
+    [curation_wave_id]
   );
 
   const isMemesSubmission = useCallback(
@@ -118,6 +130,7 @@ export const SeizeSettingsProvider = ({
     () => ({
       seizeSettings,
       isMemesWave,
+      isCurationWave,
       isMemesSubmission,
       isLoaded,
       loadError,
@@ -126,6 +139,7 @@ export const SeizeSettingsProvider = ({
     [
       seizeSettings,
       isMemesWave,
+      isCurationWave,
       isMemesSubmission,
       isLoaded,
       loadError,

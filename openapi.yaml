@@ -8743,6 +8743,7 @@ components:
         - rememes_submission_tdh_threshold
         - all_drops_notifications_subscribers_limit
         - memes_wave_id
+        - curation_wave_id
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -8751,6 +8752,9 @@ components:
           type: integer
           format: int64
         memes_wave_id:
+          type: string
+          nullable: true
+        curation_wave_id:
           type: string
           nullable: true
     ApiStartMultipartMediaUploadResponse:

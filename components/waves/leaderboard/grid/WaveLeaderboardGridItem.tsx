@@ -109,7 +109,7 @@ export const WaveLeaderboardGridItem: React.FC<
     }
 
     if (isMarketplaceImageOnlyCard) {
-      return "tw-cursor-pointer tw-rounded-xl tw-p-0 tw-transition";
+      return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
     }
 
     return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";

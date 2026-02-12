@@ -154,13 +154,11 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 </React.Fragment>
               ))}
             </div>
-            {isMemesWave && (
-              <WaveleaderboardSort
-                sort={sort}
-                onSortChange={onSortChange}
-                waveId={wave.id}
-              />
-            )}
+            <WaveleaderboardSort
+              sort={sort}
+              onSortChange={onSortChange}
+              waveId={wave.id}
+            />
           </div>
         </div>
         {connectedProfile && participation.isEligible && (

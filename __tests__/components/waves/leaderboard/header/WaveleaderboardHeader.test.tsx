@@ -65,13 +65,14 @@ it("renders meme controls and handles actions", async () => {
   expect(onCreate).toHaveBeenCalled();
 });
 
-it("renders three view toggles for non-meme waves", async () => {
+it("renders three view toggles and sort for non-meme waves", async () => {
   useWave.mockReturnValue({
     isMemesWave: false,
     participation: { isEligible: true },
   });
   const user = userEvent.setup();
   const onViewModeChange = jest.fn();
+  const onSortChange = jest.fn();
 
   render(
     <AuthContext.Provider value={{ connectedProfile: {} } as any}>
@@ -81,12 +82,14 @@ it("renders three view toggles for non-meme waves", async () => {
         viewMode="grid_content_only"
         onViewModeChange={onViewModeChange}
         sort={WaveDropsLeaderboardSort.RANK}
-        onSortChange={jest.fn()}
+        onSortChange={onSortChange}
       />
     </AuthContext.Provider>
   );
 
-  expect(screen.queryByTestId("sort")).not.toBeInTheDocument();
+  expect(screen.getByTestId("sort")).toBeInTheDocument();
+  await user.click(screen.getByTestId("sort"));
+  expect(onSortChange).toHaveBeenCalledWith("SORT");
   await user.click(screen.getByRole("button", { name: "Content only" }));
   expect(onViewModeChange).toHaveBeenCalledWith("grid_content_only");
 });

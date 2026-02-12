@@ -12,13 +12,16 @@ test("provides settings and helper", async () => {
     rememes_submission_tdh_threshold: 1,
     all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: "orig",
+    curation_wave_id: "orig-curation",
   });
 
   function Consumer() {
-    const { seizeSettings, isMemesWave } = useSeizeSettings();
+    const { seizeSettings, isMemesWave, isCurationWave } = useSeizeSettings();
     return (
       <div>{`${seizeSettings.memes_wave_id}-${isMemesWave(
         "test-memes-wave-id"
+      )}-${seizeSettings.curation_wave_id}-${isCurationWave(
+        "test-curation-wave-id"
       )}`}</div>
     );
   }
@@ -30,7 +33,9 @@ test("provides settings and helper", async () => {
   );
 
   await waitFor(() =>
-    expect(screen.getByText("test-memes-wave-id-true")).toBeInTheDocument()
+    expect(
+      screen.getByText("test-memes-wave-id-true-test-curation-wave-id-true")
+    ).toBeInTheDocument()
   );
   expect(fetchUrl).toHaveBeenCalledWith(
     "https://api.test.6529.io/api/settings"
