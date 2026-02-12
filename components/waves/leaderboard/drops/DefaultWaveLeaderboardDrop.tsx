@@ -5,6 +5,7 @@ import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -97,6 +98,12 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           </div>
           <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-[3.25rem]">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+              <DropCurationButton
+                dropId={drop.id}
+                waveId={drop.wave.id}
+                isCuratable={drop.context_profile_context?.curatable ?? false}
+                isCurated={drop.context_profile_context?.curated ?? false}
+              />
               <WaveLeaderboardDropRaters drop={drop} />
               <WaveLeaderboardDropFooter drop={drop} />
             </div>

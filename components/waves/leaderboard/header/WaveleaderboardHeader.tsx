@@ -38,6 +38,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { isMemesWave, participation } = useWave(wave);
+  const showCurationGroupSelect = Boolean(
+    onCurationGroupChange && curationGroups.length > 0
+  );
   const viewModes: LeaderboardViewMode[] = isMemesWave
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];
@@ -170,13 +173,6 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               waveId={wave.id}
               curatedByGroupId={curatedByGroupId ?? undefined}
             />
-            {onCurationGroupChange && (
-              <WaveLeaderboardCurationGroupSelect
-                groups={curationGroups}
-                selectedGroupId={curatedByGroupId}
-                onChange={onCurationGroupChange}
-              />
-            )}
           </div>
         </div>
         {connectedProfile && participation.isEligible && (
@@ -209,6 +205,15 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           </div>
         )}
       </div>
+      {showCurationGroupSelect && onCurationGroupChange && (
+        <div className="tw-mb-2">
+          <WaveLeaderboardCurationGroupSelect
+            groups={curationGroups}
+            selectedGroupId={curatedByGroupId}
+            onChange={onCurationGroupChange}
+          />
+        </div>
+      )}
     </div>
   );
 };

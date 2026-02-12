@@ -15,6 +15,20 @@ jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => ({
   ),
 }));
 
+jest.mock(
+  "@/components/waves/leaderboard/header/WaveLeaderboardCurationGroupSelect",
+  () => ({
+    WaveLeaderboardCurationGroupSelect: (props: any) => (
+      <button
+        data-testid="curation-group-select"
+        onClick={() => props.onChange("cg-1")}
+      >
+        Curation
+      </button>
+    ),
+  })
+);
+
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
 }));
@@ -124,6 +138,34 @@ it("renders curation selector and handles curation filter changes", async () => 
   );
 
   expect(screen.getByTestId("curation-group-select")).toBeInTheDocument();
-  await user.selectOptions(screen.getByTestId("curation-group-select"), "cg-1");
+  await user.click(screen.getByTestId("curation-group-select"));
   expect(onCurationGroupChange).toHaveBeenCalledWith("cg-1");
+});
+
+it("does not render curation selector when curation controls are unavailable", () => {
+  render(
+    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        curationGroups={[
+          {
+            id: "cg-1",
+            name: "Curators One",
+            wave_id: "w",
+            group_id: "g-1",
+            created_at: 1,
+            updated_at: 1,
+          },
+        ]}
+        curatedByGroupId={null}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.queryByTestId("curation-group-select")).not.toBeInTheDocument();
 });

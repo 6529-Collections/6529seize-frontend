@@ -27,6 +27,10 @@ jest.mock(
   () => () => <div data-testid="votes" />
 );
 
+jest.mock("@/components/waves/drops/DropCurationButton", () => () => (
+  <div data-testid="curate" />
+));
+
 jest.mock("@/hooks/isMobileScreen", () => () => false);
 
 jest.mock("@/utils/monitoring/dropOpenTiming", () => ({
@@ -45,6 +49,7 @@ describe("WaveLeaderboardGridItem", () => {
       },
     ],
     wave: { id: "w1" },
+    context_profile_context: { curatable: true, curated: false },
     mentioned_users: [],
     mentioned_waves: [],
     referenced_nfts: [],
@@ -68,6 +73,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
+    expect(screen.getByTestId("curate")).toBeInTheDocument();
     expect(markdownProps.marketplaceImageOnly).toBe(false);
     expect(
       screen.getByTestId("wave-leaderboard-grid-item-footer-d1")
@@ -80,7 +86,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-p-3");
     expect(card).toHaveClass("tw-border");
     expect(card).toHaveClass("tw-bg-iron-950");
-    expect(viewport).toHaveClass("tw-h-[19rem]");
+    expect(viewport).toHaveClass("tw-h-[15rem]");
     expect(viewport).toHaveClass("tw-p-3");
     expect(viewport).toHaveClass("tw-rounded-lg");
     expect(viewport).toHaveClass("tw-bg-iron-900/50");
@@ -98,6 +104,7 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.queryByTestId("rank")).not.toBeInTheDocument();
     expect(screen.queryByTestId("votes")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("curate")).not.toBeInTheDocument();
     expect(markdownProps.marketplaceImageOnly).toBe(true);
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
@@ -123,7 +130,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(content).not.toHaveClass("tw-space-y-3");
   });
 
-  it("removes outer card border for marketplace-only image mode", () => {
+  it("keeps marketplace-only card border while removing inner padding", () => {
     const marketplaceOnlyDrop = {
       ...baseDrop,
       parts: [
@@ -146,7 +153,7 @@ describe("WaveLeaderboardGridItem", () => {
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     expect(card).toHaveClass("tw-p-0");
     expect(card).not.toHaveClass("tw-p-2");
-    expect(card).not.toHaveClass("tw-border");
+    expect(card).toHaveClass("tw-border");
     expect(markdownProps.marketplaceImageOnly).toBe(true);
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   });

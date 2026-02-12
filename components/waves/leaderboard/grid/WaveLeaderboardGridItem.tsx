@@ -4,6 +4,7 @@ import MediaDisplay from "@/components/drops/view/item/content/media/MediaDispla
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -327,6 +328,12 @@ export const WaveLeaderboardGridItem: React.FC<
             </div>
           </div>
           <div className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
+            <DropCurationButton
+              dropId={drop.id}
+              waveId={drop.wave.id}
+              isCuratable={drop.context_profile_context?.curatable ?? false}
+              isCurated={drop.context_profile_context?.curated ?? false}
+            />
             {hasUserVoted && (
               <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
                 {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
