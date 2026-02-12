@@ -43,7 +43,12 @@ export function useDropModal() {
     router.replace(newUrl, { scroll: false });
   }, [dropId, beginClosingDrop, searchParams, pathname, router]);
 
-  const isDropOpen = !!effectiveDropId && !!drop;
+  const isDropMatch = Boolean(
+    effectiveDropId &&
+      drop?.id.toLowerCase() === effectiveDropId.toLowerCase()
+  );
+  const activeDrop = isDropMatch ? drop : undefined;
+  const isDropOpen = isDropMatch;
 
   // Handle escape key for drop modal
   useEffect(() => {
@@ -60,6 +65,7 @@ export function useDropModal() {
   }, [isDropOpen, onDropClose]);
 
   return {
+    activeDrop,
     drop,
     dropId,
     isDropOpen,

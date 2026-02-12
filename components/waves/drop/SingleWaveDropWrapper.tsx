@@ -66,7 +66,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   }, [drop.id, wave.id]);
 
   return (
-    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-iron-950 lg:tw-flex-row">
+    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 lg:tw-flex-row">
       <div className="@container tw-relative tw-h-full tw-flex-1 tw-overflow-hidden">
         <header className="tw-absolute tw-left-0 tw-right-3 tw-top-0 tw-z-20 tw-bg-iron-950/55 tw-bg-gradient-to-b tw-from-iron-950/75 tw-via-iron-950/55 tw-to-iron-950/10 tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] tw-backdrop-blur-sm @[640px]:tw-px-8 lg:tw-px-8">
           <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
@@ -101,7 +101,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
           </div>
         </header>
 
-        <div className="tw-[scrollbar-gutter:stable] tw-h-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+        <div className="tw-[scrollbar-gutter:stable] tw-h-full tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div
             className="tw-h-[calc(env(safe-area-inset-top,0px)+4rem)] tw-shrink-0"
             aria-hidden="true"
@@ -131,7 +131,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
 
       <CompactModeProvider compact={true}>
         <Transition.Root show={isChatOpen} as={Fragment}>
-          <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-overflow-hidden lg:tw-hidden">
+          <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[90] tw-h-[100dvh] tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none lg:tw-hidden">
             <Transition.Child
               as={Fragment}
               enter="tw-duration-150 tw-ease-out"
@@ -155,8 +155,8 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
               leaveFrom="tw-translate-x-0"
               leaveTo="tw-translate-x-full"
             >
-              <div className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
-                <div className="tw-flex tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
+              <div className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
+                <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
                   <button
                     onClick={toggleChat}
                     className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-white/70 tw-transition-colors desktop-hover:hover:tw-text-white"
@@ -166,7 +166,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
                   </button>
                 </div>
 
-                <div className="@container tw-flex tw-flex-1 tw-flex-col tw-overflow-hidden">
+                <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">
                   <SingleWaveDropChat key={drop.id} wave={wave} drop={drop} />
                 </div>
               </div>

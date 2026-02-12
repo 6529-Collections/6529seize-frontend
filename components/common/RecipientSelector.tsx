@@ -41,21 +41,27 @@ function RecipientSelectedDisplay({
   profile,
   isIdentityLoading,
   onClear,
+  allowProfileChange,
+  showSelectedProfileCard,
   walletsListRef,
   walletsHasOverflow,
   walletsAtEnd,
   selectedWallet,
   onWalletSelect,
+  disableSingleWalletSelection,
 }: {
   readonly selectedProfile: CommunityMemberMinimal;
   readonly profile: ApiIdentity | null;
   readonly isIdentityLoading: boolean;
   readonly onClear: () => void;
+  readonly allowProfileChange: boolean;
+  readonly showSelectedProfileCard: boolean;
   readonly walletsListRef: React.RefObject<HTMLDivElement | null>;
   readonly walletsHasOverflow: boolean;
   readonly walletsAtEnd: boolean;
   readonly selectedWallet: string | null;
   readonly onWalletSelect: (wallet: string) => void;
+  readonly disableSingleWalletSelection: boolean;
 }) {
   const getWallets = () => {
     if (profile?.wallets && profile.wallets.length > 0) {
@@ -89,23 +95,42 @@ function RecipientSelectedDisplay({
       </div>
     );
   } else {
+    const hasSingleWallet = wallets.length === 1;
+    const isWalletSelectionDisabled =
+      disableSingleWalletSelection && hasSingleWallet;
+
     walletsContent = wallets.map(
       (w: { wallet: string; display: string | null; tdh: number }) => {
         const isSel = selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
         const hasDisplay =
           w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
+        const classes = [
+          "tw-flex tw-min-h-[58px] tw-w-full tw-flex-col tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2",
+          hasDisplay
+            ? "tw-items-start tw-justify-between"
+            : "tw-items-start tw-justify-center",
+          isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
+        ].join(" ");
+
+        if (isWalletSelectionDisabled) {
+          return (
+            <div key={w.wallet} className={classes}>
+              <div className="tw-text-sm tw-font-medium">
+                {w.display || w.wallet}
+              </div>
+              {hasDisplay && (
+                <div className="tw-text-[11px] tw-opacity-60">{w.wallet}</div>
+              )}
+            </div>
+          );
+        }
+
         return (
           <button
             key={w.wallet}
             type="button"
             onClick={() => onWalletSelect(w.wallet)}
-            className={[
-              "tw-flex tw-min-h-[58px] tw-w-full tw-flex-col tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 hover:tw-bg-white/15",
-              hasDisplay
-                ? "tw-items-start tw-justify-between"
-                : "tw-items-start tw-justify-center",
-              isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
-            ].join(" ")}
+            className={[classes, "hover:tw-bg-white/15"].join(" ")}
           >
             <div className="tw-text-sm tw-font-medium">
               {w.display || w.wallet}
@@ -121,38 +146,44 @@ function RecipientSelectedDisplay({
 
   return (
     <>
-      <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-          <TransferModalPfp
-            src={selectedProfile.pfp}
-            alt={
-              selectedProfile.display ||
-              selectedProfile.handle ||
-              selectedProfile.wallet
-            }
-            level={selectedProfile.level}
-          />
-          <div className="tw-min-w-0">
-            <div className="tw-truncate tw-text-sm tw-font-medium">
-              {selectedProfile.handle || selectedProfile.display}
-            </div>
-            <div className="tw-truncate tw-text-[11px] tw-opacity-60">
-              TDH: {selectedProfile.tdh.toLocaleString()} - Level:{" "}
-              {selectedProfile.level}
+      {showSelectedProfileCard && (
+        <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+            <TransferModalPfp
+              src={selectedProfile.pfp}
+              alt={
+                selectedProfile.display ||
+                selectedProfile.handle ||
+                selectedProfile.wallet
+              }
+              level={selectedProfile.level}
+            />
+            <div className="tw-min-w-0">
+              <div className="tw-truncate tw-text-sm tw-font-medium">
+                {selectedProfile.handle || selectedProfile.display}
+              </div>
+              <div className="tw-truncate tw-text-[11px] tw-opacity-60">
+                TDH: {selectedProfile.tdh.toLocaleString()} - Level:{" "}
+                {selectedProfile.level}
+              </div>
             </div>
           </div>
+          {allowProfileChange && (
+            <button
+              type="button"
+              className="tw-rounded-md tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-2 tw-py-1 !tw-text-xs tw-font-medium hover:tw-bg-white/15"
+              onClick={onClear}
+            >
+              Change
+            </button>
+          )}
         </div>
-        <button
-          type="button"
-          className="tw-rounded-md tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-2 tw-py-1 !tw-text-xs tw-font-medium hover:tw-bg-white/15"
-          onClick={onClear}
-        >
-          Change
-        </button>
-      </div>
+      )}
 
-      <div className="tw-flex tw-min-h-0 tw-flex-col tw-space-y-2 tw-pt-4">
-        {wallets.length > 1 && (
+      <div
+        className={`tw-flex tw-min-h-0 tw-flex-col tw-space-y-2 ${showSelectedProfileCard ? "tw-pt-4" : "tw-pt-0"}`}
+      >
+        {(showSelectedProfileCard ? wallets.length > 1 : wallets.length > 0) && (
           <div className="tw-text-sm">Choose destination wallet</div>
         )}
         <div
@@ -253,6 +284,9 @@ interface RecipientSelectorProps {
   readonly placeholder?: string;
   readonly showLabel?: boolean;
   readonly label?: string;
+  readonly allowProfileChange?: boolean;
+  readonly disableSingleWalletSelection?: boolean;
+  readonly showSelectedProfileCard?: boolean;
 }
 
 export default function RecipientSelector({
@@ -264,6 +298,9 @@ export default function RecipientSelector({
   placeholder,
   showLabel = true,
   label = "Recipient",
+  allowProfileChange = true,
+  disableSingleWalletSelection = false,
+  showSelectedProfileCard = true,
 }: RecipientSelectorProps) {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -525,11 +562,14 @@ export default function RecipientSelector({
           profile={profile}
           isIdentityLoading={isIdentityLoading}
           onClear={handleClear}
+          allowProfileChange={allowProfileChange}
+          showSelectedProfileCard={showSelectedProfileCard}
           walletsListRef={walletsListRef}
           walletsHasOverflow={walletsHasOverflow}
           walletsAtEnd={walletsAtEnd}
           selectedWallet={selectedWallet}
           onWalletSelect={onWalletSelect}
+          disableSingleWalletSelection={disableSingleWalletSelection}
         />
       ) : (
         <RecipientSearchDisplay

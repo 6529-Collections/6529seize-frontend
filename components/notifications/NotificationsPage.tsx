@@ -15,7 +15,7 @@ import ConnectWallet from "@/components/common/ConnectWallet";
 export default function NotificationsPage() {
   const { isAuthenticated } = useSeizeConnectContext();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-  const { drop, isDropOpen, onDropClose } = useDropModal();
+  const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
   const { spaces } = useLayout();
 
@@ -30,7 +30,7 @@ export default function NotificationsPage() {
   return (
     <div className="tw-h-full tw-bg-black tailwind-scope tw-relative tw-overflow-hidden">
       {isDropOpen &&
-        drop &&
+        modalDrop &&
         (isApp ? (
           <div
             className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40"
@@ -39,9 +39,9 @@ export default function NotificationsPage() {
             <BrainDesktopDrop
               drop={{
                 type: DropSize.FULL,
-                ...drop,
-                stableKey: drop.id,
-                stableHash: drop.id,
+                ...modalDrop,
+                stableKey: modalDrop.id,
+                stableHash: modalDrop.id,
               }}
               onClose={onDropClose}
             />
@@ -51,9 +51,9 @@ export default function NotificationsPage() {
             <BrainDesktopDrop
               drop={{
                 type: DropSize.FULL,
-                ...drop,
-                stableKey: drop.id,
-                stableHash: drop.id,
+                ...modalDrop,
+                stableKey: modalDrop.id,
+                stableHash: modalDrop.id,
               }}
               onClose={onDropClose}
             />

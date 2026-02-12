@@ -20,6 +20,11 @@ jest.mock('@/components/user/utils/UserCICAndLevel', () => ({
   UserCICAndLevelSize: { XLARGE: 'XLARGE' },
 }));
 
+jest.mock('@/components/nft-transfer/TransferModalPfp', () => ({
+  __esModule: true,
+  default: () => <div data-testid="transfer-pfp" />,
+}));
+
 let mockOnProfileSelect: ((profile: any) => void) | null = null;
 let mockOnWalletSelect: ((wallet: string | null) => void) | null = null;
 
@@ -83,6 +88,42 @@ describe('ManifoldMintingConnect', () => {
   it('calls onMintFor with account address on mount', () => {
     const { onMintFor, seizeCtx } = renderConnected();
     expect(onMintFor).toHaveBeenCalledWith(seizeCtx.address);
+  });
+
+  it('lets mint for me switch wallet inside connected profile', async () => {
+    const { onMintFor } = renderConnected();
+    const alternateWallet = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+
+    if (mockOnWalletSelect) {
+      mockOnWalletSelect(alternateWallet);
+    }
+
+    await waitFor(() =>
+      expect(onMintFor).toHaveBeenLastCalledWith(alternateWallet)
+    );
+  });
+
+  it('reselects connected wallet when switching back to mint for me', async () => {
+    const { onMintFor, seizeCtx } = renderConnected();
+    const alternateWallet = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+    const frenWallet = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+    if (mockOnWalletSelect) {
+      mockOnWalletSelect(alternateWallet);
+    }
+    await waitFor(() =>
+      expect(onMintFor).toHaveBeenLastCalledWith(alternateWallet)
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /Mint for fren/i }));
+    if (mockOnProfileSelect && mockOnWalletSelect) {
+      mockOnProfileSelect({ handle: 'fren', wallet: frenWallet });
+      mockOnWalletSelect(frenWallet);
+    }
+    await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenWallet));
+
+    await userEvent.click(screen.getByRole('button', { name: /Mint for me/i }));
+    await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(seizeCtx.address));
   });
 
   it('shows RecipientSelector when mint for fren is clicked', async () => {
