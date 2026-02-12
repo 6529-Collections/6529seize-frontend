@@ -16,8 +16,12 @@ import {
   useState,
 } from "react";
 
+type TempApiSeizeSettings = ApiSeizeSettings & {
+  curation_wave_id: string | null;
+};
+
 type SeizeSettingsContextType = {
-  seizeSettings: ApiSeizeSettings;
+  seizeSettings: TempApiSeizeSettings;
   isMemesWave: (waveId: string | undefined | null) => boolean;
   isCurationWave: (waveId: string | undefined | null) => boolean;
   isMemesSubmission: (drop: ApiDrop | undefined | null) => boolean;
@@ -39,7 +43,7 @@ export const SeizeSettingsProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [seizeSettings, setSeizeSettings] = useState<ApiSeizeSettings>({
+  const [seizeSettings, setSeizeSettings] = useState<TempApiSeizeSettings>({
     rememes_submission_tdh_threshold: 0,
     all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
@@ -57,7 +61,7 @@ export const SeizeSettingsProvider = ({
       }
 
       try {
-        const settings = await fetchUrl<ApiSeizeSettings>(
+        const settings = await fetchUrl<TempApiSeizeSettings>(
           `${publicEnv.API_ENDPOINT}/api/settings`
         );
 

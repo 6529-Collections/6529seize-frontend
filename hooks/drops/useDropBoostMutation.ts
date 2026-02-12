@@ -64,6 +64,8 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
               reaction: null,
               boosted: false,
               bookmarked: false,
+              curatable: false,
+              curated: false,
             };
 
           draft.context_profile_context = {

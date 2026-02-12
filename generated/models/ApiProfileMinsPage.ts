@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
-export class ApiSeizeSettings {
-    'rememes_submission_tdh_threshold': number;
-    'all_drops_notifications_subscribers_limit': number;
-    'memes_wave_id': string | null;
+export class ApiProfileMinsPage {
+    'data': Array<ApiProfileMin>;
+    'count': number;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +26,32 @@ export class ApiSeizeSettings {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "rememes_submission_tdh_threshold",
-            "baseName": "rememes_submission_tdh_threshold",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiProfileMin>",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "all_drops_notifications_subscribers_limit",
-            "baseName": "all_drops_notifications_subscribers_limit",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "memes_wave_id",
-            "baseName": "memes_wave_id",
-            "type": "string",
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSeizeSettings.attributeTypeMap;
+        return ApiProfileMinsPage.attributeTypeMap;
     }
 
     public constructor() {

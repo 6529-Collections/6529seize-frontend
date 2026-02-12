@@ -13,10 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiSeizeSettings {
-    'rememes_submission_tdh_threshold': number;
-    'all_drops_notifications_subscribers_limit': number;
-    'memes_wave_id': string | null;
+export class ApiWaveCurationGroupRequest {
+    'name': string;
+    'group_id': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +23,20 @@ export class ApiSeizeSettings {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "rememes_submission_tdh_threshold",
-            "baseName": "rememes_submission_tdh_threshold",
-            "type": "number",
-            "format": "int64"
+            "name": "name",
+            "baseName": "name",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "all_drops_notifications_subscribers_limit",
-            "baseName": "all_drops_notifications_subscribers_limit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "memes_wave_id",
-            "baseName": "memes_wave_id",
+            "name": "group_id",
+            "baseName": "group_id",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSeizeSettings.attributeTypeMap;
+        return ApiWaveCurationGroupRequest.attributeTypeMap;
     }
 
     public constructor() {

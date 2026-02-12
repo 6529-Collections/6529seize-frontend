@@ -20,6 +20,8 @@ export class ApiDropContextProfileContext {
     'reaction': string | null;
     'boosted': boolean;
     'bookmarked': boolean;
+    'curatable': boolean;
+    'curated': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -59,6 +61,18 @@ export class ApiDropContextProfileContext {
         {
             "name": "bookmarked",
             "baseName": "bookmarked",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "curatable",
+            "baseName": "curatable",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "curated",
+            "baseName": "curated",
             "type": "boolean",
             "format": ""
         }    ];
