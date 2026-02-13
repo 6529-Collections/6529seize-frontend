@@ -150,7 +150,7 @@ const hasTokenIdPlaceholder = (tokenUri: string): boolean =>
   /\{id\}/i.test(tokenUri) || /%7Bid%7D/i.test(tokenUri);
 
 const replaceTokenIdPlaceholders = (tokenUri: string, value: string): string =>
-  tokenUri.replace(/\{id\}/gi, value).replace(/%7Bid%7D/gi, value);
+  tokenUri.replaceAll(/\{id\}/gi, value).replaceAll(/%7Bid%7D/gi, value);
 
 const logFallback = (
   requestId: string,
@@ -167,7 +167,7 @@ const logFallback = (
     {
       requestUrl: requestUrl.toString(),
       reason,
-      ...(details ?? {}),
+      ...details,
     }
   );
 };
@@ -679,7 +679,7 @@ async function fetchTransientNftMetadata(
     kind: "fallback",
     reason: "no_image_candidate",
     network,
-    requestedTokenId: tokenIdCandidates[tokenIdCandidates.length - 1],
+    requestedTokenId: tokenIdCandidates.at(-1),
     errorMessage:
       lastTopLevelKeys.length > 0
         ? `metadata_not_found_in_payload:${lastTopLevelKeys.join(",")}`
