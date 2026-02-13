@@ -9,8 +9,9 @@ import { useWave } from "@/hooks/useWave";
 import { WaveleaderboardSort } from "./WaveleaderboardSort";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import type { LeaderboardViewMode } from "../types";
-import { Tooltip } from "react-tooltip";
+import { PlusIcon } from "@heroicons/react/24/solid";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
+
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
   readonly onCreateDrop: () => void;
@@ -45,7 +46,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];
 
-  const getTooltipLabel = (mode: LeaderboardViewMode) => {
+  const getViewModeLabel = (mode: LeaderboardViewMode) => {
     if (mode === "list") {
       return "List view";
     }
@@ -55,18 +56,18 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     return "Content only";
   };
 
-  const getViewModeButtonClass = (
+  const getViewModeTabClass = (
     mode: LeaderboardViewMode,
     activeMode: LeaderboardViewMode
   ): string => {
     const baseClassName =
-      "tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-transition-colors";
+      "tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-transparent tw-transition-colors";
 
     if (activeMode === mode) {
       return `${baseClassName} tw-border-primary-500/50 tw-bg-primary-600/20 tw-text-primary-400`;
     }
 
-    return `${baseClassName} tw-border-white/10 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-bg-white/10`;
+    return `${baseClassName} tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-300`;
   };
 
   const getViewModeIcon = (mode: LeaderboardViewMode): React.ReactNode => {
@@ -131,40 +132,28 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
-      <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto">
+      <div className="tw-flex tw-items-center tw-gap-2">
         <div className="tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <div className="tw-flex tw-items-center tw-gap-2">
+            <div
+              role="tablist"
+              aria-label="Leaderboard view modes"
+              className="tw-flex tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
+            >
               {viewModes.map((mode) => (
-                <React.Fragment key={mode}>
-                  <button
-                    aria-label={getTooltipLabel(mode)}
-                    className={getViewModeButtonClass(mode, viewMode)}
-                    onClick={() => onViewModeChange(mode)}
-                    data-tooltip-id={`${mode}-view-${wave.id}`}
-                  >
-                    {getViewModeIcon(mode)}
-                  </button>
-                  <Tooltip
-                    id={`${mode}-view-${wave.id}`}
-                    place="top"
-                    offset={8}
-                    opacity={1}
-                    style={{
-                      padding: "4px 8px",
-                      background: "#37373E",
-                      color: "white",
-                      fontSize: "13px",
-                      fontWeight: 500,
-                      borderRadius: "6px",
-                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                      zIndex: 99999,
-                      pointerEvents: "none",
-                    }}
-                  >
-                    {getTooltipLabel(mode)}
-                  </Tooltip>
-                </React.Fragment>
+                <button
+                  key={mode}
+                  type="button"
+                  role="tab"
+                  aria-label={getViewModeLabel(mode)}
+                  aria-selected={viewMode === mode}
+                  tabIndex={viewMode === mode ? 0 : -1}
+                  className={getViewModeTabClass(mode, viewMode)}
+                  onClick={() => onViewModeChange(mode)}
+                >
+                  {getViewModeIcon(mode)}
+                  <span className="tw-sr-only">{getViewModeLabel(mode)}</span>
+                </button>
               ))}
             </div>
             <WaveleaderboardSort
@@ -175,45 +164,29 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             />
           </div>
         </div>
-        {connectedProfile && participation.isEligible && (
-          <div
-            className={`tw-w-auto ${
-              isMemesWave ? "tw-ml-auto lg:tw-hidden" : "tw-ml-auto"
-            }`}
-          >
-            <PrimaryButton
-              loading={false}
-              disabled={false}
-              onClicked={onCreateDrop}
-              padding="tw-px-3 tw-py-2"
-            >
-              <svg
-                className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
+        <div className="tw-ml-auto tw-flex tw-items-center tw-gap-x-2">
+          {showCurationGroupSelect && onCurationGroupChange && (
+            <WaveLeaderboardCurationGroupSelect
+              groups={curationGroups}
+              selectedGroupId={curatedByGroupId}
+              onChange={onCurationGroupChange}
+            />
+          )}
+          {connectedProfile && participation.isEligible && (
+            <div className={`tw-w-auto ${isMemesWave ? "lg:tw-hidden" : ""}`}>
+              <PrimaryButton
+                loading={false}
+                disabled={false}
+                onClicked={onCreateDrop}
+                padding="tw-px-3 tw-py-2"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>Drop</span>
-            </PrimaryButton>
-          </div>
-        )}
-      </div>
-      {showCurationGroupSelect && onCurationGroupChange && (
-        <div className="tw-mb-2">
-          <WaveLeaderboardCurationGroupSelect
-            groups={curationGroups}
-            selectedGroupId={curatedByGroupId}
-            onChange={onCurationGroupChange}
-          />
+                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <span>Drop</span>
+              </PrimaryButton>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

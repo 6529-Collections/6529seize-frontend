@@ -38,9 +38,9 @@ export default function DropCurationButton({
   return (
     <button
       type="button"
-      className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-xs tw-whitespace-nowrap tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out ${
+      className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out ${
         isCurated
-          ? "tw-border-primary-400/30 tw-bg-primary-500/10 tw-text-primary-300 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-border-primary-400/40"
+          ? "tw-text-primary-200 tw-border-primary-400/30 tw-bg-primary-500/10 desktop-hover:hover:tw-bg-primary-500/15"
           : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-200"
       } ${isDisabled ? "tw-cursor-wait tw-opacity-70" : "tw-cursor-pointer"} ${
         className ?? ""
@@ -55,7 +55,7 @@ export default function DropCurationButton({
           aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"
-          className="tw-size-3.5 tw-flex-shrink-0"
+          className="-tw-ml-1 tw-size-3.5 tw-flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

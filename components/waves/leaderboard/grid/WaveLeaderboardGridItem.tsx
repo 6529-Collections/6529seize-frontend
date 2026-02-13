@@ -15,9 +15,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
-import {
-  WAVE_VOTING_LABELS,
-} from "@/helpers/waves/waves.constants";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useDropCurationMutation } from "@/hooks/drops/useDropCurationMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -109,6 +107,8 @@ export const WaveLeaderboardGridItem: React.FC<
   const isCompactMode = mode === "compact";
   const isContentOnlyMode = mode === "content_only";
   const activePart = drop.parts[0];
+  const author = drop.author as typeof drop.author | undefined;
+  const authorHandle = author?.handle ?? null;
   const primaryMedia = activePart?.media[0];
   const isCuratable = drop.context_profile_context?.curatable ?? false;
   const isCurated = drop.context_profile_context?.curated ?? false;
@@ -131,13 +131,13 @@ export const WaveLeaderboardGridItem: React.FC<
     }
 
     if (isMarketplaceImageOnlyCard) {
-      return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
+      return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
     }
 
-    return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";
+    return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";
   })();
   const viewportClassName = isCompactMode
-    ? "tw-relative tw-overflow-hidden tw-bg-iron-950 tw-pr-3"
+    ? "tw-relative tw-overflow-hidden tw-bg-iron-950"
     : "tw-relative tw-overflow-hidden tw-max-h-[20rem]";
   const contentSpacingClass = isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
   const mediaWrapperClass = isCompactMode
@@ -212,14 +212,15 @@ export const WaveLeaderboardGridItem: React.FC<
   const userVote = drop.context_profile_context?.rating ?? 0;
   const isNegativeVote = userVote < 0;
   const isZeroVote = userVote === 0;
-  const voteStyle = isZeroVote
-    ? "tw-text-iron-400"
-    : isNegativeVote
-      ? "tw-text-iron-400"
-      : "tw-text-iron-300";
+  let voteStyle = "tw-text-iron-300";
+  if (isZeroVote || isNegativeVote) {
+    voteStyle = "tw-text-iron-400";
+  }
   const votingCreditType = drop.wave.voting_credit_type;
+  const votingCreditLabels =
+    WAVE_VOTING_LABELS as Partial<Record<typeof votingCreditType, string>>;
   const votingCreditLabel =
-    WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
+    votingCreditLabels[votingCreditType] ?? votingCreditType;
 
   const handleVoteButtonClick = () => {
     setIsVotingModalOpen(true);
@@ -362,30 +363,30 @@ export const WaveLeaderboardGridItem: React.FC<
             )}
             <div className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-              {drop.author?.handle && (
-                <UserProfileTooltipWrapper
-                  user={drop.author.handle ?? drop.author.id}
-                >
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    href={`/${drop.author?.handle}`}
-                    className="tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                {authorHandle && (
+                  <UserProfileTooltipWrapper
+                    user={authorHandle}
                   >
-                    {drop.author?.handle}
-                  </Link>
-                </UserProfileTooltipWrapper>
-              )}
-            </div>
-            {drop.rank !== undefined ? (
-              <WinnerDropBadge
-                rank={drop.rank}
-                decisionTime={drop.winning_context?.decision_time ?? null}
-              />
-            ) : (
-              <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400">
-                -
+                    <Link
+                      onClick={(e) => e.stopPropagation()}
+                      href={`/${authorHandle}`}
+                      className="tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                    >
+                      {authorHandle}
+                    </Link>
+                  </UserProfileTooltipWrapper>
+                )}
               </div>
-            )}
+              {drop.rank !== null ? (
+                <WinnerDropBadge
+                  rank={drop.rank}
+                  decisionTime={drop.winning_context?.decision_time ?? null}
+                />
+              ) : (
+                <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400">
+                  -
+                </div>
+              )}
             </div>
           </div>
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">

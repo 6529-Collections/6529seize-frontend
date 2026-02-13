@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, type MouseEvent } from "react";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import {
@@ -8,6 +9,7 @@ import {
   type LinkPreviewVariant,
 } from "./LinkPreviewContext";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
+import { removeBaseEndpoint } from "@/helpers/Helpers";
 
 interface ManifoldItemPreviewCardProps {
   readonly href: string;
@@ -45,6 +47,80 @@ function getTitleRowClass(variant: LinkPreviewVariant): string {
   return "tw-bg-iron-950 tw-px-3 tw-py-1.5";
 }
 
+function OverlayActionButtons({ href }: { readonly href: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const relative = removeBaseEndpoint(href);
+  const relativeHref =
+    typeof relative === "string" && relative.startsWith("/")
+      ? relative
+      : undefined;
+
+  const stop = (e: MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const copyToClipboard = (e: MouseEvent<HTMLButtonElement>) => {
+    stop(e);
+    void navigator.clipboard
+      .writeText(href)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 500);
+      })
+      .catch(() => {
+        // Ignore clipboard write failures (e.g. missing permissions).
+      });
+  };
+
+  return (
+    <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-flex tw-flex-col tw-gap-2">
+      <button
+        type="button"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-text-white tw-backdrop-blur-md tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-black/60"
+        onClick={copyToClipboard}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <svg
+          className="tw-size-3.5 tw-flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke={copied ? "#34d399" : "currentColor"}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+          />
+        </svg>
+      </button>
+      <Link
+        href={relativeHref ?? href}
+        target={relativeHref ? undefined : "_blank"}
+        className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-text-white tw-no-underline tw-backdrop-blur-md tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-black/60"
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <svg
+          className="tw-size-3.5 tw-flex-shrink-0"
+          viewBox="0 0 64 64"
+          xmlns="http://www.w3.org/2000/svg"
+          strokeWidth="3"
+          stroke="currentColor"
+          fill="none"
+        >
+          <path d="M55.4,32V53.58a1.81,1.81,0,0,1-1.82,1.82H10.42A1.81,1.81,0,0,1,8.6,53.58V10.42A1.81,1.81,0,0,1,10.42,8.6H32" />
+          <polyline points="40.32 8.6 55.4 8.6 55.4 24.18" />
+          <line x1="19.32" y1="45.72" x2="54.61" y2="8.91" />
+        </svg>
+      </Link>
+    </div>
+  );
+}
+
 export default function ManifoldItemPreviewCard({
   href,
   title,
@@ -56,11 +132,7 @@ export default function ManifoldItemPreviewCard({
   const variant = useLinkPreviewVariant();
 
   return (
-    <LinkPreviewCardLayout
-      href={href}
-      variant={variant}
-      hideActions={hideActions}
-    >
+    <LinkPreviewCardLayout href={href} variant={variant} hideActions>
       <div
         className={getContainerClass(variant, imageOnly)}
         data-testid="manifold-item-card"
@@ -73,7 +145,7 @@ export default function ManifoldItemPreviewCard({
           className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-no-underline"
         >
           <div
-            className="tw-relative tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-iron-950 md:tw-min-h-[15rem]"
+            className="tw-relative tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-inherit md:tw-min-h-[15rem]"
             data-testid="manifold-item-media"
           >
             <MediaDisplay
@@ -81,6 +153,7 @@ export default function ManifoldItemPreviewCard({
               media_url={mediaUrl}
               disableMediaInteraction={true}
             />
+            {!hideActions && <OverlayActionButtons href={href} />}
           </div>
           {!imageOnly && (
             <div className={getTitleRowClass(variant)}>

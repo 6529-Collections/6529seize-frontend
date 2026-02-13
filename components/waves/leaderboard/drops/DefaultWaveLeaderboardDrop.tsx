@@ -40,23 +40,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   });
 
   const getBorderClasses = () => {
-    const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
-
-    // Base classes with consistent border styling for ongoing competition items
-    const baseClasses =
-      "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
-
-    // Match the hover effects from the other component
-    if (rank === 1) {
-      return `${baseClasses} desktop-hover:hover:tw-border-[#fbbf24]/40`;
-    } else if (rank === 2) {
-      return `${baseClasses} desktop-hover:hover:tw-border-[#94a3b8]/40`;
-    } else if (rank === 3) {
-      return `${baseClasses} desktop-hover:hover:tw-border-[#CD7F32]/40`;
-    } else {
-      // More subtle hover effect for ranks 4+
-      return `${baseClasses} desktop-hover:hover:tw-border-iron-700`;
-    }
+    return "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700";
   };
 
   return (
@@ -102,7 +86,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               <WaveLeaderboardDropFooter drop={drop} />
             </div>
             <div
-              className="tw-flex tw-items-center tw-gap-1.5 tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
+              className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
               onClick={(e) => e.stopPropagation()}
             >
               <DropCurationButton

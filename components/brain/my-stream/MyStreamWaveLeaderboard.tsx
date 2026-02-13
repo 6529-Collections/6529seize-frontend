@@ -76,7 +76,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const [sort, setSort] = useLocalPreference<WaveDropsLeaderboardSort>(
     sortPreferenceKey,
     WaveDropsLeaderboardSort.RANK,
-    (value) => Object.values(WaveDropsLeaderboardSort).includes(value)
+    (value): value is WaveDropsLeaderboardSort =>
+      value === WaveDropsLeaderboardSort.RANK ||
+      value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
+      value === WaveDropsLeaderboardSort.TREND ||
+      value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
+      value === WaveDropsLeaderboardSort.CREATED_AT
   );
 
   const {
@@ -183,13 +188,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
-      {/* Main content container */}
-      <div className="tw-pt-2 md:tw-pt-4">
-        <WaveLeaderboardTime wave={wave} />
-      </div>
+      <WaveLeaderboardTime wave={wave} />
 
       {/* Sticky tabs/filters section */}
-      <div className="tw-sticky tw-top-0 tw-z-30 tw-bg-black">
+      <div className="tw-sticky tw-top-0 tw-z-30 tw-bg-black tw-py-4">
         <WaveLeaderboardHeader
           wave={wave}
           viewMode={effectiveViewMode}
@@ -210,7 +212,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       </div>
 
       {/* Content section */}
-      <div className="tw-mt-2">
+      <div>
         <AnimatePresence>
           {isCreatingDrop && !isMemesWave && (
             <motion.div

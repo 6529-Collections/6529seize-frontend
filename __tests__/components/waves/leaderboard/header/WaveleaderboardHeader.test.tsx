@@ -69,7 +69,7 @@ it("renders meme controls and handles actions", async () => {
       />
     </AuthContext.Provider>
   );
-  await user.click(screen.getByRole("button", { name: "List view" }));
+  await user.click(screen.getByRole("tab", { name: "List view" }));
   expect(onViewModeChange).toHaveBeenCalledWith("list");
   // sort
   await user.click(screen.getByTestId("sort"));
@@ -104,7 +104,7 @@ it("renders three view toggles and sort for non-meme waves", async () => {
   expect(screen.getByTestId("sort")).toBeInTheDocument();
   await user.click(screen.getByTestId("sort"));
   expect(onSortChange).toHaveBeenCalledWith("SORT");
-  await user.click(screen.getByRole("button", { name: "Content only" }));
+  await user.click(screen.getByRole("tab", { name: "Content only" }));
   expect(onViewModeChange).toHaveBeenCalledWith("grid_content_only");
 });
 
