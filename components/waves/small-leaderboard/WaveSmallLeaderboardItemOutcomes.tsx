@@ -17,7 +17,7 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
   WaveSmallLeaderboardItemOutcomesProps
 > = ({ drop, isMobile: _isMobile = false }) => {
   const [isTouch] = useState(
-    () => typeof window !== "undefined" && "ontouchstart" in window
+    () => typeof globalThis !== "undefined" && "ontouchstart" in globalThis
   );
   const [isOpen, setIsOpen] = useState(false);
 

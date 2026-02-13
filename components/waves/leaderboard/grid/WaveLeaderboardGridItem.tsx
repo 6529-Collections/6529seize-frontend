@@ -108,7 +108,7 @@ export const WaveLeaderboardGridItem: React.FC<
   const isCompactMode = mode === "compact";
   const isContentOnlyMode = mode === "content_only";
   const activePart = drop.parts[0];
-  const author = drop.author as typeof drop.author | undefined;
+  const author = drop.author;
   const authorHandle = author?.handle ?? null;
   const primaryMedia = activePart?.media[0];
   const isCuratable = drop.context_profile_context?.curatable ?? false;
@@ -218,8 +218,9 @@ export const WaveLeaderboardGridItem: React.FC<
     voteStyle = "tw-text-iron-400";
   }
   const votingCreditType = drop.wave.voting_credit_type;
-  const votingCreditLabels =
-    WAVE_VOTING_LABELS as Partial<Record<typeof votingCreditType, string>>;
+  const votingCreditLabels = WAVE_VOTING_LABELS as Partial<
+    Record<typeof votingCreditType, string>
+  >;
   const votingCreditLabel =
     votingCreditLabels[votingCreditType] ?? votingCreditType;
 
@@ -306,15 +307,15 @@ export const WaveLeaderboardGridItem: React.FC<
           )}
           {activePart && (
             <LinkPreviewProvider variant="home">
-            <WaveDropPartContentMarkdown
-              mentionedUsers={drop.mentioned_users}
-              mentionedWaves={drop.mentioned_waves}
-              referencedNfts={drop.referenced_nfts}
-              part={activePart}
-              wave={drop.wave}
-              onQuoteClick={() => {}}
-              marketplaceImageOnly={mode === "content_only"}
-            />
+              <WaveDropPartContentMarkdown
+                mentionedUsers={drop.mentioned_users}
+                mentionedWaves={drop.mentioned_waves}
+                referencedNfts={drop.referenced_nfts}
+                part={activePart}
+                wave={drop.wave}
+                onQuoteClick={() => {}}
+                marketplaceImageOnly={mode === "content_only"}
+              />
             </LinkPreviewProvider>
           )}
         </div>
@@ -367,9 +368,7 @@ export const WaveLeaderboardGridItem: React.FC<
             <div className="tw-flex tw-items-center tw-justify-between">
               <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
                 {authorHandle && (
-                  <UserProfileTooltipWrapper
-                    user={authorHandle}
-                  >
+                  <UserProfileTooltipWrapper user={authorHandle}>
                     <Link
                       onClick={(e) => e.stopPropagation()}
                       href={`/${authorHandle}`}
