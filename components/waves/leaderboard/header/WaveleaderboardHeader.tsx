@@ -142,38 +142,42 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               className="tw-flex tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
             >
               {viewModes.map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  role="tab"
-                  aria-label={getViewModeLabel(mode)}
-                  aria-selected={viewMode === mode}
-                  tabIndex={viewMode === mode ? 0 : -1}
-                  className={getViewModeTabClass(mode, viewMode)}
-                  onClick={() => onViewModeChange(mode)}
-                  data-tooltip-id={`leaderboard-view-mode-${mode}-tooltip`}
-                >
-                  {getViewModeIcon(mode)}
-                  <span className="tw-sr-only">{getViewModeLabel(mode)}</span>
-                </button>
+                <React.Fragment key={mode}>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-label={getViewModeLabel(mode)}
+                    aria-selected={viewMode === mode}
+                    tabIndex={viewMode === mode ? 0 : -1}
+                    className={getViewModeTabClass(mode, viewMode)}
+                    onClick={() => onViewModeChange(mode)}
+                    data-tooltip-id={`leaderboard-view-mode-${mode}-${wave.id}`}
+                  >
+                    {getViewModeIcon(mode)}
+                    <span className="tw-sr-only">{getViewModeLabel(mode)}</span>
+                  </button>
+                  <Tooltip
+                    id={`leaderboard-view-mode-${mode}-${wave.id}`}
+                    place="top"
+                    offset={8}
+                    opacity={1}
+                    style={{
+                      padding: "4px 8px",
+                      background: "#37373E",
+                      color: "white",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      borderRadius: "6px",
+                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                      zIndex: 99999,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {getViewModeLabel(mode)}
+                  </Tooltip>
+                </React.Fragment>
               ))}
             </div>
-            {viewModes.map((mode) => (
-              <Tooltip
-                key={mode}
-                id={`leaderboard-view-mode-${mode}-tooltip`}
-                place="bottom"
-                positionStrategy="fixed"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                  zIndex: 1000,
-                }}
-              >
-                <span className="tw-text-xs">{getViewModeLabel(mode)}</span>
-              </Tooltip>
-            ))}
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
