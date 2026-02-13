@@ -80,7 +80,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               />
             </div>
           </div>
-          <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-14">
+          <div className="tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-14">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
               <WaveLeaderboardDropRaters drop={drop} />
               <WaveLeaderboardDropFooter drop={drop} />
@@ -99,6 +99,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 <VotingModalButton
                   drop={drop}
                   onClick={() => setIsVotingModalOpen(true)}
+                  variant="subtle"
                 />
               )}
             </div>

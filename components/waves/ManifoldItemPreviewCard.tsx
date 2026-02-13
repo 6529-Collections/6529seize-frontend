@@ -33,18 +33,18 @@ function getContainerClass(
   }
 
   if (variant === "home") {
-    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black";
+    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950/50";
   }
 
-  return "tw-w-full tw-overflow-hidden tw-bg-iron-950";
+  return "tw-w-full tw-overflow-hidden tw-bg-inherit";
 }
 
 function getTitleRowClass(variant: LinkPreviewVariant): string {
   if (variant === "home") {
-    return "tw-bg-black/80 tw-px-3 tw-py-2";
+    return "tw-bg-iron-950/50 tw-px-3 tw-py-2";
   }
 
-  return "tw-bg-iron-950 tw-px-3 tw-py-1.5";
+  return "tw-py-1.5";
 }
 
 function OverlayActionButtons({ href }: { readonly href: string }) {
@@ -78,7 +78,7 @@ function OverlayActionButtons({ href }: { readonly href: string }) {
     <div className="tw-absolute tw-right-3 tw-top-3 tw-z-10 tw-flex tw-flex-col tw-gap-2">
       <button
         type="button"
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-text-white tw-backdrop-blur-md tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-black/60"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-text-white tw-backdrop-blur-md tw-transition-colors tw-duration-150"
         onClick={copyToClipboard}
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -100,7 +100,7 @@ function OverlayActionButtons({ href }: { readonly href: string }) {
       <Link
         href={relativeHref ?? href}
         target={relativeHref ? undefined : "_blank"}
-        className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-text-white tw-no-underline tw-backdrop-blur-md tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-black/60"
+        className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-text-white tw-no-underline tw-backdrop-blur-md tw-transition-colors tw-duration-150"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -134,7 +134,7 @@ export default function ManifoldItemPreviewCard({
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
       <div
-        className={getContainerClass(variant, imageOnly)}
+        className={`${getContainerClass(variant, imageOnly)} tw-relative`}
         data-testid="manifold-item-card"
       >
         <Link
@@ -145,7 +145,7 @@ export default function ManifoldItemPreviewCard({
           className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-no-underline"
         >
           <div
-            className="tw-relative tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-inherit md:tw-min-h-[15rem]"
+            className="tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-inherit md:tw-min-h-[15rem]"
             data-testid="manifold-item-media"
           >
             <MediaDisplay
@@ -153,7 +153,6 @@ export default function ManifoldItemPreviewCard({
               media_url={mediaUrl}
               disableMediaInteraction={true}
             />
-            {!hideActions && <OverlayActionButtons href={href} />}
           </div>
           {!imageOnly && (
             <div className={getTitleRowClass(variant)}>
@@ -166,6 +165,7 @@ export default function ManifoldItemPreviewCard({
             </div>
           )}
         </Link>
+        {!hideActions && <OverlayActionButtons href={href} />}
       </div>
     </LinkPreviewCardLayout>
   );

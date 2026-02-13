@@ -40,7 +40,7 @@ export default function DropCurationButton({
       type="button"
       className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-transition-all tw-duration-300 tw-ease-out ${
         isCurated
-          ? "tw-text-primary-200 tw-border-primary-400/30 tw-bg-primary-500/10 desktop-hover:hover:tw-bg-primary-500/15"
+          ? "tw-text-primary-400 tw-border-primary-400/30 tw-bg-primary-500/10 desktop-hover:hover:tw-bg-primary-500/15"
           : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-200"
       } ${isDisabled ? "tw-cursor-wait tw-opacity-70" : "tw-cursor-pointer"} ${
         className ?? ""

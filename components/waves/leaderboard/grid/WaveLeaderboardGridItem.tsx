@@ -10,6 +10,7 @@ import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
+import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -304,6 +305,7 @@ export const WaveLeaderboardGridItem: React.FC<
             </div>
           )}
           {activePart && (
+            <LinkPreviewProvider variant="home">
             <WaveDropPartContentMarkdown
               mentionedUsers={drop.mentioned_users}
               mentionedWaves={drop.mentioned_waves}
@@ -313,6 +315,7 @@ export const WaveLeaderboardGridItem: React.FC<
               onQuoteClick={() => {}}
               marketplaceImageOnly={mode === "content_only"}
             />
+            </LinkPreviewProvider>
           )}
         </div>
         {showGradient && (

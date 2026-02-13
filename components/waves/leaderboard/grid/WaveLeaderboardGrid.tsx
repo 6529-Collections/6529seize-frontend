@@ -38,7 +38,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+              className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/40 tw-bg-iron-950"
             >
               <div className="tw-aspect-[16/9] tw-min-h-[14rem] tw-animate-pulse tw-bg-iron-900 md:tw-min-h-[15rem]" />
               <div className="tw-space-y-2 tw-px-3 tw-py-3">
