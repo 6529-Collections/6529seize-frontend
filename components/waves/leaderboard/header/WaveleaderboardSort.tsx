@@ -16,6 +16,7 @@ interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
   readonly waveId?: string | undefined;
+  readonly curatedByGroupId?: string | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<
@@ -33,8 +34,10 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   sort,
   onSortChange,
   waveId,
+  curatedByGroupId,
 }) => {
   const queryClient = useQueryClient();
+  const normalizedCuratedByGroupId = curatedByGroupId?.trim() ?? undefined;
 
   const prefetchSortImmediate = useCallback(
     (targetSort: WaveDropsLeaderboardSort) => {
@@ -48,6 +51,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
           page_size: WAVE_DROPS_PARAMS.limit,
           sort: targetSort,
           sort_direction: sortDirection,
+          curated_by_group: normalizedCuratedByGroupId ?? null,
         },
       ];
 
@@ -66,6 +70,10 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
 
             if (typeof pageParam === "number") {
               params["page"] = `${pageParam}`;
+            }
+
+            if (normalizedCuratedByGroupId) {
+              params["curated_by_group"] = normalizedCuratedByGroupId;
             }
 
             return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -98,7 +106,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
           });
         });
     },
-    [queryClient, waveId, sort]
+    [queryClient, waveId, sort, normalizedCuratedByGroupId]
   );
 
   // Debounce prefetch to prevent excessive network requests on rapid hover events
@@ -126,7 +134,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   return (
     <div
       id="tabsId"
-      className="tw-flex tw-rounded-lg tw-whitespace-nowrap tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
+      className="tw-flex tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
     >
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.RANK)}

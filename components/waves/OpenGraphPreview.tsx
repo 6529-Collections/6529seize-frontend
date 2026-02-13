@@ -35,6 +35,8 @@ interface OpenGraphPreviewProps {
   readonly href: string;
   readonly preview?: OpenGraphPreviewData | null | undefined;
   readonly variant?: LinkPreviewVariant | undefined;
+  readonly imageOnly?: boolean | undefined;
+  readonly hideActions?: boolean | undefined;
 }
 
 type MaybeRecord = Record<string, unknown>;
@@ -236,10 +238,12 @@ export function LinkPreviewCardLayout({
   href,
   children,
   variant,
+  hideActions = false,
 }: {
   readonly href: string;
   readonly children: ReactNode;
   readonly variant?: LinkPreviewVariant | undefined;
+  readonly hideActions?: boolean | undefined;
 }) {
   const contextVariant = useLinkPreviewVariant();
   const resolvedVariant = variant ?? contextVariant;
@@ -260,7 +264,9 @@ export function LinkPreviewCardLayout({
       <div className="tw-h-full tw-min-h-0 tw-min-w-0 tw-max-w-full tw-flex-1 tw-overflow-hidden focus-within:tw-overflow-visible">
         {children}
       </div>
-      <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
+      {!hideActions && (
+        <ChatItemHrefButtons href={href} relativeHref={relativeHref} />
+      )}
     </div>
   );
 }
@@ -283,6 +289,8 @@ export default function OpenGraphPreview({
   href,
   preview,
   variant,
+  imageOnly = false,
+  hideActions = false,
 }: OpenGraphPreviewProps) {
   const contextVariant = useLinkPreviewVariant();
   const resolvedVariant = variant ?? contextVariant;
@@ -295,7 +303,11 @@ export default function OpenGraphPreview({
   if (typeof preview === "undefined") {
     if (resolvedVariant === "home") {
       return (
-        <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+        <LinkPreviewCardLayout
+          href={href}
+          variant={resolvedVariant}
+          hideActions={hideActions}
+        >
           <div
             className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30"
             data-testid="og-preview-skeleton"
@@ -312,7 +324,11 @@ export default function OpenGraphPreview({
     }
 
     return (
-      <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+      <LinkPreviewCardLayout
+        href={href}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+      >
         <div className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4">
           <div
             className="tw-flex tw-h-full tw-min-h-0 tw-animate-pulse tw-flex-col tw-justify-end tw-gap-y-3"
@@ -334,10 +350,45 @@ export default function OpenGraphPreview({
   const domain = deriveDomain(href, preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
 
+  if (imageOnly && imageUrl) {
+    return (
+      <LinkPreviewCardLayout
+        href={href}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+      >
+        <Link
+          href={effectiveHref}
+          target={linkTarget}
+          rel={linkRel}
+          onClick={(e) => e.stopPropagation()}
+          className="tw-block tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-no-underline"
+          data-testid="og-preview-card"
+        >
+          <div className="tw-relative tw-aspect-[16/9] tw-w-full tw-overflow-hidden tw-bg-iron-900/60">
+            <Image
+              src={imageUrl}
+              alt={title ?? domain ?? "Link preview"}
+              fill
+              className="tw-object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 480px"
+              unoptimized
+            />
+          </div>
+        </Link>
+      </LinkPreviewCardLayout>
+    );
+  }
+
   if (!hasContent) {
     if (resolvedVariant === "home") {
       return (
-        <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+        <LinkPreviewCardLayout
+          href={href}
+          variant={resolvedVariant}
+          hideActions={hideActions}
+        >
           <Link
             href={effectiveHref}
             target={linkTarget}
@@ -361,7 +412,11 @@ export default function OpenGraphPreview({
     }
 
     return (
-      <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+      <LinkPreviewCardLayout
+        href={href}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+      >
         <div
           className="tw-flex tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-6"
           data-testid="og-preview-unavailable"
@@ -385,7 +440,11 @@ export default function OpenGraphPreview({
   }
 
   return (
-    <LinkPreviewCardLayout href={href} variant={resolvedVariant}>
+    <LinkPreviewCardLayout
+      href={href}
+      variant={resolvedVariant}
+      hideActions={hideActions}
+    >
       {resolvedVariant === "home" ? (
         <Link
           href={effectiveHref}

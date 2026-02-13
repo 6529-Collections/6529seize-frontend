@@ -91,6 +91,7 @@ if (!process.env.PUBLIC_RUNTIME) {
     TENOR_API_KEY: "test-tenor-api-key",
     WS_ENDPOINT: "wss://ws.test.6529.io",
     DEV_MODE_MEMES_WAVE_ID: "test-memes-wave-id",
+    DEV_MODE_CURATION_WAVE_ID: "test-curation-wave-id",
   });
 }
 
@@ -167,7 +168,7 @@ if (globalThis.AbortSignal === undefined) {
 if (globalThis.Request === undefined) {
   class TestRequest {
     constructor(input, init = {}) {
-      this.url = typeof input === "string" ? input : input?.url ?? "";
+      this.url = typeof input === "string" ? input : (input?.url ?? "");
       this.method = init.method ?? "GET";
       this.headers = init.headers ?? {};
       this.body = init.body ?? null;

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import type { DropInteractionParams } from "../Drop";
 import { DropLocation } from "../Drop";
+import DropCurationButton from "../DropCurationButton";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
@@ -194,6 +195,12 @@ export default function EndedParticipationDrop({
           </div>
         )}
         <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+          <DropCurationButton
+            dropId={drop.id}
+            waveId={drop.wave.id}
+            isCuratable={drop.context_profile_context?.curatable ?? false}
+            isCurated={drop.context_profile_context?.curated ?? false}
+          />
           <WaveDropReactions drop={drop} />
         </div>
 

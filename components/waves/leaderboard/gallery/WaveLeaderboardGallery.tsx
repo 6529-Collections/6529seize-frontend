@@ -11,17 +11,20 @@ interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly curatedByGroupId?: string | undefined;
 }
 
 export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   wave,
   sort,
   onDropClick,
+  curatedByGroupId,
 }) => {
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       sort,
+      curatedByGroupId,
     });
 
   // Track when sort changes to signal animation

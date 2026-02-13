@@ -243,6 +243,7 @@ export interface DropPartMarkdownProps {
   readonly textSize?: "sm" | "md" | undefined;
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
+  readonly marketplaceImageOnly?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -258,6 +259,7 @@ function DropPartMarkdown({
   textSize,
   currentDropId,
   hideLinkPreviews = false,
+  marketplaceImageOnly = false,
   embedPath,
   quotePath,
   embedDepth = 0,
@@ -297,6 +299,7 @@ function DropPartMarkdown({
         currentDropId,
         hideLinkPreviews,
         tweetPreviewMode,
+        marketplaceImageOnly,
         embedPath: normalizedEmbedPath,
         quotePath: normalizedQuotePath,
         embedDepth,
@@ -307,6 +310,7 @@ function DropPartMarkdown({
       currentDropId,
       hideLinkPreviews,
       tweetPreviewMode,
+      marketplaceImageOnly,
       normalizedEmbedPath,
       normalizedQuotePath,
       embedDepth,

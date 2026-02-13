@@ -19,6 +19,7 @@ interface WaveDropQuoteProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
+  readonly marketplaceImageOnly?: boolean | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
 }
@@ -29,6 +30,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   onQuoteClick,
   embedPath,
   quotePath,
+  marketplaceImageOnly,
   embedDepth,
   maxEmbedDepth,
 }) => {
@@ -189,6 +191,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 textSize="sm"
                 onQuoteClick={onQuoteClick}
                 currentDropId={drop?.id}
+                marketplaceImageOnly={marketplaceImageOnly}
                 embedPath={embedPath}
                 quotePath={effectiveQuotePath}
                 embedDepth={embedDepth}

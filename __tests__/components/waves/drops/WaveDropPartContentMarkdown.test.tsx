@@ -42,9 +42,11 @@ it("renders markdown only", () => {
       part={basePart}
       wave={wave}
       onQuoteClick={jest.fn()}
+      marketplaceImageOnly={true}
     />
   );
   expect(screen.getByTestId("md")).toHaveTextContent("hello");
+  expect(markdownProps.marketplaceImageOnly).toBe(true);
   expect(screen.queryByTestId("quote")).toBeNull();
 });
 
@@ -66,7 +68,9 @@ it("renders quoted drop", () => {
   );
   expect(screen.getByTestId("quote")).toHaveAttribute("data-id", "d");
   expect(markdownProps.quotePath).toEqual(["w:7"]);
+  expect(markdownProps.marketplaceImageOnly).toBe(false);
   expect(quoteProps.embedPath).toEqual(["root-drop"]);
   expect(quoteProps.quotePath).toEqual(["w:7"]);
+  expect(quoteProps.marketplaceImageOnly).toBe(false);
   expect(quoteProps.embedDepth).toBe(1);
 });

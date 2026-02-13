@@ -15,7 +15,7 @@ const DEFAULT_CONTAINER_CLASSES =
   "sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500";
 
 const DEFAULT_BODY_CLASSES =
-  "tw-h-64 tw-overflow-y-auto tw-mt-4 tw-px-4";
+  "tw-h-64 tw-overflow-y-auto tw-mt-4 tw-px-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300";
 
 type SelectGroupSearchPanelProps = {
   readonly onClose: () => void;
