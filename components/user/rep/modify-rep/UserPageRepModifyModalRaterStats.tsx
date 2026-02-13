@@ -68,12 +68,14 @@ export default function UserPageRepModifyModalRaterStats({
             </span>
           </span>
         )}
-        <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
-          <span>Your available Rep:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(availableCredit)}
+        {!activeProfileProxy && (
+          <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
+            <span>Your available Rep:</span>
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+              {formatNumberWithCommas(availableCredit)}
+            </span>
           </span>
-        </span>
+        )}
         {!activeProfileProxy && (
           <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
             <span>Your max/min Rep Rating to {repState.category}:</span>

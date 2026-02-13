@@ -69,12 +69,14 @@ export default function UserPageIdentityHeaderCICRateStats({
           </span>
         </span>
       )}
-      <span className="tw-block tw-text-iron-200 tw-font-normal">
-        <span>Your available NIC:</span>
-        <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
-          {formatNumberWithCommas(availableCredit)}
+      {!activeProfileProxy && (
+        <span className="tw-block tw-text-iron-200 tw-font-normal">
+          <span>Your available NIC:</span>
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
+            {formatNumberWithCommas(availableCredit)}
+          </span>
         </span>
-      </span>
+      )}
       {!activeProfileProxy && (
         <span className="tw-block tw-text-iron-200 tw-font-normal tw-break-all">
           <span>Your max/min NIC Rating to {profile.handle}:</span>
