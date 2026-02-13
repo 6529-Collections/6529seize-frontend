@@ -82,6 +82,12 @@ export default function UserPageIdentityHeaderCICRate({
         profileProxy: activeProfileProxy ?? null,
       });
     },
+    onError: (error) => {
+      setToast({
+        message: error as unknown as string,
+        type: "error",
+      });
+    },
     onSettled: () => {
       setMutating(false);
     },
