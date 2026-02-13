@@ -16,7 +16,6 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
-  WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 import { useDropCurationMutation } from "@/hooks/drops/useDropCurationMutation";
@@ -128,7 +127,7 @@ export const WaveLeaderboardGridItem: React.FC<
   }, [activePart?.content, mode, primaryMedia]);
   const cardClassName = (() => {
     if (isCompactMode) {
-      return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-transition desktop-hover:hover:tw-border-iron-700 tw-h-[26rem]";
+      return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
     }
 
     if (isMarketplaceImageOnlyCard) {
@@ -138,7 +137,7 @@ export const WaveLeaderboardGridItem: React.FC<
     return "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";
   })();
   const viewportClassName = isCompactMode
-    ? "tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/50 tw-p-3 tw-h-[15rem]"
+    ? "tw-relative tw-overflow-hidden tw-bg-iron-950 tw-pr-3"
     : "tw-relative tw-overflow-hidden tw-max-h-[20rem]";
   const contentSpacingClass = isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
   const mediaWrapperClass = isCompactMode
@@ -353,15 +352,16 @@ export const WaveLeaderboardGridItem: React.FC<
       {isCompactMode && (
         <div
           data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
-          className="tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
+          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3"
         >
-          <div className="tw-mb-3 tw-flex tw-items-start tw-justify-between">
-            <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-              {drop.title && (
-                <h3 className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
-                  {drop.title}
-                </h3>
-              )}
+          <div className="tw-mb-1.5">
+            {drop.title && (
+              <h3 className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+                {drop.title}
+              </h3>
+            )}
+            <div className="tw-flex tw-items-center tw-justify-between">
+              <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
               {drop.author?.handle && (
                 <UserProfileTooltipWrapper
                   user={drop.author.handle ?? drop.author.id}
@@ -369,7 +369,7 @@ export const WaveLeaderboardGridItem: React.FC<
                   <Link
                     onClick={(e) => e.stopPropagation()}
                     href={`/${drop.author?.handle}`}
-                    className="tw-mt-0.5 tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                    className="tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
                   >
                     {drop.author?.handle}
                   </Link>
@@ -386,6 +386,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 -
               </div>
             )}
+            </div>
           </div>
           <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-text-xs">
             <WaveLeaderboardGalleryItemVotes drop={drop} variant="subtle" />
@@ -410,16 +411,10 @@ export const WaveLeaderboardGridItem: React.FC<
               </span>
             </div>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
-            <DropCurationButton
-              dropId={drop.id}
-              waveId={drop.wave.id}
-              isCuratable={drop.context_profile_context?.curatable ?? false}
-              isCurated={drop.context_profile_context?.curated ?? false}
-            />
+          <div className="tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
             {hasUserVoted && (
               <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
-                {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
+                You:{" "}
                 <span className={voteStyle}>
                   {isNegativeVote && "-"}
                   {formatNumberWithCommas(Math.abs(userVote))}{" "}
@@ -427,15 +422,21 @@ export const WaveLeaderboardGridItem: React.FC<
                 </span>
               </span>
             )}
-            {canShowVote && (
-              <div className="tw-flex tw-flex-1 tw-justify-end">
+            <div className="tw-ml-auto tw-flex tw-items-center tw-gap-1.5">
+              <DropCurationButton
+                dropId={drop.id}
+                waveId={drop.wave.id}
+                isCuratable={drop.context_profile_context?.curatable ?? false}
+                isCurated={drop.context_profile_context?.curated ?? false}
+              />
+              {canShowVote && (
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
                   variant="subtle"
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

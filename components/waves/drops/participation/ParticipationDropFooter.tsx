@@ -36,7 +36,15 @@ export default function ParticipationDropFooter({
               )}
             </div>
 
-            <div className="tw-flex tw-w-full tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0">
+            <div
+              className="tw-flex tw-items-center tw-gap-1.5 tw-w-full tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0"
+            >
+              <DropCurationButton
+                dropId={drop.id}
+                waveId={drop.wave.id}
+                isCuratable={drop.context_profile_context?.curatable ?? false}
+                isCurated={drop.context_profile_context?.curated ?? false}
+              />
               <VotingModalButton
                 drop={drop}
                 onClick={() => setIsVotingModalOpen(true)}
@@ -68,12 +76,14 @@ export default function ParticipationDropFooter({
       )}
 
       <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4">
-        <DropCurationButton
-          dropId={drop.id}
-          waveId={drop.wave.id}
-          isCuratable={drop.context_profile_context?.curatable ?? false}
-          isCurated={drop.context_profile_context?.curated ?? false}
-        />
+        {!canShowVote && (
+          <DropCurationButton
+            dropId={drop.id}
+            waveId={drop.wave.id}
+            isCuratable={drop.context_profile_context?.curatable ?? false}
+            isCurated={drop.context_profile_context?.curated ?? false}
+          />
+        )}
         <WaveDropReactions drop={drop} />
       </div>
 

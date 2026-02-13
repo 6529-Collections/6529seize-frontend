@@ -134,7 +134,7 @@ function WaveCurationGroupAddButton({
       type="button"
       disabled={disabled}
       onClick={onAddGroup}
-      className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+      className="tw-w-full tw-py-2.5 tw-mt-2 tw-text-xs tw-font-bold tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-bg-primary-500/10 tw-rounded-lg tw-transition-all tw-border tw-border-dashed tw-border-primary-500/30 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-bg-transparent disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
     >
       <svg
         aria-hidden="true"

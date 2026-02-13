@@ -31,18 +31,18 @@ function getContainerClass(
   }
 
   if (variant === "home") {
-    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30";
+    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black";
   }
 
-  return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40";
+  return "tw-w-full tw-overflow-hidden tw-bg-iron-950";
 }
 
 function getTitleRowClass(variant: LinkPreviewVariant): string {
   if (variant === "home") {
-    return "tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/70 tw-px-4 tw-py-2.5";
+    return "tw-bg-black/80 tw-px-3 tw-py-2";
   }
 
-  return "tw-border-t tw-border-solid tw-border-iron-700 tw-bg-iron-900/85 tw-px-4 tw-py-2.5";
+  return "tw-bg-iron-950 tw-px-3 tw-py-1.5";
 }
 
 export default function ManifoldItemPreviewCard({
@@ -73,7 +73,7 @@ export default function ManifoldItemPreviewCard({
           className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-no-underline"
         >
           <div
-            className="tw-relative tw-aspect-[16/9] tw-min-h-[10rem] tw-w-full tw-bg-black/70 md:tw-min-h-[11rem]"
+            className="tw-relative tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-iron-950 md:tw-min-h-[15rem]"
             data-testid="manifold-item-media"
           >
             <MediaDisplay
@@ -85,7 +85,7 @@ export default function ManifoldItemPreviewCard({
           {!imageOnly && (
             <div className={getTitleRowClass(variant)}>
               <h3
-                className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-50"
+                className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200"
                 data-testid="manifold-item-title"
               >
                 {title}

@@ -111,14 +111,14 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
     <>
       <button
         onClick={handleClick}
-        className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${isMobile ? "tw-gap-4" : "tw-gap-2"
-          } tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${isTouch ? "tw-cursor-pointer" : ""
+        className={`tw-border tw-border-solid tw-border-iron-700/50 tw-rounded-lg tw-flex tw-items-center ${isMobile ? "tw-gap-3" : "tw-gap-2"
+          } tw-min-w-6 tw-py-1 tw-px-2.5 tw-bg-iron-900/60 tw-backdrop-blur-sm tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-iron-600/50 desktop-hover:hover:tw-bg-iron-800/60 ${isTouch ? "tw-cursor-pointer" : ""
           }`}
         data-tooltip-id={`wave-outcomes-${drop.id}`}>
-        <span className="tw-text-xs tw-font-medium tw-text-iron-200">
-          Outcome:
+        <span className="tw-text-[11px] tw-font-medium tw-text-iron-400">
+          Outcome
         </span>
-        <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center tw-gap-1.5">
           {!!nicTotal && (
             <FontAwesomeIcon
               icon={faAddressCard}
@@ -143,10 +143,14 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
         id={`wave-outcomes-${drop.id}`}
         place="top"
         style={{
-          backgroundColor: "#1F2937",
-          color: "white",
           padding: "4px 8px",
-          zIndex: 10,
+          background: "#37373E",
+          color: "white",
+          fontSize: "13px",
+          fontWeight: 500,
+          borderRadius: "6px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          zIndex: 50,
         }}
         clickable={true}
         openEvents={isTouch ? { click: true } : { mouseenter: true }}

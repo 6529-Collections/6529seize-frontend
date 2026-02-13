@@ -89,35 +89,35 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           </div>
 
           <div className="tw-space-y-2">
-            <div className="tw-ml-[3.35rem]">
+            <div className="tw-ml-14">
               <WaveLeaderboardDropContent
                 drop={drop}
                 isCompetitionDrop={true}
               />
             </div>
           </div>
-          <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-[3.25rem]">
+          <div className="tw-mt-3 tw-inline-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 sm:tw-ml-14">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+              <WaveLeaderboardDropRaters drop={drop} />
+              <WaveLeaderboardDropFooter drop={drop} />
+            </div>
+            <div
+              className="tw-flex tw-items-center tw-gap-1.5 tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
+              onClick={(e) => e.stopPropagation()}
+            >
               <DropCurationButton
                 dropId={drop.id}
                 waveId={drop.wave.id}
                 isCuratable={drop.context_profile_context?.curatable ?? false}
                 isCurated={drop.context_profile_context?.curated ?? false}
               />
-              <WaveLeaderboardDropRaters drop={drop} />
-              <WaveLeaderboardDropFooter drop={drop} />
-            </div>
-            {canShowVote && (
-              <div
-                className="tw-flex tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"
-                onClick={(e) => e.stopPropagation()}
-              >
+              {canShowVote && (
                 <VotingModalButton
                   drop={drop}
                   onClick={() => setIsVotingModalOpen(true)}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

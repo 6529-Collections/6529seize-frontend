@@ -34,7 +34,7 @@ export const SingleWaveDropInfoPanel = ({
             </div>
 
             {!isChatWave && (
-              <div className="tw-mb-6">
+              <div className="tw-mb-6 tw-flex tw-justify-center">
                 <WaveDropVoteSummary
                   drop={drop}
                   isWinner={isWinner}
