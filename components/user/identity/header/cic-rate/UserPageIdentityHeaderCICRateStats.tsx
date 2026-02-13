@@ -75,22 +75,7 @@ export default function UserPageIdentityHeaderCICRateStats({
           {formatNumberWithCommas(availableCredit)}
         </span>
       </span>
-      {activeProfileProxy ? (
-        <>
-          <span className="tw-block tw-text-iron-200 tw-font-normal">
-            <span>Your max NIC Rating to {profile.handle}:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
-              {formatNumberWithCommas(minMaxValues.max)}
-            </span>
-          </span>
-          <span className="tw-block tw-text-iron-200 tw-font-normal">
-            <span>Your min NIC Rating to {profile.handle}:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
-              {formatNumberWithCommas(minMaxValues.min)}
-            </span>
-          </span>
-        </>
-      ) : (
+      {!activeProfileProxy && (
         <span className="tw-block tw-text-iron-200 tw-font-normal tw-break-all">
           <span>Your max/min NIC Rating to {profile.handle}:</span>
           <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">

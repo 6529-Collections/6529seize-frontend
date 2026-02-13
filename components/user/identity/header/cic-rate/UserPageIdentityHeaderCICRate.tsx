@@ -185,6 +185,9 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   const adjustStrValueToMinMax = (): void => {
+    if (activeProfileProxy) {
+      return;
+    }
     const { min, max } = getMinMaxValues();
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
@@ -198,6 +201,9 @@ export default function UserPageIdentityHeaderCICRate({
   };
 
   const getIsValidValue = (): boolean => {
+    if (activeProfileProxy) {
+      return true;
+    }
     const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
