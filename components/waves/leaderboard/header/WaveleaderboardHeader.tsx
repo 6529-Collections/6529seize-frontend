@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext } from "react";
+import { Tooltip } from "react-tooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -150,12 +151,29 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   tabIndex={viewMode === mode ? 0 : -1}
                   className={getViewModeTabClass(mode, viewMode)}
                   onClick={() => onViewModeChange(mode)}
+                  data-tooltip-id={`leaderboard-view-mode-${mode}-tooltip`}
                 >
                   {getViewModeIcon(mode)}
                   <span className="tw-sr-only">{getViewModeLabel(mode)}</span>
                 </button>
               ))}
             </div>
+            {viewModes.map((mode) => (
+              <Tooltip
+                key={mode}
+                id={`leaderboard-view-mode-${mode}-tooltip`}
+                place="bottom"
+                positionStrategy="fixed"
+                style={{
+                  backgroundColor: "#1F2937",
+                  color: "white",
+                  padding: "4px 8px",
+                  zIndex: 1000,
+                }}
+              >
+                <span className="tw-text-xs">{getViewModeLabel(mode)}</span>
+              </Tooltip>
+            ))}
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
