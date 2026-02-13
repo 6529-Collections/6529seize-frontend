@@ -133,7 +133,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
-      <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
         <div className="tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <div
@@ -186,7 +186,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             />
           </div>
         </div>
-        <div className="tw-ml-auto tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
           {showCurationGroupSelect && onCurationGroupChange && (
             <WaveLeaderboardCurationGroupSelect
               groups={curationGroups}
