@@ -258,6 +258,9 @@ export default function UserPageRepModifyModal({
   };
 
   const adjustStrValueToMinMax = (): void => {
+    if (activeProfileProxy) {
+      return;
+    }
     const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
@@ -280,6 +283,9 @@ export default function UserPageRepModifyModal({
   };
 
   const getIsValidValue = (): boolean => {
+    if (activeProfileProxy) {
+      return true;
+    }
     const { min, max } = minMaxValues;
     const valueAsNumber = getStringAsNumberOrZero(adjustedRatingStr);
     if (valueAsNumber > max) {
