@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useContext } from "react";
-import { Tooltip } from "react-tooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
 import { useWave } from "@/hooks/useWave";
-import { WaveleaderboardSort } from "./WaveleaderboardSort";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import type { LeaderboardViewMode } from "../types";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import React, { useContext } from "react";
+import { Tooltip } from "react-tooltip";
+import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
+import { WaveleaderboardSort } from "./WaveleaderboardSort";
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
