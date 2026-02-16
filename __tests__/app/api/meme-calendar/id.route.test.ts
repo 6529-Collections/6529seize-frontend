@@ -2,7 +2,6 @@ const nextResponseJson = jest.fn();
 
 jest.mock("next/server", () => ({
   NextResponse: { json: nextResponseJson },
-  NextRequest: class {},
 }));
 
 import {
