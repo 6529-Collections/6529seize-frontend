@@ -9,7 +9,13 @@ import {
   getClaimSeason,
   traitsDataToUpdateRequest,
 } from "@/components/drop-control/claimTraitsData";
+import DropControlMediaTypePill from "@/components/drop-control/DropControlMediaTypePill";
+import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
 import { DROP_CONTROL_SECTIONS } from "@/components/drop-control/drop-control.constants";
+import {
+  getClaimPrimaryStatus,
+  getPrimaryStatusPillClassName,
+} from "@/components/drop-control/drop-control-status.helpers";
 import { DropControlPermissionFallback } from "@/components/drop-control/DropControlPermissionFallback";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
@@ -28,10 +34,8 @@ import {
 import {
   ArrowLeftIcon,
   ArrowTopRightOnSquareIcon,
-  CheckCircleIcon,
   DocumentDuplicateIcon,
   PlusIcon,
-  XCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -233,7 +237,7 @@ export default function DropControlPrepareClaimPageClient({
         <ArweaveSection
           memeId={memeId}
           claim={claim}
-          onSynced={fetchClaim}
+          onStatusRefresh={fetchClaim}
           hasPendingChanges={hasPendingPageChanges}
         />
       </div>
@@ -668,15 +672,17 @@ function AnimationSection({
           pendingAnimation !== undefined ||
           pendingAnimationFile !== null) && (
           <>
-            <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-              {animationPreviewMimeType?.startsWith("video/")
-                ? "Video"
-                : animationPreviewMimeType?.startsWith("model/gltf")
-                  ? "GLB"
-                  : animationPreviewMimeType === "text/html"
-                    ? "HTML"
-                    : "Animation"}
-            </span>
+            <DropControlMediaTypePill
+              label={
+                animationPreviewMimeType?.startsWith("video/")
+                  ? "Video"
+                  : animationPreviewMimeType?.startsWith("model/gltf")
+                    ? "GLB"
+                    : animationPreviewMimeType === "text/html"
+                      ? "HTML"
+                      : "Animation"
+              }
+            />
             {animationDisplayUrl && animationPreviewMimeType && (
               <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
                 <MediaDisplay
@@ -1241,48 +1247,46 @@ function ArweaveLinkRow({ label, url }: { label: string; url: string }) {
 function ArweaveSection({
   memeId,
   claim,
-  onSynced,
+  onStatusRefresh,
   hasPendingChanges,
 }: {
   memeId: number;
   claim: MemeClaim;
-  onSynced: () => Promise<void>;
+  onStatusRefresh: () => Promise<void>;
   hasPendingChanges: boolean;
 }) {
   const { setToast } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const mediaUploading = claim.media_uploading === true;
-  const canSync =
-    claim.arweave_synced_at == null &&
-    !hasPendingChanges &&
-    !loading &&
-    !mediaUploading;
-  const synced = claim.arweave_synced_at != null;
+  const primaryStatus = getClaimPrimaryStatus({ claim });
+  const isPublishing = primaryStatus.key === "publishing";
+  const isDraft = primaryStatus.key === "draft";
+  const canPublish = isDraft && !hasPendingChanges && !loading && !isPublishing;
+  const hasPublishedMetadata = claim.metadata_location != null;
 
   useEffect(() => {
-    if (!mediaUploading) return;
+    if (!isPublishing) return;
     const id = setInterval(() => {
-      void onSynced().catch((e) => {
+      void onStatusRefresh().catch((e) => {
         const msg = getErrorMessage(e, "Failed to refresh claim status");
         setError(msg);
       });
     }, 10000);
     return () => clearInterval(id);
-  }, [mediaUploading, onSynced]);
+  }, [isPublishing, onStatusRefresh]);
 
   async function handleUpload() {
-    if (!canSync) return;
+    if (!canPublish) return;
     setError(null);
     setLoading(true);
     try {
       await postArweaveUpload(memeId);
-      setToast({ message: "Upload to Arweave started", type: "success" });
-      await onSynced();
+      setToast({ message: "Publishing to Arweave started", type: "success" });
+      await onStatusRefresh();
     } catch (e) {
       const msg = getErrorMessage(e, "Upload failed");
       setError(msg);
-      if (msg !== "Already synced" && msg !== "Not authorized") {
+      if (msg !== "Already published" && msg !== "Not authorized") {
         setToast({ message: msg, type: "error" });
       }
     } finally {
@@ -1296,30 +1300,14 @@ function ArweaveSection({
         Arweave
       </h2>
       <div className="tw-mb-4 tw-flex tw-items-center tw-gap-3">
-        {mediaUploading ? (
-          <>
-            <CircleLoader size={CircleLoaderSize.SMALL} />
-            <span className="tw-text-base tw-font-medium tw-text-primary-300">
-              Uploading to Arweave…
-            </span>
-          </>
-        ) : synced ? (
-          <>
-            <CheckCircleIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-green" />
-            <span className="tw-text-base tw-font-medium tw-text-green">
-              Uploaded to Arweave
-            </span>
-          </>
-        ) : (
-          <>
-            <XCircleIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-red" />
-            <span className="tw-text-base tw-font-medium tw-text-red">
-              Not uploaded to Arweave
-            </span>
-          </>
-        )}
+        <DropControlStatusPill
+          className={getPrimaryStatusPillClassName(primaryStatus.tone)}
+          label={primaryStatus.label}
+          showLoader={primaryStatus.key === "publishing"}
+          tooltipText={primaryStatus.reason ?? ""}
+        />
       </div>
-      {synced &&
+      {hasPublishedMetadata &&
         (claim.image_location ||
           claim.animation_location ||
           claim.metadata_location) && (
@@ -1344,16 +1332,16 @@ function ArweaveSection({
             )}
           </div>
         )}
-      {!synced && (
+      {(isDraft || isPublishing) && (
         <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-4">
-          {!mediaUploading && (
+          {isDraft && (
             <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-              Sync this claim's media and metadata to Arweave.
+              Publish this claim&apos;s media and metadata to Arweave.
             </p>
           )}
           {hasPendingChanges && (
             <p className="tw-mb-0 tw-text-yellow-400 tw-text-sm">
-              Save or revert pending changes before uploading to Arweave.
+              Save or revert pending changes before publishing to Arweave.
             </p>
           )}
           {error && (
@@ -1361,20 +1349,20 @@ function ArweaveSection({
               {error}
             </p>
           )}
-          {!mediaUploading && (
+          {isDraft && (
             <button
               type="button"
               onClick={handleUpload}
-              disabled={!canSync}
+              disabled={!canPublish}
               className={`${BTN_PRIMARY} tw-w-fit`}
             >
               {loading ? (
                 <span className="tw-inline-flex tw-items-center tw-gap-2">
                   <CircleLoader size={CircleLoaderSize.SMALL} />
-                  <span>Uploading…</span>
+                  <span>Publishing…</span>
                 </span>
               ) : (
-                "Upload to Arweave"
+                "Publish to Arweave"
               )}
             </button>
           )}

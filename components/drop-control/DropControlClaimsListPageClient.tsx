@@ -1,14 +1,16 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   DROP_CONTROL_SECTIONS,
   PREPARE_CLAIMS_PAGE_SIZE,
 } from "@/components/drop-control/drop-control.constants";
-import { isMissingRequiredLaunchInfo } from "@/components/drop-control/launchClaimHelpers";
+import DropControlMediaTypePill from "@/components/drop-control/DropControlMediaTypePill";
+import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
+import {
+  getClaimPrimaryStatus,
+  getPrimaryStatusPillClassName,
+} from "@/components/drop-control/drop-control-status.helpers";
 import { DropControlPermissionFallback } from "@/components/drop-control/DropControlPermissionFallback";
 import Pagination from "@/components/pagination/Pagination";
 import type { MemeClaim } from "@/generated/models/MemeClaim";
@@ -289,9 +291,7 @@ function ClaimCardContent({
         <div className="tw-truncate tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
           {claim.name || "—"}
         </div>
-        <div className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-          {mediaTypeLabel}
-        </div>
+        <DropControlMediaTypePill label={mediaTypeLabel} />
         {imageMissing && (
           <span className="tw-text-xs tw-leading-tight tw-text-amber-500/90">
             *image missing
@@ -302,62 +302,22 @@ function ClaimCardContent({
   );
 }
 
-function StatusPill({
-  className,
-  label,
-  showLoader = false,
-}: {
-  className: string;
-  label: string;
-  showLoader?: boolean;
-}) {
-  return (
-    <span
-      className={`tw-static tw-mb-3 tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-full tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-leading-tight tw-ring-1 tw-ring-inset sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 ${className}`}
-    >
-      {showLoader ? (
-        <CircleLoader size={CircleLoaderSize.SMALL} />
-      ) : (
-        <span className="tw-inline-block tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-current" />
-      )}
-      {label}
-    </span>
-  );
-}
-
 function PrepareClaimCard({ claim }: { claim: MemeClaim }) {
-  const arweaveStatus =
-    claim.media_uploading === true
-      ? {
-          label: "Uploading to Arweave",
-          className:
-            "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-primary-400/40",
-          showLoader: true,
-        }
-      : claim.arweave_synced_at != null
-        ? {
-            label: "Uploaded to Arweave",
-            className:
-              "tw-bg-emerald-500/15 tw-text-emerald-300 tw-ring-emerald-400/40",
-            showLoader: false,
-          }
-        : {
-            label: "Not uploaded to Arweave",
-            className:
-              "tw-bg-rose-500/15 tw-text-rose-300 tw-ring-rose-400/40",
-            showLoader: false,
-          };
+  const primaryStatus = getClaimPrimaryStatus({ claim });
 
   return (
     <Link
       href={`${getCardDetailsBasePath("prepare")}/${claim.meme_id}`}
       className={`${CARD_CLASS} tw-relative`}
     >
-      <StatusPill
-        className={arweaveStatus.className}
-        label={arweaveStatus.label}
-        showLoader={arweaveStatus.showLoader}
-      />
+      <div className="tw-static tw-mb-3 tw-flex tw-flex-col tw-gap-2 sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 sm:tw-items-end">
+        <DropControlStatusPill
+          className={getPrimaryStatusPillClassName(primaryStatus.tone)}
+          label={primaryStatus.label}
+          showLoader={primaryStatus.key === "publishing"}
+          tooltipText={primaryStatus.reason ?? ""}
+        />
+      </div>
       <ClaimCardContent claim={claim} />
     </Link>
   );
@@ -365,44 +325,24 @@ function PrepareClaimCard({ claim }: { claim: MemeClaim }) {
 
 function LaunchClaimCard({ claim }: { claim: MemeClaim }) {
   const manifoldClaim = useMemesManifoldClaim(claim.meme_id);
-
-  const initialized = !!manifoldClaim?.instanceId;
-  const missingRequiredInfo = isMissingRequiredLaunchInfo(claim);
-  const outOfSync =
-    initialized &&
-    !!claim.metadata_location &&
-    manifoldClaim.location !== claim.metadata_location;
-
-  const launchStatus = !initialized
-    ? missingRequiredInfo
-      ? {
-          label: "Not Initialized - Missing Info",
-          className:
-            "tw-bg-amber-500/15 tw-text-amber-300 tw-ring-amber-400/40",
-        }
-      : {
-          label: "Not Initialized",
-          className:
-            "tw-bg-iron-700/30 tw-text-iron-300 tw-ring-iron-500/40",
-        }
-    : outOfSync
-      ? {
-          label: "Initialized - Out of Sync",
-          className:
-            "tw-bg-rose-500/15 tw-text-rose-300 tw-ring-rose-400/40",
-        }
-      : {
-          label: "Initialized",
-          className:
-            "tw-bg-emerald-500/15 tw-text-emerald-300 tw-ring-emerald-400/40",
-        };
+  const primaryStatus = getClaimPrimaryStatus({
+    claim,
+    manifoldClaim: manifoldClaim ?? null,
+  });
 
   return (
     <Link
       href={`${getCardDetailsBasePath("launch")}/${claim.meme_id}`}
       className={`${CARD_CLASS} tw-relative`}
     >
-      <StatusPill className={launchStatus.className} label={launchStatus.label} />
+      <div className="tw-static tw-mb-3 tw-flex tw-flex-col tw-gap-2 sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 sm:tw-items-end">
+        <DropControlStatusPill
+          className={getPrimaryStatusPillClassName(primaryStatus.tone)}
+          label={primaryStatus.label}
+          showLoader={primaryStatus.key === "publishing"}
+          tooltipText={primaryStatus.reason ?? ""}
+        />
+      </div>
       <ClaimCardContent claim={claim} showLaunchFields />
     </Link>
   );

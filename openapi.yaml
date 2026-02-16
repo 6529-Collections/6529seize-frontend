@@ -35,7 +35,7 @@ paths:
             minimum: 1
         - name: sort_direction
           in: query
-          description: Default is ASC
+          description: Default is ASC; applied to id sort
           required: false
           schema:
             type: string
@@ -749,6 +749,37 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /distributions/{contract}/{id}/automatic_airdrops:
+    get:
+      tags:
+        - Distributions
+      summary: Get automatic airdrops for a specific contract and card
+      operationId: getDistributionAutomaticAirdrops
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid request
   /light-drops:
     get:
       tags:
@@ -1280,6 +1311,76 @@ paths:
           description: Invalid request
         "404":
           description: Drop not found
+  /drops/{dropId}/curations:
+    get:
+      tags:
+        - Drops
+      summary: Get identities who curated a drop
+      operationId: getDropCurators
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileMinsPage"
+        "404":
+          description: Drop not found
+    post:
+      tags:
+        - Drops
+      summary: Mark a drop as curated by authenticated user
+      operationId: addDropCuration
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+    delete:
+      tags:
+        - Drops
+      summary: Remove authenticated user"s curation from a drop
+      operationId: removeDropCuration
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
   /drops/{dropId}/reactions:
     post:
       tags:
@@ -1875,6 +1976,96 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /memes-mint-stats:
+    get:
+      tags:
+        - Memes Mint Stats
+      summary: Get paginated memes mint stats
+      operationId: getMemesMintStats
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is ASC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemesMintStatsPage"
+  /memes-mint-stats/total:
+    get:
+      tags:
+        - Memes Mint Stats
+      summary: Get total memes mint stats
+      operationId: getMemesMintStatsTotal
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemesMintStatsTotals"
+  /memes-mint-stats/yearly:
+    get:
+      tags:
+        - Memes Mint Stats
+      summary: Get yearly aggregated memes mint stats
+      operationId: getMemesMintStatsYearly
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMemesMintStatsYearly"
+  /memes-mint-stats/{id}:
+    get:
+      tags:
+        - Memes Mint Stats
+      summary: Get memes mint stats for one meme id
+      operationId: getMemesMintStatsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemesMintStat"
+        "404":
+          description: Memes mint stats for id not found
   /memes-minting/proofs/{merkle_root}:
     get:
       tags:
@@ -3523,6 +3714,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AirdropAddressResponse"
+  /subscriptions/final/{contract}/{token_id}/phases/{phase_name}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get final subscription airdrops for a token phase
+      operationId: getFinalSubscriptionsByPhase
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: token_id
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: phase_name
+          in: path
+          description: Phase name (URL encoded)
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid token ID
   /subscriptions/consolidation/final/{consolidation_key}/{contract}/{token_id}:
     get:
       tags:
@@ -4842,6 +5070,11 @@ paths:
               - CREATED_AT
               - RATING_PREDICTION
               - TREND
+        - name: curated_by_group
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: successful operation
@@ -4849,6 +5082,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropsLeaderboardPage"
+  /waves/{id}/curation-groups:
+    get:
+      tags:
+        - Waves
+      summary: List curation groups configured for wave
+      operationId: listWaveCurationGroups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveCurationGroup"
+    post:
+      tags:
+        - Waves
+      summary: Create curation group for wave
+      operationId: createWaveCurationGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiWaveCurationGroupRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveCurationGroup"
+  /waves/{id}/curation-groups/{curationGroupId}:
+    post:
+      tags:
+        - Waves
+      summary: Update curation group for wave
+      operationId: updateWaveCurationGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: curationGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiWaveCurationGroupRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveCurationGroup"
+    delete:
+      tags:
+        - Waves
+      summary: Delete curation group from wave
+      operationId: deleteWaveCurationGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: curationGroupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
   /waves/{id}/logs:
     get:
       tags:
@@ -7139,6 +7466,8 @@ components:
         - reaction
         - boosted
         - bookmarked
+        - curatable
+        - curated
       properties:
         rating:
           type: number
@@ -7155,6 +7484,10 @@ components:
         boosted:
           type: boolean
         bookmarked:
+          type: boolean
+        curatable:
+          type: boolean
+        curated:
           type: boolean
     ApiDropId:
       type: object
@@ -7968,6 +8301,106 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMemesMintStat:
+      type: object
+      required:
+        - id
+        - mint_date
+        - mint_count
+        - proceeds_eth
+        - proceeds_usd
+        - artist_split_eth
+        - artist_split_usd
+      properties:
+        id:
+          type: integer
+          format: int64
+        mint_date:
+          type: string
+          format: date-time
+          nullable: true
+        mint_count:
+          type: integer
+          format: int64
+        proceeds_eth:
+          type: number
+          format: double
+        proceeds_usd:
+          type: number
+          format: double
+        artist_split_eth:
+          type: number
+          format: double
+        artist_split_usd:
+          type: number
+          format: double
+    ApiMemesMintStatsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemesMintStat"
+    ApiMemesMintStatsTotals:
+      type: object
+      required:
+        - mint_count
+        - proceeds_eth
+        - proceeds_usd
+        - artist_split_eth
+        - artist_split_usd
+        - artists_count
+      properties:
+        mint_count:
+          type: integer
+          format: int64
+        proceeds_eth:
+          type: number
+          format: double
+        proceeds_usd:
+          type: number
+          format: double
+        artist_split_eth:
+          type: number
+          format: double
+        artist_split_usd:
+          type: number
+          format: double
+        artists_count:
+          type: integer
+          format: int64
+    ApiMemesMintStatsYearly:
+      type: object
+      required:
+        - year
+        - mint_count
+        - proceeds_eth
+        - proceeds_usd
+        - artist_split_eth
+        - artist_split_usd
+      properties:
+        year:
+          type: integer
+          format: int64
+        mint_count:
+          type: integer
+          format: int64
+        proceeds_eth:
+          type: number
+          format: double
+        proceeds_usd:
+          type: number
+          format: double
+        artist_split_eth:
+          type: number
+          format: double
+        artist_split_usd:
+          type: number
+          format: double
     ApiMentionedWave:
       type: object
       required:
@@ -8622,6 +9055,17 @@ components:
             type: string
         is_wave_creator:
           type: boolean
+    ApiProfileMinsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileMin"
     ApiProfileProxy:
       type: object
       required:
@@ -9468,6 +9912,42 @@ components:
         - REP
         - XTDH
         - TDH_PLUS_XTDH
+    ApiWaveCurationGroup:
+      type: object
+      required:
+        - id
+        - name
+        - wave_id
+        - group_id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        wave_id:
+          type: string
+        group_id:
+          type: string
+        created_at:
+          type: number
+          format: int64
+        updated_at:
+          type: number
+          format: int64
+    ApiWaveCurationGroupRequest:
+      type: object
+      required:
+        - name
+        - group_id
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        group_id:
+          type: string
     ApiWaveDecision:
       type: object
       required:
@@ -10591,10 +11071,6 @@ components:
         metadata_location:
           type: string
           nullable: true
-        arweave_synced_at:
-          type: integer
-          format: int64
-          nullable: true
         media_uploading:
           type: boolean
         edition_size:
@@ -10725,15 +11201,6 @@ components:
           type: integer
           format: int32
           minimum: 1
-        image_location:
-          type: string
-          nullable: true
-        animation_location:
-          type: string
-          nullable: true
-        metadata_location:
-          type: string
-          nullable: true
         edition_size:
           type: integer
           format: int32
@@ -10955,6 +11422,17 @@ components:
         subscribed:
           type: boolean
         subscribed_count:
+          type: integer
+          format: int64
+    PhaseAirdrop:
+      type: object
+      required:
+        - wallet
+        - amount
+      properties:
+        wallet:
+          type: string
+        amount:
           type: integer
           format: int64
     RedeemedSubscription:

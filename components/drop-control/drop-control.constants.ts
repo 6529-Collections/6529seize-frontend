@@ -1,6 +1,6 @@
 export const DROP_CONTROL_TITLE = "Drop Control";
 
-export const PREPARE_CLAIMS_PAGE_SIZE = 10;
+export const PREPARE_CLAIMS_PAGE_SIZE = 5;
 
 export const DROP_CONTROL_SECTIONS = {
   PREPARE: {

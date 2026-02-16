@@ -8,6 +8,45 @@ import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 const CLAIMS_BASE = "memes-minting/claims";
+const GENERATED_STORAGE_FIELDS = new Set<string>([
+  "metadata_location",
+  "image_location",
+  "animation_location",
+]);
+const ALLOWED_PATCH_FIELDS = new Set<string>([
+  "season",
+  "edition_size",
+  "description",
+  "name",
+  "image_url",
+  "attributes",
+  "animation_url",
+]);
+
+function validateClaimPatchBody(body: MemeClaimUpdateRequest): void {
+  const payload = body as Record<string, unknown>;
+  const keys = Object.keys(payload);
+
+  const forbiddenGeneratedFields = keys.filter((key) =>
+    GENERATED_STORAGE_FIELDS.has(key)
+  );
+
+  if (forbiddenGeneratedFields.length > 0) {
+    throw new Error(
+      `PATCH cannot update generated storage fields: ${forbiddenGeneratedFields.join(", ")}`
+    );
+  }
+
+  const unsupportedFields = keys.filter(
+    (key) => !ALLOWED_PATCH_FIELDS.has(key)
+  );
+
+  if (unsupportedFields.length > 0) {
+    throw new Error(
+      `PATCH contains unsupported fields: ${unsupportedFields.join(", ")}`
+    );
+  }
+}
 
 function getHeaders(): Record<string, string> {
   const apiAuth = getStagingAuth();
@@ -51,6 +90,7 @@ export async function patchClaim(
   memeId: number,
   body: MemeClaimUpdateRequest
 ): Promise<MemeClaim> {
+  validateClaimPatchBody(body);
   return commonApiPatch<MemeClaimUpdateRequest, MemeClaim>({
     endpoint: `${CLAIMS_BASE}/${memeId}`,
     body,
@@ -65,7 +105,7 @@ export async function postArweaveUpload(memeId: number): Promise<void> {
     body: "",
   });
   if (res.status === 409) {
-    throw new Error("Already synced");
+    throw new Error("Already published");
   }
   if (res.status === 403) {
     throw new Error("Not authorized");

@@ -11,17 +11,15 @@
  * Do not edit the class manually.
  */
 
-import { MemeClaimAttribute } from '../models/MemeClaimAttribute';
 import { HttpFile } from '../http/http';
 
-export class MemeClaimUpdateRequest {
-    'season'?: number;
-    'edition_size'?: number | null;
-    'description'?: string;
-    'name'?: string;
-    'image_url'?: string | null;
-    'attributes'?: Array<MemeClaimAttribute>;
-    'animation_url'?: string | null;
+export class ApiWaveCurationGroup {
+    'id': string;
+    'name': string;
+    'wave_id': string;
+    'group_id': string;
+    'created_at': number;
+    'updated_at': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,20 +27,8 @@ export class MemeClaimUpdateRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "season",
-            "baseName": "season",
-            "type": "number",
-            "format": "int32"
-        },
-        {
-            "name": "edition_size",
-            "baseName": "edition_size",
-            "type": "number",
-            "format": "int32"
-        },
-        {
-            "name": "description",
-            "baseName": "description",
+            "name": "id",
+            "baseName": "id",
             "type": "string",
             "format": ""
         },
@@ -53,26 +39,32 @@ export class MemeClaimUpdateRequest {
             "format": ""
         },
         {
-            "name": "image_url",
-            "baseName": "image_url",
+            "name": "wave_id",
+            "baseName": "wave_id",
             "type": "string",
             "format": ""
         },
         {
-            "name": "attributes",
-            "baseName": "attributes",
-            "type": "Array<MemeClaimAttribute>",
+            "name": "group_id",
+            "baseName": "group_id",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "animation_url",
-            "baseName": "animation_url",
-            "type": "string",
-            "format": ""
+            "name": "created_at",
+            "baseName": "created_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return MemeClaimUpdateRequest.attributeTypeMap;
+        return ApiWaveCurationGroup.attributeTypeMap;
     }
 
     public constructor() {
