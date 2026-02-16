@@ -72,6 +72,10 @@ import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
+import {
+  hasCurrentDropPartContent,
+  shouldUseInitialDropConfig,
+} from "./utils/createDropContentSubmission";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { validateCurationDropInput } from "./utils/validateCurationDropUrl";
@@ -680,38 +684,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const getInitialDrop = (): CreateDropConfig | null => {
     const markdown = getMarkdown;
-    const hasFiles = !isCurationDropMode && files.length > 0;
-
-    if (markdown === null || markdown.length === 0 || hasFiles) return null;
-
-    const dropParts = drop?.parts;
-    const dropPartCount = dropParts?.length;
-    const hasDropParts = dropPartCount !== undefined && dropPartCount > 0;
-    let baseParts: CreateDropConfig["parts"] = [];
-
-    if (!isCurationDropMode && hasDropParts && dropParts !== undefined) {
-      baseParts = dropParts;
+    if (shouldUseInitialDropConfig(markdown, files.length)) {
+      const baseParts = drop?.parts.length ? drop.parts : [];
+      const replyTo = getReplyTo();
+      const replyToObj = replyTo ? { reply_to: replyTo } : {};
+      return {
+        title: null,
+        ...replyToObj,
+        parts: ensurePartsWithFallback(baseParts, hasMetadata),
+        mentioned_users: drop?.mentioned_users ?? [],
+        mentioned_waves: drop?.mentioned_waves ?? [],
+        referenced_nfts: drop?.referenced_nfts ?? [],
+        metadata: convertMetadataToDropMetadata(metadata),
+        signature: null,
+        drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
+        is_safe_signature: isSafeWallet,
+        signer_address: address ?? "",
+      };
     }
-    const replyTo = getReplyTo();
-    const replyToObj = replyTo ? { reply_to: replyTo } : {};
-    return {
-      title: null,
-      ...replyToObj,
-      parts: ensurePartsWithFallback(
-        baseParts,
-        !isCurationDropMode && hasMetadata
-      ),
-      mentioned_users: isCurationDropMode ? [] : (drop?.mentioned_users ?? []),
-      mentioned_waves: isCurationDropMode ? [] : (drop?.mentioned_waves ?? []),
-      referenced_nfts: isCurationDropMode ? [] : (drop?.referenced_nfts ?? []),
-      metadata: isCurationDropMode
-        ? []
-        : convertMetadataToDropMetadata(metadata),
-      signature: null,
-      drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
-      is_safe_signature: isSafeWallet,
-      signer_address: address ?? "",
-    };
+    return null;
   };
 
   const replyTo = getReplyTo();
@@ -754,8 +745,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   ): CreateDropConfig => {
     const availableFiles = isCurationDropMode ? [] : files;
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
-    const hasCurrentContent = !!(
-      markdown?.trim().length ?? availableFiles.length
+    const hasCurrentContent = hasCurrentDropPartContent(
+      markdown,
+      availableFiles.length
     );
     const quotedDrop =
       activeDrop?.action === ActiveDropAction.QUOTE
