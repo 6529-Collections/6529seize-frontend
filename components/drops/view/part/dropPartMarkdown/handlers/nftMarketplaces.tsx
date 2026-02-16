@@ -1,24 +1,31 @@
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import type { LinkHandler } from "../linkTypes";
 
 const MANIFOLD_LISTING_PATH_PATTERN = /^\/@[^/]+\/id\/[^/?#]+\/?$/i;
 const SUPER_RARE_ARTWORK_PATH_PATTERN =
-  /^\/artwork\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
-const SUPER_RARE_ARTWORK_V2_PATH_PATTERN = /^\/artwork-v2\/[^/?#]+\/?$/i;
+  /^\/artwork\/eth\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const FOUNDATION_MINT_PATH_PATTERN =
-  /^\/mint\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+  /^\/mint\/eth\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const OPENSEA_ITEM_PATH_PATTERN =
-  /^\/item\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+  /^\/item\/ethereum\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const OPENSEA_ASSET_PATH_PATTERN =
-  /^\/assets\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+  /^\/assets\/ethereum\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const TRANSIENT_NFT_PATH_PATTERN =
-  /^\/nfts\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+  /^\/nfts\/ethereum\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+const TRANSIENT_MINT_PATH_PATTERN = /^\/mint\/[^/?#]+\/?$/i;
+
+const MANIFOLD_HOST = "manifold.xyz";
+const SUPER_RARE_HOST = "superrare.com";
+const FOUNDATION_HOST = "foundation.app";
+const OPENSEA_HOST = "opensea.io";
+const TRANSIENT_HOST = "transient.xyz";
+
+const isApexOrWwwHost = (hostname: string, domain: string): boolean =>
+  hostname === domain || hostname === `www.${domain}`;
 
 const isSuperRareArtworkPath = (pathname: string): boolean =>
-  SUPER_RARE_ARTWORK_PATH_PATTERN.test(pathname) ||
-  SUPER_RARE_ARTWORK_V2_PATH_PATTERN.test(pathname);
+  SUPER_RARE_ARTWORK_PATH_PATTERN.test(pathname);
 
 const isFoundationMintPath = (pathname: string): boolean =>
   FOUNDATION_MINT_PATH_PATTERN.test(pathname);
@@ -27,8 +34,9 @@ const isOpenSeaItemPath = (pathname: string): boolean =>
   OPENSEA_ITEM_PATH_PATTERN.test(pathname) ||
   OPENSEA_ASSET_PATH_PATTERN.test(pathname);
 
-const isTransientItemPath = (pathname: string): boolean =>
-  TRANSIENT_NFT_PATH_PATTERN.test(pathname);
+const isTransientPath = (pathname: string): boolean =>
+  TRANSIENT_NFT_PATH_PATTERN.test(pathname) ||
+  TRANSIENT_MINT_PATH_PATTERN.test(pathname);
 
 const isManifoldListingPath = (pathname: string): boolean =>
   MANIFOLD_LISTING_PATH_PATTERN.test(pathname);
@@ -36,27 +44,31 @@ const isManifoldListingPath = (pathname: string): boolean =>
 const isNftMarketplaceLink = (href: string): boolean => {
   try {
     const url = new URL(href);
+    if (url.protocol !== "https:") {
+      return false;
+    }
+
     const hostname = url.hostname.toLowerCase();
     const pathname = url.pathname;
 
-    if (matchesDomainOrSubdomain(hostname, "manifold.xyz")) {
+    if (isApexOrWwwHost(hostname, MANIFOLD_HOST)) {
       return isManifoldListingPath(pathname);
     }
 
-    if (matchesDomainOrSubdomain(hostname, "superrare.com")) {
+    if (isApexOrWwwHost(hostname, SUPER_RARE_HOST)) {
       return isSuperRareArtworkPath(pathname);
     }
 
-    if (matchesDomainOrSubdomain(hostname, "foundation.app")) {
+    if (isApexOrWwwHost(hostname, FOUNDATION_HOST)) {
       return isFoundationMintPath(pathname);
     }
 
-    if (matchesDomainOrSubdomain(hostname, "opensea.io")) {
+    if (isApexOrWwwHost(hostname, OPENSEA_HOST)) {
       return isOpenSeaItemPath(pathname);
     }
 
-    if (matchesDomainOrSubdomain(hostname, "transient.xyz")) {
-      return isTransientItemPath(pathname);
+    if (isApexOrWwwHost(hostname, TRANSIENT_HOST)) {
+      return isTransientPath(pathname);
     }
 
     return false;

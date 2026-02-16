@@ -78,7 +78,10 @@ import {
 } from "./utils/createDropContentSubmission";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
-import { validateCurationDropInput } from "./utils/validateCurationDropUrl";
+import {
+  normalizeCurationDropInput,
+  validateCurationDropInput,
+} from "./utils/validateCurationDropUrl";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -951,13 +954,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    let normalizedDropRequest = dropRequest;
+
     if (isCurationDropMode) {
       const hasTooManyParts = dropRequest.parts.length !== 1;
       const hasMedia = dropRequest.parts.some((part) => part.media.length > 0);
       const curationText = dropRequest.parts[0]?.content?.trim() ?? "";
-      const curationValidation = validateCurationDropInput(curationText);
+      const primaryPart = dropRequest.parts[0];
+      const normalizedCurationText = normalizeCurationDropInput(curationText);
+      const curationValidation = normalizedCurationText
+        ? null
+        : validateCurationDropInput(curationText);
 
-      if (hasTooManyParts || hasMedia || curationValidation) {
+      if (
+        hasTooManyParts ||
+        hasMedia ||
+        !normalizedCurationText ||
+        !primaryPart
+      ) {
         setToast({
           message:
             curationValidation?.helperText ??
@@ -966,6 +980,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         });
         return;
       }
+
+      normalizedDropRequest = {
+        ...dropRequest,
+        parts: [
+          {
+            ...primaryPart,
+            content: normalizedCurationText,
+            media: [],
+          },
+        ],
+      };
     }
 
     setSubmitting(true);
@@ -975,13 +1000,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    if (!dropRequest.parts.length) {
+    if (!normalizedDropRequest.parts.length) {
       setSubmitting(false);
       return;
     }
 
     try {
-      const parts = await generateParts(dropRequest.parts, setUploadingFiles);
+      const parts = await generateParts(
+        normalizedDropRequest.parts,
+        setUploadingFiles
+      );
       if (!parts.length) {
         setSubmitting(false);
         return;
@@ -1000,16 +1028,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       }
 
       const requestBody: ApiCreateDropRequest = {
-        ...dropRequest,
+        ...normalizedDropRequest,
         mentioned_users: filterMentionedUsers({
-          mentionedUsers: dropRequest.mentioned_users,
-          parts: dropRequest.parts,
+          mentionedUsers: normalizedDropRequest.mentioned_users,
+          parts: normalizedDropRequest.parts,
         }),
         mentioned_waves: filterMentionedWaves({
-          mentionedWaves: dropRequest.mentioned_waves ?? [],
-          parts: dropRequest.parts,
+          mentionedWaves: normalizedDropRequest.mentioned_waves ?? [],
+          parts: normalizedDropRequest.parts,
         }),
-        metadata: isCurationDropMode ? [] : dropRequest.metadata,
+        metadata: isCurationDropMode ? [] : normalizedDropRequest.metadata,
         wave_id: wave.id,
         parts,
       };
