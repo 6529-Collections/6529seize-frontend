@@ -28,7 +28,7 @@ export function WaveLeaderboardCurationGroupSelect({
   const breakpoint = useBreakpoint();
   const isSmallViewport = breakpoint === "S";
 
-  const groupDetailsQueries = useQueries({
+  const pfpMap = useQueries({
     queries: groups.map((group) => ({
       queryKey: [QueryKey.GROUP, group.group_id],
       queryFn: async () =>
@@ -38,19 +38,17 @@ export function WaveLeaderboardCurationGroupSelect({
       enabled: Boolean(group.group_id),
       staleTime: 5 * 60 * 1000,
     })),
+    combine: (results) => {
+      const map = new Map<string, string>();
+      groups.forEach((group, i) => {
+        const pfp = results[i]?.data?.created_by?.pfp;
+        if (pfp) {
+          map.set(group.id, pfp);
+        }
+      });
+      return map;
+    },
   });
-
-  const pfpMap = useMemo(() => {
-    const map = new Map<string, string>();
-    groups.forEach((group, i) => {
-      const pfp = groupDetailsQueries[i]?.data?.created_by?.pfp;
-      if (pfp) {
-        map.set(group.id, pfp);
-      }
-    });
-    return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groups, ...groupDetailsQueries.map((q) => q.data)]);
 
   const items = useMemo<readonly CommonSelectItem<string | null>[]>(
     () => [

@@ -9,7 +9,10 @@ jest.mock("react-use", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
-  useQueries: jest.fn(() => []),
+  useQueries: jest.fn(({ queries, combine }: any) => {
+    const results = (queries ?? []).map(() => ({ data: undefined }));
+    return combine ? combine(results) : results;
+  }),
 }));
 
 const commonDropdownMock = jest.fn((props: any) => (
