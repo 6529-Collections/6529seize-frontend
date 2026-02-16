@@ -2,25 +2,32 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveLeaderboardCurationGroupSelect } from "@/components/waves/leaderboard/header/WaveLeaderboardCurationGroupSelect";
 
-const commonSelectMock = jest.fn();
+let mockBreakpoint = "MD";
 
-jest.mock("@/components/utils/select/CommonSelect", () => ({
+jest.mock("react-use", () => ({
+  createBreakpoint: jest.fn(() => () => mockBreakpoint),
+}));
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueries: jest.fn(({ queries, combine }: any) => {
+    const results = (queries ?? []).map(() => ({ data: undefined }));
+    return combine ? combine(results) : results;
+  }),
+}));
+
+const commonDropdownMock = jest.fn((props: any) => (
+  <div data-testid="mobile-dropdown">
+    {props.items.map((item: any) => (
+      <button key={item.key} onClick={() => props.setSelected(item.value)}>
+        {item.label}
+      </button>
+    ))}
+  </div>
+));
+
+jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => ({
   __esModule: true,
-  default: (props: any) => {
-    commonSelectMock(props);
-    return (
-      <div data-testid="common-select">
-        {props.items.map((item: any) => (
-          <button key={item.key} onClick={() => props.setSelected(item.value)}>
-            {item.label}
-          </button>
-        ))}
-        <span data-testid="active-item">
-          {props.activeItem === null ? "null" : props.activeItem}
-        </span>
-      </div>
-    );
-  },
+  default: (props: any) => commonDropdownMock(props),
 }));
 
 const groups = [
@@ -44,7 +51,8 @@ const groups = [
 
 describe("WaveLeaderboardCurationGroupSelect", () => {
   beforeEach(() => {
-    commonSelectMock.mockClear();
+    mockBreakpoint = "MD";
+    commonDropdownMock.mockClear();
   });
 
   it("returns null when there are no curation groups", () => {
@@ -57,10 +65,9 @@ describe("WaveLeaderboardCurationGroupSelect", () => {
     );
 
     expect(container).toBeEmptyDOMElement();
-    expect(commonSelectMock).not.toHaveBeenCalled();
   });
 
-  it("maps curation options and passes select configuration", () => {
+  it("renders horizontal tabs on desktop", () => {
     render(
       <WaveLeaderboardCurationGroupSelect
         groups={groups}
@@ -70,19 +77,31 @@ describe("WaveLeaderboardCurationGroupSelect", () => {
     );
 
     expect(screen.getByTestId("curation-group-select")).toBeInTheDocument();
-    expect(screen.getByTestId("active-item")).toHaveTextContent("cg-2");
-
-    const commonSelectProps = commonSelectMock.mock.calls[0][0];
-    expect(commonSelectProps.filterLabel).toBe("Curation");
-    expect(commonSelectProps.fill).toBe(false);
-    expect(commonSelectProps.items).toEqual([
-      { key: "all-submissions", label: "All submissions", value: null },
-      { key: "cg-1", label: "Curators One", value: "cg-1" },
-      { key: "cg-2", label: "Curators Two", value: "cg-2" },
-    ]);
+    expect(screen.getByText("All submissions")).toBeInTheDocument();
+    expect(screen.getByText("Curators One")).toBeInTheDocument();
+    expect(screen.getByText("Curators Two")).toBeInTheDocument();
+    expect(commonDropdownMock).not.toHaveBeenCalled();
   });
 
-  it("handles selecting curation options", async () => {
+  it("highlights the active tab on desktop", () => {
+    render(
+      <WaveLeaderboardCurationGroupSelect
+        groups={groups}
+        selectedGroupId={"cg-2"}
+        onChange={jest.fn()}
+      />
+    );
+
+    const activeButton = screen.getByText("Curators Two").closest("button")!;
+    expect(activeButton.className).toContain("tw-ring-iron-600");
+
+    const inactiveButton = screen
+      .getByText("All submissions")
+      .closest("button")!;
+    expect(inactiveButton.className).toContain("tw-ring-transparent");
+  });
+
+  it("handles tab clicks on desktop", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
@@ -94,10 +113,49 @@ describe("WaveLeaderboardCurationGroupSelect", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Curators One" }));
-    await user.click(screen.getByRole("button", { name: "All submissions" }));
+    await user.click(screen.getByText("Curators One"));
+    await user.click(screen.getByText("All submissions"));
 
     expect(onChange).toHaveBeenNthCalledWith(1, "cg-1");
     expect(onChange).toHaveBeenNthCalledWith(2, null);
+  });
+
+  it("renders dropdown on mobile", () => {
+    mockBreakpoint = "S";
+
+    render(
+      <WaveLeaderboardCurationGroupSelect
+        groups={groups}
+        selectedGroupId={null}
+        onChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("mobile-dropdown")).toBeInTheDocument();
+    expect(commonDropdownMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterLabel: "Group",
+        showFilterLabel: true,
+        size: "sm",
+        activeItem: null,
+      })
+    );
+  });
+
+  it("handles dropdown selection on mobile", async () => {
+    mockBreakpoint = "S";
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <WaveLeaderboardCurationGroupSelect
+        groups={groups}
+        selectedGroupId={null}
+        onChange={onChange}
+      />
+    );
+
+    await user.click(screen.getByText("Curators One"));
+    expect(onChange).toHaveBeenCalledWith("cg-1");
   });
 });
