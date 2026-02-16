@@ -30,6 +30,8 @@ import ArtBlocksIcon from "./ArtBlocksIcon";
 import DecaArtIcon from "./DecaArtIcon";
 import OnCyberIcon from "./OnCyberIcon";
 import TheLineIcon from "./TheLineIcon";
+import ManifoldIcon from "./ManifoldIcon";
+import TransientIcon from "./TransientIcon";
 
 export default function SocialStatementIcon({
   statementType,
@@ -97,8 +99,11 @@ export default function SocialStatementIcon({
       return <OnCyberIcon aria-hidden="true" />;
     case STATEMENT_TYPE.THE_LINE:
       return <TheLineIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.MANIFOLD:
+      return <ManifoldIcon />;
+    case STATEMENT_TYPE.TRANSIENT:
+      return <TransientIcon />;
     default:
       assertUnreachable(statementType);
-      return;
   }
 }
