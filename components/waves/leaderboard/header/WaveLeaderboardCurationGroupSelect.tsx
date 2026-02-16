@@ -114,7 +114,7 @@ export function WaveLeaderboardCurationGroupSelect({
                 alt=""
                 width={16}
                 height={16}
-                className="tw-size-4 tw-flex-shrink-0 tw-rounded-lg tw-object-cover"
+                className="tw-size-4 tw-flex-shrink-0 tw-rounded-md tw-object-cover"
               />
             )}
             {item.label}
