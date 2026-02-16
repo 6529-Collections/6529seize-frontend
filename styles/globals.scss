@@ -827,11 +827,6 @@ pre code {
   display: flex;
 }
 
-/* Prevent iOS Safari auto-zoom on emoji picker buttons and search input.
-   emoji-mart's Shadow DOM applies font-size: var(--font-size) to all
-   <button> and <input> elements (default 15px). iOS Safari auto-zooms
-   any interactive element below 16px. Setting --font-size to 17px keeps
-   buttons at 17px and the search input at calc(17px - 1px) = 16px. */
 em-emoji-picker {
   --font-size: 17px;
 }
