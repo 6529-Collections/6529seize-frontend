@@ -9,6 +9,7 @@ import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import React, { useContext } from "react";
 import { Tooltip } from "react-tooltip";
+import { getWaveDropEligibility } from "../dropEligibility";
 import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
 import { WaveleaderboardSort } from "./WaveleaderboardSort";
@@ -38,8 +39,15 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   curatedByGroupId = null,
   onCurationGroupChange,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
-  const { isMemesWave, participation } = useWave(wave);
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isMemesWave, isCurationWave, participation } = useWave(wave);
+  const isLoggedIn = Boolean(connectedProfile?.handle);
+  const { canCreateDrop } = getWaveDropEligibility({
+    isLoggedIn,
+    isProxy: Boolean(activeProfileProxy),
+    isCurationWave,
+    participation,
+  });
   const showCurationGroupSelect = Boolean(
     onCurationGroupChange && curationGroups.length > 0
   );
@@ -177,10 +185,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               </React.Fragment>
             ))}
           </div>
-          <WaveleaderboardSort
-            sort={sort}
-            onSortChange={onSortChange}
-          />
+          <WaveleaderboardSort sort={sort} onSortChange={onSortChange} />
           {showCurationGroupSelect && onCurationGroupChange && (
             <WaveLeaderboardCurationGroupSelect
               groups={curationGroups}
@@ -189,17 +194,21 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             />
           )}
         </div>
-        {connectedProfile && participation.isEligible && (
-          <div className={`${isMemesWave ? "lg:tw-hidden" : ""}`}>
-            <PrimaryButton
-              loading={false}
-              disabled={false}
-              onClicked={onCreateDrop}
-              padding="tw-px-3 tw-py-2"
-            >
-              <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              <span>Drop</span>
-            </PrimaryButton>
+        {isLoggedIn && (
+          <div
+            className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
+          >
+            {canCreateDrop && (
+              <PrimaryButton
+                loading={false}
+                disabled={false}
+                onClicked={onCreateDrop}
+                padding="tw-px-3 tw-py-2"
+              >
+                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <span>Drop</span>
+              </PrimaryButton>
+            )}
           </div>
         )}
       </div>

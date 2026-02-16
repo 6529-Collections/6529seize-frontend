@@ -34,7 +34,11 @@ jest.mock("@/hooks/useWave", () => ({
 }));
 
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
-  <button data-testid="create" onClick={props.onClicked}>
+  <button
+    data-testid="create"
+    onClick={props.onClicked}
+    disabled={props.disabled}
+  >
     {props.children}
   </button>
 ));
@@ -48,7 +52,13 @@ const wave = { id: "w" } as any;
 beforeEach(() => {
   useWave.mockReturnValue({
     isMemesWave: true,
-    participation: { isEligible: true },
+    isCurationWave: false,
+    participation: {
+      isEligible: true,
+      canSubmitNow: true,
+      hasReachedLimit: false,
+      status: "ACTIVE",
+    },
   });
 });
 
@@ -58,7 +68,14 @@ it("renders meme controls and handles actions", async () => {
   const onViewModeChange = jest.fn();
   const onSortChange = jest.fn();
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={onCreate}
@@ -82,6 +99,7 @@ it("renders meme controls and handles actions", async () => {
 it("renders three view toggles and sort for non-meme waves", async () => {
   useWave.mockReturnValue({
     isMemesWave: false,
+    isCurationWave: false,
     participation: { isEligible: true },
   });
   const user = userEvent.setup();
@@ -89,7 +107,14 @@ it("renders three view toggles and sort for non-meme waves", async () => {
   const onSortChange = jest.fn();
 
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={jest.fn()}
@@ -113,7 +138,14 @@ it("renders curation selector and handles curation filter changes", async () => 
   const onCurationGroupChange = jest.fn();
 
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={jest.fn()}
@@ -144,7 +176,14 @@ it("renders curation selector and handles curation filter changes", async () => 
 
 it("does not render curation selector when curation controls are unavailable", () => {
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={jest.fn()}
@@ -168,4 +207,83 @@ it("does not render curation selector when curation controls are unavailable", (
   );
 
   expect(screen.queryByTestId("curation-group-select")).not.toBeInTheDocument();
+});
+
+it("hides drop button when submissions are blocked", () => {
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: false,
+    participation: {
+      isEligible: true,
+      canSubmitNow: false,
+      hasReachedLimit: true,
+      status: "ACTIVE",
+    },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("You have reached the maximum number of drops allowed")
+  ).not.toBeInTheDocument();
+});
+
+it("hides drop button for curation waves when not eligible", () => {
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: {
+      isEligible: false,
+      canSubmitNow: false,
+      hasReachedLimit: false,
+      status: "ACTIVE",
+    },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Curation wave submissions require at least Level 10.")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Learn more about Network Levels" })
+  ).not.toBeInTheDocument();
 });

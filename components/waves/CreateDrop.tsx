@@ -27,6 +27,7 @@ import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
+import { useWave } from "@/hooks/useWave";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -63,6 +64,7 @@ export default function CreateDrop({
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
+  const { isCurationWave } = useWave(wave);
   const getIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -77,6 +79,7 @@ export default function CreateDrop({
   };
 
   const [isDropMode, setIsDropMode] = useState(getIsDropMode());
+  const isCurationDropMode = isCurationWave && isDropMode;
   useEffect(() => setIsDropMode(getIsDropMode()), [wave, activeDrop]);
 
   const getIsDropModeDisabled = () => {
@@ -276,7 +279,7 @@ export default function CreateDrop({
   return (
     <>
       <AnimatePresence>
-        {isStormMode && (
+        {isStormMode && !isCurationDropMode && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
