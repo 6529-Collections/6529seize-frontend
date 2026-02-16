@@ -138,7 +138,10 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
         >
-          <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+          <div
+            className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             <Picker
               theme="dark"
               data={data}

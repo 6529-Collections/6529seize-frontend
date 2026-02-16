@@ -40,6 +40,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const {
     isChatWave,
     isMemesWave,
+    isCurationWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const {
@@ -130,6 +131,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             waveId: wave.id,
             isMemesWave,
             isChatWave,
+            isCurationWave,
             votingState,
             hasFirstDecisionPassed: firstDecisionDone,
           }
@@ -139,6 +141,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     wave,
     isMemesWave,
     isChatWave,
+    isCurationWave,
     isUpcoming,
     isCompleted,
     isInProgress,

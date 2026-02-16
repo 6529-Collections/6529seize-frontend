@@ -1,4 +1,4 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
@@ -17,6 +17,10 @@ import {
   buildResponse,
 } from "./utils";
 import { createCompoundPlan, type PreviewPlan } from "./compound/service";
+import { createFoundationPlan } from "./foundation/service";
+import { createManifoldPlan } from "./manifold/service";
+import { createOpenSeaPlan } from "./opensea/service";
+import { createTransientPlan } from "./transient/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -31,7 +35,15 @@ const HTML_FETCH_HEADERS = {
 
 const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
   blockedHosts: ["localhost", "127.0.0.1", "::1"],
-  blockedHostSuffixes: [".local", ".internal", ".lan", ".intra", ".corp", ".home", ".test"],
+  blockedHostSuffixes: [
+    ".local",
+    ".internal",
+    ".lan",
+    ".intra",
+    ".corp",
+    ".home",
+    ".test",
+  ],
 };
 
 const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
@@ -52,10 +64,12 @@ type HostOverrides = {
 const HOST_OVERRIDES: readonly HostOverrides[] = [
   {
     domain: "facebook.com",
-    userAgent: "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+    userAgent:
+      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
     headers: {
       set: {
-        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         referer: "https://www.facebook.com/",
       },
     },
@@ -64,8 +78,9 @@ const HOST_OVERRIDES: readonly HostOverrides[] = [
 
 function findHostOverrides(hostname: string): HostOverrides | undefined {
   const normalizedHost = hostname.toLowerCase();
-  return HOST_OVERRIDES.find(({ domain }) =>
-    normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+  return HOST_OVERRIDES.find(
+    ({ domain }) =>
+      normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
   );
 }
 
@@ -131,7 +146,9 @@ const cache = new LruTtlCache<string, LinkPreviewResponse>({
 
 const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   error instanceof UrlGuardError ||
-  (typeof error === "object" && error !== null && (error as { name?: string | undefined }).name === "UrlGuardError");
+  (typeof error === "object" &&
+    error !== null &&
+    (error as { name?: string | undefined }).name === "UrlGuardError");
 type FetchInput = Parameters<typeof fetch>[0];
 
 const isRequestLike = (value: unknown): value is { url: string } => {
@@ -154,7 +171,11 @@ const stringifiesToUrl = (value: unknown): string | null => {
 
   try {
     const raw = (value as { toString: () => string }).toString();
-    return typeof raw === "string" && !raw.startsWith("[object ") && raw.length > 0 ? raw : null;
+    return typeof raw === "string" &&
+      !raw.startsWith("[object ") &&
+      raw.length > 0
+      ? raw
+      : null;
   } catch {
     return null;
   }
@@ -182,7 +203,11 @@ const resolveRequestUrl = (input: FetchInput): URL => {
     return new URL(stringified);
   }
 
-  throw new UrlGuardError("Unsupported fetch input provided.", "invalid-url", 400);
+  throw new UrlGuardError(
+    "Unsupported fetch input provided.",
+    "invalid-url",
+    400
+  );
 };
 
 // Apply host-specific header overrides while letting fetchPublicUrl enforce SSRF guardrails.
@@ -242,7 +267,9 @@ async function extractHtmlResponse(
       throw error;
     }
 
-    throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, { cause: error });
+    throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, {
+      cause: error,
+    });
   }
 }
 
@@ -267,10 +294,14 @@ async function fetchHtml(
 
 function handleGuardError(error: unknown, fallbackStatus = 400) {
   if (isUrlGuardError(error)) {
-    return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode }
+    );
   }
 
-  const message = error instanceof Error ? error.message : "Invalid or forbidden URL";
+  const message =
+    error instanceof Error ? error.message : "Invalid or forbidden URL";
   return NextResponse.json({ error: message }, { status: fallbackStatus });
 }
 
@@ -287,7 +318,8 @@ function createGenericPlan(url: URL): PreviewPlan {
         url
       );
       const data =
-        googleWorkspace ?? buildResponse(finalUrlInstance, html, contentType, finalUrl);
+        googleWorkspace ??
+        buildResponse(finalUrlInstance, html, contentType, finalUrl);
       return { data, ttl: CACHE_TTL_MS };
     },
   };
@@ -303,9 +335,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(preview);
     } catch (error) {
       if (error instanceof EnsPreviewError) {
-        return NextResponse.json({ error: error.message }, { status: error.status });
+        return NextResponse.json(
+          { error: error.message },
+          { status: error.status }
+        );
       }
-      const message = error instanceof Error ? error.message : "Failed to fetch ENS preview";
+      const message =
+        error instanceof Error ? error.message : "Failed to fetch ENS preview";
       return NextResponse.json({ error: message }, { status: 502 });
     }
   }
@@ -324,8 +360,29 @@ export async function GET(request: NextRequest) {
     return handleGuardError(error);
   }
 
-  const compoundPlan = createCompoundPlan(targetUrl);
-  const plan = compoundPlan ?? createGenericPlan(targetUrl);
+  const manifoldPlan = createManifoldPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
+  const foundationPlan = createFoundationPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
+  const openSeaPlan = createOpenSeaPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
+  const transientPlan = createTransientPlan(targetUrl, {
+    fetchHtml,
+    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+  });
+  const plan =
+    manifoldPlan ??
+    foundationPlan ??
+    openSeaPlan ??
+    transientPlan ??
+    createCompoundPlan(targetUrl) ??
+    createGenericPlan(targetUrl);
 
   const cached = cache.get(plan.cacheKey);
 
@@ -340,10 +397,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     if (isUrlGuardError(error)) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode }
+      );
     }
 
-    const message = error instanceof Error ? error.message : "Unable to fetch URL";
+    const message =
+      error instanceof Error ? error.message : "Unable to fetch URL";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

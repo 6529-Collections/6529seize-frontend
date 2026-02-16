@@ -17,6 +17,7 @@ export default function CommonTabs<T, U = unknown>(
     "sortDirection" in props ? props.sortDirection : undefined;
   const disabled = "disabled" in props ? props.disabled ?? false : false;
 
+
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const [showStartFade, setShowStartFade] = useState(false);
@@ -159,6 +160,7 @@ export default function CommonTabs<T, U = unknown>(
               }}
               disabled={disabled}
               fill={props.fill ?? true}
+
             />
           ))}
         </div>

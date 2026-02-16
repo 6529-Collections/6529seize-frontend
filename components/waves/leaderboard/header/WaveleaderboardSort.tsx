@@ -5,17 +5,21 @@ import {
   WAVE_DROPS_PARAMS,
   getDefaultQueryRetry,
 } from "@/components/react-query-wrapper/utils/query-utils";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useMemo } from "react";
+import { createBreakpoint } from "react-use";
 
 interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
   readonly waveId?: string | undefined;
+  readonly curatedByGroupId?: string | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<
@@ -29,12 +33,45 @@ const SORT_DIRECTION_MAP: Record<
   [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
 };
 
+const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
+
 export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   sort,
   onSortChange,
   waveId,
+  curatedByGroupId,
 }) => {
+  const breakpoint = useBreakpoint();
+  const isSmallViewport = breakpoint === "S";
   const queryClient = useQueryClient();
+  const normalizedCuratedByGroupId = curatedByGroupId?.trim() ?? undefined;
+  const sortItems = useMemo<
+    readonly CommonSelectItem<WaveDropsLeaderboardSort>[]
+  >(
+    () => [
+      {
+        key: WaveDropsLeaderboardSort.RANK,
+        label: "Current Vote",
+        value: WaveDropsLeaderboardSort.RANK,
+      },
+      {
+        key: WaveDropsLeaderboardSort.RATING_PREDICTION,
+        label: "Projected Vote",
+        value: WaveDropsLeaderboardSort.RATING_PREDICTION,
+      },
+      {
+        key: WaveDropsLeaderboardSort.TREND,
+        label: "Hot",
+        value: WaveDropsLeaderboardSort.TREND,
+      },
+      {
+        key: WaveDropsLeaderboardSort.CREATED_AT,
+        label: "Newest",
+        value: WaveDropsLeaderboardSort.CREATED_AT,
+      },
+    ],
+    []
+  );
 
   const prefetchSortImmediate = useCallback(
     (targetSort: WaveDropsLeaderboardSort) => {
@@ -48,6 +85,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
           page_size: WAVE_DROPS_PARAMS.limit,
           sort: targetSort,
           sort_direction: sortDirection,
+          curated_by_group: normalizedCuratedByGroupId ?? null,
         },
       ];
 
@@ -66,6 +104,10 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
 
             if (typeof pageParam === "number") {
               params["page"] = `${pageParam}`;
+            }
+
+            if (normalizedCuratedByGroupId) {
+              params["curated_by_group"] = normalizedCuratedByGroupId;
             }
 
             return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -98,7 +140,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
           });
         });
     },
-    [queryClient, waveId, sort]
+    [queryClient, waveId, sort, normalizedCuratedByGroupId]
   );
 
   // Debounce prefetch to prevent excessive network requests on rapid hover events
@@ -123,10 +165,25 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
     return `${baseClass} tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-300`;
   };
 
+  if (isSmallViewport) {
+    return (
+      <div className="tw-w-full tw-min-w-0">
+        <CommonDropdown<WaveDropsLeaderboardSort>
+          items={sortItems}
+          activeItem={sort}
+          filterLabel="Sort"
+          setSelected={onSortChange}
+          size="sm"
+          showFilterLabel={true}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       id="tabsId"
-      className="tw-flex tw-rounded-lg tw-whitespace-nowrap tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
+      className="tw-flex tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
     >
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.RANK)}

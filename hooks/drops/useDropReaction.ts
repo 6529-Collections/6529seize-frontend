@@ -91,6 +91,8 @@ export function useDropReaction(
                 reaction: null,
                 boosted: false,
                 bookmarked: false,
+                curatable: false,
+                curated: false,
               };
 
           draft.context_profile_context = {

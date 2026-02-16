@@ -8,7 +8,6 @@ import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyAct
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
-import CommonInfoBox from "@/components/utils/CommonInfoBox";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 export default function UserPageRepNewRepSearchHeader({
@@ -112,19 +111,13 @@ export default function UserPageRepNewRepSearchHeader({
           </span>
         </span>
       )}
-      {!!activeProfileProxy && !activeRepRates.available ? (
-        <div className="tw-py-4">
-          <CommonInfoBox message="You don't have any rep left to rate" />
-        </div>
-      ) : (
-        <>
-          <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-            <span>Your available Rep:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-              {formatNumberWithCommas(availableCredit)}
-            </span>
+      {!activeProfileProxy && (
+        <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
+          <span>Your available Rep:</span>
+          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+            {formatNumberWithCommas(availableCredit)}
           </span>
-        </>
+        </span>
       )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
         <span>

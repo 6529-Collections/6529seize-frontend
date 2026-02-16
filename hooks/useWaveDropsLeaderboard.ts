@@ -1,23 +1,23 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import {
-  generateUniqueKeys,
-  mapToExtendedDrops,
-} from "@/helpers/waves/wave-drops.helpers";
-import { useDebounce } from "react-use";
 import {
   getDefaultQueryRetry,
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import {
+  generateUniqueKeys,
+  mapToExtendedDrops,
+} from "@/helpers/waves/wave-drops.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDebounce } from "react-use";
 import useCapacitor from "./useCapacitor";
 
 export enum WaveDropsLeaderboardSort {
@@ -32,6 +32,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly pausePolling?: boolean | undefined;
+  readonly curatedByGroupId?: string | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<
@@ -66,6 +67,7 @@ export function useWaveDropsLeaderboard({
   waveId,
   sort = WaveDropsLeaderboardSort.RANK,
   pausePolling = false,
+  curatedByGroupId,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -76,15 +78,83 @@ export function useWaveDropsLeaderboard({
 
   const sortDirection = SORT_DIRECTION_MAP[sort];
 
-  const queryKey = [
-    QueryKey.DROPS_LEADERBOARD,
-    {
-      waveId,
-      page_size: WAVE_DROPS_PARAMS.limit,
-      sort: sort,
-      sort_direction: sortDirection,
+  const normalizedCuratedByGroupId = useMemo(
+    () => curatedByGroupId?.trim() ?? undefined,
+    [curatedByGroupId]
+  );
+
+  const queryKey = useMemo(
+    () =>
+      [
+        QueryKey.DROPS_LEADERBOARD,
+        {
+          waveId,
+          page_size: WAVE_DROPS_PARAMS.limit,
+          sort,
+          sort_direction: sortDirection,
+          curated_by_group: normalizedCuratedByGroupId ?? null,
+        },
+      ] as const,
+    [waveId, sort, sortDirection, normalizedCuratedByGroupId]
+  );
+
+  const buildLeaderboardParams = useCallback(
+    ({
+      pageParam,
+      pageSize,
+      targetSort,
+      targetSortDirection,
+    }: {
+      readonly pageParam: number | null;
+      readonly pageSize: number;
+      readonly targetSort: WaveDropsLeaderboardSort;
+      readonly targetSortDirection: "ASC" | "DESC" | undefined;
+    }) => {
+      const params: Record<string, string> = {
+        page_size: pageSize.toString(),
+        sort: targetSort,
+      };
+
+      if (targetSortDirection) {
+        params["sort_direction"] = targetSortDirection;
+      }
+
+      if (typeof pageParam === "number") {
+        params["page"] = `${pageParam}`;
+      }
+
+      if (normalizedCuratedByGroupId) {
+        params["curated_by_group"] = normalizedCuratedByGroupId;
+      }
+
+      return params;
     },
-  ];
+    [normalizedCuratedByGroupId]
+  );
+
+  const fetchLeaderboardPage = useCallback(
+    async ({
+      pageParam,
+      pageSize,
+      targetSort,
+      targetSortDirection,
+    }: {
+      readonly pageParam: number | null;
+      readonly pageSize: number;
+      readonly targetSort: WaveDropsLeaderboardSort;
+      readonly targetSortDirection: "ASC" | "DESC" | undefined;
+    }) =>
+      await commonApiFetch<ApiDropsLeaderboardPage>({
+        endpoint: `waves/${waveId}/leaderboard`,
+        params: buildLeaderboardParams({
+          pageParam,
+          pageSize,
+          targetSort,
+          targetSortDirection,
+        }),
+      }),
+    [waveId, buildLeaderboardParams]
+  );
 
   const getNextPageParam = useCallback(
     (lastPage: ApiDropsLeaderboardPage) => {
@@ -105,32 +175,28 @@ export function useWaveDropsLeaderboard({
     if (!waveId) return;
     queryClient.prefetchInfiniteQuery({
       queryKey,
-      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-        const params: Record<string, string> = {
-          page_size: WAVE_DROPS_PARAMS.limit.toString(),
-          sort: sort,
-        };
-
-        if (sortDirection) {
-          params["sort_direction"] = sortDirection;
-        }
-
-        if (typeof pageParam === "number") {
-          params["page"] = `${pageParam}`;
-        }
-
-        return await commonApiFetch<ApiDropsLeaderboardPage>({
-          endpoint: `waves/${waveId}/leaderboard`,
-          params,
-        });
-      },
+      queryFn: async ({ pageParam }: { pageParam: number | null }) =>
+        await fetchLeaderboardPage({
+          pageParam,
+          pageSize: WAVE_DROPS_PARAMS.limit,
+          targetSort: sort,
+          targetSortDirection: sortDirection,
+        }),
       initialPageParam: null,
       getNextPageParam,
       pages: 1,
       staleTime: 60000,
       ...getDefaultQueryRetry(),
     });
-  }, [waveId, sort]);
+  }, [
+    fetchLeaderboardPage,
+    getNextPageParam,
+    queryClient,
+    queryKey,
+    sort,
+    sortDirection,
+    waveId,
+  ]);
 
   const {
     data,
@@ -141,25 +207,13 @@ export function useWaveDropsLeaderboard({
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        page_size: WAVE_DROPS_PARAMS.limit.toString(),
-        sort: sort,
-      };
-
-      if (sortDirection) {
-        params["sort_direction"] = sortDirection;
-      }
-
-      if (typeof pageParam === "number") {
-        params["page"] = `${pageParam}`;
-      }
-
-      return await commonApiFetch<ApiDropsLeaderboardPage>({
-        endpoint: `waves/${waveId}/leaderboard`,
-        params,
-      });
-    },
+    queryFn: async ({ pageParam }: { pageParam: number | null }) =>
+      await fetchLeaderboardPage({
+        pageParam,
+        pageSize: WAVE_DROPS_PARAMS.limit,
+        targetSort: sort,
+        targetSortDirection: sortDirection,
+      }),
     initialPageParam: null,
     getNextPageParam,
     enabled: !pausePolling && !!waveId,
@@ -232,15 +286,11 @@ export function useWaveDropsLeaderboard({
   const { data: haveNewDrops = false } = useQuery({
     queryKey: [...queryKey, "polling"],
     queryFn: async () => {
-      const params: Record<string, string> = {
-        page_size: "1",
-        sort: WaveDropsLeaderboardSort.CREATED_AT,
-        sort_direction: "DESC",
-      };
-
-      const result = await commonApiFetch<ApiDropsLeaderboardPage>({
-        endpoint: `waves/${waveId}/leaderboard`,
-        params,
+      const result = await fetchLeaderboardPage({
+        pageParam: null,
+        pageSize: 1,
+        targetSort: WaveDropsLeaderboardSort.CREATED_AT,
+        targetSortDirection: "DESC",
       });
 
       // Trigger refetch directly in the query callback when conditions are met

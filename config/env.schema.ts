@@ -70,6 +70,7 @@ export const publicEnvSchema = z.object({
   CORE_SCHEME: z.string().optional(),
   DEV_MODE_AUTH_JWT: z.string().optional(),
   DEV_MODE_MEMES_WAVE_ID: z.string().optional(),
+  DEV_MODE_CURATION_WAVE_ID: z.string().optional(),
   DEV_MODE_WALLET_ADDRESS: z.string().optional(),
   MOBILE_APP_SCHEME: z.string().optional(),
   NEXTGEN_CHAIN_ID: z.coerce.number().int().positive().optional(),
@@ -118,7 +119,7 @@ export const publicEnvSchema = z.object({
   SENTRY_DSN: z.string().optional(),
   SENTRY_REPLAY_ENABLED: z.enum(["true", "false"]).optional(),
 
-    /**
+  /**
    * ────────────────
    * PORTS / RUNTIME (all optional)
    * ────────────────

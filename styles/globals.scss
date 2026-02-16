@@ -826,3 +826,7 @@ pre code {
 .drop-content-container.should-truncate .drop-expand-button {
   display: flex;
 }
+
+em-emoji-picker {
+  --font-size: 17px;
+}

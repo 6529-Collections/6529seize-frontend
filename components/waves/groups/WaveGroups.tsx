@@ -2,6 +2,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveGroup from "../specs/groups/group/WaveGroup";
 import { WaveGroupType } from "../specs/groups/group/WaveGroup.types";
+import WaveCurationGroupsSection from "./curation/WaveCurationGroupsSection";
 
 interface WaveGroupsProps {
   readonly wave: ApiWave;
@@ -14,16 +15,16 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
     : "tw-rounded-b-xl lg:tw-rounded-b-none";
 
   return (
-    <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
-      <div className={`tw-h-full tw-bg-iron-950 tw-relative ${ringClasses}`}>
-        <div className="tw-h-full tw-overflow-y-auto tw-overflow-x-hidden no-scrollbar">
+    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
+      <div className={`tw-relative tw-h-full tw-bg-iron-950 ${ringClasses}`}>
+        <div className="no-scrollbar tw-h-full tw-overflow-y-auto tw-overflow-x-hidden">
           <div className="tw-pb-4">
-            <div className="tw-px-4 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
-              <p className="tw-mb-0 tw-text-base tw-text-iron-200 tw-font-semibold tw-tracking-tight">
-                Eligible
+            <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
+              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+                General
               </p>
             </div>
-            <div className="tw-px-4 tw-flex tw-flex-col tw-gap-y-2 tw-mt-2">
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">
               <WaveGroup
                 scope={wave.visibility.scope}
                 type={WaveGroupType.VIEW}
@@ -56,6 +57,21 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
                 wave={wave}
               />
             </div>
+
+            {wave.wave.type !== ApiWaveType.Chat && (
+              <>
+                {" "}
+                <div className="tw-mx-4 tw-mt-4 tw-border-t tw-border-solid tw-border-iron-800/80" />
+                <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-4">
+                  <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+                    Curation Groups
+                  </p>
+                </div>
+                <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4">
+                  <WaveCurationGroupsSection wave={wave} />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

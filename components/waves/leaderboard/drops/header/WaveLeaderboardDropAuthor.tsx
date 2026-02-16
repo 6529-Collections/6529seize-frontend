@@ -45,34 +45,28 @@ export const WaveLeaderboardDropAuthor: React.FC<
           )}
         </div>
       </Link>
-      <div className="tw-flex tw-flex-col tw-gap-y-1.5">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <UserCICAndLevel
-            level={drop.author.level}
-            size={UserCICAndLevelSize.SMALL}
-          />
-          <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
-            <Link
-              href={`/${drop.author.handle}`}
-              onClick={(e) => e.stopPropagation()}
-              className="tw-no-underline"
-            >
-              <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-                {drop.author.handle}
-              </span>
-            </Link>
-          </UserProfileTooltipWrapper>
-
-          <div className="tw-size-[3px] tw-bg-iron-900 tw-rounded-full tw-flex-shrink-0"></div>
-
-          <WaveDropTime timestamp={drop.created_at} />
-        </div>
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <WinnerDropBadge
-            rank={drop.rank}
-            decisionTime={drop.winning_context?.decision_time || null}
-          />
-        </div>
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap">
+        <UserProfileTooltipWrapper user={drop.author.handle ?? drop.author.id}>
+          <Link
+            href={`/${drop.author.handle}`}
+            onClick={(e) => e.stopPropagation()}
+            className="tw-no-underline"
+          >
+            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+              {drop.author.handle}
+            </span>
+          </Link>
+        </UserProfileTooltipWrapper>
+        <UserCICAndLevel
+          level={drop.author.level}
+          size={UserCICAndLevelSize.SMALL}
+        />
+        <WinnerDropBadge
+          rank={drop.rank}
+          decisionTime={drop.winning_context?.decision_time || null}
+        />
+        <div className="tw-size-[3px] tw-bg-iron-900 tw-rounded-full tw-flex-shrink-0"></div>
+        <WaveDropTime timestamp={drop.created_at} />
       </div>
     </div>
   );

@@ -182,7 +182,10 @@ const WaveDropActionsAddReaction: React.FC<{
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
         >
-          <div className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <div
+            className="tw-flex tw-size-full tw-items-center tw-justify-center"
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             <Picker
               theme="dark"
               data={data}

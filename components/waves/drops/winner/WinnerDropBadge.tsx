@@ -16,13 +16,10 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   decisionTime,
   variant = "default",
 }) => {
-  const effectiveRank = rank !== null && rank !== undefined ? rank : position;
-  if (!effectiveRank) return null;
+  const effectiveRank = rank ?? position;
+  if (effectiveRank === 0 || Number.isNaN(effectiveRank)) return null;
 
-  const rankNumber =
-    typeof effectiveRank === "string"
-      ? parseInt(effectiveRank, 10)
-      : effectiveRank;
+  const rankNumber = effectiveRank;
 
   function getOrdinalSuffix(n: number): string {
     const mod10 = n % 10;
@@ -34,7 +31,10 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
     return "th";
   }
 
-  const dateTime = decisionTime ? new Date(decisionTime) : null;
+  const dateTime =
+    decisionTime !== null && decisionTime !== 0 && !Number.isNaN(decisionTime)
+      ? new Date(decisionTime)
+      : null;
 
   const dateString = dateTime
     ? dateTime.toLocaleString(undefined, {
@@ -83,7 +83,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       <div
         className={`tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold ${textColorClass}`}
       >
-        <FontAwesomeIcon icon={faTrophy} className="tw-w-3.5 tw-h-3.5" />
+        <FontAwesomeIcon icon={faTrophy} className="tw-h-3.5 tw-w-3.5" />
         <span>
           {rankText}
           {position > 1 && ` #${position}`}
@@ -102,16 +102,16 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-0.5 tw-rounded tw-text-xs tw-font-semibold tw-border tw-border-solid tw-whitespace-nowrap ${colorClasses}`}
+      className={`tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-rounded tw-border tw-border-solid tw-px-1.5 tw-py-0.5 tw-text-[11px] tw-font-semibold ${colorClasses}`}
     >
-      <FontAwesomeIcon icon={faTrophy} className="tw-size-2.5" />
+      <FontAwesomeIcon icon={faTrophy} className="tw-size-2" />
       {rankText}
       {position > 1 && <span>#{position}</span>}
 
       {dateString && (
-        <span className="tw-hidden md:tw-flex tw-items-center">
+        <span className="tw-hidden tw-items-center md:tw-flex">
           <div className="tw-size-[3px] tw-rounded-full tw-bg-current tw-opacity-70"></div>
-          <span className="tw-border-l tw-border-current/40 tw-px-2 tw-flex tw-items-center">
+          <span className="tw-border-current/40 tw-flex tw-items-center tw-border-l tw-px-2">
             <FontAwesomeIcon icon={faClock} className="tw-mr-1.5 tw-size-2.5" />
             {dateString}
             {timeString && (

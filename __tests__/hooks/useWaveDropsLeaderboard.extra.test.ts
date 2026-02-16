@@ -8,6 +8,7 @@ import {
   useQueryClient,
   useQuery,
 } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
 
 jest.mock("@tanstack/react-query", () => ({
   useInfiniteQuery: jest.fn(),
@@ -35,6 +36,12 @@ const queryClientMock = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (commonApiFetch as jest.Mock).mockResolvedValue({
+    wave: {},
+    drops: [],
+    page: 1,
+    next: false,
+  });
   (useInfiniteQuery as jest.Mock).mockReturnValue({
     data: { pages: [] },
     fetchNextPage,
@@ -73,5 +80,30 @@ describe("useWaveDropsLeaderboard extra", () => {
     const call = (queryClientMock.prefetchInfiniteQuery as jest.Mock).mock
       .calls[0][0];
     expect(call.queryKey[1].sort).toBe(WaveDropsLeaderboardSort.CREATED_AT);
+  });
+
+  it("includes curated_by_group in query key and request params", async () => {
+    renderHook(() =>
+      useWaveDropsLeaderboard({
+        waveId: "2",
+        curatedByGroupId: "curation-group-1",
+      })
+    );
+
+    const call = (queryClientMock.prefetchInfiniteQuery as jest.Mock).mock
+      .calls[0][0];
+    expect(call.queryKey[1].curated_by_group).toBe("curation-group-1");
+
+    await call.queryFn({ pageParam: null });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/2/leaderboard",
+        params: expect.objectContaining({
+          sort: WaveDropsLeaderboardSort.RANK,
+          curated_by_group: "curation-group-1",
+        }),
+      })
+    );
   });
 });

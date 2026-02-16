@@ -16,6 +16,13 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
 }));
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({ id, style, children }: any) => (
+    <div data-testid={`tooltip-${id}`} data-z-index={String(style?.zIndex)}>
+      {children}
+    </div>
+  ),
+}));
 
 afterEach(() => jest.clearAllMocks());
 
@@ -42,6 +49,10 @@ test("pushes route on click", async () => {
     get: jest.fn(),
   });
   render(<WaveDropActionsOpen drop={drop} />);
+  expect(screen.getByTestId("tooltip-open-2")).toHaveAttribute(
+    "data-z-index",
+    "20"
+  );
   await user.click(screen.getByRole("button"));
   expect(push).toHaveBeenCalled();
 });

@@ -26,6 +26,7 @@ function areEqual(
     "textSize",
     "currentDropId",
     "hideLinkPreviews",
+    "marketplaceImageOnly",
     "embedPath",
     "quotePath",
     "embedDepth",
