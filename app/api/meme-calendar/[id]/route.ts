@@ -13,6 +13,15 @@ const invalidIdResponse = () =>
     { status: 400 }
   );
 
+const unresolvedTimelineResponse = () =>
+  NextResponse.json(
+    {
+      error:
+        "Unable to resolve calendar details for this mint id. The id may be out of range.",
+    },
+    { status: 422 }
+  );
+
 function parseMintId(id: string): number | null {
   if (!POSITIVE_INTEGER_PATTERN.test(id)) {
     return null;
@@ -37,15 +46,22 @@ export async function GET(
     return invalidIdResponse();
   }
 
-  const timeline = getMintTimelineDetails(mintId);
+  try {
+    const timeline = getMintTimelineDetails(mintId);
+    if (!Number.isFinite(timeline.instantUtc.getTime())) {
+      return unresolvedTimelineResponse();
+    }
 
-  return NextResponse.json({
-    mint_date: toISO(timeline.instantUtc),
-    season: timeline.seasonNumber,
-    year: timeline.yearNumber,
-    epoch: timeline.epochNumber,
-    period: timeline.periodNumber,
-    era: timeline.eraNumber,
-    eon: timeline.eonNumber,
-  });
+    return NextResponse.json({
+      mint_date: toISO(timeline.instantUtc),
+      season: timeline.seasonNumber,
+      year: timeline.yearNumber,
+      epoch: timeline.epochNumber,
+      period: timeline.periodNumber,
+      era: timeline.eraNumber,
+      eon: timeline.eonNumber,
+    });
+  } catch {
+    return unresolvedTimelineResponse();
+  }
 }

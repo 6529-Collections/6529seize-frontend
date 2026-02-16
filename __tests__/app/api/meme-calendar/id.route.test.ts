@@ -64,4 +64,19 @@ describe("/api/meme-calendar/[id]", () => {
       );
     }
   );
+
+  it("returns 400 for values above max safe integer", async () => {
+    const response = await GET({} as any, {
+      params: Promise.resolve({ id: "9007199254740992" }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(nextResponseJson).toHaveBeenCalledWith(
+      {
+        error:
+          "Invalid id. Use a positive integer in /api/meme-calendar/<id>.",
+      },
+      { status: 400 }
+    );
+  });
 });
