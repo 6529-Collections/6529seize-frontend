@@ -1,22 +1,16 @@
 import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-let mockBreakpoint = "MD";
 const commonDropdownMock = jest.fn((props: any) => (
   <button
-    data-testid="mobile-sort"
+    data-testid="sort-dropdown"
     onClick={() => props.setSelected(WaveDropsLeaderboardSort.CREATED_AT)}
   >
     {props.filterLabel}: {props.activeItem}
   </button>
 ));
-
-jest.mock("react-use", () => ({
-  createBreakpoint: jest.fn(() => () => mockBreakpoint),
-}));
 
 jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => ({
   __esModule: true,
@@ -25,72 +19,55 @@ jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => ({
 
 describe("WaveleaderboardSort", () => {
   beforeEach(() => {
-    mockBreakpoint = "MD";
     commonDropdownMock.mockClear();
   });
 
-  it("shows desktop sort tabs and triggers changes on desktop", async () => {
+  it("always renders dropdown sort and forwards selection", async () => {
     const onSortChange = jest.fn();
     const user = userEvent.setup();
-    const queryClient = new QueryClient();
 
     render(
-      <QueryClientProvider client={queryClient}>
-        <WaveleaderboardSort
-          sort={WaveDropsLeaderboardSort.RANK}
-          onSortChange={onSortChange}
-        />
-      </QueryClientProvider>
+      <WaveleaderboardSort
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={onSortChange}
+      />
     );
 
-    const current = screen.getByText("Current Vote");
-    expect(current.className).toContain("tw-bg-white/10");
-
-    await user.click(screen.getByText("Projected Vote"));
-    expect(onSortChange).toHaveBeenCalledWith(
-      WaveDropsLeaderboardSort.RATING_PREDICTION
-    );
-
-    await user.click(screen.getByText("Hot"));
-    expect(onSortChange).toHaveBeenCalledWith(WaveDropsLeaderboardSort.TREND);
-
-    await user.click(screen.getByText("Newest"));
-    expect(onSortChange).toHaveBeenCalledWith(
-      WaveDropsLeaderboardSort.CREATED_AT
-    );
-
-    expect(commonDropdownMock).not.toHaveBeenCalled();
-  });
-
-  it("shows dropdown sort and forwards selection on small screens", async () => {
-    mockBreakpoint = "S";
-
-    const onSortChange = jest.fn();
-    const user = userEvent.setup();
-    const queryClient = new QueryClient();
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <WaveleaderboardSort
-          sort={WaveDropsLeaderboardSort.RANK}
-          onSortChange={onSortChange}
-        />
-      </QueryClientProvider>
-    );
-
-    expect(screen.queryByText("Current Vote")).not.toBeInTheDocument();
-    expect(screen.getByTestId("mobile-sort")).toHaveTextContent("Sort: RANK");
-    expect(screen.getByTestId("mobile-sort").parentElement).toHaveClass(
-      "tw-w-full",
+    expect(screen.getByTestId("sort-dropdown")).toHaveTextContent("Sort: RANK");
+    expect(screen.getByTestId("sort-dropdown").parentElement).toHaveClass(
       "tw-min-w-0"
     );
-    expect(
-      screen.getByTestId("mobile-sort").parentElement?.className
-    ).not.toContain("tw-w-[11rem]");
 
-    await user.click(screen.getByTestId("mobile-sort"));
+    await user.click(screen.getByTestId("sort-dropdown"));
     expect(onSortChange).toHaveBeenCalledWith(
       WaveDropsLeaderboardSort.CREATED_AT
     );
+  });
+
+  it("passes correct props to CommonDropdown", () => {
+    render(
+      <WaveleaderboardSort
+        sort={WaveDropsLeaderboardSort.TREND}
+        onSortChange={jest.fn()}
+      />
+    );
+
+    expect(commonDropdownMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeItem: WaveDropsLeaderboardSort.TREND,
+        filterLabel: "Sort",
+        size: "sm",
+        showFilterLabel: true,
+      })
+    );
+
+    const items = commonDropdownMock.mock.calls[0]![0].items;
+    expect(items).toHaveLength(4);
+    expect(items.map((i: any) => i.label)).toEqual([
+      "Current Vote",
+      "Projected Vote",
+      "Hot",
+      "Newest",
+    ]);
   });
 });
