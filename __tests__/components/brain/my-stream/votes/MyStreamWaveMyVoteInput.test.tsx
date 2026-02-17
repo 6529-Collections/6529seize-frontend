@@ -54,16 +54,17 @@ describe("MyStreamWaveMyVoteInput", () => {
     }));
   });
 
-  it("shows available votes from context", () => {
+  it("shows max votes from context", () => {
     const dropWithRating = {
       ...drop,
       context_profile_context: { rating: 2, min_rating: 0, max_rating: 10 },
     };
     render(<MyStreamWaveMyVoteInput drop={dropWithRating} />, { wrapper });
-    expect(screen.getByText(/Available\s*8\s*Max\s*10/)).toBeInTheDocument();
+    expect(screen.getByText(/Max\s*10/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
 
-  it("handles negative current rating when computing available votes", () => {
+  it("keeps max visible with negative current rating", () => {
     const dropWithNegativeRating = {
       ...drop,
       context_profile_context: { rating: -2, min_rating: -10, max_rating: 10 },
@@ -71,7 +72,8 @@ describe("MyStreamWaveMyVoteInput", () => {
     render(<MyStreamWaveMyVoteInput drop={dropWithNegativeRating} />, {
       wrapper,
     });
-    expect(screen.getByText(/Available\s*12\s*Max\s*10/)).toBeInTheDocument();
+    expect(screen.getByText(/Max\s*10/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
 
   it("clamps vote value within limits and submits on click", async () => {
@@ -85,7 +87,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10 });
   });
 
-  it("updates available votes immediately after successful vote", async () => {
+  it("updates input value immediately after successful vote", async () => {
     const dropWithRating = {
       ...drop,
       context_profile_context: { rating: 2, min_rating: 0, max_rating: 10 },
@@ -97,8 +99,10 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
 
     await waitFor(() =>
-      expect(screen.getByText(/Available\s*5\s*Max\s*10/)).toBeInTheDocument()
+      expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5")
     );
+    expect(screen.getByText(/Max\s*10/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ["DROPS_LEADERBOARD"],
     });
@@ -124,8 +128,10 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
 
     await waitFor(() =>
-      expect(screen.getByText(/Available\s*6\s*Max\s*10/)).toBeInTheDocument()
+      expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("4")
     );
+    expect(screen.getByText(/Max\s*10/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
 
   it("resets draft value when live vote context changes", () => {
@@ -155,7 +161,8 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const rerenderedInput = screen.getByRole("textbox");
     expect((rerenderedInput as HTMLInputElement).value).toBe("4");
-    expect(screen.getByText(/Available\s*5\s*Max\s*9/)).toBeInTheDocument();
+    expect(screen.getByText(/Max\s*9/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
 
   it("uses optimistic value, then follows updated parent context", async () => {
@@ -176,8 +183,9 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
 
     await waitFor(() =>
-      expect(screen.getByText(/Available\s*5\s*Max\s*10/)).toBeInTheDocument()
+      expect(screen.getByText(/Max\s*10/)).toBeInTheDocument()
     );
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
     expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5");
 
     const serverUpdatedDrop = {
@@ -187,6 +195,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     rerender(<MyStreamWaveMyVoteInput drop={serverUpdatedDrop} />);
 
     expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("6");
-    expect(screen.getByText(/Available\s*3\s*Max\s*9/)).toBeInTheDocument();
+    expect(screen.getByText(/Max\s*9/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
 });

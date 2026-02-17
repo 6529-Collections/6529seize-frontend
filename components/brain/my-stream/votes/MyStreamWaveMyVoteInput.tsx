@@ -65,7 +65,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
   const isEditing =
     hasValidVoteValue && parsedVoteValue !== liveCurrentVoteValue;
-  const availableVotes = Math.max(0, liveMaxRating - liveCurrentVoteValue);
 
   const setVoteDraftValue = (nextValue: string) => {
     setVoteDraftState({
@@ -204,6 +203,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1.5">
+      <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
+        Max{" "}
+        <span className="tw-tabular-nums tw-text-iron-300">
+          {formatNumberWithCommas(liveMaxRating)}
+        </span>
+      </p>
       <div className="tw-flex tw-items-center tw-gap-x-3">
         <div className="tw-relative tw-w-full md:tw-w-36">
           <input
@@ -232,7 +237,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
               void handleSubmit();
             }}
             disabled={!isEditing || isProcessing || isResetting}
-            className="tw-flex tw-h-8 tw-min-w-[60px] tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
+            className="tw-relative tw-flex tw-h-8 tw-min-w-[60px] tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-iron-600"
             aria-label="Submit vote"
           >
             {isProcessing || isResetting ? (
@@ -260,20 +265,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           </button>
         </div>
       </div>
-      <p className="tw-mb-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-0.5 tw-text-xs tw-text-iron-500">
-        <span>
-          Available{" "}
-          <span className="tw-tabular-nums tw-text-iron-300">
-            {formatNumberWithCommas(availableVotes)}
-          </span>
-        </span>
-        <span>
-          Max{" "}
-          <span className="tw-tabular-nums tw-text-iron-300">
-            {formatNumberWithCommas(liveMaxRating)}
-          </span>
-        </span>
-      </p>
     </div>
   );
 };
