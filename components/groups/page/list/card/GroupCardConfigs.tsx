@@ -6,6 +6,7 @@ import type { ApiGroupDescription } from "@/generated/models/ApiGroupDescription
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
+import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -19,11 +20,24 @@ export interface GroupCardConfigProps {
 const MANUAL_LIST_TOOLTIP =
   "Wallets explicitly listed in this group. Filter-matching wallets are not counted here.";
 
+const GRANT_TOOLTIP =
+  "Identity must be a beneficiary of the selected xTDH grant.";
+
+const GRANT_STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
+  [ApiXTdhGrantStatus.Pending]: "PENDING",
+  [ApiXTdhGrantStatus.Failed]: "FAILED",
+  [ApiXTdhGrantStatus.Disabled]: "REVOKED",
+  [ApiXTdhGrantStatus.Granted]: "GRANTED",
+};
+const NOW_MS_AT_MODULE_INIT = Date.now();
+
 export default function GroupCardConfigs({
   group,
 }: {
   readonly group?: ApiGroupFull | undefined;
 }) {
+  const nowMs = NOW_MS_AT_MODULE_INIT;
+
   const directionLabels: Record<ApiGroupFilterDirection, string> = {
     [ApiGroupFilterDirection.Received]: "from",
     [ApiGroupFilterDirection.Sent]: "to",
@@ -151,6 +165,66 @@ export default function GroupCardConfigs({
     };
   };
 
+  const toShortGrantId = (grantId: string): string => {
+    const normalizedId = grantId.trim();
+    if (normalizedId.length <= 14) {
+      return normalizedId;
+    }
+    return `${normalizedId.slice(0, 7)}...${normalizedId.slice(-4)}`;
+  };
+
+  const getGrantStatusLabel = (
+    grant: ApiGroupDescription["is_beneficiary_of_grant"],
+    now: number | null
+  ): string | null => {
+    if (grant?.status === undefined) {
+      return null;
+    }
+
+    if (grant.status === ApiXTdhGrantStatus.Granted) {
+      if (now === null) {
+        return "GRANTED";
+      }
+      const from = grant.valid_from ?? null;
+      const to = grant.valid_to ?? null;
+
+      if (typeof to === "number" && to > 0 && to < now) {
+        return "ENDED";
+      }
+      if (typeof from === "number" && from > now) {
+        return "SCHEDULED";
+      }
+      return "ACTIVE";
+    }
+
+    return GRANT_STATUS_LABELS[grant.status];
+  };
+
+  const getGrantConfig = (
+    groupDescription: ApiGroupDescription
+  ): GroupCardConfigProps | null => {
+    const grantId = groupDescription.is_beneficiary_of_grant_id;
+    if (!grantId) {
+      return null;
+    }
+
+    const statusLabel = getGrantStatusLabel(
+      groupDescription.is_beneficiary_of_grant,
+      nowMs
+    );
+    const shortGrantId = toShortGrantId(grantId);
+    const value = statusLabel
+      ? `${statusLabel} (${shortGrantId})`
+      : shortGrantId;
+
+    return {
+      key: GroupDescriptionType.XTDH_GRANT,
+      value,
+      label: "Grant",
+      tooltip: GRANT_TOOLTIP,
+    };
+  };
+
   const getConfigs = (): GroupCardConfigProps[] => {
     if (!group) {
       return [
@@ -170,11 +244,13 @@ export default function GroupCardConfigs({
     const repConfig = getRepConfig(rep);
     const cicConfig = getCicConfig(cic);
     const levelConfig = getLevelConfig(level);
+    const grantConfig = getGrantConfig(group.group);
     const walletsConfig = getWalletsConfig(identity_group_identities_count);
     if (tdhConfig) configs.push(tdhConfig);
     if (repConfig) configs.push(repConfig);
     if (cicConfig) configs.push(cicConfig);
     if (levelConfig) configs.push(levelConfig);
+    if (grantConfig) configs.push(grantConfig);
     configs.push(walletsConfig);
 
     return configs;
