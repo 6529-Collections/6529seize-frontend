@@ -294,14 +294,24 @@ export default function GroupCreateXtdhGrantModal({
                             ? trimmedCollectionName
                             : grant.target_contract || "Unknown target";
                         const isSelected = selectedGrantId === grant.id;
+                        const onSelect = () => onGrantSelect(grant);
 
                         return (
                           <li
                             key={grant.id}
-                            className={`tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-transition tw-duration-200 ${
+                            role="button"
+                            tabIndex={0}
+                            onClick={onSelect}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onSelect();
+                              }
+                            }}
+                            className={`tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-outline-none tw-transition tw-duration-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                               isSelected
                                 ? "tw-border-primary-400 tw-bg-primary-500/10"
-                                : "tw-border-iron-800 tw-bg-iron-900/70"
+                                : "tw-border-iron-800 tw-bg-iron-900/70 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
                             }`}
                           >
                             <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
@@ -337,7 +347,10 @@ export default function GroupCreateXtdhGrantModal({
                               </div>
                               <button
                                 type="button"
-                                onClick={() => onGrantSelect(grant)}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onSelect();
+                                }}
                                 className={`tw-h-9 tw-rounded-md tw-border tw-border-solid tw-px-4 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${
                                   isSelected
                                     ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
