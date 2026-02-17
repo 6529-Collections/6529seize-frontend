@@ -8,17 +8,13 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { SortDirection } from "@/entities/ISort";
+import { SortDirection } from "@/entities/ISort";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
 import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 
-export type XtdhGrantSortField =
-  | "created_at"
-  | "valid_from"
-  | "valid_to"
-  | "rate";
+type XtdhGrantSortField = "created_at" | "valid_from" | "valid_to" | "rate";
 
 interface UseXtdhGrantsSearchQueryParams {
   readonly grantor?: string | null | undefined;
@@ -26,7 +22,7 @@ interface UseXtdhGrantsSearchQueryParams {
   readonly targetContract?: string | null | undefined;
   readonly statuses?: readonly ApiXTdhGrantStatus[] | undefined;
   readonly sortField?: XtdhGrantSortField | undefined;
-  readonly sortDirection: SortDirection;
+  readonly sortDirection?: SortDirection | undefined;
   readonly pageSize?: number | undefined;
   readonly enabled?: boolean | undefined;
 }
@@ -48,6 +44,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 2000;
 const DEFAULT_SORT_FIELD: XtdhGrantSortField = "created_at";
+const DEFAULT_SORT_DIRECTION: SortDirection = SortDirection.DESC;
 const DEFAULT_STALE_TIME = 30_000; // 30 seconds
 
 const normalizeTextFilter = (value?: string | null): string => {
@@ -70,7 +67,7 @@ export function useXtdhGrantsSearchQuery({
   targetContract,
   statuses,
   sortField = DEFAULT_SORT_FIELD,
-  sortDirection,
+  sortDirection = DEFAULT_SORT_DIRECTION,
   pageSize = DEFAULT_PAGE_SIZE,
   enabled = true,
 }: Readonly<UseXtdhGrantsSearchQueryParams>): UseXtdhGrantsSearchQueryResult {

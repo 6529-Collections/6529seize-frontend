@@ -63,12 +63,12 @@ export default function GroupCreateConfig({
           <GroupCreateTDH tdh={tdh} setTDH={setTDH} />
           <GroupCreateCIC cic={cic} setCIC={setCIC} />
           <GroupCreateRep rep={rep} setRep={setRep} />
+          <GroupCreateNfts nfts={nfts} setNfts={setNfts} />
+          <GroupCreateCollections nfts={nfts} setNfts={setNfts} />
           <GroupCreateXtdhGrant
             beneficiaryGrantId={beneficiaryGrantId}
             setBeneficiaryGrantId={setBeneficiaryGrantId}
           />
-          <GroupCreateNfts nfts={nfts} setNfts={setNfts} />
-          <GroupCreateCollections nfts={nfts} setNfts={setNfts} />
         </div>
       </div>
 

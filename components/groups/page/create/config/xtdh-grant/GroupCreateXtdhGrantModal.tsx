@@ -4,14 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
-import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { SortDirection } from "@/entities/ISort";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
-import {
-  type XtdhGrantSortField,
-  useXtdhGrantsSearchQuery,
-} from "@/hooks/useXtdhGrantsSearchQuery";
+import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
 import {
   formatAmount,
   formatDateTime,
@@ -27,14 +22,14 @@ interface GroupCreateXtdhGrantModalProps {
 
 const STATUS_OPTIONS: readonly CommonSelectItem<ApiXTdhGrantStatus>[] = [
   {
-    key: ApiXTdhGrantStatus.Pending,
-    value: ApiXTdhGrantStatus.Pending,
-    label: "Pending",
-  },
-  {
     key: ApiXTdhGrantStatus.Granted,
     value: ApiXTdhGrantStatus.Granted,
     label: "Granted",
+  },
+  {
+    key: ApiXTdhGrantStatus.Pending,
+    value: ApiXTdhGrantStatus.Pending,
+    label: "Pending",
   },
   {
     key: ApiXTdhGrantStatus.Disabled,
@@ -46,18 +41,6 @@ const STATUS_OPTIONS: readonly CommonSelectItem<ApiXTdhGrantStatus>[] = [
     value: ApiXTdhGrantStatus.Failed,
     label: "Failed",
   },
-];
-
-const SORT_OPTIONS: readonly CommonSelectItem<XtdhGrantSortField>[] = [
-  { key: "created_at", value: "created_at", label: "Created" },
-  { key: "valid_from", value: "valid_from", label: "Valid from" },
-  { key: "valid_to", value: "valid_to", label: "Valid to" },
-  { key: "rate", value: "rate", label: "Rate" },
-];
-
-const DIRECTION_OPTIONS: readonly CommonSelectItem<SortDirection>[] = [
-  { key: SortDirection.DESC, value: SortDirection.DESC, label: "Desc" },
-  { key: SortDirection.ASC, value: SortDirection.ASC, label: "Asc" },
 ];
 
 const getStatusPillClasses = (statusLabel: string): string => {
@@ -87,16 +70,10 @@ export default function GroupCreateXtdhGrantModal({
 
   const [grantorInput, setGrantorInput] = useState("");
   const [targetCollectionInput, setTargetCollectionInput] = useState("");
-  const [targetContractInput, setTargetContractInput] = useState("");
   const [grantorFilter, setGrantorFilter] = useState("");
   const [targetCollectionFilter, setTargetCollectionFilter] = useState("");
-  const [targetContractFilter, setTargetContractFilter] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<
-    ApiXTdhGrantStatus[]
-  >([]);
-  const [sortField, setSortField] = useState<XtdhGrantSortField>("created_at");
-  const [sortDirection, setSortDirection] = useState<SortDirection>(
-    SortDirection.DESC
+  const [selectedStatus, setSelectedStatus] = useState<ApiXTdhGrantStatus>(
+    ApiXTdhGrantStatus.Granted
   );
 
   useEffect(() => {
@@ -115,9 +92,6 @@ export default function GroupCreateXtdhGrantModal({
     250,
     [targetCollectionInput]
   );
-  useDebounce(() => setTargetContractFilter(targetContractInput.trim()), 250, [
-    targetContractInput,
-  ]);
 
   useClickAway(modalRef, () => {
     if (skipInitialOutsideClick.current) {
@@ -141,40 +115,17 @@ export default function GroupCreateXtdhGrantModal({
   } = useXtdhGrantsSearchQuery({
     grantor: grantorFilter || null,
     targetCollectionName: targetCollectionFilter || null,
-    targetContract: targetContractFilter || null,
-    statuses: selectedStatuses,
-    sortField,
-    sortDirection,
+    statuses: [selectedStatus],
     enabled: isOpen,
     pageSize: 20,
   });
 
-  const allStatusesSelected = selectedStatuses.length === 0;
-
-  const onStatusToggle = (status: ApiXTdhGrantStatus) => {
-    setSelectedStatuses((prev) => {
-      if (prev.includes(status)) {
-        return prev.filter((item) => item !== status);
-      }
-
-      const next = [...prev, status];
-      if (next.length === STATUS_OPTIONS.length) {
-        return [];
-      }
-      return next;
-    });
-  };
-
   const onResetFilters = () => {
     setGrantorInput("");
     setTargetCollectionInput("");
-    setTargetContractInput("");
     setGrantorFilter("");
     setTargetCollectionFilter("");
-    setTargetContractFilter("");
-    setSelectedStatuses([]);
-    setSortField("created_at");
-    setSortDirection(SortDirection.DESC);
+    setSelectedStatus(ApiXTdhGrantStatus.Granted);
   };
 
   if (!isOpen) {
@@ -223,7 +174,7 @@ export default function GroupCreateXtdhGrantModal({
             </div>
 
             <div className="tw-space-y-4 tw-p-4 sm:tw-p-5">
-              <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-3">
+              <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
                 <label className="tw-block">
                   <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
                     Grantor
@@ -250,79 +201,32 @@ export default function GroupCreateXtdhGrantModal({
                     className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
                   />
                 </label>
-                <label className="tw-block">
-                  <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                    Contract
-                  </span>
-                  <input
-                    type="text"
-                    value={targetContractInput}
-                    onChange={(event) =>
-                      setTargetContractInput(event.target.value)
-                    }
-                    placeholder="0x..."
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
-                  />
-                </label>
               </div>
 
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedStatuses([])}
-                  className={`tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${
-                    allStatusesSelected
-                      ? "tw-border-primary-400 tw-bg-primary-400/20 tw-text-primary-300"
-                      : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-border-iron-600"
-                  }`}
-                >
-                  ALL
-                </button>
-                {STATUS_OPTIONS.map((statusOption) => {
-                  const isActive = selectedStatuses.includes(
-                    statusOption.value
-                  );
-                  return (
-                    <button
-                      key={statusOption.key}
-                      type="button"
-                      onClick={() => onStatusToggle(statusOption.value)}
-                      className={`tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${
-                        isActive
-                          ? "tw-border-primary-400 tw-bg-primary-400/20 tw-text-primary-300"
-                          : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-border-iron-600"
-                      }`}
-                    >
-                      {statusOption.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="tw-grid tw-grid-cols-1 tw-items-end tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-                <div>
+              <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3">
+                <div className="tw-min-w-0 tw-flex-1">
                   <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                    Sort by
+                    Status
                   </span>
-                  <CommonDropdown<XtdhGrantSortField>
-                    items={SORT_OPTIONS}
-                    activeItem={sortField}
-                    setSelected={setSortField}
-                    filterLabel="Sort grants by field"
-                    size="sm"
-                  />
-                </div>
-                <div>
-                  <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                    Direction
-                  </span>
-                  <CommonDropdown<SortDirection>
-                    items={DIRECTION_OPTIONS}
-                    activeItem={sortDirection}
-                    setSelected={setSortDirection}
-                    filterLabel="Sort direction"
-                    size="sm"
-                  />
+                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                    {STATUS_OPTIONS.map((statusOption) => {
+                      const isActive = selectedStatus === statusOption.value;
+                      return (
+                        <button
+                          key={statusOption.key}
+                          type="button"
+                          onClick={() => setSelectedStatus(statusOption.value)}
+                          className={`tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${
+                            isActive
+                              ? "tw-border-primary-400 tw-bg-primary-400/20 tw-text-primary-300"
+                              : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-border-iron-600"
+                          }`}
+                        >
+                          {statusOption.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <button
                   type="button"
