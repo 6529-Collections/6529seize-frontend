@@ -15,7 +15,10 @@ describe("UserPageIdentityAddStatementsContactInput", () => {
       />
     );
     const input = screen.getByRole("textbox");
-    expect(input).toHaveAttribute("placeholder", STATEMENT_META[STATEMENT_TYPE.EMAIL].inputPlaceholder);
+    expect(input).toHaveAttribute(
+      "placeholder",
+      STATEMENT_META[STATEMENT_TYPE.EMAIL].inputPlaceholder
+    );
     await waitFor(() => expect(input).toHaveFocus());
     await userEvent.type(input, "abc");
     expect(onChange).toHaveBeenCalled();
@@ -28,7 +31,36 @@ describe("UserPageIdentityAddStatementsContactInput", () => {
       />
     );
     const newInput = screen.getByRole("textbox");
-    expect(newInput).toHaveAttribute("placeholder", STATEMENT_META[STATEMENT_TYPE.DISCORD].inputPlaceholder);
+    expect(newInput).toHaveAttribute(
+      "placeholder",
+      STATEMENT_META[STATEMENT_TYPE.DISCORD].inputPlaceholder
+    );
     await waitFor(() => expect(newInput).toHaveFocus());
+
+    rerender(
+      <UserPageIdentityAddStatementsContactInput
+        activeType={STATEMENT_TYPE.MANIFOLD}
+        value=""
+        onChange={onChange}
+      />
+    );
+    const manifoldInput = screen.getByRole("textbox");
+    expect(manifoldInput).toHaveAttribute(
+      "placeholder",
+      STATEMENT_META[STATEMENT_TYPE.MANIFOLD].inputPlaceholder
+    );
+
+    rerender(
+      <UserPageIdentityAddStatementsContactInput
+        activeType={STATEMENT_TYPE.TRANSIENT}
+        value=""
+        onChange={onChange}
+      />
+    );
+    const transientInput = screen.getByRole("textbox");
+    expect(transientInput).toHaveAttribute(
+      "placeholder",
+      STATEMENT_META[STATEMENT_TYPE.TRANSIENT].inputPlaceholder
+    );
   });
 });
