@@ -18,6 +18,7 @@ import SubstackIcon from "./SubstackIcon";
 import MediumIcon from "./MediumIcon";
 import MirrorIcon from "./MirrorIcon";
 import YoutubeIcon from "./YoutubeIcon";
+import LinktreeIcon from "./LinktreeIcon";
 import LinkIcon from "./LinkIcon";
 import BioIcon from "./BioIcon";
 import SuperRareIcon from "./SuperRareIcon";
@@ -63,6 +64,8 @@ export default function SocialStatementIcon({
       return <MirrorIcon aria-hidden="true" />;
     case STATEMENT_TYPE.YOUTUBE:
       return <YoutubeIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.LINKTREE:
+      return <LinktreeIcon />;
     case STATEMENT_TYPE.DISCORD:
       return <DiscordIcon aria-hidden="true" />;
     case STATEMENT_TYPE.TELEGRAM:
@@ -105,5 +108,6 @@ export default function SocialStatementIcon({
       return <TransientIcon />;
     default:
       assertUnreachable(statementType);
+      return null;
   }
 }
