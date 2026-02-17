@@ -47,6 +47,7 @@ export enum STATEMENT_TYPE {
   MEDIUM = "MEDIUM",
   MIRROR_XYZ = "MIRROR_XYZ",
   YOUTUBE = "YOUTUBE",
+  LINKTREE = "LINKTREE",
   DISCORD = "DISCORD",
   TELEGRAM = "TELEGRAM",
   WECHAT = "WECHAT",
@@ -148,6 +149,12 @@ export const STATEMENT_META: Record<
     title: "YouTube",
     inputPlaceholder: "https://www.youtube.com/username",
     inputInitialValue: "https://www.youtube.com/",
+    canOpenStatement: true,
+  },
+  [STATEMENT_TYPE.LINKTREE]: {
+    title: "Linktree",
+    inputPlaceholder: "https://linktr.ee/username",
+    inputInitialValue: "https://linktr.ee/",
     canOpenStatement: true,
   },
   [STATEMENT_TYPE.DISCORD]: {
@@ -285,6 +292,7 @@ export const SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES = [
   STATEMENT_TYPE.MEDIUM,
   STATEMENT_TYPE.MIRROR_XYZ,
   STATEMENT_TYPE.YOUTUBE,
+  STATEMENT_TYPE.LINKTREE,
 ] as const;
 
 export type SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE =

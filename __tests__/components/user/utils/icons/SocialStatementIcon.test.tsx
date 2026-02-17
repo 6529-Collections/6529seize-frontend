@@ -23,6 +23,9 @@ jest.mock("@/components/user/utils/icons/ManifoldIcon", () => () => (
 jest.mock("@/components/user/utils/icons/TransientIcon", () => () => (
   <div data-testid="TRANSIENT" />
 ));
+jest.mock("@/components/user/utils/icons/LinktreeIcon", () => () => (
+  <div data-testid="LINKTREE" />
+));
 
 // other icons default to simple spans
 jest.mock("@/components/user/utils/icons/FacebookIcon", () => () => <div />);
@@ -51,6 +54,11 @@ describe("SocialStatementIcon", () => {
   it("renders Transient icon for STATEMENT_TYPE.TRANSIENT", () => {
     render(<SocialStatementIcon statementType={STATEMENT_TYPE.TRANSIENT} />);
     expect(screen.getByTestId("TRANSIENT")).toBeInTheDocument();
+  });
+
+  it("renders Linktree icon for STATEMENT_TYPE.LINKTREE", () => {
+    render(<SocialStatementIcon statementType={STATEMENT_TYPE.LINKTREE} />);
+    expect(screen.getByTestId("LINKTREE")).toBeInTheDocument();
   });
 
   it("calls assertUnreachable for unknown type", () => {
