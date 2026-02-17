@@ -81,43 +81,47 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 
   const modalContent = (
     <div
-      className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
+      className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
       onClick={handleCloseModal}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}>
-      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-pointer-events-none"></div>
+      onTouchMove={(e) => e.stopPropagation()}
+    >
+      <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80"></div>
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
         smooth
-        onZoom={(e) => setIsZoomed(e.state.scale > 1)}>
+        onZoom={(e) => setIsZoomed(e.state.scale > 1)}
+      >
         {({ resetTransform }) => (
-          <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
-            <div className="tw-relative tw-flex tw-flex-col lg:tw-flex-row tw-max-w-[95vw] tw-max-h-[90vh]">
+          <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
+            <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
               <div
                 role="button"
-                className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-flex-1 tw-min-h-0 tw-min-w-0"
+                className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center"
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.stopPropagation();
                   }
-                }}>
+                }}
+              >
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                >
                   <img
                     src={resolvedSrc}
                     alt={alt}
                     style={{ pointerEvents: "auto" }}
-                    className="tw-max-h-[75vh] lg:tw-max-h-[90vh] tw-max-w-full tw-object-contain"
+                    className="tw-max-h-[75vh] tw-max-w-full tw-object-contain lg:tw-max-h-[90vh]"
                   />
                 </TransformComponent>
               </div>
 
-              <div className="tw-fixed tw-top-2 tw-right-4 tw-flex tw-flex-row tw-gap-x-4 tw-z-[1001] tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-top-0 lg:tw-right-auto lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-ml-4 lg:tw-pt-0 lg:tw-self-start">
+              <div className="tw-fixed tw-right-4 tw-top-2 tw-z-[1001] tw-flex tw-flex-row tw-gap-x-4 tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-right-auto lg:tw-top-0 lg:tw-ml-4 lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-self-start lg:tw-pt-0">
                 {isZoomed && (
                   <button
                     onClick={(e) => {
@@ -127,19 +131,25 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     }}
                     data-tooltip-id="reset-zoom-markdown"
                     className={modalButtonClasses}
-                    aria-label="Reset">
+                    aria-label="Reset"
+                  >
                     <FontAwesomeIcon
                       icon={faRotateLeft}
                       className="tw-size-4"
                     />
                   </button>
                 )}
-                <Link href={resolvedSrc} target="_blank" rel="noopener noreferrer">
+                <Link
+                  href={resolvedSrc}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <button
                     onClick={(e) => e.stopPropagation()}
                     data-tooltip-id={openBrowserTooltipId}
                     className={modalButtonClasses}
-                    aria-label="Open image in new tab">
+                    aria-label="Open image in new tab"
+                  >
                     <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
                 </Link>
@@ -148,7 +158,8 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     onClick={handleFullScreen}
                     data-tooltip-id="full-screen-markdown"
                     className={modalButtonClasses}
-                    aria-label="Full screen">
+                    aria-label="Full screen"
+                  >
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
                   </button>
                 )}
@@ -156,14 +167,16 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   onClick={handleCloseModal}
                   data-tooltip-id="close-modal-markdown"
                   className={modalButtonClasses}
-                  aria-label="Close modal">
+                  aria-label="Close modal"
+                >
                   <svg
                     className="tw-h-5 tw-w-5 tw-flex-shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    aria-hidden="true">
+                    aria-hidden="true"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -203,9 +216,9 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 
   return (
     <>
-      <div className="tw-flex tw-mt-2">
-        {isLoading && ( 
-          <div className="tw-absolute tw-inset-0 tw-bg-iron-800 tw-animate-pulse tw-rounded-xl tw-h-64"></div>
+      <div className="tw-relative tw-mt-2 tw-flex">
+        {isLoading && (
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-animate-pulse tw-rounded-xl tw-bg-iron-800"></div>
         )}
         <img
           ref={imgRef}
@@ -213,7 +226,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
           alt={alt}
           onLoad={handleImageLoad}
           onClick={handleImageClick}
-          className={`tw-object-center tw-object-contain tw-max-w-full tw-h-64 tw-cursor-pointer ${
+          className={`tw-h-64 tw-max-w-full tw-cursor-pointer tw-object-contain tw-object-center ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           }`}
           {...props}
