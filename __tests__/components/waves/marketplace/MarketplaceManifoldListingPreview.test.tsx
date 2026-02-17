@@ -3,19 +3,32 @@ import React from "react";
 
 import MarketplaceManifoldListingPreview from "@/components/waves/marketplace/MarketplaceManifoldListingPreview";
 
-const mockOpenGraphPreview = jest.fn(() => <div data-testid="placeholder" />);
-const mockManifoldItemPreviewCard = jest.fn((props: any) => (
+const mockMarketplacePreviewPlaceholder = jest.fn(() => (
+  <div data-testid="marketplace-placeholder" />
+));
+const mockMarketplaceUnavailableCard = jest.fn(() => (
+  <div data-testid="marketplace-unavailable" />
+));
+const mockMarketplaceItemPreviewCard = jest.fn((props: any) => (
   <div data-testid="marketplace-item-card" data-title={props.title} />
 ));
 
-jest.mock("@/components/waves/OpenGraphPreview", () => ({
+jest.mock(
+  "@/components/waves/marketplace/MarketplacePreviewPlaceholder",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockMarketplacePreviewPlaceholder(props),
+  })
+);
+
+jest.mock("@/components/waves/marketplace/MarketplaceUnavailableCard", () => ({
   __esModule: true,
-  default: (props: any) => mockOpenGraphPreview(props),
+  default: (props: any) => mockMarketplaceUnavailableCard(props),
 }));
 
-jest.mock("@/components/waves/ManifoldItemPreviewCard", () => ({
+jest.mock("@/components/waves/MarketplaceItemPreviewCard", () => ({
   __esModule: true,
-  default: (props: any) => mockManifoldItemPreviewCard(props),
+  default: (props: any) => mockMarketplaceItemPreviewCard(props),
 }));
 
 jest.mock("@/services/api/link-preview-api", () => ({
@@ -29,7 +42,7 @@ describe("MarketplaceManifoldListingPreview", () => {
     jest.clearAllMocks();
   });
 
-  it("renders marketplace card and forwards imageOnly", async () => {
+  it("renders marketplace card and forwards compact", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
 
     fetchLinkPreview.mockResolvedValue({
@@ -41,23 +54,23 @@ describe("MarketplaceManifoldListingPreview", () => {
       },
     });
 
-    render(<MarketplaceManifoldListingPreview href={href} imageOnly={true} />);
+    render(<MarketplaceManifoldListingPreview href={href} compact={true} />);
 
     await waitFor(() =>
-      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
+      expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
           title: "The Big Bang",
           mediaUrl: "https://arweave.net/test-image.webp",
           mediaMimeType: "image/webp",
-          imageOnly: true,
+          compact: true,
           hideActions: true,
         })
       )
     );
   });
 
-  it("falls back to open graph preview when image is missing", async () => {
+  it("renders unavailable card when image is missing", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
     fetchLinkPreview.mockResolvedValue({
       type: "manifold.listing",
@@ -71,16 +84,10 @@ describe("MarketplaceManifoldListingPreview", () => {
     render(<MarketplaceManifoldListingPreview href={href} />);
 
     await waitFor(() =>
-      expect(mockOpenGraphPreview).toHaveBeenCalledWith(
-        expect.objectContaining({
-          href,
-          preview: expect.objectContaining({
-            title: "The Big Bang",
-          }),
-          imageOnly: false,
-          hideActions: false,
-        })
-      )
+      expect(mockMarketplaceUnavailableCard).toHaveBeenCalledWith({
+        href,
+        compact: false,
+      })
     );
   });
 
@@ -101,7 +108,7 @@ describe("MarketplaceManifoldListingPreview", () => {
     render(<MarketplaceManifoldListingPreview href={href} />);
 
     await waitFor(() =>
-      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
+      expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
           title: "The Big Bang",

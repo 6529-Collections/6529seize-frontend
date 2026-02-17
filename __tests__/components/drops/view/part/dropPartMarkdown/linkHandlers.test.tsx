@@ -22,10 +22,10 @@ describe("createLinkRenderer", () => {
     jest.clearAllMocks();
   });
 
-  it("passes marketplaceImageOnly option to link handlers", () => {
+  it("passes marketplaceCompact option to link handlers", () => {
     const renderer = createLinkRenderer({
       onQuoteClick: jest.fn(),
-      marketplaceImageOnly: true,
+      marketplaceCompact: true,
     });
 
     const rendered = renderer.renderAnchor({
@@ -37,7 +37,7 @@ describe("createLinkRenderer", () => {
 
     expect(createLinkHandlers).toHaveBeenCalledWith(
       expect.objectContaining({
-        marketplaceImageOnly: true,
+        marketplaceCompact: true,
       })
     );
     expect(screen.getByTestId("handled-link")).toBeInTheDocument();

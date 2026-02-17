@@ -1,63 +1,84 @@
 "use client";
 
-import OpenGraphPreview from "./OpenGraphPreview";
+import type { ReactElement } from "react";
+
+import { useInView } from "@/hooks/useInView";
 import MarketplaceFoundationMintPreview from "./marketplace/MarketplaceFoundationMintPreview";
 import MarketplaceManifoldListingPreview from "./marketplace/MarketplaceManifoldListingPreview";
 import MarketplaceOpenseaAssetPreview from "./marketplace/MarketplaceOpenseaAssetPreview";
 import MarketplaceOpenseaItemPreview from "./marketplace/MarketplaceOpenseaItemPreview";
+import MarketplacePreviewPlaceholder from "./marketplace/MarketplacePreviewPlaceholder";
 import MarketplaceSuperrareArtworkPreview from "./marketplace/MarketplaceSuperrareArtworkPreview";
 import MarketplaceTransientMintPreview from "./marketplace/MarketplaceTransientMintPreview";
 import MarketplaceTransientNftPreview from "./marketplace/MarketplaceTransientNftPreview";
+import MarketplaceUnavailableCard from "./marketplace/MarketplaceUnavailableCard";
 import { getMarketplaceUrlKind } from "./marketplace/urlKind";
+
+const MARKETPLACE_PREVIEW_IN_VIEW_OPTIONS: IntersectionObserverInit = {
+  rootMargin: "500px 0px",
+  threshold: 0,
+};
 
 interface MarketplacePreviewProps {
   readonly href: string;
-  readonly imageOnly?: boolean | undefined;
+  readonly compact?: boolean | undefined;
 }
 
 export default function MarketplacePreview({
   href,
-  imageOnly = false,
+  compact = false,
 }: MarketplacePreviewProps) {
+  const [containerRef, isVisible] = useInView<HTMLDivElement>(
+    MARKETPLACE_PREVIEW_IN_VIEW_OPTIONS
+  );
   const kind = getMarketplaceUrlKind(href);
 
-  switch (kind) {
-    case "manifold.listing":
-      return (
-        <MarketplaceManifoldListingPreview href={href} imageOnly={imageOnly} />
-      );
-    case "superrare.artwork":
-      return (
-        <MarketplaceSuperrareArtworkPreview href={href} imageOnly={imageOnly} />
-      );
-    case "foundation.mint":
-      return (
-        <MarketplaceFoundationMintPreview href={href} imageOnly={imageOnly} />
-      );
-    case "opensea.item":
-      return (
-        <MarketplaceOpenseaItemPreview href={href} imageOnly={imageOnly} />
-      );
-    case "opensea.asset":
-      return (
-        <MarketplaceOpenseaAssetPreview href={href} imageOnly={imageOnly} />
-      );
-    case "transient.nft":
-      return (
-        <MarketplaceTransientNftPreview href={href} imageOnly={imageOnly} />
-      );
-    case "transient.mint":
-      return (
-        <MarketplaceTransientMintPreview href={href} imageOnly={imageOnly} />
-      );
-    case null:
-      return (
-        <OpenGraphPreview
-          href={href}
-          preview={undefined}
-          imageOnly={imageOnly}
-          hideActions={imageOnly}
-        />
-      );
+  let content: ReactElement;
+
+  if (!isVisible) {
+    content = <MarketplacePreviewPlaceholder href={href} compact={compact} />;
+  } else {
+    switch (kind) {
+      case "manifold.listing":
+        content = (
+          <MarketplaceManifoldListingPreview href={href} compact={compact} />
+        );
+        break;
+      case "superrare.artwork":
+        content = (
+          <MarketplaceSuperrareArtworkPreview href={href} compact={compact} />
+        );
+        break;
+      case "foundation.mint":
+        content = (
+          <MarketplaceFoundationMintPreview href={href} compact={compact} />
+        );
+        break;
+      case "opensea.item":
+        content = (
+          <MarketplaceOpenseaItemPreview href={href} compact={compact} />
+        );
+        break;
+      case "opensea.asset":
+        content = (
+          <MarketplaceOpenseaAssetPreview href={href} compact={compact} />
+        );
+        break;
+      case "transient.nft":
+        content = (
+          <MarketplaceTransientNftPreview href={href} compact={compact} />
+        );
+        break;
+      case "transient.mint":
+        content = (
+          <MarketplaceTransientMintPreview href={href} compact={compact} />
+        );
+        break;
+      case null:
+        content = <MarketplaceUnavailableCard href={href} compact={compact} />;
+        break;
+    }
   }
+
+  return <div ref={containerRef}>{content}</div>;
 }

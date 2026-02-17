@@ -62,3 +62,48 @@ test("displays quoted part content", () => {
   expect(screen.getByTestId("markdown")).toHaveTextContent("text");
   expect(markdownProps.quotePath).toContain("w1:42");
 });
+
+test("updates quoted part when partId changes on rerender", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [
+      { part_id: 1, content: "first" },
+      { part_id: 2, content: "second" },
+    ],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+
+  const { rerender } = render(
+    <WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />
+  );
+  expect(screen.getByTestId("markdown")).toHaveTextContent("first");
+
+  rerender(<WaveDropQuote drop={drop} partId={2} onQuoteClick={jest.fn()} />);
+  expect(screen.getByTestId("markdown")).toHaveTextContent("second");
+});
+
+test("clears quoted part content when drop becomes null", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 5, content: "text" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+
+  const { rerender } = render(
+    <WaveDropQuote drop={drop} partId={5} onQuoteClick={jest.fn()} />
+  );
+  expect(screen.getByTestId("markdown")).toHaveTextContent("text");
+
+  rerender(<WaveDropQuote drop={null} partId={5} onQuoteClick={jest.fn()} />);
+  expect(screen.getByTestId("markdown")).toHaveTextContent("");
+});

@@ -28,12 +28,12 @@ jest.mock("@/components/tweets/TweetPreviewModeContext", () => ({
   useTweetPreviewMode: () => "auto",
 }));
 
-describe("DropPartMarkdown marketplaceImageOnly", () => {
+describe("DropPartMarkdown marketplaceCompact", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("passes marketplaceImageOnly to createLinkRenderer", () => {
+  it("passes marketplaceCompact to createLinkRenderer", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
@@ -41,13 +41,13 @@ describe("DropPartMarkdown marketplaceImageOnly", () => {
         referencedNfts={[]}
         partContent="[nft](https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/1)"
         onQuoteClick={jest.fn()}
-        marketplaceImageOnly={true}
+        marketplaceCompact={true}
       />
     );
 
     expect(createLinkRenderer).toHaveBeenCalledWith(
       expect.objectContaining({
-        marketplaceImageOnly: true,
+        marketplaceCompact: true,
       })
     );
   });

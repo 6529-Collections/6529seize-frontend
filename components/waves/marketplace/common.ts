@@ -1,4 +1,3 @@
-import type { OpenGraphPreviewData } from "../OpenGraphPreview";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
@@ -13,7 +12,7 @@ type MediaCandidate =
 
 export interface MarketplaceTypePreviewProps {
   readonly href: string;
-  readonly imageOnly?: boolean | undefined;
+  readonly compact?: boolean | undefined;
 }
 
 export type MarketplacePreviewState =
@@ -49,20 +48,6 @@ export const asNonEmptyString = (value: unknown): string | undefined => {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-};
-
-export const toPreviewData = (
-  response: LinkPreviewResponse
-): OpenGraphPreviewData => {
-  return {
-    ...response,
-    image: response.image ?? undefined,
-    images: response.images ?? undefined,
-    url: response.url ?? response.requestUrl ?? undefined,
-    siteName: response.siteName ?? undefined,
-    description: response.description ?? undefined,
-    title: response.title ?? undefined,
-  };
 };
 
 const isOpenSeaHref = (href: string): boolean => {

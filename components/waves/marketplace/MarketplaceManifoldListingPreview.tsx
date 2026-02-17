@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from "react";
 
-import ManifoldItemPreviewCard from "../ManifoldItemPreviewCard";
-import OpenGraphPreview from "../OpenGraphPreview";
+import MarketplaceItemPreviewCard from "../MarketplaceItemPreviewCard";
+import MarketplacePreviewPlaceholder from "./MarketplacePreviewPlaceholder";
+import MarketplaceUnavailableCard from "./MarketplaceUnavailableCard";
 import {
   asNonEmptyString,
   type MarketplacePreviewState,
   type MarketplaceTypePreviewProps,
   pickMedia,
-  toPreviewData,
 } from "./common";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 
 export default function MarketplaceManifoldListingPreview({
   href,
-  imageOnly = false,
+  compact = false,
 }: MarketplaceTypePreviewProps) {
   const [state, setState] = useState<MarketplacePreviewState>({
     type: "loading",
@@ -57,18 +57,11 @@ export default function MarketplaceManifoldListingPreview({
   }, [href]);
 
   if (state.href !== href || state.type === "loading") {
-    return (
-      <OpenGraphPreview
-        href={href}
-        preview={undefined}
-        imageOnly={imageOnly}
-        hideActions={imageOnly}
-      />
-    );
+    return <MarketplacePreviewPlaceholder href={href} compact={compact} />;
   }
 
   if (state.type === "error") {
-    throw state.error;
+    return <MarketplaceUnavailableCard href={href} compact={compact} />;
   }
 
   const title = asNonEmptyString(state.data.title);
@@ -76,23 +69,16 @@ export default function MarketplaceManifoldListingPreview({
 
   if (title && media) {
     return (
-      <ManifoldItemPreviewCard
+      <MarketplaceItemPreviewCard
         href={href}
         title={title}
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
-        imageOnly={imageOnly}
-        hideActions={imageOnly}
+        compact={compact}
+        hideActions={compact}
       />
     );
   }
 
-  return (
-    <OpenGraphPreview
-      href={href}
-      preview={toPreviewData(state.data)}
-      imageOnly={imageOnly}
-      hideActions={imageOnly}
-    />
-  );
+  return <MarketplaceUnavailableCard href={href} compact={compact} />;
 }

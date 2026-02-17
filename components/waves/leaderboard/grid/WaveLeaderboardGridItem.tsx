@@ -109,7 +109,7 @@ export const WaveLeaderboardGridItem: React.FC<
   const isContentOnlyMode = mode === "content_only";
   const activePart = drop.parts[0];
   const author = drop.author;
-  const authorHandle = author?.handle ?? null;
+  const authorHandle = author.handle ?? null;
   const primaryMedia = activePart?.media[0];
   const isCuratable = drop.context_profile_context?.curatable ?? false;
   const isCurated = drop.context_profile_context?.curated ?? false;
@@ -314,7 +314,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 part={activePart}
                 wave={drop.wave}
                 onQuoteClick={() => {}}
-                marketplaceImageOnly={mode === "content_only"}
+                marketplaceCompact={mode === "content_only"}
               />
             </LinkPreviewProvider>
           )}

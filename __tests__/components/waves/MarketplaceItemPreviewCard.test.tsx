@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import ManifoldItemPreviewCard from "@/components/waves/ManifoldItemPreviewCard";
+import MarketplaceItemPreviewCard from "@/components/waves/MarketplaceItemPreviewCard";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 
 jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
@@ -21,14 +21,14 @@ jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   default: () => <div data-testid="href-buttons" />,
 }));
 
-describe("ManifoldItemPreviewCard", () => {
+describe("MarketplaceItemPreviewCard", () => {
   it("renders uncropped media and keeps title outside media", () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
     const title = "The Big Bang";
 
     const { container } = render(
       <LinkPreviewProvider variant="home">
-        <ManifoldItemPreviewCard
+        <MarketplaceItemPreviewCard
           href={href}
           title={title}
           mediaUrl="https://arweave.net/test-image"
@@ -51,21 +51,21 @@ describe("ManifoldItemPreviewCard", () => {
     expect(mediaDisplay).toHaveAttribute("data-disable", "true");
     expect(media).toContainElement(mediaDisplay);
     expect(media).toHaveClass("tw-aspect-[16/9]");
-    expect(media).toHaveClass("tw-min-h-[10rem]");
+    expect(media).toHaveClass("tw-min-h-[14rem]");
     expect(media).not.toContainElement(titleElement);
     expect(screen.getByText(title)).toBeInTheDocument();
     expect(container.querySelector('[class*="bg-gradient"]')).toBeNull();
   });
 
-  it("hides title row in image-only mode", () => {
+  it("hides title row in compact mode", () => {
     const { container } = render(
       <LinkPreviewProvider variant="home">
-        <ManifoldItemPreviewCard
+        <MarketplaceItemPreviewCard
           href="https://manifold.xyz/@andrew-hooker/id/4098474224"
           title="The Big Bang"
           mediaUrl="https://arweave.net/test-image"
           mediaMimeType="image/*"
-          imageOnly={true}
+          compact={true}
         />
       </LinkPreviewProvider>
     );
@@ -87,11 +87,11 @@ describe("ManifoldItemPreviewCard", () => {
     };
 
     const { rerender } = render(
-      <ManifoldItemPreviewCard {...props} hideActions={false} />
+      <MarketplaceItemPreviewCard {...props} hideActions={false} />
     );
     expect(screen.getByTestId("href-buttons")).toBeInTheDocument();
 
-    rerender(<ManifoldItemPreviewCard {...props} hideActions={true} />);
+    rerender(<MarketplaceItemPreviewCard {...props} hideActions={true} />);
     expect(screen.queryByTestId("href-buttons")).toBeNull();
   });
 });

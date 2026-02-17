@@ -3,19 +3,32 @@ import React from "react";
 
 import MarketplaceOpenseaAssetPreview from "@/components/waves/marketplace/MarketplaceOpenseaAssetPreview";
 
-const mockOpenGraphPreview = jest.fn(() => <div data-testid="placeholder" />);
-const mockManifoldItemPreviewCard = jest.fn((props: any) => (
+const mockMarketplacePreviewPlaceholder = jest.fn(() => (
+  <div data-testid="marketplace-placeholder" />
+));
+const mockMarketplaceUnavailableCard = jest.fn(() => (
+  <div data-testid="marketplace-unavailable" />
+));
+const mockMarketplaceItemPreviewCard = jest.fn((props: any) => (
   <div data-testid="marketplace-item-card" data-title={props.title} />
 ));
 
-jest.mock("@/components/waves/OpenGraphPreview", () => ({
+jest.mock(
+  "@/components/waves/marketplace/MarketplacePreviewPlaceholder",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockMarketplacePreviewPlaceholder(props),
+  })
+);
+
+jest.mock("@/components/waves/marketplace/MarketplaceUnavailableCard", () => ({
   __esModule: true,
-  default: (props: any) => mockOpenGraphPreview(props),
+  default: (props: any) => mockMarketplaceUnavailableCard(props),
 }));
 
-jest.mock("@/components/waves/ManifoldItemPreviewCard", () => ({
+jest.mock("@/components/waves/MarketplaceItemPreviewCard", () => ({
   __esModule: true,
-  default: (props: any) => mockManifoldItemPreviewCard(props),
+  default: (props: any) => mockMarketplaceItemPreviewCard(props),
 }));
 
 jest.mock("@/services/api/link-preview-api", () => ({
@@ -53,7 +66,7 @@ describe("MarketplaceOpenseaAssetPreview", () => {
     render(<MarketplaceOpenseaAssetPreview href={href} />);
 
     await waitFor(() =>
-      expect(mockManifoldItemPreviewCard).toHaveBeenCalledWith(
+      expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
           title: "Radar dome - Earth Spaces | OpenSea",

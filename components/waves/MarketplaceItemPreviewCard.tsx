@@ -4,47 +4,22 @@ import Link from "next/link";
 import { useState, type MouseEvent } from "react";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import {
-  useLinkPreviewVariant,
-  type LinkPreviewVariant,
-} from "./LinkPreviewContext";
+import { useLinkPreviewVariant } from "./LinkPreviewContext";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+import {
+  getMarketplaceContainerClass,
+  MARKETPLACE_MEDIA_FRAME_CLASS,
+  getMarketplaceTitleRowClass,
+} from "./marketplace/previewLayout";
 
-interface ManifoldItemPreviewCardProps {
+interface MarketplaceItemPreviewCardProps {
   readonly href: string;
   readonly title: string;
   readonly mediaUrl: string;
   readonly mediaMimeType: string;
-  readonly imageOnly?: boolean | undefined;
+  readonly compact?: boolean | undefined;
   readonly hideActions?: boolean | undefined;
-}
-
-function getContainerClass(
-  variant: LinkPreviewVariant,
-  imageOnly: boolean
-): string {
-  if (imageOnly) {
-    if (variant === "home") {
-      return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black/30";
-    }
-
-    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40";
-  }
-
-  if (variant === "home") {
-    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950/50";
-  }
-
-  return "tw-w-full tw-overflow-hidden tw-bg-inherit";
-}
-
-function getTitleRowClass(variant: LinkPreviewVariant): string {
-  if (variant === "home") {
-    return "tw-bg-iron-950/50 tw-px-3 tw-py-2";
-  }
-
-  return "tw-py-1.5";
 }
 
 function OverlayActionButtons({ href }: { readonly href: string }) {
@@ -121,20 +96,20 @@ function OverlayActionButtons({ href }: { readonly href: string }) {
   );
 }
 
-export default function ManifoldItemPreviewCard({
+export default function MarketplaceItemPreviewCard({
   href,
   title,
   mediaUrl,
   mediaMimeType,
-  imageOnly = false,
+  compact = false,
   hideActions = false,
-}: ManifoldItemPreviewCardProps) {
+}: MarketplaceItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
 
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
       <div
-        className={`${getContainerClass(variant, imageOnly)} tw-relative`}
+        className={`${getMarketplaceContainerClass(variant, compact)} tw-relative`}
         data-testid="manifold-item-card"
       >
         <Link
@@ -145,7 +120,7 @@ export default function ManifoldItemPreviewCard({
           className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-no-underline"
         >
           <div
-            className="tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-inherit md:tw-min-h-[15rem]"
+            className={MARKETPLACE_MEDIA_FRAME_CLASS}
             data-testid="manifold-item-media"
           >
             <MediaDisplay
@@ -154,8 +129,8 @@ export default function ManifoldItemPreviewCard({
               disableMediaInteraction={true}
             />
           </div>
-          {!imageOnly && (
-            <div className={getTitleRowClass(variant)}>
+          {!compact && (
+            <div className={getMarketplaceTitleRowClass(variant)}>
               <h3
                 className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200"
                 data-testid="manifold-item-title"

@@ -1,9 +1,15 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
 
-const mockOpenGraphPreview = jest.fn(() => <div data-testid="og-fallback" />);
+const mockUseInView = jest.fn();
+const mockMarketplacePreviewPlaceholder = jest.fn(() => (
+  <div data-testid="marketplace-placeholder" />
+));
+const mockMarketplaceUnavailableCard = jest.fn(() => (
+  <div data-testid="marketplace-unavailable" />
+));
 const mockMarketplaceManifoldListingPreview = jest.fn(() => (
   <div data-testid="manifold-listing" />
 ));
@@ -26,9 +32,22 @@ const mockMarketplaceTransientMintPreview = jest.fn(() => (
   <div data-testid="transient-mint" />
 ));
 
-jest.mock("@/components/waves/OpenGraphPreview", () => ({
+jest.mock("@/hooks/useInView", () => ({
   __esModule: true,
-  default: (props: any) => mockOpenGraphPreview(props),
+  useInView: (...args: any[]) => mockUseInView(...args),
+}));
+
+jest.mock(
+  "@/components/waves/marketplace/MarketplacePreviewPlaceholder",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockMarketplacePreviewPlaceholder(props),
+  })
+);
+
+jest.mock("@/components/waves/marketplace/MarketplaceUnavailableCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockMarketplaceUnavailableCard(props),
 }));
 
 jest.mock(
@@ -90,6 +109,7 @@ jest.mock(
 describe("MarketplacePreview", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseInView.mockReturnValue([{ current: null }, true]);
   });
 
   it.each([
@@ -129,27 +149,48 @@ describe("MarketplacePreview", () => {
       mockMarketplaceTransientMintPreview,
     ],
   ])(
-    "routes %s to matching marketplace component",
+    "routes %s to matching marketplace component when visible",
     (_, href: string, targetMock: any) => {
-      render(<MarketplacePreview href={href} imageOnly={true} />);
+      render(<MarketplacePreview href={href} compact={true} />);
 
-      expect(targetMock).toHaveBeenCalledWith({ href, imageOnly: true });
-      expect(mockOpenGraphPreview).not.toHaveBeenCalled();
+      expect(targetMock).toHaveBeenCalledWith({ href, compact: true });
+      expect(mockMarketplacePreviewPlaceholder).not.toHaveBeenCalled();
+      expect(mockMarketplaceUnavailableCard).not.toHaveBeenCalled();
     }
   );
 
-  it("renders OpenGraph fallback for unknown URLs", () => {
+  it("renders placeholder when marketplace preview is out of viewport", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockUseInView.mockReturnValue([{ current: null }, false]);
+
+    render(<MarketplacePreview href={href} />);
+
+    expect(mockMarketplacePreviewPlaceholder).toHaveBeenCalledWith({
+      href,
+      compact: false,
+    });
+    expect(screen.getByTestId("marketplace-placeholder")).toBeInTheDocument();
+    expect(mockMarketplaceManifoldListingPreview).not.toHaveBeenCalled();
+  });
+
+  it("renders marketplace unavailable card for unsupported URLs when visible", () => {
     const href = "not-a-marketplace-link";
 
     render(<MarketplacePreview href={href} />);
 
-    expect(mockOpenGraphPreview).toHaveBeenCalledWith(
-      expect.objectContaining({
-        href,
-        preview: undefined,
-        imageOnly: false,
-        hideActions: false,
-      })
-    );
+    expect(mockMarketplaceUnavailableCard).toHaveBeenCalledWith({
+      href,
+      compact: false,
+    });
+    expect(screen.getByTestId("marketplace-unavailable")).toBeInTheDocument();
+  });
+
+  it("uses marketplace viewport preload options", () => {
+    render(<MarketplacePreview href="https://transient.xyz/mint/edition-1" />);
+
+    expect(mockUseInView).toHaveBeenCalledWith({
+      rootMargin: "500px 0px",
+      threshold: 0,
+    });
   });
 });

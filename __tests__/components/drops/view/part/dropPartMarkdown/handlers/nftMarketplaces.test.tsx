@@ -139,7 +139,7 @@ describe("createNftMarketplacesHandler", () => {
 
   it("renders MarketplacePreview for matched URLs", () => {
     const handler = createNftMarketplacesHandler({
-      marketplaceImageOnly: true,
+      marketplaceCompact: true,
     });
     const href =
       "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729";
@@ -149,7 +149,7 @@ describe("createNftMarketplacesHandler", () => {
 
     expect(mockMarketplacePreview).toHaveBeenCalledWith({
       href,
-      imageOnly: true,
+      compact: true,
     });
     expect(screen.getByTestId("marketplace-preview")).toHaveAttribute(
       "data-href",

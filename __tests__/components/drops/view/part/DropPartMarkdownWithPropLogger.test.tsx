@@ -8,9 +8,7 @@ jest.mock("@/components/drops/view/part/DropPartMarkdown", () => {
     return (
       <div
         data-testid="drop-part-markdown"
-        data-marketplace-image-only={String(
-          Boolean(props.marketplaceImageOnly)
-        )}
+        data-marketplace-compact={String(Boolean(props.marketplaceCompact))}
       >
         {props.partContent}
       </div>
@@ -53,16 +51,16 @@ describe("DropPartMarkdownWithPropLogger", () => {
     );
   });
 
-  it("passes marketplaceImageOnly prop to DropPartMarkdown", () => {
+  it("passes marketplaceCompact prop to DropPartMarkdown", () => {
     const { getByTestId } = render(
       <DropPartMarkdownWithPropLogger
         {...baseProps}
-        marketplaceImageOnly={true}
+        marketplaceCompact={true}
       />
     );
 
     expect(getByTestId("drop-part-markdown")).toHaveAttribute(
-      "data-marketplace-image-only",
+      "data-marketplace-compact",
       "true"
     );
   });

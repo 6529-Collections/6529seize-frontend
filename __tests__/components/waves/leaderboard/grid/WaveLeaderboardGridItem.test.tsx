@@ -157,7 +157,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("votes")).toBeInTheDocument();
     expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
-    expect(markdownProps.marketplaceImageOnly).toBe(false);
+    expect(markdownProps.marketplaceCompact).toBe(false);
     expect(
       screen.getByTestId("wave-leaderboard-grid-item-footer-d1")
     ).toBeInTheDocument();
@@ -187,7 +187,7 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.queryByTestId("rank")).not.toBeInTheDocument();
     expect(screen.queryByTestId("votes")).not.toBeInTheDocument();
-    expect(markdownProps.marketplaceImageOnly).toBe(true);
+    expect(markdownProps.marketplaceCompact).toBe(true);
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
@@ -244,7 +244,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-p-0");
     expect(card).not.toHaveClass("tw-p-2");
     expect(card).toHaveClass("tw-border");
-    expect(markdownProps.marketplaceImageOnly).toBe(true);
+    expect(markdownProps.marketplaceCompact).toBe(true);
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   });
 
