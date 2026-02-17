@@ -62,5 +62,18 @@ describe("UserPageIdentityAddStatementsContactInput", () => {
       "placeholder",
       STATEMENT_META[STATEMENT_TYPE.TRANSIENT].inputPlaceholder
     );
+
+    rerender(
+      <UserPageIdentityAddStatementsContactInput
+        activeType={STATEMENT_TYPE.LINKTREE}
+        value=""
+        onChange={onChange}
+      />
+    );
+    const linktreeInput = screen.getByRole("textbox");
+    expect(linktreeInput).toHaveAttribute(
+      "placeholder",
+      STATEMENT_META[STATEMENT_TYPE.LINKTREE].inputPlaceholder
+    );
   });
 });
