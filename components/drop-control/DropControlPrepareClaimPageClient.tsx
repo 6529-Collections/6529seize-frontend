@@ -9,24 +9,34 @@ import {
   getClaimSeason,
   traitsDataToUpdateRequest,
 } from "@/components/drop-control/claimTraitsData";
-import DropControlMediaTypePill from "@/components/drop-control/DropControlMediaTypePill";
-import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
-import { DROP_CONTROL_SECTIONS } from "@/components/drop-control/drop-control.constants";
+import { useDropControlMintingConfig } from "@/components/drop-control/drop-control-config";
 import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-control/drop-control-status.helpers";
+import { DROP_CONTROL_SECTIONS } from "@/components/drop-control/drop-control.constants";
+import DropControlAccordionSection from "@/components/drop-control/DropControlAccordionSection";
+import DropControlMediaTypePill from "@/components/drop-control/DropControlMediaTypePill";
 import { DropControlPermissionFallback } from "@/components/drop-control/DropControlPermissionFallback";
+import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
+import DropControlTestnetIndicator from "@/components/drop-control/DropControlTestnetIndicator";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 import ArtworkDetails from "@/components/waves/memes/submission/details/ArtworkDetails";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
+import { publicEnv } from "@/config/env";
+import type { DistributionPhoto } from "@/entities/IDistribution";
 import type { MemeClaim } from "@/generated/models/MemeClaim";
 import type { MemeClaimUpdateRequest } from "@/generated/models/MemeClaimUpdateRequest";
+import type { MemesMintingRootItem } from "@/generated/models/MemesMintingRootItem";
 import { useDropControlPermissions } from "@/hooks/useDropControlPermissions";
+import { fetchAllPages } from "@/services/6529api";
 import {
   getClaim,
+  getMemesMintingAirdrops,
+  getMemesMintingRoots,
+  type MemesMintingAirdropSummaryItem,
   patchClaim,
   postArweaveUpload,
   uploadClaimMedia,
@@ -36,12 +46,11 @@ import {
   ArrowTopRightOnSquareIcon,
   DocumentDuplicateIcon,
   PlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-const CARD_CLASS =
-  "tw-rounded-xl tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-800 tw-p-6";
+import { createPortal } from "react-dom";
 
 const BTN_PRIMARY =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-opacity-50";
@@ -116,6 +125,7 @@ export default function DropControlPrepareClaimPageClient({
   const [error, setError] = useState<string | null>(null);
   const [imageDirty, setImageDirty] = useState(false);
   const [animationDirty, setAnimationDirty] = useState(false);
+  const [coreInfoDirty, setCoreInfoDirty] = useState(false);
   const [metadataDirty, setMetadataDirty] = useState(false);
 
   const fetchClaim = useCallback(async () => {
@@ -159,6 +169,7 @@ export default function DropControlPrepareClaimPageClient({
   if (loading && !claim) {
     return (
       <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+        <DropControlTestnetIndicator />
         <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-text-iron-50">
           {title}
         </h1>
@@ -170,10 +181,11 @@ export default function DropControlPrepareClaimPageClient({
   if (error && !claim) {
     return (
       <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+        <DropControlTestnetIndicator />
         <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-text-iron-50">
           {title}
         </h1>
-        <p className="tw-mb-0 tw-text-red-400" role="alert">
+        <p className="tw-text-red-400 tw-mb-0" role="alert">
           {error}
         </p>
         <Link
@@ -189,10 +201,13 @@ export default function DropControlPrepareClaimPageClient({
 
   if (!claim) return null;
 
-  const hasPendingPageChanges = imageDirty || animationDirty || metadataDirty;
+  const hasPendingPageChanges =
+    imageDirty || animationDirty || coreInfoDirty || metadataDirty;
+  const hasAnimation = Boolean(claim.animation_url);
 
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+      <DropControlTestnetIndicator />
       <div className="tw-mb-6">
         <Link
           href="/drop-control/prepare"
@@ -206,40 +221,58 @@ export default function DropControlPrepareClaimPageClient({
         </h1>
       </div>
 
-      <div className="tw-mb-8">
-        <ImageSection
-          claim={claim}
-          memeId={memeId}
-          onUpdated={setClaim}
-          onPendingChange={setImageDirty}
-        />
-      </div>
+      <div className="tw-flex tw-flex-col tw-gap-5">
+        <DropControlAccordionSection title="Image" defaultOpen>
+          <ImageSection
+            claim={claim}
+            memeId={memeId}
+            onUpdated={setClaim}
+            onPendingChange={setImageDirty}
+          />
+        </DropControlAccordionSection>
 
-      <div className="tw-mb-8">
-        <AnimationSection
-          claim={claim}
-          memeId={memeId}
-          onUpdated={setClaim}
-          onPendingChange={setAnimationDirty}
-        />
-      </div>
+        <DropControlAccordionSection
+          title="Animation"
+          defaultOpen={hasAnimation}
+        >
+          <AnimationSection
+            claim={claim}
+            memeId={memeId}
+            onUpdated={setClaim}
+            onPendingChange={setAnimationDirty}
+          />
+        </DropControlAccordionSection>
 
-      <div className="tw-mb-8">
-        <MetadataSection
-          claim={claim}
-          memeId={memeId}
-          onUpdated={setClaim}
-          onPendingChange={setMetadataDirty}
-        />
-      </div>
+        <DropControlAccordionSection title="Core Information" defaultOpen>
+          <CoreInformationSection
+            claim={claim}
+            memeId={memeId}
+            onUpdated={setClaim}
+            onPendingChange={setCoreInfoDirty}
+          />
+        </DropControlAccordionSection>
 
-      <div>
-        <ArweaveSection
-          memeId={memeId}
-          claim={claim}
-          onStatusRefresh={fetchClaim}
-          hasPendingChanges={hasPendingPageChanges}
-        />
+        <DropControlAccordionSection title="Metadata" defaultOpen>
+          <MetadataSection
+            claim={claim}
+            memeId={memeId}
+            onUpdated={setClaim}
+            onPendingChange={setMetadataDirty}
+          />
+        </DropControlAccordionSection>
+
+        <DropControlAccordionSection title="Arweave" defaultOpen>
+          <ArweaveSection
+            memeId={memeId}
+            claim={claim}
+            onStatusRefresh={fetchClaim}
+            hasPendingChanges={hasPendingPageChanges}
+          />
+        </DropControlAccordionSection>
+
+        <DropControlAccordionSection title="Distribution" defaultOpen={false}>
+          <DistributionSection memeId={memeId} />
+        </DropControlAccordionSection>
       </div>
     </div>
   );
@@ -332,10 +365,7 @@ function ImageSection({
   }, [onPendingChange]);
 
   return (
-    <div className={CARD_CLASS}>
-      <h2 className="tw-mb-4 tw-text-lg tw-font-medium tw-text-iron-50">
-        Image
-      </h2>
+    <div>
       <div className="tw-mb-6 tw-flex tw-w-full tw-flex-col tw-gap-2">
         <div
           className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800"
@@ -394,7 +424,7 @@ function ImageSection({
           </p>
         )}
         {formError && (
-          <p className="tw-mb-0 tw-text-red-400 tw-text-sm" role="alert">
+          <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
             {formError}
           </p>
         )}
@@ -465,7 +495,9 @@ function AnimationSection({
       : pendingAnimation === undefined
         ? claim.animation_url
         : pendingAnimation;
-  const isAnimationVideoUrl = Boolean(animationDisplayUrl && isVideoUrl(animationDisplayUrl));
+  const isAnimationVideoUrl = Boolean(
+    animationDisplayUrl && isVideoUrl(animationDisplayUrl)
+  );
   const animationPreviewMimeType = (() => {
     if (pendingAnimationFile) {
       const mime = pendingAnimationFile.type?.toLowerCase();
@@ -477,7 +509,8 @@ function AnimationSection({
     if (!animationDisplayUrl) return null;
     const lowered = animationDisplayUrl.toLowerCase();
     if (mediaType === "video" || isAnimationVideoUrl) return "video/mp4";
-    if (mediaType === "glb" || lowered.endsWith(".glb")) return "model/gltf-binary";
+    if (mediaType === "glb" || lowered.endsWith(".glb"))
+      return "model/gltf-binary";
     if (lowered.endsWith(".gltf")) return "model/gltf+json";
     if (
       mediaType === "html" ||
@@ -610,10 +643,7 @@ function AnimationSection({
   const showAddLink = showAddFlow && replaceMode === "link";
 
   return (
-    <div className={CARD_CLASS}>
-      <h2 className="tw-mb-4 tw-text-lg tw-font-medium tw-text-iron-50">
-        Animation
-      </h2>
+    <div>
       <div className="tw-mb-6 tw-flex tw-w-full tw-flex-col tw-gap-4">
         <input
           ref={animationInputRef}
@@ -689,18 +719,22 @@ function AnimationSection({
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
                   previewImageUrl={
-                    animationPreviewMimeType === "text/html" ? imageUrl : undefined
+                    animationPreviewMimeType === "text/html"
+                      ? imageUrl
+                      : undefined
                   }
                 />
               </div>
             )}
             {animationDisplayUrl && !animationPreviewMimeType && (
-                <div className="tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-iron-800">
-                  Link
-                </div>
+              <div className="tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-iron-800">
+                Link
+              </div>
             )}
             {animationDisplayUrl === null && (
-              <p className="tw-mb-0 tw-text-sm tw-text-iron-500">Animation removed</p>
+              <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+                Animation removed
+              </p>
             )}
           </>
         )}
@@ -721,7 +755,7 @@ function AnimationSection({
               className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
             />
             {linkError && (
-              <p className="tw-mb-0 tw-text-red-400 tw-text-sm" role="alert">
+              <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
                 {linkError}
               </p>
             )}
@@ -804,7 +838,10 @@ function AnimationSection({
                   className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
                 />
                 {linkError && (
-                  <p className="tw-mb-0 tw-text-red-400 tw-w-full tw-text-sm" role="alert">
+                  <p
+                    className="tw-text-red-400 tw-mb-0 tw-w-full tw-text-sm"
+                    role="alert"
+                  >
                     {linkError}
                   </p>
                 )}
@@ -837,7 +874,7 @@ function AnimationSection({
       {hasPendingChanges && (
         <form onSubmit={handleSave} className="tw-flex tw-flex-col tw-gap-2">
           {formError && (
-            <p className="tw-mb-0 tw-text-red-400 tw-text-sm" role="alert">
+            <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
               {formError}
             </p>
           )}
@@ -877,7 +914,7 @@ function AnimationSection({
   );
 }
 
-function MetadataSection({
+function CoreInformationSection({
   claim,
   memeId,
   onUpdated,
@@ -889,47 +926,25 @@ function MetadataSection({
   onPendingChange: (dirty: boolean) => void;
 }) {
   const { setToast } = useAuth();
-  const initialTraits = useMemo(() => claimToTraitsData(claim), [claim]);
-  const [traits, setTraits] = useState<TraitsData>(initialTraits);
   const [editionSize, setEditionSize] = useState(
     claim.edition_size != null ? String(claim.edition_size) : ""
   );
   const [season, setSeason] = useState(() => getClaimSeason(claim));
   const [coreSaving, setCoreSaving] = useState(false);
   const [coreError, setCoreError] = useState<string | null>(null);
-  const [traitsSaving, setTraitsSaving] = useState(false);
-  const [traitsError, setTraitsError] = useState<string | null>(null);
-  const [traitsFormKey, setTraitsFormKey] = useState(0);
-  const traitsSaveButtonRef = useRef<HTMLButtonElement>(null);
-  const mergeUpdatedClaim = useCallback(
-    (updated: MemeClaim): MemeClaim => ({
-      ...claim,
-      ...updated,
-      attributes:
-        Array.isArray(updated.attributes) && updated.attributes.length > 0
-          ? updated.attributes
-          : claim.attributes,
-    }),
-    [claim]
-  );
 
   useEffect(() => {
-    setTraits(claimToTraitsData(claim));
     setEditionSize(
       claim.edition_size != null ? String(claim.edition_size) : ""
     );
     setSeason(getClaimSeason(claim));
     setCoreError(null);
-    setTraitsError(null);
-    setTraitsFormKey((prev) => prev + 1);
   }, [claim.meme_id]);
 
   const coreChanged =
     editionSize !==
       (claim.edition_size != null ? String(claim.edition_size) : "") ||
     season !== getClaimSeason(claim);
-  const traitsChanged =
-    JSON.stringify(traits) !== JSON.stringify(claimToTraitsData(claim));
 
   const editionSizeNum =
     editionSize !== "" && Number.isFinite(Number(editionSize))
@@ -939,8 +954,8 @@ function MetadataSection({
     season !== "" && Number.isFinite(Number(season)) ? Number(season) : null;
 
   useEffect(() => {
-    onPendingChange(coreChanged || traitsChanged);
-  }, [coreChanged, traitsChanged, onPendingChange]);
+    onPendingChange(coreChanged);
+  }, [coreChanged, onPendingChange]);
 
   useEffect(() => {
     return () => onPendingChange(false);
@@ -955,8 +970,10 @@ function MetadataSection({
         edition_size: editionSizeNum,
         season: seasonNum,
       };
-      const updated = await patchClaim(memeId, body as MemeClaimUpdateRequest);
-      const nextClaim = mergeUpdatedClaim(updated);
+      const nextClaim = await patchClaim(
+        memeId,
+        body as MemeClaimUpdateRequest
+      );
       setEditionSize(
         nextClaim.edition_size != null ? String(nextClaim.edition_size) : ""
       );
@@ -971,6 +988,138 @@ function MetadataSection({
       setCoreSaving(false);
     }
   }
+
+  return (
+    <form onSubmit={handleCoreSave} className="tw-flex tw-flex-col tw-gap-2">
+      <div className="tailwind-scope tw-grid tw-grid-cols-2 tw-gap-6">
+        <div className="tw-group tw-relative tw-min-w-0 tw-pb-8">
+          <div className="tw-relative">
+            <label
+              htmlFor="metadata-season"
+              className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
+            >
+              Season
+            </label>
+            <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
+              <input
+                id="metadata-season"
+                type="number"
+                min={1}
+                step={1}
+                value={season}
+                onChange={(e) => setSeason(e.target.value)}
+                placeholder="Season"
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+                style={{
+                  MozAppearance: "textfield",
+                  WebkitAppearance: "none",
+                }}
+                onWheel={(e) => e.currentTarget.blur()}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="tw-group tw-relative tw-min-w-0 tw-pb-8">
+          <div className="tw-relative">
+            <label
+              htmlFor="metadata-edition-size"
+              className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
+            >
+              Edition size
+            </label>
+            <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
+              <input
+                id="metadata-edition-size"
+                type="number"
+                min={1}
+                step={1}
+                value={editionSize}
+                onChange={(e) => setEditionSize(e.target.value)}
+                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+                style={{
+                  MozAppearance: "textfield",
+                  WebkitAppearance: "none",
+                }}
+                onWheel={(e) => e.currentTarget.blur()}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      {coreError && (
+        <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+          {coreError}
+        </p>
+      )}
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+        <button
+          type="submit"
+          disabled={coreSaving || !coreChanged}
+          className={`${BTN_SAVE} tw-w-full`}
+        >
+          {coreSaving ? (
+            <span className="tw-inline-flex tw-items-center tw-gap-2">
+              <CircleLoader size={CircleLoaderSize.SMALL} />
+              <span>Saving…</span>
+            </span>
+          ) : (
+            "Save"
+          )}
+        </button>
+        <button
+          type="button"
+          disabled={!coreChanged}
+          onClick={() => {
+            setEditionSize(
+              claim.edition_size != null ? String(claim.edition_size) : ""
+            );
+            setSeason(getClaimSeason(claim));
+            setCoreError(null);
+          }}
+          className={`${BTN_DANGER} tw-w-full disabled:tw-opacity-50`}
+        >
+          Revert
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function MetadataSection({
+  claim,
+  memeId,
+  onUpdated,
+  onPendingChange,
+}: {
+  claim: MemeClaim;
+  memeId: number;
+  onUpdated: (c: MemeClaim) => void;
+  onPendingChange: (dirty: boolean) => void;
+}) {
+  const { setToast } = useAuth();
+  const initialTraits = useMemo(() => claimToTraitsData(claim), [claim]);
+  const [traits, setTraits] = useState<TraitsData>(initialTraits);
+  const [traitsSaving, setTraitsSaving] = useState(false);
+  const [traitsError, setTraitsError] = useState<string | null>(null);
+  const [traitsFormKey, setTraitsFormKey] = useState(0);
+  const traitsSaveButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setTraits(claimToTraitsData(claim));
+    setTraitsError(null);
+    setTraitsFormKey((prev) => prev + 1);
+  }, [claim.meme_id]);
+
+  const traitsChanged =
+    JSON.stringify(traits) !== JSON.stringify(claimToTraitsData(claim));
+
+  useEffect(() => {
+    onPendingChange(traitsChanged);
+  }, [traitsChanged, onPendingChange]);
+
+  useEffect(() => {
+    return () => onPendingChange(false);
+  }, [onPendingChange]);
 
   async function handleTraitsSave(e: React.FormEvent) {
     e.preventDefault();
@@ -990,8 +1139,10 @@ function MetadataSection({
       if (currentAttributesSnapshot === nextAttributesSnapshot) {
         delete body.attributes;
       }
-      const updated = await patchClaim(memeId, body as MemeClaimUpdateRequest);
-      const nextClaim = mergeUpdatedClaim(updated);
+      const nextClaim = await patchClaim(
+        memeId,
+        body as MemeClaimUpdateRequest
+      );
       setTraits(claimToTraitsData(nextClaim));
       onUpdated(nextClaim);
       setToast({ message: "Metadata updated", type: "success" });
@@ -1012,176 +1163,69 @@ function MetadataSection({
   }
 
   return (
-    <>
-      <div className={`${CARD_CLASS} tw-mb-8`}>
-        <h2 className="tw-mb-4 tw-text-lg tw-font-medium tw-text-iron-50">
-          Core Information
-        </h2>
-        <form onSubmit={handleCoreSave} className="tw-flex tw-flex-col tw-gap-2">
-          <div className="tailwind-scope tw-grid tw-grid-cols-2 tw-gap-6">
-            <div className="tw-group tw-relative tw-min-w-0 tw-pb-8">
-              <div className="tw-relative">
-                <label
-                  htmlFor="metadata-season"
-                  className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
-                >
-                  Season
-                </label>
-                <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
-                  <input
-                    id="metadata-season"
-                    type="number"
-                    min={1}
-                    step={1}
-                    value={season}
-                    onChange={(e) => setSeason(e.target.value)}
-                    placeholder="Season"
-                    className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
-                    style={{
-                      MozAppearance: "textfield",
-                      WebkitAppearance: "none",
-                    }}
-                    onWheel={(e) => e.currentTarget.blur()}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="tw-group tw-relative tw-min-w-0 tw-pb-8">
-              <div className="tw-relative">
-                <label
-                  htmlFor="metadata-edition-size"
-                  className="group-focus-visible-within:tw-text-primary-400 tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all"
-                >
-                  Edition size
-                </label>
-                <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
-                  <input
-                    id="metadata-edition-size"
-                    type="number"
-                    min={1}
-                    step={1}
-                    value={editionSize}
-                    onChange={(e) => setEditionSize(e.target.value)}
-                    className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
-                    style={{
-                      MozAppearance: "textfield",
-                      WebkitAppearance: "none",
-                    }}
-                    onWheel={(e) => e.currentTarget.blur()}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          {coreError && (
-            <p className="tw-mb-0 tw-text-red-400 tw-text-sm" role="alert">
-              {coreError}
-            </p>
-          )}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-2">
-            <button
-              type="submit"
-              disabled={coreSaving || !coreChanged}
-              className={`${BTN_SAVE} tw-w-full`}
-            >
-              {coreSaving ? (
-                <span className="tw-inline-flex tw-items-center tw-gap-2">
-                  <CircleLoader size={CircleLoaderSize.SMALL} />
-                  <span>Saving…</span>
-                </span>
-              ) : (
-                "Save"
-              )}
-            </button>
-            <button
-              type="button"
-              disabled={!coreChanged}
-              onClick={() => {
-                setEditionSize(
-                  claim.edition_size != null ? String(claim.edition_size) : ""
-                );
-                setSeason(getClaimSeason(claim));
-                setCoreError(null);
-              }}
-              className={`${BTN_DANGER} tw-w-full disabled:tw-opacity-50`}
-            >
-              Revert
-            </button>
-          </div>
-        </form>
-      </div>
+    <form
+      onSubmit={handleTraitsSave}
+      noValidate
+      className="tw-flex tw-flex-col tw-gap-2"
+    >
+      <ArtworkDetails
+        title={traits.title}
+        description={traits.description}
+        onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
+        onDescriptionChange={(description) =>
+          setTraits((prev) => ({ ...prev, description }))
+        }
+      />
 
-      <div className={CARD_CLASS}>
-        <h2 className="tw-mb-4 tw-text-lg tw-font-medium tw-text-iron-50">
-          Metadata
-        </h2>
-        <form
-          onSubmit={handleTraitsSave}
-          noValidate
-          className="tw-flex tw-flex-col tw-gap-2"
+      <div className="tw-mt-6 tw-space-y-4">
+        <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-mb-6 sm:tw-text-xl">
+          Artwork Traits
+        </h3>
+        <MemesArtSubmissionTraits
+          key={`metadata-traits-${traitsFormKey}`}
+          traits={traits}
+          setTraits={(partial) =>
+            setTraits((prev) => ({ ...prev, ...partial }))
+          }
+          showTitle={false}
+          readOnlyOverrides={{ seizeArtistProfile: false }}
+        />
+      </div>
+      {traitsError && (
+        <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+          {traitsError}
+        </p>
+      )}
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+        <button
+          ref={traitsSaveButtonRef}
+          type="submit"
+          disabled={traitsSaving || !traitsChanged}
+          className={`${BTN_SAVE} tw-w-full`}
         >
-          <ArtworkDetails
-            title={traits.title}
-            description={traits.description}
-            onTitleChange={(title) =>
-              setTraits((prev) => ({ ...prev, title }))
-            }
-            onDescriptionChange={(description) =>
-              setTraits((prev) => ({ ...prev, description }))
-            }
-          />
-
-          <div className="tw-mt-6 tw-space-y-4">
-            <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6">
-              Artwork Traits
-            </h3>
-          <MemesArtSubmissionTraits
-            key={`metadata-traits-${traitsFormKey}`}
-            traits={traits}
-            setTraits={(partial) =>
-              setTraits((prev) => ({ ...prev, ...partial }))
-            }
-            showTitle={false}
-            readOnlyOverrides={{ seizeArtistProfile: false }}
-          />
-          </div>
-          {traitsError && (
-            <p className="tw-mb-0 tw-text-red-400 tw-text-sm" role="alert">
-              {traitsError}
-            </p>
+          {traitsSaving ? (
+            <span className="tw-inline-flex tw-items-center tw-gap-2">
+              <CircleLoader size={CircleLoaderSize.SMALL} />
+              <span>Saving…</span>
+            </span>
+          ) : (
+            "Save"
           )}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-2">
-            <button
-              ref={traitsSaveButtonRef}
-              type="submit"
-              disabled={traitsSaving || !traitsChanged}
-              className={`${BTN_SAVE} tw-w-full`}
-            >
-              {traitsSaving ? (
-                <span className="tw-inline-flex tw-items-center tw-gap-2">
-                  <CircleLoader size={CircleLoaderSize.SMALL} />
-                  <span>Saving…</span>
-                </span>
-              ) : (
-                "Save"
-              )}
-            </button>
-            <button
-              type="button"
-              disabled={!traitsChanged}
-              onClick={() => {
-                setTraits(claimToTraitsData(claim));
-                setTraitsError(null);
-                setTraitsFormKey((prev) => prev + 1);
-              }}
-              className={`${BTN_DANGER} tw-w-full disabled:tw-opacity-50`}
-            >
-              Revert
-            </button>
-          </div>
-        </form>
+        </button>
+        <button
+          type="button"
+          disabled={!traitsChanged}
+          onClick={() => {
+            setTraits(claimToTraitsData(claim));
+            setTraitsError(null);
+            setTraitsFormKey((prev) => prev + 1);
+          }}
+          className={`${BTN_DANGER} tw-w-full disabled:tw-opacity-50`}
+        >
+          Revert
+        </button>
       </div>
-    </>
+    </form>
   );
 }
 
@@ -1295,10 +1339,7 @@ function ArweaveSection({
   }
 
   return (
-    <div className={CARD_CLASS}>
-      <h2 className="tw-mb-4 tw-text-lg tw-font-medium tw-text-iron-50">
-        Arweave
-      </h2>
+    <div>
       <div className="tw-mb-4 tw-flex tw-items-center tw-gap-3">
         <DropControlStatusPill
           className={getPrimaryStatusPillClassName(primaryStatus.tone)}
@@ -1340,12 +1381,12 @@ function ArweaveSection({
             </p>
           )}
           {hasPendingChanges && (
-            <p className="tw-mb-0 tw-text-yellow-400 tw-text-sm">
+            <p className="tw-mb-0 tw-text-sm tw-text-yellow-400">
               Save or revert pending changes before publishing to Arweave.
             </p>
           )}
           {error && (
-            <p className="tw-mb-0 tw-text-red-400 tw-text-sm" role="alert">
+            <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
               {error}
             </p>
           )}
@@ -1369,5 +1410,482 @@ function ArweaveSection({
         </div>
       )}
     </div>
+  );
+}
+
+function DistributionSection({ memeId }: { memeId: number }) {
+  const { contract: dropControlMintingContract } =
+    useDropControlMintingConfig();
+  const [photos, setPhotos] = useState<DistributionPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [airdropSummaries, setAirdropSummaries] = useState<
+    MemesMintingAirdropSummaryItem[]
+  >([]);
+  const [airdropSummariesLoading, setAirdropSummariesLoading] = useState(true);
+  const [airdropSummariesError, setAirdropSummariesError] = useState<
+    string | null
+  >(null);
+  const [roots, setRoots] = useState<MemesMintingRootItem[] | null>(null);
+  const [rootsLoading, setRootsLoading] = useState(true);
+  const [rootsError, setRootsError] = useState<string | null>(null);
+  const [expandedPhoto, setExpandedPhoto] = useState<DistributionPhoto | null>(
+    null
+  );
+
+  useEffect(() => {
+    let isActive = true;
+    setLoading(true);
+    setError(null);
+
+    const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${dropControlMintingContract}/${memeId}`;
+
+    const loadDistributionPhotos = async () => {
+      try {
+        const distributionPhotos = await fetchAllPages<DistributionPhoto>(
+          distributionPhotosUrl
+        );
+        if (!isActive) return;
+        setPhotos(distributionPhotos);
+      } catch (e) {
+        if (!isActive) return;
+        setPhotos([]);
+        setError(getErrorMessage(e, "Failed to load distribution photos"));
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadDistributionPhotos();
+
+    return () => {
+      isActive = false;
+    };
+  }, [memeId, dropControlMintingContract]);
+
+  useEffect(() => {
+    let isActive = true;
+    setAirdropSummariesLoading(true);
+    setAirdropSummariesError(null);
+    const loadAirdropSummaries = async () => {
+      try {
+        const summaries = await getMemesMintingAirdrops(
+          dropControlMintingContract,
+          memeId
+        );
+        if (!isActive) return;
+        setAirdropSummaries(summaries);
+      } catch (e) {
+        if (!isActive) return;
+        setAirdropSummaries([]);
+        setAirdropSummariesError(
+          getErrorMessage(e, "Failed to load airdrop summaries")
+        );
+      } finally {
+        if (isActive) {
+          setAirdropSummariesLoading(false);
+        }
+      }
+    };
+
+    void loadAirdropSummaries();
+
+    return () => {
+      isActive = false;
+    };
+  }, [memeId, dropControlMintingContract]);
+
+  useEffect(() => {
+    let isActive = true;
+    setRootsLoading(true);
+    setRootsError(null);
+
+    const loadRoots = async () => {
+      try {
+        const loadedRoots = await getMemesMintingRoots(
+          dropControlMintingContract,
+          memeId
+        );
+        if (!isActive) return;
+        setRoots(loadedRoots);
+      } catch (e) {
+        if (!isActive) return;
+        setRoots([]);
+        setRootsError(getErrorMessage(e, "Failed to load allowlist summaries"));
+      } finally {
+        if (isActive) {
+          setRootsLoading(false);
+        }
+      }
+    };
+
+    void loadRoots();
+
+    return () => {
+      isActive = false;
+    };
+  }, [memeId, dropControlMintingContract]);
+
+  function getPhotoFileName(link: string): string {
+    const withoutHash = link.split("#")[0] ?? link;
+    const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
+    const lastSegment = withoutQuery.split("/").pop() ?? "";
+    if (!lastSegment) return link;
+
+    try {
+      return decodeURIComponent(lastSegment);
+    } catch {
+      return lastSegment;
+    }
+  }
+
+  type DistributionSectionKey =
+    | "automatic"
+    | "phase0"
+    | "phase1"
+    | "phase2"
+    | "public";
+
+  function normalizeDistributionPhase(value: string): string {
+    return value.replace(/[\s_-]+/g, "").toLowerCase();
+  }
+
+  function normalizeRootPhase(value: string): string {
+    return value.replace(/\s+/g, "").toLowerCase();
+  }
+
+  const phaseAliases: Record<DistributionSectionKey, string[]> = {
+    automatic: ["automatic", "airdrop", "teamandartistairdrops"],
+    phase0: ["phase0", "0"],
+    phase1: ["phase1", "1"],
+    phase2: ["phase2", "2"],
+    public: ["public", "publicphase"],
+  };
+
+  function getPhaseSummary(
+    section: DistributionSectionKey
+  ): MemesMintingAirdropSummaryItem | undefined {
+    const aliases = phaseAliases[section];
+    return airdropSummaries.find((item) =>
+      aliases.includes(normalizeDistributionPhase(item.phase))
+    );
+  }
+
+  function getRootForPhase(
+    phase: "phase0" | "phase1" | "phase2" | "publicphase"
+  ): MemesMintingRootItem | null {
+    if (!roots) return null;
+    const targets: Record<typeof phase, string[]> = {
+      phase0: ["phase0"],
+      phase1: ["phase1"],
+      phase2: ["phase2"],
+      publicphase: ["publicphase", "public"],
+    };
+    return (
+      roots.find((root) =>
+        targets[phase].includes(normalizeRootPhase(root.phase ?? ""))
+      ) ?? null
+    );
+  }
+
+  function renderPhaseSummaryBox(section: DistributionSectionKey) {
+    const summary = getPhaseSummary(section);
+    const isMissing = !summary && !airdropSummariesLoading;
+    return (
+      <div className="tw-relative tw-rounded-md tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+        <span className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-[-0.6rem] tw-bg-iron-950 tw-px-1.5 tw-text-sm tw-text-iron-400">
+          Address Count / Total Airdrops
+        </span>
+        <div
+          className={`tw-text-base ${
+            isMissing
+              ? "tw-text-rose-300"
+              : airdropSummariesLoading
+                ? "tw-text-iron-400"
+                : "tw-text-white"
+          }`}
+        >
+          {airdropSummariesLoading
+            ? "loading / loading"
+            : summary
+              ? `${summary.addresses_count.toLocaleString()} / ${summary.total_airdrops.toLocaleString()}`
+              : "missing / missing"}
+        </div>
+      </div>
+    );
+  }
+
+  function renderAllowlistSummaryBox(phase: "phase0" | "phase1" | "phase2") {
+    const root = getRootForPhase(phase);
+    const isMissing = !root && !rootsLoading;
+
+    return (
+      <div className="tw-relative tw-rounded-md tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+        <span className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-[-0.6rem] tw-bg-iron-950 tw-px-1.5 tw-text-sm tw-text-iron-400">
+          Address Count / Total Spots
+        </span>
+        <div
+          className={`tw-text-base ${
+            isMissing
+              ? "tw-text-rose-300"
+              : rootsLoading
+                ? "tw-text-iron-400"
+                : "tw-text-white"
+          }`}
+        >
+          {rootsLoading
+            ? "loading / loading"
+            : root
+              ? `${root.addresses_count.toLocaleString()} / ${root.total_spots.toLocaleString()}`
+              : "missing / missing"}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h3 className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-100">
+        Photos
+      </h3>
+
+      {loading && (
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          Loading distribution photos…
+        </p>
+      )}
+
+      {!loading && error && (
+        <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && photos.length === 0 && (
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+          No Distribution photos found
+        </p>
+      )}
+
+      {!loading && !error && photos.length > 0 && (
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2 md:tw-grid-cols-3 lg:tw-grid-cols-4">
+          {photos.map((photo) => (
+            <div
+              key={photo.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setExpandedPhoto(photo)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setExpandedPhoto(photo);
+                }
+              }}
+              className="tw-relative tw-cursor-zoom-in tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
+            >
+              <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
+                <img
+                  src={photo.link}
+                  alt={getPhotoFileName(photo.link)}
+                  loading="lazy"
+                  className="tw-h-full tw-w-full tw-object-contain"
+                />
+              </div>
+              <a
+                href={photo.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                aria-label={`Open distribution photo ${getPhotoFileName(photo.link)} in new tab`}
+                title={photo.link}
+                className="tw-absolute tw-right-2 tw-top-2 tw-inline-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/90 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
+              >
+                <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4" />
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <DistributionPhotoLightbox
+        photo={expandedPhoto}
+        photoFileName={
+          expandedPhoto ? getPhotoFileName(expandedPhoto.link) : ""
+        }
+        onClose={() => setExpandedPhoto(null)}
+      />
+
+      <div className="tw-mt-8 tw-space-y-7">
+        {airdropSummariesError && (
+          <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+            {airdropSummariesError}
+          </p>
+        )}
+        {rootsError && (
+          <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+            {rootsError}
+          </p>
+        )}
+
+        <div className="tw-space-y-2">
+          <h3 className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-100">
+            Team and Artist
+          </h3>
+          <div className="tw-space-y-3">
+            <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+              Airdrop
+            </p>
+            <div className="tw-w-full md:tw-w-1/2">
+              {renderPhaseSummaryBox("automatic")}
+            </div>
+          </div>
+        </div>
+
+        <div className="tw-space-y-2">
+          <h3 className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-100">
+            Phase 0
+          </h3>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-gap-3">
+            <div className="tw-space-y-3">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                Airdrop
+              </p>
+              {renderPhaseSummaryBox("phase0")}
+            </div>
+            <div className="tw-space-y-3">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                Allowlist
+              </p>
+              {renderAllowlistSummaryBox("phase0")}
+            </div>
+          </div>
+        </div>
+
+        <div className="tw-space-y-2">
+          <h3 className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-100">
+            Phase 1
+          </h3>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-gap-3">
+            <div className="tw-space-y-3">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                Airdrop
+              </p>
+              {renderPhaseSummaryBox("phase1")}
+            </div>
+            <div className="tw-space-y-3">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                Allowlist
+              </p>
+              {renderAllowlistSummaryBox("phase1")}
+            </div>
+          </div>
+        </div>
+
+        <div className="tw-space-y-2">
+          <h3 className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-100">
+            Phase 2
+          </h3>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-gap-3">
+            <div className="tw-space-y-3">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                Airdrop
+              </p>
+              {renderPhaseSummaryBox("phase2")}
+            </div>
+            <div className="tw-space-y-3">
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                Allowlist
+              </p>
+              {renderAllowlistSummaryBox("phase2")}
+            </div>
+          </div>
+        </div>
+
+        <div className="tw-space-y-2">
+          <h3 className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-100">
+            Public Phase
+          </h3>
+          <div className="tw-space-y-3">
+            <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-300">
+              Airdrop
+            </p>
+            <div className="tw-w-full md:tw-w-1/2">
+              {renderPhaseSummaryBox("public")}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DistributionPhotoLightbox({
+  photo,
+  photoFileName,
+  onClose,
+}: {
+  photo: DistributionPhoto | null;
+  photoFileName: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!photo) return;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [photo, onClose]);
+
+  if (!photo || typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
+    <div
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-flex tw-items-center tw-justify-center"
+      onClick={onClose}
+    >
+      <div className="tw-absolute tw-inset-0 tw-bg-black/85" />
+
+      <div
+        className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <img
+          src={photo.link}
+          alt={photoFileName}
+          className="tw-h-[min(76vh,760px)] tw-w-full tw-object-contain"
+        />
+
+        <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3 tw-flex tw-gap-2">
+          <a
+            href={photo.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open distribution photo ${photoFileName} in new tab`}
+            className="tw-pointer-events-auto tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/90 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
+          >
+            <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close image preview"
+            className="tw-pointer-events-auto tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-iron-900/90 tw-text-iron-100 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-iron-500"
+          >
+            <XMarkIcon className="tw-h-5 tw-w-5" />
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }

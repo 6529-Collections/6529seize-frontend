@@ -2144,6 +2144,42 @@ paths:
                   $ref: "#/components/schemas/MemesMintingRootItem"
         "400":
           description: Invalid request (missing or invalid parameters)
+  /memes-minting/airdrops/{contract}/{card_id}:
+    get:
+      tags:
+        - Memes minting
+      summary: Get per-phase airdrop totals for a token
+      description: >
+        Returns automatic and phase airdrop totals for the given contract and
+        card. Includes Automatic, Phase 0, Phase 1, Phase 2 and Public phases.
+      operationId: getMemesMintingAirdrops
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMemesMintingAirdropItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
   /memes-minting/claims:
     get:
       tags:
@@ -8301,6 +8337,24 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMemesMintingAirdropItem:
+      type: object
+      required:
+        - phase
+        - addresses_count
+        - total_airdrops
+      properties:
+        phase:
+          type: string
+          description: Phase name
+        addresses_count:
+          type: integer
+          format: int64
+          description: Number of unique addresses with airdrops in this phase
+        total_airdrops:
+          type: integer
+          format: int64
+          description: Sum of airdrops for this phase
     ApiMemesMintStat:
       type: object
       required:
@@ -9403,6 +9457,7 @@ components:
         - rememes_submission_tdh_threshold
         - all_drops_notifications_subscribers_limit
         - memes_wave_id
+        - curation_wave_id
         - distribution_admin_wallets
         - claims_admin_wallets
       properties:
@@ -9413,6 +9468,9 @@ components:
           type: integer
           format: int64
         memes_wave_id:
+          type: string
+          nullable: true
+        curation_wave_id:
           type: string
           nullable: true
         distribution_admin_wallets:

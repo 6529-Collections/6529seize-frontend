@@ -3,7 +3,7 @@
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import {
   MEMES_CONTRACT,
-  MEMES_MANIFOLD_PROXY_CONTRACT,
+  MANIFOLD_LAZY_CLAIM_CONTRACT,
 } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
@@ -32,7 +32,7 @@ export default function TheMemesMint(props: {
     <ManifoldMinting
       title={`The Memes #${nft.id}`}
       contract={MEMES_CONTRACT}
-      proxy={MEMES_MANIFOLD_PROXY_CONTRACT}
+      proxy={MANIFOLD_LAZY_CLAIM_CONTRACT}
       abi={MEMES_MANIFOLD_PROXY_ABI}
       token_id={nft.id}
       mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}

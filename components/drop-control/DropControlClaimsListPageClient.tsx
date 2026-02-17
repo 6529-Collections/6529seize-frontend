@@ -1,21 +1,22 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { useDropControlManifoldClaim } from "@/components/drop-control/drop-control-config";
+import {
+  getClaimPrimaryStatus,
+  getPrimaryStatusPillClassName,
+} from "@/components/drop-control/drop-control-status.helpers";
 import {
   DROP_CONTROL_SECTIONS,
   PREPARE_CLAIMS_PAGE_SIZE,
 } from "@/components/drop-control/drop-control.constants";
 import DropControlMediaTypePill from "@/components/drop-control/DropControlMediaTypePill";
-import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
-import {
-  getClaimPrimaryStatus,
-  getPrimaryStatusPillClassName,
-} from "@/components/drop-control/drop-control-status.helpers";
 import { DropControlPermissionFallback } from "@/components/drop-control/DropControlPermissionFallback";
+import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
+import DropControlTestnetIndicator from "@/components/drop-control/DropControlTestnetIndicator";
 import Pagination from "@/components/pagination/Pagination";
 import type { MemeClaim } from "@/generated/models/MemeClaim";
 import { useDropControlPermissions } from "@/hooks/useDropControlPermissions";
-import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
 import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -147,8 +148,7 @@ export default function DropControlClaimsListPageClient({
     permissionsLoading,
     canAccessPrepare,
     canAccessLaunchPage,
-  } =
-    useDropControlPermissions();
+  } = useDropControlPermissions();
   const section =
     mode === "launch"
       ? DROP_CONTROL_SECTIONS.LAUNCH
@@ -213,6 +213,7 @@ export default function DropControlClaimsListPageClient({
 
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+      <DropControlTestnetIndicator />
       <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-text-iron-50">
         {title}
       </h1>
@@ -282,7 +283,7 @@ function ClaimCardContent({
   return (
     <div className="tw-flex tw-min-h-full tw-flex-1 tw-items-stretch tw-gap-3 sm:tw-gap-5">
       <ClaimCardThumbnail claim={claim} />
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 sm:tw-gap-3 tw-self-stretch sm:tw-pr-48">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 tw-self-stretch sm:tw-gap-3 sm:tw-pr-48">
         <div className="tw-font-mono tw-text-xs tw-tracking-wide tw-text-iron-400">
           {showLaunchFields
             ? `#${claim.meme_id} | SEASON ${claim.season ?? "—"} | EDITION SIZE ${claim.edition_size ?? "—"}`
@@ -324,7 +325,7 @@ function PrepareClaimCard({ claim }: { claim: MemeClaim }) {
 }
 
 function LaunchClaimCard({ claim }: { claim: MemeClaim }) {
-  const manifoldClaim = useMemesManifoldClaim(claim.meme_id);
+  const manifoldClaim = useDropControlManifoldClaim(claim.meme_id);
   const primaryStatus = getClaimPrimaryStatus({
     claim,
     manifoldClaim: manifoldClaim ?? null,

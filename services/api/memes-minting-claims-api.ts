@@ -86,6 +86,21 @@ export async function getMemesMintingRoots(
   });
 }
 
+export interface MemesMintingAirdropSummaryItem {
+  phase: string;
+  addresses_count: number;
+  total_airdrops: number;
+}
+
+export async function getMemesMintingAirdrops(
+  contract: string,
+  cardId: number
+): Promise<MemesMintingAirdropSummaryItem[]> {
+  return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
+    endpoint: `memes-minting/airdrops/${contract}/${cardId}`,
+  });
+}
+
 export async function patchClaim(
   memeId: number,
   body: MemeClaimUpdateRequest

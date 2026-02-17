@@ -5,6 +5,7 @@ import {
   DROP_CONTROL_TITLE,
 } from "@/components/drop-control/drop-control.constants";
 import { DropControlPermissionFallback } from "@/components/drop-control/DropControlPermissionFallback";
+import DropControlTestnetIndicator from "@/components/drop-control/DropControlTestnetIndicator";
 import { useDropControlPermissions } from "@/hooks/useDropControlPermissions";
 import {
   RocketLaunchIcon,
@@ -34,6 +35,7 @@ export default function DropControlPageClient() {
 
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+      <DropControlTestnetIndicator />
       <h1 className="tw-mb-8 tw-text-3xl tw-font-semibold tw-text-iron-50">
         {DROP_CONTROL_TITLE}
       </h1>

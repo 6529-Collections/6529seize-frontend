@@ -92,6 +92,10 @@ const nextConfigFactory = (phase: string): NextConfig => {
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
         ENABLE_SECURITY_LOGGING: publicEnv.ENABLE_SECURITY_LOGGING,
+        DROP_CONTROL_TESTNET:
+          publicEnv.DROP_CONTROL_TESTNET === undefined
+            ? undefined
+            : String(publicEnv.DROP_CONTROL_TESTNET),
         VITE_FEATURE_AB_CARD: publicEnv.VITE_FEATURE_AB_CARD,
         FEATURE_AB_CARD: publicEnv.FEATURE_AB_CARD,
         PEPE_CACHE_TTL_MINUTES: publicEnv.PEPE_CACHE_TTL_MINUTES,

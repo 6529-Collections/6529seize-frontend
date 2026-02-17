@@ -5,7 +5,7 @@ import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-cale
 import {
   MANIFOLD_NETWORK,
   MEMES_CONTRACT,
-  MEMES_MANIFOLD_PROXY_CONTRACT,
+  MANIFOLD_LAZY_CLAIM_CONTRACT,
   NULL_MERKLE,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -118,12 +118,16 @@ export interface ManifoldClaim {
   isError: boolean;
 }
 
+export type ManifoldClaimReadMethod = "getClaimForToken" | "getClaim";
+
 export function useManifoldClaim(
   contract: string,
   proxy: string,
   abi: Abi,
-  tokenId: number,
-  onError?: () => void
+  identifier: number,
+  onError?: () => void,
+  chainId: number = MANIFOLD_NETWORK.id,
+  readMethod: ManifoldClaimReadMethod = "getClaimForToken"
 ) {
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
   const [refetchInterval, setRefetchInterval] = useState<number>(5000);
@@ -161,12 +165,16 @@ export function useManifoldClaim(
     abi,
     query: {
       enabled:
-        !!contract && !!proxy && !!abi && tokenId >= 0 && !claim?.isFinalized,
+        !!contract &&
+        !!proxy &&
+        !!abi &&
+        identifier >= 0 &&
+        !claim?.isFinalized,
       refetchInterval: refetchInterval,
     },
-    chainId: MANIFOLD_NETWORK.id,
-    functionName: "getClaimForToken",
-    args: [contract, tokenId],
+    chainId,
+    functionName: readMethod,
+    args: [contract, identifier],
   });
 
   useEffect(() => {
@@ -239,7 +247,7 @@ export function useManifoldClaim(
 export function useMemesManifoldClaim(tokenId: number, onError?: () => void) {
   return useManifoldClaim(
     MEMES_CONTRACT,
-    MEMES_MANIFOLD_PROXY_CONTRACT,
+    MANIFOLD_LAZY_CLAIM_CONTRACT,
     MEMES_MANIFOLD_PROXY_ABI,
     tokenId,
     onError

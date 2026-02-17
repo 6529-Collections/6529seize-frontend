@@ -93,6 +93,10 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   ENABLE_SECURITY_LOGGING: z.string().optional(),
+  DROP_CONTROL_TESTNET: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
   NEXT_PUBLIC_DEBUG_NAV: z.string().optional(),

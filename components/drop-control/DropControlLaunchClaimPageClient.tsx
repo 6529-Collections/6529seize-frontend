@@ -2,6 +2,10 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import {
+  useDropControlManifoldClaim,
+  useDropControlMintingConfig,
+} from "@/components/drop-control/drop-control-config";
+import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-control/drop-control-status.helpers";
@@ -9,18 +13,15 @@ import { DROP_CONTROL_SECTIONS } from "@/components/drop-control/drop-control.co
 import DropControlMediaTypePill from "@/components/drop-control/DropControlMediaTypePill";
 import { DropControlPermissionFallback } from "@/components/drop-control/DropControlPermissionFallback";
 import DropControlStatusPill from "@/components/drop-control/DropControlStatusPill";
+import DropControlTestnetIndicator from "@/components/drop-control/DropControlTestnetIndicator";
 import { isMissingRequiredLaunchInfo } from "@/components/drop-control/launchClaimHelpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
-import { MEMES_CONTRACT } from "@/constants/constants";
 import type { MemeClaim } from "@/generated/models/MemeClaim";
 import type { MemesMintingRootItem } from "@/generated/models/MemesMintingRootItem";
 import { Time } from "@/helpers/time";
 import { useDropControlPermissions } from "@/hooks/useDropControlPermissions";
-import {
-  buildMemesPhases,
-  useMemesManifoldClaim,
-} from "@/hooks/useManifoldClaim";
+import { buildMemesPhases } from "@/hooks/useManifoldClaim";
 import {
   getClaim,
   getMemesMintingRoots,
@@ -378,9 +379,11 @@ export default function DropControlLaunchClaimPageClient({
   memeId,
 }: DropControlLaunchClaimPageClientProps) {
   const { setToast } = useAuth();
+  const { contract: dropControlMintingContract } =
+    useDropControlMintingConfig();
   const { hasWallet, permissionsLoading, canAccessLaunchPage } =
     useDropControlPermissions();
-  const manifoldClaim = useMemesManifoldClaim(memeId);
+  const manifoldClaim = useDropControlManifoldClaim(memeId);
   const [claim, setClaim] = useState<MemeClaim | null>(null);
   const [roots, setRoots] = useState<MemesMintingRootItem[] | null>(null);
   const [rootsLoading, setRootsLoading] = useState(false);
@@ -446,29 +449,40 @@ export default function DropControlLaunchClaimPageClient({
         }
       });
 
-    getMemesMintingRoots(MEMES_CONTRACT, memeId)
-      .then((res) => {
-        if (!cancelled) {
-          setRoots(res);
-        }
-      })
-      .catch((e) => {
-        const msg = e instanceof Error ? e.message : "Failed to load roots";
-        if (!cancelled) {
-          setRootsError(msg);
-          showErrorToast(msg);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setRootsLoading(false);
-        }
-      });
+    if (!dropControlMintingContract) {
+      setRoots(null);
+      setRootsLoading(false);
+    } else {
+      getMemesMintingRoots(dropControlMintingContract, memeId)
+        .then((res) => {
+          if (!cancelled) {
+            setRoots(res);
+          }
+        })
+        .catch((e) => {
+          const msg = e instanceof Error ? e.message : "Failed to load roots";
+          if (!cancelled) {
+            setRootsError(msg);
+            showErrorToast(msg);
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setRootsLoading(false);
+          }
+        });
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [hasWallet, canAccessLaunchPage, memeId, showErrorToast]);
+  }, [
+    hasWallet,
+    canAccessLaunchPage,
+    memeId,
+    showErrorToast,
+    dropControlMintingContract,
+  ]);
 
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage || claim?.media_uploading !== true)
@@ -632,6 +646,7 @@ export default function DropControlLaunchClaimPageClient({
 
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+      <DropControlTestnetIndicator />
       <h1 className="tw-mb-2 tw-text-3xl tw-font-semibold tw-text-iron-50">
         Launch Claim #{memeId}
       </h1>
@@ -812,43 +827,52 @@ export default function DropControlLaunchClaimPageClient({
           </LaunchAccordionSection>
           <div className="tw-flex tw-flex-col tw-gap-3">
             {hasPublishedMetadata ? (
-              <div className="tw-relative">
-                <select
-                  value={selectedPhase}
-                  onChange={(e) =>
-                    setSelectedPhase(
-                      e.target.value as
-                        | ""
-                        | "phase0"
-                        | "phase1"
-                        | "phase2"
-                        | "publicphase"
-                    )
-                  }
-                  className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-pl-4 tw-pr-12 tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-600"
+              <>
+                <label
+                  htmlFor="phase-selection"
+                  className="tw-text-base tw-font-semibold tw-text-iron-50"
                 >
-                  <option value="" disabled>
-                    Phase Selection
-                  </option>
-                  <option value="phase0">Phase 0 - Initialize Claim</option>
-                  <option value="phase1" disabled={!isInitialized}>
-                    Phase 1
-                  </option>
-                  <option value="phase2" disabled={!isInitialized}>
-                    Phase 2
-                  </option>
-                  <option value="publicphase" disabled={!isInitialized}>
-                    Public Phase
-                  </option>
-                </select>
-                <ChevronDownIcon className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-text-iron-300" />
-              </div>
+                  Phase Selection
+                </label>
+                <div className="tw-relative">
+                  <select
+                    id="phase-selection"
+                    value={selectedPhase}
+                    onChange={(e) =>
+                      setSelectedPhase(
+                        e.target.value as
+                          | ""
+                          | "phase0"
+                          | "phase1"
+                          | "phase2"
+                          | "publicphase"
+                      )
+                    }
+                    className="tw-h-16 tw-w-full tw-appearance-none tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-pl-4 tw-pr-12 tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-600"
+                  >
+                    <option value="" disabled>
+                      Phase Selection
+                    </option>
+                    <option value="phase0">Phase 0 - Initialize Claim</option>
+                    <option value="phase1" disabled={!isInitialized}>
+                      Phase 1
+                    </option>
+                    <option value="phase2" disabled={!isInitialized}>
+                      Phase 2
+                    </option>
+                    <option value="publicphase" disabled={!isInitialized}>
+                      Public Phase
+                    </option>
+                  </select>
+                  <ChevronDownIcon className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-text-iron-300" />
+                </div>
+              </>
             ) : (
               <p className="tw-mb-0 tw-text-white">
                 Finish claim preparation before launching:{" "}
                 <Link
                   href={`/drop-control/prepare/${memeId}`}
-                  className="tw-text-primary-300 tw-no-underline hover:tw-text-primary-200"
+                  className="hover:tw-text-primary-200 tw-text-primary-300 tw-no-underline"
                 >
                   Prepare Claim #{memeId}
                 </Link>
