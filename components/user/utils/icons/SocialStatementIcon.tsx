@@ -105,5 +105,6 @@ export default function SocialStatementIcon({
       return <TransientIcon />;
     default:
       assertUnreachable(statementType);
+      return null;
   }
 }

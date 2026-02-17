@@ -393,9 +393,11 @@ describe("DropPartMarkdown", () => {
     );
 
     const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
+    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
     expect(stableFrame).toBeInTheDocument();
-    expect(stableFrame.className).toContain("tw-h-[13rem]");
-    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
+    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
+    expect(mediaFrame.className).toContain("tw-aspect-video");
 
     resolvePreview?.(preview);
 
@@ -501,8 +503,10 @@ describe("DropPartMarkdown", () => {
     );
 
     const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    expect(stableFrame.className).toContain("tw-h-[13rem]");
-    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
+    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
+    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
+    expect(mediaFrame.className).toContain("tw-aspect-video");
 
     const fallbackLink = await screen.findByTestId(
       "youtube-preview-fallback-link"
@@ -526,8 +530,10 @@ describe("DropPartMarkdown", () => {
     );
 
     const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    expect(stableFrame.className).toContain("tw-h-[13rem]");
-    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
+    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
+    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
+    expect(mediaFrame.className).toContain("tw-aspect-video");
 
     const fallbackLink = await screen.findByTestId(
       "youtube-preview-fallback-link"
@@ -551,8 +557,10 @@ describe("DropPartMarkdown", () => {
     );
 
     const stableFrame = screen.getByTestId("youtube-preview-stable-frame");
-    expect(stableFrame.className).toContain("tw-h-[13rem]");
-    expect(stableFrame.className).toContain("md:tw-h-[15rem]");
+    const mediaFrame = screen.getByTestId("youtube-preview-media-frame");
+    expect(stableFrame.className).not.toContain("tw-h-[13rem]");
+    expect(stableFrame.className).not.toContain("md:tw-h-[15rem]");
+    expect(mediaFrame.className).toContain("tw-aspect-video");
 
     const fallbackLink = await screen.findByTestId(
       "youtube-preview-fallback-link"
