@@ -22,14 +22,12 @@ export default function MetricSparkline({
   if (data.length === 0) return null;
 
   const maxValue = Math.max(...data);
-  const reversed = [...data].reverse();
-  const reversedDates = dates ? [...dates].reverse() : undefined;
 
   return (
     <div className="tw-mt-auto tw-flex tw-h-12 tw-items-end tw-gap-px tw-pt-4">
-      {reversed.map((value, index) => {
+      {data.map((value, index) => {
         const height = maxValue > 0 ? (value / maxValue) * 100 : 0;
-        const date = reversedDates?.[index];
+        const date = dates?.[index];
         const tooltipContent =
           typeof date === "number"
             ? `${formatDate(date)}: ${formatCompactNumber(value)}`
