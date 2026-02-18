@@ -59,6 +59,10 @@ export default function GroupCreateXtdhGrantModal({
   );
 
   useEffect(() => {
+    if (isOpen) {
+      skipInitialOutsideClick.current = true;
+    }
+
     const timeout = globalThis.setTimeout(() => {
       skipInitialOutsideClick.current = false;
     }, 0);
@@ -135,11 +139,17 @@ export default function GroupCreateXtdhGrantModal({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-2 tw-text-center sm:tw-items-center lg:tw-p-4">
           <div
             ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="grant-modal-title"
             className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-4xl"
           >
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-b tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-5">
               <div className="tw-space-y-1">
-                <p className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+                <p
+                  id="grant-modal-title"
+                  className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+                >
                   Find xTDH Grant
                 </p>
                 <p className="tw-m-0 tw-text-sm tw-text-iron-400">
