@@ -39,6 +39,7 @@ interface AdditionalInfoStepProps {
   readonly onArtworkCommentaryChange: (commentary: string) => void;
   readonly onAboutArtistChange: (aboutArtist: string) => void;
   readonly onBack: () => void;
+  readonly onPreview: () => void;
   readonly onSubmit: () => void;
   readonly isSubmitting: boolean;
 }
@@ -64,6 +65,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   onArtworkCommentaryChange,
   onAboutArtistChange,
   onBack,
+  onPreview,
   onSubmit,
   isSubmitting,
 }) => {
@@ -146,6 +148,8 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     return true;
   };
 
+  const formValid = isFormValid();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -203,14 +207,22 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
         <SecondaryButton onClicked={onBack} disabled={isSubmitting}>
           Back
         </SecondaryButton>
-        <PrimaryButton
-          onClicked={onSubmit}
-          disabled={!isFormValid()}
-          loading={isSubmitting}
-          padding="tw-px-6 tw-py-3"
-        >
-          Submit Artwork
-        </PrimaryButton>
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <SecondaryButton
+            onClicked={onPreview}
+            disabled={!formValid || isSubmitting}
+          >
+            Preview
+          </SecondaryButton>
+          <PrimaryButton
+            onClicked={onSubmit}
+            disabled={!formValid}
+            loading={isSubmitting}
+            padding="tw-px-6 tw-py-3"
+          >
+            Submit Artwork
+          </PrimaryButton>
+        </div>
       </div>
     </motion.div>
   );
