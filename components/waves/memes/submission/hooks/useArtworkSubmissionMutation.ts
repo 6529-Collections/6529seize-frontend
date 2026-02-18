@@ -15,6 +15,7 @@ import type { InteractiveMediaMimeType } from "../constants/media";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { validateStrictAddress } from "../utils/addressValidation";
+import { objectEntries } from "../utils/objectEntries";
 
 import { OperationalData } from "../types/OperationalData";
 
@@ -58,9 +59,9 @@ const transformToApiRequest = (data: {
   } = data;
 
   // Create metadata array from trait data
-  const metadata: ApiDropMetadata[] = Object.entries(traits)
+  const metadata: ApiDropMetadata[] = objectEntries(traits)
     .map(([key, value]) => ({
-      data_key: key,
+      data_key: String(key),
       data_value: value?.toString(),
     }))
     .filter(
