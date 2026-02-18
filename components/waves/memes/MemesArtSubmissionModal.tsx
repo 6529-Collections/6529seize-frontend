@@ -32,20 +32,23 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-gray-600/80 tw-backdrop-blur-sm tw-overflow-hidden"
-          onClick={onClose}>
-          <div className="tw-fixed tw-inset-2 md:tw-inset-4 tw-flex tw-items-center tw-justify-center">
+          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-overflow-hidden tw-bg-gray-600/80 tw-backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <div className="tw-fixed tw-inset-0 tw-flex tw-items-center tw-justify-center md:tw-inset-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="tw-w-full tw-h-full tw-flex tw-flex-col"
+              data-testid="memes-art-submission-modal-panel"
+              className="tw-flex tw-h-[100dvh] tw-max-h-[100dvh] tw-w-full tw-flex-col md:tw-h-full md:tw-max-h-none"
               ref={modalRef}
               onClick={(e) => {
                 e.stopPropagation();
-              }}>
-              <div className="tw-h-full tw-overflow-hidden tw-flex tw-flex-col">
+              }}
+            >
+              <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
                 <MemesArtSubmissionContainer onClose={onClose} wave={wave} />
               </div>
             </motion.div>
