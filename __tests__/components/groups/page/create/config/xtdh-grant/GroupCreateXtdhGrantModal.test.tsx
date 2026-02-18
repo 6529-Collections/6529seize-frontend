@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import GroupCreateXtdhGrantModal from "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrantModal";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 
 jest.mock("react-dom", () => ({
   ...jest.requireActual("react-dom"),
@@ -48,13 +49,21 @@ const queryState = () => ({
   isFetchingNextPage: false,
 });
 
-const renderModal = () =>
+const renderModal = ({
+  isOpen = true,
+  onClose = jest.fn(),
+  onGrantSelect = () => undefined,
+}: {
+  isOpen?: boolean;
+  onClose?: () => void;
+  onGrantSelect?: (grant: ApiXTdhGrant) => void;
+} = {}) =>
   render(
     <GroupCreateXtdhGrantModal
-      isOpen={true}
+      isOpen={isOpen}
       selectedGrantId={null}
-      onClose={jest.fn()}
-      onGrantSelect={jest.fn()}
+      onClose={onClose}
+      onGrantSelect={onGrantSelect}
     />
   );
 
@@ -116,5 +125,23 @@ describe("GroupCreateXtdhGrantModal", () => {
     expect(
       screen.getByRole("textbox", { name: "Collection name" })
     ).toBeInTheDocument();
+  });
+
+  it("closes when Escape is pressed while open", () => {
+    const onClose = jest.fn();
+    renderModal({ onClose });
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not close when Escape is pressed while closed", () => {
+    const onClose = jest.fn();
+    renderModal({ isOpen: false, onClose });
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

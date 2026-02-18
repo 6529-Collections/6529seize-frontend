@@ -7,6 +7,7 @@ import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirect
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {
@@ -29,14 +30,13 @@ const GRANT_STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
   [ApiXTdhGrantStatus.Disabled]: "REVOKED",
   [ApiXTdhGrantStatus.Granted]: "GRANTED",
 };
-const NOW_MS_AT_MODULE_INIT = Date.now();
 
 export default function GroupCardConfigs({
   group,
 }: {
   readonly group?: ApiGroupFull | undefined;
 }) {
-  const nowMs = NOW_MS_AT_MODULE_INIT;
+  const [nowMs] = useState<number>(() => Date.now());
 
   const directionLabels: Record<ApiGroupFilterDirection, string> = {
     [ApiGroupFilterDirection.Received]: "from",
@@ -165,33 +165,21 @@ export default function GroupCardConfigs({
     };
   };
 
-  const toShortGrantId = (grantId: string): string => {
-    const normalizedId = grantId.trim();
-    if (normalizedId.length <= 14) {
-      return normalizedId;
-    }
-    return `${normalizedId.slice(0, 7)}...${normalizedId.slice(-4)}`;
-  };
-
   const getGrantStatusLabel = (
-    grant: ApiGroupDescription["is_beneficiary_of_grant"],
-    now: number | null
+    grant: ApiGroupDescription["is_beneficiary_of_grant"]
   ): string | null => {
     if (grant?.status === undefined) {
       return null;
     }
 
     if (grant.status === ApiXTdhGrantStatus.Granted) {
-      if (now === null) {
-        return "GRANTED";
-      }
       const from = grant.valid_from ?? null;
       const to = grant.valid_to ?? null;
 
-      if (typeof to === "number" && to > 0 && to < now) {
+      if (typeof to === "number" && to > 0 && to < nowMs) {
         return "ENDED";
       }
-      if (typeof from === "number" && from > now) {
+      if (typeof from === "number" && from > nowMs) {
         return "SCHEDULED";
       }
       return "ACTIVE";
@@ -209,8 +197,7 @@ export default function GroupCardConfigs({
     }
 
     const statusLabel = getGrantStatusLabel(
-      groupDescription.is_beneficiary_of_grant,
-      nowMs
+      groupDescription.is_beneficiary_of_grant
     );
     const shortGrantId = toShortGrantId(grantId);
     const value = statusLabel

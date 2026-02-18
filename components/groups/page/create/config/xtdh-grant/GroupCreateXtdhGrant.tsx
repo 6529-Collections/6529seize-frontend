@@ -1,19 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useDebounce } from "react-use";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
-import {
-  formatAmount,
-  formatDateTime,
-} from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 import GroupCreateXtdhGrantModal from "./GroupCreateXtdhGrantModal";
-import {
-  getGrantStatusLabel,
-  isSelectableNonGrantedStatus,
-  toShortGrantId,
-} from "./utils";
+import GroupCreateXtdhGrantRow from "./subcomponents/GroupCreateXtdhGrantRow";
+import { isSelectableNonGrantedStatus, toShortGrantId } from "./utils";
 
 interface GroupCreateXtdhGrantProps {
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
@@ -47,20 +40,12 @@ export default function GroupCreateXtdhGrant({
     enabled: !!lookupGrantId,
   });
 
-  const grantStatusLabel = useMemo(() => {
-    if (grant?.status === undefined) {
-      return null;
-    }
-    return getGrantStatusLabel({
-      status: grant.status,
-      validFrom: grant.valid_from,
-      validTo: grant.valid_to,
-    });
-  }, [grant]);
-
+  const isLookupFresh = lookupGrantId === normalizedGrantId;
   const showNonGrantedWarning =
-    grant?.status !== undefined && isSelectableNonGrantedStatus(grant.status);
-  const showLookupError = Boolean(lookupGrantId && isError);
+    isLookupFresh &&
+    grant?.status !== undefined &&
+    isSelectableNonGrantedStatus(grant.status);
+  const showLookupError = isLookupFresh && Boolean(lookupGrantId && isError);
 
   const onInputChange = (nextValue: string) => {
     const normalized = nextValue.trim();
@@ -71,12 +56,6 @@ export default function GroupCreateXtdhGrant({
     setLookupGrantId(null);
     setBeneficiaryGrantId(null);
   };
-
-  const targetCollectionName = grant?.target_collection_name?.trim() ?? "";
-  const selectedTargetLabel =
-    targetCollectionName.length > 0
-      ? targetCollectionName
-      : (grant?.target_contract ?? "Unknown target");
 
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
@@ -140,35 +119,13 @@ export default function GroupCreateXtdhGrant({
         </div>
       )}
 
-      {!!grant && (
-        <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-p-3">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            {grantStatusLabel && (
-              <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-400/20 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-tracking-wide tw-text-primary-300">
-                {grantStatusLabel}
-              </span>
-            )}
-            <p className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
-              {selectedTargetLabel}
-            </p>
-          </div>
-
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
-            ID: {toShortGrantId(grant.id)} | Rate: {formatAmount(grant.rate)}
-          </p>
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-500">
-            Valid:{" "}
-            {formatDateTime(grant.valid_from ?? null, {
-              fallbackLabel: "Immediately",
-              includeTime: false,
-            })}{" "}
-            {"->"}{" "}
-            {formatDateTime(grant.valid_to ?? null, {
-              fallbackLabel: "No expiry",
-              includeTime: false,
-            })}
-          </p>
-        </div>
+      {isLookupFresh && !!grant && (
+        <GroupCreateXtdhGrantRow
+          grant={grant}
+          isSelected={true}
+          interactive={false}
+          className="tw-mt-3"
+        />
       )}
 
       {showNonGrantedWarning && (

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import { useClickAway, useDebounce } from "react-use";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import IdentitySearch, {
   IdentitySearchSize,
@@ -10,11 +10,7 @@ import IdentitySearch, {
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
-import {
-  formatAmount,
-  formatDateTime,
-} from "@/components/user/xtdh/utils/xtdhGrantFormatters";
-import { getGrantStatusLabel, toShortGrantId } from "./utils";
+import GroupCreateXtdhGrantRow from "./subcomponents/GroupCreateXtdhGrantRow";
 
 interface GroupCreateXtdhGrantModalProps {
   readonly isOpen: boolean;
@@ -45,22 +41,6 @@ const STATUS_OPTIONS: readonly CommonSelectItem<ApiXTdhGrantStatus>[] = [
     label: "Failed",
   },
 ];
-
-const getStatusPillClasses = (statusLabel: string): string => {
-  if (statusLabel === "ACTIVE") {
-    return "tw-bg-green/20 tw-text-green";
-  }
-  if (statusLabel === "SCHEDULED") {
-    return "tw-bg-blue-400/20 tw-text-blue-200";
-  }
-  if (statusLabel === "ENDED") {
-    return "tw-bg-iron-700/30 tw-text-iron-400";
-  }
-  if (statusLabel === "PENDING") {
-    return "tw-bg-primary-400/20 tw-text-primary-300";
-  }
-  return "tw-bg-red/20 tw-text-red";
-};
 
 export default function GroupCreateXtdhGrantModal({
   isOpen,
@@ -101,7 +81,23 @@ export default function GroupCreateXtdhGrantModal({
     }
     onClose();
   });
-  useKeyPressEvent("Escape", onClose);
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    globalThis.addEventListener("keydown", handleEscape);
+
+    return () => {
+      globalThis.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose]);
 
   const {
     grants,
@@ -278,85 +274,15 @@ export default function GroupCreateXtdhGrantModal({
                   {!!grants.length && (
                     <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
                       {grants.map((grant) => {
-                        const statusLabel = getGrantStatusLabel({
-                          status: grant.status,
-                          validFrom: grant.valid_from,
-                          validTo: grant.valid_to,
-                        });
-                        const trimmedCollectionName =
-                          grant.target_collection_name?.trim() ?? "";
-                        const targetLabel =
-                          trimmedCollectionName.length > 0
-                            ? trimmedCollectionName
-                            : grant.target_contract || "Unknown target";
-                        const isSelected = selectedGrantId === grant.id;
-                        const onSelect = () => onGrantSelect(grant);
-
                         return (
-                          <li
+                          <GroupCreateXtdhGrantRow
                             key={grant.id}
-                            role="button"
-                            tabIndex={0}
-                            onClick={onSelect}
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                onSelect();
-                              }
-                            }}
-                            className={`tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-outline-none tw-transition tw-duration-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                              isSelected
-                                ? "tw-border-primary-400 tw-bg-primary-500/10"
-                                : "tw-border-iron-800 tw-bg-iron-900/70 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
-                            }`}
-                          >
-                            <div className="tw-flex tw-flex-col tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
-                              <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-                                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                                  <span
-                                    className={`tw-inline-flex tw-items-center tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-tracking-wide ${getStatusPillClasses(
-                                      statusLabel
-                                    )}`}
-                                  >
-                                    {statusLabel}
-                                  </span>
-                                  <p className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
-                                    {targetLabel}
-                                  </p>
-                                </div>
-                                <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                                  ID: {toShortGrantId(grant.id)} | Rate:{" "}
-                                  {formatAmount(grant.rate)}
-                                </p>
-                                <p className="tw-m-0 tw-text-xs tw-text-iron-500">
-                                  Valid:{" "}
-                                  {formatDateTime(grant.valid_from ?? null, {
-                                    fallbackLabel: "Immediately",
-                                    includeTime: false,
-                                  })}{" "}
-                                  {"->"}{" "}
-                                  {formatDateTime(grant.valid_to ?? null, {
-                                    fallbackLabel: "No expiry",
-                                    includeTime: false,
-                                  })}
-                                </p>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onSelect();
-                                }}
-                                className={`tw-h-9 tw-rounded-md tw-border tw-border-solid tw-px-4 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${
-                                  isSelected
-                                    ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
-                                    : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800"
-                                }`}
-                              >
-                                {isSelected ? "Selected" : "Select"}
-                              </button>
-                            </div>
-                          </li>
+                            grant={grant}
+                            isSelected={selectedGrantId === grant.id}
+                            interactive={true}
+                            asListItem={true}
+                            onSelect={onGrantSelect}
+                          />
                         );
                       })}
                     </ul>
