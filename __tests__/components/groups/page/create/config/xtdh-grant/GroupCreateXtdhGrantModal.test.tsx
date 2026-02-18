@@ -109,4 +109,12 @@ describe("GroupCreateXtdhGrantModal", () => {
       })
     );
   });
+
+  it("keeps collection input accessible by name without visible label", () => {
+    renderModal();
+
+    expect(
+      screen.getByRole("textbox", { name: "Collection name" })
+    ).toBeInTheDocument();
+  });
 });

@@ -187,20 +187,16 @@ export default function GroupCreateXtdhGrantModal({
                     }
                   />
                 </div>
-                <label className="tw-block">
-                  <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                    Collection
-                  </span>
-                  <input
-                    type="text"
-                    value={targetCollectionInput}
-                    onChange={(event) =>
-                      setTargetCollectionInput(event.target.value)
-                    }
-                    placeholder="Collection name"
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
-                  />
-                </label>
+                <input
+                  type="text"
+                  value={targetCollectionInput}
+                  onChange={(event) =>
+                    setTargetCollectionInput(event.target.value)
+                  }
+                  placeholder="Collection name"
+                  aria-label="Collection name"
+                  className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
+                />
               </div>
 
               <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3">
