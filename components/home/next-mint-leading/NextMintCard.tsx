@@ -10,10 +10,11 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useNextMintSubscription } from "@/hooks/useNextMintSubscription";
 import Link from "next/link";
 
 interface NextMintCardProps {
-  readonly drop: ApiDrop;
+  readonly drop: ApiDrop | null;
 }
 
 const formatNextMintDateTime = (date: Date): string => {
@@ -32,15 +33,47 @@ const formatNextMintDateTime = (date: Date): string => {
 };
 
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
+  const hasDrop = !!drop;
   const { hasTouchScreen } = useDeviceInfo();
+  const {
+    nextSubscription,
+    isSubscribed,
+    isLoading: isSubscriptionLoading,
+    isMutating: isSubscriptionMutating,
+    canToggle,
+    toggleSubscription,
+  } = useNextMintSubscription(hasDrop);
+
+  if (!drop) {
+    return null;
+  }
+
   const media = drop.parts[0]?.media[0];
   const title =
     drop.title ??
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Untitled";
   const author = drop.author;
+  const authorHandle = author.handle ?? author.primary_address;
+  const authorName = author.handle ?? "Anonymous";
+  const dropHref = getWaveRoute({
+    waveId: drop.wave.id,
+    extraParams: { drop: drop.id },
+    isDirectMessage: false,
+    isApp: false,
+  });
   const nextMintDate = getNextMintStart();
   const timestamp = formatNextMintDateTime(nextMintDate);
+  let subscriptionActionLabel = "Subscribe";
+  if (isSubscriptionMutating) {
+    subscriptionActionLabel = "Updating...";
+  } else if (isSubscribed) {
+    subscriptionActionLabel = "Subscribed";
+  }
+  const isSubscriptionUnavailable = !isSubscriptionLoading && !nextSubscription;
+  const onSubscriptionToggle = () => {
+    void toggleSubscription();
+  };
 
   return (
     <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-300">
@@ -82,30 +115,51 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               size="sm"
             />
             <Link
-              href={getWaveRoute({
-                waveId: drop.wave.id,
-                extraParams: { drop: drop.id },
-                isDirectMessage: false,
-                isApp: false,
-              })}
+              href={dropHref}
               className="tw-m-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
             >
               {title}
             </Link>
           </div>
-          <Link
-            href={`/${author.handle ?? author.primary_address}`}
-            className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
-          >
-            <ProfileAvatar
-              pfpUrl={author.pfp}
-              alt={author.handle ?? "Artist"}
-              size={ProfileBadgeSize.SMALL}
-            />
-            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50 desktop-hover:hover:tw-text-white">
-              {author.handle ?? "Anonymous"}
-            </span>
-          </Link>
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-2">
+            {authorHandle ? (
+              <Link
+                href={`/${authorHandle}`}
+                className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-no-underline"
+              >
+                <ProfileAvatar
+                  pfpUrl={author.pfp}
+                  alt={authorHandle}
+                  size={ProfileBadgeSize.SMALL}
+                />
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50 desktop-hover:hover:tw-text-white">
+                  {authorName}
+                </span>
+              </Link>
+            ) : (
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
+                <ProfileAvatar
+                  pfpUrl={author.pfp}
+                  alt={authorName}
+                  size={ProfileBadgeSize.SMALL}
+                />
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50">
+                  {authorName}
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={onSubscriptionToggle}
+              disabled={
+                !canToggle || isSubscriptionLoading || isSubscriptionUnavailable
+              }
+              className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-white/15 tw-bg-white/[0.04] tw-px-2.5 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-white/[0.08] disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+              aria-label="Toggle next mint subscription"
+            >
+              {subscriptionActionLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>
