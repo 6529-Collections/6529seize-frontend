@@ -113,7 +113,7 @@ export default function GroupCreateXtdhGrant({
           <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-red/90">
             The ID will still be submitted as entered:{" "}
             <span className="tw-font-semibold">
-              {toShortGrantId(lookupGrantId ?? "")}
+              {toShortGrantId(lookupGrantId)}
             </span>
           </p>
         </div>

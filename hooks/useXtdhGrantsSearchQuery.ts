@@ -11,7 +11,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
-import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 
 type XtdhGrantSortField = "created_at" | "valid_from" | "valid_to" | "rate";
@@ -46,6 +46,34 @@ const MAX_PAGE_SIZE = 2000;
 const DEFAULT_SORT_FIELD: XtdhGrantSortField = "created_at";
 const DEFAULT_SORT_DIRECTION: SortDirection = SortDirection.DESC;
 const DEFAULT_STALE_TIME = 30_000; // 30 seconds
+const XTDH_GRANT_STATUS_SORT_RANK: Readonly<Record<string, number>> = {
+  [ApiXTdhGrantStatus.Pending]: 0,
+  [ApiXTdhGrantStatus.Failed]: 1,
+  [ApiXTdhGrantStatus.Disabled]: 2,
+  [ApiXTdhGrantStatus.Granted]: 3,
+};
+
+const compareXtdhGrantStatuses = (
+  left: ApiXTdhGrantStatus,
+  right: ApiXTdhGrantStatus
+): number => {
+  const leftRank = XTDH_GRANT_STATUS_SORT_RANK[left];
+  const rightRank = XTDH_GRANT_STATUS_SORT_RANK[right];
+
+  if (leftRank !== undefined && rightRank !== undefined) {
+    return leftRank - rightRank;
+  }
+
+  if (leftRank !== undefined) {
+    return -1;
+  }
+
+  if (rightRank !== undefined) {
+    return 1;
+  }
+
+  return left.localeCompare(right);
+};
 
 const normalizeTextFilter = (value?: string | null): string => {
   const normalized = value?.trim() ?? "";
@@ -58,7 +86,7 @@ const normalizeStatuses = (
   if (statuses === undefined || statuses.length === 0) {
     return [];
   }
-  return Array.from(new Set(statuses)).sort();
+  return Array.from(new Set(statuses)).sort(compareXtdhGrantStatuses);
 };
 
 export function useXtdhGrantsSearchQuery({
