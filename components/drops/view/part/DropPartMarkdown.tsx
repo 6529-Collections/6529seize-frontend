@@ -23,6 +23,11 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useTweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import {
+  LinkPreviewProvider,
+  useLinkPreviewContext,
+  type LinkPreviewToggleControl,
+} from "@/components/waves/LinkPreviewContext";
 
 import {
   DropContentPartType,
@@ -248,6 +253,7 @@ export interface DropPartMarkdownProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
 }
 
 function DropPartMarkdown({
@@ -264,10 +270,12 @@ function DropPartMarkdown({
   quotePath,
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
+  linkPreviewToggleControl,
 }: DropPartMarkdownProps) {
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const tweetPreviewMode = useTweetPreviewMode();
+  const { variant: linkPreviewVariant } = useLinkPreviewContext();
 
   const textSizeClass = useMemo(() => {
     switch (textSize) {
@@ -292,6 +300,19 @@ function DropPartMarkdown({
     [quotePath]
   );
 
+  const inlineShowControl = useMemo(() => {
+    if (!linkPreviewToggleControl) {
+      return undefined;
+    }
+
+    return {
+      enabled: linkPreviewToggleControl.isHidden,
+      isLoading: linkPreviewToggleControl.isLoading,
+      onToggle: linkPreviewToggleControl.onToggle,
+      label: linkPreviewToggleControl.label,
+    };
+  }, [linkPreviewToggleControl]);
+
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
@@ -304,6 +325,7 @@ function DropPartMarkdown({
         quotePath: normalizedQuotePath,
         embedDepth,
         maxEmbedDepth,
+        inlineShowControl,
       }),
     [
       onQuoteClick,
@@ -315,6 +337,7 @@ function DropPartMarkdown({
       normalizedQuotePath,
       embedDepth,
       maxEmbedDepth,
+      inlineShowControl,
     ]
   );
 
@@ -404,14 +427,20 @@ function DropPartMarkdown({
   );
 
   return (
-    <Markdown
-      rehypePlugins={rehypePlugins}
-      remarkPlugins={remarkPlugins}
-      className="tw-w-full"
-      components={markdownComponents}
+    <LinkPreviewProvider
+      variant={linkPreviewVariant}
+      previewToggle={linkPreviewToggleControl}
+      inlineShowControl={inlineShowControl}
     >
-      {processedContent}
-    </Markdown>
+      <Markdown
+        rehypePlugins={rehypePlugins}
+        remarkPlugins={remarkPlugins}
+        className="tw-w-full"
+        components={markdownComponents}
+      >
+        {processedContent}
+      </Markdown>
+    </LinkPreviewProvider>
   );
 }
 

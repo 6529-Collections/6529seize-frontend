@@ -3,41 +3,30 @@ import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-jest.mock(
-  "@/components/waves/drops/WaveDropMobileMenuDelete",
-  () => () => (
-    <div data-testid="delete" />
-  )
-);
-jest.mock(
-  "@/components/waves/drops/WaveDropMobileMenuFollow",
-  () => () => (
-    <div data-testid="follow" />
-  )
-);
-jest.mock(
-  "@/components/waves/drops/WaveDropMobileMenuOpen",
-  () => () => (
-    <div data-testid="open" />
-  )
-);
-jest.mock(
-  "@/components/waves/drops/WaveDropActionsRate",
-  () => () => (
-    <div data-testid="clap" />
-  )
-);
-jest.mock(
-  "@/components/waves/drops/WaveDropActionsAddReaction",
-  () => () => (
-    <div data-testid="add-reaction" />
-  )
-);
+jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
+  <div data-testid="delete" />
+));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
+  <div data-testid="open" />
+));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuBoost", () => () => (
+  <div data-testid="boost" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsMarkUnread", () => () => (
+  <div data-testid="mark-unread" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsRate", () => () => (
+  <div data-testid="clap" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsAddReaction", () => () => (
+  <div data-testid="add-reaction" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => () => (
+  <div data-testid="quick-react" />
+));
 jest.mock(
   "@/components/waves/drops/WaveDropActionsToggleLinkPreview",
-  () => () => (
-    <div data-testid="toggle-link-preview" />
-  )
+  () => () => <div data-testid="toggle-link-preview" />
 );
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
@@ -85,7 +74,8 @@ test("copies link and shows feedback", async () => {
           connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
-      }>
+      }
+    >
       <WaveDropMobileMenu
         drop={drop}
         isOpen
@@ -117,7 +107,8 @@ test("hides follow and clap when author and memes wave", () => {
           connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
-      }>
+      }
+    >
       <WaveDropMobileMenu
         drop={drop}
         isOpen
@@ -132,5 +123,6 @@ test("hides follow and clap when author and memes wave", () => {
   );
   expect(screen.queryByTestId("follow")).toBeNull();
   expect(screen.queryByTestId("clap")).toBeNull();
+  expect(screen.queryByTestId("toggle-link-preview")).toBeNull();
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
