@@ -31,6 +31,7 @@ function areEqual(
     "quotePath",
     "embedDepth",
     "maxEmbedDepth",
+    "linkPreviewToggleControl",
   ];
 
   for (const key of propsToCheck) {

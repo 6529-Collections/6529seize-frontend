@@ -13,6 +13,7 @@ export default function GroupCardConfig({
     [GroupDescriptionType.LEVEL]: "Level",
     [GroupDescriptionType.OWNS_NFTS]: "Owns NFTs",
     [GroupDescriptionType.WALLETS]: "Manual list",
+    [GroupDescriptionType.XTDH_GRANT]: "Grant",
   };
 
   return (
