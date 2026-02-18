@@ -7,13 +7,13 @@ import type { FC } from "react";
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
 import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, {
-  AllowlistBatchRaw,
+  type AllowlistBatchRaw,
 } from "../components/AllowlistBatchManager";
 import PaymentConfig from "../components/PaymentConfig";
 import {
   AIRDROP_TOTAL,
-  AirdropEntry,
-  PaymentInfo,
+  type AirdropEntry,
+  type PaymentInfo,
 } from "../types/OperationalData";
 import { validateStrictAddress } from "../utils/addressValidation";
 import { validateTokenIdFormat } from "../utils/tokenParsing";
@@ -78,7 +78,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   };
 
   const getTokenIdsError = (tokenIds: string) => {
-    return validateTokenIdFormat(tokenIds) || undefined;
+    return validateTokenIdFormat(tokenIds) ?? undefined;
   };
 
   const isFormValid = () => {
@@ -89,10 +89,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     );
     if (hasInvalidCount) return false;
 
-    const totalAllocated = airdropEntries.reduce(
-      (sum, e) => sum + (e.count ?? 0),
-      0
-    );
+    const totalAllocated = airdropEntries.reduce((sum, e) => sum + e.count, 0);
     if (totalAllocated !== AIRDROP_TOTAL) return false;
 
     // Every entry with count > 0 must have a valid address
