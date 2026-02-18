@@ -44,8 +44,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 const useNextMintSubscriptionMock = jest.fn();
 jest.mock("@/hooks/useNextMintSubscription", () => ({
   __esModule: true,
-  useNextMintSubscription: (enabled?: boolean) =>
-    useNextMintSubscriptionMock(enabled),
+  useNextMintSubscription: () => useNextMintSubscriptionMock(),
 }));
 
 describe("LatestDropNextMintSection", () => {
@@ -97,7 +96,7 @@ describe("LatestDropNextMintSection", () => {
       screen.getByRole("button", { name: "Toggle next mint subscription" })
     ).toBeInTheDocument();
     expect(screen.getByText("Subscribed")).toBeInTheDocument();
-    expect(useNextMintSubscriptionMock).toHaveBeenCalledWith(true);
+    expect(useNextMintSubscriptionMock).toHaveBeenCalledWith();
   });
 
   it("calls toggleSubscription when button is clicked", async () => {

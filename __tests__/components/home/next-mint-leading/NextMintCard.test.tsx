@@ -38,8 +38,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 const useNextMintSubscriptionMock = jest.fn();
 jest.mock("@/hooks/useNextMintSubscription", () => ({
   __esModule: true,
-  useNextMintSubscription: (enabled?: boolean) =>
-    useNextMintSubscriptionMock(enabled),
+  useNextMintSubscription: () => useNextMintSubscriptionMock(),
 }));
 
 import { NextMintCard } from "@/components/home/next-mint-leading/NextMintCard";
@@ -91,7 +90,7 @@ describe("NextMintCard", () => {
       screen.getByRole("button", { name: "Toggle next mint subscription" })
     ).toBeInTheDocument();
     expect(screen.getByText("Subscribed")).toBeInTheDocument();
-    expect(useNextMintSubscriptionMock).toHaveBeenCalledWith(true);
+    expect(useNextMintSubscriptionMock).toHaveBeenCalledWith();
   });
 
   it("calls toggleSubscription when action button is clicked", async () => {
@@ -127,15 +126,14 @@ describe("NextMintCard", () => {
     const { container } = render(<NextMintCard drop={null} />);
 
     expect(container.firstChild).toBeNull();
-    expect(useNextMintSubscriptionMock).toHaveBeenCalledWith(false);
+    expect(useNextMintSubscriptionMock).not.toHaveBeenCalled();
   });
 
-  it("passes enabled flag based on drop presence across renders", () => {
+  it("mounts subscription hook only when drop is present across renders", () => {
     const { rerender } = render(<NextMintCard drop={null} />);
     rerender(<NextMintCard drop={drop} />);
 
-    expect(
-      useNextMintSubscriptionMock.mock.calls.map(([enabled]) => enabled)
-    ).toEqual([false, true]);
+    expect(useNextMintSubscriptionMock).toHaveBeenCalledTimes(1);
+    expect(useNextMintSubscriptionMock).toHaveBeenCalledWith();
   });
 });

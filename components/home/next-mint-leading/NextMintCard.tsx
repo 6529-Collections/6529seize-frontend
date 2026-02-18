@@ -6,11 +6,11 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
+import { NextMintSubscribeButton } from "@/components/home/next-mint/NextMintSubscribeButton";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useNextMintSubscription } from "@/hooks/useNextMintSubscription";
 import Link from "next/link";
 
 interface NextMintCardProps {
@@ -33,16 +33,7 @@ const formatNextMintDateTime = (date: Date): string => {
 };
 
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
-  const hasDrop = !!drop;
   const { hasTouchScreen } = useDeviceInfo();
-  const {
-    nextSubscription,
-    isSubscribed,
-    isLoading: isSubscriptionLoading,
-    isMutating: isSubscriptionMutating,
-    canToggle,
-    toggleSubscription,
-  } = useNextMintSubscription(hasDrop);
 
   if (!drop) {
     return null;
@@ -64,16 +55,6 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
   });
   const nextMintDate = getNextMintStart();
   const timestamp = formatNextMintDateTime(nextMintDate);
-  let subscriptionActionLabel = "Subscribe";
-  if (isSubscriptionMutating) {
-    subscriptionActionLabel = "Updating...";
-  } else if (isSubscribed) {
-    subscriptionActionLabel = "Subscribed";
-  }
-  const isSubscriptionUnavailable = !isSubscriptionLoading && !nextSubscription;
-  const onSubscriptionToggle = () => {
-    void toggleSubscription();
-  };
 
   return (
     <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-300">
@@ -148,17 +129,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
                 </span>
               </div>
             )}
-            <button
-              type="button"
-              onClick={onSubscriptionToggle}
-              disabled={
-                !canToggle || isSubscriptionLoading || isSubscriptionUnavailable
-              }
-              className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-white/15 tw-bg-white/[0.04] tw-px-2.5 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-white/[0.08] disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-              aria-label="Toggle next mint subscription"
-            >
-              {subscriptionActionLabel}
-            </button>
+            <NextMintSubscribeButton />
           </div>
         </div>
       </div>

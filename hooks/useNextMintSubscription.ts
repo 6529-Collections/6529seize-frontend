@@ -34,7 +34,7 @@ const fetchNextUpcomingSubscription = async (
   return subscriptions[0] ?? null;
 };
 
-export function useNextMintSubscription(enabled: boolean = true): {
+export function useNextMintSubscription(): {
   readonly nextSubscription: NFTSubscription | null;
   readonly isSubscribed: boolean;
   readonly isLoading: boolean;
@@ -53,7 +53,7 @@ export function useNextMintSubscription(enabled: boolean = true): {
   );
 
   const canToggle = !!connectedProfile && !activeProfileProxy && !isMutating;
-  const shouldQuery = enabled && !!profileKey && !activeProfileProxy;
+  const shouldQuery = !!profileKey && !activeProfileProxy;
 
   const { data, isLoading } = useQuery<NFTSubscription | null>({
     queryKey: [NEXT_MINT_SUBSCRIPTION_QUERY_KEY, profileKey],

@@ -7,12 +7,12 @@ import {
   formatFullDateTime,
   getNextMintStart,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import { NextMintSubscribeButton } from "@/components/home/next-mint/NextMintSubscribeButton";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useNextMintSubscription } from "@/hooks/useNextMintSubscription";
 import Image from "next/image";
 import Link from "next/link";
 import NowMintingStatsItem from "./NowMintingStatsItem";
@@ -44,14 +44,6 @@ export default function LatestDropNextMintSection({
   drop,
 }: LatestDropNextMintSectionProps) {
   const { hasTouchScreen } = useDeviceInfo();
-  const {
-    nextSubscription,
-    isSubscribed,
-    isLoading: isSubscriptionLoading,
-    isMutating: isSubscriptionMutating,
-    canToggle,
-    toggleSubscription,
-  } = useNextMintSubscription(true);
   const media = drop.parts[0]?.media[0];
   const title =
     drop.title ??
@@ -65,16 +57,6 @@ export default function LatestDropNextMintSection({
     drop.metadata.find((m) => m.data_key === "description")?.data_value ?? null;
   const nextMintStart = getNextMintStart();
   const nextMintLabel = formatFullDateTime(nextMintStart, "local");
-  let subscriptionActionLabel = "Subscribe";
-  if (isSubscriptionMutating) {
-    subscriptionActionLabel = "Updating...";
-  } else if (isSubscribed) {
-    subscriptionActionLabel = "Subscribed";
-  }
-  const isSubscriptionUnavailable = !isSubscriptionLoading && !nextSubscription;
-  const onSubscriptionToggle = () => {
-    void toggleSubscription();
-  };
 
   return (
     <section className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-6 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
@@ -120,19 +102,7 @@ export default function LatestDropNextMintSection({
                       {nextMintLabel}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={onSubscriptionToggle}
-                    disabled={
-                      !canToggle ||
-                      isSubscriptionLoading ||
-                      isSubscriptionUnavailable
-                    }
-                    className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-white/15 tw-bg-white/[0.04] tw-px-2.5 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-200 tw-transition hover:tw-bg-white/[0.08] disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-                    aria-label="Toggle next mint subscription"
-                  >
-                    {subscriptionActionLabel}
-                  </button>
+                  <NextMintSubscribeButton />
                 </div>
 
                 <Link
