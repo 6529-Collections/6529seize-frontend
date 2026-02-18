@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
@@ -9,14 +8,13 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import { useContext, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsDownload from "./WaveDropActionsDownload";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
-import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -30,11 +28,7 @@ export default function WaveDropActionsMore({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
-
-  const isAuthor =
-    connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
 
   const handleOpenChange = (newIsOpen: boolean) => {
     setIsOpen(newIsOpen);
@@ -126,13 +120,6 @@ export default function WaveDropActionsMore({
                 drop={drop}
                 isDropdownItem={true}
                 onDelete={handleDeleteClick}
-              />
-            )}
-            {isAuthor && (
-              <WaveDropActionsToggleLinkPreview
-                drop={drop}
-                isDropdownItem={true}
-                onToggle={closeDropdown}
               />
             )}
           </div>
