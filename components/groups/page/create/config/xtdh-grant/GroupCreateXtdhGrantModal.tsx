@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import IdentitySearch, {
+  IdentitySearchSize,
+} from "@/components/utils/input/identity/IdentitySearch";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
@@ -68,9 +71,8 @@ export default function GroupCreateXtdhGrantModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const skipInitialOutsideClick = useRef(true);
 
-  const [grantorInput, setGrantorInput] = useState("");
+  const [selectedGrantor, setSelectedGrantor] = useState<string | null>(null);
   const [targetCollectionInput, setTargetCollectionInput] = useState("");
-  const [grantorFilter, setGrantorFilter] = useState("");
   const [targetCollectionFilter, setTargetCollectionFilter] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<ApiXTdhGrantStatus>(
     ApiXTdhGrantStatus.Granted
@@ -86,7 +88,6 @@ export default function GroupCreateXtdhGrantModal({
     };
   }, [isOpen]);
 
-  useDebounce(() => setGrantorFilter(grantorInput.trim()), 250, [grantorInput]);
   useDebounce(
     () => setTargetCollectionFilter(targetCollectionInput.trim()),
     250,
@@ -113,7 +114,7 @@ export default function GroupCreateXtdhGrantModal({
     fetchNextPage,
     isFetchingNextPage,
   } = useXtdhGrantsSearchQuery({
-    grantor: grantorFilter || null,
+    grantor: selectedGrantor,
     targetCollectionName: targetCollectionFilter || null,
     statuses: [selectedStatus],
     enabled: isOpen,
@@ -121,9 +122,8 @@ export default function GroupCreateXtdhGrantModal({
   });
 
   const onResetFilters = () => {
-    setGrantorInput("");
+    setSelectedGrantor(null);
     setTargetCollectionInput("");
-    setGrantorFilter("");
     setTargetCollectionFilter("");
     setSelectedStatus(ApiXTdhGrantStatus.Granted);
   };
@@ -175,18 +175,18 @@ export default function GroupCreateXtdhGrantModal({
 
             <div className="tw-space-y-4 tw-p-4 sm:tw-p-5">
               <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
-                <label className="tw-block">
-                  <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                    Grantor
-                  </span>
-                  <input
-                    type="text"
-                    value={grantorInput}
-                    onChange={(event) => setGrantorInput(event.target.value)}
-                    placeholder="Handle or wallet"
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
+                <div className="tw-block">
+                  <IdentitySearch
+                    label="Grantor"
+                    size={IdentitySearchSize.SM}
+                    identity={selectedGrantor}
+                    setIdentity={(identity) =>
+                      setSelectedGrantor(
+                        identity ? identity.toLowerCase() : null
+                      )
+                    }
                   />
-                </label>
+                </div>
                 <label className="tw-block">
                   <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
                     Collection
