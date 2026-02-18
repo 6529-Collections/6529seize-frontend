@@ -1,16 +1,14 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import type {
-  ApiProfileRepRatesState,
-  RatingStats,
-} from "@/entities/IProfile";
-import UserPageRepRepsTop from "./UserPageRepRepsTop";
+import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-const TOP_REPS_COUNT = 5;
+import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
+import UserPageRepNewRep from "../new-rep/UserPageRepNewRep";
+import { RateMatter } from "@/types/enums";
 
 export default function UserPageRepReps({
   repRates,
@@ -33,17 +31,10 @@ export default function UserPageRepReps({
     sortReps(repRates?.rating_stats ?? [])
   );
 
-  const getTopReps = (items: RatingStats[]) => {
-    return items.slice(0, TOP_REPS_COUNT);
-  };
-
-  const [topReps, setTopReps] = useState<RatingStats[]>(getTopReps(reps));
   useEffect(
     () => setReps(sortReps(repRates?.rating_stats ?? [])),
     [repRates?.rating_stats]
   );
-
-  useEffect(() => setTopReps(getTopReps(reps)), [reps]);
 
   const getCanEditRep = ({
     myProfile,
@@ -86,31 +77,31 @@ export default function UserPageRepReps({
   }, [connectedProfile, profile]);
 
   return (
-    <div>
-      {!!reps.length && (
-        <>
-          <div className="tw-mt-6 lg:tw-mt-8">
-            <h3 className="tw-float-none tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-              Top Rep
-            </h3>
+    <div className="tw-mt-6 lg:tw-mt-8">
+      <div className="tw-relative">
+        <div className="tw-mb-6">
+          <h3 className="tw-mb-1 tw-text-lg tw-font-semibold tw-text-iron-50">
+            Total Rep
+          </h3>
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
+            Tags people have given this profile
+          </p>
+        </div>
+
+        <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
+          <UserPageRepNewRep profile={profile} repRates={repRates} />
+        </UserPageRateWrapper>
+
+        {!!reps.length && (
+          <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2">
+            <UserPageRepRepsTable
+              reps={reps}
+              profile={profile}
+              canEditRep={canEditRep}
+            />
           </div>
-          <UserPageRepRepsTop
-            reps={topReps}
-            profile={profile}
-            canEditRep={canEditRep}
-          />
-          <div className="tw-mt-6 lg:tw-mt-8">
-            <h3 className="tw-float-none tw-block tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-              Total Rep
-            </h3>
-          </div>
-          <UserPageRepRepsTable
-            reps={reps}
-            profile={profile}
-            canEditRep={canEditRep}
-          />
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

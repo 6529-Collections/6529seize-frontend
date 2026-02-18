@@ -6,19 +6,22 @@ export default function UserPageRepRepsTableBody({
   reps,
   profile,
   canEditRep,
+  maxRep,
 }: {
   readonly reps: RatingStats[];
   readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
+  readonly maxRep: number;
 }) {
   return (
-    <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-800">
+    <tbody>
       {reps.map((rep) => (
         <UserPageRepRepsTableItem
           key={rep.category}
           rep={rep}
           profile={profile}
           canEditRep={canEditRep}
+          maxRep={maxRep}
         />
       ))}
     </tbody>

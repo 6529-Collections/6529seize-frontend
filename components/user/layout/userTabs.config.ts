@@ -24,15 +24,10 @@ const TAB_DEFINITIONS = [
   },
   {
     id: "rep",
-    title: "Rep",
+    title: "Rep & Identity",
     route: "rep",
   },
-  {
-    id: "identity",
-    title: "Identity",
-    route: "identity",
-  },
-  {
+{
     id: "collected",
     title: "Collected",
     route: "collected",

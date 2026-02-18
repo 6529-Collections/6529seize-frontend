@@ -27,11 +27,11 @@ export default function UserPageRepRepsTableHeader({
   useEffect(() => setTypes(getTypes(showMyRates)), [showMyRates]);
 
   return (
-    <thead className="tw-bg-iron-950 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-white/10">
-      <tr>
+    <thead>
+      <tr className="tw-border-y tw-border-solid tw-border-white/[0.06] tw-border-x-0">
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-1.5 tw-text-left tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-border-0">
           Category
         </th>
         {types.map((sortType) => (

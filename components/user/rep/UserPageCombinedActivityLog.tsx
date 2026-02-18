@@ -1,30 +1,21 @@
-import type {
-  ActivityLogParams,
-} from "@/components/profile-activity/ProfileActivityLogs";
+import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
-import ProfileName, {
-  ProfileNameType,
-} from "@/components/profile-activity/ProfileName";
 import UserTableHeaderWrapper from "../utils/UserTableHeaderWrapper";
 
-export default function UserPageRepActivityLog({
+export default function UserPageCombinedActivityLog({
   initialActivityLogParams,
 }: {
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   return (
     <div>
-      <UserTableHeaderWrapper>
-        <span>
-          <ProfileName type={ProfileNameType.POSSESSION} />
-        </span>{" "}
-        Rep Activity Log
-      </UserTableHeaderWrapper>
+      <UserTableHeaderWrapper>Activity Log</UserTableHeaderWrapper>
       <div className="tw-mt-2 lg:tw-mt-4">
         <div className="tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl">
           <ProfileActivityLogs
             initialParams={initialActivityLogParams}
-            withFilters={false}
+            withFilters={true}
+            withMatterFilter={true}
           />
         </div>
       </div>

@@ -18,20 +18,17 @@ export default function UserPageIdentityHeaderCIC({
   }, [profile]);
 
   return (
-    <div className="tw-mb-6 tw-mt-4 tw-flex tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-space-x-6 tw-gap-y-1">
-      <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-200">
-        <div className="tw-flex tw items-center tw-space-x-1">
-          <span>NIC:</span>
-          <span className="tw-text-iron-100 tw-font-semibold">
-            {formatNumberWithCommas(cicRating)}
-          </span>
-        </div>
-        <span className="tw-ml-2 tw-h-5 tw-w-5">
+    <div className="tw-mb-8">
+      <div className="tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-2">
+        NIC
+      </div>
+      <div className="tw-text-3xl tw-font-bold tw-text-white tw-tracking-tight tw-leading-none">
+        {formatNumberWithCommas(cicRating)}
+      </div>
+      <div className="tw-mt-3 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-bold tw-tracking-widest tw-uppercase">
+        <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
           <UserCICTypeIconWrapper profile={profile} />
         </span>
-      </div>
-      <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-space-x-1">
-        <span className="tw-text-iron-200 tw-font-medium">Status:</span>
         <UserCICStatus cic={cicRating} />
       </div>
     </div>

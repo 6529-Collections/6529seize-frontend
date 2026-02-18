@@ -37,11 +37,11 @@ export default function UserPageRepRepsTableHeaderSortableCell({
   return (
     <th
       scope="col"
-      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-1.5 tw-text-right tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-border-0"
       onClick={() => onSortTypeClick(type)}>
       <span
         className={`${
-          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
+          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-400"
         } tw-transition tw-duration-300 tw-ease-out`}>
         {SORT_TYPE_TO_TEXT[type]}
       </span>

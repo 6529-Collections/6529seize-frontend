@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import type { WalletConsolidationState } from "@/entities/IProfile";
-import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
+
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 import { amIUser } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -119,18 +119,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
 
   return (
     <div>
-      <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800">
-        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
-            <EthereumIcon />
-          </div>
-        </div>
-        <span className="tw-text-base tw-font-semibold tw-text-iron-100">
-          Consolidated Addresses
-        </span>
-      </div>
-      <div className="tw-mt-3 tw-h-px tw-bg-white/5 tw-w-full"></div>
-      <ul className="tw-mb-0 tw-mt-3 md:tw-mt-4 lg:tw-mt-6 tw-list-none tw-space-y-2 md:tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
+      <span className="tw-text-[10px] tw-font-semibold tw-text-iron-600 tw-uppercase tw-tracking-widest">
+        Consolidated Addresses
+      </span>
+      <div className="tw-mt-2 tw-h-px tw-bg-white/[0.04] tw-w-full"></div>
+      <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet}
@@ -143,14 +136,14 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
         <Link
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-solid tw-border-white/10 tw-ring-0 hover:tw-bg-white/[0.08] focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
           Wallet Checker
         </Link>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
             <Link
               href="/delegation/delegation-center"
-              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-solid tw-border-white/10 tw-ring-0 hover:tw-bg-white/[0.08] focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
               Delegation Center
             </Link>
           )}

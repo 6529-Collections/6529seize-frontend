@@ -62,11 +62,11 @@ export default function ProfileActivityLogRate({
 
   const getTotalRatingClass = () => {
     if (isNewRatingPositive) {
-      return "tw-text-green";
+      return "tw-text-emerald-400";
     } else if (isNewRatingNegative) {
-      return "tw-text-red";
+      return "tw-text-rose-400";
     } else {
-      return "tw-text-iron-400";
+      return "tw-text-iron-500";
     }
   };
 
@@ -76,10 +76,7 @@ export default function ProfileActivityLogRate({
     (searchParams?.get("user") as string)?.toLowerCase() ===
     handleOrWallet.toLowerCase();
 
-  const tabTarget =
-    log.contents.rating_matter === RateMatter.REP
-      ? USER_PAGE_TAB_IDS.REP
-      : USER_PAGE_TAB_IDS.IDENTITY;
+  const tabTarget = USER_PAGE_TAB_IDS.REP;
 
   const getProxyHandle = (): string | null => {
     if (!log.proxy_handle) return null;
@@ -98,7 +95,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline"
         >
           (Proxy for {proxyHandle})
         </Link>
@@ -106,18 +103,18 @@ export default function ProfileActivityLogRate({
       <ProfileActivityLogItemAction action={ACTION[ratingType]} />
       <span
         className={`${
-          isChangePositive ? "tw-text-green" : "tw-text-red"
-        } tw-text-base tw-font-medium`}
+          isChangePositive ? "tw-text-emerald-400" : "tw-text-rose-400"
+        } tw-text-sm tw-font-bold`}
       >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-base tw-font-medium`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-medium`}
       >
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300">
           {log.contents.rating_category}
         </span>
       )}
@@ -135,7 +132,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline"
         >
           (Proxy: {proxyHandle})
         </Link>

@@ -12,11 +12,15 @@ export default function UserPageRepWrapper({
   initialRepReceivedParams,
   initialRepGivenParams,
   initialActivityLogParams,
+  initialCICReceivedParams,
+  initialCICGivenParams,
 }: {
   readonly profile: ApiIdentity;
   readonly initialRepReceivedParams: ProfileRatersParams;
   readonly initialRepGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
+  readonly initialCICReceivedParams: ProfileRatersParams;
+  readonly initialCICGivenParams: ProfileRatersParams;
 }) {
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
@@ -33,6 +37,8 @@ export default function UserPageRepWrapper({
         initialRepReceivedParams={initialRepReceivedParams}
         initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}
+        initialCICReceivedParams={initialCICReceivedParams}
+        initialCICGivenParams={initialCICGivenParams}
       />
     </UserPageSetUpProfileWrapper>
   );

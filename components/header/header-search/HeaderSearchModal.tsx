@@ -577,7 +577,7 @@ export default function HeaderSearchModal({
     const path = getProfileTargetRoute({
       handleOrWallet,
       pathname: pathname ?? "",
-      defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
+      defaultPath: USER_PAGE_TAB_IDS.REP,
     });
     router.push(path);
     onClose();

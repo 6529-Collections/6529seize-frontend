@@ -6,13 +6,14 @@ import UserPageRepRepsTableBody from "./UserPageRepRepsTableBody";
 import UserPageRepRepsTableHeader from "./UserPageRepRepsTableHeader";
 import { SortDirection } from "@/entities/ISort";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import CommonTableWrapper from "@/components/utils/table/CommonTableWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 export enum RepsTableSort {
   REP = "REP",
   RATERS = "RATERS",
   MY_RATES = "MY_RATES",
 }
+
+const INITIAL_COUNT = 10;
 
 export default function UserPageRepRepsTable({
   reps,
@@ -23,6 +24,7 @@ export default function UserPageRepRepsTable({
   readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
 }) {
+  const [showAll, setShowAll] = useState(false);
   const [sortType, setSortType] = useState<RepsTableSort>(RepsTableSort.REP);
   const [sortDirection, setSortDirection] = useState<SortDirection>(
     SortDirection.DESC
@@ -103,20 +105,43 @@ export default function UserPageRepRepsTable({
     }
   }, [canEditRep, sortType]);
 
-  return (
-    <CommonTableWrapper>
-      <UserPageRepRepsTableHeader
-        activeType={sortType}
-        sortDirection={sortDirection}
-        showMyRates={canEditRep}
-        onSortTypeClick={onSortTypeClick}
-      />
+  const displayedReps = showAll
+    ? sortedReps
+    : sortedReps.slice(0, INITIAL_COUNT);
+  const hasMore = sortedReps.length > INITIAL_COUNT;
+  const maxRep = Math.max(...reps.map((r) => Math.abs(r.rating)), 0);
 
-      <UserPageRepRepsTableBody
-        reps={sortedReps}
-        profile={profile}
-        canEditRep={canEditRep}
-      />
-    </CommonTableWrapper>
+  return (
+    <div className="tw-flow-root">
+      <div className="tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+        <table
+          className="tw-min-w-full tw-border-separate"
+          style={{ borderSpacing: "0 0.375rem" }}
+        >
+          <UserPageRepRepsTableHeader
+            activeType={sortType}
+            sortDirection={sortDirection}
+            showMyRates={canEditRep}
+            onSortTypeClick={onSortTypeClick}
+          />
+
+          <UserPageRepRepsTableBody
+            reps={displayedReps}
+            profile={profile}
+            canEditRep={canEditRep}
+            maxRep={maxRep}
+          />
+        </table>
+      </div>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setShowAll((prev) => !prev)}
+          className="tw-w-full tw-mt-2 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-bg-transparent tw-border tw-border-solid tw-border-white/[0.06] tw-rounded-lg tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-border-white/10"
+        >
+          {showAll ? "Show less" : `See all ${sortedReps.length}`}
+        </button>
+      )}
+    </div>
   );
 }

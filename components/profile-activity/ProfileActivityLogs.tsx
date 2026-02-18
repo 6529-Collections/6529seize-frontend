@@ -11,9 +11,9 @@ import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { selectActiveGroupId } from "@/store/groupSlice";
-import type {
+import {
   ProfileActivityFilterTargetType,
-  ProfileActivityLogType,
+  type ProfileActivityLogType,
   RateMatter,
 } from "@/types/enums";
 import { useSelector } from "react-redux";
@@ -31,6 +31,34 @@ export interface ActivityLogParams {
   readonly groupId: string | null;
 }
 
+const MATTER_OPTIONS: {
+  readonly key: string;
+  readonly label: string;
+  readonly value: RateMatter | null;
+}[] = [
+  { key: "all", label: "ALL", value: null },
+  { key: "rep", label: "REP", value: RateMatter.REP },
+  { key: "nic", label: "NIC", value: RateMatter.NIC },
+];
+
+const DIRECTION_OPTIONS: {
+  readonly key: string;
+  readonly label: string;
+  readonly value: ProfileActivityFilterTargetType;
+}[] = [
+  { key: "all", label: "all", value: ProfileActivityFilterTargetType.ALL },
+  {
+    key: "incoming",
+    label: "incoming",
+    value: ProfileActivityFilterTargetType.INCOMING,
+  },
+  {
+    key: "outgoing",
+    label: "outgoing",
+    value: ProfileActivityFilterTargetType.OUTGOING,
+  },
+];
+
 export interface ActivityLogParamsConverted {
   readonly page: string;
   readonly page_size: string;
@@ -45,11 +73,13 @@ export interface ActivityLogParamsConverted {
 export default function ProfileActivityLogs({
   initialParams,
   withFilters,
+  withMatterFilter = false,
   disableActiveGroup = false,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
+  readonly withMatterFilter?: boolean | undefined;
   readonly disableActiveGroup?: boolean | undefined;
   readonly children?: React.ReactNode | undefined;
 }) {
@@ -61,11 +91,15 @@ export default function ProfileActivityLogs({
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
+  const [matter, setMatter] = useState<RateMatter | null>(
+    initialParams.matter
+  );
 
   useEffect(() => {
     setSelectedFilters(initialParams.logTypes);
     setTargetType(initialParams.targetType);
     setCurrentPage(initialParams.page);
+    setMatter(initialParams.matter);
   }, [initialParams]);
 
   const onFilter = (filter: ProfileActivityLogType) => {
@@ -82,13 +116,18 @@ export default function ProfileActivityLogs({
     setCurrentPage(1);
   };
 
+  const onMatterChange = (m: RateMatter | null) => {
+    setMatter(m);
+    setCurrentPage(1);
+  };
+
   const [params, setParams] = useState<ActivityLogParamsConverted>(
     convertActivityLogParams({
       params: {
         page: currentPage,
         pageSize: initialParams.pageSize,
         logTypes: selectedFilters,
-        matter: initialParams.matter,
+        matter,
         targetType,
         handleOrWallet: initialParams.handleOrWallet,
         groupId: activeGroupId,
@@ -104,7 +143,7 @@ export default function ProfileActivityLogs({
           page: currentPage,
           pageSize: initialParams.pageSize,
           logTypes: selectedFilters,
-          matter: initialParams.matter,
+          matter,
           targetType,
           handleOrWallet: initialParams.handleOrWallet,
           groupId: activeGroupId,
@@ -118,6 +157,7 @@ export default function ProfileActivityLogs({
     initialParams.handleOrWallet,
     targetType,
     activeGroupId,
+    matter,
   ]);
 
   const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(
@@ -150,7 +190,7 @@ export default function ProfileActivityLogs({
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-center min-[1200px]:tw-justify-between min-[1200px]:tw-gap-x-16">
         {children && <div>{children}</div>}
-        {withFilters && (
+        {withFilters && !withMatterFilter && (
           <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
             <div
               className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-80`}
@@ -165,7 +205,53 @@ export default function ProfileActivityLogs({
           </div>
         )}
       </div>
-      {initialParams.handleOrWallet && (
+      {withMatterFilter && (
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-px-4 tw-pt-4 sm:tw-px-6">
+          <div className="tw-inline-flex tw-items-center tw-gap-1 tw-p-1 tw-bg-black/40 tw-rounded-lg tw-border tw-border-solid tw-border-white/10">
+            {MATTER_OPTIONS.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => onMatterChange(opt.value)}
+                className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-transition-all tw-cursor-pointer ${
+                  matter === opt.value
+                    ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border tw-border-solid tw-border-white/5"
+                    : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          {initialParams.handleOrWallet && (
+            <div className="tw-inline-flex tw-items-center tw-gap-1 tw-p-1 tw-bg-black/40 tw-rounded-lg tw-border tw-border-solid tw-border-white/10">
+              {DIRECTION_OPTIONS.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => onTargetType(opt.value)}
+                  className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-capitalize tw-transition-all tw-cursor-pointer ${
+                    targetType === opt.value
+                      ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border tw-border-solid tw-border-white/5"
+                      : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {withFilters && matter === RateMatter.NIC && (
+            <div className="tw-ml-auto tw-w-56">
+              <ProfileActivityLogsFilter
+                user={initialParams.handleOrWallet}
+                options={initialParams.logTypes}
+                selected={selectedFilters}
+                setSelected={onFilter}
+              />
+            </div>
+          )}
+        </div>
+      )}
+      {!withMatterFilter && initialParams.handleOrWallet && (
         <CommonFilterTargetSelect
           selected={targetType}
           onChange={onTargetType}

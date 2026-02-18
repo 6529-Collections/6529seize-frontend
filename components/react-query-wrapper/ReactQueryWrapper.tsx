@@ -126,13 +126,6 @@ interface InitProfileRepPageParams {
   readonly handleOrWallet: string;
 }
 
-interface InitProfileIdentityPageParams {
-  readonly profile: ApiIdentity;
-  readonly activityLogs: InitProfileActivityLogsParams;
-  readonly cicGivenToUsers: InitProfileRatersParamsAndData;
-  readonly cicReceivedFromUsers: InitProfileRatersParamsAndData;
-}
-
 type ReactQueryWrapperContextType = {
   readonly setProfile: (profile: ApiIdentity) => void;
   readonly setWave: (wave: ApiWave) => void;
@@ -173,7 +166,6 @@ type ReactQueryWrapperContextType = {
   onProfileStatementRemove: (params: { profile: ApiIdentity }) => void;
   onIdentityFollowChange: () => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
-  initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
   initCommunityActivityPage: ({
     activityLogs,
   }: {
@@ -211,7 +203,6 @@ export const ReactQueryWrapperContext =
     onProfileStatementRemove: () => {},
     onIdentityFollowChange: () => {},
     initProfileRepPage: () => {},
-    initProfileIdentityPage: () => {},
     initCommunityActivityPage: () => {},
     waitAndInvalidateDrops: async () => {},
     addOptimisticDrop: async () => {},
@@ -766,22 +757,6 @@ const createReactQueryContextValue = (
     setProfileRaters(repReceivedFromUsers);
   };
 
-  const initProfileIdentityPage = ({
-    profile,
-    activityLogs,
-    cicGivenToUsers,
-    cicReceivedFromUsers,
-  }: InitProfileIdentityPageParams) => {
-    setProfile(profile);
-    initProfileActivityLogs({
-      params: activityLogs.params,
-      data: activityLogs.data,
-      disableActiveGroup: true,
-    });
-    setProfileRaters(cicGivenToUsers);
-    setProfileRaters(cicReceivedFromUsers);
-  };
-
   const initCommunityActivityPage = ({
     activityLogs,
   }: {
@@ -991,7 +966,6 @@ const createReactQueryContextValue = (
     onProfileStatementAdd,
     onProfileStatementRemove,
     initProfileRepPage,
-    initProfileIdentityPage,
     initCommunityActivityPage,
     onGroupRemoved,
     onGroupChanged,

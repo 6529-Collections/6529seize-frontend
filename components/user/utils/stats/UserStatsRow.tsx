@@ -59,10 +59,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/collected`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(tdh)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             TDH
           </span>
           {tdh_rate > 0 && (
@@ -81,10 +81,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/xtdh`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(xtdh)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             xTDH
           </span>
           {xtdh_rate > 0 && (
@@ -100,13 +100,13 @@ export default function UserStatsRow({
         </Link>
 
         <Link
-          href={`/${routeHandle}/identity`}
+          href={`/${routeHandle}/rep`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(cic)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             NIC
           </span>
         </Link>
@@ -115,10 +115,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/rep`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(rep)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             Rep
           </span>
         </Link>
@@ -127,10 +127,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/followers`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatNumberWithCommas(count)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             {followerLabel}
           </span>
         </Link>

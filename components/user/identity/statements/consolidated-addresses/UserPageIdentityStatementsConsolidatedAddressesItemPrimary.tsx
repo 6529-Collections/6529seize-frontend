@@ -13,7 +13,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
 }) {
   if (isPrimary) {
     return (
-      <span className="tw-ml-1 tw-text-xs tw-font-bold tw-text-iron-500">
+      <span className="tw-text-[9px] tw-font-bold tw-text-emerald-400 tw-bg-emerald-900/20 tw-px-1.5 tw-py-px tw-rounded tw-border tw-border-solid tw-border-emerald-500/20">
         Primary
       </span>
     );

@@ -54,36 +54,73 @@ export default function UserPageIdentityHeaderCICRateStats({
     () => setAvailableCredit(getAvailableCredit()),
     [heroAvailableCredit, proxyAvailableCredit]
   );
+
+  if (isTooltip) {
+    return (
+      <div className="tw-text-xs tw-flex tw-flex-col tw-space-y-1.5">
+        {!!activeProfileProxy && (
+          <span className="tw-block tw-text-iron-400 tw-font-medium">
+            <span>Proxy for:</span>
+            <span className="tw-ml-1 tw-font-semibold tw-text-emerald-400">
+              <Link href={`/${activeProfileProxy.created_by.handle}`}>
+                {activeProfileProxy.created_by.handle}
+              </Link>
+            </span>
+          </span>
+        )}
+        {!activeProfileProxy && (
+          <span className="tw-block tw-text-iron-400 tw-font-medium">
+            <span>Available NIC:</span>
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+              {formatNumberWithCommas(availableCredit)}
+            </span>
+          </span>
+        )}
+        {!activeProfileProxy && (
+          <span className="tw-block tw-text-iron-400 tw-font-medium tw-break-all">
+            <span>Max/min to {profile.handle}:</span>
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+              +/- {formatNumberWithCommas(minMaxValues.max)}
+            </span>
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={`${
-        isTooltip ? "tw-text-sm" : "tw-text-base"
-      } tw-flex tw-flex-col tw-space-y-1`}>
+    <div className="tw-space-y-2">
       {!!activeProfileProxy && (
-        <span className="tw-block tw-text-iron-200 tw-font-normal">
-          <span>You are acting as proxy for:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-2 tw-py-1.5 tw-bg-black/20 tw-rounded tw-border tw-border-solid tw-border-white/5">
+          <span className="tw-text-xs tw-text-iron-400 tw-font-medium">
+            Proxy for
+          </span>
+          <span className="tw-text-xs tw-font-bold tw-text-emerald-400">
             <Link href={`/${activeProfileProxy.created_by.handle}`}>
               {activeProfileProxy.created_by.handle}
             </Link>
           </span>
-        </span>
+        </div>
       )}
       {!activeProfileProxy && (
-        <span className="tw-block tw-text-iron-200 tw-font-normal">
-          <span>Your available NIC:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-2 tw-py-1.5 tw-bg-black/20 tw-rounded tw-border tw-border-solid tw-border-white/5">
+          <span className="tw-text-xs tw-text-iron-400 tw-font-medium">
+            Available NIC
+          </span>
+          <span className="tw-text-xs tw-font-bold tw-text-iron-50">
             {formatNumberWithCommas(availableCredit)}
           </span>
-        </span>
+        </div>
       )}
       {!activeProfileProxy && (
-        <span className="tw-block tw-text-iron-200 tw-font-normal tw-break-all">
-          <span>Your max/min NIC Rating to {profile.handle}:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-100">
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-2 tw-py-1.5 tw-bg-black/20 tw-rounded tw-border tw-border-solid tw-border-white/5">
+          <span className="tw-text-xs tw-text-iron-400 tw-font-medium tw-break-all">
+            Max/min to {profile.handle}
+          </span>
+          <span className="tw-text-xs tw-font-bold tw-text-iron-50">
             +/- {formatNumberWithCommas(minMaxValues.max)}
           </span>
-        </span>
+        </div>
       )}
     </div>
   );

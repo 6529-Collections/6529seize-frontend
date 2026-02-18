@@ -16,7 +16,7 @@ export default function UserRateAdjustmentHelper({
       className={`${
         inLineValues
           ? "tw-mt-2 tw-flex tw-flex-wrap tw-gap-y-1 tw-gap-x-4"
-          : "tw-mt-3 md:tw-mt-0 tw-space-x-4 md:tw-space-x-0 md:-tw-space-y-1 tw-flex md:tw-flex-col"
+          : "tw-grid tw-grid-cols-2 tw-gap-2 tw-mb-4"
       } `}
     >
       <UserRateAdjustmentHelperValue

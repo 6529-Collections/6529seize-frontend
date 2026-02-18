@@ -84,26 +84,26 @@ export default function UserPageIdentityStatements({
   }, [statements]);
 
   return (
-    <div className="tw-mt-6 lg:tw-mt-8">
+    <div className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/[0.06] tw-pt-6 lg:tw-pt-8 tw-px-4 lg:tw-px-8">
       <div>
         <UserPageIdentityAddStatementsHeader profile={profile} />
-        <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-800 tw-border-solid tw-rounded-xl tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-          <div className="tw-relative tw-px-4 tw-py-6 lg:tw-p-8 tw-mx-auto tw-grid tw-grid-cols-1 xl:tw-gap-x-8 xl:tw-gap-y-2 lg:tw-mx-0 xl:tw-grid-cols-5">
+        <div className="tw-mt-2 lg:tw-mt-4 tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-transparent desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+          <div className="tw-relative tw-pb-6 lg:tw-pb-8 tw-mx-auto tw-grid tw-grid-cols-1 xl:tw-gap-x-8 xl:tw-gap-y-2 lg:tw-mx-0 xl:tw-grid-cols-5">
             <div className="tw-col-span-full tw-space-y-6 md:tw-space-y-8">
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 xl:tw-grid-cols-9">
-                <div className="tw-col-span-3">
+              <div className="tw-grid tw-grid-cols-1 tw-gap-y-6">
+                <div>
                   <UserPageIdentityStatementsConsolidatedAddresses
                     profile={profile}
                   />
                 </div>
-                <div className="tw-col-span-3">
+                <div>
                   <UserPageIdentityStatementsSocialMediaAccounts
                     statements={socialMediaAccounts}
                     profile={profile}
                     loading={isLoading}
                   />
                 </div>
-                <div className="tw-col-span-3">
+                <div>
                   <UserPageIdentityStatementsNFTAccounts
                     statements={nftAccounts}
                     profile={profile}
@@ -111,14 +111,14 @@ export default function UserPageIdentityStatements({
                   />
                 </div>
 
-                <div className="tw-col-span-3">
+                <div>
                   <UserPageIdentityStatementsContacts
                     statements={contacts}
                     profile={profile}
                     loading={isLoading}
                   />
                 </div>
-                <div className="tw-col-span-3">
+                <div>
                   <UserPageIdentityStatementsSocialMediaVerificationPosts
                     statements={socialMediaVerificationPosts}
                     profile={profile}
@@ -131,7 +131,7 @@ export default function UserPageIdentityStatements({
                       tabIndex={0}
                       role="button"
                       aria-label="Statements help"
-                      className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+                      className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
                       data-tooltip-id="statements-help">
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"

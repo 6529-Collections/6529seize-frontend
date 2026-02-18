@@ -16,7 +16,8 @@ export interface UserPageRepPropsRepRates {
   readonly rater: string | null;
 }
 
-const MATTER_TYPE = RateMatter.REP;
+const REP_MATTER_TYPE = RateMatter.REP;
+const CIC_MATTER_TYPE = RateMatter.NIC;
 
 const getInitialActivityLogParams = (
   handleOrWallet: string
@@ -26,7 +27,7 @@ const getInitialActivityLogParams = (
   logTypes: getProfileLogTypes({
     logTypes: [],
   }),
-  matter: RateMatter.REP,
+  matter: null,
   targetType: ProfileActivityFilterTargetType.ALL,
   handleOrWallet,
   groupId: null,
@@ -41,16 +42,30 @@ function RepTab({ profile }: { readonly profile: ApiIdentity }) {
 
   const initialRepGivenParams = getInitialRatersParams({
     handleOrWallet,
-    matter: MATTER_TYPE,
+    matter: REP_MATTER_TYPE,
     given: false,
   });
 
   const initialRepReceivedParams = getInitialRatersParams({
     handleOrWallet,
-    matter: MATTER_TYPE,
+    matter: REP_MATTER_TYPE,
     given: true,
   });
-  const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
+
+  const initialActivityLogParams =
+    getInitialActivityLogParams(handleOrWallet);
+
+  const initialCICGivenParams = getInitialRatersParams({
+    handleOrWallet,
+    matter: CIC_MATTER_TYPE,
+    given: false,
+  });
+
+  const initialCICReceivedParams = getInitialRatersParams({
+    handleOrWallet,
+    matter: CIC_MATTER_TYPE,
+    given: true,
+  });
 
   return (
     <div className="tailwind-scope">
@@ -59,6 +74,8 @@ function RepTab({ profile }: { readonly profile: ApiIdentity }) {
         initialRepReceivedParams={initialRepReceivedParams}
         initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}
+        initialCICReceivedParams={initialCICReceivedParams}
+        initialCICGivenParams={initialCICGivenParams}
       />
     </div>
   );
