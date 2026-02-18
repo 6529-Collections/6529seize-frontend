@@ -7,12 +7,17 @@ import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGro
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import { getWaveDropEligibility } from "../dropEligibility";
 import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
-import { WaveleaderboardSort } from "./WaveleaderboardSort";
+import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
+import {
+  WAVE_LEADERBOARD_SORT_ITEMS,
+  WaveleaderboardSort,
+} from "./WaveleaderboardSort";
+import { resolveWaveLeaderboardHeaderControlModes } from "./waveLeaderboardHeaderControls";
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
@@ -54,6 +59,58 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const viewModes: LeaderboardViewMode[] = isMemesWave
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];
+
+  const sortLabelByValue = useMemo(
+    () =>
+      new Map(
+        WAVE_LEADERBOARD_SORT_ITEMS.map((item) => [item.value, item.label])
+      ),
+    []
+  );
+  const activeSortLabel = sortLabelByValue.get(sort) ?? "Current Vote";
+
+  const activeCurationLabel = useMemo(() => {
+    if (!showCurationGroupSelect || !curatedByGroupId) {
+      return "All submissions";
+    }
+
+    return (
+      curationGroups.find((group) => group.id === curatedByGroupId)?.name ??
+      "All submissions"
+    );
+  }, [curatedByGroupId, curationGroups, showCurationGroupSelect]);
+
+  const curationProbeKey = useMemo(
+    () => curationGroups.map((group) => `${group.id}:${group.name}`).join("|"),
+    [curationGroups]
+  );
+
+  const {
+    controlsRowRef,
+    viewModeTabsRef,
+    sortTabsProbeRef,
+    sortDropdownProbeRef,
+    curationTabsProbeRef,
+    curationDropdownProbeRef,
+    measurements,
+  } = useLeaderboardHeaderControlMeasurements({
+    showCurationGroupSelect,
+    remeasureKey: `${activeSortLabel}|${activeCurationLabel}|${curationProbeKey}`,
+  });
+
+  const controlModes = useMemo(
+    () =>
+      resolveWaveLeaderboardHeaderControlModes({
+        availableWidth: measurements.availableWidth,
+        viewModesWidth: measurements.viewModesWidth,
+        sortTabsWidth: measurements.sortTabsWidth,
+        sortDropdownWidth: measurements.sortDropdownWidth,
+        hasCurationControl: showCurationGroupSelect,
+        curationTabsWidth: measurements.curationTabsWidth,
+        curationDropdownWidth: measurements.curationDropdownWidth,
+      }),
+    [measurements, showCurationGroupSelect]
+  );
 
   const getViewModeLabel = (mode: LeaderboardViewMode) => {
     if (mode === "list") {
@@ -140,13 +197,22 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
+    <div className="tw-relative tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
       <div className="tw-flex tw-items-start tw-gap-2">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
+        <div
+          ref={controlsRowRef}
+          data-testid="leaderboard-header-controls-row"
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2 ${
+            controlModes.enableControlsScroll
+              ? "horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
+              : "tw-overflow-x-hidden"
+          }`}
+        >
           <div
+            ref={viewModeTabsRef}
             role="tablist"
             aria-label="Leaderboard view modes"
-            className="tw-flex tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
+            className="tw-flex tw-flex-shrink-0 tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1"
           >
             {viewModes.map((mode) => (
               <React.Fragment key={mode}>
@@ -185,13 +251,22 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               </React.Fragment>
             ))}
           </div>
-          <WaveleaderboardSort sort={sort} onSortChange={onSortChange} />
-          {showCurationGroupSelect && onCurationGroupChange && (
-            <WaveLeaderboardCurationGroupSelect
-              groups={curationGroups}
-              selectedGroupId={curatedByGroupId}
-              onChange={onCurationGroupChange}
+          <div className="tw-flex-shrink-0">
+            <WaveleaderboardSort
+              sort={sort}
+              onSortChange={onSortChange}
+              mode={controlModes.sortMode}
             />
+          </div>
+          {showCurationGroupSelect && onCurationGroupChange && (
+            <div className="tw-flex-shrink-0">
+              <WaveLeaderboardCurationGroupSelect
+                groups={curationGroups}
+                selectedGroupId={curatedByGroupId}
+                onChange={onCurationGroupChange}
+                mode={controlModes.curationMode}
+              />
+            </div>
           )}
         </div>
         {isLoggedIn && (
@@ -210,6 +285,62 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               </PrimaryButton>
             )}
           </div>
+        )}
+      </div>
+
+      <div
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-left-0 tw-top-0 tw-h-0 tw-overflow-hidden tw-whitespace-nowrap tw-opacity-0"
+      >
+        <div
+          ref={sortTabsProbeRef}
+          className="tw-inline-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+        >
+          {WAVE_LEADERBOARD_SORT_ITEMS.map((item) => (
+            <div
+              key={item.key}
+              className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-xs tw-font-semibold"
+            >
+              {item.label}
+            </div>
+          ))}
+        </div>
+
+        <div
+          ref={sortDropdownProbeRef}
+          className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-3.5 tw-pr-8 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
+        >
+          <span className="tw-font-semibold tw-text-iron-500">Sort: </span>
+          {activeSortLabel}
+        </div>
+
+        {showCurationGroupSelect && (
+          <>
+            <div
+              ref={curationTabsProbeRef}
+              className="tw-inline-flex tw-items-center tw-gap-x-1"
+            >
+              <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-px-3 tw-py-2.5 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-600">
+                All submissions
+              </div>
+              {curationGroups.map((group) => (
+                <div
+                  key={group.id}
+                  className="tw-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-px-3 tw-py-2.5 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-600"
+                >
+                  {group.name}
+                </div>
+              ))}
+            </div>
+
+            <div
+              ref={curationDropdownProbeRef}
+              className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-3.5 tw-pr-8 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
+            >
+              <span className="tw-font-semibold tw-text-iron-500">Group: </span>
+              {activeCurationLabel}
+            </div>
+          </>
         )}
       </div>
     </div>

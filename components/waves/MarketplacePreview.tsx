@@ -35,9 +35,7 @@ export default function MarketplacePreview({
 
   let content: ReactElement;
 
-  if (!isVisible) {
-    content = <MarketplacePreviewPlaceholder href={href} compact={compact} />;
-  } else {
+  if (isVisible) {
     switch (kind) {
       case "manifold.listing":
         content = (
@@ -78,6 +76,8 @@ export default function MarketplacePreview({
         content = <MarketplaceUnavailableCard href={href} compact={compact} />;
         break;
     }
+  } else {
+    content = <MarketplacePreviewPlaceholder href={href} compact={compact} />;
   }
 
   return <div ref={containerRef}>{content}</div>;

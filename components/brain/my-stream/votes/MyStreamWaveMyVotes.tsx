@@ -35,6 +35,23 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   // State to track checked drops
   const [checkedDrops, setCheckedDrops] = useState<Set<string>>(new Set());
 
+  const sharedAvailableVotes = useMemo(() => {
+    const dropWithContext = drops.find((drop) => drop.context_profile_context);
+    if (!dropWithContext) {
+      return null;
+    }
+
+    const currentVoteValue =
+      dropWithContext.context_profile_context?.rating ?? 0;
+    const maxRating = dropWithContext.context_profile_context?.max_rating;
+
+    if (typeof maxRating !== "number") {
+      return null;
+    }
+
+    return Math.max(0, maxRating - currentVoteValue);
+  }, [drops]);
+
   // Check if all items are selected
   const allItemsSelected = useMemo(() => {
     return !!drops.length && drops.every((drop) => checkedDrops.has(drop.id));
@@ -89,6 +106,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         <div className="tw-mt-4 tw-space-y-4">
           <MyStreamWaveMyVotesReset
             haveDrops={!!drops.length}
+            availableVotes={sharedAvailableVotes}
             selected={checkedDrops}
             onToggleSelectAll={handleToggleSelectAll}
             allItemsSelected={allItemsSelected}

@@ -47,6 +47,7 @@ export enum STATEMENT_TYPE {
   MEDIUM = "MEDIUM",
   MIRROR_XYZ = "MIRROR_XYZ",
   YOUTUBE = "YOUTUBE",
+  LINKTREE = "LINKTREE",
   DISCORD = "DISCORD",
   TELEGRAM = "TELEGRAM",
   WECHAT = "WECHAT",
@@ -65,6 +66,8 @@ export enum STATEMENT_TYPE {
   DECA_ART = "DECA_ART",
   ON_CYBER = "ON_CYBER",
   THE_LINE = "THE_LINE",
+  MANIFOLD = "MANIFOLD",
+  TRANSIENT = "TRANSIENT",
 }
 
 export const STATEMENT_META: Record<
@@ -146,6 +149,12 @@ export const STATEMENT_META: Record<
     title: "YouTube",
     inputPlaceholder: "https://www.youtube.com/username",
     inputInitialValue: "https://www.youtube.com/",
+    canOpenStatement: true,
+  },
+  [STATEMENT_TYPE.LINKTREE]: {
+    title: "Linktree",
+    inputPlaceholder: "https://linktr.ee/username",
+    inputInitialValue: "https://linktr.ee/",
     canOpenStatement: true,
   },
   [STATEMENT_TYPE.DISCORD]: {
@@ -256,6 +265,18 @@ export const STATEMENT_META: Record<
     inputInitialValue: "https://oncyber.io/line",
     canOpenStatement: true,
   },
+  [STATEMENT_TYPE.MANIFOLD]: {
+    title: "Manifold",
+    inputPlaceholder: "https://manifold.xyz/",
+    inputInitialValue: "https://manifold.xyz/",
+    canOpenStatement: true,
+  },
+  [STATEMENT_TYPE.TRANSIENT]: {
+    title: "Transient",
+    inputPlaceholder: "https://transient.xyz/",
+    inputInitialValue: "https://transient.xyz/",
+    canOpenStatement: true,
+  },
 };
 
 export const SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES = [
@@ -271,6 +292,7 @@ export const SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES = [
   STATEMENT_TYPE.MEDIUM,
   STATEMENT_TYPE.MIRROR_XYZ,
   STATEMENT_TYPE.YOUTUBE,
+  STATEMENT_TYPE.LINKTREE,
 ] as const;
 
 export type SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE =
@@ -287,6 +309,8 @@ export const NFT_ACCOUNTS_STATEMENT_TYPES = [
   STATEMENT_TYPE.DECA_ART,
   STATEMENT_TYPE.ON_CYBER,
   STATEMENT_TYPE.THE_LINE,
+  STATEMENT_TYPE.MANIFOLD,
+  STATEMENT_TYPE.TRANSIENT,
 ] as const;
 
 export type NFT_ACCOUNTS_STATEMENT_TYPE =

@@ -1,27 +1,41 @@
-import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
-import MemesArtSubmissionModal from '@/components/waves/memes/MemesArtSubmissionModal';
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
+import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 
-jest.mock('@/components/waves/memes/submission/MemesArtSubmissionContainer', () => ({
-  __esModule: true,
-  default: () => <div data-testid="container" />,
-}));
+jest.mock(
+  "@/components/waves/memes/submission/MemesArtSubmissionContainer",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="container" />,
+  })
+);
 
-describe('MemesArtSubmissionModal', () => {
-  const wave = { id: 'w', participation: { terms: '' } } as any;
+describe("MemesArtSubmissionModal", () => {
+  const wave = { id: "w", participation: { terms: "" } } as any;
 
-  it('renders nothing when closed', () => {
+  it("renders nothing when closed", () => {
     const { container } = render(
       <MemesArtSubmissionModal isOpen={false} wave={wave} onClose={jest.fn()} />
     );
     expect(container.firstChild).toBeNull();
   });
 
-  it('calls onClose when backdrop clicked', () => {
+  it("calls onClose when backdrop clicked", () => {
     const onClose = jest.fn();
-    render(<MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />);
-    const overlay = document.querySelector('.tailwind-scope') as HTMLElement;
+    render(
+      <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />
+    );
+    const overlay = document.querySelector(".tailwind-scope") as HTMLElement;
     fireEvent.click(overlay);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("uses full mobile viewport height constraints", () => {
+    render(
+      <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={jest.fn()} />
+    );
+    const panel = screen.getByTestId("memes-art-submission-modal-panel");
+    expect(panel).toHaveClass("tw-h-[100dvh]");
+    expect(panel).toHaveClass("tw-max-h-[100dvh]");
   });
 });

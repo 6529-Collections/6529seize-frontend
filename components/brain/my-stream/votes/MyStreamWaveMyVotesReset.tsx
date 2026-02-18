@@ -8,9 +8,11 @@ import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface MyStreamWaveMyVotesResetProps {
   readonly haveDrops: boolean;
+  readonly availableVotes?: number | null;
   readonly selected: Set<string>;
   readonly allItemsSelected: boolean;
   readonly onToggleSelectAll: () => void;
@@ -22,6 +24,7 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   haveDrops,
+  availableVotes = null,
   selected,
   allItemsSelected,
   onToggleSelectAll,
@@ -85,19 +88,31 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   if (!haveDrops) return null;
   return (
     <div className="tw-pl-1">
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <SecondaryButton
-          onClicked={onToggleSelectAll}
-          size="sm"
-          disabled={isResetting}>
-          {allItemsSelected ? "Deselect All" : "Select All"}
-        </SecondaryButton>
-        <SecondaryButton
-          onClicked={handleReset}
-          size="sm"
-          disabled={!selectedCount || isResetting}>
-          {isResetting ? "Resetting..." : "Reset Votes"}
-        </SecondaryButton>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <SecondaryButton
+            onClicked={onToggleSelectAll}
+            size="sm"
+            disabled={isResetting}
+          >
+            {allItemsSelected ? "Deselect All" : "Select All"}
+          </SecondaryButton>
+          <SecondaryButton
+            onClicked={handleReset}
+            size="sm"
+            disabled={!selectedCount || isResetting}
+          >
+            {isResetting ? "Resetting..." : "Reset Votes"}
+          </SecondaryButton>
+        </div>
+        {typeof availableVotes === "number" && (
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
+            Available{" "}
+            <span className="tw-tabular-nums tw-text-iron-300">
+              {formatNumberWithCommas(availableVotes)}
+            </span>
+          </p>
+        )}
       </div>
 
       <MyStreamWaveMyVotesResetProgress

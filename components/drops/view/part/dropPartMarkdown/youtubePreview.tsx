@@ -230,11 +230,13 @@ type PreviewState = {
   readonly showEmbed: boolean;
 };
 
-const YOUTUBE_STABLE_FRAME_CLASSES =
-  "tw-h-[13rem] tw-min-h-[13rem] tw-max-h-[13rem] tw-w-full md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
+const YOUTUBE_STABLE_FRAME_CLASSES = "tw-min-w-0 tw-flex-1";
 
 const YOUTUBE_CARD_CLASSES =
-  "tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg";
+  "tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg";
+
+const YOUTUBE_MEDIA_FRAME_CLASSES =
+  "tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-bg-black";
 
 const YOUTUBE_META_CLASSES =
   "tw-flex tw-h-11 tw-shrink-0 tw-flex-col tw-justify-center tw-gap-y-0.5 tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-900/95 tw-px-3";
@@ -363,7 +365,10 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
     if (isLoading) {
       return (
         <div className={`${YOUTUBE_CARD_CLASSES} tw-bg-iron-900`}>
-          <div className="tw-h-full tw-w-full tw-animate-pulse tw-bg-iron-800" />
+          <div
+            className={`${YOUTUBE_MEDIA_FRAME_CLASSES} tw-animate-pulse tw-bg-iron-800`}
+            data-testid="youtube-preview-media-frame"
+          />
           <div className={YOUTUBE_META_CLASSES}>
             <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded tw-bg-iron-700" />
             <div className="tw-h-2.5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-iron-700/80" />
@@ -379,7 +384,10 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
 
       return (
         <div className={`${YOUTUBE_CARD_CLASSES} tw-bg-iron-900`}>
-          <div className="tw-relative tw-min-h-0 tw-flex-1 tw-overflow-hidden tw-bg-black">
+          <div
+            className={YOUTUBE_MEDIA_FRAME_CLASSES}
+            data-testid="youtube-preview-media-frame"
+          >
             {showEmbed ? (
               <div
                 className="tw-h-full tw-w-full tw-bg-black"
@@ -443,7 +451,10 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
         data-testid="youtube-preview-fallback-link"
         className={`${YOUTUBE_CARD_CLASSES} tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
       >
-        <div className="tw-flex tw-min-h-0 tw-flex-1 tw-items-center tw-justify-center tw-px-4 tw-text-center">
+        <div
+          className={`${YOUTUBE_MEDIA_FRAME_CLASSES} tw-flex tw-items-center tw-justify-center tw-px-4 tw-text-center`}
+          data-testid="youtube-preview-media-frame"
+        >
           <span className="tw-line-clamp-2 tw-text-sm tw-font-medium tw-text-iron-100">
             {fallbackMessage}
           </span>
@@ -463,7 +474,7 @@ const YoutubePreview = ({ href }: YoutubePreviewProps) => {
   return (
     <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
       <div
-        className={`tw-min-w-0 tw-flex-1 ${YOUTUBE_STABLE_FRAME_CLASSES}`}
+        className={YOUTUBE_STABLE_FRAME_CLASSES}
         data-testid="youtube-preview-stable-frame"
       >
         {card()}

@@ -18,6 +18,7 @@ import SubstackIcon from "./SubstackIcon";
 import MediumIcon from "./MediumIcon";
 import MirrorIcon from "./MirrorIcon";
 import YoutubeIcon from "./YoutubeIcon";
+import LinktreeIcon from "./LinktreeIcon";
 import LinkIcon from "./LinkIcon";
 import BioIcon from "./BioIcon";
 import SuperRareIcon from "./SuperRareIcon";
@@ -30,6 +31,8 @@ import ArtBlocksIcon from "./ArtBlocksIcon";
 import DecaArtIcon from "./DecaArtIcon";
 import OnCyberIcon from "./OnCyberIcon";
 import TheLineIcon from "./TheLineIcon";
+import ManifoldIcon from "./ManifoldIcon";
+import TransientIcon from "./TransientIcon";
 
 export default function SocialStatementIcon({
   statementType,
@@ -61,6 +64,8 @@ export default function SocialStatementIcon({
       return <MirrorIcon aria-hidden="true" />;
     case STATEMENT_TYPE.YOUTUBE:
       return <YoutubeIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.LINKTREE:
+      return <LinktreeIcon />;
     case STATEMENT_TYPE.DISCORD:
       return <DiscordIcon aria-hidden="true" />;
     case STATEMENT_TYPE.TELEGRAM:
@@ -97,8 +102,12 @@ export default function SocialStatementIcon({
       return <OnCyberIcon aria-hidden="true" />;
     case STATEMENT_TYPE.THE_LINE:
       return <TheLineIcon aria-hidden="true" />;
+    case STATEMENT_TYPE.MANIFOLD:
+      return <ManifoldIcon />;
+    case STATEMENT_TYPE.TRANSIENT:
+      return <TransientIcon />;
     default:
       assertUnreachable(statementType);
-      return;
+      return null;
   }
 }

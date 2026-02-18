@@ -16,17 +16,25 @@ interface WaveLeaderboardCurationGroupSelectProps {
   readonly groups: readonly ApiWaveCurationGroup[];
   readonly selectedGroupId: string | null;
   readonly onChange: (groupId: string | null) => void;
+  readonly mode?: WaveLeaderboardCurationGroupSelectMode;
 }
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
+
+type WaveLeaderboardCurationGroupSelectMode = "auto" | "tabs" | "dropdown";
 
 export function WaveLeaderboardCurationGroupSelect({
   groups,
   selectedGroupId,
   onChange,
+  mode = "auto",
 }: WaveLeaderboardCurationGroupSelectProps) {
   const breakpoint = useBreakpoint();
   const isSmallViewport = breakpoint === "S";
+  let resolvedMode: WaveLeaderboardCurationGroupSelectMode = mode;
+  if (mode === "auto") {
+    resolvedMode = isSmallViewport ? "dropdown" : "tabs";
+  }
 
   const pfpMap = useQueries({
     queries: groups.map((group) => ({
@@ -41,7 +49,7 @@ export function WaveLeaderboardCurationGroupSelect({
     combine: (results) => {
       const map = new Map<string, string>();
       groups.forEach((group, i) => {
-        const pfp = results[i]?.data?.created_by?.pfp;
+        const pfp = results[i]?.data?.created_by.pfp;
         if (pfp) {
           map.set(group.id, pfp);
         }
@@ -66,7 +74,7 @@ export function WaveLeaderboardCurationGroupSelect({
     return null;
   }
 
-  if (isSmallViewport) {
+  if (resolvedMode === "dropdown") {
     return (
       <div className="tw-min-w-0">
         <CommonDropdown<string | null>
