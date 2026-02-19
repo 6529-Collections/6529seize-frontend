@@ -69,7 +69,9 @@ export default function TopRaterAvatars({
         pfpUrl: identity.pfp ?? null,
         href: `/${identity.handle ?? identity.primary_wallet}`,
         ariaLabel: identity.handle ?? identity.primary_wallet ?? "Profile",
-        fallback: (identity.handle || "?")[0].toUpperCase(),
+        fallback: identity.handle
+          ? identity.handle.charAt(0).toUpperCase()
+          : "?",
         title: identity.handle ?? identity.primary_wallet ?? undefined,
       };
     });

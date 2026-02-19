@@ -93,7 +93,7 @@ export default function UserPageRepNewRepSearch({
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile?.query,
+        handleOrWallet: profile?.handle,
       },
     ],
     queryFn: async () =>
@@ -113,7 +113,7 @@ export default function UserPageRepNewRepSearch({
         QueryKey.PROFILE_REP_RATINGS,
         {
           rater: connectedProfile?.handle,
-          handleOrWallet: profile?.query,
+          handleOrWallet: profile?.handle,
         },
       ],
       queryFn: async () =>
