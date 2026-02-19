@@ -75,14 +75,14 @@ export default function GroupCreate({
 
   const [isFetching, setIsFetching] = useState(
     loadingOriginalGroup ||
-    loadingOriginalGroupWallets ||
-    loadingOriginalGroupExcludedWallets
+      loadingOriginalGroupWallets ||
+      loadingOriginalGroupExcludedWallets
   );
   useEffect(() => {
     setIsFetching(
       loadingOriginalGroup ||
-      loadingOriginalGroupWallets ||
-      loadingOriginalGroupExcludedWallets
+        loadingOriginalGroupWallets ||
+        loadingOriginalGroupExcludedWallets
     );
   }, [
     loadingOriginalGroup,
@@ -115,6 +115,7 @@ export default function GroupCreate({
       owns_nfts: [],
       identity_addresses: null,
       excluded_identity_addresses: null,
+      is_beneficiary_of_grant_id: null,
     },
     is_private: false,
   });
@@ -155,6 +156,8 @@ export default function GroupCreate({
         owns_nfts: originalGroup.group.owns_nfts,
         identity_addresses: originalGroupWallets ?? [],
         excluded_identity_addresses: originalGroupExcludedWallets ?? [],
+        is_beneficiary_of_grant_id:
+          originalGroup.group.is_beneficiary_of_grant_id ?? null,
       },
       is_private: originalGroup.is_private ?? false,
     });
@@ -211,7 +214,7 @@ export default function GroupCreate({
       <div className="tw-flex tw-flex-col tw-gap-y-6 sm:tw-gap-y-8">
         <div className="tw-space-y-4 sm:tw-space-y-5">
           <GroupCreateHeader />
-          <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-2">
             <GroupCreateName
               name={groupConfig.name}
               setName={(name) =>
@@ -244,6 +247,7 @@ export default function GroupCreate({
               wallets={groupConfig.group.identity_addresses}
               excludeWallets={groupConfig.group.excluded_identity_addresses}
               nfts={groupConfig.group.owns_nfts}
+              beneficiaryGrantId={groupConfig.group.is_beneficiary_of_grant_id}
               iAmIncluded={iAmIncluded}
               setLevel={(level) =>
                 setGroupConfig((prev) => ({
@@ -291,6 +295,15 @@ export default function GroupCreate({
                 setGroupConfig((prev) => ({
                   ...prev,
                   group: { ...prev.group, owns_nfts: nfts },
+                }))
+              }
+              setBeneficiaryGrantId={(grantId) =>
+                setGroupConfig((prev) => ({
+                  ...prev,
+                  group: {
+                    ...prev.group,
+                    is_beneficiary_of_grant_id: grantId ?? null,
+                  },
                 }))
               }
             />

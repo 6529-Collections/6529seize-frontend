@@ -22,7 +22,7 @@ describe("WaveleaderboardSort", () => {
     commonDropdownMock.mockClear();
   });
 
-  it("always renders dropdown sort and forwards selection", async () => {
+  it("renders dropdown sort by default and forwards selection", async () => {
     const onSortChange = jest.fn();
     const user = userEvent.setup();
 
@@ -39,6 +39,29 @@ describe("WaveleaderboardSort", () => {
     );
 
     await user.click(screen.getByTestId("sort-dropdown"));
+    expect(onSortChange).toHaveBeenCalledWith(
+      WaveDropsLeaderboardSort.CREATED_AT
+    );
+  });
+
+  it("renders tabs mode and forwards tab clicks", async () => {
+    const onSortChange = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <WaveleaderboardSort
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={onSortChange}
+        mode="tabs"
+      />
+    );
+
+    expect(
+      screen.getByRole("tablist", { name: "Sort options" })
+    ).toBeInTheDocument();
+    expect(commonDropdownMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("tab", { name: "Newest" }));
     expect(onSortChange).toHaveBeenCalledWith(
       WaveDropsLeaderboardSort.CREATED_AT
     );

@@ -67,7 +67,7 @@ describe("WaveLeaderboardCurationGroupSelect", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders horizontal tabs on desktop", () => {
+  it("renders horizontal tabs on desktop in auto mode", () => {
     render(
       <WaveLeaderboardCurationGroupSelect
         groups={groups}
@@ -120,7 +120,7 @@ describe("WaveLeaderboardCurationGroupSelect", () => {
     expect(onChange).toHaveBeenNthCalledWith(2, null);
   });
 
-  it("renders dropdown on mobile", () => {
+  it("renders dropdown on mobile in auto mode", () => {
     mockBreakpoint = "S";
 
     render(
@@ -140,6 +140,37 @@ describe("WaveLeaderboardCurationGroupSelect", () => {
         activeItem: null,
       })
     );
+  });
+
+  it("forces tabs mode on small viewport", () => {
+    mockBreakpoint = "S";
+
+    render(
+      <WaveLeaderboardCurationGroupSelect
+        groups={groups}
+        selectedGroupId={null}
+        onChange={jest.fn()}
+        mode="tabs"
+      />
+    );
+
+    expect(screen.getByTestId("curation-group-select")).toBeInTheDocument();
+    expect(commonDropdownMock).not.toHaveBeenCalled();
+  });
+
+  it("forces dropdown mode on desktop viewport", () => {
+    mockBreakpoint = "MD";
+
+    render(
+      <WaveLeaderboardCurationGroupSelect
+        groups={groups}
+        selectedGroupId={null}
+        onChange={jest.fn()}
+        mode="dropdown"
+      />
+    );
+
+    expect(screen.getByTestId("mobile-dropdown")).toBeInTheDocument();
   });
 
   it("handles dropdown selection on mobile", async () => {

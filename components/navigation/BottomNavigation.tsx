@@ -9,7 +9,7 @@ import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
 import LogoIcon from "../common/icons/LogoIcon";
-import Squares2X2Icon from "../common/icons/Squares2X2Icon";
+import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
@@ -58,7 +58,7 @@ const items: NavItemData[] = [
     name: "Collections",
     href: "/the-memes",
     icon: "collections",
-    iconComponent: Squares2X2Icon,
+    iconComponent: CollectionsMenuIcon,
   },
   {
     kind: "route",

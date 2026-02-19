@@ -1,20 +1,37 @@
-import type { ComponentProps } from 'react';
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import ArtworkStep from '@/components/waves/memes/submission/steps/ArtworkStep';
-import type { TraitsData } from '@/components/waves/memes/submission/types/TraitsData';
-import type { InteractiveMediaMimeType } from '@/components/waves/memes/submission/constants/media';
+import type { ComponentProps } from "react";
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import ArtworkStep from "@/components/waves/memes/submission/steps/ArtworkStep";
+import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
+import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
 
-jest.mock('@/components/waves/memes/MemesArtSubmissionFile', () => () => <div data-testid="file" />);
-jest.mock('@/components/waves/memes/submission/details/ArtworkDetails', () => (props: any) => (
-  <div data-testid="details" onClick={() => props.onTitleChange('t')} />
+jest.mock("@/components/waves/memes/MemesArtSubmissionFile", () => () => (
+  <div data-testid="file" />
 ));
-jest.mock('@/components/waves/memes/MemesArtSubmissionTraits', () => () => <div data-testid="traits" />);
-jest.mock('@/components/waves/memes/submission/ui/SubmissionProgress', () => () => <div data-testid="progress" />);
-jest.mock('@/components/utils/button/PrimaryButton', () => (props: any) => (
-  <button data-testid="submit" disabled={props.disabled} title={props.title} onClick={props.onClicked}>{props.children}</button>
+jest.mock(
+  "@/components/waves/memes/submission/details/ArtworkDetails",
+  () => (props: any) => (
+    <div data-testid="details" onClick={() => props.onTitleChange("t")} />
+  )
+);
+jest.mock("@/components/waves/memes/MemesArtSubmissionTraits", () => () => (
+  <div data-testid="traits" />
 ));
-jest.mock('@/components/waves/memes/submission/validation', () => ({
+jest.mock(
+  "@/components/waves/memes/submission/ui/SubmissionProgress",
+  () => () => <div data-testid="progress" />
+);
+jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
+  <button
+    data-testid="submit"
+    disabled={props.disabled}
+    title={props.title}
+    onClick={props.onClicked}
+  >
+    {props.children}
+  </button>
+));
+jest.mock("@/components/waves/memes/submission/validation", () => ({
   useTraitsValidation: () => ({
     errors: {},
     validateAll: () => ({ isValid: true }),
@@ -22,33 +39,33 @@ jest.mock('@/components/waves/memes/submission/validation', () => ({
     markFieldTouched: jest.fn(),
     isValid: true,
     submitAttempted: false,
-  })
+  }),
 }));
 
 function createTraits(): TraitsData {
   return {
-    title: '',
-    description: '',
-    artist: 'a',
-    seizeArtistProfile: '',
-    palette: 'p',
-    style: '',
-    jewel: '',
-    superpower: '',
-    dharma: '',
-    gear: '',
-    clothing: '',
-    element: '',
-    mystery: '',
-    secrets: '',
-    weapon: '',
-    home: '',
-    parent: '',
-    sibling: '',
-    food: '',
-    drink: '',
-    bonus: '',
-    boost: '',
+    title: "",
+    description: "",
+    artist: "a",
+    seizeArtistProfile: "",
+    palette: "p",
+    style: "",
+    jewel: "",
+    superpower: "",
+    dharma: "",
+    gear: "",
+    clothing: "",
+    element: "",
+    mystery: "",
+    secrets: "",
+    weapon: "",
+    home: "",
+    parent: "",
+    sibling: "",
+    food: "",
+    drink: "",
+    bonus: "",
+    boost: "",
     punk6529: false,
     gradient: false,
     movement: false,
@@ -61,7 +78,7 @@ function createTraits(): TraitsData {
     gm: false,
     summer: false,
     tulip: false,
-    memeName: 'Use a Hardware Wallet',
+    memeName: "Use a Hardware Wallet",
     pointsPower: 1,
     pointsWisdom: 2,
     pointsLoki: 3,
@@ -74,16 +91,16 @@ const createProps = (
 ) => ({
   traits: createTraits(),
   artworkUploaded: false,
-  artworkUrl: '',
+  artworkUrl: "",
   setArtworkUploaded: () => {},
   handleFileSelect: () => {},
-  mediaSource: 'upload' as const,
+  mediaSource: "upload" as const,
   setMediaSource: () => {},
-  externalHash: '',
-  externalProvider: 'ipfs',
-  externalConstructedUrl: '',
-  externalPreviewUrl: '',
-  externalMimeType: 'text/html' as InteractiveMediaMimeType,
+  externalHash: "",
+  externalProvider: "ipfs",
+  externalConstructedUrl: "",
+  externalPreviewUrl: "",
+  externalMimeType: "text/html" as InteractiveMediaMimeType,
   externalError: null as string | null,
   isExternalMediaValid: false,
   onExternalHashChange: () => {},
@@ -96,77 +113,88 @@ const createProps = (
   ...override,
 });
 
-describe('ArtworkStep', () => {
-  it('shows upload tooltip when artwork missing', () => {
+describe("ArtworkStep", () => {
+  it("renders responsive content container with mobile scroll and desktop split behavior", () => {
     render(<ArtworkStep {...createProps()} />);
-    expect(screen.getByTestId('submit')).toBeDisabled();
-    expect(screen.getByTestId('submit').getAttribute('title')).toMatch('Please upload artwork');
+    const contentContainer = screen.getByTestId("artwork-step-content");
+    expect(contentContainer).toHaveClass("tw-overflow-y-auto");
+    expect(contentContainer).toHaveClass("lg:tw-overflow-hidden");
   });
 
-  it('enables submit when complete', () => {
+  it("shows upload tooltip when artwork missing", () => {
+    render(<ArtworkStep {...createProps()} />);
+    expect(screen.getByTestId("submit")).toBeDisabled();
+    expect(screen.getByTestId("submit").getAttribute("title")).toMatch(
+      "Please upload artwork"
+    );
+  });
+
+  it("enables submit when complete", () => {
     const traits = createTraits();
-    traits.title = 't';
-    traits.description = 'd';
-    traits.style = 's';
-    traits.jewel = 'j';
-    traits.superpower = 'sp';
-    traits.dharma = 'dh';
-    traits.gear = 'g';
-    traits.clothing = 'c';
-    traits.element = 'e';
-    traits.mystery = 'm';
-    traits.secrets = 'se';
-    traits.weapon = 'w';
-    traits.home = 'h';
-    traits.parent = 'pa';
-    traits.sibling = 'si';
-    traits.food = 'f';
-    traits.drink = 'dr';
-    traits.bonus = 'b';
-    traits.boost = 'bo';
+    traits.title = "t";
+    traits.description = "d";
+    traits.style = "s";
+    traits.jewel = "j";
+    traits.superpower = "sp";
+    traits.dharma = "dh";
+    traits.gear = "g";
+    traits.clothing = "c";
+    traits.element = "e";
+    traits.mystery = "m";
+    traits.secrets = "se";
+    traits.weapon = "w";
+    traits.home = "h";
+    traits.parent = "pa";
+    traits.sibling = "si";
+    traits.food = "f";
+    traits.drink = "dr";
+    traits.bonus = "b";
+    traits.boost = "bo";
     render(
       <ArtworkStep
-        {...createProps({ traits, artworkUploaded: true, artworkUrl: 'url' })}
+        {...createProps({ traits, artworkUploaded: true, artworkUrl: "url" })}
       />
     );
-    expect(screen.getByTestId('submit')).not.toBeDisabled();
+    expect(screen.getByTestId("submit")).not.toBeDisabled();
   });
 
-  it('calls onSubmit when submit clicked', () => {
+  it("calls onSubmit when submit clicked", () => {
     const traits = createTraits();
-    Object.keys(traits).forEach(k => { if(typeof (traits as any)[k] === 'string') (traits as any)[k] = 'x'; });
+    Object.keys(traits).forEach((k) => {
+      if (typeof (traits as any)[k] === "string") (traits as any)[k] = "x";
+    });
     const onSubmit = jest.fn();
     render(
       <ArtworkStep
         {...createProps({
-          traits: { ...traits, title: 't', description: 'd' },
+          traits: { ...traits, title: "t", description: "d" },
           artworkUploaded: true,
-          artworkUrl: 'u',
+          artworkUrl: "u",
           onSubmit,
         })}
       />
     );
-    screen.getByTestId('submit').click();
+    screen.getByTestId("submit").click();
     expect(onSubmit).toHaveBeenCalled();
   });
 
-  it('disables cancel during upload phase', () => {
+  it("disables cancel during upload phase", () => {
     const traits = createTraits();
-    traits.title = 't';
-    traits.description = 'd';
+    traits.title = "t";
+    traits.description = "d";
     const onCancel = jest.fn();
     render(
       <ArtworkStep
         {...createProps({
           traits,
           artworkUploaded: true,
-          artworkUrl: 'url',
+          artworkUrl: "url",
           onCancel,
-          submissionPhase: 'uploading',
+          submissionPhase: "uploading",
         })}
       />
     );
-    const btn = screen.getByRole('button', { name: /cancel/i });
+    const btn = screen.getByRole("button", { name: /cancel/i });
     expect(btn).toBeDisabled();
   });
 });

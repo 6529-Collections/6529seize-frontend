@@ -201,7 +201,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   submissionError,
 }) => {
   // Set up validation with initial empty touched fields to prevent errors on load
-  const validation = useTraitsValidation(traits, initialTraits || traits);
+  const validation = useTraitsValidation(traits, initialTraits ?? traits);
 
   // Check form completeness - separate from validation
   const isFormComplete = useMemo(
@@ -298,62 +298,75 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     }
   };
 
+  const renderMediaSubmissionPanel = () => (
+    <MemesArtSubmissionFile
+      artworkUploaded={artworkUploaded}
+      artworkUrl={artworkUrl}
+      setArtworkUploaded={setArtworkUploaded}
+      handleFileSelect={handleFileSelect}
+      mediaSource={mediaSource}
+      setMediaSource={setMediaSource}
+      externalHash={externalHash}
+      externalProvider={externalProvider}
+      externalConstructedUrl={externalConstructedUrl}
+      externalPreviewUrl={externalPreviewUrl}
+      externalMimeType={externalMimeType}
+      externalError={externalError}
+      externalValidationStatus={externalValidationStatus}
+      isExternalMediaValid={isExternalMediaValid}
+      onExternalHashChange={onExternalHashChange}
+      onExternalProviderChange={onExternalProviderChange}
+      onExternalMimeTypeChange={onExternalMimeTypeChange}
+      onClearExternalMedia={onClearExternalMedia}
+    />
+  );
+
+  const renderArtworkDetailsPanel = () => (
+    <ArtworkDetails
+      title={traits.title}
+      description={traits.description}
+      onTitleChange={handleTitleChange}
+      onDescriptionChange={handleDescriptionChange}
+      titleError={validation.errors.title}
+      descriptionError={validation.errors.description}
+      onTitleBlur={() => handleFieldBlur("title")}
+      onDescriptionBlur={() => handleFieldBlur("description")}
+    />
+  );
+
+  const renderArtworkTraitsPanel = () => (
+    <MemesArtSubmissionTraits
+      traits={traits}
+      setTraits={setTraits}
+      validationErrors={validation.errors}
+      onFieldBlur={handleFieldBlur}
+    />
+  );
+
   return (
-    <div className="tw-flex tw-flex-col tw-h-full">
-      {/* Two-column layout */}
-      <div className="tw-flex-1 tw-flex tw-flex-col lg:tw-flex-row tw-w-full tw-overflow-hidden">
-        {/* Left column - scrollable independently */}
-        <div className="tw-pl-4 tw-pr-2 md:tw-pl-8 md:tw-pr-4 tw-w-full lg:tw-w-1/2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-          <div className="tw-h-[calc(100vh-14rem)]">
-            <MemesArtSubmissionFile
-              artworkUploaded={artworkUploaded}
-              artworkUrl={artworkUrl}
-              setArtworkUploaded={setArtworkUploaded}
-              handleFileSelect={handleFileSelect}
-              mediaSource={mediaSource}
-              setMediaSource={setMediaSource}
-              externalHash={externalHash}
-              externalProvider={externalProvider}
-              externalConstructedUrl={externalConstructedUrl}
-              externalPreviewUrl={externalPreviewUrl}
-              externalMimeType={externalMimeType}
-              externalError={externalError}
-              externalValidationStatus={externalValidationStatus}
-              isExternalMediaValid={isExternalMediaValid}
-              onExternalHashChange={onExternalHashChange}
-              onExternalProviderChange={onExternalProviderChange}
-              onExternalMimeTypeChange={onExternalMimeTypeChange}
-              onClearExternalMedia={onClearExternalMedia}
-            />
+    <div className="tw-flex tw-h-full tw-flex-col">
+      <div
+        data-testid="artwork-step-content"
+        className="tw-min-h-0 tw-w-full tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-overflow-hidden"
+      >
+        <div className="tw-flex tw-min-h-full tw-w-full tw-flex-col lg:tw-h-full lg:tw-min-h-0 lg:tw-flex-row">
+          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pb-0 lg:tw-pl-8 lg:tw-pr-4 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
+            <div className="lg:tw-h-full lg:tw-min-h-[520px]">
+              {renderMediaSubmissionPanel()}
+            </div>
+          </div>
+
+          <div className="tw-w-full tw-px-4 tw-pb-6 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pl-4 lg:tw-pr-8 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500">
+            <div className="tw-flex tw-flex-col tw-gap-y-6">
+              {renderArtworkDetailsPanel()}
+              {renderArtworkTraitsPanel()}
+            </div>
           </div>
         </div>
-
-        {/* Right column - scrollable independently */}
-        <div className="tw-pl-2 tw-pr-4 md:tw-pl-4 md:tw-pr-8 tw-w-full lg:tw-w-1/2 tw-flex tw-flex-col tw-gap-y-6 tw-pb-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-            {/* Artwork Title and Description */}
-            <ArtworkDetails
-              title={traits.title}
-              description={traits.description}
-              onTitleChange={handleTitleChange}
-              onDescriptionChange={handleDescriptionChange}
-              titleError={validation.errors.title}
-              descriptionError={validation.errors.description}
-              onTitleBlur={() => handleFieldBlur("title")}
-              onDescriptionBlur={() => handleFieldBlur("description")}
-            />
-
-            {/* Traits Component */}
-            <MemesArtSubmissionTraits
-              traits={traits}
-              setTraits={setTraits}
-              validationErrors={validation.errors}
-              onFieldBlur={handleFieldBlur}
-            />
-          </div>
       </div>
 
       {/* Action Buttons - Fixed at bottom */}
-      <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-b-0 tw-border-x-0 tw-bg-iron-950 tw-py-3">
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
         <div className="tw-px-4 md:tw-px-8">
           {/* Submission Progress - Only shown when active */}
           {submissionPhase !== "idle" && (
@@ -382,7 +395,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
                   submissionPhase === "uploading" ||
                   submissionPhase === "processing"
                 }
-                className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-px-3.5 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-ring-iron-650"
                 type="button"
               >
                 Cancel
