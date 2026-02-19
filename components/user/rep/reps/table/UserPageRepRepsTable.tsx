@@ -137,7 +137,7 @@ export default function UserPageRepRepsTable({
         <button
           type="button"
           onClick={() => setShowAll((prev) => !prev)}
-          className="tw-w-full tw-mt-2 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-bg-transparent tw-border tw-border-solid tw-border-white/[0.06] tw-rounded-lg tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-border-white/10"
+          className="tw-w-full tw-mt-2 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-bg-transparent tw-border tw-border-solid tw-border-white/[0.14] tw-rounded-lg tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-border-white/[0.2]"
         >
           {showAll ? "Show less" : `See all ${sortedReps.length}`}
         </button>

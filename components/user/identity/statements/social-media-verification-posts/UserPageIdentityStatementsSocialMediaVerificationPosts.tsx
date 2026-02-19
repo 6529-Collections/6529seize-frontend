@@ -16,7 +16,6 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
       <span className="tw-text-[10px] tw-font-semibold tw-text-iron-600 tw-uppercase tw-tracking-widest">
         Social Media Verification Posts
       </span>
-      <div className="tw-mt-2 tw-h-px tw-bg-white/[0.04] tw-w-full"></div>
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}

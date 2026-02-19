@@ -45,7 +45,7 @@ export default function UserPageRepRepsTableItem({
   const cellBase =
     "tw-py-3.5 tw-px-4 sm:tw-px-6 tw-bg-gradient-to-r tw-from-[#0f1014]/40 tw-to-[#0A0A0C]/40 tw-border-y tw-border-solid tw-border-white/[0.04] tw-border-x-0 tw-transition-all tw-duration-200 tw-ease-out";
   const hoverClass = canEditRep
-    ? "group-hover:tw-from-[#12141a]/60 group-hover:tw-to-[#0d0f13]/60 group-hover:tw-border-white/[0.10]"
+    ? "group-hover:tw-from-[#12141a]/60 group-hover:tw-to-[#0d0f13]/60 group-hover:tw-border-white/[0.16]"
     : "";
 
   return (
@@ -58,9 +58,9 @@ export default function UserPageRepRepsTableItem({
       >
         {/* Category + progress bar */}
         <td
-          className={`${cellBase} ${hoverClass} tw-rounded-l-xl tw-border-l`}
+          className={`${cellBase} ${hoverClass} tw-rounded-l-lg tw-border-l`}
         >
-          <div className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-text-sm tw-font-bold tw-text-iron-200 group-hover:tw-text-white tw-transition-colors tw-mb-2">
+          <div className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-text-sm tw-font-semibold tw-text-iron-200 group-hover:tw-text-white tw-transition-colors tw-mb-2">
             {rep.category}
           </div>
           <div className="tw-h-1 tw-w-full tw-max-w-[16rem] tw-bg-white/[0.04] tw-rounded-full tw-overflow-hidden">
@@ -81,7 +81,7 @@ export default function UserPageRepRepsTableItem({
         {/* People (Raters) */}
         <td
           className={`${cellBase} ${hoverClass} tw-text-right ${
-            !canEditRep ? "tw-rounded-r-xl tw-border-r" : ""
+            canEditRep ? "" : "tw-rounded-r-lg tw-border-r"
           }`}
         >
           <span className="tw-text-sm tw-font-bold tw-text-iron-400 group-hover:tw-text-iron-300 tw-transition-colors">
@@ -92,7 +92,7 @@ export default function UserPageRepRepsTableItem({
         {/* From You (My Rates) */}
         {canEditRep && (
           <td
-            className={`${cellBase} ${hoverClass} tw-rounded-r-xl tw-border-r tw-text-right`}
+            className={`${cellBase} ${hoverClass} tw-rounded-r-lg tw-border-r tw-text-right`}
           >
             {rep.rater_contribution ? (
               <span

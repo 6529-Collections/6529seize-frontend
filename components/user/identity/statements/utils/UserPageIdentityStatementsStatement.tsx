@@ -5,6 +5,7 @@ import CopyIcon from "@/components/utils/icons/CopyIcon";
 import OutsideLinkIcon from "@/components/utils/icons/OutsideLinkIcon";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { STATEMENT_META } from "@/helpers/Types";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -38,17 +39,17 @@ export default function UserPageIdentityStatementsStatement({
   }, []);
 
   return (
-    <li className="tw-group hover:tw-bg-white/[0.02] tw-rounded-lg tw-px-2 tw-py-4 tw-transition-colors tw-duration-200 tw-ease-out tw-border-b tw-border-solid tw-border-white/[0.06] tw-border-t-0 tw-border-x-0 last:tw-border-b-0">
+    <li className="tw-group hover:tw-bg-white/[0.02] tw-overflow-x-hidden tw-rounded-lg tw-py-4 tw-transition-colors tw-duration-200 tw-ease-out tw-border-b tw-border-solid tw-border-white/[0.06] tw-border-t-0 tw-border-x-0 last:tw-border-b-0">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-flex tw-items-center tw-gap-3.5 tw-min-w-0">
           <div className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-flex tw-items-center tw-justify-center">
             <SocialStatementIcon statementType={statement.statement_type} />
           </div>
           <div className="tw-min-w-0">
-            <div className="tw-text-[10px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-wider">
+            <div className="tw-text-[10px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-wider tw-leading-none">
               {STATEMENT_META[statement.statement_type].title}
             </div>
-            <div className="tw-text-sm tw-font-medium tw-text-white tw-break-all tw-mt-1">
+            <div className="tw-text-xs tw-font-medium tw-text-iron-100 tw-break-all tw-leading-4 tw-mt-1.5">
               {title === "Copied!" ? (
                 <span className="tw-text-primary-400">{title}</span>
               ) : (
@@ -57,27 +58,27 @@ export default function UserPageIdentityStatementsStatement({
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-1 tw-flex-shrink-0">
+        <div className="tw-flex tw-items-center tw-gap-2 tw-ml-3 tw-flex-shrink-0 tw-leading-none">
           {canOpen && (
             <>
               <a
                 href={statement.statement_value}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tw-p-1 tw-bg-transparent tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-                data-tooltip-id={`open-statement-${statement.statement_type}`}>
-                <OutsideLinkIcon />
+                className="tw-border-none tw-bg-transparent tw-p-0 tw-cursor-pointer tw-text-iron-600 hover:tw-text-iron-200 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                data-tooltip-id={`open-statement-${statement.id}`}>
+                <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 [&>svg]:tw-w-full [&>svg]:tw-h-full">
+                  <OutsideLinkIcon />
+                </div>
               </a>
               {!isTouchScreen && (
                 <Tooltip
-                  id={`open-statement-${statement.statement_type}`}
+                  id={`open-statement-${statement.id}`}
                   place="top"
                   positionStrategy="fixed"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}>
+                  offset={8}
+                  opacity={1}
+                  style={TOOLTIP_STYLES}>
                   <span className="tw-text-xs">Open</span>
                 </Tooltip>
               )}
@@ -85,23 +86,21 @@ export default function UserPageIdentityStatementsStatement({
           )}
           <button
             aria-label="Copy"
-            className="tw-p-1 tw-bg-transparent tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none"
             onClick={handleCopy}
-            data-tooltip-id={`copy-statement-${statement.statement_type}`}>
-            <div className="tw-h-4 tw-w-4 [&>svg]:tw-w-full [&>svg]:tw-h-full">
+            data-tooltip-id={`copy-statement-${statement.id}`}>
+            <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 [&>svg]:tw-w-full [&>svg]:tw-h-full">
               <CopyIcon />
             </div>
           </button>
           {!isTouchScreen && (
             <Tooltip
-              id={`copy-statement-${statement.statement_type}`}
+              id={`copy-statement-${statement.id}`}
               place="top"
               positionStrategy="fixed"
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}>
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLES}>
               <span className="tw-text-xs">Copy</span>
             </Tooltip>
           )}

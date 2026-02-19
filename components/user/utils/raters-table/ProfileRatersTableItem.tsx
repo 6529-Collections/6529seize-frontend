@@ -2,7 +2,6 @@
 
 import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import { formatNumberWithCommas, getTimeAgo } from "@/helpers/Helpers";
-import { ProfileRatersTableType } from "@/types/enums";
 import Link from "next/link";
 import UserCICAndLevel from "../UserCICAndLevel";
 
@@ -10,7 +9,6 @@ export default function ProfileRatersTableItem({
   rating,
 }: {
   readonly rating: RatingWithProfileInfoAndLevel;
-  readonly type: ProfileRatersTableType;
 }) {
   const getRatingStr = (rating: number) => {
     return rating > 0

@@ -13,6 +13,7 @@ import {
 } from "@/constants/constants";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
@@ -142,7 +143,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-group tw-flex tw-items-center tw-justify-between tw-py-1">
+      <div className="tw-group tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-py-1">
         <div className="tw-flex-1 tw-min-w-0">
           <div className="tw-flex tw-items-center tw-gap-2 tw-mb-0.5">
             <span className="tw-text-xs tw-text-iron-500 tw-font-mono">
@@ -165,7 +166,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             </div>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-gap-1.5 tw-ml-3 tw-flex-shrink-0">
+        <div className="tw-flex tw-items-center tw-gap-2 tw-ml-auto tw-flex-shrink-0">
           <button
             onClick={goToEtherscan}
             aria-label="Go to Etherscan"
@@ -182,11 +183,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               id={`etherscan-tooltip-${address.wallet}`}
               place="top"
               positionStrategy="fixed"
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLES}
             />
           )}
           <button
@@ -205,11 +204,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               id={`opensea-tooltip-${address.wallet}`}
               place="top"
               positionStrategy="fixed"
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLES}
             />
           )}
           <button
@@ -228,11 +225,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               id={`copy-tooltip-${address.wallet}`}
               place="top"
               positionStrategy="fixed"
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLES}
             />
           )}
         </div>

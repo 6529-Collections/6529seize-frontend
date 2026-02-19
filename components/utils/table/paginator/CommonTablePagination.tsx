@@ -5,6 +5,8 @@ export default function CommonTablePagination({
   totalPages,
   haveNextPage,
   loading = false,
+  showTopBorder = true,
+  className,
 }: {
   readonly small: boolean;
   readonly currentPage: number;
@@ -12,14 +14,16 @@ export default function CommonTablePagination({
   readonly totalPages: number | null;
   readonly haveNextPage: boolean;
   readonly loading?: boolean | undefined;
+  readonly showTopBorder?: boolean | undefined;
+  readonly className?: string | undefined;
 }) {
   return (
     <div
       className={`${
-        small
-          ? "tw-px-4 sm:tw-px-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800"
+        small && showTopBorder
+          ? "tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-800"
           : ""
-      } tw-pt-4 tw-pb-3`}
+      } tw-pt-4 tw-pb-3 ${className ?? ""}`}
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
         {typeof totalPages === "number" ? (

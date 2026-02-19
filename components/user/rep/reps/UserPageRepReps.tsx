@@ -79,12 +79,12 @@ export default function UserPageRepReps({
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
       <div className="tw-relative">
-        <div className="tw-mb-6">
-          <h3 className="tw-mb-1 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <div className="tw-mb-6 tw-space-y-1">
+          <h3 className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-100">
             Total Rep
           </h3>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
-            Tags people have given this profile
+            Where this profile has earned rep.
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export default function UserPageRepReps({
         </UserPageRateWrapper>
 
         {!!reps.length && (
-          <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2">
+          <div className="tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-0">
             <UserPageRepRepsTable
               reps={reps}
               profile={profile}

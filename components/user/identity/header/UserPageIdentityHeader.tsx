@@ -7,8 +7,8 @@ export default function UserPageIdentityHeader({
   readonly profile: ApiIdentity;
 }) {
   return (
-    <div className="tw-px-8 tw-pt-8">
-      <div className="tw-mb-8">
+    <div className="tw-px-6 tw-pt-6">
+      <div className="tw-mb-6">
         <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-white">
           Network Identity Check (NIC)
         </h2>

@@ -10,7 +10,7 @@ export default function UserPageIdentityActivityLogList({
   readonly user: string | null;
 }) {
   return (
-    <div className={`${user ? "tw-px-4 sm:tw-px-6" : ""} tw-mt-2 tw-pb-2`}>
+    <div className="tw-mt-4 md:tw-mt-6">
       <div className="tw-space-y-2.5">
         {logs.map((log) => (
           <ProfileActivityLogItemWrapper key={log.id} log={log} user={user}>

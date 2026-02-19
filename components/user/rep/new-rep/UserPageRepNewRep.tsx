@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import type {
   ApiProfileRepRatesState,
-  RatingStats,
 } from "@/entities/IProfile";
 import UserPageRepNewRepSearch from "./UserPageRepNewRepSearch";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -16,42 +13,10 @@ export default function UserPageRepNewRep({
   readonly profile: ApiIdentity;
   readonly repRates: ApiProfileRepRatesState | null;
 }) {
-  const [isAddNewRepModalOpen, setIsAddNewRepModalOpen] =
-    useState<boolean>(false);
-
-  const [repToAdd, setRepToAdd] = useState<RatingStats | null>(null);
-
-  const onRepSearch = (repSearch: string) => {
-    const rep: RatingStats = repRates?.rating_stats.find(
-      (r) => r.category === repSearch
-    ) ?? {
-      category: repSearch,
-      rating: 0,
-      contributor_count: 0,
-      rater_contribution: 0,
-    };
-    setRepToAdd(rep);
-    setIsAddNewRepModalOpen(true);
-  };
-
-  const onCloseModal = () => {
-    setIsAddNewRepModalOpen(false);
-    setRepToAdd(null);
-  };
-
   return (
-    <>
-      <UserPageRepNewRepSearch
-        repRates={repRates}
-        profile={profile}
-      />
-      {isAddNewRepModalOpen && repToAdd && (
-        <UserPageRepModifyModal
-          profile={profile}
-          category={repToAdd.category}
-          onClose={onCloseModal}
-        />
-      )}
-    </>
+    <UserPageRepNewRepSearch
+      repRates={repRates}
+      profile={profile}
+    />
   );
 }

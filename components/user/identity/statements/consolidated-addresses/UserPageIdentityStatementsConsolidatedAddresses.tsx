@@ -122,7 +122,6 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       <span className="tw-text-[10px] tw-font-semibold tw-text-iron-600 tw-uppercase tw-tracking-widest">
         Consolidated Addresses
       </span>
-      <div className="tw-mt-2 tw-h-px tw-bg-white/[0.04] tw-w-full"></div>
       <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem

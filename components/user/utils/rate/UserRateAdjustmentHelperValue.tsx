@@ -44,7 +44,7 @@ export default function UserRateAdjustmentHelperValue({
   }, [value]);
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-px-2 tw-py-1.5 tw-bg-iron-800/50 tw-border tw-border-solid tw-border-iron-700/50 tw-rounded">
+    <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-2 tw-py-1.5 tw-bg-iron-800/50 tw-border tw-border-solid tw-border-iron-700/50 tw-rounded">
       <span className="tw-text-xs tw-text-iron-400 tw-font-medium">
         {title}
       </span>

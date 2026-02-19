@@ -10,12 +10,12 @@ export default function ProfileActivityLogHandle({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "created" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
+      <span className="tw-whitespace-nowrap tw-text-md tw-text-iron-300 tw-font-medium">
         handle
       </span>
       {!isAdded && (
         <>
-          <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-100">
+          <span className="tw-whitespace-nowrap tw-text-md tw-font-medium tw-text-iron-100">
             {log.contents.old_value}
           </span>
           <svg
@@ -35,7 +35,7 @@ export default function ProfileActivityLogHandle({
         </>
       )}
 
-      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200">
+      <span className="tw-whitespace-nowrap tw-text-md tw-font-medium tw-text-iron-200">
         {log.contents.new_value}
       </span>
     </>

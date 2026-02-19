@@ -44,7 +44,7 @@ export default function ProfileRatersTable({
                 isLoading={loading}
                 onSortTypeClick={onSortTypeClick}
               />
-              <ProfileRatersTableBody ratings={ratings} type={type} />
+              <ProfileRatersTableBody ratings={ratings} />
             </table>
           </div>
 

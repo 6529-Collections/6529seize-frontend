@@ -317,8 +317,8 @@ export default function UserPageRepNewRepSearch({
 
   const onGrantRep = async () => {
     if (mutating || !selectedCategory || !amountStr) return;
-    const amount = parseInt(amountStr, 10);
-    if (isNaN(amount)) return;
+    const amount = Number.parseInt(amountStr, 10);
+    if (Number.isNaN(amount)) return;
     if (!haveChanged) return;
     setMutating(true);
     const { success } = await requestAuth();
@@ -390,7 +390,7 @@ export default function UserPageRepNewRepSearch({
       <div className="tw-w-full">
         <div className="tw-w-full">
           <div ref={listRef} className="tw-w-full">
-            <div className="tw-w-full tw-relative tw-rounded-xl tw-bg-iron-900/50 tw-border tw-border-solid tw-border-white/[0.06] tw-p-4">
+            <div className="tw-w-full tw-relative tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-white/5 tw-px-4 tw-py-5">
               <div className="tw-flex tw-items-center tw-justify-between">
                 <label
                   htmlFor="search-rep"
@@ -443,7 +443,7 @@ export default function UserPageRepNewRepSearch({
                       value={repSearch}
                       onChange={handleRepSearchChange}
                       onFocus={() => setIsOpen(true)}
-                      className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-py-3 tw-pl-9 tw-pr-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium tw-caret-primary-400 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/20 tw-py-3 tw-pl-9 tw-pr-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium tw-caret-primary-400 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
                       placeholder="Category to grant rep for"
                     />
                     {checkingAvailability && (
@@ -452,6 +452,25 @@ export default function UserPageRepNewRepSearch({
                       </div>
                     )}
                   </div>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        className="tw-origin-top tw-absolute tw-left-0 tw-top-full tw-z-10 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-950 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={(e) => e.stopPropagation()}>
+                        <UserPageRepNewRepSearchDropdown
+                          categories={categoriesToDisplay}
+                          state={repSearchState}
+                          minSearchLength={SEARCH_LENGTH.MIN}
+                          maxSearchLength={SEARCH_LENGTH.MAX}
+                          onRepSelect={onRepSelect}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </form>
                 <div className="tw-relative tw-flex tw-w-full sm:tw-w-36">
                   <UserPageRateInput
@@ -459,7 +478,8 @@ export default function UserPageRepNewRepSearch({
                     onChange={setAmountStr}
                     minMax={minMaxValues}
                     isProxy={!!activeProfileProxy}
-                    inputClassName="tw-form-input tw-appearance-none -tw-ml-0.5 tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-white tw-text-sm tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
+                    spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/20 tw-bg-[#0A0A0A]/80 tw-px-3"
+                    inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/20 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium tw-caret-primary-400 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
                 <button
@@ -467,10 +487,10 @@ export default function UserPageRepNewRepSearch({
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
                   className={`${
-                    !isGrantDisabled
-                      ? "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
-                      : "tw-cursor-not-allowed tw-opacity-50"
-                  } tw-flex-shrink-0 tw-bg-primary-500 tw-border-primary-500 tw-px-5 tw-py-3 tw-text-xs tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
+                    isGrantDisabled
+                      ? "tw-cursor-not-allowed tw-opacity-50"
+                      : "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
+                  } tw-flex-shrink-0 tw-bg-primary-500 tw-border-primary-500 tw-px-5 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
                   {mutating ? (
                     <div className="tw-w-12">
                       <CircleLoader />
@@ -489,25 +509,6 @@ export default function UserPageRepNewRepSearch({
                 />
               )}
             </div>
-            <AnimatePresence mode="wait" initial={false}>
-              {isOpen && (
-                <motion.div
-                  className="tw-origin-top-right tw-absolute tw-z-10 tw-mt-1 tw-w-full tw-max-w-xs tw-rounded-lg tw-shadow-xl tw-bg-iron-950 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={(e) => e.stopPropagation()}>
-                  <UserPageRepNewRepSearchDropdown
-                    categories={categoriesToDisplay}
-                    state={repSearchState}
-                    minSearchLength={SEARCH_LENGTH.MIN}
-                    maxSearchLength={SEARCH_LENGTH.MAX}
-                    onRepSelect={onRepSelect}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
         <AnimatePresence mode="wait" initial={false}>

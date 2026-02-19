@@ -188,8 +188,16 @@ export default function ProfileActivityLogs({
   }, [logs?.page, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
-      <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-center min-[1200px]:tw-justify-between min-[1200px]:tw-gap-x-16">
-        {children && <div>{children}</div>}
+      <div
+        className={`${
+          withMatterFilter
+            ? "tw-flex tw-w-full tw-flex-col tw-gap-y-4"
+            : "tw-flex tw-w-full tw-flex-col tw-gap-y-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-start min-[1200px]:tw-justify-between min-[1200px]:tw-gap-x-6"
+        }`}
+      >
+        {children && (
+          <div className="tw-flex-none tw-whitespace-nowrap">{children}</div>
+        )}
         {withFilters && !withMatterFilter && (
           <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
             <div
@@ -204,53 +212,55 @@ export default function ProfileActivityLogs({
             </div>
           </div>
         )}
-      </div>
-      {withMatterFilter && (
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-px-4 tw-pt-4 sm:tw-px-6">
-          <div className="tw-inline-flex tw-items-center tw-gap-1 tw-p-1 tw-bg-black/40 tw-rounded-lg tw-border tw-border-solid tw-border-white/10">
-            {MATTER_OPTIONS.map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => onMatterChange(opt.value)}
-                className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-transition-all tw-cursor-pointer ${
-                  matter === opt.value
-                    ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border tw-border-solid tw-border-white/5"
-                    : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
+        {withMatterFilter && (
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+              <div className="tw-inline-flex tw-items-center tw-gap-1 tw-p-1 tw-bg-black/40 tw-rounded-lg tw-border tw-border-solid tw-border-white/20">
+                {MATTER_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => onMatterChange(opt.value)}
+                    className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-transition-all tw-cursor-pointer ${
+                      matter === opt.value
+                        ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border-0"
+                        : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {initialParams.handleOrWallet && (
+                <div className="tw-inline-flex tw-items-center tw-gap-1 tw-p-1 tw-bg-black/40 tw-rounded-lg tw-border tw-border-solid tw-border-white/20">
+                  {DIRECTION_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => onTargetType(opt.value)}
+                      className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-capitalize tw-transition-all tw-cursor-pointer ${
+                        targetType === opt.value
+                          ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border-0"
+                          : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {withFilters && matter === RateMatter.NIC && (
+              <div className="tw-w-full sm:tw-ml-auto sm:tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+                <ProfileActivityLogsFilter
+                  user={initialParams.handleOrWallet}
+                  options={initialParams.logTypes}
+                  selected={selectedFilters}
+                  setSelected={onFilter}
+                />
+              </div>
+            )}
           </div>
-          {initialParams.handleOrWallet && (
-            <div className="tw-inline-flex tw-items-center tw-gap-1 tw-p-1 tw-bg-black/40 tw-rounded-lg tw-border tw-border-solid tw-border-white/10">
-              {DIRECTION_OPTIONS.map((opt) => (
-                <button
-                  key={opt.key}
-                  onClick={() => onTargetType(opt.value)}
-                  className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-capitalize tw-transition-all tw-cursor-pointer ${
-                    targetType === opt.value
-                      ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border tw-border-solid tw-border-white/5"
-                      : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          )}
-          {withFilters && matter === RateMatter.NIC && (
-            <div className="tw-ml-auto tw-w-56">
-              <ProfileActivityLogsFilter
-                user={initialParams.handleOrWallet}
-                options={initialParams.logTypes}
-                selected={selectedFilters}
-                setSelected={onFilter}
-              />
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
       {!withMatterFilter && initialParams.handleOrWallet && (
         <CommonFilterTargetSelect
           selected={targetType}
@@ -271,13 +281,15 @@ export default function ProfileActivityLogs({
                 totalPages={null}
                 haveNextPage={logs.next}
                 small={!!initialParams.handleOrWallet}
+                showTopBorder={false}
+                className="tw-pt-6"
               />
             </div>
           ) : (
             <div className="tw-py-4">
               <span
                 className={`${
-                  initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
+                  initialParams.handleOrWallet ? "tw-px-2 sm:tw-px-3" : ""
                 } tw-text-sm tw-italic tw-text-iron-500 sm:tw-text-md`}
               >
                 No Activity Log

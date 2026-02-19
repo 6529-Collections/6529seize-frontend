@@ -9,8 +9,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,
+  rightAccessory,
 }: {
   readonly profile: ApiIdentity;
+  readonly rightAccessory?: React.ReactNode | undefined;
 }) {
   const account = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
@@ -48,7 +50,10 @@ export default function UserPageIdentityAddStatementsHeader({
         <h3 className="tw-mb-0 tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest">
           <span>{possessionName}</span> ID Statements
         </h3>
-        {canEdit && <UserPageIdentityStatementsAddButton profile={profile} />}
+        <div className="tw-inline-flex tw-items-center tw-gap-2">
+          {canEdit && <UserPageIdentityStatementsAddButton profile={profile} />}
+          {rightAccessory}
+        </div>
       </div>
     </div>
   );

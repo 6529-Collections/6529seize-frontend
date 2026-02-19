@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import UserPageRepNewRep from '@/components/user/rep/new-rep/UserPageRepNewRep';
 import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 

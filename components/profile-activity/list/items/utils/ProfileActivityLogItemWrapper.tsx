@@ -34,37 +34,39 @@ export default function ProfileActivityLogItemWrapper({
   const tabTarget = USER_PAGE_TAB_IDS.REP;
 
   const { profile } = useIdentity({
-    handleOrWallet: !isArchived ? handleOrWallet : null,
+    handleOrWallet: isArchived ? null : handleOrWallet,
     initialProfile: null,
   });
 
   const pfp = profile?.pfp ?? null;
 
   return (
-    <div className="tw-group tw-p-4 tw-bg-[#0A0A0C]/50 hover:tw-bg-[#0A0A0C] tw-border tw-border-solid tw-border-white/5 hover:tw-border-white/10 tw-rounded-xl tw-transition-all tw-duration-200">
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <span className="tw-inline-flex tw-items-center tw-flex-wrap tw-gap-x-1.5 tw-gap-y-1">
-          {!isArchived && (
-            <>
-              {pfp ? (
-                <img
-                  src={getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)}
-                  alt={handleOrWallet}
-                  className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover"
-                />
-              ) : (
-                <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700" />
-              )}
+    <div className="tw-group tw-p-4 tw-bg-[#0A0A0C]/50 hover:tw-bg-[#0A0A0C] tw-border tw-border-solid tw-border-white/[0.12] hover:tw-border-white/[0.16] tw-rounded-lg tw-transition-all tw-duration-200">
+      <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
+          {!isArchived &&
+            (pfp ? (
+              <img
+                src={getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)}
+                alt={handleOrWallet}
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover"
+              />
+            ) : (
+              <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700" />
+            ))}
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+            {!isArchived && (
               <CommonProfileLink
                 handleOrWallet={handleOrWallet}
                 isCurrentUser={isCurrentUser}
                 tabTarget={tabTarget}
+                textClassName="tw-text-md tw-font-semibold tw-text-iron-100"
               />
-            </>
-          )}
-          {children}
-        </span>
-        <div className="tw-pl-3 tw-flex-shrink-0">
+            )}
+            {children}
+          </div>
+        </div>
+        <div className="tw-flex-shrink-0 tw-pl-3">
           <ProfileActivityLogItemTimeAgo log={log} />
         </div>
       </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import { AnimatePresence } from "framer-motion";
 import type {
   ApiProfileRepRatesState,
   RatingStats,
@@ -10,11 +9,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import TopRaterAvatars from "./TopRaterAvatars";
 
-const TOP_REPS_COUNT = 3;
+const TOP_REPS_COUNT = 4;
 
 function formatCompact(n: number): string {
   const abs = Math.abs(n);
@@ -108,8 +106,7 @@ export default function UserPageRepHeader({
         <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-[1px] tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
         <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-[1px] tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
 
-        <div className="tw-relative tw-p-6 lg:tw-p-8">
-          {/* Rep title */}
+        <div className="tw-relative tw-p-6">
           <div>
             <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-white">
               Reputation
@@ -119,7 +116,6 @@ export default function UserPageRepHeader({
             </p>
           </div>
 
-          {/* Total Rep + Raters on same baseline */}
           <div className="tw-mt-4 tw-flex tw-items-end tw-justify-between tw-gap-6">
             <div>
               <div className="tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-1">
@@ -160,10 +156,10 @@ export default function UserPageRepHeader({
                         : "tw-cursor-default"
                     }`}
                   >
-                    <span className="tw-text-sm tw-font-semibold tw-text-iron-300">
+                    <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
                       {rep.category}
                     </span>
-                    <span className="tw-text-sm tw-font-bold tw-text-white">
+                    <span className="tw-text-sm tw-font-bold tw-text-iron-300">
                       {formatCompact(rep.rating)}
                     </span>
                     <span className="tw-text-iron-600 tw-text-xs">·</span>

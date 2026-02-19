@@ -17,7 +17,7 @@ export default function ProfileActivityLogSocialMediaVerificationPost({
       <ProfileActivityLogItemAction
         action={PROFILE_ACTIVITY_LOG_ACTION_STR[log.contents.action]}
       />
-      <span className="tw-whitespace-nowrap tw-text-base tw-text-iron-300 tw-font-medium">
+      <span className="tw-whitespace-nowrap tw-text-md tw-text-iron-300 tw-font-medium">
         social media verification post
       </span>
       <div className="tw-flex tw-items-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-200">
