@@ -9,8 +9,8 @@ const mockMarketplacePreviewPlaceholder = jest.fn(() => (
 const mockMarketplaceUnavailableCard = jest.fn(() => (
   <div data-testid="marketplace-unavailable" />
 ));
-const mockMarketplaceItemPreviewCard = jest.fn((props: any) => (
-  <div data-testid="marketplace-item-card" data-title={props.title} />
+const mockMarketplaceItemPreviewCard = jest.fn(() => (
+  <div data-testid="marketplace-item-card" />
 ));
 
 jest.mock(
@@ -35,22 +35,40 @@ jest.mock("@/services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
 
+jest.mock("@/services/api/nft-link-api", () => ({
+  fetchNftLink: jest.fn(),
+}));
+
 describe("MarketplaceManifoldListingPreview", () => {
   const { fetchLinkPreview } = require("@/services/api/link-preview-api");
+  const { fetchNftLink } = require("@/services/api/nft-link-api");
 
   beforeEach(() => {
     jest.clearAllMocks();
+    fetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: null,
+    });
   });
 
-  it("renders marketplace card and forwards compact", async () => {
+  it("renders marketplace card from nft-link media and skips open-graph", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
 
-    fetchLinkPreview.mockResolvedValue({
-      type: "manifold.listing",
-      title: "The Big Bang",
-      image: { url: "https://arweave.net/test-image.webp", type: "image/webp" },
-      manifold: {
-        listingId: "123",
+    fetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: {
+        canonical_id: "manifold:123",
+        platform: "manifold",
+        chain: "ethereum",
+        contract: "0x123",
+        token: "1",
+        media_uri: "https://cdn.example.com/nft-image.png",
+        last_error_message: null,
+        price: "1.25 ETH",
+        last_successfully_updated: 1735689600,
+        failed_since: null,
       },
     });
 
@@ -60,21 +78,25 @@ describe("MarketplaceManifoldListingPreview", () => {
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
-          title: "The Big Bang",
-          mediaUrl: "https://arweave.net/test-image.webp",
-          mediaMimeType: "image/webp",
+          mediaUrl: "https://cdn.example.com/nft-image.png",
+          mediaMimeType: "image/png",
+          price: "1.25 ETH",
           compact: true,
           hideActions: true,
         })
       )
     );
+    expect(fetchLinkPreview).not.toHaveBeenCalled();
+    expect(
+      mockMarketplaceItemPreviewCard.mock.calls[0][0].title
+    ).toBeUndefined();
   });
 
-  it("renders unavailable card when image is missing", async () => {
+  it("renders unavailable card when nft-link and fallback provide no media", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
     fetchLinkPreview.mockResolvedValue({
       type: "manifold.listing",
-      title: "The Big Bang",
       description: "No preview media available",
       manifold: {
         listingId: "123",
@@ -89,17 +111,83 @@ describe("MarketplaceManifoldListingPreview", () => {
         compact: false,
       })
     );
+    expect(fetchNftLink).toHaveBeenCalledWith(href);
+    expect(fetchLinkPreview).toHaveBeenCalledWith(href);
   });
 
-  it("defaults media mime type when image type is missing", async () => {
+  it("defaults media mime type when nft-link media type cannot be inferred", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    fetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: {
+        canonical_id: "manifold:123",
+        platform: "manifold",
+        chain: "ethereum",
+        contract: "0x123",
+        token: "1",
+        media_uri: "https://arweave.net/test-image",
+        last_error_message: null,
+        price: null,
+        last_successfully_updated: 1735689600,
+        failed_since: null,
+      },
+    });
+
+    render(<MarketplaceManifoldListingPreview href={href} />);
+
+    await waitFor(() =>
+      expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href,
+          mediaUrl: "https://arweave.net/test-image",
+          mediaMimeType: "image/*",
+        })
+      )
+    );
+    expect(fetchLinkPreview).not.toHaveBeenCalled();
+  });
+
+  it("falls back to link preview media when nft-link has no data", async () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
 
     fetchLinkPreview.mockResolvedValue({
       type: "manifold.listing",
-      title: "The Big Bang",
-      image: {
-        url: "https://arweave.net/test-image",
+      image: { url: "https://arweave.net/test-image.webp", type: "image/webp" },
+      manifold: {
+        listingId: "123",
       },
+    });
+
+    fetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: null,
+    });
+
+    render(<MarketplaceManifoldListingPreview href={href} />);
+
+    await waitFor(() =>
+      expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          href,
+          mediaUrl: "https://arweave.net/test-image.webp",
+          mediaMimeType: "image/webp",
+          price: undefined,
+        })
+      )
+    );
+    expect(fetchLinkPreview).toHaveBeenCalledWith(href);
+  });
+
+  it("falls back to link preview media when nft-link request fails", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    fetchNftLink.mockRejectedValue(new Error("nft-link failed"));
+    fetchLinkPreview.mockResolvedValue({
+      type: "manifold.listing",
+      image: { url: "https://arweave.net/test-image.webp", type: "image/webp" },
       manifold: {
         listingId: "123",
       },
@@ -111,11 +199,12 @@ describe("MarketplaceManifoldListingPreview", () => {
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
         expect.objectContaining({
           href,
-          title: "The Big Bang",
-          mediaUrl: "https://arweave.net/test-image",
-          mediaMimeType: "image/*",
+          mediaUrl: "https://arweave.net/test-image.webp",
+          mediaMimeType: "image/webp",
+          price: undefined,
         })
       )
     );
+    expect(fetchLinkPreview).toHaveBeenCalledWith(href);
   });
 });

@@ -2035,6 +2035,25 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
+  /nft-link:
+    get:
+      tags:
+        - NFT Link
+      summary: Get marketplace data about NFT link
+      operationId: getNftLinkData
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiNftLinkResponse"
   /nft-owners:
     get:
       tags:
@@ -8307,6 +8326,66 @@ components:
         highest_offer_from:
           type: string
           nullable: true
+    ApiNftLinkData:
+      type: object
+      required:
+        - canonical_id
+        - platform
+        - chain
+        - contract
+        - token
+        - media_uri
+        - last_error_message
+        - price
+        - last_successfully_updated
+        - failed_since
+      properties:
+        canonical_id:
+          type: string
+        platform:
+          type: string
+        chain:
+          type: string
+          nullable: true
+        contract:
+          type: string
+          nullable: true
+        token:
+          type: string
+          nullable: true
+        media_uri:
+          type: string
+          nullable: true
+        last_error_message:
+          type: string
+          nullable: true
+        price:
+          type: string
+          nullable: true
+        last_successfully_updated:
+          type: integer
+          format: int64
+          nullable: true
+        failed_since:
+          type: integer
+          format: int64
+          nullable: true
+    ApiNftLinkResponse:
+      type: object
+      required:
+        - is_enrichable
+        - validation_error
+        - data
+      properties:
+        is_enrichable:
+          type: boolean
+        validation_error:
+          type: string
+          nullable: true
+        data:
+          anyOf:
+            - $ref: "#/components/schemas/ApiNftLinkData"
+            - type: "null"
     ApiNftMedia:
       type: object
       required:

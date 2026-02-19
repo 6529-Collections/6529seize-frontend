@@ -15,9 +15,9 @@ import {
 
 interface MarketplaceItemPreviewCardProps {
   readonly href: string;
-  readonly title: string;
   readonly mediaUrl: string;
   readonly mediaMimeType: string;
+  readonly price?: string | undefined;
   readonly compact?: boolean | undefined;
   readonly hideActions?: boolean | undefined;
 }
@@ -98,13 +98,15 @@ function OverlayActionButtons({ href }: { readonly href: string }) {
 
 export default function MarketplaceItemPreviewCard({
   href,
-  title,
   mediaUrl,
   mediaMimeType,
+  price,
   compact = false,
   hideActions = false,
 }: MarketplaceItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
+  const normalizedPrice = typeof price === "string" ? price.trim() : "";
+  const hasPrice = normalizedPrice.length > 0;
 
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
@@ -129,14 +131,16 @@ export default function MarketplaceItemPreviewCard({
               disableMediaInteraction={true}
             />
           </div>
-          {!compact && (
+          {hasPrice && (
             <div className={getMarketplaceTitleRowClass(variant)}>
-              <h3
-                className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200"
-                data-testid="manifold-item-title"
+              <p
+                className={`tw-mb-0 tw-truncate tw-leading-tight tw-text-iron-300 ${
+                  compact ? "tw-text-sm tw-font-semibold" : "tw-mt-1 tw-text-xs"
+                }`}
+                data-testid="manifold-item-price"
               >
-                {title}
-              </h3>
+                {normalizedPrice}
+              </p>
             </div>
           )}
         </Link>

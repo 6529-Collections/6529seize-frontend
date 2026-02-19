@@ -1,4 +1,5 @@
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 type MediaCandidate =
@@ -20,11 +21,12 @@ export type MarketplacePreviewState =
   | {
       readonly type: "success";
       readonly href: string;
-      readonly data: LinkPreviewResponse;
+      readonly resolvedMedia?: PickedMedia | undefined;
+      readonly resolvedPrice?: string | undefined;
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
 
-type PickedMedia = {
+export type PickedMedia = {
   readonly url: string;
   readonly mimeType: string;
 };
@@ -41,7 +43,7 @@ const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   webp: "image/webp",
 };
 
-export const asNonEmptyString = (value: unknown): string | undefined => {
+const asNonEmptyString = (value: unknown): string | undefined => {
   if (typeof value !== "string") {
     return undefined;
   }
@@ -120,6 +122,18 @@ const toPickedMedia = (candidate: MediaCandidate): PickedMedia | undefined => {
   };
 };
 
+const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
+  const url = asNonEmptyString(value);
+  if (!url) {
+    return undefined;
+  }
+
+  return {
+    url,
+    mimeType: inferMimeTypeFromUrl(url) ?? "image/*",
+  };
+};
+
 export const pickMedia = (
   data: LinkPreviewResponse
 ): PickedMedia | undefined => {
@@ -142,6 +156,14 @@ export const pickMedia = (
 
   return undefined;
 };
+
+export const pickNftLinkMedia = (
+  response: ApiNftLinkResponse | undefined
+): PickedMedia | undefined => pickMediaFromUrl(response?.data?.media_uri);
+
+export const pickNftLinkPrice = (
+  response: ApiNftLinkResponse | undefined
+): string | undefined => asNonEmptyString(response?.data?.price);
 
 export const sanitizeOpenSeaOverlayMedia = (
   href: string,

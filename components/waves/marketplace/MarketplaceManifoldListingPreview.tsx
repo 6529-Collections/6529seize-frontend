@@ -1,60 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import MarketplaceItemPreviewCard from "../MarketplaceItemPreviewCard";
 import MarketplacePreviewPlaceholder from "./MarketplacePreviewPlaceholder";
 import MarketplaceUnavailableCard from "./MarketplaceUnavailableCard";
-import {
-  asNonEmptyString,
-  type MarketplacePreviewState,
-  type MarketplaceTypePreviewProps,
-  pickMedia,
-} from "./common";
-import { fetchLinkPreview } from "@/services/api/link-preview-api";
+import type { MarketplaceTypePreviewProps } from "./common";
+import { useMarketplacePreviewState } from "./useMarketplacePreviewState";
 
 export default function MarketplaceManifoldListingPreview({
   href,
   compact = false,
 }: MarketplaceTypePreviewProps) {
-  const [state, setState] = useState<MarketplacePreviewState>({
-    type: "loading",
-    href,
-  });
-
-  useEffect(() => {
-    let active = true;
-
-    const loadPreview = async (): Promise<void> => {
-      try {
-        const response = await fetchLinkPreview(href);
-        if (!active) {
-          return;
-        }
-
-        setState({ type: "success", href, data: response });
-      } catch (error: unknown) {
-        if (!active) {
-          return;
-        }
-
-        setState({
-          type: "error",
-          href,
-          error:
-            error instanceof Error
-              ? error
-              : new Error("Failed to load marketplace preview"),
-        });
-      }
-    };
-
-    void loadPreview();
-
-    return () => {
-      active = false;
-    };
-  }, [href]);
+  const state = useMarketplacePreviewState({ href });
 
   if (state.href !== href || state.type === "loading") {
     return <MarketplacePreviewPlaceholder href={href} compact={compact} />;
@@ -64,16 +20,15 @@ export default function MarketplaceManifoldListingPreview({
     return <MarketplaceUnavailableCard href={href} compact={compact} />;
   }
 
-  const title = asNonEmptyString(state.data.title);
-  const media = pickMedia(state.data);
+  const media = state.resolvedMedia;
 
-  if (title && media) {
+  if (media) {
     return (
       <MarketplaceItemPreviewCard
         href={href}
-        title={title}
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
+        price={state.resolvedPrice}
         compact={compact}
         hideActions={compact}
       />

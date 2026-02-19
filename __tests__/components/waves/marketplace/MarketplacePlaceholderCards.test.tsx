@@ -6,7 +6,7 @@ import MarketplacePreviewPlaceholder from "@/components/waves/marketplace/Market
 import MarketplaceUnavailableCard from "@/components/waves/marketplace/MarketplaceUnavailableCard";
 
 describe("Marketplace placeholder cards", () => {
-  it("renders stable media frame and title row in non-compact placeholder mode", () => {
+  it("renders stable media frame in non-compact placeholder mode", () => {
     render(
       <LinkPreviewProvider variant="home">
         <MarketplacePreviewPlaceholder
@@ -19,12 +19,9 @@ describe("Marketplace placeholder cards", () => {
     const media = screen.getByTestId("marketplace-preview-placeholder-media");
     expect(media).toHaveClass("tw-aspect-[16/9]");
     expect(media).toHaveClass("tw-min-h-[14rem]");
-    expect(
-      screen.getByTestId("marketplace-preview-placeholder-title-row")
-    ).toBeInTheDocument();
   });
 
-  it("omits title row in compact placeholder mode", () => {
+  it("keeps placeholder layout the same in compact mode", () => {
     render(
       <MarketplacePreviewPlaceholder
         href="https://manifold.xyz/@andrew-hooker/id/4098474224"
@@ -35,9 +32,6 @@ describe("Marketplace placeholder cards", () => {
     expect(
       screen.getByTestId("marketplace-preview-placeholder-media")
     ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("marketplace-preview-placeholder-title-row")
-    ).toBeNull();
   });
 
   it("renders stable unavailable card with compact mode support", () => {

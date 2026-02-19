@@ -8,7 +8,6 @@ import type { MarketplaceTypePreviewProps } from "./common";
 import {
   getMarketplaceContainerClass,
   MARKETPLACE_MEDIA_FRAME_CLASS,
-  getMarketplaceTitleRowClass,
 } from "./previewLayout";
 
 export default function MarketplaceUnavailableCard({
@@ -38,14 +37,6 @@ export default function MarketplaceUnavailableCard({
               Preview unavailable
             </span>
           </div>
-
-          {!compact && (
-            <div className={getMarketplaceTitleRowClass(variant)}>
-              <span className="tw-block tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-400">
-                Preview unavailable
-              </span>
-            </div>
-          )}
         </Link>
       </div>
     </LinkPreviewCardLayout>
