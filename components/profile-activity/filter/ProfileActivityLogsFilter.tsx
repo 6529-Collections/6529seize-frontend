@@ -8,7 +8,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 
 export default function ProfileActivityLogsFilter({
-  user,
+  user: _user,
   selected,
   options,
   setSelected,

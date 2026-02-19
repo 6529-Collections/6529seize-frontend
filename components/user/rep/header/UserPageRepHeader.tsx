@@ -23,6 +23,10 @@ function formatCompact(n: number): string {
   }
   if (abs >= 1_000) {
     const k = abs / 1_000;
+    if (k >= 1000) {
+      const m = k / 1_000;
+      return sign + (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + "M";
+    }
     return sign + (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)) + "K";
   }
   return formatNumberWithCommas(n);
@@ -94,7 +98,7 @@ export default function UserPageRepHeader({
         targetProfile: profile,
       })
     );
-  }, [connectedProfile, profile]);
+  }, [connectedProfile, profile, activeProfileProxy]);
 
   const [editCategory, setEditCategory] = useState<string | null>(null);
 
@@ -108,7 +112,7 @@ export default function UserPageRepHeader({
 
         <div className="tw-relative tw-p-6">
           <div>
-            <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-white">
+            <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-iron-100">
               Reputation
             </h2>
             <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-medium tw-leading-relaxed">
@@ -118,7 +122,7 @@ export default function UserPageRepHeader({
 
           <div className="tw-mt-4 tw-flex tw-items-end tw-justify-between tw-gap-6">
             <div>
-              <div className="tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-1">
+              <div className="tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-1">
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-bold tw-text-primary-400 tw-tracking-tight tw-leading-none">
@@ -141,7 +145,7 @@ export default function UserPageRepHeader({
 
           {topReps.length > 0 && (
             <div className="tw-mt-6 tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-l-0 tw-border-r-0 tw-border-b-0">
-              <div className="tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-4">
+              <div className="tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-4">
                Top Rep
               </div>
               <div className="tw-flex tw-flex-wrap tw-gap-3">

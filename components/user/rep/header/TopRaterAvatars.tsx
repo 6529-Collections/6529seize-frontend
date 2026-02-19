@@ -29,7 +29,7 @@ export default function TopRaterAvatars({
     given: "false",
   };
   if (category) {
-    params.category = category;
+    params["category"] = category;
   }
 
   const { data: ratersPage } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
@@ -65,12 +65,12 @@ export default function TopRaterAvatars({
     .map((q) => {
       const identity = q.data!;
       return {
-        key: identity.handle ?? identity.wallet ?? "",
+        key: identity.handle ?? identity.primary_wallet ?? "",
         pfpUrl: identity.pfp ?? null,
-        href: `/${identity.handle ?? identity.wallet}`,
-        ariaLabel: identity.handle ?? identity.wallet ?? "Profile",
-        fallback: (identity.handle ?? "?")[0].toUpperCase(),
-        title: identity.handle ?? identity.wallet ?? undefined,
+        href: `/${identity.handle ?? identity.primary_wallet}`,
+        ariaLabel: identity.handle ?? identity.primary_wallet ?? "Profile",
+        fallback: (identity.handle || "?")[0].toUpperCase(),
+        title: identity.handle ?? identity.primary_wallet ?? undefined,
       };
     });
 

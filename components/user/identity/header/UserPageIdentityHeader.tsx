@@ -9,7 +9,7 @@ export default function UserPageIdentityHeader({
   return (
     <div className="tw-px-6 tw-pt-6">
       <div className="tw-mb-6">
-        <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-white">
+        <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-iron-100">
           Network Identity Check (NIC)
         </h2>
         <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-medium tw-leading-relaxed">

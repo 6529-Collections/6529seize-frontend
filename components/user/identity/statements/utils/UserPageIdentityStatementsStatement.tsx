@@ -46,7 +46,7 @@ export default function UserPageIdentityStatementsStatement({
             <SocialStatementIcon statementType={statement.statement_type} />
           </div>
           <div className="tw-min-w-0">
-            <div className="tw-text-[10px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-wider tw-leading-none">
+            <div className="tw-text-[10px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-[0.05em] tw-leading-none">
               {STATEMENT_META[statement.statement_type].title}
             </div>
             <div className="tw-text-xs tw-font-medium tw-text-iron-100 tw-break-all tw-leading-4 tw-mt-1.5">

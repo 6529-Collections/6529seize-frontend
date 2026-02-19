@@ -93,7 +93,7 @@ export default function UserPageRepNewRepSearch({
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile?.handle,
+        handleOrWallet: profile?.query,
       },
     ],
     queryFn: async () =>
@@ -113,7 +113,7 @@ export default function UserPageRepNewRepSearch({
         QueryKey.PROFILE_REP_RATINGS,
         {
           rater: connectedProfile?.handle,
-          handleOrWallet: profile?.handle,
+          handleOrWallet: profile?.query,
         },
       ],
       queryFn: async () =>
@@ -310,9 +310,6 @@ export default function UserPageRepNewRepSearch({
     onError: (error) => {
       setToast({ message: error as unknown as string, type: "error" });
     },
-    onSettled: () => {
-      setMutating(false);
-    },
   });
 
   const onGrantRep = async () => {
@@ -321,13 +318,16 @@ export default function UserPageRepNewRepSearch({
     if (Number.isNaN(amount)) return;
     if (!haveChanged) return;
     setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setToast({ message: "You must be logged in.", type: "error" });
+    try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setToast({ message: "You must be logged in.", type: "error" });
+        return;
+      }
+      await addRepMutation.mutateAsync({ amount, category: selectedCategory });
+    } finally {
       setMutating(false);
-      return;
     }
-    await addRepMutation.mutateAsync({ amount, category: selectedCategory });
   };
 
   const onSearchSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

@@ -15,6 +15,10 @@ function formatCompact(n: number): string {
   }
   if (abs >= 1_000) {
     const k = abs / 1_000;
+    if (k >= 1000) {
+      const m = k / 1_000;
+      return sign + (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + "M";
+    }
     return sign + (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)) + "K";
   }
   return formatNumberWithCommas(n);

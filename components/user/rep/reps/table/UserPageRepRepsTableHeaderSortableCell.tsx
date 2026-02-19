@@ -37,7 +37,7 @@ export default function UserPageRepRepsTableHeaderSortableCell({
   return (
     <th
       scope="col"
-      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-1.5 tw-text-right tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-border-0"
+      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-1.5 tw-text-right tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-border-0"
       onClick={() => onSortTypeClick(type)}>
       <span
         className={`${

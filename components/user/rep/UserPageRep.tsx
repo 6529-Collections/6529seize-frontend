@@ -21,11 +21,11 @@ import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepReps from "./reps/UserPageRepReps";
 export default function UserPageRep({
   profile,
-  initialRepReceivedParams,
-  initialRepGivenParams,
+  initialRepReceivedParams: _initialRepReceivedParams,
+  initialRepGivenParams: _initialRepGivenParams,
   initialActivityLogParams,
-  initialCICReceivedParams,
-  initialCICGivenParams,
+  initialCICReceivedParams: _initialCICReceivedParams,
+  initialCICGivenParams: _initialCICGivenParams,
 }: {
   readonly profile: ApiIdentity;
   readonly initialRepReceivedParams: ProfileRatersParams;

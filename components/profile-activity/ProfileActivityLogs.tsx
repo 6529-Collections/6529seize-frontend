@@ -118,6 +118,7 @@ export default function ProfileActivityLogs({
 
   const onMatterChange = (m: RateMatter | null) => {
     setMatter(m);
+    setSelectedFilters([]);
     setCurrentPage(1);
   };
 
@@ -220,10 +221,10 @@ export default function ProfileActivityLogs({
                   <button
                     key={opt.key}
                     onClick={() => onMatterChange(opt.value)}
-                    className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-transition-all tw-cursor-pointer ${
+                    className={`tw-rounded-md tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-widest tw-transition-all tw-cursor-pointer ${
                       matter === opt.value
                         ? "tw-bg-white/10 tw-text-white tw-shadow-sm tw-border-0"
-                        : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-300 tw-border-0"
+                        : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300 tw-border-0"
                     }`}
                   >
                     {opt.label}
