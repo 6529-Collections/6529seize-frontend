@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import ChatItemHrefButtons from "@/components/waves/ChatItemHrefButtons";
+import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 
 const writeText = jest.fn().mockResolvedValue(undefined);
 Object.assign(navigator, {
@@ -30,5 +31,25 @@ describe("ChatItemHrefButtons", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/local");
     expect(link).not.toHaveAttribute("target");
+  });
+
+  it("renders and triggers preview toggle action from context", () => {
+    const onToggle = jest.fn();
+    render(
+      <LinkPreviewProvider
+        previewToggle={{
+          canToggle: true,
+          isHidden: false,
+          isLoading: false,
+          label: "Hide link previews",
+          onToggle,
+        }}
+      >
+        <ChatItemHrefButtons href="https://a" />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide link previews" }));
+    expect(onToggle).toHaveBeenCalledTimes(1);
   });
 });
