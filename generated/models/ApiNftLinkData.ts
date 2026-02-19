@@ -19,6 +19,8 @@ export class ApiNftLinkData {
     'chain': string | null;
     'contract': string | null;
     'token': string | null;
+    'name': string | null;
+    'description': string | null;
     'media_uri': string | null;
     'last_error_message': string | null;
     'price': string | null;
@@ -57,6 +59,18 @@ export class ApiNftLinkData {
         {
             "name": "token",
             "baseName": "token",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "name",
+            "baseName": "name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "description",
+            "baseName": "description",
             "type": "string",
             "format": ""
         },

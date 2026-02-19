@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   type PickedMedia,
   pickMedia,
@@ -20,101 +21,98 @@ interface UseMarketplacePreviewStateParams {
   readonly mode?: MarketplacePreviewMode | undefined;
 }
 
+const MARKETPLACE_PREVIEW_STALE_TIME_MS = 5 * 60 * 1000;
+
+const toError = (value: unknown, fallbackMessage: string): Error =>
+  value instanceof Error ? value : new Error(fallbackMessage);
+
 export const useMarketplacePreviewState = ({
   href,
   mode = "default",
 }: UseMarketplacePreviewStateParams): MarketplacePreviewState => {
-  const [state, setState] = useState<MarketplacePreviewState>({
-    type: "loading",
-    href,
+  const normalizedHref = href.trim();
+  const hasHref = normalizedHref.length > 0;
+
+  const nftLinkQuery = useQuery({
+    queryKey: [QueryKey.MARKETPLACE_NFT_LINK, { href: normalizedHref }],
+    queryFn: async () => await fetchNftLink(normalizedHref),
+    enabled: hasHref,
+    staleTime: MARKETPLACE_PREVIEW_STALE_TIME_MS,
+    retry: false,
   });
 
-  useEffect(() => {
-    let active = true;
+  const selectedNftLink =
+    nftLinkQuery.data !== undefined && nftLinkQuery.data.data !== null
+      ? nftLinkQuery.data
+      : undefined;
+  const resolvedMedia = pickNftLinkMedia(selectedNftLink);
+  const resolvedPrice = pickNftLinkPrice(selectedNftLink);
+  const shouldLoadFallback =
+    !nftLinkQuery.isPending && resolvedMedia === undefined;
 
-    const loadPreview = async (): Promise<void> => {
-      let resolvedMedia: PickedMedia | undefined;
-      let resolvedPrice: string | undefined;
-      let nftLinkError: unknown;
+  const linkPreviewQuery = useQuery({
+    queryKey: [
+      QueryKey.MARKETPLACE_LINK_PREVIEW,
+      { href: normalizedHref, mode },
+    ],
+    queryFn: async () => await fetchLinkPreview(normalizedHref),
+    enabled: hasHref && shouldLoadFallback,
+    staleTime: MARKETPLACE_PREVIEW_STALE_TIME_MS,
+    retry: false,
+  });
 
-      try {
-        const nftLinkResult = await fetchNftLink(href);
-        console.warn("[MarketplacePreview] /nft-link response", {
-          href,
-          response: nftLinkResult,
-        });
-        const selectedNftLink =
-          nftLinkResult.data !== null ? nftLinkResult : undefined;
-        resolvedMedia = pickNftLinkMedia(selectedNftLink);
-        resolvedPrice = pickNftLinkPrice(selectedNftLink);
-      } catch (error) {
-        nftLinkError = error;
-        console.error("[MarketplacePreview] /nft-link failed", {
-          href,
-          error,
-        });
-      }
-
-      if (resolvedMedia) {
-        if (!active) {
-          return;
-        }
-
-        setState({
-          type: "success",
-          href,
-          resolvedMedia,
-          resolvedPrice,
-        });
-        return;
-      }
-
-      let fallbackMedia: PickedMedia | undefined;
-      let linkPreviewError: unknown;
-
-      try {
-        const linkPreviewResponse = await fetchLinkPreview(href);
-        const response =
-          mode === "opensea-sanitized"
-            ? sanitizeOpenSeaOverlayMedia(href, linkPreviewResponse)
-            : linkPreviewResponse;
-        fallbackMedia = pickMedia(response);
-      } catch (error) {
-        linkPreviewError = error;
-      }
-
-      if (!active) {
-        return;
-      }
-
-      if (fallbackMedia) {
-        setState({
-          type: "success",
-          href,
-          resolvedMedia: fallbackMedia,
-          resolvedPrice,
-        });
-        return;
-      }
-
-      const error = linkPreviewError ?? nftLinkError;
-
-      setState({
-        type: "error",
-        href,
-        error:
-          error instanceof Error
-            ? error
-            : new Error("Failed to load marketplace preview"),
-      });
+  if (!hasHref) {
+    return {
+      type: "error",
+      href,
+      error: new Error(
+        "A valid URL is required to fetch link preview metadata."
+      ),
     };
+  }
 
-    void loadPreview();
-
-    return () => {
-      active = false;
+  if (resolvedMedia) {
+    return {
+      type: "success",
+      href,
+      resolvedMedia,
+      resolvedPrice,
     };
-  }, [href, mode]);
+  }
 
-  return state;
+  if (
+    nftLinkQuery.isPending ||
+    (shouldLoadFallback && linkPreviewQuery.isPending)
+  ) {
+    return {
+      type: "loading",
+      href,
+    };
+  }
+
+  let fallbackMedia: PickedMedia | undefined;
+  if (linkPreviewQuery.data) {
+    const linkPreviewResponse =
+      mode === "opensea-sanitized"
+        ? sanitizeOpenSeaOverlayMedia(href, linkPreviewQuery.data)
+        : linkPreviewQuery.data;
+    fallbackMedia = pickMedia(linkPreviewResponse);
+  }
+
+  if (fallbackMedia) {
+    return {
+      type: "success",
+      href,
+      resolvedMedia: fallbackMedia,
+      resolvedPrice,
+    };
+  }
+
+  const error = linkPreviewQuery.error ?? nftLinkQuery.error;
+
+  return {
+    type: "error",
+    href,
+    error: toError(error, "Failed to load marketplace preview"),
+  };
 };

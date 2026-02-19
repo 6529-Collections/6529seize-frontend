@@ -1,7 +1,8 @@
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import React from "react";
 
 import MarketplaceOpenseaAssetPreview from "@/components/waves/marketplace/MarketplaceOpenseaAssetPreview";
+import { renderWithQueryClient } from "../../../utils/reactQuery";
 
 const mockMarketplacePreviewPlaceholder = jest.fn(() => (
   <div data-testid="marketplace-placeholder" />
@@ -72,7 +73,7 @@ describe("MarketplaceOpenseaAssetPreview", () => {
       ],
     });
 
-    render(<MarketplaceOpenseaAssetPreview href={href} />);
+    renderWithQueryClient(<MarketplaceOpenseaAssetPreview href={href} />);
 
     await waitFor(() =>
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
@@ -108,7 +109,7 @@ describe("MarketplaceOpenseaAssetPreview", () => {
       },
     });
 
-    render(<MarketplaceOpenseaAssetPreview href={href} />);
+    renderWithQueryClient(<MarketplaceOpenseaAssetPreview href={href} />);
 
     await waitFor(() =>
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(

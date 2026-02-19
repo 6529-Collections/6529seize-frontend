@@ -53,10 +53,13 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(media).toContainElement(mediaDisplay);
     expect(media).toHaveClass("tw-aspect-[16/9]");
     expect(media).toHaveClass("tw-min-h-[14rem]");
-    expect(screen.getByTestId("marketplace-item-cta-label")).toHaveTextContent(
-      "View on Manifold"
-    );
+    expect(ctaLink).toHaveAttribute("aria-label", "Open on Manifold");
+    expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("marketplace-item-cta-fallback-icon")
+    ).toBeNull();
+    expect(screen.queryByTestId("marketplace-item-cta-label")).toBeNull();
     expect(screen.queryByTestId("manifold-item-price")).toBeNull();
     expect(container.querySelector('[class*="bg-gradient"]')).toBeNull();
   });
@@ -75,16 +78,20 @@ describe("MarketplaceItemPreviewCard", () => {
     );
 
     expect(screen.getByTestId("manifold-item-media")).toBeInTheDocument();
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
+    expect(ctaLink).toHaveAttribute(
+      "aria-label",
+      "Open on Manifold - 1.25 ETH"
+    );
+    expect(ctaLink).toHaveClass("tw-rounded-full");
     expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
       "1.25 ETH"
     );
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
-    expect(screen.getByTestId("manifold-item-card")).not.toHaveClass(
-      "tw-border"
-    );
   });
 
-  it("falls back to generic CTA label when marketplace cannot be resolved", () => {
+  it("renders fallback icon CTA when marketplace cannot be resolved", () => {
     render(
       <LinkPreviewProvider variant="home">
         <MarketplaceItemPreviewCard
@@ -95,8 +102,36 @@ describe("MarketplaceItemPreviewCard", () => {
       </LinkPreviewProvider>
     );
 
-    expect(screen.getByTestId("marketplace-item-cta-label")).toHaveTextContent(
-      "View listing"
+    expect(
+      screen.getByTestId("marketplace-item-cta-fallback-icon")
+    ).toBeInTheDocument();
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open listing");
+    expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
+    expect(screen.queryByTestId("marketplace-item-cta-label")).toBeNull();
+    expect(screen.queryByAltText(/logo$/i)).toBeNull();
+  });
+
+  it("renders fallback icon and price in top-right CTA when marketplace is unknown", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/2"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          price=" 0.42 ETH "
+        />
+      </LinkPreviewProvider>
+    );
+
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 0.42 ETH");
+    expect(
+      screen.getByTestId("marketplace-item-cta-fallback-icon")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
+      "0.42 ETH"
     );
     expect(screen.queryByAltText(/logo$/i)).toBeNull();
   });
@@ -116,6 +151,9 @@ describe("MarketplaceItemPreviewCard", () => {
 
     expect(screen.getAllByRole("button")).toHaveLength(1);
     expect(screen.getAllByRole("link")).toHaveLength(3);
+    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveClass(
+      "tw-top-[5.5rem]"
+    );
 
     rerender(
       <LinkPreviewProvider variant="home">
@@ -125,5 +163,8 @@ describe("MarketplaceItemPreviewCard", () => {
 
     expect(screen.queryAllByRole("button")).toHaveLength(0);
     expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveClass(
+      "tw-top-3"
+    );
   });
 });

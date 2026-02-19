@@ -2053,7 +2053,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiNftLinkResponse"
+                items:
+                  $ref: "#/components/schemas/ApiNftLinkResponse"
   /nft-owners:
     get:
       tags:
@@ -8334,6 +8335,8 @@ components:
         - chain
         - contract
         - token
+        - name
+        - description
         - media_uri
         - last_error_message
         - price
@@ -8351,6 +8354,12 @@ components:
           type: string
           nullable: true
         token:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        description:
           type: string
           nullable: true
         media_uri:

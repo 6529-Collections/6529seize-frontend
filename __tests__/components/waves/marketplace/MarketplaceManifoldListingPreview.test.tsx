@@ -1,7 +1,8 @@
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import React from "react";
 
 import MarketplaceManifoldListingPreview from "@/components/waves/marketplace/MarketplaceManifoldListingPreview";
+import { renderWithQueryClient } from "../../../utils/reactQuery";
 
 const mockMarketplacePreviewPlaceholder = jest.fn(() => (
   <div data-testid="marketplace-placeholder" />
@@ -72,7 +73,9 @@ describe("MarketplaceManifoldListingPreview", () => {
       },
     });
 
-    render(<MarketplaceManifoldListingPreview href={href} compact={true} />);
+    renderWithQueryClient(
+      <MarketplaceManifoldListingPreview href={href} compact={true} />
+    );
 
     await waitFor(() =>
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
@@ -103,7 +106,7 @@ describe("MarketplaceManifoldListingPreview", () => {
       },
     });
 
-    render(<MarketplaceManifoldListingPreview href={href} />);
+    renderWithQueryClient(<MarketplaceManifoldListingPreview href={href} />);
 
     await waitFor(() =>
       expect(mockMarketplaceUnavailableCard).toHaveBeenCalledWith({
@@ -135,7 +138,7 @@ describe("MarketplaceManifoldListingPreview", () => {
       },
     });
 
-    render(<MarketplaceManifoldListingPreview href={href} />);
+    renderWithQueryClient(<MarketplaceManifoldListingPreview href={href} />);
 
     await waitFor(() =>
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
@@ -166,7 +169,7 @@ describe("MarketplaceManifoldListingPreview", () => {
       data: null,
     });
 
-    render(<MarketplaceManifoldListingPreview href={href} />);
+    renderWithQueryClient(<MarketplaceManifoldListingPreview href={href} />);
 
     await waitFor(() =>
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(
@@ -193,7 +196,7 @@ describe("MarketplaceManifoldListingPreview", () => {
       },
     });
 
-    render(<MarketplaceManifoldListingPreview href={href} />);
+    renderWithQueryClient(<MarketplaceManifoldListingPreview href={href} />);
 
     await waitFor(() =>
       expect(mockMarketplaceItemPreviewCard).toHaveBeenCalledWith(

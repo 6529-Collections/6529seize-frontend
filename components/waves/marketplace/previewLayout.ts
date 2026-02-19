@@ -21,13 +21,3 @@ export function getMarketplaceContainerClass(
 
   return "tw-w-full tw-overflow-hidden tw-bg-inherit";
 }
-
-export function getMarketplaceTitleRowClass(
-  variant: LinkPreviewVariant
-): string {
-  if (variant === "home") {
-    return "tw-bg-iron-950/50 tw-px-3 tw-py-2";
-  }
-
-  return "tw-py-1.5";
-}

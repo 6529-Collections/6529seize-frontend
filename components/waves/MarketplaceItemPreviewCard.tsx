@@ -11,7 +11,6 @@ import { removeBaseEndpoint } from "@/helpers/Helpers";
 import {
   getMarketplaceContainerClass,
   MARKETPLACE_MEDIA_FRAME_CLASS,
-  getMarketplaceTitleRowClass,
 } from "./marketplace/previewLayout";
 import { getMarketplaceUrlKind } from "./marketplace/urlKind";
 
@@ -136,10 +135,22 @@ export default function MarketplaceItemPreviewCard({
   const normalizedPrice = typeof price === "string" ? price.trim() : "";
   const hasPrice = normalizedPrice.length > 0;
   const marketplaceBrand = getMarketplaceBrand(href);
-  const fallbackLabel = marketplaceBrand
-    ? `View on ${marketplaceBrand.displayName}`
-    : "View listing";
-  const ctaLabel = hasPrice ? normalizedPrice : fallbackLabel;
+  const hasMarketplaceBrand = marketplaceBrand !== null;
+  let ctaAriaLabel = "Open listing";
+
+  if (hasPrice) {
+    if (marketplaceBrand) {
+      ctaAriaLabel = `Open on ${marketplaceBrand.displayName} - ${normalizedPrice}`;
+    } else {
+      ctaAriaLabel = `Open listing - ${normalizedPrice}`;
+    }
+  } else if (marketplaceBrand) {
+    ctaAriaLabel = `Open on ${marketplaceBrand.displayName}`;
+  }
+  const topRightCtaTopClass = hideActions ? "tw-top-3" : "tw-top-[5.5rem]";
+  const topRightCtaSizeClass = hasPrice
+    ? "tw-max-w-[12rem] tw-gap-x-1.5 tw-rounded-full tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold"
+    : "tw-size-8 tw-rounded-lg";
 
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
@@ -166,34 +177,48 @@ export default function MarketplaceItemPreviewCard({
             />
           </div>
         </Link>
-        <div className={`${getMarketplaceTitleRowClass(variant)} tw-flex`}>
-          <Link
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            prefetch={false}
-            className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-x-1.5 tw-rounded-md tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-black tw-no-underline tw-shadow-[0_0_15px_rgba(255,255,255,0.1)] tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-300"
-            data-testid="marketplace-item-cta-link"
-          >
-            {marketplaceBrand && (
-              <Image
-                src={marketplaceBrand.logoSrc}
-                alt={`${marketplaceBrand.displayName} logo`}
-                width={16}
-                height={16}
-                className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-rounded-sm tw-object-cover"
-              />
-            )}
-            <span
-              className="tw-truncate"
-              data-testid={
-                hasPrice ? "manifold-item-price" : "marketplace-item-cta-label"
-              }
+        <Link
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          prefetch={false}
+          className={`tw-absolute tw-right-3 tw-z-10 tw-inline-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-text-white tw-no-underline tw-backdrop-blur-md tw-transition-colors tw-duration-150 ${topRightCtaTopClass} ${topRightCtaSizeClass}`}
+          data-testid="marketplace-item-cta-link"
+          aria-label={ctaAriaLabel}
+        >
+          {hasMarketplaceBrand ? (
+            <Image
+              src={marketplaceBrand.logoSrc}
+              alt={`${marketplaceBrand.displayName} logo`}
+              width={16}
+              height={16}
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-rounded-sm tw-object-cover"
+            />
+          ) : (
+            <svg
+              className="tw-size-3.5 tw-flex-shrink-0"
+              viewBox="0 0 64 64"
+              xmlns="http://www.w3.org/2000/svg"
+              strokeWidth="3"
+              stroke="currentColor"
+              fill="none"
+              aria-hidden="true"
+              data-testid="marketplace-item-cta-fallback-icon"
             >
-              {ctaLabel}
+              <path d="M55.4,32V53.58a1.81,1.81,0,0,1-1.82,1.82H10.42A1.81,1.81,0,0,1,8.6,53.58V10.42A1.81,1.81,0,0,1,10.42,8.6H32" />
+              <polyline points="40.32 8.6 55.4 8.6 55.4 24.18" />
+              <line x1="19.32" y1="45.72" x2="54.61" y2="8.91" />
+            </svg>
+          )}
+          {hasPrice && (
+            <span
+              className="tw-max-w-[8rem] tw-truncate"
+              data-testid="manifold-item-price"
+            >
+              {normalizedPrice}
             </span>
-          </Link>
-        </div>
+          )}
+        </Link>
         {!hideActions && <OverlayActionButtons href={href} />}
       </div>
     </LinkPreviewCardLayout>
