@@ -1,5 +1,5 @@
 import WavePicture from "@/components/waves/WavePicture";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
