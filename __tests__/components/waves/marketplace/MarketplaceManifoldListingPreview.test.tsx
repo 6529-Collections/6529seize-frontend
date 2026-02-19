@@ -65,6 +65,7 @@ describe("MarketplaceManifoldListingPreview", () => {
         chain: "ethereum",
         contract: "0x123",
         token: "1",
+        name: "Wave Artifact",
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "1.25 ETH",
@@ -84,15 +85,13 @@ describe("MarketplaceManifoldListingPreview", () => {
           mediaUrl: "https://cdn.example.com/nft-image.png",
           mediaMimeType: "image/png",
           price: "1.25 ETH",
+          title: "Wave Artifact",
           compact: true,
           hideActions: true,
         })
       )
     );
     expect(fetchLinkPreview).not.toHaveBeenCalled();
-    expect(
-      mockMarketplaceItemPreviewCard.mock.calls[0][0].title
-    ).toBeUndefined();
   });
 
   it("renders unavailable card when nft-link and fallback provide no media", async () => {
@@ -149,7 +148,7 @@ describe("MarketplaceManifoldListingPreview", () => {
         })
       )
     );
-    expect(fetchLinkPreview).not.toHaveBeenCalled();
+    expect(fetchLinkPreview).toHaveBeenCalledWith(href);
   });
 
   it("falls back to link preview media when nft-link has no data", async () => {

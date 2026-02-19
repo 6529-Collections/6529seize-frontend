@@ -26,6 +26,7 @@ export type MarketplacePreviewState =
       readonly href: string;
       readonly resolvedMedia?: PickedMedia | undefined;
       readonly resolvedPrice?: string | undefined;
+      readonly resolvedTitle?: string | undefined;
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
 

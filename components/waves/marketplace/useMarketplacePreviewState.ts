@@ -23,6 +23,15 @@ const MARKETPLACE_PREVIEW_STALE_TIME_MS = 5 * 60 * 1000;
 const toError = (value: unknown, fallbackMessage: string): Error =>
   value instanceof Error ? value : new Error(fallbackMessage);
 
+const toNonEmptyString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
 export const useMarketplacePreviewState = ({
   href,
   mode = "default",
@@ -95,6 +104,7 @@ export const useMarketplacePreviewState = ({
       href,
       resolvedMedia,
       resolvedPrice: marketplacePreviewQuery.data?.price ?? undefined,
+      resolvedTitle: toNonEmptyString(marketplacePreviewQuery.data?.title),
     };
   }
 

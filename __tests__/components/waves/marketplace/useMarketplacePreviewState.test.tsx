@@ -69,6 +69,7 @@ describe("useMarketplacePreviewState", () => {
         expect.objectContaining({
           type: "success",
           href,
+          resolvedTitle: "Wave Artifact",
           resolvedPrice: "1.25 ETH",
           resolvedMedia: {
             url: "https://cdn.example.com/nft-image.png",
@@ -116,6 +117,7 @@ describe("useMarketplacePreviewState", () => {
         expect.objectContaining({
           type: "success",
           href,
+          resolvedTitle: "Fallback title",
           resolvedMedia: {
             url: "https://cdn.example.com/nft-image.png",
             mimeType: "image/png",
@@ -166,6 +168,9 @@ describe("useMarketplacePreviewState", () => {
         })
       )
     );
+    expect(
+      result.current.type === "success" ? result.current.resolvedTitle : null
+    ).toBeUndefined();
     expect(mockedFetchLinkPreview).toHaveBeenCalledWith(href);
   });
 
@@ -287,6 +292,7 @@ describe("useMarketplacePreviewState", () => {
         expect.objectContaining({
           type: "success",
           href,
+          resolvedTitle: "Open graph title",
           resolvedMedia: {
             url: "https://arweave.net/og-image.png",
             mimeType: "image/png",

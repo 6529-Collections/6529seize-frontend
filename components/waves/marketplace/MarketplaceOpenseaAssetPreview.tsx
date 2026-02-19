@@ -32,6 +32,7 @@ export default function MarketplaceOpenseaAssetPreview({
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
         price={state.resolvedPrice}
+        title={state.resolvedTitle}
         compact={compact}
         hideActions={compact}
       />

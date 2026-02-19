@@ -57,6 +57,7 @@ describe("MarketplaceOpenseaItemPreview", () => {
     const href =
       "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729";
     fetchLinkPreview.mockResolvedValue({
+      title: "Radar Dome",
       image: {
         url: "https://opensea.io/item/test/opengraph-image?ts=1",
         type: "image/png",
@@ -71,6 +72,7 @@ describe("MarketplaceOpenseaItemPreview", () => {
           href,
           mediaUrl: "https://opensea.io/item/test/opengraph-image?ts=1",
           mediaMimeType: "image/png",
+          title: "Radar Dome",
         })
       )
     );

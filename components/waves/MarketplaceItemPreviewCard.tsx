@@ -19,6 +19,7 @@ interface MarketplaceItemPreviewCardProps {
   readonly mediaUrl: string;
   readonly mediaMimeType: string;
   readonly price?: string | undefined;
+  readonly title?: string | undefined;
   readonly compact?: boolean | undefined;
   readonly hideActions?: boolean | undefined;
 }
@@ -128,12 +129,15 @@ export default function MarketplaceItemPreviewCard({
   mediaUrl,
   mediaMimeType,
   price,
+  title,
   compact = false,
   hideActions = false,
 }: MarketplaceItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
   const normalizedPrice = typeof price === "string" ? price.trim() : "";
+  const normalizedTitle = typeof title === "string" ? title.trim() : "";
   const hasPrice = normalizedPrice.length > 0;
+  const hasTitle = !compact && normalizedTitle.length > 0;
   const marketplaceBrand = getMarketplaceBrand(href);
   const hasMarketplaceBrand = marketplaceBrand !== null;
   let ctaAriaLabel = "Open listing";
@@ -167,7 +171,7 @@ export default function MarketplaceItemPreviewCard({
           data-testid="marketplace-item-media-link"
         >
           <div
-            className={MARKETPLACE_MEDIA_FRAME_CLASS}
+            className={`${MARKETPLACE_MEDIA_FRAME_CLASS} tw-relative`}
             data-testid="manifold-item-media"
           >
             <MediaDisplay
@@ -176,6 +180,19 @@ export default function MarketplaceItemPreviewCard({
               disableMediaInteraction={true}
             />
           </div>
+          {hasTitle && (
+            <div
+              className="tw-w-full tw-bg-iron-900/70 tw-px-3 tw-py-2"
+              data-testid="marketplace-item-title-row"
+            >
+              <p
+                className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-white"
+                data-testid="marketplace-item-title"
+              >
+                {normalizedTitle}
+              </p>
+            </div>
+          )}
         </Link>
         <Link
           href={href}

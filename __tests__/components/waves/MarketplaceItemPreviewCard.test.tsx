@@ -91,6 +91,43 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
   });
 
+  it("renders title below media in non-compact mode when title is available", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="  Wave Artifact  "
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(
+      screen.getByTestId("marketplace-item-title-row")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("marketplace-item-title")).toHaveTextContent(
+      "Wave Artifact"
+    );
+  });
+
+  it("does not render title row in compact mode", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          compact={true}
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.queryByTestId("marketplace-item-title-row")).toBeNull();
+    expect(screen.queryByTestId("marketplace-item-title")).toBeNull();
+  });
+
   it("renders fallback icon CTA when marketplace cannot be resolved", () => {
     render(
       <LinkPreviewProvider variant="home">

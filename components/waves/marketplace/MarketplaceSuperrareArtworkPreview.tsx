@@ -29,6 +29,7 @@ export default function MarketplaceSuperrareArtworkPreview({
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
         price={state.resolvedPrice}
+        title={state.resolvedTitle}
         compact={compact}
         hideActions={compact}
       />

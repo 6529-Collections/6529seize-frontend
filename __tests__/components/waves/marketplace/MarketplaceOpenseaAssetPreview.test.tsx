@@ -101,6 +101,7 @@ describe("MarketplaceOpenseaAssetPreview", () => {
         chain: "ethereum",
         contract: "0x123",
         token: "42",
+        name: "OpenSea Asset #42",
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "0.5 ETH",
@@ -118,12 +119,10 @@ describe("MarketplaceOpenseaAssetPreview", () => {
           mediaUrl: "https://cdn.example.com/nft-image.png",
           mediaMimeType: "image/png",
           price: "0.5 ETH",
+          title: "OpenSea Asset #42",
         })
       )
     );
     expect(fetchLinkPreview).not.toHaveBeenCalled();
-    expect(
-      mockMarketplaceItemPreviewCard.mock.calls[0][0].title
-    ).toBeUndefined();
   });
 });
