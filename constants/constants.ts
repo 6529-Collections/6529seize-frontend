@@ -3,6 +3,7 @@ import { mainnet } from "wagmi/chains";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
 export const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
+export const MEMES_DEPLOYER = "0x4B76837F8D8Ad0A28590d06E53dCD44b6B7D4554";
 export const NEXTGEN_CONTRACT = "0x45882f9bc325e14fbb298a1df930c43a874b83ae";
 export const MANIFOLD_LAZY_CLAIM_CONTRACT =
   "0x26bbea7803dcac346d5f5f135b57cf2c752a02be";
@@ -49,8 +50,6 @@ export const ETHEREUM_ICON_TEXT = "Ξ";
 export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.6529.io";
 
 export const SUBSCRIPTIONS_CHAIN = mainnet;
-
-export const MANIFOLD_NETWORK = mainnet;
 
 export const SUBSCRIPTIONS_ADDRESS =
   "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";

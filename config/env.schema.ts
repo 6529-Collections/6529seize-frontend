@@ -93,9 +93,9 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   ENABLE_SECURITY_LOGGING: z.string().optional(),
-  DROP_CONTROL_TESTNET: z
-    .enum(["true", "false"])
-    .transform((value) => value === "true")
+  DROP_FORGE_TESTNET: z
+    .union([z.enum(["true", "false"]), z.boolean()])
+    .transform((value) => value === "true" || value === true)
     .optional(),
   FEATURE_AB_CARD: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

@@ -1,18 +1,19 @@
 "use client";
 
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
-import {
-  MEMES_CONTRACT,
-  MANIFOLD_LAZY_CLAIM_CONTRACT,
-} from "@/constants/constants";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
+import type {
+  ArweaveMetadata,
+  ManifoldMintMetadata,
+} from "@/components/manifold-minting/manifold-mint-metadata";
 import { useTitle } from "@/contexts/TitleContext";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Time } from "@/helpers/time";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 const ManifoldMinting = dynamic(
-  () => import("../../components/manifoldMinting/ManifoldMinting"),
+  () => import("../manifold-minting/ManifoldMinting"),
   {
     ssr: false,
   }
@@ -28,14 +29,26 @@ export default function TheMemesMint(props: {
     setTitle(`Mint #${nft.id} | ${nft.name} | The Memes`);
   }, [nft.id, nft.name, setTitle]);
 
+  const { contract, chain } = useDropForgeMintingConfig();
+  const mintMetadata = useMemo<ManifoldMintMetadata>(
+    () => ({
+      tokenId: nft.id,
+      metadata:
+        nft.metadata && typeof nft.metadata === "object"
+          ? (nft.metadata as ArweaveMetadata)
+          : {},
+    }),
+    [nft]
+  );
+
   return (
     <ManifoldMinting
       title={`The Memes #${nft.id}`}
-      contract={MEMES_CONTRACT}
-      proxy={MANIFOLD_LAZY_CLAIM_CONTRACT}
+      contract={contract}
+      chain={chain}
       abi={MEMES_MANIFOLD_PROXY_ABI}
-      token_id={nft.id}
       mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}
+      mintMetadata={mintMetadata}
     />
   );
 }

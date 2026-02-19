@@ -1,17 +1,15 @@
 "use client";
 
-import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
-  MANIFOLD_NETWORK,
-  MEMES_CONTRACT,
-  MANIFOLD_LAZY_CLAIM_CONTRACT,
+  NULL_ADDRESS,
   NULL_MERKLE,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { useCallback, useEffect, useState } from "react";
 import type { Abi } from "viem";
+import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
 
 export enum ManifoldClaimStatus {
@@ -107,6 +105,14 @@ export interface ManifoldClaim {
   totalMax: number;
   remaining: number;
   cost: number;
+  costWei?: bigint | undefined;
+  walletMax?: number | undefined;
+  storageProtocol?: number | undefined;
+  merkleRoot?: `0x${string}` | undefined;
+  tokenId?: number | undefined;
+  paymentReceiver?: `0x${string}` | undefined;
+  erc20?: `0x${string}` | undefined;
+  signingAddress?: `0x${string}` | undefined;
   startDate: number;
   endDate: number;
   status: ManifoldClaimStatus;
@@ -119,16 +125,31 @@ export interface ManifoldClaim {
 }
 
 export type ManifoldClaimReadMethod = "getClaimForToken" | "getClaim";
+export interface UseManifoldClaimResult {
+  claim: ManifoldClaim | undefined;
+  isFetching: boolean;
+  refetch: () => Promise<unknown>;
+}
 
-export function useManifoldClaim(
-  contract: string,
-  proxy: string,
-  abi: Abi,
-  identifier: number,
-  onError?: () => void,
-  chainId: number = MANIFOLD_NETWORK.id,
-  readMethod: ManifoldClaimReadMethod = "getClaimForToken"
-) {
+export interface UseManifoldClaimParams {
+  chainId?: number;
+  contract: string;
+  proxy: string;
+  abi: Abi;
+  identifier: number;
+  onError?: () => void;
+  readMethod?: ManifoldClaimReadMethod;
+}
+
+export function useManifoldClaim({
+  chainId = mainnet.id,
+  contract,
+  proxy,
+  abi,
+  identifier,
+  onError,
+  readMethod = "getClaim",
+}: UseManifoldClaimParams): UseManifoldClaimResult {
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
   const [refetchInterval, setRefetchInterval] = useState<number>(5000);
 
@@ -144,7 +165,7 @@ export function useManifoldClaim(
 
   const getMemePhase = useCallback(
     (phase: ManifoldPhase, start: number, end: number) => {
-      if (!areEqualAddresses(contract, MEMES_CONTRACT)) {
+      if (!areEqualAddresses(contract, contract)) {
         return undefined;
       }
 
@@ -180,19 +201,23 @@ export function useManifoldClaim(
   useEffect(() => {
     if (readContract.data) {
       const data = readContract.data as any;
-      const instanceId = Number(data[0]);
-      const claimData = data[1];
-      const status = getStatus(claimData.startDate, claimData.endDate);
+      const claimData =
+        readMethod === "getClaimForToken" ? (data.claim ?? data[1]) : data;
+      if (!claimData) return;
+      const instanceId =
+        readMethod === "getClaimForToken"
+          ? Number(data.instanceId ?? data[0] ?? identifier)
+          : identifier;
+      const startDate = Number(claimData.startDate ?? 0);
+      const endDate = Number(claimData.endDate ?? 0);
+      const costWei = BigInt(claimData.cost ?? 0);
+      const status = getStatus(startDate, endDate);
       const publicMerkle = areEqualAddresses(NULL_MERKLE, claimData.merkleRoot);
       const phase =
         publicMerkle && claimData.total > 0
           ? ManifoldPhase.PUBLIC
           : ManifoldPhase.ALLOWLIST;
-      const memePhase = getMemePhase(
-        phase,
-        claimData.startDate,
-        claimData.endDate
-      );
+      const memePhase = getMemePhase(phase, startDate, endDate);
       const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
         instanceId: instanceId,
@@ -200,9 +225,23 @@ export function useManifoldClaim(
         total: Number(claimData.total),
         totalMax: Number(claimData.totalMax),
         remaining: remaining,
-        cost: Number(claimData.cost),
-        startDate: Number(claimData.startDate),
-        endDate: Number(claimData.endDate),
+        cost: Number(costWei),
+        costWei,
+        walletMax: Number(claimData.walletMax ?? 0),
+        storageProtocol: Number(claimData.storageProtocol ?? 0),
+        merkleRoot: String(
+          claimData.merkleRoot ?? NULL_MERKLE
+        ) as `0x${string}`,
+        tokenId: Number(claimData.tokenId ?? 0),
+        paymentReceiver: String(
+          claimData.paymentReceiver ?? NULL_ADDRESS
+        ) as `0x${string}`,
+        erc20: String(claimData.erc20 ?? NULL_ADDRESS) as `0x${string}`,
+        signingAddress: String(
+          claimData.signingAddress ?? NULL_ADDRESS
+        ) as `0x${string}`,
+        startDate,
+        endDate,
         status: status,
         phase: phase,
         memePhase: memePhase,
@@ -214,7 +253,7 @@ export function useManifoldClaim(
       setClaim(newClaim);
       setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
     }
-  }, [readContract.data, getStatus]);
+  }, [readContract.data, readMethod, identifier, getMemePhase, getStatus]);
 
   useEffect(() => {
     if (readContract.error) {
@@ -241,15 +280,11 @@ export function useManifoldClaim(
     });
   }, [readContract.isFetching]);
 
-  return claim;
-}
-
-export function useMemesManifoldClaim(tokenId: number, onError?: () => void) {
-  return useManifoldClaim(
-    MEMES_CONTRACT,
-    MANIFOLD_LAZY_CLAIM_CONTRACT,
-    MEMES_MANIFOLD_PROXY_ABI,
-    tokenId,
-    onError
-  );
+  return {
+    claim,
+    isFetching: readContract.isFetching,
+    refetch: async () => {
+      await readContract.refetch();
+    },
+  };
 }

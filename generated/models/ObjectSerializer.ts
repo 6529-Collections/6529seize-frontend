@@ -109,7 +109,7 @@ export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
 export * from '../models/ApiMemesMintStatsTotals';
 export * from '../models/ApiMemesMintStatsYearly';
-export * from '../models/ApiMemesMintingAirdropItem';
+export * from '../models/ApiMemesMintingPhaseTotalItem';
 export * from '../models/ApiMentionedWave';
 export * from '../models/ApiMintMetrics';
 export * from '../models/ApiMintMetricsPage';
@@ -235,7 +235,6 @@ export * from '../models/DistributionPhotoCompleteRequest';
 export * from '../models/DistributionPhotoCompleteRequestPhoto';
 export * from '../models/DistributionPhotoCompleteResponse';
 export * from '../models/DistributionPhotosPage';
-export * from '../models/GetMemesMintingProofs200Response';
 export * from '../models/GetWaveSubscription200Response';
 export * from '../models/MemeClaim';
 export * from '../models/MemeClaimAnimationDetails';
@@ -387,7 +386,7 @@ import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
 import { ApiMemesMintStatsTotals } from '../models/ApiMemesMintStatsTotals';
 import { ApiMemesMintStatsYearly } from '../models/ApiMemesMintStatsYearly';
-import { ApiMemesMintingAirdropItem } from '../models/ApiMemesMintingAirdropItem';
+import { ApiMemesMintingPhaseTotalItem } from '../models/ApiMemesMintingPhaseTotalItem';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiMintMetrics } from '../models/ApiMintMetrics';
 import { ApiMintMetricsPage } from '../models/ApiMintMetricsPage';
@@ -513,7 +512,6 @@ import { DistributionPhotoCompleteRequest } from '../models/DistributionPhotoCom
 import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPhotoCompleteRequestPhoto';
 import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
-import { GetMemesMintingProofs200ResponseClass } from '../models/GetMemesMintingProofs200Response';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 import { MemeClaim } from '../models/MemeClaim';
 import { MemeClaimAnimationDetailsClass } from '../models/MemeClaimAnimationDetails';
@@ -705,7 +703,7 @@ let typeMap: {[index: string]: any} = {
     "ApiMemesMintStatsPage": ApiMemesMintStatsPage,
     "ApiMemesMintStatsTotals": ApiMemesMintStatsTotals,
     "ApiMemesMintStatsYearly": ApiMemesMintStatsYearly,
-    "ApiMemesMintingAirdropItem": ApiMemesMintingAirdropItem,
+    "ApiMemesMintingPhaseTotalItem": ApiMemesMintingPhaseTotalItem,
     "ApiMentionedWave": ApiMentionedWave,
     "ApiMintMetrics": ApiMintMetrics,
     "ApiMintMetricsPage": ApiMintMetricsPage,
@@ -813,7 +811,6 @@ let typeMap: {[index: string]: any} = {
     "DistributionPhotoCompleteRequestPhoto": DistributionPhotoCompleteRequestPhoto,
     "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
-    "GetMemesMintingProofs200Response": GetMemesMintingProofs200ResponseClass,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
     "MemeClaim": MemeClaim,
     "MemeClaimAnimationDetails": MemeClaimAnimationDetailsClass,

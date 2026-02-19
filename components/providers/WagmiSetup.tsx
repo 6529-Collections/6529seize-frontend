@@ -1,5 +1,10 @@
 "use client";
 
+import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useAuth } from "@/components/auth/Auth";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
+import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
 import { AppKitValidationError } from "@/src/errors/appkit-initialization";
 import type { AppKitInitializationConfig } from "@/utils/appkit-initialization.utils";
@@ -15,11 +20,8 @@ import {
 import { Capacitor } from "@capacitor/core";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Chain, mainnet } from "viem/chains";
 import { WagmiProvider } from "wagmi";
-import type { AppWallet } from "../app-wallets/AppWalletsContext";
-import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import { useAuth } from "../auth/Auth";
-import { AppKitAdapterManager } from "./AppKitAdapterManager";
 
 /**
  * Installs a defensive wrapper around `window.ethereum` (EIP-1193 provider).
@@ -100,6 +102,7 @@ export default function WagmiSetup({
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
   const { appWallets } = useAppWallets();
+  const { chain: dropControlChain } = useDropForgeMintingConfig();
 
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
     null
@@ -135,15 +138,21 @@ export default function WagmiSetup({
         throw new AppKitValidationError("Internal API failed");
       }
 
+      const chains: Chain[] = [mainnet];
+      if (!!dropControlChain && dropControlChain !== mainnet) {
+        chains.push(dropControlChain);
+      }
+
       const config: AppKitInitializationConfig = {
         wallets,
         adapterManager: adapterManager as AppKitAdapterManager,
         isCapacitor,
+        chains,
       };
 
       return initializeAppKit(config);
     },
-    [adapterManager, isCapacitor]
+    [adapterManager, isCapacitor, dropControlChain]
   );
 
   // Initialize AppKit with fail-fast approach

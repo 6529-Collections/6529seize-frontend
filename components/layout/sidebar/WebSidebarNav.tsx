@@ -6,6 +6,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -15,11 +16,11 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useIsMemesAdmin } from "@/hooks/useIsMemesAdmin";
+import { useIsDropForgeAdmin } from "@/hooks/useIsDropForgeAdmin";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { CommandLineIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
   useCallback,
@@ -49,7 +50,7 @@ const WebSidebarNav = React.forwardRef<
   const { address } = useSeizeConnectContext();
   const { seizeSettings } = useSeizeSettings();
   const { appWalletsSupported } = useAppWallets();
-  const isMemesAdmin = useIsMemesAdmin();
+  const isDropForgeAdmin = useIsDropForgeAdmin();
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );
@@ -76,7 +77,7 @@ const WebSidebarNav = React.forwardRef<
     { event: "keydown" }
   );
 
-  const showDropControl = useMemo(() => {
+  const showDropForge = useMemo(() => {
     if (!address) return false;
     if (
       seizeSettings.distribution_admin_wallets.some((w) =>
@@ -90,8 +91,8 @@ const WebSidebarNav = React.forwardRef<
       )
     )
       return true;
-    return isMemesAdmin;
-  }, [address, isMemesAdmin, seizeSettings]);
+    return isDropForgeAdmin;
+  }, [address, isDropForgeAdmin, seizeSettings]);
 
   const allSections = useSidebarSections(
     appWalletsSupported,
@@ -367,17 +368,17 @@ const WebSidebarNav = React.forwardRef<
                   />
                   {renderCollapsedSubmenu(section.key)}
                 </li>
-                {section.key === "about" && showDropControl && (
+                {section.key === "about" && showDropForge && (
                   <li>
                     <WebSidebarNavItem
-                      href="/drop-control"
-                      icon={CommandLineIcon}
+                      href="/drop-forge"
+                      icon={DropForgeIcon}
                       active={
-                        pathname === "/drop-control" ||
-                        pathname?.startsWith("/drop-control/")
+                        pathname === "/drop-forge" ||
+                        pathname?.startsWith("/drop-forge/")
                       }
                       collapsed={isCollapsed}
-                      label="Drop Control"
+                      label="Drop Forge"
                     />
                   </li>
                 )}

@@ -3,6 +3,8 @@ import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
+import { MEMES_CONTRACT } from "@/constants/constants";
+import { mainnet } from "viem/chains";
 import NowMintingCountdown from "./NowMintingCountdown";
 import NowMintingDetailsAccordion from "./NowMintingDetailsAccordion";
 import NowMintingHeader from "./NowMintingHeader";
@@ -37,7 +39,11 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           collection={nft.collection}
           season={nft.season}
         />
-        <NowMintingCountdown nftId={nft.id} />
+        <NowMintingCountdown
+          nftId={nft.id}
+          contract={MEMES_CONTRACT}
+          chainId={mainnet.id}
+        />
       </div>
     </div>
   );

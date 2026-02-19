@@ -191,13 +191,18 @@ export default function ReviewDistributionPlanTableRow({
   }, [item.type]);
 
   const isPublic = item.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+  const formatCount = (count: number) => count.toLocaleString();
 
   return (
     <DistributionPlanTableRowWrapper>
       <td className={nameClasses}>{item.name}</td>
       <td className={commonClasses}>{item.description}</td>
-      <td className={commonClasses}>{isPublic ? "-" : item.walletsCount}</td>
-      <td className={commonClasses}>{isPublic ? "-" : item.spotsCount}</td>
+      <td className={commonClasses}>
+        {isPublic ? "-" : formatCount(item.walletsCount)}
+      </td>
+      <td className={commonClasses}>
+        {isPublic ? "-" : formatCount(item.spotsCount)}
+      </td>
       <td className={`${commonClasses} tw-flex tw-justify-start tw-gap-x-3`}>
         <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}

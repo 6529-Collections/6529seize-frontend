@@ -11,7 +11,7 @@ import {
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet } from "viem/chains";
+import { Chain } from "viem/chains";
 import type { CreateConnectorFn } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
 import type { AppWallet } from "../app-wallets/AppWalletsContext";
@@ -43,12 +43,14 @@ export class AppKitAdapterManager {
     this.requestPassword = requestPassword;
   }
 
-  createAdapter(appWallets: AppWallet[], isCapacitor: boolean): WagmiAdapter {
+  createAdapter(
+    appWallets: AppWallet[],
+    isCapacitor: boolean,
+    chains: Chain[]
+  ): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_007: appWallets must be an array");
     }
-
-    const networks = [mainnet];
 
     // Create AppWallet connectors if any exist
     const appWalletConnectors = appWallets.map((wallet) => {
@@ -62,7 +64,7 @@ export class AppKitAdapterManager {
         // FAIL-FAST: Validate wallet security before any processing
         validateWalletSafely(wallet); // Will throw immediately on ANY failure
 
-        return createAppWalletConnector(networks, { appWallet: wallet }, () =>
+        return createAppWalletConnector(chains, { appWallet: wallet }, () =>
           this.requestPassword(wallet.address, wallet.address_hashed)
         );
       } catch (error) {
@@ -90,7 +92,7 @@ export class AppKitAdapterManager {
 
     // Create adapter with all connectors
     const wagmiAdapter = new WagmiAdapter({
-      networks,
+      networks: chains,
       projectId: CW_PROJECT_ID,
       ssr: false, // App Router requires this to be false to avoid hydration mismatches
       connectors,
@@ -144,7 +146,8 @@ export class AppKitAdapterManager {
 
   createAdapterWithCache(
     appWallets: AppWallet[],
-    isCapacitor: boolean
+    isCapacitor: boolean,
+    chains: Chain[]
   ): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");
@@ -164,7 +167,7 @@ export class AppKitAdapterManager {
       return cachedAdapter;
     }
 
-    const adapter = this.createAdapter(appWallets, isCapacitor);
+    const adapter = this.createAdapter(appWallets, isCapacitor, chains);
 
     // Maintain cache size limit and cleanup old adapters
     if (this.adapterCache.size >= this.maxCacheSize) {

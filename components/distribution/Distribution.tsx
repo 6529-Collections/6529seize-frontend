@@ -27,6 +27,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+import { mainnet } from "viem/chains";
 import styles from "./Distribution.module.scss";
 
 interface Props {
@@ -307,7 +308,15 @@ export default function DistributionPage(props: Readonly<Props>) {
       isValidNftId &&
       nftId
     ) {
-      return <NowMintingCountdown nftId={Number.parseInt(nftId, 10)} hideNextDrop fullWidth />;
+      return (
+        <NowMintingCountdown
+          nftId={Number.parseInt(nftId, 10)}
+          contract={MEMES_CONTRACT}
+          chainId={mainnet.id}
+          hideNextDrop
+          fullWidth
+        />
+      );
     }
 
     return <></>;

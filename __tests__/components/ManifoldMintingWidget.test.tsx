@@ -1,11 +1,14 @@
-import { render, screen } from "@testing-library/react";
-import ManifoldMintingWidget from "@/components/manifoldMinting/ManifoldMintingWidget";
+import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMintingWidget";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
+import { render, screen } from "@testing-library/react";
 
-jest.mock("@/components/manifoldMinting/ManifoldMintingConnect", () => (props: any) => {
-  props.onMintFor("0x1");
-  return <div />;
-});
+jest.mock(
+  "@/components/manifoldMinting/ManifoldMintingConnect",
+  () => (props: any) => {
+    props.onMintFor("0x1");
+    return <div />;
+  }
+);
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x1" }),
@@ -15,8 +18,18 @@ const readContractsData = { data: [] };
 jest.mock("wagmi", () => ({
   useReadContract: () => ({ data: 0 }),
   useReadContracts: () => readContractsData,
-  useWaitForTransactionReceipt: () => ({ isPending: false, isSuccess: false, error: null }),
-  useWriteContract: () => ({ writeContract: jest.fn(), data: null, reset: jest.fn(), isPending: true, error: null }),
+  useWaitForTransactionReceipt: () => ({
+    isPending: false,
+    isSuccess: false,
+    error: null,
+  }),
+  useWriteContract: () => ({
+    writeContract: jest.fn(),
+    data: null,
+    reset: jest.fn(),
+    isPending: true,
+    error: null,
+  }),
 }));
 
 describe("ManifoldMintingWidget", () => {

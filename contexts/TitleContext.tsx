@@ -60,6 +60,7 @@ const getDefaultTitleForRoute = (pathname: string | null): string => {
       "about",
       "delegation",
       "meme-calendar",
+      "drop-forge",
     ];
     if (!knownRoutes.includes(firstSegment!)) {
       return `Profile | 6529.io`;

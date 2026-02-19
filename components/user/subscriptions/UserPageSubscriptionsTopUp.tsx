@@ -45,6 +45,14 @@ function getEthForCards(count: number): number {
   return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
 }
 
+function getTopUpModalEmoji(
+  status: "confirm_wallet" | "submitted" | "success" | "error"
+): string {
+  if (status === "success") return "/emojis/sgt_saluting_face.webp";
+  if (status === "error") return "/emojis/sgt_sob.webp";
+  return "/emojis/sgt_grimacing.webp";
+}
+
 export default function UserPageSubscriptionsTopUp() {
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
@@ -189,7 +197,14 @@ export default function UserPageSubscriptionsTopUp() {
     if (error) {
       return (
         <div className="tw-text-center">
-          <p className="tw-mb-4 tw-text-lg tw-font-medium tw-text-red">Error</p>
+          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
+            Error
+            <img
+              src={getTopUpModalEmoji("error")}
+              alt="error"
+              className="tw-h-6 tw-w-6"
+            />
+          </p>
           <p className="tw-mb-0 tw-text-iron-100">{error}</p>
         </div>
       );
@@ -198,6 +213,11 @@ export default function UserPageSubscriptionsTopUp() {
     if (sendTransaction.isPending) {
       return (
         <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
+          <img
+            src={getTopUpModalEmoji("confirm_wallet")}
+            alt="confirm_wallet"
+            className="tw-h-6 tw-w-6"
+          />
           <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
             Confirm in your wallet
           </p>
@@ -210,6 +230,11 @@ export default function UserPageSubscriptionsTopUp() {
       return (
         <div className="tw-text-center">
           <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
+            <img
+              src={getTopUpModalEmoji("submitted")}
+              alt="submitted"
+              className="tw-h-6 tw-w-6"
+            />
             Transaction Submitted
             {sendTransaction.data && (
               <a
@@ -237,6 +262,11 @@ export default function UserPageSubscriptionsTopUp() {
       return (
         <div className="tw-text-center">
           <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
+            <img
+              src={getTopUpModalEmoji("success")}
+              alt="success"
+              className="tw-h-6 tw-w-6"
+            />
             Top Up Successful!
             {sendTransaction.data && (
               <a
@@ -498,9 +528,9 @@ export default function UserPageSubscriptionsTopUp() {
                   className="tw-relative tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="tw-flex tw-items-start tw-justify-between tw-border-b tw-border-iron-800">
+                  <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
                     <div>
-                      <h2 className="tw-text-xl tw-font-semibold tw-text-white">
+                      <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
                         Top up
                       </h2>
                       {topUpAmount !== null && (
@@ -515,7 +545,7 @@ export default function UserPageSubscriptionsTopUp() {
                     {isClosable && (
                       <button
                         onClick={closeModal}
-                        className="tw-size-9 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
+                        className="tw--mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
                         aria-label="Close modal"
                       >
                         <FontAwesomeIcon

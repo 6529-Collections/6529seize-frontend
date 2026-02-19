@@ -749,12 +749,43 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
-  /distributions/{contract}/{id}/automatic_airdrops:
+  /distributions/{contract}/{id}/airdrops_artist:
     get:
       tags:
         - Distributions
-      summary: Get automatic airdrops for a specific contract and card
-      operationId: getDistributionAutomaticAirdrops
+      summary: Get artist airdrops for a specific contract and card
+      operationId: getDistributionAirdropsArtist
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid request
+  /distributions/{contract}/{id}/airdrops_team:
+    get:
+      tags:
+        - Distributions
+      summary: Get team airdrops for a specific contract and card
+      operationId: getDistributionAirdropsTeam
       parameters:
         - name: contract
           in: path
@@ -2066,19 +2097,79 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
-  /memes-minting/proofs/{merkle_root}:
+  /memes-minting/{contract}/{card_id}/{merkle_root}/proofs:
     get:
       tags:
         - Memes minting
-      summary: Get merkle proofs
+      summary: Get all merkle proofs for a card root
       description: >
-        Returns allowlist merkle proofs for the given merkle root. If address
-        query param is provided, returns proofs for that address only
-        (MemesMintingProofsResponse). If address is omitted, returns proofs for
-        all addresses (MemesMintingProofsByAddressResponse). Listing all
-        addresses requires DISTRIBUTION_ADMIN_WALLETS.
+        Returns allowlist merkle proofs for all addresses for the given
+        contract, card and merkle root. Listing all addresses requires
+        DISTRIBUTION_ADMIN_WALLETS.
       operationId: getMemesMintingProofs
       parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: merkle_root
+          in: path
+          required: true
+          description: 0x-prefixed 66-character hex merkle root
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemesMintingProofsByAddressResponse"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+        "403":
+          description: >
+            Forbidden - only distribution admins can list all proofs for a
+            merkle_root
+        "404":
+          description: No proofs found for the given contract/card/merkle_root
+  /memes-minting/{contract}/{card_id}/{merkle_root}/proofs/{address}:
+    get:
+      tags:
+        - Memes minting
+      summary: Get merkle proofs for an address in a card root
+      description: >
+        Returns allowlist merkle proofs for one address for the given contract,
+        card and merkle root.
+      operationId: getMemesMintingProofsByAddress
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
         - name: merkle_root
           in: path
           required: true
@@ -2087,9 +2178,9 @@ paths:
             type: string
             pattern: ^0x[a-fA-F0-9]{64}$
         - name: address
-          in: query
-          required: false
-          description: Wallet address. If omitted, returns proofs for all addresses.
+          in: path
+          required: true
+          description: Wallet address
           schema:
             type: string
             pattern: ^0x[a-fA-F0-9]{40}$
@@ -2099,18 +2190,12 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: "#/components/schemas/MemesMintingProofsResponse"
-                  - $ref: "#/components/schemas/MemesMintingProofsByAddressResponse"
+                $ref: "#/components/schemas/MemesMintingProofsResponse"
         "400":
           description: Invalid request (missing or invalid parameters)
-        "403":
-          description: >
-            Forbidden - only distribution admins can list all proofs for a
-            merkle_root
         "404":
-          description: No proofs found for the given merkle_root (and address if provided)
-  /memes-minting/roots/{contract}/{card_id}:
+          description: No proofs found for the given contract/card/merkle_root and address
+  /memes-minting/{contract}/{card_id}/roots:
     get:
       tags:
         - Memes minting
@@ -2144,14 +2229,13 @@ paths:
                   $ref: "#/components/schemas/MemesMintingRootItem"
         "400":
           description: Invalid request (missing or invalid parameters)
-  /memes-minting/airdrops/{contract}/{card_id}:
+  /memes-minting/{contract}/{card_id}/airdrops:
     get:
       tags:
         - Memes minting
       summary: Get per-phase airdrop totals for a token
-      description: >
-        Returns automatic and phase airdrop totals for the given contract and
-        card. Includes Automatic, Phase 0, Phase 1, Phase 2 and Public phases.
+      description: |
+        Returns per-phase airdrop totals for the given contract and card.
       operationId: getMemesMintingAirdrops
       parameters:
         - name: contract
@@ -2177,7 +2261,42 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ApiMemesMintingAirdropItem"
+                  $ref: "#/components/schemas/ApiMemesMintingPhaseTotalItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /memes-minting/{contract}/{card_id}/allowlists:
+    get:
+      tags:
+        - Memes minting
+      summary: Get per-phase allowlist totals for a token
+      description: |
+        Returns per-phase allowlist totals for the given contract and card.
+      operationId: getMemesMintingAllowlists
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMemesMintingPhaseTotalItem"
         "400":
           description: Invalid request (missing or invalid parameters)
   /memes-minting/claims:
@@ -8337,24 +8456,24 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
-    ApiMemesMintingAirdropItem:
+    ApiMemesMintingPhaseTotalItem:
       type: object
       required:
         - phase
-        - addresses_count
-        - total_airdrops
+        - addresses
+        - total
       properties:
         phase:
           type: string
           description: Phase name
-        addresses_count:
+        addresses:
           type: integer
           format: int64
-          description: Number of unique addresses with airdrops in this phase
-        total_airdrops:
+          description: Number of unique addresses in this phase
+        total:
           type: integer
           format: int64
-          description: Sum of airdrops for this phase
+          description: Sum of spots for this phase
     ApiMemesMintStat:
       type: object
       required:

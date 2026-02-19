@@ -5,7 +5,7 @@ import {
   formatClaimStatus,
   formatEditionSize,
 } from "@/helpers/manifoldDisplayHelpers";
-import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
+import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useNftBalance } from "@/hooks/useNftBalance";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,7 +21,7 @@ export default function NowMintingStatsGrid({
   nftId,
   floorPrice,
 }: NowMintingStatsGridProps) {
-  const manifoldClaim = useMemesManifoldClaim(nftId);
+  const { claim: manifoldClaim } = useDropForgeManifoldClaim(nftId);
   const status = manifoldClaim?.status;
   const isStatusLoading = !manifoldClaim;
 

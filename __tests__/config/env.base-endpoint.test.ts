@@ -165,6 +165,15 @@ describe("config/env.ts publicEnv loader", () => {
     expect(publicEnv.API_ENDPOINT).toBe("https://api.6529.io");
   });
 
+  it("parses DROP_FORGE_TESTNET when baked runtime value is boolean", () => {
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
+      ...defaultInput,
+      DROP_FORGE_TESTNET: true,
+    });
+    const { publicEnv } = require("@/config/env");
+    expect(publicEnv.DROP_FORGE_TESTNET).toBe(true);
+  });
+
   it("throws for invalid BASE_ENDPOINT via PUBLIC_RUNTIME JSON", () => {
     process.env["PUBLIC_RUNTIME"] = JSON.stringify({
       ...defaultInput,

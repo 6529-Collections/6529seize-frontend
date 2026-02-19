@@ -36,8 +36,32 @@ test("builds claim from contract data", async () => {
     error: null,
   });
   const { result } = renderHook(() => useManifoldClaim("0x1", "0x2", [], 1));
-  await waitFor(() => expect(result.current).toBeDefined());
-  expect(result.current?.status).toBe(ManifoldClaimStatus.ACTIVE);
-  expect(result.current?.phase).toBe(ManifoldPhase.PUBLIC);
-  expect(result.current?.remaining).toBe(1);
+  await waitFor(() => expect(result.current.claim).toBeDefined());
+  expect(result.current.claim?.status).toBe(ManifoldClaimStatus.ACTIVE);
+  expect(result.current.claim?.phase).toBe(ManifoldPhase.PUBLIC);
+  expect(result.current.claim?.remaining).toBe(1);
+});
+
+test("builds claim from getClaim tuple shape", async () => {
+  mockRead.mockReturnValue({
+    data: {
+      total: BigInt(1),
+      totalMax: BigInt(3),
+      cost: BigInt(0),
+      startDate: BigInt(100),
+      endDate: BigInt(200),
+      merkleRoot: NULL_MERKLE,
+      location: "ipfs://example",
+    },
+    isFetching: false,
+    error: null,
+  });
+
+  const { result } = renderHook(() => useManifoldClaim("0x1", "0x2", [], 459));
+
+  await waitFor(() => expect(result.current.claim).toBeDefined());
+  expect(result.current.claim?.instanceId).toBe(459);
+  expect(result.current.claim?.status).toBe(ManifoldClaimStatus.ACTIVE);
+  expect(result.current.claim?.phase).toBe(ManifoldPhase.PUBLIC);
+  expect(result.current.claim?.remaining).toBe(2);
 });

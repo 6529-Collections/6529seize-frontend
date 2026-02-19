@@ -2,7 +2,9 @@ import { publicEnv } from "@/config/env";
 import type { MemeClaim } from "@/generated/models/MemeClaim";
 import type { MemeClaimUpdateRequest } from "@/generated/models/MemeClaimUpdateRequest";
 import type { MemesMintingClaimsPageResponse } from "@/generated/models/MemesMintingClaimsPageResponse";
+import type { MemesMintingProofsResponse } from "@/generated/models/MemesMintingProofsResponse";
 import type { MemesMintingRootItem } from "@/generated/models/MemesMintingRootItem";
+import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import { commonApiFetch, commonApiPatch } from "@/services/api/common-api";
 import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
@@ -82,14 +84,18 @@ export async function getMemesMintingRoots(
   cardId: number
 ): Promise<MemesMintingRootItem[]> {
   return commonApiFetch<MemesMintingRootItem[]>({
-    endpoint: `memes-minting/roots/${contract}/${cardId}`,
+    endpoint: `memes-minting/${contract}/${cardId}/roots`,
   });
 }
 
 export interface MemesMintingAirdropSummaryItem {
   phase: string;
-  addresses_count: number;
-  total_airdrops: number;
+  addresses: number;
+  total: number;
+  // Backward-compat for older backend payloads.
+  addresses_count?: number;
+  total_airdrops?: number;
+  total_spots?: number;
 }
 
 export async function getMemesMintingAirdrops(
@@ -97,7 +103,59 @@ export async function getMemesMintingAirdrops(
   cardId: number
 ): Promise<MemesMintingAirdropSummaryItem[]> {
   return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
-    endpoint: `memes-minting/airdrops/${contract}/${cardId}`,
+    endpoint: `memes-minting/${contract}/${cardId}/airdrops`,
+  });
+}
+
+export async function getMemesMintingAllowlists(
+  contract: string,
+  cardId: number
+): Promise<MemesMintingAirdropSummaryItem[]> {
+  return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
+    endpoint: `memes-minting/${contract}/${cardId}/allowlists`,
+  });
+}
+
+export async function getMemesMintingProofsByAddress(
+  contract: string,
+  cardId: number,
+  merkleRoot: string,
+  address: string
+): Promise<MemesMintingProofsResponse> {
+  return commonApiFetch<MemesMintingProofsResponse>({
+    endpoint: `memes-minting/${encodeURIComponent(contract)}/${cardId}/${encodeURIComponent(
+      merkleRoot
+    )}/proofs/${encodeURIComponent(address)}`,
+  });
+}
+
+export async function getDistributionAirdropsArtist(
+  contract: string,
+  cardId: number
+): Promise<PhaseAirdrop[]> {
+  return commonApiFetch<PhaseAirdrop[]>({
+    endpoint: `distributions/${contract}/${cardId}/airdrops_artist`,
+  });
+}
+
+export async function getDistributionAirdropsTeam(
+  contract: string,
+  cardId: number
+): Promise<PhaseAirdrop[]> {
+  return commonApiFetch<PhaseAirdrop[]>({
+    endpoint: `distributions/${contract}/${cardId}/airdrops_team`,
+  });
+}
+
+export async function getFinalSubscriptionsByPhase(
+  contract: string,
+  tokenId: number,
+  phaseName: string
+): Promise<PhaseAirdrop[]> {
+  return commonApiFetch<PhaseAirdrop[]>({
+    endpoint: `subscriptions/final/${contract}/${tokenId}/phases/${encodeURIComponent(
+      phaseName
+    )}`,
   });
 }
 

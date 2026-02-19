@@ -21,6 +21,7 @@ import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { mainnet } from "viem/chains";
 import NftNavigation from "../nft-navigation/NftNavigation";
 import {
   MemePageCollectorsRightMenu,
@@ -383,7 +384,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </Col>
               {isLastCard && (
                 <Col sm={12} md={6} className="d-flex align-items-center">
-                  {nft && <NowMintingCountdown nftId={nft.id} fullWidth />}
+                  {nft && (
+                    <NowMintingCountdown
+                      nftId={nft.id}
+                      contract={MEMES_CONTRACT}
+                      chainId={mainnet.id}
+                      fullWidth
+                    />
+                  )}
                 </Col>
               )}
             </Row>
