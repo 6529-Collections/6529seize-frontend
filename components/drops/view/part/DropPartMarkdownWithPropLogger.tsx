@@ -14,6 +14,27 @@ function areArraysEqual(arr1: any[], arr2: any[]): boolean {
   return true;
 }
 
+function areLinkPreviewToggleControlsEqual(
+  prevControl: DropPartMarkdownProps["linkPreviewToggleControl"],
+  nextControl: DropPartMarkdownProps["linkPreviewToggleControl"]
+): boolean {
+  if (prevControl === nextControl) {
+    return true;
+  }
+
+  if (!prevControl || !nextControl) {
+    return false;
+  }
+
+  return (
+    prevControl.canToggle === nextControl.canToggle &&
+    prevControl.isHidden === nextControl.isHidden &&
+    prevControl.isLoading === nextControl.isLoading &&
+    prevControl.label === nextControl.label &&
+    prevControl.onToggle === nextControl.onToggle
+  );
+}
+
 function areEqual(
   prevProps: DropPartMarkdownProps,
   nextProps: DropPartMarkdownProps
@@ -31,7 +52,6 @@ function areEqual(
     "quotePath",
     "embedDepth",
     "maxEmbedDepth",
-    "linkPreviewToggleControl",
   ];
 
   for (const key of propsToCheck) {
@@ -48,7 +68,11 @@ function areEqual(
       }
     }
   }
-  return true;
+
+  return areLinkPreviewToggleControlsEqual(
+    prevProps.linkPreviewToggleControl,
+    nextProps.linkPreviewToggleControl
+  );
 }
 
 const DropPartMarkdownWithPropLogger = React.memo(

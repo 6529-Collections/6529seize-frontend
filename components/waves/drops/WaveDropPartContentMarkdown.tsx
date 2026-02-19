@@ -1,25 +1,32 @@
 import { AuthContext, useAuth } from "@/components/auth/Auth";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
-import EditDropLexical from "./EditDropLexical";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
-import type { ApiDropPart } from "@/generated/models/ApiDropPart";
-import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { LinkPreviewToggleControl } from "@/components/waves/LinkPreviewContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import EditDropLexical from "./EditDropLexical";
+import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 
 const URL_REGEX =
   /https?:\/\/(www\.)?[-a-z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9@:%_+.~#?&=/]*)/gi;
 
-function dropHasLinks(drop: ApiDrop): boolean {
-  const parts = Array.isArray(drop.parts) ? drop.parts : [];
-  for (const dropPart of parts) {
+function dropHasLinks(parts: readonly ApiDropPart[] | undefined): boolean {
+  const safeParts = Array.isArray(parts) ? parts : [];
+  for (const dropPart of safeParts) {
     if (dropPart.content && URL_REGEX.test(dropPart.content)) {
       URL_REGEX.lastIndex = 0;
       return true;
@@ -70,27 +77,64 @@ const WaveDropPartContentMarkdown: React.FC<
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { setToast } = useAuth();
   const myStream = useMyStreamOptional();
+  const applyOptimisticDropUpdate = myStream?.applyOptimisticDropUpdate;
   const [isLinkPreviewToggleLoading, setIsLinkPreviewToggleLoading] =
     useState(false);
+  const dropId = drop?.id;
+  const dropWaveId = drop?.wave.id;
+  const dropAuthorHandle = drop?.author.handle;
+  const dropParts = drop?.parts;
   const currentQuotePath =
     drop?.serial_no === undefined ? [] : [`${wave.id}:${drop.serial_no}`];
   const isAuthor =
-    connectedProfile?.handle === drop?.author.handle && !activeProfileProxy;
-  const hasLinks = useMemo(() => (drop ? dropHasLinks(drop) : false), [drop]);
+    connectedProfile?.handle === dropAuthorHandle && !activeProfileProxy;
+  const hasLinks = useMemo(() => dropHasLinks(dropParts), [dropParts]);
   const previewsHidden = drop?.hide_link_preview ?? false;
-  const isTemporaryDrop = drop?.id.startsWith("temp-") ?? false;
-  const canToggle = Boolean(drop && !isTemporaryDrop);
+  const isTemporaryDrop = dropId?.startsWith("temp-") ?? false;
+  const canToggle = Boolean(dropId && dropWaveId && !isTemporaryDrop);
+  const toggleRuntimeRef = useRef({
+    dropId,
+    dropWaveId,
+    canToggle,
+    applyOptimisticDropUpdate,
+    setToast,
+  });
+  const isToggleInFlightRef = useRef(false);
+
+  useEffect(() => {
+    toggleRuntimeRef.current = {
+      dropId,
+      dropWaveId,
+      canToggle,
+      applyOptimisticDropUpdate,
+      setToast,
+    };
+  }, [dropId, dropWaveId, canToggle, applyOptimisticDropUpdate, setToast]);
 
   const handleToggleLinkPreviews = useCallback(async () => {
-    if (!drop || !canToggle || isLinkPreviewToggleLoading) {
+    const {
+      dropId: currentDropId,
+      dropWaveId: currentDropWaveId,
+      canToggle: currentCanToggle,
+      applyOptimisticDropUpdate: currentApplyOptimisticDropUpdate,
+      setToast: currentSetToast,
+    } = toggleRuntimeRef.current;
+
+    if (
+      !currentDropId ||
+      !currentDropWaveId ||
+      !currentCanToggle ||
+      isToggleInFlightRef.current
+    ) {
       return;
     }
 
+    isToggleInFlightRef.current = true;
     setIsLinkPreviewToggleLoading(true);
 
-    const rollbackHandle = myStream?.applyOptimisticDropUpdate({
-      waveId: drop.wave.id,
-      dropId: drop.id,
+    const rollbackHandle = currentApplyOptimisticDropUpdate?.({
+      waveId: currentDropWaveId,
+      dropId: currentDropId,
       update: (draft) => {
         if (draft.type !== DropSize.FULL) {
           return draft;
@@ -103,25 +147,30 @@ const WaveDropPartContentMarkdown: React.FC<
 
     try {
       await commonApiPost<Record<string, never>, ApiDrop>({
-        endpoint: `drops/${drop.id}/toggle-hide-link-preview`,
+        endpoint: `drops/${currentDropId}/toggle-hide-link-preview`,
         body: {},
       });
     } catch (error) {
       rollbackHandle?.rollback();
-      setToast({
+      currentSetToast({
         message:
           typeof error === "string" ? error : "Failed to toggle link preview",
         type: "error",
       });
     } finally {
+      isToggleInFlightRef.current = false;
       setIsLinkPreviewToggleLoading(false);
     }
-  }, [drop, canToggle, isLinkPreviewToggleLoading, myStream, setToast]);
+  }, []);
+
+  const onToggleLinkPreviews = useCallback(() => {
+    void handleToggleLinkPreviews();
+  }, [handleToggleLinkPreviews]);
 
   const linkPreviewToggleControl = useMemo<
     LinkPreviewToggleControl | undefined
   >(() => {
-    if (!isAuthor || !hasLinks || !drop) {
+    if (!isAuthor || !hasLinks || !dropId) {
       return undefined;
     }
 
@@ -130,18 +179,16 @@ const WaveDropPartContentMarkdown: React.FC<
       isHidden: previewsHidden,
       isLoading: isLinkPreviewToggleLoading,
       label: previewsHidden ? "Show link previews" : "Hide link previews",
-      onToggle: () => {
-        void handleToggleLinkPreviews();
-      },
+      onToggle: onToggleLinkPreviews,
     };
   }, [
     isAuthor,
     hasLinks,
-    drop,
+    dropId,
     canToggle,
     previewsHidden,
     isLinkPreviewToggleLoading,
-    handleToggleLinkPreviews,
+    onToggleLinkPreviews,
   ]);
 
   if (isEditing) {
@@ -185,11 +232,12 @@ const WaveDropPartContentMarkdown: React.FC<
           quotePath={currentQuotePath}
           linkPreviewToggleControl={linkPreviewToggleControl}
         />
-        {drop?.updated_at && drop.updated_at !== drop.created_at && (
-          <div className="tw-mt-0.5 tw-text-[10px] tw-font-normal tw-leading-none tw-text-iron-500">
-            (edited)
-          </div>
-        )}
+        {typeof drop?.updated_at === "number" &&
+          drop.updated_at !== drop.created_at && (
+            <div className="tw-mt-0.5 tw-text-[10px] tw-font-normal tw-leading-none tw-text-iron-500">
+              (edited)
+            </div>
+          )}
       </div>
       {part.quoted_drop?.drop_id && (
         <div className="tw-mt-1.5">
