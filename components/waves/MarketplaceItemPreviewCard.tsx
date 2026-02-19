@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { useLinkPreviewVariant } from "./LinkPreviewContext";
@@ -134,10 +134,13 @@ export default function MarketplaceItemPreviewCard({
   hideActions = false,
 }: MarketplaceItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
+  const mediaFrameRef = useRef<HTMLDivElement | null>(null);
+  const titleRowRef = useRef<HTMLDivElement | null>(null);
   const normalizedPrice = typeof price === "string" ? price.trim() : "";
   const normalizedTitle = typeof title === "string" ? title.trim() : "";
   const hasPrice = normalizedPrice.length > 0;
   const hasTitle = !compact && normalizedTitle.length > 0;
+  const isImageMedia = mediaMimeType.toLowerCase().includes("image");
   const marketplaceBrand = getMarketplaceBrand(href);
   const hasMarketplaceBrand = marketplaceBrand !== null;
   let ctaAriaLabel = "Open listing";
@@ -156,6 +159,118 @@ export default function MarketplaceItemPreviewCard({
     ? "tw-max-w-[12rem] tw-gap-x-1.5 tw-rounded-full tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold"
     : "tw-size-8 tw-rounded-lg";
 
+  useEffect(() => {
+    const titleRow = titleRowRef.current;
+    const setTitleRowFullWidth = () => {
+      if (!titleRow) {
+        return;
+      }
+
+      titleRow.style.width = "100%";
+      titleRow.style.maxWidth = "";
+    };
+
+    if (!hasTitle || !isImageMedia) {
+      setTitleRowFullWidth();
+      return;
+    }
+
+    const frame = mediaFrameRef.current;
+    if (!frame || !titleRow) {
+      setTitleRowFullWidth();
+      return;
+    }
+
+    let frameResizeObserver: ResizeObserver | null = null;
+    let frameMutationObserver: MutationObserver | null = null;
+    let imageLoadListener: (() => void) | null = null;
+
+    const applyTitleWidthFromImage = () => {
+      const frameWidth = frame.clientWidth;
+      const frameHeight = frame.clientHeight;
+
+      if (frameWidth <= 0 || frameHeight <= 0) {
+        setTitleRowFullWidth();
+        return;
+      }
+
+      const image = frame.querySelector("img");
+      if (!image) {
+        setTitleRowFullWidth();
+        return;
+      }
+
+      const naturalWidth = image.naturalWidth;
+      const naturalHeight = image.naturalHeight;
+
+      if (naturalWidth <= 0 || naturalHeight <= 0) {
+        setTitleRowFullWidth();
+        return;
+      }
+
+      const frameRatio = frameWidth / frameHeight;
+      const imageRatio = naturalWidth / naturalHeight;
+      const displayedImageWidth =
+        imageRatio >= frameRatio ? frameWidth : frameHeight * imageRatio;
+
+      const nextWidth = Math.max(
+        1,
+        Math.min(frameWidth, Math.round(displayedImageWidth))
+      );
+
+      titleRow.style.width = `${nextWidth}px`;
+      titleRow.style.maxWidth = "100%";
+    };
+
+    const bindImageLoadListener = () => {
+      const image = frame.querySelector("img");
+      if (!image) {
+        return;
+      }
+
+      const onImageLoad = () => {
+        applyTitleWidthFromImage();
+      };
+
+      if (!image.complete) {
+        image.addEventListener("load", onImageLoad);
+        imageLoadListener = () =>
+          image.removeEventListener("load", onImageLoad);
+      }
+    };
+
+    applyTitleWidthFromImage();
+    bindImageLoadListener();
+
+    if (typeof ResizeObserver !== "undefined") {
+      frameResizeObserver = new ResizeObserver(() => {
+        applyTitleWidthFromImage();
+      });
+      frameResizeObserver.observe(frame);
+    }
+
+    if (typeof MutationObserver !== "undefined") {
+      frameMutationObserver = new MutationObserver(() => {
+        if (imageLoadListener) {
+          imageLoadListener();
+          imageLoadListener = null;
+        }
+        bindImageLoadListener();
+        applyTitleWidthFromImage();
+      });
+      frameMutationObserver.observe(frame, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    return () => {
+      frameResizeObserver?.disconnect();
+      frameMutationObserver?.disconnect();
+      imageLoadListener?.();
+    };
+  }, [hasTitle, isImageMedia, mediaUrl]);
+
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
       <div
@@ -173,6 +288,7 @@ export default function MarketplaceItemPreviewCard({
           <div
             className={`${MARKETPLACE_MEDIA_FRAME_CLASS} tw-relative`}
             data-testid="manifold-item-media"
+            ref={mediaFrameRef}
           >
             <MediaDisplay
               media_mime_type={mediaMimeType}
@@ -181,16 +297,20 @@ export default function MarketplaceItemPreviewCard({
             />
           </div>
           {hasTitle && (
-            <div
-              className="tw-w-full tw-bg-iron-900/70 tw-px-3 tw-py-2"
-              data-testid="marketplace-item-title-row"
-            >
-              <p
-                className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-white"
-                data-testid="marketplace-item-title"
+            <div className="tw-flex tw-w-full tw-justify-center">
+              <div
+                className="tw-overflow-hidden tw-bg-iron-900/70 tw-px-3 tw-py-2"
+                style={{ width: "100%" }}
+                ref={titleRowRef}
+                data-testid="marketplace-item-title-row"
               >
-                {normalizedTitle}
-              </p>
+                <p
+                  className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-white"
+                  data-testid="marketplace-item-title"
+                >
+                  {normalizedTitle}
+                </p>
+              </div>
             </div>
           )}
         </Link>

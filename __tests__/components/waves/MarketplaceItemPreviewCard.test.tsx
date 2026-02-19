@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 
 import MarketplaceItemPreviewCard from "@/components/waves/MarketplaceItemPreviewCard";
@@ -17,11 +17,93 @@ jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
       data-mime={props.media_mime_type}
       data-url={props.media_url}
       data-disable={String(props.disableMediaInteraction)}
-    />
+    >
+      {props.media_mime_type.toLowerCase().includes("image") ? (
+        <img alt="" src={props.media_url} />
+      ) : null}
+    </div>
   ),
 }));
 
+const setElementDimensions = (
+  element: HTMLElement,
+  width: number,
+  height: number
+) => {
+  Object.defineProperty(element, "clientWidth", {
+    configurable: true,
+    value: width,
+  });
+  Object.defineProperty(element, "clientHeight", {
+    configurable: true,
+    value: height,
+  });
+};
+
+const setImageNaturalSize = (
+  image: HTMLImageElement,
+  width: number,
+  height: number
+) => {
+  Object.defineProperty(image, "naturalWidth", {
+    configurable: true,
+    value: width,
+  });
+  Object.defineProperty(image, "naturalHeight", {
+    configurable: true,
+    value: height,
+  });
+};
+
+class TestResizeObserver implements ResizeObserver {
+  private static readonly instances = new Set<TestResizeObserver>();
+  private target: Element | null = null;
+  public readonly callback: ResizeObserverCallback;
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    TestResizeObserver.instances.add(this);
+  }
+
+  static triggerAll() {
+    for (const instance of TestResizeObserver.instances) {
+      if (instance.target) {
+        instance.callback([], instance);
+      }
+    }
+  }
+
+  static clear() {
+    TestResizeObserver.instances.clear();
+  }
+
+  observe(target: Element) {
+    this.target = target;
+  }
+
+  unobserve() {}
+
+  disconnect() {
+    TestResizeObserver.instances.delete(this);
+    this.target = null;
+  }
+}
+
 describe("MarketplaceItemPreviewCard", () => {
+  const originalResizeObserver = global.ResizeObserver;
+  const originalWindowResizeObserver = window.ResizeObserver;
+
+  beforeEach(() => {
+    global.ResizeObserver = TestResizeObserver;
+    window.ResizeObserver = TestResizeObserver;
+    TestResizeObserver.clear();
+  });
+
+  afterEach(() => {
+    global.ResizeObserver = originalResizeObserver;
+    window.ResizeObserver = originalWindowResizeObserver;
+  });
+
   it("renders media and no-price CTA with marketplace logo", () => {
     const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
 
@@ -109,6 +191,110 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.getByTestId("marketplace-item-title")).toHaveTextContent(
       "Wave Artifact"
     );
+  });
+
+  it("syncs title row width to displayed image width", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    const mediaFrame = screen.getByTestId("manifold-item-media");
+    const titleRow = screen.getByTestId("marketplace-item-title-row");
+    const image = mediaFrame.querySelector("img");
+
+    expect(image).not.toBeNull();
+    setElementDimensions(mediaFrame, 320, 180);
+    setImageNaturalSize(image as HTMLImageElement, 1600, 900);
+
+    act(() => {
+      TestResizeObserver.triggerAll();
+    });
+
+    expect(titleRow.style.width).toBe("320px");
+    expect(titleRow.style.maxWidth).toBe("100%");
+  });
+
+  it("keeps title row full width when image dimensions are unavailable", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    const mediaFrame = screen.getByTestId("manifold-item-media");
+    const titleRow = screen.getByTestId("marketplace-item-title-row");
+    const image = mediaFrame.querySelector("img");
+
+    expect(image).not.toBeNull();
+    setElementDimensions(mediaFrame, 320, 180);
+    setImageNaturalSize(image as HTMLImageElement, 0, 0);
+
+    act(() => {
+      TestResizeObserver.triggerAll();
+    });
+
+    expect(titleRow.style.width).toBe("100%");
+    expect(titleRow.style.maxWidth).toBe("");
+  });
+
+  it("resets measured title width when media changes to non-image", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    const { rerender } = render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    const mediaFrame = screen.getByTestId("manifold-item-media");
+    const titleRow = screen.getByTestId("marketplace-item-title-row");
+    const image = mediaFrame.querySelector("img");
+
+    expect(image).not.toBeNull();
+    setElementDimensions(mediaFrame, 320, 180);
+    setImageNaturalSize(image as HTMLImageElement, 1600, 900);
+
+    act(() => {
+      TestResizeObserver.triggerAll();
+    });
+
+    expect(titleRow.style.width).toBe("320px");
+    expect(titleRow.style.maxWidth).toBe("100%");
+
+    rerender(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-video"
+          mediaMimeType="video/mp4"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.getByTestId("marketplace-item-title-row").style.width).toBe(
+      "100%"
+    );
+    expect(
+      screen.getByTestId("marketplace-item-title-row").style.maxWidth
+    ).toBe("");
   });
 
   it("does not render title row in compact mode", () => {
