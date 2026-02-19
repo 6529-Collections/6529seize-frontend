@@ -6,6 +6,8 @@ interface ApiNftLinkData {
   readonly chain: string | null;
   readonly contract: string | null;
   readonly token: string | null;
+  readonly name?: string | null;
+  readonly description?: string | null;
   readonly media_uri: string | null;
   readonly last_error_message: string | null;
   readonly price: string | null;

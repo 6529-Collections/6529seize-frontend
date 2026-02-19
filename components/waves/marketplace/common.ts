@@ -1,5 +1,6 @@
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
+import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 type MediaCandidate =
@@ -16,6 +17,8 @@ export interface MarketplaceTypePreviewProps {
   readonly compact?: boolean | undefined;
 }
 
+export type MarketplacePreviewMode = "default" | "opensea-sanitized";
+
 export type MarketplacePreviewState =
   | { readonly type: "loading"; readonly href: string }
   | {
@@ -26,10 +29,20 @@ export type MarketplacePreviewState =
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
 
-export type PickedMedia = {
+type PickedMedia = {
   readonly url: string;
   readonly mimeType: string;
 };
+
+export interface MarketplacePreviewData {
+  readonly href: string;
+  readonly canonicalId: string | null;
+  readonly platform: string | null;
+  readonly title: string | null;
+  readonly description: string | null;
+  readonly media: PickedMedia | null;
+  readonly price: string | null;
+}
 
 const OPENSEA_HOST = "opensea.io";
 
@@ -50,6 +63,14 @@ const asNonEmptyString = (value: unknown): string | undefined => {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const asNullableString = (value: unknown): string | null =>
+  asNonEmptyString(value) ?? null;
+
+const normalizeCanonicalId = (canonicalId: unknown): string | null => {
+  const value = asNonEmptyString(canonicalId);
+  return value ? value.toLowerCase() : null;
 };
 
 const isOpenSeaHref = (href: string): boolean => {
@@ -134,9 +155,7 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
   };
 };
 
-export const pickMedia = (
-  data: LinkPreviewResponse
-): PickedMedia | undefined => {
+const pickMedia = (data: LinkPreviewResponse): PickedMedia | undefined => {
   const primary = toPickedMedia(data.image);
   if (primary) {
     return primary;
@@ -157,15 +176,125 @@ export const pickMedia = (
   return undefined;
 };
 
-export const pickNftLinkMedia = (
+const pickNftLinkMedia = (
   response: ApiNftLinkResponse | undefined
 ): PickedMedia | undefined => pickMediaFromUrl(response?.data?.media_uri);
 
-export const pickNftLinkPrice = (
+const pickNftLinkPrice = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.price);
 
-export const sanitizeOpenSeaOverlayMedia = (
+const pickNftLinkTitle = (
+  response: ApiNftLinkResponse | undefined
+): string | undefined => asNonEmptyString(response?.data?.name);
+
+const pickNftLinkDescription = (
+  response: ApiNftLinkResponse | undefined
+): string | undefined => asNonEmptyString(response?.data?.description);
+
+export const fromNftLink = ({
+  href,
+  response,
+}: {
+  readonly href: string;
+  readonly response?: ApiNftLinkResponse | undefined;
+}): MarketplacePreviewData => ({
+  href,
+  canonicalId: asNullableString(response?.data?.canonical_id),
+  platform: asNullableString(response?.data?.platform),
+  title: pickNftLinkTitle(response) ?? null,
+  description: pickNftLinkDescription(response) ?? null,
+  media: pickNftLinkMedia(response) ?? null,
+  price: pickNftLinkPrice(response) ?? null,
+});
+
+export const needsOpenGraphFallback = (data: MarketplacePreviewData): boolean =>
+  data.title === null || data.media === null;
+
+export const mergeOpenGraphFallback = ({
+  href,
+  mode,
+  current,
+  linkPreview,
+}: {
+  readonly href: string;
+  readonly mode: MarketplacePreviewMode;
+  readonly current: MarketplacePreviewData;
+  readonly linkPreview: LinkPreviewResponse;
+}): MarketplacePreviewData => {
+  const linkPreviewResponse =
+    mode === "opensea-sanitized"
+      ? sanitizeOpenSeaOverlayMedia(href, linkPreview)
+      : linkPreview;
+
+  return {
+    ...current,
+    title: current.title ?? asNullableString(linkPreviewResponse.title),
+    description:
+      current.description ?? asNullableString(linkPreviewResponse.description),
+    media: current.media ?? pickMedia(linkPreviewResponse) ?? null,
+  };
+};
+
+const isSameMedia = (
+  first: PickedMedia | null,
+  second: PickedMedia | null
+): boolean =>
+  first?.url === second?.url && first?.mimeType === second?.mimeType;
+
+export const matchesMarketplacePreviewCanonicalId = ({
+  previewCanonicalId,
+  incomingCanonicalId,
+}: {
+  readonly previewCanonicalId: string | null;
+  readonly incomingCanonicalId: unknown;
+}): boolean => {
+  const normalizedPreviewCanonicalId = normalizeCanonicalId(previewCanonicalId);
+  const normalizedIncomingCanonicalId =
+    normalizeCanonicalId(incomingCanonicalId);
+
+  return (
+    normalizedPreviewCanonicalId !== null &&
+    normalizedPreviewCanonicalId === normalizedIncomingCanonicalId
+  );
+};
+
+export const patchFromMediaLinkUpdate = ({
+  current,
+  update,
+}: {
+  readonly current: MarketplacePreviewData;
+  readonly update: WsMediaLinkUpdatedData;
+}): MarketplacePreviewData => {
+  const nextCanonicalId = asNonEmptyString(update.canonical_id);
+  const nextPlatform = asNonEmptyString(update.platform);
+  const nextTitle = asNonEmptyString(update.name);
+  const nextDescription = asNonEmptyString(update.description);
+  const nextPrice = asNonEmptyString(update.price);
+  const nextMedia = pickMediaFromUrl(update.media_uri) ?? current.media;
+
+  const patched: MarketplacePreviewData = {
+    ...current,
+    canonicalId: nextCanonicalId ?? current.canonicalId,
+    platform: nextPlatform ?? current.platform,
+    title: nextTitle ?? current.title,
+    description: nextDescription ?? current.description,
+    media: nextMedia,
+    price: nextPrice ?? current.price,
+  };
+
+  const didChange =
+    patched.canonicalId !== current.canonicalId ||
+    patched.platform !== current.platform ||
+    patched.title !== current.title ||
+    patched.description !== current.description ||
+    patched.price !== current.price ||
+    !isSameMedia(patched.media, current.media);
+
+  return didChange ? patched : current;
+};
+
+const sanitizeOpenSeaOverlayMedia = (
   href: string,
   data: LinkPreviewResponse
 ): LinkPreviewResponse => {

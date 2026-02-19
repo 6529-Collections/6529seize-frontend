@@ -3,17 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   WebSocketContextValue,
-  WebSocketProviderProps} from "./WebSocketContext";
-import {
-  WebSocketContext
+  WebSocketProviderProps,
 } from "./WebSocketContext";
+import { WebSocketContext } from "./WebSocketContext";
 import type {
   MessageCallback,
   SubscriberMap,
-  WebSocketMessage} from "./WebSocketTypes";
-import {
-  WebSocketStatus,
+  WebSocketMessage,
 } from "./WebSocketTypes";
+import { WebSocketStatus } from "./WebSocketTypes";
 import type { WsMessageType } from "@/helpers/Types";
 import { getAuthJwt } from "../auth/auth.utils";
 
@@ -21,6 +19,56 @@ import { getAuthJwt } from "../auth/auth.utils";
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
+
+type WebSocketMessagePayload = {
+  readonly type?: unknown;
+  readonly data?: unknown;
+  readonly message?: {
+    readonly type?: unknown;
+    readonly data?: unknown;
+  };
+};
+
+const asNonEmptyString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const asWebSocketMessagePayload = (
+  value: unknown
+): WebSocketMessagePayload | undefined => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as WebSocketMessagePayload;
+};
+
+const normalizeIncomingMessage = (
+  value: unknown
+): { readonly type: string; readonly data: unknown } | undefined => {
+  const payload = asWebSocketMessagePayload(value);
+  if (!payload) {
+    return undefined;
+  }
+
+  const nestedPayload = asWebSocketMessagePayload(payload.message);
+  const type =
+    asNonEmptyString(payload.type) ?? asNonEmptyString(nestedPayload?.type);
+
+  if (!type) {
+    return undefined;
+  }
+
+  return {
+    type,
+    data: payload.data ?? nestedPayload?.data,
+  };
+};
 
 /**
  * Calculate delay for exponential backoff
@@ -64,10 +112,18 @@ export function WebSocketProvider({
   /**
    * Parse and route incoming WebSocket messages
    */
-  const handleMessage = useCallback((event: MessageEvent) => {
+  const handleMessage = useCallback((event: MessageEvent<unknown>) => {
     try {
+      if (typeof event.data !== "string") {
+        return;
+      }
+
       // Parse the message
-      const message: WebSocketMessage<{ data: any }> = JSON.parse(event.data);
+      const parsed: unknown = JSON.parse(event.data);
+      const message = normalizeIncomingMessage(parsed);
+      if (!message) {
+        return;
+      }
 
       // Get subscribers for this message type
       const subscribers = subscribersRef.current.get(message.type);

@@ -4,17 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
-  type PickedMedia,
-  pickMedia,
-  pickNftLinkMedia,
-  pickNftLinkPrice,
-  sanitizeOpenSeaOverlayMedia,
+  fromNftLink,
+  mergeOpenGraphFallback,
+  needsOpenGraphFallback,
+  type MarketplacePreviewMode,
   type MarketplacePreviewState,
 } from "./common";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 import { fetchNftLink } from "@/services/api/nft-link-api";
-
-type MarketplacePreviewMode = "default" | "opensea-sanitized";
 
 interface UseMarketplacePreviewStateParams {
   readonly href: string;
@@ -33,30 +30,42 @@ export const useMarketplacePreviewState = ({
   const normalizedHref = href.trim();
   const hasHref = normalizedHref.length > 0;
 
-  const nftLinkQuery = useQuery({
-    queryKey: [QueryKey.MARKETPLACE_NFT_LINK, { href: normalizedHref }],
-    queryFn: async () => await fetchNftLink(normalizedHref),
+  const marketplacePreviewQuery = useQuery({
+    queryKey: [QueryKey.MARKETPLACE_PREVIEW, { href: normalizedHref, mode }],
+    queryFn: async () => {
+      let preview = fromNftLink({ href: normalizedHref });
+
+      try {
+        const nftLinkResponse = await fetchNftLink(normalizedHref);
+        preview = fromNftLink({
+          href: normalizedHref,
+          response: nftLinkResponse,
+        });
+      } catch {
+        // Ignore nft-link errors and continue with open-graph fallback.
+      }
+
+      if (!needsOpenGraphFallback(preview)) {
+        return preview;
+      }
+
+      try {
+        const linkPreview = await fetchLinkPreview(normalizedHref);
+        return mergeOpenGraphFallback({
+          href: normalizedHref,
+          mode,
+          current: preview,
+          linkPreview,
+        });
+      } catch (error) {
+        if (preview.media !== null) {
+          return preview;
+        }
+
+        throw error;
+      }
+    },
     enabled: hasHref,
-    staleTime: MARKETPLACE_PREVIEW_STALE_TIME_MS,
-    retry: false,
-  });
-
-  const selectedNftLink =
-    nftLinkQuery.data !== undefined && nftLinkQuery.data.data !== null
-      ? nftLinkQuery.data
-      : undefined;
-  const resolvedMedia = pickNftLinkMedia(selectedNftLink);
-  const resolvedPrice = pickNftLinkPrice(selectedNftLink);
-  const shouldLoadFallback =
-    !nftLinkQuery.isPending && resolvedMedia === undefined;
-
-  const linkPreviewQuery = useQuery({
-    queryKey: [
-      QueryKey.MARKETPLACE_LINK_PREVIEW,
-      { href: normalizedHref, mode },
-    ],
-    queryFn: async () => await fetchLinkPreview(normalizedHref),
-    enabled: hasHref && shouldLoadFallback,
     staleTime: MARKETPLACE_PREVIEW_STALE_TIME_MS,
     retry: false,
   });
@@ -71,44 +80,25 @@ export const useMarketplacePreviewState = ({
     };
   }
 
-  if (resolvedMedia) {
-    return {
-      type: "success",
-      href,
-      resolvedMedia,
-      resolvedPrice,
-    };
-  }
-
-  if (
-    nftLinkQuery.isPending ||
-    (shouldLoadFallback && linkPreviewQuery.isPending)
-  ) {
+  if (marketplacePreviewQuery.isPending) {
     return {
       type: "loading",
       href,
     };
   }
 
-  let fallbackMedia: PickedMedia | undefined;
-  if (linkPreviewQuery.data) {
-    const linkPreviewResponse =
-      mode === "opensea-sanitized"
-        ? sanitizeOpenSeaOverlayMedia(href, linkPreviewQuery.data)
-        : linkPreviewQuery.data;
-    fallbackMedia = pickMedia(linkPreviewResponse);
-  }
+  const resolvedMedia = marketplacePreviewQuery.data?.media;
 
-  if (fallbackMedia) {
+  if (resolvedMedia !== null && resolvedMedia !== undefined) {
     return {
       type: "success",
       href,
-      resolvedMedia: fallbackMedia,
-      resolvedPrice,
+      resolvedMedia,
+      resolvedPrice: marketplacePreviewQuery.data?.price ?? undefined,
     };
   }
 
-  const error = linkPreviewQuery.error ?? nftLinkQuery.error;
+  const error = marketplacePreviewQuery.error;
 
   return {
     type: "error",

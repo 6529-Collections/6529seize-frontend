@@ -50,6 +50,8 @@ describe("useMarketplacePreviewState", () => {
         chain: "ethereum",
         contract: "0x123",
         token: "1",
+        name: "Wave Artifact",
+        description: "Some description",
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "1.25 ETH",
@@ -76,6 +78,95 @@ describe("useMarketplacePreviewState", () => {
       )
     );
     expect(mockedFetchLinkPreview).not.toHaveBeenCalled();
+  });
+
+  it("falls back to link preview title when nft-link title is missing", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockedFetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: {
+        canonical_id: "manifold:123",
+        platform: "manifold",
+        chain: "ethereum",
+        contract: "0x123",
+        token: "1",
+        media_uri: "https://cdn.example.com/nft-image.png",
+        last_error_message: null,
+        price: "0.42 ETH",
+        last_successfully_updated: 1735689600,
+        failed_since: null,
+      },
+    });
+    mockedFetchLinkPreview.mockResolvedValue({
+      title: "Fallback title",
+      description: "Fallback description",
+      image: {
+        url: "https://cdn.example.com/fallback-image.webp",
+        type: "image/webp",
+      },
+    });
+
+    const { result } = renderHook(() => useMarketplacePreviewState({ href }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          type: "success",
+          href,
+          resolvedMedia: {
+            url: "https://cdn.example.com/nft-image.png",
+            mimeType: "image/png",
+          },
+          resolvedPrice: "0.42 ETH",
+        })
+      )
+    );
+    expect(mockedFetchLinkPreview).toHaveBeenCalledWith(href);
+  });
+
+  it("keeps nft-link media when title fallback fails", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockedFetchNftLink.mockResolvedValue({
+      is_enrichable: true,
+      validation_error: null,
+      data: {
+        canonical_id: "manifold:123",
+        platform: "manifold",
+        chain: "ethereum",
+        contract: "0x123",
+        token: "1",
+        media_uri: "https://cdn.example.com/nft-image.png",
+        last_error_message: null,
+        price: "0.42 ETH",
+        last_successfully_updated: 1735689600,
+        failed_since: null,
+      },
+    });
+    mockedFetchLinkPreview.mockRejectedValue(
+      new Error("open-graph unavailable")
+    );
+
+    const { result } = renderHook(() => useMarketplacePreviewState({ href }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          type: "success",
+          href,
+          resolvedMedia: {
+            url: "https://cdn.example.com/nft-image.png",
+            mimeType: "image/png",
+          },
+          resolvedPrice: "0.42 ETH",
+        })
+      )
+    );
+    expect(mockedFetchLinkPreview).toHaveBeenCalledWith(href);
   });
 
   it("falls back to link preview media when nft-link has no media", async () => {
@@ -174,6 +265,36 @@ describe("useMarketplacePreviewState", () => {
         })
       )
     );
+  });
+
+  it("returns success from open-graph when nft-link request fails", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+    mockedFetchNftLink.mockRejectedValue(new Error("nft-link unavailable"));
+    mockedFetchLinkPreview.mockResolvedValue({
+      title: "Open graph title",
+      image: {
+        url: "https://arweave.net/og-image.png",
+        type: "image/png",
+      },
+    });
+
+    const { result } = renderHook(() => useMarketplacePreviewState({ href }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          type: "success",
+          href,
+          resolvedMedia: {
+            url: "https://arweave.net/og-image.png",
+            mimeType: "image/png",
+          },
+        })
+      )
+    );
+    expect(mockedFetchLinkPreview).toHaveBeenCalledWith(href);
   });
 
   it("returns validation error and skips requests for blank href", () => {
