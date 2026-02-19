@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState, type MouseEvent } from "react";
 
@@ -12,6 +13,7 @@ import {
   MARKETPLACE_MEDIA_FRAME_CLASS,
   getMarketplaceTitleRowClass,
 } from "./marketplace/previewLayout";
+import { getMarketplaceUrlKind } from "./marketplace/urlKind";
 
 interface MarketplaceItemPreviewCardProps {
   readonly href: string;
@@ -21,6 +23,32 @@ interface MarketplaceItemPreviewCardProps {
   readonly compact?: boolean | undefined;
   readonly hideActions?: boolean | undefined;
 }
+
+type MarketplaceBrand = {
+  readonly displayName: string;
+  readonly logoSrc: string;
+};
+
+const getMarketplaceBrand = (href: string): MarketplaceBrand | null => {
+  const kind = getMarketplaceUrlKind(href);
+
+  switch (kind) {
+    case "manifold.listing":
+      return { displayName: "Manifold", logoSrc: "/manifold.png" };
+    case "superrare.artwork":
+      return { displayName: "SuperRare", logoSrc: "/superrare-icon.png" };
+    case "foundation.mint":
+      return { displayName: "Foundation", logoSrc: "/Foundation-icon.jpg" };
+    case "opensea.item":
+    case "opensea.asset":
+      return { displayName: "OpenSea", logoSrc: "/opensea.png" };
+    case "transient.nft":
+    case "transient.mint":
+      return { displayName: "Transient", logoSrc: "/transient.png" };
+    case null:
+      return null;
+  }
+};
 
 function OverlayActionButtons({ href }: { readonly href: string }) {
   const [copied, setCopied] = useState(false);
@@ -107,6 +135,11 @@ export default function MarketplaceItemPreviewCard({
   const variant = useLinkPreviewVariant();
   const normalizedPrice = typeof price === "string" ? price.trim() : "";
   const hasPrice = normalizedPrice.length > 0;
+  const marketplaceBrand = getMarketplaceBrand(href);
+  const fallbackLabel = marketplaceBrand
+    ? `View on ${marketplaceBrand.displayName}`
+    : "View listing";
+  const ctaLabel = hasPrice ? normalizedPrice : fallbackLabel;
 
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
@@ -120,6 +153,7 @@ export default function MarketplaceItemPreviewCard({
           rel="noopener noreferrer"
           prefetch={false}
           className="tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-no-underline"
+          data-testid="marketplace-item-media-link"
         >
           <div
             className={MARKETPLACE_MEDIA_FRAME_CLASS}
@@ -131,19 +165,35 @@ export default function MarketplaceItemPreviewCard({
               disableMediaInteraction={true}
             />
           </div>
-          {hasPrice && (
-            <div className={getMarketplaceTitleRowClass(variant)}>
-              <p
-                className={`tw-mb-0 tw-truncate tw-leading-tight tw-text-iron-300 ${
-                  compact ? "tw-text-sm tw-font-semibold" : "tw-mt-1 tw-text-xs"
-                }`}
-                data-testid="manifold-item-price"
-              >
-                {normalizedPrice}
-              </p>
-            </div>
-          )}
         </Link>
+        <div className={`${getMarketplaceTitleRowClass(variant)} tw-flex`}>
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            prefetch={false}
+            className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-x-1.5 tw-rounded-md tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-black tw-no-underline tw-shadow-[0_0_15px_rgba(255,255,255,0.1)] tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-300"
+            data-testid="marketplace-item-cta-link"
+          >
+            {marketplaceBrand && (
+              <Image
+                src={marketplaceBrand.logoSrc}
+                alt={`${marketplaceBrand.displayName} logo`}
+                width={16}
+                height={16}
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-rounded-sm tw-object-cover"
+              />
+            )}
+            <span
+              className="tw-truncate"
+              data-testid={
+                hasPrice ? "manifold-item-price" : "marketplace-item-cta-label"
+              }
+            >
+              {ctaLabel}
+            </span>
+          </Link>
+        </div>
         {!hideActions && <OverlayActionButtons href={href} />}
       </div>
     </LinkPreviewCardLayout>
