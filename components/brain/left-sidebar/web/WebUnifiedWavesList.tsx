@@ -1,14 +1,12 @@
 "use client";
 
-import type { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import React, { useRef } from "react";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
-import type {
-  WebUnifiedWavesListWavesHandle,
-} from "./WebUnifiedWavesListWaves";
+import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface WebUnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -46,7 +44,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   );
 
   return (
-    <div className="tw-h-full tw-py-4 tw-bg-black">
+    <div className="tw-h-full tw-bg-black tw-py-4">
       <div className="tw-w-full">
         {/* Unified Waves List */}
         <WebUnifiedWavesListWaves

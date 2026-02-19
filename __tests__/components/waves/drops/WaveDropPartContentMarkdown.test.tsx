@@ -112,3 +112,59 @@ it("passes link preview toggle control for author drops with links", () => {
     "Hide link previews"
   );
 });
+
+it("keeps link preview toggle control stable across equivalent drop rerenders", () => {
+  const drop = {
+    id: "drop-1",
+    serial_no: 1,
+    hide_link_preview: false,
+    author: { handle: "alice" },
+    wave: { id: "w" },
+    parts: [{ content: "https://example.com" }],
+  } as any;
+
+  const authContextValue = {
+    connectedProfile: { handle: "alice" },
+    activeProfileProxy: null,
+  } as any;
+
+  const { rerender } = render(
+    <AuthContext.Provider value={authContextValue}>
+      <WaveDropPartContentMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        part={basePart}
+        wave={wave}
+        drop={drop}
+        onQuoteClick={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  const firstControl = markdownProps.linkPreviewToggleControl;
+  expect(firstControl).toBeDefined();
+
+  const equivalentDrop = {
+    ...drop,
+    author: { ...drop.author },
+    wave: { ...drop.wave },
+    parts: [...drop.parts],
+  } as any;
+
+  rerender(
+    <AuthContext.Provider value={authContextValue}>
+      <WaveDropPartContentMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        part={basePart}
+        wave={wave}
+        drop={equivalentDrop}
+        onQuoteClick={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(markdownProps.linkPreviewToggleControl).toBe(firstControl);
+});

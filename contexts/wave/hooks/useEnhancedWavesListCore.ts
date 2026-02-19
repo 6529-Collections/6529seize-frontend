@@ -41,6 +41,8 @@ interface WavesDataSource {
 
 interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
+  otherListWaveIds?: ReadonlySet<string> | undefined;
+  unknownWaveRefetchCooldownMs?: number | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
@@ -55,7 +57,11 @@ function useEnhancedWavesListCore(
   const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
     activeWaveId,
     wavesData.waves,
-    wavesData.mainWavesRefetch
+    wavesData.mainWavesRefetch,
+    {
+      otherListWaveIds: options.otherListWaveIds,
+      unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
+    }
   );
 
   const [clearedUnreadWaveIds, setClearedUnreadWaveIds] = useState<Set<string>>(

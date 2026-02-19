@@ -5,6 +5,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import useDmWavesList from "@/hooks/useDmWavesList";
+import useWavesList from "@/hooks/useWavesList";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import type { ReactNode } from "react";
 import React, {
@@ -18,9 +20,8 @@ import React, {
 } from "react";
 import type { WaveMessages } from "./hooks/types";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
-import useEnhancedDmWavesList from "./hooks/useEnhancedDmWavesList";
-import type { MinimalWave } from "./hooks/useEnhancedWavesList";
-import useEnhancedWavesList from "./hooks/useEnhancedWavesList";
+import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
+import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
@@ -100,8 +101,24 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 }) => {
   const { isCapacitor, isActive } = useCapacitor();
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
-  const wavesHookData = useEnhancedWavesList(activeWaveId);
-  const dmWavesHookData = useEnhancedDmWavesList(activeWaveId);
+  const mainWavesData = useWavesList();
+  const dmWavesData = useDmWavesList();
+  const mainWaveIds = useMemo<ReadonlySet<string>>(
+    () => new Set(mainWavesData.waves.map((wave) => wave.id)),
+    [mainWavesData.waves]
+  );
+  const dmWaveIds = useMemo<ReadonlySet<string>>(
+    () => new Set(dmWavesData.waves.map((wave) => wave.id)),
+    [dmWavesData.waves]
+  );
+  const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
+    supportsPinning: true,
+    otherListWaveIds: dmWaveIds,
+  });
+  const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
+    supportsPinning: false,
+    otherListWaveIds: mainWaveIds,
+  });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);

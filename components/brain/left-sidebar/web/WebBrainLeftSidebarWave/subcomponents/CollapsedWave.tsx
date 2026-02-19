@@ -1,8 +1,8 @@
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import Link from "next/link";
 import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface CollapsedWaveProps {
   readonly formattedWaveName: string;
@@ -36,13 +36,15 @@ export const CollapsedWave = ({
       isActive
         ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
         : "desktop-hover:hover:tw-bg-iron-800/70"
-    }`}>
+    }`}
+  >
     <Link
       href={href}
       {...(onMouseEnter ? { onMouseEnter } : {})}
       onClick={onClick}
       className="tw-flex tw-items-center tw-justify-center tw-no-underline"
-      {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}>
+      {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}
+    >
       <div className="tw-relative">
         <WaveAvatar
           isActive={isActive}
