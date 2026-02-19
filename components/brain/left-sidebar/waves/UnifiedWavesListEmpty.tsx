@@ -1,5 +1,5 @@
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import React from "react";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 
 interface UnifiedWavesListEmptyProps {
   readonly sortedWaves: MinimalWave[];
