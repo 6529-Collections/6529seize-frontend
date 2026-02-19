@@ -1,19 +1,23 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import type { FC } from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
+import { MemesSubmissionPreviewScreen } from "./preview/MemesSubmissionPreviewScreen";
 import AdditionalInfoStep from "./steps/AdditionalInfoStep";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { SubmissionStep } from "./types/Steps";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
+import { buildPreviewDrop } from "./utils/buildPreviewDrop";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;
@@ -37,7 +41,10 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 }) => {
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm();
+  const { connectedProfile } = useAuth();
   const { isSafeWallet, address } = useSeizeConnectContext();
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [previewDrop, setPreviewDrop] = useState<ExtendedDrop | null>(null);
 
   // Use the mutation hook for submission
   const {
@@ -57,6 +64,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
     return () => clearTimeout(timer);
   }, [submissionPhase, onClose]);
+
+  const resetPreviewState = useCallback(() => {
+    setIsPreviewMode(false);
+    setPreviewDrop(null);
+  }, []);
 
   // Handle file selection
   const handleFileSelect = (file: File) => {
@@ -89,6 +101,32 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     // Any additional phase-specific handling can be done here
     console.warn(`Submission phase changed to: ${phase}`);
   }, []);
+
+  const handleOpenPreview = useCallback(() => {
+    const { imageUrl, traits, operationalData } = form.getSubmissionData();
+    const media = form.getMediaSelection();
+
+    setPreviewDrop(
+      buildPreviewDrop({
+        wave,
+        traits,
+        operationalData,
+        mediaSelection: media,
+        uploadArtworkUrl: imageUrl,
+        connectedProfile,
+      })
+    );
+    setIsPreviewMode(true);
+  }, [connectedProfile, form, wave]);
+
+  const handleBackToEdit = useCallback(() => {
+    setIsPreviewMode(false);
+  }, []);
+
+  const handleBackFromAdditionalInfo = () => {
+    resetPreviewState();
+    form.handleBackToArtwork();
+  };
 
   // Handle final submission
   const handleSubmit = async () => {
@@ -218,34 +256,43 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         submissionError={submissionError}
       />
     ),
-    [SubmissionStep.ADDITIONAL_INFO]: (
-      <AdditionalInfoStep
-        airdropEntries={form.operationalData.airdrop_config}
-        onAirdropEntriesChange={form.setAirdropConfig}
-        paymentInfo={form.operationalData.payment_info}
-        onPaymentInfoChange={form.setPaymentInfo}
-        allowlistBatches={form.operationalData.allowlist_batches}
-        supportingMedia={
-          form.operationalData.additional_media.artwork_commentary_media
-        }
-        artworkCommentary={form.operationalData.commentary}
-        aboutArtist={form.operationalData.about_artist}
-        previewImage={form.operationalData.additional_media.preview_image}
-        promoVideo={form.operationalData.additional_media.promo_video}
-        requiresPreviewImage={requiresPreviewImage}
-        requiresPromoVideoOption={requiresPromoVideoOption}
-        previewRequiredMediaType={previewRequiredMediaType}
-        onBatchesChange={form.setAllowlistBatches}
-        onSupportingMediaChange={handleArtworkCommentaryMediaChange}
-        onPreviewImageChange={handlePreviewImageChange}
-        onPromoVideoChange={handlePromoVideoChange}
-        onArtworkCommentaryChange={form.setCommentary}
-        onAboutArtistChange={form.setAboutArtist}
-        onBack={form.handleBackToArtwork}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-      />
-    ),
+    [SubmissionStep.ADDITIONAL_INFO]:
+      isPreviewMode && previewDrop ? (
+        <MemesSubmissionPreviewScreen
+          previewDrop={previewDrop}
+          onBackToEdit={handleBackToEdit}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      ) : (
+        <AdditionalInfoStep
+          airdropEntries={form.operationalData.airdrop_config}
+          onAirdropEntriesChange={form.setAirdropConfig}
+          paymentInfo={form.operationalData.payment_info}
+          onPaymentInfoChange={form.setPaymentInfo}
+          allowlistBatches={form.operationalData.allowlist_batches}
+          supportingMedia={
+            form.operationalData.additional_media.artwork_commentary_media
+          }
+          artworkCommentary={form.operationalData.commentary}
+          aboutArtist={form.operationalData.about_artist}
+          previewImage={form.operationalData.additional_media.preview_image}
+          promoVideo={form.operationalData.additional_media.promo_video}
+          requiresPreviewImage={requiresPreviewImage}
+          requiresPromoVideoOption={requiresPromoVideoOption}
+          previewRequiredMediaType={previewRequiredMediaType}
+          onBatchesChange={form.setAllowlistBatches}
+          onSupportingMediaChange={handleArtworkCommentaryMediaChange}
+          onPreviewImageChange={handlePreviewImageChange}
+          onPromoVideoChange={handlePromoVideoChange}
+          onArtworkCommentaryChange={form.setCommentary}
+          onAboutArtistChange={form.setAboutArtist}
+          onBack={handleBackFromAdditionalInfo}
+          onPreview={handleOpenPreview}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      ),
   };
 
   return (

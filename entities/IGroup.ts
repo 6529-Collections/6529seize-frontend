@@ -11,4 +11,5 @@ export enum GroupDescriptionType {
   LEVEL = "LEVEL",
   OWNS_NFTS = "OWNS_NFTS",
   WALLETS = "WALLETS",
+  XTDH_GRANT = "XTDH_GRANT",
 }
