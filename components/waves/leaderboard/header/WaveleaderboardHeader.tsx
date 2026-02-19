@@ -21,7 +21,7 @@ import { resolveWaveLeaderboardHeaderControlModes } from "./waveLeaderboardHeade
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
-  readonly onCreateDrop: () => void;
+  readonly onCreateDrop?: (() => void) | undefined;
   readonly viewMode: LeaderboardViewMode;
   readonly onViewModeChange: (mode: LeaderboardViewMode) => void;
   readonly sort: WaveDropsLeaderboardSort;
@@ -273,7 +273,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           <div
             className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
           >
-            {canCreateDrop && (
+            {canCreateDrop && onCreateDrop && (
               <PrimaryButton
                 loading={false}
                 disabled={false}

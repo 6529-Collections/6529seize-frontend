@@ -98,8 +98,6 @@ const CreateDropInput = forwardRef<
     readonly isStormMode: boolean;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
-    readonly hasValidationError?: boolean | undefined;
-    readonly validationHelperText?: string | undefined;
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onEditorBlur?: (event: FocusEvent<HTMLDivElement>) => void;
@@ -119,8 +117,6 @@ const CreateDropInput = forwardRef<
       isStormMode,
       isDropMode,
       submitting,
-      hasValidationError = false,
-      validationHelperText,
       onEditorState,
       onEditorBlur,
       onReferencedNft,
@@ -245,10 +241,6 @@ const CreateDropInput = forwardRef<
       onDropRef.current();
     }, []);
 
-    const editorInputStateClass = hasValidationError
-      ? "tw-ring-red focus:tw-ring-red"
-      : "tw-ring-iron-700 focus:tw-ring-primary-400";
-
     return (
       <div className="tailwind-scope" ref={editorRef}>
         <LexicalComposer initialConfig={editorConfig}>
@@ -280,7 +272,7 @@ const CreateDropInput = forwardRef<
                         }
                       }}
                       onBlur={onEditorBlur}
-                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset ${editorInputStateClass} tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm ${
+                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm ${
                         submitting ? "tw-cursor-default tw-opacity-50" : ""
                       } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
                     />
@@ -330,15 +322,6 @@ const CreateDropInput = forwardRef<
                 disabled={submitting}
               />
               <EmojiPlugin />
-              {validationHelperText && (
-                <p
-                  role="alert"
-                  aria-live="polite"
-                  className="tw-text-red-400 tw-absolute tw-left-0 tw-top-full tw-mt-1 tw-text-xs"
-                >
-                  {validationHelperText}
-                </p>
-              )}
             </div>
           </div>
         </LexicalComposer>

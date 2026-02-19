@@ -8,6 +8,43 @@ const INVALID_URL_HELPER_TEXT = "Enter a valid HTTPS URL.";
 const ALLOWED_URL_HELPER_TEXT =
   "URL must match a supported curation link format.";
 
+type SupportedCurationUrlExample = {
+  readonly label: string;
+  readonly example: string;
+};
+
+export const SUPPORTED_CURATION_URL_EXAMPLES: readonly SupportedCurationUrlExample[] =
+  [
+    {
+      label: "SuperRare artwork",
+      example: "https://superrare.com/artwork/eth/0x.../123",
+    },
+    {
+      label: "Transient NFT",
+      example: "https://transient.xyz/nfts/ethereum/0x.../123",
+    },
+    {
+      label: "Transient mint",
+      example: "https://transient.xyz/mint/your-drop-slug",
+    },
+    {
+      label: "Manifold listing",
+      example: "https://manifold.xyz/@creator/id/123",
+    },
+    {
+      label: "Foundation mint",
+      example: "https://foundation.app/mint/eth/0x.../123",
+    },
+    {
+      label: "OpenSea item",
+      example: "https://opensea.io/item/ethereum/0x.../123",
+    },
+    {
+      label: "OpenSea asset",
+      example: "https://opensea.io/assets/ethereum/0x.../123",
+    },
+  ];
+
 const HAS_WHITESPACE_REGEX = /\s/;
 const HAS_SCHEME_REGEX = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
 

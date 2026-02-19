@@ -12,6 +12,7 @@ import type { CreateDropConfig } from "@/entities/IDrop";
 import CreateDropStormParts from "./CreateDropStormParts";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
+import CreateCurationDropContent from "./CreateCurationDropContent";
 import { useMutation } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
@@ -22,6 +23,7 @@ import { AuthContext } from "../auth/Auth";
 import { useProgressiveDebounce } from "@/hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { CurationComposerVariant } from "./PrivilegedDropCreator";
 import { DropMode } from "./PrivilegedDropCreator";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -38,6 +40,7 @@ interface CreateDropProps {
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
   readonly privileges: DropPrivileges;
+  readonly curationComposerVariant?: CurationComposerVariant | undefined;
 }
 
 export interface DropMutationBody {
@@ -56,6 +59,7 @@ export default function CreateDrop({
   dropId,
   fixedDropMode,
   privileges,
+  curationComposerVariant = "default",
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -81,21 +85,6 @@ export default function CreateDrop({
   const [isDropMode, setIsDropMode] = useState(getIsDropMode());
   const isCurationDropMode = isCurationWave && isDropMode;
   useEffect(() => setIsDropMode(getIsDropMode()), [wave, activeDrop]);
-
-  const getIsDropModeDisabled = () => {
-    if (!wave.participation.authenticated_user_eligible) return true;
-    if (activeDrop) return true;
-    return false;
-  };
-
-  const [dropModeDisabled, setDropModeDisabled] = useState(
-    getIsDropModeDisabled()
-  );
-
-  useEffect(
-    () => setDropModeDisabled(getIsDropModeDisabled()),
-    [wave, activeDrop]
-  );
 
   const onDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
@@ -257,7 +246,6 @@ export default function CreateDrop({
       setIsStormMode,
       onDropModeChange,
       submitDrop,
-      dropModeDisabled,
       privileges,
     }),
     [
@@ -271,7 +259,6 @@ export default function CreateDrop({
       setIsStormMode,
       onDropModeChange,
       submitDrop,
-      dropModeDisabled,
       privileges,
     ]
   );
@@ -297,7 +284,19 @@ export default function CreateDrop({
         )}
       </AnimatePresence>
 
-      <CreateDropContent {...createDropContentProps} wave={wave} />
+      {isCurationDropMode ? (
+        <CreateCurationDropContent
+          activeDrop={activeDrop}
+          onCancelReplyQuote={onCancelReplyQuote}
+          wave={wave}
+          dropId={dropId}
+          isDropMode={isDropMode}
+          submitDrop={submitDrop}
+          curationComposerVariant={curationComposerVariant}
+        />
+      ) : (
+        <CreateDropContent {...createDropContentProps} wave={wave} />
+      )}
     </>
   );
 }

@@ -10,15 +10,12 @@ import type {
   ReferencedNft,
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { selectEditingDropId } from "@/store/editSlice";
@@ -57,10 +54,7 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
-import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { useWave } from "@/hooks/useWave";
@@ -78,10 +72,7 @@ import {
 } from "./utils/createDropContentSubmission";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
-import {
-  normalizeCurationDropInput,
-  validateCurationDropInput,
-} from "./utils/validateCurationDropUrl";
+import { getOptimisticDrop } from "./utils/getOptimisticDrop";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -343,135 +334,6 @@ const generateParts = async (
   }
 };
 
-const getOptimisticDrop = (
-  dropRequest: ApiCreateDropRequest,
-  connectedProfile: ApiIdentity | null,
-  wave: {
-    id: string;
-    name: string;
-    pinned: boolean;
-    picture: string | null;
-    description_drop: { id: string };
-    participation: { authenticated_user_eligible: boolean };
-    voting: {
-      authenticated_user_eligible: boolean;
-      credit_type: ApiWaveCreditType;
-      period?: { min: number | null; max: number | null } | undefined;
-      forbid_negative_votes: boolean;
-    };
-    chat: { authenticated_user_eligible: boolean };
-  },
-  activeDrop: ActiveDropState | null,
-  dropType: ApiDropType
-): ApiDrop | null => {
-  if (!connectedProfile?.id || !connectedProfile.handle) {
-    return null;
-  }
-
-  const getReplyTo = (): ApiReplyToDropResponse | undefined => {
-    if (activeDrop?.action === ActiveDropAction.REPLY) {
-      return {
-        drop_id: activeDrop.drop.id,
-        drop_part_id: activeDrop.partId,
-        is_deleted: false,
-        drop: activeDrop.drop,
-      };
-    }
-    return undefined;
-  };
-
-  const replyTo = getReplyTo();
-  const replyToObj = replyTo ? { reply_to: replyTo } : {};
-
-  return {
-    id: getOptimisticDropId(),
-    serial_no: Date.now(),
-    ...replyToObj,
-    wave: {
-      id: wave.id,
-      name: wave.name,
-      pinned: wave.pinned,
-      picture: wave.picture ?? "",
-      description_drop_id: wave.description_drop.id,
-      authenticated_user_eligible_to_participate:
-        wave.participation.authenticated_user_eligible,
-      authenticated_user_eligible_to_vote:
-        wave.voting.authenticated_user_eligible,
-      authenticated_user_eligible_to_chat:
-        wave.chat.authenticated_user_eligible,
-      voting_credit_type: wave.voting.credit_type,
-      voting_period_start: wave.voting.period?.min ?? null,
-      voting_period_end: wave.voting.period?.max ?? null,
-      visibility_group_id: null,
-      participation_group_id: null,
-      chat_group_id: null,
-      voting_group_id: null,
-      admin_group_id: null,
-      admin_drop_deletion_enabled: false,
-      authenticated_user_admin: false,
-      forbid_negative_votes: wave.voting.forbid_negative_votes,
-    },
-    author: {
-      id: connectedProfile.id,
-      handle: connectedProfile.handle,
-      active_main_stage_submission_ids:
-        connectedProfile.active_main_stage_submission_ids,
-      winner_main_stage_drop_ids: connectedProfile.winner_main_stage_drop_ids,
-      pfp: connectedProfile.pfp,
-      banner1_color: getBannerColorValue(connectedProfile.banner1),
-      banner2_color: getBannerColorValue(connectedProfile.banner2),
-      cic: connectedProfile.cic,
-      rep: connectedProfile.rep,
-      tdh: connectedProfile.tdh,
-      tdh_rate: connectedProfile.tdh_rate,
-      xtdh: connectedProfile.xtdh,
-      xtdh_rate: connectedProfile.xtdh_rate,
-      level: connectedProfile.level,
-      subscribed_actions: [],
-      archived: false,
-      primary_address: connectedProfile.primary_wallet,
-      is_wave_creator: connectedProfile.is_wave_creator,
-    },
-    created_at: Date.now(),
-    updated_at: null,
-    title: dropRequest.title ?? null,
-    parts: dropRequest.parts.map((part, i) => ({
-      part_id: i + 1,
-      content: part.content ?? null,
-      media: part.media.map((media) => ({
-        url: media.url,
-        mime_type: media.mime_type,
-      })),
-      quoted_drop: part.quoted_drop
-        ? {
-            ...part.quoted_drop,
-            is_deleted: false,
-          }
-        : null,
-      replies_count: 0,
-      quotes_count: 0,
-    })),
-    parts_count: dropRequest.parts.length,
-    referenced_nfts: dropRequest.referenced_nfts,
-    mentioned_users: dropRequest.mentioned_users,
-    mentioned_waves: dropRequest.mentioned_waves ?? [],
-    metadata: dropRequest.metadata,
-    rating: 0,
-    top_raters: [],
-    raters_count: 0,
-    context_profile_context: null,
-    subscribed_actions: [],
-    drop_type: dropType,
-    rank: null,
-    realtime_rating: 0,
-    is_signed: false,
-    rating_prediction: 0,
-    reactions: [],
-    boosts: 0,
-    hide_link_preview: false,
-  };
-};
-
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
@@ -498,7 +360,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
-  const { isMemesWave, isCurationWave } = useWave(wave);
+  const { isMemesWave } = useWave(wave);
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
@@ -567,21 +429,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     [editorState]
   );
 
-  const isCurationDropMode = isCurationWave && isDropMode;
-  const isStormModeActive = isStormMode && !isCurationDropMode;
-
-  const curationDropInputValidation = useMemo(() => {
-    if (!isCurationDropMode) {
-      return null;
-    }
-
-    const input = getMarkdown?.trim() ?? "";
-    if (!input.length) {
-      return null;
-    }
-
-    return validateCurationDropInput(input);
-  }, [getMarkdown, isCurationDropMode]);
+  const isStormModeActive = isStormMode;
 
   const sendTyping = React.useCallback(() => {
     send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
@@ -607,13 +455,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const getCanSubmit = () => {
-    const dropParts = isCurationDropMode ? [] : (drop?.parts ?? []);
-
-    if (isCurationDropMode) {
-      return (
-        (getMarkdown?.trim().length ?? 0) > 0 && !curationDropInputValidation
-      );
-    }
+    const dropParts = drop?.parts ?? [];
 
     return (
       hasSubmissionContent({
@@ -625,8 +467,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     );
   };
 
-  const getHaveMarkdownOrFile = () =>
-    !!getMarkdown || (!isCurationDropMode && files.length > 0);
+  const getHaveMarkdownOrFile = () => !!getMarkdown || files.length > 0;
 
   const getIsDropLimit = () =>
     (drop?.parts.reduce(
@@ -634,12 +475,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       getMarkdown?.length ?? 0
     ) ?? 0) >= 24000;
 
-  const getCanAddPart = () => {
-    if (isCurationDropMode) {
-      return false;
-    }
-    return getHaveMarkdownOrFile() && !getIsDropLimit();
-  };
+  const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
   const canSubmit = getCanSubmit();
   const canAddPart = getCanAddPart();
 
@@ -727,7 +563,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   drop_part_id: activeDrop.partId,
                 }
               : null,
-          media: isCurationDropMode ? [] : files,
+          media: files,
         },
       ],
       mentioned_users: [],
@@ -746,7 +582,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     allNfts: ReferencedNft[],
     allWaves: ApiMentionedWave[]
   ): CreateDropConfig => {
-    const availableFiles = isCurationDropMode ? [] : files;
+    const availableFiles = files;
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
     const hasCurrentContent = hasCurrentDropPartContent(
       markdown,
@@ -772,19 +608,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             },
           ];
 
-    const newParts = isCurationDropMode
-      ? [
-          {
-            content: markdown ?? null,
-            quoted_drop: quotedDrop,
-            media: [],
-          },
-        ]
-      : nonCurationParts;
-
-    const parts = isCurationDropMode
-      ? newParts
-      : ensurePartsWithFallback(newParts, hasMetadata);
+    const parts = ensurePartsWithFallback(nonCurationParts, hasMetadata);
     const replyTo = getReplyTo();
     const replyToObj = replyTo ? { reply_to: replyTo } : {};
     return {
@@ -795,9 +619,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       mentioned_users: allMentions,
       mentioned_waves: allWaves,
       referenced_nfts: allNfts,
-      metadata: isCurationDropMode
-        ? []
-        : convertMetadataToDropMetadata(metadata),
+      metadata: convertMetadataToDropMetadata(metadata),
       signature: null,
       is_safe_signature: isSafeWallet,
       signer_address: address ?? "",
@@ -811,15 +633,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     const markdown = getMarkdown;
-    const existingMentions = isCurationDropMode
-      ? []
-      : (drop?.mentioned_users ?? []);
-    const existingNfts = isCurationDropMode
-      ? []
-      : (drop?.referenced_nfts ?? []);
-    const existingWaves = isCurationDropMode
-      ? []
-      : (drop?.mentioned_waves ?? []);
+    const existingMentions = drop?.mentioned_users ?? [];
+    const existingNfts = drop?.referenced_nfts ?? [];
+    const existingWaves = drop?.mentioned_waves ?? [];
     const { updatedMentions, updatedNfts, updatedWaves, updatedMarkdown } =
       handleDropPart(
         markdown,
@@ -954,45 +770,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    let normalizedDropRequest = dropRequest;
-
-    if (isCurationDropMode) {
-      const hasTooManyParts = dropRequest.parts.length !== 1;
-      const hasMedia = dropRequest.parts.some((part) => part.media.length > 0);
-      const curationText = dropRequest.parts[0]?.content?.trim() ?? "";
-      const primaryPart = dropRequest.parts[0];
-      const normalizedCurationText = normalizeCurationDropInput(curationText);
-      const curationValidation = normalizedCurationText
-        ? null
-        : validateCurationDropInput(curationText);
-
-      if (
-        hasTooManyParts ||
-        hasMedia ||
-        !normalizedCurationText ||
-        !primaryPart
-      ) {
-        setToast({
-          message:
-            curationValidation?.helperText ??
-            "Curation drops only support one HTTPS URL and no media.",
-          type: "error",
-        });
-        return;
-      }
-
-      normalizedDropRequest = {
-        ...dropRequest,
-        parts: [
-          {
-            ...primaryPart,
-            content: normalizedCurationText,
-            media: [],
-          },
-        ],
-      };
-    }
-
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -1000,44 +777,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    if (!normalizedDropRequest.parts.length) {
+    if (!dropRequest.parts.length) {
       setSubmitting(false);
       return;
     }
 
     try {
-      const parts = await generateParts(
-        normalizedDropRequest.parts,
-        setUploadingFiles
-      );
+      const parts = await generateParts(dropRequest.parts, setUploadingFiles);
       if (!parts.length) {
         setSubmitting(false);
         return;
       }
 
-      if (
-        isCurationDropMode &&
-        (parts.length !== 1 || parts.some((part) => part.media.length > 0))
-      ) {
-        setToast({
-          message: "Curation drops only support one HTTPS URL and no media.",
-          type: "error",
-        });
-        setSubmitting(false);
-        return;
-      }
-
       const requestBody: ApiCreateDropRequest = {
-        ...normalizedDropRequest,
+        ...dropRequest,
         mentioned_users: filterMentionedUsers({
-          mentionedUsers: normalizedDropRequest.mentioned_users,
-          parts: normalizedDropRequest.parts,
+          mentionedUsers: dropRequest.mentioned_users,
+          parts: dropRequest.parts,
         }),
         mentioned_waves: filterMentionedWaves({
-          mentionedWaves: normalizedDropRequest.mentioned_waves ?? [],
-          parts: normalizedDropRequest.parts,
+          mentionedWaves: dropRequest.mentioned_waves ?? [],
+          parts: dropRequest.parts,
         }),
-        metadata: isCurationDropMode ? [] : normalizedDropRequest.metadata,
+        metadata: dropRequest.metadata,
         wave_id: wave.id,
         parts,
       };
@@ -1120,17 +882,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
-    if (isCurationDropMode) {
-      if ((getMarkdown?.trim().length ?? 0) === 0) {
-        return;
-      }
-      if (curationDropInputValidation) {
-        return;
-      }
-      await prepareAndSubmitDrop(getUpdatedDrop());
-      return;
-    }
-
     if (
       missingRequirements.metadata.length ||
       missingRequirements.media.length
@@ -1152,13 +903,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onGifDrop = async (gif: string): Promise<void> => {
     if (submitting) {
-      return;
-    }
-    if (isCurationDropMode) {
-      setToast({
-        message: "GIFs are disabled for curation drops.",
-        type: "error",
-      });
       return;
     }
     await prepareAndSubmitDrop(createGifDrop(gif));
@@ -1204,16 +948,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
-    if (isCurationDropMode) {
-      if (newFiles.length) {
-        setToast({
-          message: "File uploads are disabled for curation drops.",
-          type: "error",
-        });
-      }
-      return;
-    }
-
     let updatedFiles = [...files, ...newFiles];
     let removedCount = 0;
 
@@ -1377,9 +1111,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const breakIntoStorm = () => {
-    if (isCurationDropMode) {
-      return;
-    }
     finalizeAndAddDropPart();
     setIsStormMode(true);
   };
@@ -1415,26 +1146,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           ref={actionsContainerRef}
           className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
         >
-          {!isCurationDropMode && (
-            <CreateDropActions
-              isStormMode={isStormModeActive}
-              canAddPart={canAddPart}
-              submitting={submitting}
-              showOptions={showOptions}
-              animateOptions={
-                !isWideContainer &&
-                hasUserToggledOptionsRef.current &&
-                !isWaveChanged
-              }
-              isRequiredMetadataMissing={!!missingRequirements.metadata.length}
-              isRequiredMediaMissing={!!missingRequirements.media.length}
-              handleFileChange={handleFileChange}
-              onAddMetadataClick={onAddMetadataClick}
-              breakIntoStorm={breakIntoStorm}
-              setShowOptions={handleSetShowOptions}
-              onGifDrop={onGifDrop}
-            />
-          )}
+          <CreateDropActions
+            isStormMode={isStormModeActive}
+            canAddPart={canAddPart}
+            submitting={submitting}
+            showOptions={showOptions}
+            animateOptions={
+              !isWideContainer &&
+              hasUserToggledOptionsRef.current &&
+              !isWaveChanged
+            }
+            isRequiredMetadataMissing={!!missingRequirements.metadata.length}
+            isRequiredMediaMissing={!!missingRequirements.media.length}
+            handleFileChange={handleFileChange}
+            onAddMetadataClick={onAddMetadataClick}
+            breakIntoStorm={breakIntoStorm}
+            setShowOptions={handleSetShowOptions}
+            onGifDrop={onGifDrop}
+          />
           <div className="tw-w-full tw-flex-grow">
             <CreateDropInput
               waveId={wave.id}
@@ -1452,8 +1181,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               onMentionedUser={onMentionedUser}
               onMentionedWave={onMentionedWave}
               onDrop={onDrop}
-              hasValidationError={!!curationDropInputValidation}
-              validationHelperText={curationDropInputValidation?.helperText}
             />
           </div>
         </div>
@@ -1475,7 +1202,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           </div>
         </div>
       </div>
-      {isDropMode && !isCurationDropMode && (
+      {isDropMode && (
         <CreateDropContentRequirements
           canSubmit={canSubmit}
           wave={wave}
@@ -1487,7 +1214,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         />
       )}
       <AnimatePresence>
-        {!isCurationDropMode && isMetadataOpen && (
+        {isMetadataOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -1507,15 +1234,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-      {!isCurationDropMode && (
-        <CreateDropContentFiles
-          parts={drop?.parts ?? []}
-          files={files}
-          uploadingFiles={uploadingFiles}
-          removeFile={removeFile}
-          disabled={submitting}
-        />
-      )}
+      <CreateDropContentFiles
+        parts={drop?.parts ?? []}
+        files={files}
+        uploadingFiles={uploadingFiles}
+        removeFile={removeFile}
+        disabled={submitting}
+      />
       <TermsSignatureFlow />
     </div>
   );

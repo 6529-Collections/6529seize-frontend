@@ -9,7 +9,7 @@ import { WaveLeaderboardMemesEmptyState } from "./WaveLeaderboardMemesEmptyState
 
 interface WaveLeaderboardEmptyStateProps {
   readonly wave: ApiWave;
-  readonly onCreateDrop: () => void;
+  readonly onCreateDrop?: (() => void) | undefined;
 }
 
 export const WaveLeaderboardEmptyState: React.FC<
