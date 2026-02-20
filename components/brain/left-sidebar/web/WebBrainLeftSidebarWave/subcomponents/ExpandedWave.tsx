@@ -1,11 +1,11 @@
-import type { MutableRefObject } from 'react';
-import Link from 'next/link';
-import type { MinimalWave } from '@/contexts/wave/hooks/useEnhancedWavesList';
-import BrainLeftSidebarWaveDropTime from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime';
-import BrainLeftSidebarWavePin from '@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin';
-import { WaveAvatar } from './WaveAvatar';
-import type { WaveTooltipPlacement } from './WaveTooltip';
-import { WaveTooltip } from './WaveTooltip';
+import type { MutableRefObject } from "react";
+import Link from "next/link";
+import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
+import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
+import { WaveAvatar } from "./WaveAvatar";
+import type { WaveTooltipPlacement } from "./WaveTooltip";
+import { WaveTooltip } from "./WaveTooltip";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface ExpandedWaveProps {
   readonly formattedWaveName: string;
@@ -48,8 +48,8 @@ export const ExpandedWave = ({
 }: ExpandedWaveProps) => {
   const tooltipAttributes = showExpandedTooltip
     ? {
-        'data-tooltip-id': tooltipId,
-        'data-tooltip-content': tooltipContent,
+        "data-tooltip-id": tooltipId,
+        "data-tooltip-content": tooltipContent,
       }
     : {};
 
@@ -57,18 +57,18 @@ export const ExpandedWave = ({
     <div
       className={`tw-group tw-flex tw-items-start tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
-          ? 'tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70'
-          : 'desktop-hover:hover:tw-bg-iron-800/80'
+          ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
+          : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
       <Link
         href={href}
         {...(onMouseEnter ? { onMouseEnter } : {})}
         onClick={onClick}
-        className={`tw-flex tw-flex-1 tw-min-w-0 tw-space-x-3 tw-no-underline tw-py-1 tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
-            ? 'tw-text-white desktop-hover:group-hover:tw-text-white tw-font-medium'
-            : 'tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300 tw-font-normal'
+            ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
+            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
         }`}
       >
         <div className="tw-relative">
@@ -79,10 +79,10 @@ export const ExpandedWave = ({
             wave={wave}
           />
         </div>
-        <div className="tw-flex-1 tw-min-w-0">
+        <div className="tw-min-w-0 tw-flex-1">
           <div
             ref={nameRef}
-            className="tw-text-sm -tw-mt-0.5 tw-mb-0.5 tw-truncate"
+            className="-tw-mt-0.5 tw-mb-0.5 tw-truncate tw-text-sm"
             {...tooltipAttributes}
           >
             {formattedWaveName}
@@ -95,7 +95,9 @@ export const ExpandedWave = ({
           )}
         </div>
       </Link>
-      {showPin && <BrainLeftSidebarWavePin waveId={waveId} isPinned={isPinned} />}
+      {showPin && (
+        <BrainLeftSidebarWavePin waveId={waveId} isPinned={isPinned} />
+      )}
       {showExpandedTooltip && (
         <WaveTooltip id={tooltipId} place={tooltipPlacement}>
           {tooltipContent}
