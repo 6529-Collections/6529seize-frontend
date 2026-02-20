@@ -1,5 +1,7 @@
+import type { QueryClient } from "@tanstack/react-query";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
+import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
@@ -47,6 +49,11 @@ export interface MarketplacePreviewData {
 }
 
 const OPENSEA_HOST = "opensea.io";
+const MARKETPLACE_PREVIEW_QUERY_KEY = "MARKETPLACE_PREVIEW";
+const MARKETPLACE_PREVIEW_MODES: readonly MarketplacePreviewMode[] = [
+  "default",
+  "opensea-sanitized",
+];
 
 const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   avif: "image/avif",
@@ -200,6 +207,81 @@ export const fromNftLink = ({
   media: pickNftLinkMedia(response) ?? null,
   price: pickNftLinkPrice(response) ?? null,
 });
+
+const fromApiDropNftLink = ({
+  href,
+  nftLink,
+}: {
+  readonly href: string;
+  readonly nftLink: ApiDropNftLink;
+}): MarketplacePreviewData =>
+  fromNftLink({
+    href,
+    response: {
+      is_enrichable: nftLink.data !== null,
+      validation_error: null,
+      data: nftLink.data,
+    },
+  });
+
+const mergeSeededMarketplacePreviewData = ({
+  current,
+  seeded,
+}: {
+  readonly current: MarketplacePreviewData | undefined;
+  readonly seeded: MarketplacePreviewData;
+}): MarketplacePreviewData => {
+  if (!current) {
+    return seeded;
+  }
+
+  return {
+    ...current,
+    canonicalId: current.canonicalId ?? seeded.canonicalId,
+    platform: current.platform ?? seeded.platform,
+    title: current.title ?? seeded.title,
+    description: current.description ?? seeded.description,
+    media: current.media ?? seeded.media,
+    price: current.price ?? seeded.price,
+  };
+};
+
+const normalizeHref = (value: unknown): string | null =>
+  asNonEmptyString(value) ?? null;
+
+export const primeMarketplacePreviewCacheFromNftLinks = ({
+  queryClient,
+  nftLinks,
+}: {
+  readonly queryClient: QueryClient;
+  readonly nftLinks: readonly ApiDropNftLink[] | null | undefined;
+}): void => {
+  if (typeof nftLinks?.length !== "number" || nftLinks.length === 0) {
+    return;
+  }
+
+  const seenHrefs = new Set<string>();
+  for (const nftLink of nftLinks) {
+    const href = normalizeHref(nftLink.url_in_text);
+    if (!href || seenHrefs.has(href)) {
+      continue;
+    }
+
+    seenHrefs.add(href);
+    const seededPreview = fromApiDropNftLink({ href, nftLink });
+
+    for (const mode of MARKETPLACE_PREVIEW_MODES) {
+      queryClient.setQueryData<MarketplacePreviewData>(
+        [MARKETPLACE_PREVIEW_QUERY_KEY, { href, mode }],
+        (current) =>
+          mergeSeededMarketplacePreviewData({
+            current,
+            seeded: seededPreview,
+          })
+      );
+    }
+  }
+};
 
 export const needsOpenGraphFallback = (data: MarketplacePreviewData): boolean =>
   data.title === null || data.media === null;

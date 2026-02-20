@@ -313,6 +313,7 @@ export const WaveLeaderboardGridItem: React.FC<
                 referencedNfts={drop.referenced_nfts}
                 part={activePart}
                 wave={drop.wave}
+                drop={drop}
                 onQuoteClick={() => {}}
                 marketplaceCompact={mode === "content_only"}
               />

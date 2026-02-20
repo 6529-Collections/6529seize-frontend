@@ -43,6 +43,7 @@ function areEqual(
     "mentionedUsers",
     "mentionedWaves",
     "referencedNfts",
+    "nftLinks",
     "partContent",
     "textSize",
     "currentDropId",

@@ -184,6 +184,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 mentionedUsers={drop?.mentioned_users ?? []}
                 mentionedWaves={drop?.mentioned_waves ?? []}
                 referencedNfts={drop?.referenced_nfts ?? []}
+                nftLinks={drop?.nft_links}
                 textSize="sm"
                 onQuoteClick={onQuoteClick}
                 currentDropId={drop?.id}

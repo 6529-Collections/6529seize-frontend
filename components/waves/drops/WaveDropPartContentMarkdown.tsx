@@ -224,6 +224,7 @@ const WaveDropPartContentMarkdown: React.FC<
           mentionedUsers={mentionedUsers}
           mentionedWaves={mentionedWaves}
           referencedNfts={referencedNfts}
+          nftLinks={drop?.nft_links}
           partContent={part.content}
           onQuoteClick={onQuoteClick}
           currentDropId={drop?.id}
