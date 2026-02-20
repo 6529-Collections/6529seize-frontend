@@ -35,12 +35,22 @@ const sanitiseGroupPayload = (
 ): ApiCreateGroup => {
   const identityAddresses = payload.group.identity_addresses;
   const excludedIdentityAddresses = payload.group.excluded_identity_addresses;
+  const rawBeneficiaryGrantId = payload.group.is_beneficiary_of_grant_id;
+  const trimmedBeneficiaryGrantId =
+    typeof rawBeneficiaryGrantId === "string"
+      ? rawBeneficiaryGrantId.trim()
+      : undefined;
+  const hasBeneficiaryGrantId =
+    typeof trimmedBeneficiaryGrantId === "string" &&
+    trimmedBeneficiaryGrantId.length > 0;
+  const groupWithoutGrantId = { ...payload.group };
+  delete groupWithoutGrantId.is_beneficiary_of_grant_id;
 
   return {
     ...payload,
     name,
     group: {
-      ...payload.group,
+      ...groupWithoutGrantId,
       owns_nfts: [...payload.group.owns_nfts],
       identity_addresses:
         identityAddresses && identityAddresses.length > 0
@@ -50,6 +60,11 @@ const sanitiseGroupPayload = (
         excludedIdentityAddresses && excludedIdentityAddresses.length > 0
           ? [...excludedIdentityAddresses]
           : null,
+      ...(hasBeneficiaryGrantId
+        ? {
+            is_beneficiary_of_grant_id: trimmedBeneficiaryGrantId,
+          }
+        : {}),
     },
   };
 };
