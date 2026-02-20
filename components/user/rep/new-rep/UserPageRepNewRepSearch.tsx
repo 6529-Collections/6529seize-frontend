@@ -506,7 +506,6 @@ export default function UserPageRepNewRepSearch({
                   originalValue={repState?.rater_contribution ?? 0}
                   adjustedValue={newRating}
                   adjustmentType="Rep"
-                  labelClassName="tw-text-xs tw-text-iron-500 tw-font-normal lg:tw-font-medium"
                 />
               )}
             </div>

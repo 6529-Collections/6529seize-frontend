@@ -1,6 +1,6 @@
 "use client";
 
-import type { UserPageRepPropsRepRates } from "@/app/[user]/rep/page";
+import type { UserPageRepPropsRepRates } from "@/app/[user]/identity/page";
 import type {
   ApiProfileRepRatesState,
   ProfileActivityLog,
