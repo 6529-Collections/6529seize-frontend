@@ -61,7 +61,7 @@ export default function MarketplaceCompactCta({
       {hasPrice && (
         <span
           className="tw-max-w-[8rem] tw-truncate"
-          data-testid="manifold-item-price"
+          data-testid="marketplace-item-price"
         >
           {normalizedPrice}
         </span>

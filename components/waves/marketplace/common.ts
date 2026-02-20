@@ -60,9 +60,21 @@ const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   gif: "image/gif",
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
+  m4v: "video/x-m4v",
+  mov: "video/quicktime",
+  mp3: "audio/mpeg",
+  mp4: "video/mp4",
+  ogg: "audio/ogg",
+  ogv: "video/ogg",
+  flac: "audio/flac",
   png: "image/png",
   svg: "image/svg+xml",
+  wav: "audio/wav",
+  webm: "video/webm",
   webp: "image/webp",
+  glb: "model/gltf-binary",
+  gltf: "model/gltf+json",
+  usdz: "model/vnd.usdz",
 };
 
 const asNullableString = (value: unknown): string | null =>

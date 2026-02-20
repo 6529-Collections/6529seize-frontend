@@ -125,7 +125,7 @@ const CurationInfoModal: React.FC<CurationInfoModalProps> = ({
       />
       <div
         ref={modalRef}
-        className="tw-z-10 tw-w-full tw-max-w-2xl tw-px-4"
+        className="tw-relative tw-z-10 tw-w-full tw-max-w-2xl tw-px-4"
         tabIndex={-1}
       >
         <ModalLayout title={title} onCancel={onClose}>
@@ -167,6 +167,9 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isInitialMountRef = useRef(true);
   const isLeaderboardVariant = curationComposerVariant === "leaderboard";
+  const handleSupportedUrlsModalClose = useCallback(() => {
+    setIsSupportedUrlsModalOpen(false);
+  }, []);
 
   const curationValidation = useMemo(() => {
     return validateCurationDropInput(urlValue);
@@ -322,7 +325,10 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         );
       }
 
-      (document.activeElement as HTMLElement).blur();
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) {
+        active.blur();
+      }
       if (isApp) {
         void (async () => {
           try {
@@ -505,7 +511,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
       {isLeaderboardVariant && (
         <CurationInfoModal
           isOpen={isSupportedUrlsModalOpen}
-          onClose={() => setIsSupportedUrlsModalOpen(false)}
+          onClose={handleSupportedUrlsModalClose}
           title="Supported URLs"
           isApp={isApp}
         >
