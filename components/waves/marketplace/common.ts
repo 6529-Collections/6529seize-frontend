@@ -269,7 +269,7 @@ export const primeMarketplacePreviewCacheFromNftLinks = ({
 
     seenHrefs.add(href);
     const seededPreview = fromApiDropNftLink({ href, nftLink });
-    if (!seededPreview.media) return;
+    if (!seededPreview.media) continue;
 
     for (const mode of MARKETPLACE_PREVIEW_MODES) {
       queryClient.setQueryData<MarketplacePreviewData>(

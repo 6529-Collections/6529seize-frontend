@@ -38,7 +38,7 @@ export default function MarketplaceCompactCta({
       rel={rel}
       prefetch={false}
       className={`tw-absolute tw-right-3 tw-z-10 tw-inline-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-text-white tw-no-underline tw-backdrop-blur-md tw-transition-colors tw-duration-150 ${topRightCtaTopClass} ${topRightCtaSizeClass}`}
-      data-testid="marketplace-item-cta-link"
+      data-testid="marketplace-item-price"
       aria-label={ctaAriaLabel}
       onClick={(event) => event.stopPropagation()}
       onMouseDown={(event) => event.stopPropagation()}

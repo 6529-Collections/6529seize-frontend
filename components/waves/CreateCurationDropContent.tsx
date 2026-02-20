@@ -503,30 +503,28 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         </div>
       )}
       {isLeaderboardVariant && (
-        <>
-          <CurationInfoModal
-            isOpen={isSupportedUrlsModalOpen}
-            onClose={() => setIsSupportedUrlsModalOpen(false)}
-            title="Supported URLs"
-            isApp={isApp}
-          >
-            <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
-              Submit one URL only. It must match one of these formats:
-            </p>
-            <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0">
-              {SUPPORTED_CURATION_URL_EXAMPLES.map(({ label, example }) => (
-                <li key={`${label}-${example}`} className="tw-space-y-1">
-                  <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-text-iron-100">
-                    {label}
-                  </p>
-                  <code className="tw-block tw-overflow-x-auto tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-[11px] tw-text-iron-300">
-                    {example}
-                  </code>
-                </li>
-              ))}
-            </ul>
-          </CurationInfoModal>
-        </>
+        <CurationInfoModal
+          isOpen={isSupportedUrlsModalOpen}
+          onClose={() => setIsSupportedUrlsModalOpen(false)}
+          title="Supported URLs"
+          isApp={isApp}
+        >
+          <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
+            Submit one URL only. It must match one of these formats:
+          </p>
+          <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0">
+            {SUPPORTED_CURATION_URL_EXAMPLES.map(({ label, example }) => (
+              <li key={`${label}-${example}`} className="tw-space-y-1">
+                <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-text-iron-100">
+                  {label}
+                </p>
+                <code className="tw-block tw-overflow-x-auto tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-[11px] tw-text-iron-300">
+                  {example}
+                </code>
+              </li>
+            ))}
+          </ul>
+        </CurationInfoModal>
       )}
       <TermsSignatureFlow />
     </div>
