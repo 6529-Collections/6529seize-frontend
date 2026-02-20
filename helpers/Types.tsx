@@ -340,6 +340,7 @@ export enum WsMessageType {
   DROP_DELETE = "DROP_DELETE",
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
+  MEDIA_LINK_UPDATED = "MEDIA_LINK_UPDATED",
   USER_IS_TYPING = "USER_IS_TYPING",
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
 }
@@ -356,6 +357,21 @@ export interface WsTypingMessage {
 export interface WsDropUpdateMessage {
   type: WsMessageType.DROP_UPDATE;
   data: ApiDrop;
+}
+
+export interface WsMediaLinkUpdatedData {
+  readonly canonical_id: string;
+  readonly platform: string | null;
+  readonly chain: string | null;
+  readonly contract: string | null;
+  readonly token: string | null;
+  readonly name: string | null;
+  readonly description: string | null;
+  readonly media_uri: string | null;
+  readonly last_error_message: string | null;
+  readonly price: string | null;
+  readonly last_successfully_updated: string | number | null;
+  readonly failed_since: string | number | null;
 }
 
 export interface PageSSRMetadata {

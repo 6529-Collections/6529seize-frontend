@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { AuthContext } from "@/components/auth/Auth";
 import MyStreamWaveLeaderboard from "@/components/brain/my-stream/MyStreamWaveLeaderboard";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
@@ -12,6 +13,7 @@ const useWaveCurationGroups = jest.fn();
 const replace = jest.fn();
 let searchParamsString = "";
 let dropsProps: any;
+let createDropProps: any[] = [];
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -47,20 +49,26 @@ jest.mock(
     WaveLeaderboardHeader: (props: any) => {
       headerProps = props;
       return (
-        <button data-testid="header" onClick={() => props.onCreateDrop()} />
+        <button data-testid="header" onClick={() => props.onCreateDrop?.()} />
       );
     },
   })
 );
 jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
-  WaveDropCreate: (props: any) => (
-    <div data-testid="create-drop" onClick={props.onCancel} />
-  ),
+  WaveDropCreate: (props: any) => {
+    createDropProps.push(props);
+    return (
+      <div
+        data-testid="create-drop"
+        data-curation-leaderboard={String(Boolean(props.isCurationLeaderboard))}
+      />
+    );
+  },
 }));
 jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrops", () => ({
   WaveLeaderboardDrops: (props: any) => {
     dropsProps = props;
-    return <div data-testid="drops" onClick={() => props.onCreateDrop()} />;
+    return <div data-testid="drops" onClick={() => props.onCreateDrop?.()} />;
   },
 }));
 jest.mock(
@@ -83,11 +91,26 @@ const wave = {
   wave: { type: "RANK" },
 } as ApiWave;
 
+const renderLeaderboard = () =>
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />
+    </AuthContext.Provider>
+  );
+
 describe("MyStreamWaveLeaderboard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     searchParamsString = "";
     dropsProps = null;
+    createDropProps = [];
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
     useWaveCurationGroups.mockReturnValue({
       data: [],
@@ -100,33 +123,55 @@ describe("MyStreamWaveLeaderboard", () => {
     ]);
   });
 
-  it("uses list view for non memes wave and can open drop create", async () => {
+  it("uses list view for non memes wave and opens create drop on demand", async () => {
     const user = userEvent.setup();
-    useWave.mockReturnValue({ isMemesWave: false });
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
     useLocalPreference.mockReturnValueOnce(["list", jest.fn()]); // view mode
     useLocalPreference.mockReturnValueOnce([
       WaveDropsLeaderboardSort.RANK,
       jest.fn(),
     ]); // sort
-    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+    renderLeaderboard();
 
     const stickyHeader = screen.getByTestId("header").parentElement;
     expect(stickyHeader).toHaveClass("tw-sticky");
     expect(stickyHeader).toHaveClass("tw-z-30");
     expect(headerProps.viewMode).toBe("list");
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+    expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
+
     await user.click(screen.getByTestId("header"));
     expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+    expect(
+      createDropProps[createDropProps.length - 1]?.isCurationLeaderboard
+    ).toBeUndefined();
   });
 
   it("uses grid view for memes wave and opens meme modal", async () => {
     const user = userEvent.setup();
-    useWave.mockReturnValue({ isMemesWave: true });
+    useWave.mockReturnValue({
+      isMemesWave: true,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
     useLocalPreference.mockReturnValueOnce(["grid", jest.fn()]);
     useLocalPreference.mockReturnValueOnce([
       WaveDropsLeaderboardSort.RANK,
       jest.fn(),
     ]);
-    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+    renderLeaderboard();
 
     expect(headerProps.viewMode).toBe("grid");
     await user.click(screen.getByTestId("header"));
@@ -134,13 +179,21 @@ describe("MyStreamWaveLeaderboard", () => {
   });
 
   it("renders non-meme content-only grid mode", () => {
-    useWave.mockReturnValue({ isMemesWave: false });
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
     useLocalPreference.mockReturnValueOnce(["grid_content_only", jest.fn()]);
     useLocalPreference.mockReturnValueOnce([
       WaveDropsLeaderboardSort.RANK,
       jest.fn(),
     ]);
-    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+    renderLeaderboard();
 
     expect(headerProps.viewMode).toBe("grid_content_only");
     expect(screen.getByTestId("grid")).toHaveAttribute(
@@ -151,7 +204,15 @@ describe("MyStreamWaveLeaderboard", () => {
 
   it("reads curation filter from URL and passes it to leaderboard data views", () => {
     searchParamsString = "curated_by_group=group-1";
-    useWave.mockReturnValue({ isMemesWave: false });
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
     useWaveCurationGroups.mockReturnValue({
       data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
       isLoading: false,
@@ -163,14 +224,31 @@ describe("MyStreamWaveLeaderboard", () => {
       jest.fn(),
     ]);
 
-    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+    renderLeaderboard();
 
     expect(headerProps.curatedByGroupId).toBe("group-1");
+    expect(headerProps.onCreateDrop).toBeUndefined();
     expect(dropsProps.curatedByGroupId).toBe("group-1");
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+    expect(screen.getByTestId("create-drop").parentElement).toHaveClass(
+      "tw-mt-2"
+    );
+    expect(
+      createDropProps[createDropProps.length - 1]?.isCurationLeaderboard
+    ).toBe(true);
   });
 
   it("updates URL when curation filter changes", () => {
-    useWave.mockReturnValue({ isMemesWave: false });
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
     useWaveCurationGroups.mockReturnValue({
       data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
       isLoading: false,
@@ -182,7 +260,7 @@ describe("MyStreamWaveLeaderboard", () => {
       jest.fn(),
     ]);
 
-    render(<MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />);
+    renderLeaderboard();
 
     headerProps.onCurationGroupChange("group-1");
     expect(replace).toHaveBeenCalledWith("/waves?curated_by_group=group-1", {

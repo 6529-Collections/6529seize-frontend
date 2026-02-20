@@ -6,6 +6,7 @@ import type { WebSocketConfig } from "./index";
 import { DEFAULT_WEBSOCKET_CONFIG } from "./index";
 import { useWebSocket } from "./useWebSocket";
 import { useWebSocketHealth } from "./useWebSocketHealth";
+import { MarketplacePreviewWebSocketSync } from "./MarketplacePreviewWebSocketSync";
 
 /**
  * WebSocket connection initializer with coordinated health monitoring
@@ -15,7 +16,7 @@ import { useWebSocketHealth } from "./useWebSocketHealth";
  * - Delegates all connection management to useWebSocketHealth()
  * - Health monitoring detects auth token and connects during first render cycle
  * - Provides cleanup on unmount
- * 
+ *
  * This ensures immediate connectivity for authenticated users while
  * maintaining centralized connection management through health monitoring.
  */
@@ -52,6 +53,7 @@ export function AppWebSocketProvider({
   return (
     <WebSocketProvider config={config}>
       <WebSocketInitializer />
+      <MarketplacePreviewWebSocketSync />
       {children}
     </WebSocketProvider>
   );

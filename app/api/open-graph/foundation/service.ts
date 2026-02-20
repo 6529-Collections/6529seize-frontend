@@ -2,6 +2,7 @@ import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import { buildResponse } from "@/app/api/open-graph/utils";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { asNonEmptyString } from "../opensea/shared";
 
 const FOUNDATION_CACHE_TTL_MS = 5 * 60 * 1000;
 const FOUNDATION_HOST = "foundation.app";
@@ -68,15 +69,6 @@ interface FoundationNextData {
     };
   };
 }
-
-const asNonEmptyString = (value: unknown): string | undefined => {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-};
 
 const asPositiveInteger = (value: unknown): number | undefined => {
   if (typeof value === "number" && Number.isInteger(value) && value > 0) {
