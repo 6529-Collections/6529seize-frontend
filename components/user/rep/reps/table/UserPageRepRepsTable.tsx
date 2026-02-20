@@ -13,16 +13,18 @@ export enum RepsTableSort {
   MY_RATES = "MY_RATES",
 }
 
-const INITIAL_COUNT = 10;
+const DEFAULT_INITIAL_COUNT = 10;
 
 export default function UserPageRepRepsTable({
   reps,
   profile,
   canEditRep,
+  initialCount = DEFAULT_INITIAL_COUNT,
 }: {
   readonly reps: RatingStats[];
   readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
+  readonly initialCount?: number;
 }) {
   const [showAll, setShowAll] = useState(false);
   const [sortType, setSortType] = useState<RepsTableSort>(RepsTableSort.REP);
@@ -107,8 +109,8 @@ export default function UserPageRepRepsTable({
 
   const displayedReps = showAll
     ? sortedReps
-    : sortedReps.slice(0, INITIAL_COUNT);
-  const hasMore = sortedReps.length > INITIAL_COUNT;
+    : sortedReps.slice(0, initialCount);
+  const hasMore = sortedReps.length > initialCount;
   const maxRep = Math.max(...reps.map((r) => Math.abs(r.rating)), 0);
 
   return (
@@ -116,7 +118,7 @@ export default function UserPageRepRepsTable({
       <div className="tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         <table
           className="tw-min-w-full tw-border-separate"
-          style={{ borderSpacing: "0 0.375rem" }}
+          style={{ borderSpacing: "0 0.25rem" }}
         >
           <UserPageRepRepsTableHeader
             activeType={sortType}

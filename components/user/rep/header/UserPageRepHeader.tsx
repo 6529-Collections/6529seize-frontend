@@ -7,30 +7,12 @@ import type {
 } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumberCompact, formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import TopRaterAvatars from "./TopRaterAvatars";
 
 const TOP_REPS_COUNT = 4;
-
-function formatCompact(n: number): string {
-  const abs = Math.abs(n);
-  const sign = n < 0 ? "-" : "";
-  if (abs >= 1_000_000) {
-    const m = abs / 1_000_000;
-    return sign + (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + "M";
-  }
-  if (abs >= 1_000) {
-    const k = abs / 1_000;
-    if (k >= 1000) {
-      const m = k / 1_000;
-      return sign + (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + "M";
-    }
-    return sign + (k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)) + "K";
-  }
-  return formatNumberWithCommas(n);
-}
 
 export default function UserPageRepHeader({
   repRates,
@@ -113,7 +95,7 @@ export default function UserPageRepHeader({
         <div className="tw-relative tw-p-6">
           <div>
             <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-iron-100">
-              Reputation
+              Rep
             </h2>
             <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-medium tw-leading-relaxed">
               What others recognize this profile for.
@@ -163,8 +145,8 @@ export default function UserPageRepHeader({
                     <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
                       {rep.category}
                     </span>
-                    <span className="tw-text-sm tw-font-bold tw-text-iron-300">
-                      {formatCompact(rep.rating)}
+                    <span className="tw-text-sm tw-font-bold tw-text-primary-400">
+                      {formatNumberCompact(rep.rating)}
                     </span>
                     <span className="tw-text-iron-600 tw-text-xs">·</span>
                     <TopRaterAvatars

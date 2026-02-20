@@ -23,7 +23,7 @@ export default function ProfileActivityLogProxyAction({
   return (
     <>
       <ProfileActivityLogItemAction action="created proxy action" />
-      <span className="tw-whitespace-nowrap tw-text-md tw-font-medium tw-text-iron-200">
+      <span className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-200">
         {PROFILE_PROXY_ACTION_LABELS[log.contents.type]}
       </span>
       <ProfileActivityLogItemAction action="for" />

@@ -85,7 +85,7 @@ export default function UserPageIdentityStatements({
   }, [statements]);
 
   return (
-    <div className="tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10 tw-pt-6 tw-px-6">
+    <div className="lg:tw-border-t lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-solid lg:tw-border-white/10 tw-pt-6 tw-px-6">
       <div>
         <UserPageIdentityAddStatementsHeader
           profile={profile}

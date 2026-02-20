@@ -149,6 +149,15 @@ export function formatNumberWithCommas(x: number) {
   return isNegative ? `-${formattedNumber}` : formattedNumber;
 }
 
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+export function formatNumberCompact(n: number): string {
+  return compactFormatter.format(n);
+}
+
 export function formatNumberWithCommasOrDash(x: number): string {
   if (x === null || isNaN(x) || x === 0) return "-";
   return formatNumberWithCommas(x);

@@ -79,13 +79,10 @@ export default function UserPageRepReps({
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
       <div className="tw-relative">
-        <div className="tw-mb-6">
-          <h3 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-iron-100">
+        <div className="tw-mb-4">
+          <h3 className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-100">
             Total Rep
           </h3>
-          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
-            Where this profile has earned rep.
-          </p>
         </div>
 
         <UserPageRateWrapper profile={profile} type={RateMatter.REP}>

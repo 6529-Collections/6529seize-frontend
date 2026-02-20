@@ -20,7 +20,7 @@ export default function ProfileRatersTableItem({
   const ratingColor = isPositiveRating ? "tw-text-green" : "tw-text-red";
   const timeAgo = getTimeAgo(new Date(rating.last_modified).getTime());
 
-  const getProfileRoute = (): string => `/${rating.handle}/rep`;
+  const getProfileRoute = (): string => `/${rating.handle}/identity`;
 
   const profileRoute = getProfileRoute();
 

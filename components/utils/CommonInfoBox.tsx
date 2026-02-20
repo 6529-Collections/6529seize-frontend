@@ -9,11 +9,11 @@ export default function CommonInfoBox({
     <div
       className={`${
         !widthFull && "sm:tw-w-auto"
-      } tw-w-full tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3`}
+      } tw-inline-flex tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-px-4 tw-py-3`}
     >
       <div className="tw-flex tw-items-center">
         <svg
-          className="tw-flex-shrink-0 tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-self-center tw-text-primary-300"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -26,8 +26,8 @@ export default function CommonInfoBox({
             strokeLinejoin="round"
           />
         </svg>
-        <div className="tw-ml-3 tw-self-center">
-          <h3 className="tw-text-sm sm:tw-text-md tw-mb-0 tw-font-semibold tw-text-primary-300 tw-break-all">
+        <div className="tw-ml-2 tw-self-center">
+          <h3 className="tw-mb-0 tw-break-all tw-text-sm tw-font-semibold tw-text-primary-300">
             {message}
           </h3>
         </div>

@@ -29,7 +29,7 @@ export default function ProfileActivityLogItemValueWithCopy({
     }, 1000);
   };
   return (
-    <span className="tw-h-6 tw-whitespace-nowrap tw-group tw-inline-flex tw-text-md tw-font-medium tw-text-iron-200">
+    <span className="tw-h-6 tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-200">
       {titleToShow}
       <>
         <button

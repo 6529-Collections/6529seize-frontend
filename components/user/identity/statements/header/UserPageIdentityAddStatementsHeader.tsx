@@ -46,15 +46,17 @@ export default function UserPageIdentityAddStatementsHeader({
 
   return (
     <div>
-      <div className="tw-h-full tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2 tw-w-full">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-iron-100">
+      <div className="tw-h-full tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-w-full">
+        <h3 className="tw-mb-0 tw-text-base md:tw-text-lg tw-font-bold tw-text-iron-100">
           {possessionName} ID Statements
         </h3>
-        <div className="tw-inline-flex tw-items-center tw-gap-2">
-          {canEdit && <UserPageIdentityStatementsAddButton profile={profile} />}
-          {rightAccessory}
-        </div>
+        {rightAccessory}
       </div>
+      {canEdit && (
+        <div className="tw-mt-2">
+          <UserPageIdentityStatementsAddButton profile={profile} />
+        </div>
+      )}
     </div>
   );
 }
