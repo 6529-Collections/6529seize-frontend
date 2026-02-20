@@ -102,6 +102,7 @@ describe("MarketplaceOpenseaAssetPreview", () => {
         contract: "0x123",
         token: "42",
         name: "OpenSea Asset #42",
+        description: null,
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "0.5 ETH",

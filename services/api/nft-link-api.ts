@@ -1,19 +1,5 @@
 import { commonApiFetch } from "./common-api";
-
-interface ApiNftLinkData {
-  readonly canonical_id: string;
-  readonly platform: string;
-  readonly chain: string | null;
-  readonly contract: string | null;
-  readonly token: string | null;
-  readonly name?: string | null;
-  readonly description?: string | null;
-  readonly media_uri: string | null;
-  readonly last_error_message: string | null;
-  readonly price: string | null;
-  readonly last_successfully_updated: number | null;
-  readonly failed_since: number | null;
-}
+import type { ApiNftLinkData } from "@/generated/models/ApiNftLinkData";
 
 export interface ApiNftLinkResponse {
   readonly is_enrichable: boolean;

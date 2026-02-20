@@ -111,11 +111,11 @@ const CurationInfoModal: React.FC<CurationInfoModalProps> = ({
   }
 
   const modalContent = (
-    <div
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-iron-600/60 tw-outline-none"
-      role="dialog"
+    <dialog
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-m-0 tw-h-full tw-w-full tw-max-w-none tw-border-0 tw-bg-iron-600/60 tw-p-0 tw-outline-none"
+      open
       aria-modal="true"
-      onClick={(event) => event.stopPropagation()}
+      aria-label={title}
     >
       <button
         type="button"
@@ -127,13 +127,12 @@ const CurationInfoModal: React.FC<CurationInfoModalProps> = ({
         ref={modalRef}
         className="tw-z-10 tw-w-full tw-max-w-2xl tw-px-4"
         tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
       >
         <ModalLayout title={title} onCancel={onClose}>
           {children}
         </ModalLayout>
       </div>
-    </div>
+    </dialog>
   );
 
   if (isApp) {

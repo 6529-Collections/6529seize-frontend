@@ -13,6 +13,7 @@ import type {
 } from "./WebSocketTypes";
 import { WebSocketStatus } from "./WebSocketTypes";
 import type { WsMessageType } from "@/helpers/Types";
+import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { getAuthJwt } from "../auth/auth.utils";
 
 // Default values for reconnection
@@ -27,15 +28,6 @@ type WebSocketMessagePayload = {
     readonly type?: unknown;
     readonly data?: unknown;
   };
-};
-
-const asNonEmptyString = (value: unknown): string | undefined => {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
 };
 
 const asWebSocketMessagePayload = (

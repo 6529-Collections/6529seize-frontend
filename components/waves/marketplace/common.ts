@@ -1,6 +1,7 @@
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
+import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 type MediaCandidate =
@@ -55,15 +56,6 @@ const IMAGE_MIME_BY_EXTENSION: Record<string, string> = {
   png: "image/png",
   svg: "image/svg+xml",
   webp: "image/webp",
-};
-
-const asNonEmptyString = (value: unknown): string | undefined => {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
 };
 
 const asNullableString = (value: unknown): string | null =>
