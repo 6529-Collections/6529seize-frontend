@@ -139,6 +139,13 @@ export default function CreateDrop({
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
+
+      if (isCurationWave && curationComposerVariant === "leaderboard") {
+        setToast({
+          message: "Drop submitted successfully",
+          type: "success",
+        });
+      }
     },
     onError: (error, body) => {
       setTimeout(() => {
