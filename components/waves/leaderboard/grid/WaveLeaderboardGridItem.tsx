@@ -315,7 +315,6 @@ export const WaveLeaderboardGridItem: React.FC<
                 wave={drop.wave}
                 drop={drop}
                 onQuoteClick={() => {}}
-                marketplaceCompact={mode === "content_only"}
               />
             </LinkPreviewProvider>
           )}
@@ -358,7 +357,7 @@ export const WaveLeaderboardGridItem: React.FC<
       {isCompactMode && (
         <div
           data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
-          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3"
+          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3 tw-pt-2"
         >
           <div className="tw-mb-1.5">
             {drop.title && (

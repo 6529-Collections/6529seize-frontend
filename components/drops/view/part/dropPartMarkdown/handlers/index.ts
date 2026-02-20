@@ -17,14 +17,11 @@ import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 export const createLinkHandlers = (options?: {
   readonly tweetPreviewMode?: TweetPreviewMode;
   readonly linkPreviewVariant?: LinkPreviewVariant;
-  readonly marketplaceCompact?: boolean;
 }): LinkHandler[] => [
   createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
-  createNftMarketplacesHandler({
-    marketplaceCompact: options?.marketplaceCompact ?? false,
-  }),
+  createNftMarketplacesHandler(),
   createEnsHandler(),
   createCompoundHandler(),
   createTwitterHandler(options),

@@ -27,28 +27,3 @@ jest.mock("@/contexts/EmojiContext", () => ({
 jest.mock("@/components/tweets/TweetPreviewModeContext", () => ({
   useTweetPreviewMode: () => "auto",
 }));
-
-describe("DropPartMarkdown marketplaceCompact", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("passes marketplaceCompact to createLinkRenderer", () => {
-    render(
-      <DropPartMarkdown
-        mentionedUsers={[]}
-        mentionedWaves={[]}
-        referencedNfts={[]}
-        partContent="[nft](https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/1)"
-        onQuoteClick={jest.fn()}
-        marketplaceCompact={true}
-      />
-    );
-
-    expect(createLinkRenderer).toHaveBeenCalledWith(
-      expect.objectContaining({
-        marketplaceCompact: true,
-      })
-    );
-  });
-});

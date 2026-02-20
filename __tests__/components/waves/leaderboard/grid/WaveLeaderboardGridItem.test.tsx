@@ -157,10 +157,11 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("votes")).toBeInTheDocument();
     expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
-    expect(markdownProps.marketplaceCompact).toBe(false);
-    expect(
-      screen.getByTestId("wave-leaderboard-grid-item-footer-d1")
-    ).toBeInTheDocument();
+    const footer = screen.getByTestId("wave-leaderboard-grid-item-footer-d1");
+    expect(footer).toBeInTheDocument();
+    expect(footer).toHaveClass("tw-px-3");
+    expect(footer).toHaveClass("tw-pt-2");
+    expect(footer).toHaveClass("tw-pb-3");
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
@@ -187,7 +188,6 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.queryByTestId("rank")).not.toBeInTheDocument();
     expect(screen.queryByTestId("votes")).not.toBeInTheDocument();
-    expect(markdownProps.marketplaceCompact).toBe(true);
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
@@ -244,7 +244,6 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-p-0");
     expect(card).not.toHaveClass("tw-p-2");
     expect(card).toHaveClass("tw-border");
-    expect(markdownProps.marketplaceCompact).toBe(true);
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   });
 

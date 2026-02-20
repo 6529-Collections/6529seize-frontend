@@ -29,7 +29,6 @@ interface LinkRendererConfig {
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
   readonly tweetPreviewMode?: TweetPreviewMode | undefined;
-  readonly marketplaceCompact?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -71,7 +70,6 @@ export const createLinkRenderer = ({
   currentDropId,
   hideLinkPreviews = false,
   tweetPreviewMode = "auto",
-  marketplaceCompact = false,
   embedPath,
   quotePath,
   embedDepth = 0,
@@ -89,7 +87,6 @@ export const createLinkRenderer = ({
   const handlers = createLinkHandlers({
     tweetPreviewMode,
     linkPreviewVariant: "chat",
-    marketplaceCompact,
   });
   let inlineShowControlRendered = false;
 

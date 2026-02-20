@@ -3,12 +3,8 @@ import { isNftMarketplaceLink } from "@/components/waves/marketplace/urlKind";
 
 import type { LinkHandler } from "../linkTypes";
 
-export const createNftMarketplacesHandler = (options?: {
-  readonly marketplaceCompact?: boolean;
-}): LinkHandler => ({
+export const createNftMarketplacesHandler = (): LinkHandler => ({
   match: isNftMarketplaceLink,
-  render: (href) => (
-    <MarketplacePreview href={href} compact={options?.marketplaceCompact} />
-  ),
+  render: (href) => <MarketplacePreview href={href} />,
   display: "block",
 });

@@ -55,7 +55,6 @@ interface WaveDropPartContentMarkdownProps {
     | undefined;
   readonly onCancel?: (() => void) | undefined;
   readonly drop?: ApiDrop | undefined; // Add drop to check for edited status
-  readonly marketplaceCompact?: boolean | undefined;
 }
 
 const WaveDropPartContentMarkdown: React.FC<
@@ -72,7 +71,6 @@ const WaveDropPartContentMarkdown: React.FC<
   onSave,
   onCancel,
   drop,
-  marketplaceCompact = false,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { setToast } = useAuth();
@@ -229,7 +227,6 @@ const WaveDropPartContentMarkdown: React.FC<
           onQuoteClick={onQuoteClick}
           currentDropId={drop?.id}
           hideLinkPreviews={drop?.hide_link_preview}
-          marketplaceCompact={marketplaceCompact}
           quotePath={currentQuotePath}
           linkPreviewToggleControl={linkPreviewToggleControl}
         />
@@ -253,7 +250,6 @@ const WaveDropPartContentMarkdown: React.FC<
             onQuoteClick={onQuoteClick}
             embedPath={drop?.id ? [drop.id] : []}
             quotePath={currentQuotePath}
-            marketplaceCompact={marketplaceCompact}
             embedDepth={1}
           />
         </div>
