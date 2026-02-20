@@ -25,6 +25,7 @@ export default function ProfileActivityLogProxy({
         handleOrWallet={handleOrWallet}
         isCurrentUser={isCurrentUser}
         tabTarget={tabTarget}
+        textClassName="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100"
       />
     </>
   );

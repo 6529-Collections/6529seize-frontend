@@ -394,13 +394,13 @@ export default function UserPageRepNewRepSearch({
               <div className="tw-flex tw-items-center tw-justify-between">
                 <label
                   htmlFor="search-rep"
-                  className="tw-block tw-text-xs tw-font-medium tw-text-iron-400">
+                  className="tw-block tw-text-xs tw-font-normal lg:tw-font-medium tw-text-iron-500">
                   Grant Rep
                 </label>
-                <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400 tw-font-medium">
+                <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-500 tw-font-normal lg:tw-font-medium">
                   <span>
                     <span>Your available Rep:</span>
-                    <span className="tw-ml-1 tw-font-bold tw-text-iron-300">
+                    <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
                       {formatNumberWithCommas(heroAvailableRep)}
                     </span>
                   </span>
@@ -410,7 +410,7 @@ export default function UserPageRepNewRepSearch({
                       Your Rep assigned to{" "}
                       {profile.query ?? profile.handle ?? profile.display}:
                     </span>
-                    <span className="tw-ml-1 tw-font-bold tw-text-iron-300">
+                    <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
                       {formatNumberWithCommas(
                         repRates?.total_rep_rating_by_rater ?? 0
                       )}
@@ -443,7 +443,7 @@ export default function UserPageRepNewRepSearch({
                       value={repSearch}
                       onChange={handleRepSearchChange}
                       onFocus={() => setIsOpen(true)}
-                      className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/20 tw-py-3 tw-pl-9 tw-pr-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium tw-caret-primary-400 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-form-input tw-appearance-none tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/20 tw-py-3 tw-pl-9 tw-pr-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 placeholder:tw-font-normal focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
                       placeholder="Category to grant rep for"
                     />
                     {checkingAvailability && (
@@ -479,7 +479,7 @@ export default function UserPageRepNewRepSearch({
                     minMax={minMaxValues}
                     isProxy={!!activeProfileProxy}
                     spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/20 tw-bg-[#0A0A0A]/80 tw-px-3"
-                    inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/20 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium tw-caret-primary-400 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
+                    inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/20 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
                   />
                 </div>
                 <button
@@ -506,6 +506,7 @@ export default function UserPageRepNewRepSearch({
                   originalValue={repState?.rater_contribution ?? 0}
                   adjustedValue={newRating}
                   adjustmentType="Rep"
+                  labelClassName="tw-text-xs tw-text-iron-500 tw-font-normal lg:tw-font-medium"
                 />
               )}
             </div>

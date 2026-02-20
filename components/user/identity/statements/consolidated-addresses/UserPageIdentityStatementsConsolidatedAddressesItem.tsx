@@ -146,7 +146,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       <div className="tw-group tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-py-1">
         <div className="tw-flex-1 tw-min-w-0">
           <div className="tw-flex tw-items-center tw-gap-2 tw-mb-0.5">
-            <span className="tw-text-xs tw-text-iron-500 tw-font-mono">
+            <span className="tw-text-xs tw-font-normal tw-text-iron-400 tw-font-mono">
               {title === "Copied!" ? (
                 <span className="tw-text-primary-400">{title}</span>
               ) : (
@@ -161,7 +161,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             />
           </div>
           {address.display && (
-            <div className="tw-text-xs tw-font-bold tw-text-iron-200 tw-truncate tw-max-w-[130px]">
+            <div className="tw-text-xs tw-font-semibold tw-font-mono tw-text-iron-200 tw-truncate tw-max-w-[130px]">
               {address.display}
             </div>
           )}

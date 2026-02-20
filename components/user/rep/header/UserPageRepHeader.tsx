@@ -94,20 +94,20 @@ export default function UserPageRepHeader({
 
         <div className="tw-relative tw-p-6">
           <div>
-            <h2 className="tw-mb-1 tw-text-xl tw-font-bold tw-text-iron-100">
+            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
               Rep
             </h2>
-            <p className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-medium tw-leading-relaxed">
+            <p className="tw-mb-0 tw-text-iron-500 tw-text-sm tw-font-normal tw-leading-relaxed">
               What others recognize this profile for.
             </p>
           </div>
 
           <div className="tw-mt-4 tw-flex tw-items-end tw-justify-between tw-gap-6">
             <div>
-              <div className="tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-1">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 tw-mb-1">
                 Total Rep
               </div>
-              <div className="tw-text-3xl tw-font-bold tw-text-primary-400 tw-tracking-tight tw-leading-none">
+              <div className="tw-text-3xl tw-font-semibold tw-text-primary-400 tw-tracking-tight tw-leading-none">
                 {repRates
                   ? formatNumberWithCommas(repRates.total_rep_rating)
                   : ""}
@@ -116,7 +116,7 @@ export default function UserPageRepHeader({
             {repRates && (
               <div className="tw-shrink-0 tw-flex tw-flex-col tw-items-end tw-gap-2.5">
                 <TopRaterAvatars handleOrWallet={profile.handle ?? ""} count={5} size="md" />
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-300">
+                <span className="tw-text-sm tw-font-normal tw-text-iron-400">
                   {formatNumberWithCommas(repRates.number_of_raters)}{" "}
                   {repRates.number_of_raters === 1 ? "rater" : "raters"}
                 </span>
@@ -127,7 +127,7 @@ export default function UserPageRepHeader({
 
           {topReps.length > 0 && (
             <div className="tw-mt-6 tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-l-0 tw-border-r-0 tw-border-b-0">
-              <div className="tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-mb-4">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 tw-mb-4">
                Top Rep
               </div>
               <div className="tw-flex tw-flex-wrap tw-gap-3">
@@ -142,10 +142,10 @@ export default function UserPageRepHeader({
                         : "tw-cursor-default"
                     }`}
                   >
-                    <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                    <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
                       {rep.category}
                     </span>
-                    <span className="tw-text-sm tw-font-bold tw-text-primary-400">
+                    <span className="tw-text-sm tw-font-semibold tw-text-primary-400">
                       {formatNumberCompact(rep.rating)}
                     </span>
                     <span className="tw-text-iron-600 tw-text-xs">·</span>
@@ -154,7 +154,7 @@ export default function UserPageRepHeader({
                       category={rep.category}
                       count={3}
                     />
-                    <span className="tw-text-xs tw-text-iron-500 tw-whitespace-nowrap">
+                    <span className="tw-text-xs tw-font-normal tw-text-iron-400 tw-whitespace-nowrap">
                       {formatNumberWithCommas(rep.contributor_count)}{" "}
                       {rep.contributor_count === 1 ? "rater" : "raters"}
                     </span>

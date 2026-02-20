@@ -14,12 +14,12 @@ export default function ProfileActivityLogClassification({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-text-iron-300 tw-font-medium">
+      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-text-iron-300 tw-font-medium">
         classification
       </span>
       {!isAdded && (
         <>
-          <span className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-200">
+          <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
             {log.contents.old_value &&
               CLASSIFICATIONS[log.contents.old_value].title}
           </span>
@@ -40,7 +40,7 @@ export default function ProfileActivityLogClassification({
         </>
       )}
 
-      <span className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-200">
+      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
         {CLASSIFICATIONS[log.contents.new_value].title}
       </span>
     </>

@@ -13,7 +13,7 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
 }) {
   return (
     <div>
-      <span className="tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest">
+      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500">
         Social Media Verification Posts
       </span>
       <UserPageIdentityStatementsStatementsList

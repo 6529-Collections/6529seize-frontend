@@ -23,7 +23,7 @@ export default function UserPageCombinedActivityLog({
         withFilters={true}
         withMatterFilter={withMatterFilter}
       >
-        <h3 className="tw-mb-0 tw-whitespace-nowrap tw-text-base md:tw-text-xl tw-font-bold tw-text-iron-100">
+        <h3 className="tw-mb-0 tw-whitespace-nowrap tw-text-xl tw-font-semibold tw-text-iron-100">
           Activity Log
         </h3>
       </ProfileActivityLogs>

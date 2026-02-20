@@ -5,11 +5,13 @@ export default function UserRateAdjustmentHelper({
   originalValue,
   adjustedValue,
   adjustmentType,
+  labelClassName,
 }: {
   readonly inLineValues: boolean;
   readonly originalValue: number;
   readonly adjustedValue: number;
   readonly adjustmentType: string;
+  readonly labelClassName?: string;
 }) {
   return (
     <div
@@ -22,10 +24,12 @@ export default function UserRateAdjustmentHelper({
       <UserRateAdjustmentHelperValue
         value={originalValue}
         title={`Current ${adjustmentType}:`}
+        labelClassName={labelClassName}
       />
       <UserRateAdjustmentHelperValue
         value={adjustedValue - originalValue}
         title="Adjustment:"
+        labelClassName={labelClassName}
       />
     </div>
   );

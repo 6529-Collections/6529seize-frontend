@@ -194,25 +194,29 @@ export default function ProfileActivityLogs({
           <div className="tw-flex-none tw-whitespace-nowrap">{children}</div>
         )}
         {withFilters && !withMatterFilter && (
-          <div className="tw-flex tw-flex-col tw-gap-y-3">
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
             {initialParams.handleOrWallet && (
-              <div className="tw-max-w-xs">
+              <div className="tw-flex-shrink-0">
                 <CommonTabs
                   items={DIRECTION_TAB_ITEMS}
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
+                  size="sm"
+                  fill={false}
                 />
               </div>
             )}
-            <div className="min-[1200px]:tw-w-80">
-              <ProfileActivityLogsFilter
-                user={initialParams.handleOrWallet}
-                options={initialParams.logTypes}
-                selected={selectedFilters}
-                setSelected={onFilter}
-              />
-            </div>
+            {matter === RateMatter.NIC && (
+              <div className="tw-ml-auto tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+                <ProfileActivityLogsFilter
+                  user={initialParams.handleOrWallet}
+                  options={initialParams.logTypes}
+                  selected={selectedFilters}
+                  setSelected={onFilter}
+                />
+              </div>
+            )}
           </div>
         )}
         {withMatterFilter && (
@@ -224,6 +228,7 @@ export default function ProfileActivityLogs({
                   activeItem={matter}
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
+                  size="sm"
                 />
               </div>
               {initialParams.handleOrWallet && (
@@ -233,11 +238,12 @@ export default function ProfileActivityLogs({
                     activeItem={targetType}
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
+                    size="sm"
                   />
                 </div>
               )}
             </div>
-            {withFilters && (matter === null || matter === RateMatter.NIC) && (
+            {withFilters && matter === RateMatter.NIC && (
               <div className="tw-ml-auto tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
                 <ProfileActivityLogsFilter
                   user={initialParams.handleOrWallet}
@@ -273,7 +279,7 @@ export default function ProfileActivityLogs({
               <span
                 className={`${
                   initialParams.handleOrWallet ? "tw-px-2 sm:tw-px-3" : ""
-                } tw-text-sm tw-italic tw-text-iron-500 sm:tw-text-md`}
+                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500`}
               >
                 No Activity Log
               </span>

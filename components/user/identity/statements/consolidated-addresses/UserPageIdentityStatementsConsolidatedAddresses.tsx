@@ -119,7 +119,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
 
   return (
     <div>
-      <span className="tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest">
+      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500">
         Consolidated Addresses
       </span>
       <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">

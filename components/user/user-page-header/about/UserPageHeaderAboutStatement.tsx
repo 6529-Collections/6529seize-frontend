@@ -25,7 +25,7 @@ export default function UserPageHeaderAboutStatement({
   return (
     <div className="tw-space-y-2">
       <div
-        className={`tw-mb-0 tw-whitespace-pre-line tw-text-md tw-font-normal tw-leading-relaxed tw-text-zinc-300 ${clampClass}`}
+        className={`tw-mb-0 tw-whitespace-pre-line tw-text-md tw-font-medium tw-leading-relaxed tw-text-iron-200 ${clampClass}`}
       >
         {statement.statement_value}
       </div>

@@ -80,7 +80,7 @@ export default function UserPageRepReps({
     <div className="tw-mt-6 lg:tw-mt-8">
       <div className="tw-relative">
         <div className="tw-mb-4">
-          <h3 className="tw-mb-0 tw-text-xl tw-font-bold tw-text-iron-100">
+          <h3 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-100">
             Total Rep
           </h3>
         </div>

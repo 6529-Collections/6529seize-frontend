@@ -31,7 +31,7 @@ export default function UserPageRepRepsTableHeader({
       <tr className="tw-border-y tw-border-solid tw-border-white/[0.06] tw-border-x-0">
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-1.5 tw-text-left tw-text-[11px] tw-font-semibold tw-text-iron-500 tw-uppercase tw-tracking-widest tw-border-0">
+          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-1.5 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 tw-border-0">
           Category
         </th>
         {types.map((sortType) => (

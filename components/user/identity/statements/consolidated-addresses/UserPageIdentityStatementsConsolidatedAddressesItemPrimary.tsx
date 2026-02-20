@@ -13,7 +13,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
 }) {
   if (isPrimary) {
     return (
-      <span className="tw-text-[9px] tw-font-bold tw-text-emerald-400 tw-bg-emerald-900/20 tw-px-1.5 tw-py-px tw-rounded tw-border tw-border-solid tw-border-emerald-500/20">
+      <span className="tw-text-[9px] tw-font-semibold tw-text-emerald-400 tw-bg-emerald-900/20 tw-px-1.5 tw-py-px tw-rounded tw-border tw-border-solid tw-border-emerald-500/20">
         Primary
       </span>
     );
@@ -24,7 +24,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
       <button
         disabled={isAssigningPrimary}
         onClick={assignPrimary}
-        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-iron-500 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-medium tw-text-iron-300 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
       >
         {isAssigningPrimary ? <CircleLoader /> : <>Set Primary</>}
       </button>

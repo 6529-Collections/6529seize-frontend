@@ -60,7 +60,7 @@ export default function ProfileActivityLogItemWrapper({
                 handleOrWallet={handleOrWallet}
                 isCurrentUser={isCurrentUser}
                 tabTarget={tabTarget}
-                textClassName="tw-text-sm md:tw-text-md tw-font-semibold tw-text-iron-100"
+                textClassName="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100"
               />
             )}
             {children}

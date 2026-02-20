@@ -46,7 +46,7 @@ export default function UserPageRepRepsTableItem({
         <td
           className={`${cellBase} ${hoverClass} tw-rounded-l-lg tw-border-l tw-border-l-white/[0.08] sm:tw-border-l-white/[0.04]`}
         >
-          <div className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-text-[14px] sm:tw-text-base tw-font-semibold tw-text-iron-200 group-hover:tw-text-white tw-transition-colors tw-mb-2">
+          <div className="tw-max-w-[12rem] lg:tw-max-w-[20rem] tw-truncate tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100 group-hover:tw-text-white tw-transition-colors tw-mb-2">
             {rep.category}
           </div>
           <div className="tw-h-1 tw-w-full tw-max-w-[16rem] tw-bg-white/[0.04] tw-rounded-full tw-overflow-hidden">
@@ -59,7 +59,7 @@ export default function UserPageRepRepsTableItem({
 
         {/* Community (Rep) */}
         <td className={`${cellBase} ${hoverClass} tw-text-right`}>
-          <span className="tw-text-[14px] sm:tw-text-base tw-font-bold tw-text-iron-300 group-hover:tw-text-iron-200 tw-transition-colors">
+          <span className="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200 tw-transition-colors">
             {formatNumberWithCommas(rep.rating)}
           </span>
         </td>
@@ -70,7 +70,7 @@ export default function UserPageRepRepsTableItem({
             canEditRep ? "" : "tw-rounded-r-lg tw-border-r tw-border-r-white/[0.08] sm:tw-border-r-white/[0.04]"
           }`}
         >
-          <span className="tw-text-sm tw-font-bold tw-text-iron-400 group-hover:tw-text-iron-300 tw-transition-colors">
+          <span className="tw-text-xs lg:tw-text-sm tw-font-normal tw-text-iron-400 group-hover:tw-text-iron-300 tw-transition-colors">
             {formatNumberWithCommas(rep.contributor_count)}
           </span>
         </td>
@@ -82,7 +82,7 @@ export default function UserPageRepRepsTableItem({
           >
             {rep.rater_contribution ? (
               <span
-                className={`tw-text-sm tw-font-bold tw-transition-colors ${
+                className={`tw-text-sm tw-font-semibold tw-transition-colors ${
                   rep.rater_contribution > 0
                     ? "tw-text-primary-400/90 group-hover:tw-text-primary-400"
                     : "tw-text-rose-400"
@@ -91,7 +91,7 @@ export default function UserPageRepRepsTableItem({
                 {formatNumberWithCommas(rep.rater_contribution)}
               </span>
             ) : (
-              <span className="tw-text-sm tw-font-bold tw-text-white/15 group-hover:tw-text-white/25 tw-transition-colors">-</span>
+              <span className="tw-text-sm tw-font-semibold tw-text-white/15 group-hover:tw-text-white/25 tw-transition-colors">-</span>
             )}
           </td>
         )}

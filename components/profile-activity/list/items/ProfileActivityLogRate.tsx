@@ -95,7 +95,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-400 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-xs lg:tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline"
         >
           (Proxy for {proxyHandle})
         </Link>
@@ -104,21 +104,21 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-emerald-400" : "tw-text-rose-400"
-        } tw-text-sm md:tw-text-md tw-font-bold`}
+        } tw-text-xs lg:tw-text-sm tw-font-semibold`}
       >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-xs lg:tw-text-sm tw-font-semibold`}
       >
         (total {newRatingStr})
       </span>
       {log.contents.rating_matter === RateMatter.REP && (
-        <span className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-200">
+        <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
           {log.contents.rating_category}
         </span>
       )}
-      <span className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-200 empty:tw-hidden">
+      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300 empty:tw-hidden">
         {LOG_MATTER_STR[log.contents.rating_matter]}
       </span>
 
@@ -127,13 +127,13 @@ export default function ProfileActivityLogRate({
         handleOrWallet={handleOrWallet}
         isCurrentUser={isCurrentUser}
         tabTarget={tabTarget}
-        textClassName="tw-text-sm md:tw-text-md tw-font-semibold tw-text-iron-100"
+        textClassName="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100"
       />
 
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-sm md:tw-text-md tw-font-medium tw-text-iron-400 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-xs lg:tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline"
         >
           (Proxy: {proxyHandle})
         </Link>
