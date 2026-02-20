@@ -60,7 +60,7 @@ const CreateCurationDropUrlInput = forwardRef<
             event.preventDefault();
             onSubmit();
           }}
-          placeholder="Paste supported curation URL"
+          placeholder="Enter supported curation URL"
           className={`tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-pr-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none sm:tw-text-sm ${inputRingClasses} ${
             disabled ? "tw-cursor-default tw-opacity-50" : ""
           } ${scrollMarginTopClassName ?? ""}`}
