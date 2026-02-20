@@ -71,6 +71,7 @@ export interface BaseFieldDefinition {
   readonly type: FieldType;
   readonly field: keyof TraitsData;
   readonly label: string;
+  readonly readOnly?: boolean | undefined;
 }
 
 /**

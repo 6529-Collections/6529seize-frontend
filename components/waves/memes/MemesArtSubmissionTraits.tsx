@@ -78,27 +78,31 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
           <Section key={`section-${sectionIndex}`} title={section.title}>
             <div className="tw-flex tw-flex-col tw-gap-6">
               {section.fields.map((field, fieldIndex) => {
+                const hasReadOnlyOverride =
+                  readOnlyOverrides?.[field.field] !== undefined;
                 const effectiveReadOnly =
                   readOnlyOverrides?.[field.field] ?? field.readOnly;
+                const definitionWithReadOnly =
+                  effectiveReadOnly === undefined
+                    ? field
+                    : { ...field, readOnly: effectiveReadOnly };
                 return (
-                <TraitField
-                  key={`field-${field.field}-${fieldIndex}`}
-                  definition={{ ...field, readOnly: effectiveReadOnly }}
-                  readOnlyOverride={
-                    readOnlyOverrides?.[field.field] !== undefined
-                      ? effectiveReadOnly
-                      : undefined
-                  }
-                  traits={traits}
-                  updateText={updateText}
-                  updateNumber={updateNumber}
-                  updateBoolean={updateBoolean}
-                  error={validationErrors[field.field]}
-                  onBlur={
-                    onFieldBlur ? () => onFieldBlur(field.field) : undefined
-                  }
-                />
-              );
+                  <TraitField
+                    key={`field-${field.field}-${fieldIndex}`}
+                    definition={definitionWithReadOnly}
+                    {...(hasReadOnlyOverride
+                      ? { readOnlyOverride: Boolean(effectiveReadOnly) }
+                      : {})}
+                    traits={traits}
+                    updateText={updateText}
+                    updateNumber={updateNumber}
+                    updateBoolean={updateBoolean}
+                    error={validationErrors[field.field]}
+                    onBlur={
+                      onFieldBlur ? () => onFieldBlur(field.field) : undefined
+                    }
+                  />
+                );
               })}
             </div>
           </Section>
