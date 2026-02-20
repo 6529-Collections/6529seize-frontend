@@ -1,10 +1,10 @@
-import type { QueryClient } from "@tanstack/react-query";
-import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
-import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
+import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
+import type { QueryClient } from "@tanstack/react-query";
 
 type MediaCandidate =
   | {
@@ -269,6 +269,7 @@ export const primeMarketplacePreviewCacheFromNftLinks = ({
 
     seenHrefs.add(href);
     const seededPreview = fromApiDropNftLink({ href, nftLink });
+    if (!seededPreview.media) return;
 
     for (const mode of MARKETPLACE_PREVIEW_MODES) {
       queryClient.setQueryData<MarketplacePreviewData>(
