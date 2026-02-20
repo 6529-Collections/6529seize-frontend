@@ -85,12 +85,15 @@ export default function UserPageRepReps({
           </h3>
         </div>
 
-        <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
+        <UserPageRateWrapper
+          profile={profile}
+          type={RateMatter.REP}
+          hideOwnProfileMessage>
           <UserPageRepNewRep profile={profile} repRates={repRates} />
         </UserPageRateWrapper>
 
         {!!reps.length && (
-          <div className="tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-0">
+          <div className="tw-mt-2">
             <UserPageRepRepsTable
               reps={reps}
               profile={profile}

@@ -4,6 +4,7 @@ import { Tooltip } from "react-tooltip";
 import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 export default function ProfileActivityLogItemValueWithCopy({
   title,
@@ -35,8 +36,8 @@ export default function ProfileActivityLogItemValueWithCopy({
         <button
           onClick={handleCopy}
           className={`${
-            isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-          } tw-mx-1 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+            isTouchScreen ? "tw-block" : "tw-opacity-0 group-hover:tw-opacity-100"
+          } tw-mx-1 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-500 hover:tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
           data-tooltip-id={`copy-activity-${value}`}>
           <CopyIcon />
         </button>
@@ -44,12 +45,11 @@ export default function ProfileActivityLogItemValueWithCopy({
           <Tooltip
             id={`copy-activity-${value}`}
             place="top"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}>
-            Copy
+            positionStrategy="fixed"
+            offset={8}
+            opacity={1}
+            style={TOOLTIP_STYLES}>
+            <span className="tw-text-xs">Copy</span>
           </Tooltip>
         )}
       </>

@@ -98,7 +98,7 @@ export default function UserPageRep({
           </div>
 
           {/* Right Sidebar - Identity Card */}
-          <div className="tw-min-w-0 tw-self-start tw-sticky tw-top-6 tw-max-h-[calc(100vh-1.5rem)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-transparent">
+          <div className="tw-min-w-0 tw-self-start">
             <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-bg-[#08090b] tw-border tw-border-solid tw-border-white/[0.08]">
               <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent tw-pointer-events-none" />
               <div className="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/25 tw-to-transparent" />
@@ -108,14 +108,17 @@ export default function UserPageRep({
               <div className="tw-relative tw-z-10">
                 <UserPageIdentityHeader profile={profile} />
                 <UserPageIdentityStatements profile={profile} />
-                <div className="tw-px-6 tw-pb-8">
-                  <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
+                <UserPageRateWrapper
+                  profile={profile}
+                  type={RateMatter.NIC}
+                  hideOwnProfileMessage>
+                  <div className="tw-px-6 tw-pb-8">
                     <UserPageIdentityHeaderCICRate
                       profile={profile}
                       isTooltip={false}
                     />
-                  </UserPageRateWrapper>
-                </div>
+                  </div>
+                </UserPageRateWrapper>
               </div>
             </div>
           </div>

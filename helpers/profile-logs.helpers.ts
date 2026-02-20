@@ -57,9 +57,8 @@ export const convertActivityLogParams = ({
       : "",
   };
 
-  if (params.matter) {
-    converted.rating_matter =
-      params.matter === RateMatter.NIC ? "CIC" : params.matter;
+  if (params.matter === RateMatter.REP) {
+    converted.rating_matter = params.matter;
   }
   if (params.groupId && !params.handleOrWallet && !disableActiveGroup) {
     converted.group_id = params.groupId;
