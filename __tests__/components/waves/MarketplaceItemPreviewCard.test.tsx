@@ -83,8 +83,13 @@ describe("MarketplaceItemPreviewCard", () => {
       "aria-label",
       "Open on Manifold - 1.25 ETH"
     );
+    expect(screen.queryByTestId("marketplace-item-cta-open-icon")).toBeNull();
+    expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
+    expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
+    expect(ctaLink.className).toContain("tw-border-white");
+    expect(ctaLink).not.toHaveClass("tw-size-8");
     expect(ctaLink).not.toHaveClass("tw-absolute");
-    expect(screen.queryByAltText("Manifold logo")).toBeNull();
+    expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
     expect(screen.queryByTestId("marketplace-item-title-row")).toBeNull();
   });
 
@@ -108,12 +113,61 @@ describe("MarketplaceItemPreviewCard", () => {
       "aria-label",
       "Open listing"
     );
+    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveClass(
+      "tw-size-8",
+      "tw-bg-black/50"
+    );
 
     await act(async () => {
       fireEvent.click(screen.getByTestId("marketplace-item-copy-button"));
       await Promise.resolve();
     });
     expect(mockClipboardWriteText).toHaveBeenCalledWith(href);
+  });
+
+  it("renders full-mode light price CTA without marketplace logo when marketplace is unknown", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/3"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          price=" 0.42 ETH "
+        />
+      </LinkPreviewProvider>
+    );
+
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
+    expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
+    expect(ctaLink.className).toContain("tw-border-white");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 0.42 ETH");
+    expect(screen.queryByTestId("marketplace-item-cta-open-icon")).toBeNull();
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
+      "0.42 ETH"
+    );
+    expect(screen.queryByAltText(/logo$/i)).toBeNull();
+  });
+
+  it("renders full-mode light brand CTA when price is missing but marketplace is known", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+        />
+      </LinkPreviewProvider>
+    );
+
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open on Manifold");
+    expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
+    expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
+    expect(ctaLink.className).toContain("tw-border-white");
+    expect(ctaLink).not.toHaveClass("tw-size-8");
+    expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
+    expect(screen.queryByTestId("manifold-item-price")).toBeNull();
   });
 
   it("hides copy action in full mode when hideActions is true", () => {
@@ -130,6 +184,24 @@ describe("MarketplaceItemPreviewCard", () => {
 
     expect(screen.queryByTestId("marketplace-item-copy-button")).toBeNull();
     expect(screen.getByTestId("marketplace-item-cta-link")).toBeInTheDocument();
+  });
+
+  it("keeps full-mode dark fallback button when marketplace and price are both missing", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/no-price"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+        />
+      </LinkPreviewProvider>
+    );
+
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open listing");
+    expect(ctaLink).toHaveClass("tw-size-8", "tw-bg-black/50", "tw-text-white");
+    expect(screen.queryByAltText(/logo$/i)).toBeNull();
+    expect(screen.queryByTestId("manifold-item-price")).toBeNull();
   });
 
   it("keeps compact mode CTA style with overlay actions when hideActions is false", () => {

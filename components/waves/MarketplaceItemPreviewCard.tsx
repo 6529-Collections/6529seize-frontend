@@ -86,17 +86,19 @@ function ExternalOpenIcon({
   return (
     <svg
       className={className}
-      viewBox="0 0 64 64"
+      viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      strokeWidth="3"
       stroke="currentColor"
       fill="none"
       aria-hidden="true"
       data-testid={testId}
     >
-      <path d="M55.4,32V53.58a1.81,1.81,0,0,1-1.82,1.82H10.42A1.81,1.81,0,0,1,8.6,53.58V10.42A1.81,1.81,0,0,1,10.42,8.6H32" />
-      <polyline points="40.32 8.6 55.4 8.6 55.4 24.18" />
-      <line x1="19.32" y1="45.72" x2="54.61" y2="8.91" />
+      <path
+        d="M13.5 6H18M18 6V10.5M18 6L10.5 13.5M7.5 8.25H6C4.75736 8.25 3.75 9.25736 3.75 10.5V18C3.75 19.2426 4.75736 20.25 6 20.25H13.5C14.7426 20.25 15.75 19.2426 15.75 18V16.5"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -319,13 +321,52 @@ export default function MarketplaceItemPreviewCard({
             {displayTitle}
           </p>
           <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-            {hasPrice && (
-              <span
-                className="tw-inline-flex tw-max-w-[8rem] tw-truncate tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/50 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-leading-4 tw-text-white"
-                data-testid="manifold-item-price"
+            {hasPrice || hasMarketplaceBrand ? (
+              <Link
+                href={resolvedHref}
+                target={target}
+                rel={rel}
+                prefetch={false}
+                className="tw-inline-flex tw-max-w-[13rem] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-white tw-bg-[#E5E5E5] tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-leading-4 tw-text-[#0A0A0A] tw-no-underline tw-transition-colors tw-duration-150 hover:tw-border-[#EFEFEF] hover:tw-bg-[#EFEFEF] hover:tw-text-[#0A0A0A]"
+                data-testid="marketplace-item-cta-link"
+                aria-label={ctaAriaLabel}
+                onClick={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
               >
-                {normalizedPrice}
-              </span>
+                {hasMarketplaceBrand && (
+                  <Image
+                    src={marketplaceBrand.logoSrc}
+                    alt={`${marketplaceBrand.displayName} logo`}
+                    width={14}
+                    height={14}
+                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-rounded-sm tw-object-cover"
+                  />
+                )}
+                {hasPrice && (
+                  <span
+                    className="tw-max-w-[8rem] tw-truncate"
+                    data-testid="manifold-item-price"
+                  >
+                    {normalizedPrice}
+                  </span>
+                )}
+              </Link>
+            ) : (
+              <Link
+                href={resolvedHref}
+                target={target}
+                rel={rel}
+                prefetch={false}
+                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/50 tw-text-white tw-no-underline tw-transition-colors tw-duration-150"
+                data-testid="marketplace-item-cta-link"
+                aria-label={ctaAriaLabel}
+                onClick={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
+              >
+                <ExternalOpenIcon className="tw-size-3.5 tw-flex-shrink-0" />
+              </Link>
             )}
             {!hideActions && (
               <CopyListingButton
@@ -334,20 +375,6 @@ export default function MarketplaceItemPreviewCard({
                 className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/50 tw-text-white tw-transition-colors tw-duration-150"
               />
             )}
-            <Link
-              href={resolvedHref}
-              target={target}
-              rel={rel}
-              prefetch={false}
-              className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/50 tw-text-white tw-no-underline tw-transition-colors tw-duration-150"
-              data-testid="marketplace-item-cta-link"
-              aria-label={ctaAriaLabel}
-              onClick={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-              onTouchStart={(event) => event.stopPropagation()}
-            >
-              <ExternalOpenIcon className="tw-size-3.5 tw-flex-shrink-0" />
-            </Link>
           </div>
         </div>
       </div>
