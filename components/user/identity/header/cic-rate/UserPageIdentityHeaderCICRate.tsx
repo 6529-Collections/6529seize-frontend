@@ -270,7 +270,7 @@ export default function UserPageIdentityHeaderCICRate({
           : "tw-pt-6 tw-border-t tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10"
       } `}>
       {!isTooltip && (
-        <div className="tw-flex tw-items-center tw-gap-2 tw-mb-4">
+        <div className="tw-hidden lg:tw-flex tw-items-center tw-gap-2 tw-mb-4">
           <svg
             className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-text-emerald-400"
             viewBox="0 0 24 24"

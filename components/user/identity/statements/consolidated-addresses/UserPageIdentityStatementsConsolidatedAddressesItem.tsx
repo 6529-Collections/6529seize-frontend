@@ -166,15 +166,15 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             </div>
           )}
         </div>
-        <div className="tw-flex tw-items-center tw-gap-2 tw-ml-auto tw-flex-shrink-0">
+        <div className="tw-flex tw-items-center tw-gap-3 lg:tw-gap-2 tw-ml-auto tw-flex-shrink-0">
           <button
             onClick={goToEtherscan}
             aria-label="Go to Etherscan"
-            className="tw-border-none tw-bg-transparent tw-p-0 tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-border-none tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
             data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
             {...(!isTouchScreen ? { "data-tooltip-content": "Etherscan" } : null)}
           >
-            <div className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
+            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
               <EtherscanIcon />
             </div>
           </button>
@@ -191,11 +191,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           <button
             onClick={goToOpensea}
             aria-label="Go to Opensea"
-            className="tw-border-none tw-bg-transparent tw-p-0 tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-border-none tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
             data-tooltip-id={`opensea-tooltip-${address.wallet}`}
             {...(isTouchScreen ? null : { "data-tooltip-content": "Opensea" })}
           >
-            <div className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
+            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
               <OpenseaIcon />
             </div>
           </button>
@@ -211,12 +211,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           )}
           <button
             aria-label="Copy address"
-            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none"
+            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-text-iron-600 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none"
             onClick={handleCopy}
             data-tooltip-id={`copy-tooltip-${address.wallet}`}
             {...(!isTouchScreen ? { "data-tooltip-content": "Copy" } : null)}
           >
-            <div className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center [&>svg]:tw-w-full [&>svg]:tw-h-full">
+            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center [&>svg]:tw-w-full [&>svg]:tw-h-full">
               <CopyIcon />
             </div>
           </button>

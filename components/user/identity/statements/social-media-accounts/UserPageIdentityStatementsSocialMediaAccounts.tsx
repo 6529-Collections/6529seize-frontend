@@ -1,6 +1,6 @@
 import type { CicStatement } from "@/entities/IProfile";
-import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityStatementsStatementsList";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityStatementsStatementsList";
 
 export default function UserPageIdentityStatementsSocialMediaAccounts({
   statements,
@@ -13,7 +13,7 @@ export default function UserPageIdentityStatementsSocialMediaAccounts({
 }) {
   return (
     <div>
-      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500">
+      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
         Social Media Accounts
       </span>
       <UserPageIdentityStatementsStatementsList

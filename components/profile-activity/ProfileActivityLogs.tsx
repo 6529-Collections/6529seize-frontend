@@ -208,7 +208,7 @@ export default function ProfileActivityLogs({
               </div>
             )}
             {matter === RateMatter.NIC && (
-              <div className="tw-ml-auto tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+              <div className="md:tw-ml-auto tw-flex-1 md:tw-flex-none md:tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
                 <ProfileActivityLogsFilter
                   user={initialParams.handleOrWallet}
                   options={initialParams.logTypes}

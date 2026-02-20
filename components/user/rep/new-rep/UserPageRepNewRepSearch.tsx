@@ -390,14 +390,15 @@ export default function UserPageRepNewRepSearch({
       <div className="tw-w-full">
         <div className="tw-w-full">
           <div ref={listRef} className="tw-w-full">
-            <div className="tw-w-full tw-relative tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-white/5 tw-px-4 tw-py-5">
-              <div className="tw-flex tw-items-center tw-justify-between">
+            <div className="tw-w-full tw-relative lg:tw-rounded-xl tw-bg-iron-950 lg:tw-border lg:tw-border-solid lg:tw-border-white/5 lg:tw-px-4 lg:tw-py-5">
+              <div
+                className="tw-flex tw-items-center tw-justify-between">
                 <label
                   htmlFor="search-rep"
-                  className="tw-block tw-text-xs tw-font-normal lg:tw-font-medium tw-text-iron-500">
+                  className="tw-hidden lg:tw-block tw-text-xs tw-font-medium tw-text-iron-500">
                   Grant Rep
                 </label>
-                <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-500 tw-font-normal lg:tw-font-medium">
+                <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-500 tw-font-medium">
                   <span>
                     <span>Your available Rep:</span>
                     <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
@@ -424,7 +425,7 @@ export default function UserPageRepNewRepSearch({
                   className="tw-w-full sm:tw-flex-1 tw-relative">
                   <div className="tw-w-full tw-relative">
                     <svg
-                      className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-4 tw-w-4 tw-text-iron-500"
+                      className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true">
@@ -490,7 +491,7 @@ export default function UserPageRepNewRepSearch({
                     isGrantDisabled
                       ? "tw-cursor-not-allowed tw-opacity-50"
                       : "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
-                  } tw-flex-shrink-0 tw-bg-primary-500 tw-border-primary-500 tw-px-5 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
+                  } tw-flex-shrink-0 tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
                   {mutating ? (
                     <div className="tw-w-12">
                       <CircleLoader />

@@ -89,29 +89,6 @@ export default function UserPageIdentityStatements({
       <div>
         <UserPageIdentityAddStatementsHeader
           profile={profile}
-          rightAccessory={
-            <div
-              tabIndex={0}
-              role="button"
-              aria-label="Statements help"
-              className="tw-rounded-full tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
-              data-tooltip-id="statements-help">
-              <svg
-                className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-text-iron-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-          }
         />
         <div className="tw-mt-2 lg:tw-mt-4 tw-scroll-py-3 tw-overflow-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-transparent desktop-hover:hover:tw-scrollbar-thumb-iron-500">
           <div className="tw-relative tw-pb-6 lg:tw-pb-8 tw-mx-auto tw-grid tw-grid-cols-1 xl:tw-gap-x-8 xl:tw-gap-y-2 lg:tw-mx-0 xl:tw-grid-cols-5">

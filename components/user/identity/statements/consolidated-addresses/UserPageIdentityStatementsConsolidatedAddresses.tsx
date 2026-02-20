@@ -1,20 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import type { WalletConsolidationState } from "@/entities/IProfile";
+import { useContext, useEffect, useState } from "react";
 
-import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
-import { amIUser } from "@/helpers/Helpers";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useQueries } from "@tanstack/react-query";
-import type { Page } from "@/helpers/Types";
-import Link from "next/link";
-import { AnimatePresence } from "framer-motion";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
+import { amIUser } from "@/helpers/Helpers";
+import type { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQueries } from "@tanstack/react-query";
+import { AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {
@@ -119,9 +119,32 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
 
   return (
     <div>
-      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500">
-        Consolidated Addresses
-      </span>
+      <div className="tw-flex tw-items-center tw-justify-between">
+        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          Consolidated Addresses
+        </span>
+        <div
+          tabIndex={0}
+          role="button"
+          aria-label="Statements help"
+          className="tw-rounded-full tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+          data-tooltip-id="statements-help">
+          <svg
+            className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-text-iron-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
       <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem

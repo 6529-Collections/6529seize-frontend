@@ -70,7 +70,7 @@ export default function UserPageRep({
 
       {/* Desktop layout (>=1024px) */}
       <div className="tw-hidden lg:tw-block">
-        <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] lg:tw-gap-x-10">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           {/* Left Column - Rep Content */}
           <div className="tw-min-w-0">
             <UserPageRepHeader repRates={repRates ?? null} profile={profile} />

@@ -1,11 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import Link from "next/link";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
 
 export default function UserPageIdentityHeaderCICRateStats({
   isTooltip,
@@ -96,7 +96,7 @@ export default function UserPageIdentityHeaderCICRateStats({
         {items.map((item) => (
           <span
             key={item.label}
-            className={`tw-block tw-text-iron-500 tw-font-normal lg:tw-font-medium${
+            className={`tw-block tw-text-iron-500 tw-font-medium${
               item.labelBreakAll ? " tw-break-all" : ""
             }`}>
             <span>
@@ -118,13 +118,11 @@ export default function UserPageIdentityHeaderCICRateStats({
           key={item.label}
           className="tw-flex tw-items-center tw-justify-between">
           <span
-            className={`tw-text-xs tw-text-iron-500 tw-font-normal lg:tw-font-medium${
-              item.labelBreakAll ? " tw-break-all" : ""
-            }`}>
+            className="tw-text-xs tw-text-iron-500 tw-font-medium">
             {item.label}
           </span>
           <span
-            className={`tw-text-xs tw-font-semibold ${item.valueColorClassName}`}>
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${item.valueColorClassName}`}>
             {item.value}
           </span>
         </div>

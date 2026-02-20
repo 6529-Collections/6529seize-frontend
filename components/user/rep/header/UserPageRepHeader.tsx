@@ -1,14 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/components/auth/Auth";
 import type {
-  ApiProfileRepRatesState,
-  RatingStats,
+    ApiProfileRepRatesState,
+    RatingStats,
 } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { formatNumberCompact, formatNumberWithCommas } from "@/helpers/Helpers";
-import { AuthContext } from "@/components/auth/Auth";
+import { useContext, useEffect, useState } from "react";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import TopRaterAvatars from "./TopRaterAvatars";
 
@@ -104,7 +104,7 @@ export default function UserPageRepHeader({
 
           <div className="tw-mt-4 tw-flex tw-items-end tw-justify-between tw-gap-6">
             <div>
-              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 tw-mb-1">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-1">
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-semibold tw-text-primary-400 tw-tracking-tight tw-leading-none">
@@ -127,7 +127,7 @@ export default function UserPageRepHeader({
 
           {topReps.length > 0 && (
             <div className="tw-mt-6 tw-pt-6 tw-border-t tw-border-solid tw-border-white/10 tw-border-l-0 tw-border-r-0 tw-border-b-0">
-              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 tw-mb-4">
+              <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-4">
                Top Rep
               </div>
               <div className="tw-flex tw-flex-wrap tw-gap-3">

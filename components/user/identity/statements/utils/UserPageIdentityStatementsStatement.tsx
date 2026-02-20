@@ -58,16 +58,16 @@ export default function UserPageIdentityStatementsStatement({
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-2 tw-ml-3 tw-flex-shrink-0 tw-leading-none">
+        <div className="tw-flex tw-items-center tw-gap-3 lg:tw-gap-2 tw-ml-3 tw-flex-shrink-0 tw-leading-none">
           {canOpen && (
             <>
               <a
                 href={statement.statement_value}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tw-border-none tw-bg-transparent tw-p-0 tw-cursor-pointer tw-text-iron-600 hover:tw-text-iron-200 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
+                className="tw-border-none tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-cursor-pointer tw-text-iron-600 hover:tw-text-iron-200 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
                 data-tooltip-id={`open-statement-${statement.id}`}>
-                <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 [&>svg]:tw-w-full [&>svg]:tw-h-full">
+                <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 [&>svg]:tw-w-full [&>svg]:tw-h-full">
                   <OutsideLinkIcon />
                 </div>
               </a>
@@ -86,10 +86,10 @@ export default function UserPageIdentityStatementsStatement({
           )}
           <button
             aria-label="Copy"
-            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none"
+            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-text-iron-600 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none"
             onClick={handleCopy}
             data-tooltip-id={`copy-statement-${statement.id}`}>
-            <div className="tw-h-4 tw-w-4 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 [&>svg]:tw-w-full [&>svg]:tw-h-full">
+            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 [&>svg]:tw-w-full [&>svg]:tw-h-full">
               <CopyIcon />
             </div>
           </button>

@@ -95,7 +95,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-xs lg:tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-normal tw-text-iron-500 tw-no-underline"
         >
           (Proxy for {proxyHandle})
         </Link>
@@ -104,12 +104,12 @@ export default function ProfileActivityLogRate({
       <span
         className={`${
           isChangePositive ? "tw-text-emerald-400" : "tw-text-rose-400"
-        } tw-text-xs lg:tw-text-sm tw-font-semibold`}
+        } tw-text-sm lg:tw-text-base tw-font-semibold`}
       >
         {changeStr}
       </span>
       <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-xs lg:tw-text-sm tw-font-semibold`}
+        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-semibold`}
       >
         (total {newRatingStr})
       </span>
@@ -133,7 +133,7 @@ export default function ProfileActivityLogRate({
       {!!proxyHandle && !isSelfProxy && (
         <Link
           href={`/${proxyHandle}`}
-          className="tw-whitespace-nowrap tw-text-xs lg:tw-text-sm tw-font-normal tw-text-iron-500 tw-no-underline"
+          className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-normal tw-text-iron-500 tw-no-underline"
         >
           (Proxy: {proxyHandle})
         </Link>

@@ -29,7 +29,7 @@ export default function UserPageRepRepsTableItem({
     maxRep > 0 ? (Math.abs(rep.rating) / maxRep) * 100 : 0;
 
   const cellBase =
-    "tw-py-2.5 sm:tw-py-3 tw-px-4 sm:tw-px-6 tw-bg-gradient-to-r tw-from-[#0f1014]/40 tw-to-[#0A0A0C]/40 tw-border-y tw-border-solid tw-border-white/[0.08] sm:tw-border-white/[0.04] tw-border-x-0 tw-transition-all tw-duration-200 tw-ease-out";
+    "tw-py-2.5 sm:tw-py-3 tw-px-4 tw-bg-gradient-to-r tw-from-[#0f1014]/40 tw-to-[#0A0A0C]/40 tw-border-y tw-border-solid tw-border-white/[0.08] sm:tw-border-white/[0.04] tw-border-x-0 tw-transition-all tw-duration-200 tw-ease-out";
   const hoverClass = canEditRep
     ? "group-hover:tw-from-[#12141a]/60 group-hover:tw-to-[#0d0f13]/60 group-hover:tw-border-white/[0.16]"
     : "";

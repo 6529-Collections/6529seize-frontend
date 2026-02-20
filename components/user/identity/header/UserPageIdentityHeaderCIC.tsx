@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import UserCICStatus from "@/components/user/utils/user-cic-status/UserCICStatus";
+import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
-import UserCICStatus from "@/components/user/utils/user-cic-status/UserCICStatus";
+import { useEffect, useState } from "react";
 
 export default function UserPageIdentityHeaderCIC({
   profile,
@@ -19,7 +19,7 @@ export default function UserPageIdentityHeaderCIC({
 
   return (
     <div className="tw-mb-8">
-      <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 tw-mb-2">
+      <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-2">
         NIC
       </div>
       <div className="tw-text-3xl tw-font-semibold tw-text-white tw-tracking-tight tw-leading-none">
