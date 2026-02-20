@@ -1,9 +1,14 @@
+import Image from "next/image";
+
 export default function FoundationIcon() {
   return (
-    <img
-      src="/foundation-icon.jpg"
+    <Image
+      src="/foundation.png"
       alt="Foundation App"
-      className="tw-rounded-full tw-object-contain tw-flex-shrink-0 tw-h-5 tw-w-5 tw-align-top"
+      width={20}
+      height={20}
+      unoptimized
+      className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-rounded-full tw-object-contain tw-align-top"
     />
   );
 }

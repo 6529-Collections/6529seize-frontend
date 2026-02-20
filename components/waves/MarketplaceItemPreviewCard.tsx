@@ -64,7 +64,7 @@ const getMarketplaceBrand = (href: string): MarketplaceBrand | null => {
     case "superrare.artwork":
       return { displayName: "SuperRare", logoSrc: "/superrare-icon.png" };
     case "foundation.mint":
-      return { displayName: "Foundation", logoSrc: "/foundation-icon.jpg" };
+      return { displayName: "Foundation", logoSrc: "/foundation.png" };
     case "opensea.item":
     case "opensea.asset":
       return { displayName: "OpenSea", logoSrc: "/opensea.png" };
