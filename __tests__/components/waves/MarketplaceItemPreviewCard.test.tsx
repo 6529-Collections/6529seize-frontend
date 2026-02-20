@@ -93,6 +93,32 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.queryByTestId("marketplace-item-title-row")).toBeNull();
   });
 
+  it("renders Foundation logo and price in full mode CTA", () => {
+    const href =
+      "https://foundation.app/mint/eth/0x5847Eaef547F1B01C0a23d8af615AB2f0bB235A4/8";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          price=" 0.77 ETH "
+        />
+      </LinkPreviewProvider>
+    );
+
+    const foundationLogo = screen.getByAltText("Foundation logo");
+    expect(foundationLogo).toHaveAttribute("src", "/foundation-icon.jpg");
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
+      "0.77 ETH"
+    );
+    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveAttribute(
+      "aria-label",
+      "Open on Foundation - 0.77 ETH"
+    );
+  });
+
   it("uses fallback title in full mode and copies link from footer action", async () => {
     const href = "https://example.com/item/1";
 
