@@ -16,7 +16,6 @@ export default function MarketplaceItemPreviewMediaLink({
   resolvedPreviewHref,
 }: MarketplaceItemPreviewMediaLinkProps) {
   const { href, target, rel } = resolvedPreviewHref;
-
   return (
     <Link
       href={href}

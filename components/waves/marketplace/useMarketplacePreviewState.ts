@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { fetchLinkPreview } from "@/services/api/link-preview-api";
+import { fetchNftLink } from "@/services/api/nft-link-api";
 import {
   fromNftLink,
   mergeOpenGraphFallback,
@@ -10,8 +12,6 @@ import {
   type MarketplacePreviewMode,
   type MarketplacePreviewState,
 } from "./common";
-import { fetchLinkPreview } from "@/services/api/link-preview-api";
-import { fetchNftLink } from "@/services/api/nft-link-api";
 
 interface UseMarketplacePreviewStateParams {
   readonly href: string;
