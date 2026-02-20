@@ -132,18 +132,18 @@ export const WaveLeaderboardGridItem: React.FC<
     }
 
     if (isMarketplaceImageOnlyCard) {
-      return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
+      return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
     }
 
-    return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";
+    return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
   })();
   const viewportClassName = isCompactMode
     ? "tw-relative tw-overflow-hidden tw-bg-iron-950"
-    : "tw-relative tw-overflow-hidden tw-max-h-[20rem]";
+    : "tw-relative tw-overflow-hidden tw-max-h-[20rem] tw-bg-iron-950";
   const contentSpacingClass = isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
   const mediaWrapperClass = isCompactMode
     ? "tw-overflow-hidden tw-rounded-lg tw-bg-iron-900"
-    : "tw-overflow-hidden";
+    : "tw-overflow-hidden tw-bg-iron-950";
   const isMobileScreen = useIsMobileScreen();
   const { hasTouchScreen } = useDeviceInfo();
   const { toggleCuration, isPending: isCurating } = useDropCurationMutation();
@@ -168,6 +168,7 @@ export const WaveLeaderboardGridItem: React.FC<
 
   const mediaUrl = primaryMedia?.url ?? previewImageUrl ?? null;
   const mediaMimeType = primaryMedia?.mime_type ?? "image/jpeg";
+  const shouldPadContentOnlyText = isContentOnlyMode && Boolean(mediaUrl);
 
   const getOverflowSnapshot = useCallback(() => {
     if (!viewportEl || !innerEl) {
@@ -305,19 +306,34 @@ export const WaveLeaderboardGridItem: React.FC<
               />
             </div>
           )}
-          {activePart && (
-            <LinkPreviewProvider variant="home">
-              <WaveDropPartContentMarkdown
-                mentionedUsers={drop.mentioned_users}
-                mentionedWaves={drop.mentioned_waves}
-                referencedNfts={drop.referenced_nfts}
-                part={activePart}
-                wave={drop.wave}
-                drop={drop}
-                onQuoteClick={() => {}}
-              />
-            </LinkPreviewProvider>
-          )}
+          {activePart &&
+            (shouldPadContentOnlyText ? (
+              <div className="tw-p-2">
+                <LinkPreviewProvider variant="home">
+                  <WaveDropPartContentMarkdown
+                    mentionedUsers={drop.mentioned_users}
+                    mentionedWaves={drop.mentioned_waves}
+                    referencedNfts={drop.referenced_nfts}
+                    part={activePart}
+                    wave={drop.wave}
+                    drop={drop}
+                    onQuoteClick={() => {}}
+                  />
+                </LinkPreviewProvider>
+              </div>
+            ) : (
+              <LinkPreviewProvider variant="home">
+                <WaveDropPartContentMarkdown
+                  mentionedUsers={drop.mentioned_users}
+                  mentionedWaves={drop.mentioned_waves}
+                  referencedNfts={drop.referenced_nfts}
+                  part={activePart}
+                  wave={drop.wave}
+                  drop={drop}
+                  onQuoteClick={() => {}}
+                />
+              </LinkPreviewProvider>
+            ))}
         </div>
         {showGradient && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-14 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/90 tw-to-transparent" />

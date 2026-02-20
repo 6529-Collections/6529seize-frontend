@@ -166,14 +166,10 @@ describe("WaveLeaderboardGridItem", () => {
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
     const content = viewport.firstElementChild as HTMLElement;
-    expect(card).toHaveClass("tw-h-[26rem]");
-    expect(card).toHaveClass("tw-p-3");
+    expect(card).toHaveClass("tw-p-0");
     expect(card).toHaveClass("tw-border");
     expect(card).toHaveClass("tw-bg-iron-950");
-    expect(viewport).toHaveClass("tw-h-[15rem]");
-    expect(viewport).toHaveClass("tw-p-3");
-    expect(viewport).toHaveClass("tw-rounded-lg");
-    expect(viewport).toHaveClass("tw-bg-iron-900/50");
+    expect(viewport).toHaveClass("tw-bg-iron-950");
     expect(content).toHaveClass("tw-space-y-3");
   });
 
@@ -203,14 +199,12 @@ describe("WaveLeaderboardGridItem", () => {
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
     const content = viewport.firstElementChild as HTMLElement;
-    expect(card).not.toHaveClass("tw-h-[26rem]");
-    expect(card).not.toHaveClass("tw-h-[23rem]");
-    expect(card).toHaveClass("tw-p-2");
-    expect(card).not.toHaveClass("tw-p-0");
-    expect(card).not.toHaveClass("tw-p-3");
+    expect(card).toHaveClass("tw-p-0");
+    expect(card).not.toHaveClass("tw-p-2");
     expect(card).toHaveClass("tw-border");
-    expect(card).not.toHaveClass("tw-bg-iron-950");
+    expect(card).toHaveClass("tw-bg-iron-950");
     expect(viewport).toHaveClass("tw-max-h-[20rem]");
+    expect(viewport).toHaveClass("tw-bg-iron-950");
     expect(viewport).not.toHaveClass("tw-h-[20rem]");
     expect(viewport).not.toHaveClass("tw-p-2");
     expect(viewport).not.toHaveClass("tw-p-3");
@@ -218,6 +212,9 @@ describe("WaveLeaderboardGridItem", () => {
     expect(viewport).not.toHaveClass("tw-bg-iron-900/50");
     expect(content).toHaveClass("tw-space-y-1");
     expect(content).not.toHaveClass("tw-space-y-3");
+    const markdownContainer = screen.getByTestId("markdown")
+      .parentElement as HTMLElement;
+    expect(markdownContainer).toHaveClass("tw-p-2");
   });
 
   it("keeps marketplace-only card border while removing inner padding", () => {
@@ -244,6 +241,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-p-0");
     expect(card).not.toHaveClass("tw-p-2");
     expect(card).toHaveClass("tw-border");
+    expect(card).toHaveClass("tw-bg-iron-950");
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   });
 
