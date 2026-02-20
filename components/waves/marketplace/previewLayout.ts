@@ -15,9 +15,12 @@ export function getMarketplaceContainerClass(
     return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40";
   }
 
+  const fullModeBaseClass =
+    "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10";
+
   if (variant === "home") {
-    return "tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950/50";
+    return `${fullModeBaseClass} tw-bg-black/40`;
   }
 
-  return "tw-w-full tw-overflow-hidden tw-bg-inherit";
+  return `${fullModeBaseClass} tw-bg-iron-950/65`;
 }

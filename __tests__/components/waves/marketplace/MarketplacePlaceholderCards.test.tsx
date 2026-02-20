@@ -19,6 +19,9 @@ describe("Marketplace placeholder cards", () => {
     const media = screen.getByTestId("marketplace-preview-placeholder-media");
     expect(media).toHaveClass("tw-aspect-[16/9]");
     expect(media).toHaveClass("tw-min-h-[14rem]");
+    expect(
+      screen.getByTestId("marketplace-preview-placeholder-footer")
+    ).toBeInTheDocument();
   });
 
   it("keeps placeholder layout the same in compact mode", () => {
@@ -32,6 +35,9 @@ describe("Marketplace placeholder cards", () => {
     expect(
       screen.getByTestId("marketplace-preview-placeholder-media")
     ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("marketplace-preview-placeholder-footer")
+    ).toBeNull();
   });
 
   it("renders stable unavailable card with compact mode support", () => {
@@ -46,5 +52,23 @@ describe("Marketplace placeholder cards", () => {
     expect(media).toHaveClass("tw-aspect-[16/9]");
     expect(media).toHaveClass("tw-min-h-[14rem]");
     expect(screen.getByText("Preview unavailable")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("marketplace-preview-unavailable-footer")
+    ).toBeNull();
+  });
+
+  it("renders unavailable footer row in non-compact mode", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceUnavailableCard
+          href="https://manifold.xyz/@andrew-hooker/id/4098474224"
+          compact={false}
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(
+      screen.getByTestId("marketplace-preview-unavailable-footer")
+    ).toBeInTheDocument();
   });
 });
