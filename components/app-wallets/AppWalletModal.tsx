@@ -1,6 +1,6 @@
 "use client";
 import styles from "./AppWallet.module.scss";
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,7 +10,79 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
 
-const SEED_MIN_PASS_LENGTH = 6;
+const WALLET_CREATE_MIN_PASS_LENGTH = 12;
+
+type PasswordStrength = {
+  score: 0 | 1 | 2 | 3 | 4;
+  label: "Weak" | "Fair" | "Good" | "Strong";
+  percent: number;
+  variant: "danger" | "warning" | "info" | "success";
+  hasLeadingOrTrailingWhitespace: boolean;
+};
+
+function getPasswordStrength(password: string): PasswordStrength {
+  const hasLeadingOrTrailingWhitespace = /^\s|\s$/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+  let score = 0;
+  if (password.length >= 12) score += 1;
+  if (password.length >= 16) score += 1;
+  if (password.length >= 24) score += 1;
+
+  const variety = [hasLower, hasUpper, hasNumber, hasSymbol].filter(
+    Boolean
+  ).length;
+  if (variety >= 2) score += 1;
+  if (variety >= 3) score += 1;
+
+  score = Math.max(0, Math.min(4, score));
+
+  const scoreTyped = score as 0 | 1 | 2 | 3 | 4;
+  const labelByScore: Record<PasswordStrength["score"], PasswordStrength["label"]> =
+    {
+      0: "Weak",
+      1: "Weak",
+      2: "Fair",
+      3: "Good",
+      4: "Strong",
+    };
+  const variantByScore: Record<
+    PasswordStrength["score"],
+    PasswordStrength["variant"]
+  > = {
+    0: "danger",
+    1: "danger",
+    2: "warning",
+    3: "info",
+    4: "success",
+  };
+
+  return {
+    score: scoreTyped,
+    label: labelByScore[scoreTyped],
+    percent: (scoreTyped / 4) * 100,
+    variant: variantByScore[scoreTyped],
+    hasLeadingOrTrailingWhitespace,
+  };
+}
+
+function validateNewWalletPassword(password: string): string | null {
+  if (password.length < WALLET_CREATE_MIN_PASS_LENGTH) {
+    return `Password must be at least ${WALLET_CREATE_MIN_PASS_LENGTH} characters long`;
+  }
+
+  const strength = getPasswordStrength(password);
+  if (strength.hasLeadingOrTrailingWhitespace) {
+    return "Password must not start or end with whitespace";
+  }
+  if (strength.score < 3 && password.length < 16) {
+    return "Password is too weak. Use a longer passphrase or add more character variety.";
+  }
+  return null;
+}
 
 const showAppWalletError = (
   timeoutRef: RefObject<NodeJS.Timeout | null>,
@@ -51,6 +123,8 @@ export function CreateAppWalletModal(
   const [isAdding, setIsAdding] = useState(false);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const passStrength = getPasswordStrength(walletPass);
+  const passError = validateNewWalletPassword(walletPass);
 
   const handleHide = useCallback(
     (isSuccess?: boolean) => {
@@ -63,11 +137,12 @@ export function CreateAppWalletModal(
   );
 
   const handleCreate = useCallback(async () => {
-    if (walletPass.length < SEED_MIN_PASS_LENGTH) {
+    const validationError = validateNewWalletPassword(walletPass);
+    if (validationError) {
       showAppWalletError(
         timeoutRef,
         setError,
-        `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
+        validationError
       );
       return;
     } else {
@@ -95,11 +170,12 @@ export function CreateAppWalletModal(
   const handleImport = useCallback(async () => {
     if (!importData) return;
 
-    if (walletPass.length < SEED_MIN_PASS_LENGTH) {
+    const validationError = validateNewWalletPassword(walletPass);
+    if (validationError) {
       showAppWalletError(
         timeoutRef,
         setError,
-        `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
+        validationError
       );
       return;
     } else {
@@ -179,19 +255,29 @@ export function CreateAppWalletModal(
           placeholder="******"
           value={walletPass}
           className={styles["newWalletInput"]}
-          onChange={(e: any) => {
-            const value = e.target.value;
-            if (/^\S*$/.test(value)) {
-              setWalletPass(value);
-            } else {
-              showAppWalletError(
-                timeoutRef,
-                setError,
-                "Password must not contain any whitespace characters"
-              );
-            }
-          }}
+          autoComplete="new-password"
+          spellCheck={false}
+          autoCapitalize="none"
+          onChange={(e: any) => setWalletPass(e.target.value)}
         />
+        {walletPass && (
+          <div className="pt-2">
+            <div className="progress" style={{ height: 8 }}>
+              <div
+                className={`progress-bar bg-${passStrength.variant}`}
+                role="progressbar"
+                style={{ width: `${passStrength.percent}%` }}
+                aria-valuenow={passStrength.percent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              />
+            </div>
+            <div className="pt-1 font-smaller font-color-h">
+              Strength: {passStrength.label}
+              {passError ? ` • ${passError}` : ""}
+            </div>
+          </div>
+        )}
         <p className="mt-4 mb-1">
           {error ? (
             <span className="text-danger">{error}</span>
@@ -207,14 +293,14 @@ export function CreateAppWalletModal(
         {importData ? (
           <Button
             variant="primary"
-            disabled={!walletName || !walletPass || isAdding}
+            disabled={!walletName || !walletPass || Boolean(passError) || isAdding}
             onClick={handleImport}>
             {isAdding ? "Importing..." : "Import"}
           </Button>
         ) : (
           <Button
             variant="primary"
-            disabled={!walletName || !walletPass || isAdding}
+            disabled={!walletName || !walletPass || Boolean(passError) || isAdding}
             onClick={handleCreate}>
             {isAdding ? "Creating..." : "Create"}
           </Button>
@@ -318,17 +404,12 @@ export function UnlockAppWalletModal(
           placeholder="******"
           value={walletPass}
           className={styles["newWalletInput"]}
+          autoComplete="current-password"
+          spellCheck={false}
+          autoCapitalize="none"
           onChange={(e) => {
             const value = e.target.value;
-            if (/^\S*$/.test(value)) {
-              setWalletPass(value);
-            } else {
-              showAppWalletError(
-                timeoutRef,
-                setError,
-                "Password must not contain any whitespace characters"
-              );
-            }
+            setWalletPass(value);
           }}
           onKeyDown={handleKeyPress}
         />
@@ -346,9 +427,7 @@ export function UnlockAppWalletModal(
         </Button>
         <Button
           variant="primary"
-          disabled={
-            unlocking || !walletPass || walletPass.length < SEED_MIN_PASS_LENGTH
-          }
+          disabled={unlocking || !walletPass}
           onClick={handleUnlock}>
           {unlocking ? "Unlocking..." : "Unlock"}
         </Button>
