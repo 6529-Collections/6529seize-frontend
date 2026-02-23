@@ -1,4 +1,5 @@
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
+import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
@@ -188,9 +189,37 @@ const pickMedia = (data: LinkPreviewResponse): PickedMedia | undefined => {
   return undefined;
 };
 
+const pickNftLinkMediaPreview = (
+  response: ApiNftLinkResponse | undefined
+): PickedMedia | undefined => {
+  const preview = response?.data?.media_preview;
+  if (preview?.status !== ApiNftLinkMediaPreviewStatusEnum.Ready) {
+    return undefined;
+  }
+
+  const url =
+    asNonEmptyString(preview.card_url) ??
+    asNonEmptyString(preview.small_url) ??
+    asNonEmptyString(preview.thumb_url);
+
+  if (!url) {
+    return undefined;
+  }
+
+  return {
+    url,
+    mimeType:
+      asNonEmptyString(preview.mime_type) ??
+      inferMimeTypeFromUrl(url) ??
+      "image/*",
+  };
+};
+
 const pickNftLinkMedia = (
   response: ApiNftLinkResponse | undefined
-): PickedMedia | undefined => pickMediaFromUrl(response?.data?.media_uri);
+): PickedMedia | undefined =>
+  pickNftLinkMediaPreview(response) ??
+  pickMediaFromUrl(response?.data?.media_uri);
 
 const pickNftLinkPrice = (
   response: ApiNftLinkResponse | undefined

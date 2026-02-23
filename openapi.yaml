@@ -8393,6 +8393,7 @@ components:
         - price
         - last_successfully_updated
         - failed_since
+        - media_preview
       properties:
         canonical_id:
           type: string
@@ -8429,6 +8430,53 @@ components:
         failed_since:
           type: integer
           format: int64
+          nullable: true
+        media_preview:
+          anyOf:
+            - $ref: "#/components/schemas/ApiNftLinkMediaPreview"
+            - type: "null"
+    ApiNftLinkMediaPreview:
+      type: object
+      required:
+        - status
+        - kind
+        - card_url
+        - thumb_url
+        - small_url
+        - width
+        - height
+        - mime_type
+      properties:
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - READY
+            - FAILED
+            - SKIPPED
+        kind:
+          type: string
+          nullable: true
+        card_url:
+          type: string
+          nullable: true
+        thumb_url:
+          type: string
+          nullable: true
+        small_url:
+          type: string
+          nullable: true
+        width:
+          type: integer
+          format: int64
+          nullable: true
+        height:
+          type: integer
+          format: int64
+          nullable: true
+        mime_type:
+          type: string
           nullable: true
     ApiNftLinkResponse:
       type: object
