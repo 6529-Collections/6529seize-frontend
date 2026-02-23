@@ -1,5 +1,7 @@
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -23,6 +25,109 @@ interface MyStreamWaveMyVoteProps {
   readonly isResetting?: boolean | undefined;
 }
 
+type ResolvedPreviewMedia = {
+  readonly url: string;
+  readonly mimeType: string;
+};
+
+const DEFAULT_MIME_TYPE = "image/jpeg";
+
+const MIME_BY_EXTENSION: Record<string, string> = {
+  avif: "image/avif",
+  gif: "image/gif",
+  jpeg: DEFAULT_MIME_TYPE,
+  jpg: DEFAULT_MIME_TYPE,
+  m4v: "video/x-m4v",
+  mov: "video/quicktime",
+  mp3: "audio/mpeg",
+  mp4: "video/mp4",
+  ogg: "audio/ogg",
+  ogv: "video/ogg",
+  flac: "audio/flac",
+  png: "image/png",
+  svg: "image/svg+xml",
+  wav: "audio/wav",
+  webm: "video/webm",
+  webp: "image/webp",
+  glb: "model/gltf-binary",
+  gltf: "model/gltf+json",
+  usdz: "model/vnd.usdz",
+};
+
+const toNonEmptyString = (value: unknown): string | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+const inferMimeTypeFromUrl = (url: string): string | undefined => {
+  try {
+    const parsed = new URL(url);
+    const extensionMatch = parsed.pathname
+      .toLowerCase()
+      .match(/\.([a-z0-9]+)$/);
+    if (!extensionMatch?.[1]) {
+      return undefined;
+    }
+
+    return MIME_BY_EXTENSION[extensionMatch[1]];
+  } catch {
+    const path = url.split("?")[0]?.toLowerCase() ?? "";
+    const extensionMatch = path.match(/\.([a-z0-9]+)$/);
+    if (!extensionMatch?.[1]) {
+      return undefined;
+    }
+
+    return MIME_BY_EXTENSION[extensionMatch[1]];
+  }
+};
+
+const resolveCurationPreviewMedia = (
+  nftLinks: ExtendedDrop["nft_links"]
+): ResolvedPreviewMedia | null => {
+  if (typeof nftLinks?.length !== "number" || nftLinks.length === 0) {
+    return null;
+  }
+
+  for (const nftLink of nftLinks) {
+    const preview = nftLink.data?.media_preview;
+    const previewMimeType = toNonEmptyString(preview?.mime_type);
+    const previewUrl =
+      preview?.status === ApiNftLinkMediaPreviewStatusEnum.Ready
+        ? (toNonEmptyString(preview.card_url) ??
+          toNonEmptyString(preview.small_url) ??
+          toNonEmptyString(preview.thumb_url))
+        : null;
+    if (previewUrl) {
+      return {
+        url: previewUrl,
+        mimeType:
+          previewMimeType ??
+          inferMimeTypeFromUrl(previewUrl) ??
+          DEFAULT_MIME_TYPE,
+      };
+    }
+
+    const fallbackUrl = toNonEmptyString(nftLink.data?.media_uri);
+    if (!fallbackUrl) {
+      continue;
+    }
+
+    return {
+      url: fallbackUrl,
+      mimeType:
+        inferMimeTypeFromUrl(fallbackUrl) ??
+        previewMimeType ??
+        DEFAULT_MIME_TYPE,
+    };
+  }
+
+  return null;
+};
+
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   drop,
   onDropClick,
@@ -30,11 +135,23 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   onToggleCheck,
   isResetting = false,
 }) => {
+  const { isCurationWave } = useSeizeSettings();
   const artWork = drop.parts.at(0)?.media.at(0);
   const previewImageUrl = useMemo(
     () => getDropPreviewImageUrl(drop.metadata),
     [drop.metadata]
   );
+  const curationPreviewMedia = useMemo(
+    () =>
+      !artWork && isCurationWave(drop.wave.id)
+        ? resolveCurationPreviewMedia(drop.nft_links)
+        : null,
+    [artWork, drop.nft_links, drop.wave.id, isCurationWave]
+  );
+  const resolvedMediaUrl = artWork?.url ?? curationPreviewMedia?.url ?? null;
+  const resolvedMediaMimeType =
+    artWork?.mime_type ?? curationPreviewMedia?.mimeType ?? DEFAULT_MIME_TYPE;
+  const badgeMimeType = artWork?.mime_type ?? curationPreviewMedia?.mimeType;
 
   const handleClick = () => {
     if (window.getSelection()?.toString()) {
@@ -93,10 +210,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         <div className="tw-relative tw-min-h-[106px] tw-min-w-[106px] tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 @xs:tw-h-56 @xs:tw-w-full @sm:tw-mb-2 @sm:tw-h-56 @sm:tw-w-full @md:tw-size-[106px]">
           <div className="tw-relative tw-flex tw-h-full tw-w-full tw-transform tw-items-center tw-justify-center tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-105">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
-              {artWork && (
+              {resolvedMediaUrl && (
                 <MediaDisplay
-                  media_mime_type={artWork.mime_type}
-                  media_url={artWork.url}
+                  media_mime_type={resolvedMediaMimeType}
+                  media_url={resolvedMediaUrl}
                   imageScale={ImageScale.AUTOx450}
                   previewImageUrl={previewImageUrl}
                   disableMediaInteraction={true}
@@ -110,7 +227,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <MediaTypeBadge
-                mimeType={artWork?.mime_type}
+                mimeType={badgeMimeType}
                 dropId={drop.id}
                 size="sm"
               />
@@ -118,7 +235,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 {drop.title}
               </h3>
             </div>
-            {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
+            {typeof drop.rank === "number" && (
+              <SingleWaveDropPosition rank={drop.rank} />
+            )}
           </div>
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2">
             <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
@@ -136,11 +255,14 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               user={drop.author.handle ?? drop.author.id}
             >
               <Link
-                href={`/${drop.author.handle}`}
+                href={`/${drop.author.handle ?? drop.author.primary_address}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  window.open(`/${drop.author.handle}`, "_blank");
+                  window.open(
+                    `/${drop.author.handle ?? drop.author.primary_address}`,
+                    "_blank"
+                  );
                 }}
                 className="tw-truncate tw-text-md tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
               >
@@ -159,12 +281,12 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               </div>
               <div className="tw-flex tw-items-center tw-gap-2">
                 <div className="tw-flex tw-items-center -tw-space-x-2">
-                  {drop.top_raters?.slice(0, 3).map((voter) => (
+                  {drop.top_raters.slice(0, 3).map((voter) => (
                     <React.Fragment key={voter.profile.handle}>
                       <Link
-                        href={`/${voter.profile.handle}`}
+                        href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
                         onClick={(e) => e.stopPropagation()}
-                        data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle}`}
+                        data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
                       >
                         {voter.profile.pfp ? (
                           <img
@@ -177,7 +299,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                         )}
                       </Link>
                       <Tooltip
-                        id={`my-vote-voter-${drop.id}-${voter.profile.handle}`}
+                        id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
                         place="top"
                         offset={8}
                         opacity={1}
