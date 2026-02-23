@@ -18,7 +18,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import type { KeyboardEvent } from "react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatementsAddButton from "../identity/statements/add/UserPageIdentityStatementsAddButton";
@@ -129,16 +128,6 @@ export default function UserPageRepMobile({
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()
     );
 
-  const onRepCardKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      setActiveTab("rep");
-    }
-  };
-
   // --- render ---
 
   return (
@@ -146,10 +135,8 @@ export default function UserPageRepMobile({
       {/* Score Cards (tappable navigation) */}
       <div className="tw-grid tw-grid-cols-2 tw-gap-3">
         {/* Rep Score */}
-        <div
-          role="button"
-          tabIndex={0}
-          onKeyDown={onRepCardKeyDown}
+        <button
+          type="button"
           onClick={() => setActiveTab("rep")}
           className={`tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
             activeTab === "rep" ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
@@ -200,7 +187,7 @@ export default function UserPageRepMobile({
               </div>
             )}
           </div>
-        </div>
+        </button>
 
         {/* NIC Score */}
         <button

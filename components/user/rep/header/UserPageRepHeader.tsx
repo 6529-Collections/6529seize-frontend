@@ -4,7 +4,6 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { KeyboardEvent } from "react";
 import { useContext, useEffect, useState } from "react";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import TopRaterAvatars from "./TopRaterAvatars";
@@ -67,19 +66,6 @@ export default function UserPageRepHeader({
     setEditCategory(category);
   };
 
-  const onCategoryKeyDown = (
-    e: KeyboardEvent<HTMLDivElement>,
-    category: string
-  ) => {
-    if (!canEditRep || e.target !== e.currentTarget) {
-      return;
-    }
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      setEditCategory(category);
-    }
-  };
-
   return (
     <>
       <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-gradient-to-br tw-from-[#0f1014] tw-via-[#0A0A0C] tw-to-[#08090b] tw-shadow-2xl">
@@ -89,17 +75,17 @@ export default function UserPageRepHeader({
         <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-[1px] tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
 
         <div className="tw-relative tw-p-6">
-          <div>
-            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
-              Rep
-            </h2>
-            <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
-              What others recognize this identity for.
-            </p>
-          </div>
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-6">
+            <div className="tw-min-w-0">
+              <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
+                Rep
+              </h2>
+              <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+                What others recognize this identity for.
+              </p>
+            </div>
 
-          <div className="tw-mt-4 tw-flex tw-items-end tw-justify-between tw-gap-6">
-            <div>
+            <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-end tw-text-right">
               <div className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                 Total Rep
               </div>
@@ -108,15 +94,13 @@ export default function UserPageRepHeader({
                   ? formatNumberWithCommas(repRates.total_rep_rating)
                   : ""}
               </div>
-            </div>
-            {repRates && (
-              <div className="tw-flex tw-shrink-0 tw-flex-col tw-items-end">
-                <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+              {repRates && (
+                <span className="tw-mt-1 tw-text-sm tw-font-normal tw-text-iron-400">
                   {formatNumberWithCommas(repRates.number_of_raters)}{" "}
                   {repRates.number_of_raters === 1 ? "rater" : "raters"}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {topReps.length > 0 && (
@@ -128,29 +112,40 @@ export default function UserPageRepHeader({
                 {topReps.map((rep) => (
                   <div
                     key={rep.category}
-                    role={canEditRep ? "button" : undefined}
-                    tabIndex={canEditRep ? 0 : undefined}
-                    onClick={() => openEditCategory(rep.category)}
-                    onKeyDown={(e) => onCategoryKeyDown(e, rep.category)}
-                    aria-disabled={!canEditRep}
                     className={`group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-transition-colors ${
                       canEditRep
                         ? "tw-cursor-pointer hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60"
                         : "tw-cursor-default"
                     }`}
                   >
-                    <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                      {rep.category}
-                    </span>
-                    <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
-                      {formatNumberWithCommas(rep.rating)}
-                    </span>
+                    {canEditRep ? (
+                      <button
+                        type="button"
+                        onClick={() => openEditCategory(rep.category)}
+                        className="tw-inline-flex tw-items-center tw-gap-2.5 tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit tw-cursor-pointer focus:tw-outline-none"
+                      >
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                          {rep.category}
+                        </span>
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
+                          {formatNumberWithCommas(rep.rating)}
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="tw-inline-flex tw-items-center tw-gap-2.5">
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                          {rep.category}
+                        </span>
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
+                          {formatNumberWithCommas(rep.rating)}
+                        </span>
+                      </div>
+                    )}
                     <span className="tw-text-xs tw-text-iron-600">·</span>
                     <TopRaterAvatars
                       handleOrWallet={profile.handle ?? ""}
                       category={rep.category}
                       count={3}
-                      onAvatarClick={(e) => e.stopPropagation()}
                     />
                     <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
                       {formatNumberWithCommas(rep.contributor_count)}{" "}
