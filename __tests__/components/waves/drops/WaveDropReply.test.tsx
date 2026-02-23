@@ -16,7 +16,7 @@ jest.mock("@/components/waves/drops/ContentDisplay", () => (props: any) => {
 
 const hookData: any = {
   drop: null,
-  content: { segments: [] },
+  content: { segments: [], apiMedia: [] },
   isLoading: false,
 };
 
@@ -83,5 +83,6 @@ describe("WaveDropReply", () => {
         mockContentDisplaySpy.mock.calls.length - 1
       ][0];
     expect(lastCallProps.textClassName).not.toContain("tw-block");
+    expect(lastCallProps.linkify).toBe(false);
   });
 });
