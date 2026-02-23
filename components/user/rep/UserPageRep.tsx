@@ -108,17 +108,17 @@ export default function UserPageRep({
               <div className="tw-relative tw-z-10">
                 <UserPageIdentityHeader profile={profile} />
                 <UserPageIdentityStatements profile={profile} />
-                <UserPageRateWrapper
-                  profile={profile}
-                  type={RateMatter.NIC}
-                  hideOwnProfileMessage>
-                  <div className="tw-px-6 tw-pb-8">
+                <div className="tw-px-6 tw-pb-8">
+                  <UserPageRateWrapper
+                    profile={profile}
+                    type={RateMatter.NIC}
+                    hideOwnProfileMessage>
                     <UserPageIdentityHeaderCICRate
                       profile={profile}
                       isTooltip={false}
                     />
-                  </div>
-                </UserPageRateWrapper>
+                  </UserPageRateWrapper>
+                </div>
               </div>
             </div>
           </div>

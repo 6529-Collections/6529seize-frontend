@@ -227,29 +227,33 @@ export default function UserPageRepMobile({
             transition={{ duration: 0.15, ease: "easeInOut" }}
           >
             {canEditRep && (
-              <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
-                <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
-                  Recognize this profile&apos;s skills
-                </span>
-                <button
-                  onClick={() => setIsGrantRepOpen(true)}
-                  className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-blue-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 md:tw-py-3"
-                >
-                  <svg
-                    className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  Grant Rep
-                </button>
+              <div className="tw-mt-4">
+                <UserPageRateWrapper profile={profile} type={RateMatter.REP} hideOwnProfileMessage>
+                  <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
+                    <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
+                      Recognize this profile&apos;s skills
+                    </span>
+                    <button
+                      onClick={() => setIsGrantRepOpen(true)}
+                      className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-blue-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 md:tw-py-3"
+                    >
+                      <svg
+                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Grant Rep
+                    </button>
+                  </div>
+                </UserPageRateWrapper>
               </div>
             )}
 
@@ -283,16 +287,20 @@ export default function UserPageRepMobile({
           >
             {/* Rate NIC CTA */}
             {canEditNic && (
-              <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-bg-emerald-500/5 tw-border-emerald-500/10 tw-px-5 tw-py-3">
-                <span className="tw-text-xs tw-font-medium tw-text-emerald-200/70">
-                  Verify this profile&apos;s identity
-                </span>
-                <button
-                  onClick={() => setIsNicRateOpen(true)}
-                  className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500 tw-bg-emerald-500 tw-px-3.5 tw-py-2 sm:tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-emerald-400 hover:tw-bg-emerald-400"
-                >
-                  Rate NIC
-                </button>
+              <div className="tw-mt-4">
+                <UserPageRateWrapper profile={profile} type={RateMatter.NIC} hideOwnProfileMessage>
+                  <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-bg-emerald-500/5 tw-border-emerald-500/10 tw-px-5 tw-py-3">
+                    <span className="tw-text-xs tw-font-medium tw-text-emerald-200/70">
+                      Verify this profile&apos;s identity
+                    </span>
+                    <button
+                      onClick={() => setIsNicRateOpen(true)}
+                      className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500 tw-bg-emerald-500 tw-px-3.5 tw-py-2 sm:tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-emerald-400 hover:tw-bg-emerald-400"
+                    >
+                      Rate NIC
+                    </button>
+                  </div>
+                </UserPageRateWrapper>
               </div>
             )}
 
@@ -325,7 +333,6 @@ export default function UserPageRepMobile({
         title="Grant Rep"
         isOpen={isGrantRepOpen}
         onClose={() => setIsGrantRepOpen(false)}
-        tall
         tabletModal
       >
         <div className="tw-px-4 sm:tw-px-6">
@@ -333,8 +340,17 @@ export default function UserPageRepMobile({
             <UserPageRepNewRep
               profile={profile}
               repRates={repRates}
+              onSuccess={() => setIsGrantRepOpen(false)}
             />
           </UserPageRateWrapper>
+          <div className="tw-mt-3">
+            <button
+              onClick={() => setIsGrantRepOpen(false)}
+              type="button"
+              className="tw-w-full tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+              Cancel
+            </button>
+          </div>
         </div>
       </MobileWrapperDialog>
 
@@ -347,8 +363,16 @@ export default function UserPageRepMobile({
       >
         <div className="tw-px-4 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
-            <UserPageIdentityHeaderCICRate profile={profile} isTooltip={false} />
+            <UserPageIdentityHeaderCICRate profile={profile} isTooltip={false} onSuccess={() => setIsNicRateOpen(false)} />
           </UserPageRateWrapper>
+          <div className="tw-mt-3">
+            <button
+              onClick={() => setIsNicRateOpen(false)}
+              type="button"
+              className="tw-w-full tw-cursor-pointer tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
+              Cancel
+            </button>
+          </div>
         </div>
       </MobileWrapperDialog>
 

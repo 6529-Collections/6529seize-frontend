@@ -45,7 +45,8 @@ export default function UserPageRepRepsTableHeaderSortableCell({
         } tw-transition tw-duration-300 tw-ease-out`}>
         {SORT_TYPE_TO_TEXT[type]}
       </span>
-      <span className="-tw-mt-0.5 tw-ml-2">
+      {/* TODO: re-enable sort icons next branch */}
+      <span className="-tw-mt-0.5 tw-ml-2 tw-hidden">
         <CommonTableSortIcon direction={sor} isActive={isActive} />
       </span>
     </th>

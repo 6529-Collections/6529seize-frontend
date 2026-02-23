@@ -5,10 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import type {
-  ApiProfileRepRatesState,
-  RatingStats,
-} from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import UserPageRepNewRepError from "./UserPageRepNewRepError";
@@ -18,10 +15,10 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { formatNumberWithCommas, getStringAsNumberOrZero } from "@/helpers/Helpers";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import { useRepAllocation } from "@/hooks/useRepAllocation";
 
 const SEARCH_LENGTH = {
   MIN: 3,
@@ -38,9 +35,11 @@ export enum RepSearchState {
 export default function UserPageRepNewRepSearch({
   repRates,
   profile,
+  onSuccess,
 }: {
   readonly repRates: ApiProfileRepRatesState | null;
   readonly profile: ApiIdentity;
+  readonly onSuccess?: () => void;
 }) {
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -87,155 +86,10 @@ export default function UserPageRepNewRepSearch({
     enabled: matchingSearchLength,
   });
 
-  // Proxy grantor rep rates (same query as SearchHeader — React Query deduplicates)
-  const { data: proxyGrantorRepRates } = useQuery<ApiProfileRepRatesState>({
-    queryKey: [
-      QueryKey.PROFILE_REP_RATINGS,
-      {
-        rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile?.handle,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile?.query}/rep/ratings/received`,
-        params: activeProfileProxy?.created_by.handle
-          ? { rater: activeProfileProxy.created_by.handle }
-          : {},
-      }),
-    enabled: !!activeProfileProxy?.created_by.handle,
+  const { repState, heroAvailableRep, minMaxValues } = useRepAllocation({
+    profile,
+    category: selectedCategory,
   });
-
-  // Connected profile rep rates (same query as modal)
-  const { data: connectedProfileRepRates } =
-    useQuery<ApiProfileRepRatesState>({
-      queryKey: [
-        QueryKey.PROFILE_REP_RATINGS,
-        {
-          rater: connectedProfile?.handle,
-          handleOrWallet: profile?.handle,
-        },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiProfileRepRatesState>({
-          endpoint: `profiles/${profile?.query}/rep/ratings/received`,
-          params: connectedProfile?.handle
-            ? { rater: connectedProfile.handle }
-            : {},
-        }),
-      enabled: !!connectedProfile?.handle,
-    });
-
-  // --- Derived rep state for selected category (mirrors modal logic) ---
-
-  const getRepState = (): RatingStats | null => {
-    if (!selectedCategory) return null;
-
-    if (activeProfileProxy && proxyGrantorRepRates) {
-      const target = proxyGrantorRepRates.rating_stats.find(
-        (s) => s.category === selectedCategory
-      );
-      return (
-        target ?? {
-          category: selectedCategory,
-          rating: 0,
-          contributor_count: 0,
-          rater_contribution: 0,
-        }
-      );
-    }
-
-    if (activeProfileProxy) return null;
-
-    if (connectedProfileRepRates) {
-      const target = connectedProfileRepRates.rating_stats.find(
-        (s) => s.category === selectedCategory
-      );
-      return (
-        target ?? {
-          category: selectedCategory,
-          rating: 0,
-          contributor_count: 0,
-          rater_contribution: 0,
-        }
-      );
-    }
-
-    return null;
-  };
-
-  const getProxyAvailableCredit = (): number | null => {
-    const repProxy = activeProfileProxy?.actions.find(
-      (a) => a.action_type === ApiProfileProxyActionType.AllocateRep
-    );
-    if (!repProxy) return null;
-    return Math.max(
-      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0),
-      0
-    );
-  };
-
-  const getHeroAvailableRep = (): number => {
-    if (activeProfileProxy) {
-      return proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
-    }
-    return connectedProfileRepRates?.rep_rates_left_for_rater ?? 0;
-  };
-
-  const [repState, setRepState] = useState<RatingStats | null>(getRepState());
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
-  const [heroAvailableRep, setHeroAvailableRep] = useState<number>(
-    getHeroAvailableRep()
-  );
-
-  useEffect(() => {
-    setRepState(getRepState());
-  }, [
-    selectedCategory,
-    proxyGrantorRepRates,
-    activeProfileProxy,
-    connectedProfileRepRates,
-  ]);
-
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
-
-  useEffect(
-    () => setHeroAvailableRep(getHeroAvailableRep()),
-    [activeProfileProxy, proxyGrantorRepRates, connectedProfileRepRates]
-  );
-
-  const getMinValue = (): number => {
-    const currentRep = repState?.rater_contribution ?? 0;
-    const minHeroRep = 0 - (Math.abs(currentRep) + heroAvailableRep);
-    if (typeof proxyAvailableCredit !== "number") return minHeroRep;
-    const minProxyRep = currentRep - proxyAvailableCredit;
-    return Math.abs(minHeroRep) < Math.abs(minProxyRep)
-      ? minHeroRep
-      : minProxyRep;
-  };
-
-  const getMaxValue = (): number => {
-    const currentRep = repState?.rater_contribution ?? 0;
-    const maxHeroRep = Math.abs(currentRep) + heroAvailableRep;
-    if (typeof proxyAvailableCredit !== "number") return maxHeroRep;
-    const maxProxyRep = currentRep + proxyAvailableCredit;
-    return Math.min(maxHeroRep, maxProxyRep);
-  };
-
-  const [minMaxValues, setMinMaxValues] = useState<{
-    readonly min: number;
-    readonly max: number;
-  }>({ min: getMinValue(), max: getMaxValue() });
-
-  useEffect(
-    () => setMinMaxValues({ min: getMinValue(), max: getMaxValue() }),
-    [repState, proxyGrantorRepRates, proxyAvailableCredit, heroAvailableRep]
-  );
 
   // Pre-fill amountStr when category is selected
   useEffect(() => {
@@ -305,7 +159,9 @@ export default function UserPageRepNewRepSearch({
       });
       setSelectedCategory(null);
       setRepSearch("");
-      setAmountStr("");
+      setAmountStr("0");
+      setIsOpen(false);
+      onSuccess?.();
     },
     onError: (error) => {
       setToast({ message: error as unknown as string, type: "error" });
@@ -350,10 +206,10 @@ export default function UserPageRepNewRepSearch({
     }
 
     setCategoriesToDisplay(items);
-    if (debouncedValue.length && !selectedCategory) {
+    if (debouncedValue.length && repSearch.length && !selectedCategory) {
       setIsOpen(true);
     }
-  }, [debouncedValue, categories, matchingSearchLength, selectedCategory]);
+  }, [debouncedValue, repSearch, categories, matchingSearchLength, selectedCategory]);
 
   const [repSearchState, setRepSearchState] = useState<RepSearchState>(
     RepSearchState.MIN_LENGTH_ERROR
@@ -392,7 +248,7 @@ export default function UserPageRepNewRepSearch({
           <div ref={listRef} className="tw-w-full">
             <div className="tw-w-full tw-relative lg:tw-rounded-xl tw-bg-iron-950 lg:tw-border lg:tw-border-solid lg:tw-border-white/5 lg:tw-px-4 lg:tw-py-5">
               <div
-                className="tw-flex tw-items-center tw-justify-between">
+                className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-y-1.5 tw-gap-x-4">
                 <label
                   htmlFor="search-rep"
                   className="tw-hidden lg:tw-block tw-text-xs tw-font-medium tw-text-iron-500">
@@ -419,10 +275,10 @@ export default function UserPageRepNewRepSearch({
                   </span>
                 </div>
               </div>
-              <div className="tw-flex tw-flex-col sm:tw-flex-row tw-items-stretch sm:tw-items-end tw-gap-3 tw-mt-3">
+              <div className="tw-flex tw-flex-col lg:tw-flex-row tw-items-stretch lg:tw-items-end tw-gap-3 tw-mt-3">
                 <form
                   onSubmit={onSearchSubmit}
-                  className="tw-w-full sm:tw-flex-1 tw-relative">
+                  className="tw-w-full lg:tw-flex-1 xl:tw-min-w-[250px] tw-relative">
                   <div className="tw-w-full tw-relative">
                     <svg
                       className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
@@ -473,7 +329,7 @@ export default function UserPageRepNewRepSearch({
                     )}
                   </AnimatePresence>
                 </form>
-                <div className="tw-relative tw-flex tw-w-full sm:tw-w-36">
+                <div className="tw-relative tw-flex tw-w-full lg:tw-w-32 xl:tw-w-36">
                   <UserPageRateInput
                     value={amountStr}
                     onChange={setAmountStr}

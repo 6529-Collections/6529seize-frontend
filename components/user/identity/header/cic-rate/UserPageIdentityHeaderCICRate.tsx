@@ -38,9 +38,11 @@ const CIC_INPUT_FULL_CLASS_NAME =
 export default function UserPageIdentityHeaderCICRate({
   profile,
   isTooltip,
+  onSuccess,
 }: {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
+  readonly onSuccess?: () => void;
 }) {
   const { address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -92,6 +94,7 @@ export default function UserPageIdentityHeaderCICRate({
           null,
         profileProxy: activeProfileProxy ?? null,
       });
+      onSuccess?.();
     },
     onError: (error) => {
       setToast({

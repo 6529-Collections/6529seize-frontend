@@ -39,7 +39,7 @@ export default function UserPageIdentityStatementsStatement({
   }, []);
 
   return (
-    <li className="tw-group hover:tw-bg-white/[0.02] tw-py-4 tw-transition-colors tw-duration-200 tw-ease-out tw-border-b tw-border-solid tw-border-white/[0.06] tw-border-t-0 tw-border-x-0 last:tw-border-b-0">
+    <li className="tw-group hover:tw-bg-white/[0.02] tw-pl-0.5 tw-py-4 tw-transition-colors tw-duration-200 tw-ease-out tw-border-b tw-border-solid tw-border-white/[0.06] tw-border-t-0 tw-border-x-0 last:tw-border-b-0">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-flex tw-items-center tw-gap-3.5 tw-min-w-0">
           <div className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-flex tw-items-center tw-justify-center">

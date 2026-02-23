@@ -30,16 +30,23 @@ export default function ProfileActivityLogItemValueWithCopy({
     }, 1000);
   };
   return (
-    <span className="tw-h-6 tw-whitespace-nowrap tw-group tw-inline-flex tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
-      {titleToShow}
+    <span className="tw-group tw-inline-flex tw-h-6 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-text-base">
+      <span className={titleToShow === "Copied!" ? "tw-text-primary-400" : ""}>
+        {titleToShow}
+      </span>
       <>
         <button
           onClick={handleCopy}
           className={`${
-            isTouchScreen ? "tw-block" : "tw-opacity-0 group-hover:tw-opacity-100"
-          } tw-mx-1 tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-500 hover:tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-          data-tooltip-id={`copy-activity-${value}`}>
-          <CopyIcon />
+            isTouchScreen
+              ? "tw-block"
+              : "tw-opacity-0 group-hover:tw-opacity-100"
+          } tw-mx-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-text-sm tw-font-semibold tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none`}
+          data-tooltip-id={`copy-activity-${value}`}
+        >
+          <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center lg:tw-h-4 lg:tw-w-4 [&>svg]:tw-h-full [&>svg]:tw-w-full">
+            <CopyIcon />
+          </div>
         </button>
         {!isTouchScreen && (
           <Tooltip
@@ -48,7 +55,8 @@ export default function ProfileActivityLogItemValueWithCopy({
             positionStrategy="fixed"
             offset={8}
             opacity={1}
-            style={TOOLTIP_STYLES}>
+            style={TOOLTIP_STYLES}
+          >
             <span className="tw-text-xs">Copy</span>
           </Tooltip>
         )}

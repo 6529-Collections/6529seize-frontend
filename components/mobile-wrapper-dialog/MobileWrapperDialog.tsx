@@ -45,9 +45,11 @@ export default function MobileWrapperDialog({
     return `calc(${viewportHeight} - 10rem)`;
   };
 
-  const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md${
-    isIos ? "" : " tw-transform-gpu tw-will-change-transform"
-  }${tabletModal ? " md:tw-w-full md:tw-max-w-[58rem]" : ""}`;
+  const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen${
+    tabletModal ? "" : " md:tw-max-w-screen-md"
+  }${isIos ? "" : " tw-transform-gpu tw-will-change-transform"}${
+    tabletModal ? " md:tw-w-full md:tw-max-w-md" : ""
+  }`;
 
   const containerClassNames = `tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10${
     tabletModal ? " md:tw-inset-0 md:tw-items-center md:tw-pt-0 md:tw-p-6" : ""
@@ -117,7 +119,7 @@ export default function MobileWrapperDialog({
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >
-                    <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
+                    <div className="tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pt-4 tw-pr-2 md:tw-pr-0">
                       <button
                         type="button"
                         title="Close panel"
