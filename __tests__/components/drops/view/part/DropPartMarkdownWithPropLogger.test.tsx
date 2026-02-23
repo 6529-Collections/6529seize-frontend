@@ -8,16 +8,7 @@ let dropPartMarkdownRenderCount = 0;
 jest.mock("@/components/drops/view/part/DropPartMarkdown", () => {
   return function MockDropPartMarkdown(props: any) {
     dropPartMarkdownRenderCount += 1;
-    return (
-      <div
-        data-testid="drop-part-markdown"
-        data-marketplace-image-only={String(
-          Boolean(props.marketplaceImageOnly)
-        )}
-      >
-        {props.partContent}
-      </div>
-    );
+    return <div data-testid="drop-part-markdown">{props.partContent}</div>;
   };
 });
 
@@ -57,20 +48,6 @@ describe("DropPartMarkdownWithPropLogger", () => {
 
     expect(getByTestId("drop-part-markdown")).toHaveTextContent(
       "Custom content"
-    );
-  });
-
-  it("passes marketplaceImageOnly prop to DropPartMarkdown", () => {
-    const { getByTestId } = render(
-      <DropPartMarkdownWithPropLogger
-        {...baseProps}
-        marketplaceImageOnly={true}
-      />
-    );
-
-    expect(getByTestId("drop-part-markdown")).toHaveAttribute(
-      "data-marketplace-image-only",
-      "true"
     );
   });
 

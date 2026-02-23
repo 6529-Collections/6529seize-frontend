@@ -11,6 +11,8 @@ export enum DropMode {
   BOTH = "BOTH",
 }
 
+export type CurationComposerVariant = "default" | "leaderboard";
+
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
@@ -19,6 +21,7 @@ interface PrivilegedDropCreatorProps {
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
+  readonly curationComposerVariant?: CurationComposerVariant | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -29,6 +32,7 @@ export default function PrivilegedDropCreator({
   fixedDropMode,
   onAllDropsAdded,
   onDropAddedToQueue,
+  curationComposerVariant = "default",
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
@@ -80,6 +84,7 @@ export default function PrivilegedDropCreator({
         chatRestriction,
       }}
       onDropAddedToQueue={onDropAddedToQueue}
+      curationComposerVariant={curationComposerVariant}
     />
   );
 }

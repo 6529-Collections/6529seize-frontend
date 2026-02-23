@@ -2035,6 +2035,26 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
+  /nft-link:
+    get:
+      tags:
+        - NFT Link
+      summary: Get marketplace data about NFT link
+      operationId: getNftLinkData
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ApiNftLinkResponse"
   /nft-owners:
     get:
       tags:
@@ -3317,6 +3337,36 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/NFTSubscription"
+  /subscriptions/consolidation/upcoming-memes/{meme_id}/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get upcoming meme subscription status for a consolidation
+      operationId: getUpcomingMemeSubscriptionStatus
+      parameters:
+        - name: meme_id
+          in: path
+          description: Meme token id
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: consolidation_key
+          in: path
+          description: Consolidation key
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUpcomingMemeSubscriptionStatus"
+        "400":
+          description: Meme already dropped
   /subscriptions/upcoming-memes-counts:
     get:
       tags:
@@ -7140,6 +7190,10 @@ components:
           format: int64
         hide_link_preview:
           type: boolean
+        nft_links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropNftLink"
     ApiDropAndDropVote:
       type: object
       required:
@@ -7256,6 +7310,19 @@ components:
         data_value:
           type: string
           maxLength: 5000
+    ApiDropNftLink:
+      type: object
+      required:
+        - url_in_text
+        - data
+      properties:
+        url_in_text:
+          type: string
+          maxLength: 2000
+        data:
+          anyOf:
+            - $ref: "#/components/schemas/ApiNftLinkData"
+            - type: "null"
     ApiDropPart:
       type: object
       required:
@@ -7547,6 +7614,10 @@ components:
           format: int64
         hide_link_preview:
           type: boolean
+        nft_links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropNftLink"
     ApiDropWithoutWavesPageWithoutCount:
       type: object
       required:
@@ -8307,6 +8378,74 @@ components:
         highest_offer_from:
           type: string
           nullable: true
+    ApiNftLinkData:
+      type: object
+      required:
+        - canonical_id
+        - platform
+        - chain
+        - contract
+        - token
+        - name
+        - description
+        - media_uri
+        - last_error_message
+        - price
+        - last_successfully_updated
+        - failed_since
+      properties:
+        canonical_id:
+          type: string
+        platform:
+          type: string
+        chain:
+          type: string
+          nullable: true
+        contract:
+          type: string
+          nullable: true
+        token:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        media_uri:
+          type: string
+          nullable: true
+        last_error_message:
+          type: string
+          nullable: true
+        price:
+          type: string
+          nullable: true
+        last_successfully_updated:
+          type: integer
+          format: int64
+          nullable: true
+        failed_since:
+          type: integer
+          format: int64
+          nullable: true
+    ApiNftLinkResponse:
+      type: object
+      required:
+        - is_enrichable
+        - validation_error
+        - data
+      properties:
+        is_enrichable:
+          type: boolean
+        validation_error:
+          type: string
+          nullable: true
+        data:
+          anyOf:
+            - $ref: "#/components/schemas/ApiNftLinkData"
+            - type: "null"
     ApiNftMedia:
       type: object
       required:
@@ -9328,6 +9467,25 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTransaction"
+    ApiUpcomingMemeSubscriptionStatus:
+      type: object
+      required:
+        - subscribed
+        - eligibility
+      properties:
+        subscribed:
+          type: boolean
+        eligibility:
+          type: integer
+          format: int64
+        count:
+          type: integer
+          format: int64
+        source:
+          type: string
+          enum:
+            - automatic
+            - manual
     ApiUpdateDropRequest:
       type: object
       allOf:
