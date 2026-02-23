@@ -8,16 +8,12 @@ import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
-import { getInitialRatersParams } from "@/helpers/server.helpers";
-import { ProfileActivityFilterTargetType, RateMatter } from "@/types/enums";
+import { ProfileActivityFilterTargetType } from "@/types/enums";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
   readonly rater: string | null;
 }
-
-const REP_MATTER_TYPE = RateMatter.REP;
-const CIC_MATTER_TYPE = RateMatter.NIC;
 
 const getInitialActivityLogParams = (
   handleOrWallet: string
@@ -40,42 +36,13 @@ function RepTab({ profile }: { readonly profile: ApiIdentity }) {
     ""
   ).toLowerCase();
 
-  const initialRepGivenParams = getInitialRatersParams({
-    handleOrWallet,
-    matter: REP_MATTER_TYPE,
-    given: false,
-  });
-
-  const initialRepReceivedParams = getInitialRatersParams({
-    handleOrWallet,
-    matter: REP_MATTER_TYPE,
-    given: true,
-  });
-
-  const initialActivityLogParams =
-    getInitialActivityLogParams(handleOrWallet);
-
-  const initialCICGivenParams = getInitialRatersParams({
-    handleOrWallet,
-    matter: CIC_MATTER_TYPE,
-    given: false,
-  });
-
-  const initialCICReceivedParams = getInitialRatersParams({
-    handleOrWallet,
-    matter: CIC_MATTER_TYPE,
-    given: true,
-  });
+  const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
 
   return (
     <div className="tailwind-scope">
       <UserPageRepWrapper
         profile={profile}
-        initialRepReceivedParams={initialRepReceivedParams}
-        initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}
-        initialCICReceivedParams={initialCICReceivedParams}
-        initialCICGivenParams={initialCICGivenParams}
       />
     </div>
   );

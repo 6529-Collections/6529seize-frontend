@@ -126,14 +126,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         <button
           type="button"
           aria-label="Statements help"
-          className="tw-rounded-full tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
-          data-tooltip-id="statements-help">
+          className="tw-inline-flex tw-h-8 tw-w-8 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+          data-tooltip-id="statements-help"
+        >
           <svg
-            className="tw-flex-shrink-0 tw-w-4 tw-h-4 tw-text-iron-400"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
               stroke="currentColor"
@@ -157,14 +159,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
         <Link
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-solid tw-border-white/10 tw-ring-0 hover:tw-bg-white/[0.08] focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+          className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.08] hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none"
+        >
           Wallet Checker
         </Link>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
             <Link
               href="/delegation/delegation-center"
-              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-solid tw-border-white/10 tw-ring-0 hover:tw-bg-white/[0.08] focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.08] hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none"
+            >
               Delegation Center
             </Link>
           )}

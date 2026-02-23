@@ -25,6 +25,22 @@ const SEARCH_LENGTH = {
   MAX: 100,
 };
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (error as { readonly message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+  return "Something went wrong.";
+};
+
 export enum RepSearchState {
   MIN_LENGTH_ERROR = "MIN_LENGTH_ERROR",
   MAX_LENGTH_ERROR = "MAX_LENGTH_ERROR",
@@ -164,7 +180,7 @@ export default function UserPageRepNewRepSearch({
       onSuccess?.();
     },
     onError: (error) => {
-      setToast({ message: error as unknown as string, type: "error" });
+      setToast({ message: getErrorMessage(error), type: "error" });
     },
   });
 

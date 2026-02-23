@@ -14,7 +14,6 @@ import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import type { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRepHeader from "./header/UserPageRepHeader";
@@ -22,18 +21,10 @@ import UserPageRepMobile from "./UserPageRepMobile";
 import UserPageRepReps from "./reps/UserPageRepReps";
 export default function UserPageRep({
   profile,
-  initialRepReceivedParams: _initialRepReceivedParams,
-  initialRepGivenParams: _initialRepGivenParams,
   initialActivityLogParams,
-  initialCICReceivedParams: _initialCICReceivedParams,
-  initialCICGivenParams: _initialCICGivenParams,
 }: {
   readonly profile: ApiIdentity;
-  readonly initialRepReceivedParams: ProfileRatersParams;
-  readonly initialRepGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
-  readonly initialCICReceivedParams: ProfileRatersParams;
-  readonly initialCICGivenParams: ProfileRatersParams;
 }) {
   const { connectedProfile } = useContext(AuthContext);
 
@@ -99,12 +90,12 @@ export default function UserPageRep({
 
           {/* Right Sidebar - Identity Card */}
           <div className="tw-min-w-0 tw-self-start">
-            <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-bg-[#08090b] tw-border tw-border-solid tw-border-white/[0.08]">
-              <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent tw-pointer-events-none" />
-              <div className="tw-absolute tw-top-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/25 tw-to-transparent" />
+            <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#08090b]">
+              <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent" />
+              <div className="tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/25 tw-to-transparent" />
               <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/40 tw-to-transparent" />
-              <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
-              <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
               <div className="tw-relative tw-z-10">
                 <UserPageIdentityHeader profile={profile} />
                 <UserPageIdentityStatements profile={profile} />
@@ -112,7 +103,8 @@ export default function UserPageRep({
                   <UserPageRateWrapper
                     profile={profile}
                     type={RateMatter.NIC}
-                    hideOwnProfileMessage>
+                    hideOwnProfileMessage
+                  >
                     <UserPageIdentityHeaderCICRate
                       profile={profile}
                       isTooltip={false}

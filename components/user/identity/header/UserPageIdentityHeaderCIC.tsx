@@ -1,9 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type {
-  RatingWithProfileInfoAndLevel,
-} from "@/entities/IProfile";
+import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
 import UserCICStatus from "@/components/user/utils/user-cic-status/UserCICStatus";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
@@ -58,14 +56,22 @@ export default function UserPageIdentityHeaderCIC({
 
   return (
     <div className="tw-mb-8">
-      <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-mb-2">
+      <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
         NIC
       </div>
-      <div className="tw-mt-4 tw-flex tw-items-end tw-justify-between tw-gap-6">
-        <div className="tw-text-3xl tw-font-semibold tw-text-white tw-tracking-tight tw-leading-none">
-          {formatNumberWithCommas(cicRating)}
+      <div className="tw-mt-1 tw-flex tw-items-start tw-justify-between tw-gap-6">
+        <div className="tw-flex tw-flex-col tw-items-start">
+          <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white">
+            {formatNumberWithCommas(cicRating)}
+          </div>
+          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold tw-uppercase">
+            <span className="-tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0">
+              <UserCICTypeIconWrapper profile={profile} />
+            </span>
+            <UserCICStatus cic={cicRating} />
+          </div>
         </div>
-        <div className="tw-shrink-0 tw-flex tw-flex-col tw-items-end tw-gap-2.5">
+        <div className="tw-flex tw-shrink-0 tw-flex-col tw-items-end tw-gap-2.5">
           <TopRaterAvatars
             handleOrWallet={profile.handle ?? ""}
             matter={RateMatter.NIC}
@@ -77,12 +83,6 @@ export default function UserPageIdentityHeaderCIC({
             {(ratings?.count ?? 0) === 1 ? "rater" : "raters"}
           </span>
         </div>
-      </div>
-      <div className="tw-mt-3 tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold tw-uppercase">
-        <span className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mt-0.5">
-          <UserCICTypeIconWrapper profile={profile} />
-        </span>
-        <UserCICStatus cic={cicRating} />
       </div>
     </div>
   );

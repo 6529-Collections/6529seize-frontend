@@ -8,6 +8,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { RateMatter } from "@/types/enums";
+import type { MouseEvent } from "react";
 
 const STALE_TIME = 5 * 60 * 1000;
 
@@ -15,12 +16,16 @@ export default function TopRaterAvatars({
   handleOrWallet,
   category,
   matter = RateMatter.REP,
+  withLinks = true,
+  onAvatarClick,
   count = 5,
   size = "sm",
 }: {
   readonly handleOrWallet: string;
   readonly category?: string;
   readonly matter?: RateMatter.REP | RateMatter.NIC;
+  readonly withLinks?: boolean;
+  readonly onAvatarClick?: (e: MouseEvent<HTMLAnchorElement>) => void;
   readonly count?: number;
   readonly size?: "sm" | "md";
 }) {
@@ -77,15 +82,16 @@ export default function TopRaterAvatars({
     .filter((q) => q.data)
     .map((q) => {
       const identity = q.data!;
+      const target = identity.handle ?? identity.primary_wallet;
       return {
-        key: identity.handle ?? identity.primary_wallet ?? "",
+        key: target,
         pfpUrl: identity.pfp ?? null,
-        href: `/${identity.handle ?? identity.primary_wallet}`,
-        ariaLabel: identity.handle ?? identity.primary_wallet ?? "Profile",
+        ...(withLinks && target ? { href: `/${target}` } : {}),
+        ariaLabel: target,
         fallback: identity.handle
           ? identity.handle.charAt(0).toUpperCase()
           : "?",
-        title: identity.handle ?? identity.primary_wallet ?? undefined,
+        title: target,
       };
     });
 
@@ -93,5 +99,12 @@ export default function TopRaterAvatars({
     return null;
   }
 
-  return <OverlappingAvatars items={items} size={size} maxCount={count} />;
+  return (
+    <OverlappingAvatars
+      items={items}
+      size={size}
+      maxCount={count}
+      onItemClick={(e) => onAvatarClick?.(e)}
+    />
+  );
 }
