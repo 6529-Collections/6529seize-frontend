@@ -9,10 +9,12 @@ export default function CommonProfileLink({
   handleOrWallet,
   isCurrentUser,
   tabTarget,
+  textClassName,
 }: {
   readonly handleOrWallet: string;
   readonly isCurrentUser: boolean;
   readonly tabTarget: UserPageTabKey;
+  readonly textClassName?: string | undefined;
 }) {
   const pathname = usePathname();
   const url = getProfileTargetRoute({
@@ -20,17 +22,19 @@ export default function CommonProfileLink({
     pathname: pathname ?? "",
     defaultPath: tabTarget,
   });
+  const resolvedTextClassName =
+    textClassName ?? "tw-text-base tw-font-medium tw-text-iron-200";
 
   return (
     <Link
       href={url}
       className={`${
         isCurrentUser ? "tw-pointer-events-none tw-no-underline" : ""
-      } tw-leading-4 tw-p-0`}>
+      } tw-leading-4 tw-p-0 tw-no-underline hover:tw-no-underline`}>
       <span
         className={`${
           isCurrentUser ? "" : "tw-cursor-pointer"
-        } tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-200 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out`}>
+        } tw-whitespace-nowrap hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out ${resolvedTextClassName}`}>
         {handleOrWallet}
       </span>
     </Link>

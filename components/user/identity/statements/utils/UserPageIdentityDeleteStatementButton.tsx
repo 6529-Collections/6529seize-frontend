@@ -4,6 +4,7 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
@@ -58,11 +59,9 @@ export default function UserPageIdentityDeleteStatementButton({
           id={tooltipId}
           place="top"
           positionStrategy="fixed"
-          style={{
-            backgroundColor: "#1F2937",
-            color: "white",
-            padding: "4px 8px",
-          }}
+          offset={8}
+          opacity={1}
+          style={TOOLTIP_STYLES}
         >
           <span className="tw-text-xs">Delete</span>
         </Tooltip>

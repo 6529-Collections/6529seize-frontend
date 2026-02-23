@@ -8,7 +8,7 @@ export default function ProfileActivityLogItemTimeAgo({
 }) {
   const timeAgo = getTimeAgo(new Date(log.created_at).getTime());
   return (
-    <span className="tw-whitespace-nowrap tw-font-normal tw-text-sm sm:tw-text-base tw-text-iron-500">
+    <span className="tw-whitespace-nowrap tw-font-normal tw-text-xs lg:tw-text-sm tw-text-iron-500">
       {timeAgo}
     </span>
   );

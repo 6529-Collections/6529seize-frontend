@@ -1,18 +1,14 @@
 "use client";
 
 import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas, getTimeAgo } from "@/helpers/Helpers";
-import { ProfileRatersTableType } from "@/types/enums";
 import Link from "next/link";
 import UserCICAndLevel from "../UserCICAndLevel";
 
 export default function ProfileRatersTableItem({
   rating,
-  type,
 }: {
   readonly rating: RatingWithProfileInfoAndLevel;
-  readonly type: ProfileRatersTableType;
 }) {
   const getRatingStr = (rating: number) => {
     return rating > 0
@@ -24,19 +20,7 @@ export default function ProfileRatersTableItem({
   const ratingColor = isPositiveRating ? "tw-text-green" : "tw-text-red";
   const timeAgo = getTimeAgo(new Date(rating.last_modified).getTime());
 
-  const getProfileRoute = (): string => {
-    switch (type) {
-      case ProfileRatersTableType.CIC_RECEIVED:
-      case ProfileRatersTableType.CIC_GIVEN:
-        return `/${rating.handle}/identity`;
-      case ProfileRatersTableType.REP_RECEIVED:
-      case ProfileRatersTableType.REP_GIVEN:
-        return `/${rating.handle}/rep`;
-      default:
-        assertUnreachable(type);
-        return "";
-    }
-  };
+  const getProfileRoute = (): string => `/${rating.handle}/identity`;
 
   const profileRoute = getProfileRoute();
 

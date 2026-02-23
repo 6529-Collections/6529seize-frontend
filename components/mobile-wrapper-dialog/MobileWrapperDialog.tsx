@@ -18,6 +18,7 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
+  tabletModal,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -28,6 +29,7 @@ export default function MobileWrapperDialog({
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  readonly tabletModal?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
 
@@ -43,8 +45,14 @@ export default function MobileWrapperDialog({
     return `calc(${viewportHeight} - 10rem)`;
   };
 
-  const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md${
-    isIos ? "" : " tw-transform-gpu tw-will-change-transform"
+  const panelClassNames = `mobile-wrapper-dialog tw-pointer-events-auto tw-relative tw-w-screen${
+    tabletModal ? "" : " md:tw-max-w-screen-md"
+  }${isIos ? "" : " tw-transform-gpu tw-will-change-transform"}${
+    tabletModal ? " md:tw-w-full md:tw-max-w-md" : ""
+  }`;
+
+  const containerClassNames = `tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10${
+    tabletModal ? " md:tw-inset-0 md:tw-items-center md:tw-pt-0 md:tw-p-6" : ""
   }`;
 
   return (
@@ -79,15 +87,23 @@ export default function MobileWrapperDialog({
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10">
+            <div className={containerClassNames}>
               <TransitionChild
                 as={Fragment}
                 enter="tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out"
-                enterFrom="tw-translate-y-full"
-                enterTo="tw-translate-y-0"
+                enterFrom={`tw-translate-y-full${
+                  tabletModal ? " md:tw-translate-y-4 md:tw-opacity-0" : ""
+                }`}
+                enterTo={`tw-translate-y-0${
+                  tabletModal ? " md:tw-opacity-100" : ""
+                }`}
                 leave="tw-duration-250 sm:tw-duration-350 tw-transform tw-transition tw-ease-in-out"
-                leaveFrom="tw-translate-y-0"
-                leaveTo="tw-translate-y-full"
+                leaveFrom={`tw-translate-y-0${
+                  tabletModal ? " md:tw-opacity-100" : ""
+                }`}
+                leaveTo={`tw-translate-y-full${
+                  tabletModal ? " md:tw-translate-y-4 md:tw-opacity-0" : ""
+                }`}
               >
                 <DialogPanel
                   className={panelClassNames}
@@ -103,7 +119,7 @@ export default function MobileWrapperDialog({
                     leaveFrom="tw-opacity-100"
                     leaveTo="tw-opacity-0"
                   >
-                    <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
+                    <div className="tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pt-4 tw-pr-2 md:tw-pr-0">
                       <button
                         type="button"
                         title="Close panel"
@@ -132,7 +148,7 @@ export default function MobileWrapperDialog({
                   <div
                     className={`tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 ${
                       noPadding ? "tw-py-0" : "tw-py-6"
-                    }`}
+                    }${tabletModal ? " md:tw-rounded-xl" : ""}`}
                     style={{
                       ...(fixedHeight
                         ? { height: getHeight() }

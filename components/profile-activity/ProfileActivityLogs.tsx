@@ -5,20 +5,21 @@ import type { CountlessPage } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import CommonFilterTargetSelect from "../utils/CommonFilterTargetSelect";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
 
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { selectActiveGroupId } from "@/store/groupSlice";
-import type {
+import {
   ProfileActivityFilterTargetType,
-  ProfileActivityLogType,
+  type ProfileActivityLogType,
   RateMatter,
 } from "@/types/enums";
 import { useSelector } from "react-redux";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
+import type { CommonSelectItem } from "../utils/select/CommonSelect";
+import CommonTabs from "../utils/select/tabs/CommonTabs";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 export interface ActivityLogParams {
@@ -30,6 +31,27 @@ export interface ActivityLogParams {
   readonly handleOrWallet: string | null;
   readonly groupId: string | null;
 }
+
+const MATTER_TAB_ITEMS: CommonSelectItem<RateMatter | null>[] = [
+  { label: "All", value: null, key: "all" },
+  { label: "REP", value: RateMatter.REP, key: "rep" },
+  { label: "NIC", value: RateMatter.NIC, key: "nic" },
+];
+
+const DIRECTION_TAB_ITEMS: CommonSelectItem<ProfileActivityFilterTargetType>[] =
+  [
+    { label: "All", value: ProfileActivityFilterTargetType.ALL, key: "all" },
+    {
+      label: "Incoming",
+      value: ProfileActivityFilterTargetType.INCOMING,
+      key: "incoming",
+    },
+    {
+      label: "Outgoing",
+      value: ProfileActivityFilterTargetType.OUTGOING,
+      key: "outgoing",
+    },
+  ];
 
 export interface ActivityLogParamsConverted {
   readonly page: string;
@@ -45,11 +67,13 @@ export interface ActivityLogParamsConverted {
 export default function ProfileActivityLogs({
   initialParams,
   withFilters,
+  withMatterFilter = false,
   disableActiveGroup = false,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
+  readonly withMatterFilter?: boolean | undefined;
   readonly disableActiveGroup?: boolean | undefined;
   readonly children?: React.ReactNode | undefined;
 }) {
@@ -61,11 +85,15 @@ export default function ProfileActivityLogs({
     initialParams.targetType
   );
   const [currentPage, setCurrentPage] = useState<number>(initialParams.page);
+  const [matter, setMatter] = useState<RateMatter | null>(
+    initialParams.matter
+  );
 
   useEffect(() => {
     setSelectedFilters(initialParams.logTypes);
     setTargetType(initialParams.targetType);
     setCurrentPage(initialParams.page);
+    setMatter(initialParams.matter);
   }, [initialParams]);
 
   const onFilter = (filter: ProfileActivityLogType) => {
@@ -82,13 +110,19 @@ export default function ProfileActivityLogs({
     setCurrentPage(1);
   };
 
+  const onMatterChange = (m: RateMatter | null) => {
+    setMatter(m);
+    setSelectedFilters(initialParams.logTypes);
+    setCurrentPage(1);
+  };
+
   const [params, setParams] = useState<ActivityLogParamsConverted>(
     convertActivityLogParams({
       params: {
         page: currentPage,
         pageSize: initialParams.pageSize,
         logTypes: selectedFilters,
-        matter: initialParams.matter,
+        matter,
         targetType,
         handleOrWallet: initialParams.handleOrWallet,
         groupId: activeGroupId,
@@ -104,7 +138,7 @@ export default function ProfileActivityLogs({
           page: currentPage,
           pageSize: initialParams.pageSize,
           logTypes: selectedFilters,
-          matter: initialParams.matter,
+          matter,
           targetType,
           handleOrWallet: initialParams.handleOrWallet,
           groupId: activeGroupId,
@@ -118,6 +152,7 @@ export default function ProfileActivityLogs({
     initialParams.handleOrWallet,
     targetType,
     activeGroupId,
+    matter,
   ]);
 
   const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(
@@ -148,29 +183,79 @@ export default function ProfileActivityLogs({
   }, [logs?.page, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
-      <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-center min-[1200px]:tw-justify-between min-[1200px]:tw-gap-x-16">
-        {children && <div>{children}</div>}
-        {withFilters && (
-          <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
-            <div
-              className={`${children ? "" : "tw-mt-6"} min-[1200px]:tw-w-80`}
-            >
-              <ProfileActivityLogsFilter
-                user={initialParams.handleOrWallet}
-                options={initialParams.logTypes}
-                selected={selectedFilters}
-                setSelected={onFilter}
-              />
+      <div
+        className={`${
+          withMatterFilter
+            ? "tw-flex tw-w-full tw-flex-col tw-gap-y-4"
+            : "tw-flex tw-w-full tw-flex-col tw-gap-y-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-start min-[1200px]:tw-justify-between min-[1200px]:tw-gap-x-6"
+        }`}
+      >
+        {children && (
+          <div className="tw-flex-none tw-whitespace-nowrap">{children}</div>
+        )}
+        {withFilters && !withMatterFilter && (
+          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
+            {initialParams.handleOrWallet && (
+              <div className="tw-flex-shrink-0">
+                <CommonTabs
+                  items={DIRECTION_TAB_ITEMS}
+                  activeItem={targetType}
+                  filterLabel="Filter direction"
+                  setSelected={onTargetType}
+                  size="sm"
+                  fill={false}
+                />
+              </div>
+            )}
+            {matter === RateMatter.NIC && (
+              <div className="md:tw-ml-auto tw-flex-1 md:tw-flex-none md:tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+                <ProfileActivityLogsFilter
+                  user={initialParams.handleOrWallet}
+                  options={initialParams.logTypes}
+                  selected={selectedFilters}
+                  setSelected={onFilter}
+                />
+              </div>
+            )}
+          </div>
+        )}
+        {withMatterFilter && (
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-3">
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
+              <div className="tw-max-w-[12rem]">
+                <CommonTabs
+                  items={MATTER_TAB_ITEMS}
+                  activeItem={matter}
+                  filterLabel="Filter matter"
+                  setSelected={onMatterChange}
+                  size="sm"
+                />
+              </div>
+              {initialParams.handleOrWallet && (
+                <div className="tw-max-w-[16rem]">
+                  <CommonTabs
+                    items={DIRECTION_TAB_ITEMS}
+                    activeItem={targetType}
+                    filterLabel="Filter direction"
+                    setSelected={onTargetType}
+                    size="sm"
+                  />
+                </div>
+              )}
             </div>
+            {withFilters && matter === RateMatter.NIC && (
+              <div className="tw-ml-auto tw-w-[17.5rem] min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+                <ProfileActivityLogsFilter
+                  user={initialParams.handleOrWallet}
+                  options={initialParams.logTypes}
+                  selected={selectedFilters}
+                  setSelected={onFilter}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
-      {initialParams.handleOrWallet && (
-        <CommonFilterTargetSelect
-          selected={targetType}
-          onChange={onTargetType}
-        />
-      )}
       {logs ? (
         <div>
           {logs?.data.length ? (
@@ -185,14 +270,16 @@ export default function ProfileActivityLogs({
                 totalPages={null}
                 haveNextPage={logs.next}
                 small={!!initialParams.handleOrWallet}
+                showTopBorder={false}
+                className="tw-pt-6"
               />
             </div>
           ) : (
             <div className="tw-py-4">
               <span
                 className={`${
-                  initialParams.handleOrWallet ? "tw-px-4 sm:tw-px-6" : ""
-                } tw-text-sm tw-italic tw-text-iron-500 sm:tw-text-md`}
+                  initialParams.handleOrWallet ? "tw-px-2 sm:tw-px-3" : ""
+                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500`}
               >
                 No Activity Log
               </span>

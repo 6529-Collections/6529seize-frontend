@@ -65,7 +65,7 @@ export default function UserPageHeaderName({
             </p>
           </UserPageHeaderNameWrapper>
           {profile?.handle && (
-            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-self-center md:-tw-mt-0.5">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
           )}

@@ -102,32 +102,37 @@ export default function UserPageRepNewRepSearchHeader({
   return (
     <div className="tw-flex tw-flex-col tw-space-y-1">
       {!!activeProfileProxy && (
-        <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
+        <span className="tw-text-xs tw-block tw-text-iron-400 tw-font-medium">
           <span>You are acting as proxy for:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+          <span className="tw-ml-1 tw-font-bold tw-text-iron-300">
             <Link href={`/${activeProfileProxy.created_by.handle}`}>
               {activeProfileProxy.created_by.handle}
             </Link>
           </span>
         </span>
       )}
-      {!activeProfileProxy && (
-        <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-          <span>Your available Rep:</span>
-          <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-            {formatNumberWithCommas(availableCredit)}
+      <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400 tw-font-medium">
+        {!activeProfileProxy && (
+          <>
+            <span>
+              <span>Your available Rep:</span>
+              <span className="tw-ml-1 tw-font-bold tw-text-iron-300">
+                {formatNumberWithCommas(availableCredit)}
+              </span>
+            </span>
+            <span className="tw-w-px tw-h-3 tw-bg-white/20" />
+          </>
+        )}
+        <span>
+          <span>
+            Your Rep assigned to{" "}
+            {profile.query ?? profile.handle ?? profile.display}:
+          </span>
+          <span className="tw-ml-1 tw-font-bold tw-text-iron-300">
+            {repRates ? formatNumberWithCommas(activeRepRates.rated) : ""}
           </span>
         </span>
-      )}
-      <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-        <span>
-          Your Rep assigned to{" "}
-          {profile.query ?? profile.handle ?? profile.display}:
-        </span>
-        <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-          {repRates ? formatNumberWithCommas(activeRepRates.rated) : ""}
-        </span>
-      </span>
+      </div>
     </div>
   );
 }

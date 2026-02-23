@@ -1,20 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import type { WalletConsolidationState } from "@/entities/IProfile";
-import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
-import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
-import { amIUser } from "@/helpers/Helpers";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useQueries } from "@tanstack/react-query";
-import type { Page } from "@/helpers/Types";
-import Link from "next/link";
-import { AnimatePresence } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
+import { amIUser } from "@/helpers/Helpers";
+import type { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQueries } from "@tanstack/react-query";
+import { AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {
@@ -119,18 +119,34 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
 
   return (
     <div>
-      <div className="tw-flex tw-items-center tw-space-x-4">
-        <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800">
-        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-100">
-            <EthereumIcon />
-          </div>
-        </div>
-        <span className="tw-text-base tw-font-semibold tw-text-iron-100">
+      <div className="tw-flex tw-items-center tw-justify-between">
+        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
           Consolidated Addresses
         </span>
+        <button
+          type="button"
+          aria-label="Statements help"
+          className="tw-inline-flex tw-h-8 tw-w-8 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+          data-tooltip-id="statements-help"
+        >
+          <svg
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
-      <div className="tw-mt-3 tw-h-px tw-bg-white/5 tw-w-full"></div>
-      <ul className="tw-mb-0 tw-mt-3 md:tw-mt-4 lg:tw-mt-6 tw-list-none tw-space-y-2 md:tw-space-y-4 tw-pl-0 tw-text-base tw-leading-7 tw-text-gray-600">
+      <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet}
@@ -143,14 +159,16 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
       <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
         <Link
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+          className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.08] hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none"
+        >
           Wallet Checker
         </Link>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
             <Link
               href="/delegation/delegation-center"
-              className="tw-no-underline tw-relative tw-text-xs tw-font-medium tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-iron-200 hover:tw-text-iron-200 focus:tw-outline-none tw-border tw-border-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out">
+              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2.5 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline tw-ring-0 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.08] hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none"
+            >
               Delegation Center
             </Link>
           )}

@@ -31,7 +31,7 @@ export default function ProfileRatersTableHeaderSortableCell({
   return (
     <th
       onClick={() => onSortTypeClick(sortType)}
-      className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
+      className="tw-group tw-cursor-pointer tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-right tw-text-[11px] tw-font-bold tw-text-iron-500 tw-uppercase tw-tracking-widest sm:tw-px-6 lg:tw-pl-4"
     >
       <span
         className={`${

@@ -1,16 +1,19 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import UserPageIdentityWrapper from "@/components/user/identity/UserPageIdentityWrapper";
 import {
   USER_PAGE_TAB_IDS,
   USER_PAGE_TAB_MAP,
 } from "@/components/user/layout/userTabs.config";
+import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
-import { getInitialRatersParams } from "@/helpers/server.helpers";
-import { ProfileActivityFilterTargetType, RateMatter } from "@/types/enums";
+import { ProfileActivityFilterTargetType } from "@/types/enums";
 
-const MATTER_TYPE = RateMatter.NIC;
+export interface UserPageRepPropsRepRates {
+  readonly ratings: ApiProfileRepRatesState;
+  readonly rater: string | null;
+}
 
 const getInitialActivityLogParams = (
   handleOrWallet: string
@@ -26,45 +29,31 @@ const getInitialActivityLogParams = (
   groupId: null,
 });
 
-function IdentityTab({ profile }: { readonly profile: ApiIdentity }) {
+function RepTab({ profile }: { readonly profile: ApiIdentity }) {
   const handleOrWallet = (
     profile.handle ??
     profile.wallets?.[0]?.wallet ??
     ""
   ).toLowerCase();
 
-  const initialCICGivenParams = getInitialRatersParams({
-    handleOrWallet,
-    matter: MATTER_TYPE,
-    given: false,
-  });
-
-  const initialCICReceivedParams = getInitialRatersParams({
-    handleOrWallet,
-    matter: MATTER_TYPE,
-    given: true,
-  });
-
   const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
 
   return (
     <div className="tailwind-scope">
-      <UserPageIdentityWrapper
+      <UserPageRepWrapper
         profile={profile}
-        initialCICReceivedParams={initialCICReceivedParams}
-        initialCICGivenParams={initialCICGivenParams}
         initialActivityLogParams={initialActivityLogParams}
       />
     </div>
   );
 }
 
-const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.IDENTITY];
+const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.REP];
 
 const { Page, generateMetadata } = createUserTabPage({
   subroute: TAB_CONFIG.route,
   metaLabel: TAB_CONFIG.metaLabel,
-  Tab: IdentityTab,
+  Tab: RepTab,
 });
 
 export default Page;
