@@ -357,9 +357,9 @@ export default function UserPageIdentityHeaderCICRate({
               type="submit"
               disabled={isSaveDisabled}
               className={`${
-                !isSaveDisabled
-                  ? "hover:tw-bg-emerald-400 hover:tw-border-emerald-400 active:tw-scale-[0.98]"
-                  : "tw-cursor-not-allowed tw-opacity-50"
+                isSaveDisabled
+                  ? "tw-cursor-not-allowed tw-opacity-50"
+                  : "hover:tw-bg-emerald-400 hover:tw-border-emerald-400 active:tw-scale-[0.98]"
               } tw-mt-4 tw-w-full tw-bg-emerald-500 tw-py-3.5 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-emerald-500 tw-rounded-lg tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out`}>
               {fullButtonContent}
             </button>

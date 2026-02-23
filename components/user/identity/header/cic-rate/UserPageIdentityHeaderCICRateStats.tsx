@@ -68,23 +68,23 @@ export default function UserPageIdentityHeaderCICRateStats({
       }
     : null;
 
-  const creditItem = !activeProfileProxy
-    ? {
+  const creditItem = activeProfileProxy
+    ? null
+    : {
         label: "Your available NIC:",
         value: formatNumberWithCommas(availableCredit),
         valueColorClassName: "tw-text-iron-300",
         labelBreakAll: false,
-      }
-    : null;
+      };
 
-  const minMaxItem = !activeProfileProxy
-    ? {
+  const minMaxItem = activeProfileProxy
+    ? null
+    : {
         label: `Your max/min NIC Rating to ${profile.handle}:`,
         value: `+/- ${formatNumberWithCommas(minMaxValues.max)}`,
         valueColorClassName: "tw-text-iron-300",
         labelBreakAll: true,
-      }
-    : null;
+      };
 
   const items = [proxyItem, creditItem, minMaxItem].filter(
     (item): item is NonNullable<typeof item> => item !== null

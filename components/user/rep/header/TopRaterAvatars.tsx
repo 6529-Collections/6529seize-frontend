@@ -7,17 +7,20 @@ import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
+import { RateMatter } from "@/types/enums";
 
 const STALE_TIME = 5 * 60 * 1000;
 
 export default function TopRaterAvatars({
   handleOrWallet,
   category,
+  matter = RateMatter.REP,
   count = 5,
   size = "sm",
 }: {
   readonly handleOrWallet: string;
   readonly category?: string;
+  readonly matter?: RateMatter.REP | RateMatter.NIC;
   readonly count?: number;
   readonly size?: "sm" | "md";
 }) {
@@ -28,18 +31,28 @@ export default function TopRaterAvatars({
     order_by: "rating",
     given: "false",
   };
-  if (category) {
+  if (matter === RateMatter.REP && category) {
     params["category"] = category;
   }
+
+  const ratingsEndpoint =
+    matter === RateMatter.NIC
+      ? `profiles/${handleOrWallet}/cic/ratings/by-rater`
+      : `profiles/${handleOrWallet}/rep/ratings/by-rater`;
 
   const { data: ratersPage } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
     queryKey: [
       QueryKey.PROFILE_RATERS,
-      { handleOrWallet: handleOrWallet.toLowerCase(), category, count },
+      {
+        handleOrWallet: handleOrWallet.toLowerCase(),
+        matter,
+        category,
+        count,
+      },
     ],
     queryFn: async () =>
       await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${handleOrWallet}/rep/ratings/by-rater`,
+        endpoint: ratingsEndpoint,
         params,
       }),
     enabled: !!handleOrWallet,

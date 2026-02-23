@@ -114,8 +114,7 @@ export default function UserPageRepHeader({
               </div>
             </div>
             {repRates && (
-              <div className="tw-shrink-0 tw-flex tw-flex-col tw-items-end tw-gap-2.5">
-                <TopRaterAvatars handleOrWallet={profile.handle ?? ""} count={5} size="md" />
+              <div className="tw-shrink-0 tw-flex tw-flex-col tw-items-end">
                 <span className="tw-text-sm tw-font-normal tw-text-iron-400">
                   {formatNumberWithCommas(repRates.number_of_raters)}{" "}
                   {repRates.number_of_raters === 1 ? "rater" : "raters"}
@@ -136,7 +135,7 @@ export default function UserPageRepHeader({
                     key={rep.category}
                     onClick={() => setEditCategory(rep.category)}
                     disabled={!canEditRep}
-                    className={`tw-inline-flex tw-items-center tw-gap-2.5 tw-px-4 tw-py-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-transition-colors ${
+                    className={`group tw-inline-flex tw-items-center tw-gap-2.5 tw-px-4 tw-py-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-transition-colors ${
                       canEditRep
                         ? "tw-cursor-pointer hover:tw-bg-iron-800/60 hover:tw-border-iron-600/60"
                         : "tw-cursor-default"
@@ -145,7 +144,7 @@ export default function UserPageRepHeader({
                     <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
                       {rep.category}
                     </span>
-                    <span className="tw-text-sm tw-font-semibold tw-text-primary-400">
+                    <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
                       {formatNumberCompact(rep.rating)}
                     </span>
                     <span className="tw-text-iron-600 tw-text-xs">·</span>

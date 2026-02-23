@@ -123,9 +123,8 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
           Consolidated Addresses
         </span>
-        <div
-          tabIndex={0}
-          role="button"
+        <button
+          type="button"
           aria-label="Statements help"
           className="tw-rounded-full tw-h-8 tw-w-8 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
           data-tooltip-id="statements-help">
@@ -143,7 +142,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               strokeLinejoin="round"
             />
           </svg>
-        </div>
+        </button>
       </div>
       <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">
         {sortedByPrimary.map((wallet) => (

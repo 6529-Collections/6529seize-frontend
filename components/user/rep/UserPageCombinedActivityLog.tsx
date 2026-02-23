@@ -12,9 +12,9 @@ export default function UserPageCombinedActivityLog({
   readonly withMatterFilter?: boolean;
 }) {
   const params: ActivityLogParams =
-    matter !== undefined
-      ? { ...initialActivityLogParams, matter }
-      : initialActivityLogParams;
+    matter === undefined
+      ? initialActivityLogParams
+      : { ...initialActivityLogParams, matter };
 
   return (
     <div>

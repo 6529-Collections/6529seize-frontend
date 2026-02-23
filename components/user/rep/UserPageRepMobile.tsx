@@ -44,7 +44,7 @@ export default function UserPageRepMobile({
 
   // Close modals when viewport reaches lg breakpoint
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
+    const mq = globalThis.matchMedia("(min-width: 1024px)");
     const handler = (e: MediaQueryListEvent) => {
       if (e.matches) {
         setIsGrantRepOpen(false);
