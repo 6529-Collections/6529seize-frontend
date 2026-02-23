@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiNftLinkMediaPreview } from '../models/ApiNftLinkMediaPreview';
 import { HttpFile } from '../http/http';
 
 export class ApiNftLinkData {
@@ -26,6 +27,7 @@ export class ApiNftLinkData {
     'price': string | null;
     'last_successfully_updated': number | null;
     'failed_since': number | null;
+    'media_preview': ApiNftLinkMediaPreview | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -103,6 +105,12 @@ export class ApiNftLinkData {
             "baseName": "failed_since",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "media_preview",
+            "baseName": "media_preview",
+            "type": "ApiNftLinkMediaPreview",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

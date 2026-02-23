@@ -8,6 +8,13 @@ import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 const getMarketplacePreviewQueryKey = (href: string, mode: string) =>
   ["MARKETPLACE_PREVIEW", { href, mode }] as const;
 
+const READY_MEDIA_PREVIEW_STATUS = "READY" as NonNullable<
+  NonNullable<ApiDropNftLink["data"]>["media_preview"]
+>["status"];
+const PROCESSING_MEDIA_PREVIEW_STATUS = "PROCESSING" as NonNullable<
+  NonNullable<ApiDropNftLink["data"]>["media_preview"]
+>["status"];
+
 const DEFAULT_NFT_LINK_DATA: NonNullable<ApiDropNftLink["data"]> = {
   canonical_id: "ethereum:0xabc:1",
   platform: "opensea",
@@ -21,6 +28,7 @@ const DEFAULT_NFT_LINK_DATA: NonNullable<ApiDropNftLink["data"]> = {
   price: "0.5 ETH",
   last_successfully_updated: 1735689600,
   failed_since: null,
+  media_preview: null,
 };
 
 const createNftLink = (
@@ -43,6 +51,26 @@ const createNftLinkWithMediaUri = ({
     data: {
       ...DEFAULT_NFT_LINK_DATA,
       media_uri: mediaUri,
+    },
+  });
+
+const createNftLinkWithMediaPreview = ({
+  href,
+  mediaUri,
+  mediaPreview,
+}: {
+  readonly href: string;
+  readonly mediaUri: string;
+  readonly mediaPreview: NonNullable<
+    NonNullable<ApiDropNftLink["data"]>["media_preview"]
+  >;
+}): ApiDropNftLink =>
+  createNftLink({
+    url_in_text: href,
+    data: {
+      ...DEFAULT_NFT_LINK_DATA,
+      media_uri: mediaUri,
+      media_preview: mediaPreview,
     },
   });
 
@@ -138,6 +166,114 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
     expect(seeded?.media).toEqual({
       url: mediaUri,
       mimeType: "image/*",
+    });
+  });
+
+  it("prefers READY media_preview urls over media_uri", () => {
+    const queryClient = createTestQueryClient();
+    const href = "https://opensea.io/assets/ethereum/0xabc/preview-first";
+    const mediaUri = "https://cdn.example.com/fallback.png";
+    const cardUrl = "https://cdn.example.com/card.webp";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [
+        createNftLinkWithMediaPreview({
+          href,
+          mediaUri,
+          mediaPreview: {
+            status: READY_MEDIA_PREVIEW_STATUS,
+            kind: "image",
+            card_url: cardUrl,
+            thumb_url: "https://cdn.example.com/thumb.jpg",
+            small_url: "https://cdn.example.com/small.jpg",
+            width: 1200,
+            height: 1200,
+            mime_type: "image/webp",
+          },
+        }),
+      ],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: cardUrl,
+      mimeType: "image/webp",
+    });
+  });
+
+  it("falls back through media_preview small_url then thumb_url", () => {
+    const queryClient = createTestQueryClient();
+    const href = "https://opensea.io/assets/ethereum/0xabc/preview-fallback";
+    const mediaUri = "https://cdn.example.com/fallback.png";
+    const smallUrl = "https://cdn.example.com/small.jpg?v=1";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [
+        createNftLinkWithMediaPreview({
+          href,
+          mediaUri,
+          mediaPreview: {
+            status: READY_MEDIA_PREVIEW_STATUS,
+            kind: "image",
+            card_url: null,
+            thumb_url: "https://cdn.example.com/thumb.jpg",
+            small_url: smallUrl,
+            width: 1200,
+            height: 1200,
+            mime_type: null,
+          },
+        }),
+      ],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: smallUrl,
+      mimeType: "image/jpeg",
+    });
+  });
+
+  it("uses media_uri when media_preview is not READY", () => {
+    const queryClient = createTestQueryClient();
+    const href =
+      "https://opensea.io/assets/ethereum/0xabc/preview-processing-fallback";
+    const mediaUri = "https://cdn.example.com/fallback.png";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [
+        createNftLinkWithMediaPreview({
+          href,
+          mediaUri,
+          mediaPreview: {
+            status: PROCESSING_MEDIA_PREVIEW_STATUS,
+            kind: "image",
+            card_url: "https://cdn.example.com/card.webp",
+            thumb_url: "https://cdn.example.com/thumb.jpg",
+            small_url: "https://cdn.example.com/small.jpg",
+            width: 1200,
+            height: 1200,
+            mime_type: "image/webp",
+          },
+        }),
+      ],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: mediaUri,
+      mimeType: "image/png",
     });
   });
 
