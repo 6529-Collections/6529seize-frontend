@@ -108,7 +108,7 @@ export enum QueryKey {
   MARKETPLACE_PREVIEW = "MARKETPLACE_PREVIEW",
 }
 
-export interface ProfileRatersParams {
+interface ProfileRatersParams {
   readonly page: number;
   readonly pageSize: number;
   readonly given: boolean;

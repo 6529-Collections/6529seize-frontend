@@ -143,7 +143,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   );
   const curationPreviewMedia = useMemo(
     () =>
-      !artWork && isCurationWave(drop.wave.id)
+      !artWork && isCurationWave(drop.wave.id.toLowerCase())
         ? resolveCurationPreviewMedia(drop.nft_links)
         : null,
     [artWork, drop.nft_links, drop.wave.id, isCurationWave]
@@ -282,7 +282,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               <div className="tw-flex tw-items-center tw-gap-2">
                 <div className="tw-flex tw-items-center -tw-space-x-2">
                   {drop.top_raters.slice(0, 3).map((voter) => (
-                    <React.Fragment key={voter.profile.handle}>
+                    <React.Fragment
+                      key={voter.profile.id || voter.profile.primary_address}
+                    >
                       <Link
                         href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
                         onClick={(e) => e.stopPropagation()}
@@ -315,8 +317,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                           pointerEvents: "none",
                         }}
                       >
-                        {voter.profile.handle} -{" "}
-                        {formatNumberWithCommas(voter.rating)}
+                        {voter.profile.handle ?? voter.profile.primary_address}{" "}
+                        - {formatNumberWithCommas(voter.rating)}
                       </Tooltip>
                     </React.Fragment>
                   ))}

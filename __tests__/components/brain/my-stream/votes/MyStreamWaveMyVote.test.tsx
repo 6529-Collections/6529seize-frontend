@@ -50,6 +50,7 @@ describe("MyStreamWaveMyVote", () => {
     metadata: [],
     wave: { id: "w1" },
     nft_links: [],
+    top_raters: [],
     author: { handle: "alice", cic: 1, level: 2 },
     rating: 0,
     raters_count: 3,
@@ -101,6 +102,7 @@ describe("MyStreamWaveMyVote", () => {
     mockIsCurationWave.mockReturnValue(true);
     const curationDrop = {
       ...drop,
+      wave: { id: "W1" },
       parts: [{ media: [] }],
       nft_links: [
         {
@@ -122,6 +124,7 @@ describe("MyStreamWaveMyVote", () => {
     render(<MyStreamWaveMyVote drop={curationDrop} onDropClick={jest.fn()} />);
 
     expect(screen.getByTestId("media")).toBeInTheDocument();
+    expect(mockIsCurationWave).toHaveBeenCalledWith("w1");
     const props = mockMediaDisplay.mock.calls.at(-1)?.[0];
     expect(props?.media_url).toBe("https://cdn.example.com/card.webp");
     expect(props?.media_mime_type).toBe("image/webp");
