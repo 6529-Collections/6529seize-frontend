@@ -7,13 +7,15 @@ import { useIsDropForgeAdmin } from "@/hooks/useIsDropForgeAdmin";
 import { useMemo } from "react";
 
 export function useDropForgePermissions() {
-  const { address } = useSeizeConnectContext();
+  const { address, connectionState } = useSeizeConnectContext();
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const isDropForgeAdmin = useIsDropForgeAdmin();
 
   return useMemo(() => {
     const hasWallet = !!address;
-    const permissionsLoading = hasWallet && !isLoaded;
+    const isWalletInitializing = connectionState === "initializing";
+    const permissionsLoading =
+      isWalletInitializing || (hasWallet && !isLoaded);
     const isDistributionAdmin =
       hasWallet &&
       seizeSettings.distribution_admin_wallets.some((w) =>
@@ -41,5 +43,5 @@ export function useDropForgePermissions() {
       isClaimsAdmin,
       isDropForgeAdmin,
     };
-  }, [address, isLoaded, isDropForgeAdmin, seizeSettings]);
+  }, [address, connectionState, isLoaded, isDropForgeAdmin, seizeSettings]);
 }

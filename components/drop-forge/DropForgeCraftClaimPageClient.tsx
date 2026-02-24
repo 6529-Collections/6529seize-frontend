@@ -127,6 +127,8 @@ export default function DropForgeCraftClaimPageClient({
   const [animationDirty, setAnimationDirty] = useState(false);
   const [coreInfoDirty, setCoreInfoDirty] = useState(false);
   const [metadataDirty, setMetadataDirty] = useState(false);
+  const [distributionSummariesRefreshNonce, setDistributionSummariesRefreshNonce] =
+    useState(0);
 
   const fetchClaim = useCallback(async () => {
     setLoading(true);
@@ -211,7 +213,7 @@ export default function DropForgeCraftClaimPageClient({
             <DropForgeTestnetIndicator className="tw-flex-shrink-0" />
           </div>
         </div>
-        <p className="tw-text-red-400 tw-mb-0" role="alert">
+        <p className="tw-text-rose-300 tw-mb-0" role="alert">
           {error}
         </p>
       </div>
@@ -283,6 +285,9 @@ export default function DropForgeCraftClaimPageClient({
             claimId={claimId}
             onUpdated={setClaim}
             onPendingChange={setCoreInfoDirty}
+            onEditionSizeSaved={() =>
+              setDistributionSummariesRefreshNonce((prev) => prev + 1)
+            }
           />
         </DropForgeAccordionSection>
 
@@ -305,7 +310,10 @@ export default function DropForgeCraftClaimPageClient({
         </DropForgeAccordionSection>
 
         <DropForgeAccordionSection title="Distribution" defaultOpen={false}>
-          <DistributionSection claimId={claimId} />
+          <DistributionSection
+            claimId={claimId}
+            summariesRefreshNonce={distributionSummariesRefreshNonce}
+          />
         </DropForgeAccordionSection>
       </div>
     </div>
@@ -458,7 +466,7 @@ function ImageSection({
           </p>
         )}
         {formError && (
-          <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+          <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
             {formError}
           </p>
         )}
@@ -789,7 +797,7 @@ function AnimationSection({
               className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
             />
             {linkError && (
-              <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+              <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
                 {linkError}
               </p>
             )}
@@ -873,7 +881,7 @@ function AnimationSection({
                 />
                 {linkError && (
                   <p
-                    className="tw-text-red-400 tw-mb-0 tw-w-full tw-text-sm"
+                    className="tw-text-rose-300 tw-mb-0 tw-w-full tw-text-sm"
                     role="alert"
                   >
                     {linkError}
@@ -908,7 +916,7 @@ function AnimationSection({
       {hasPendingChanges && (
         <form onSubmit={handleSave} className="tw-flex tw-flex-col tw-gap-2">
           {formError && (
-            <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+            <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
               {formError}
             </p>
           )}
@@ -953,11 +961,13 @@ function CoreInformationSection({
   claimId,
   onUpdated,
   onPendingChange,
+  onEditionSizeSaved,
 }: {
   claim: MintingClaim;
   claimId: number;
   onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
+  onEditionSizeSaved: () => void;
 }) {
   const { setToast } = useAuth();
   const [editionSize, setEditionSize] = useState(
@@ -979,6 +989,8 @@ function CoreInformationSection({
     editionSize !==
       (claim.edition_size != null ? String(claim.edition_size) : "") ||
     season !== getClaimSeason(claim);
+  const editionSizeChanged =
+    editionSize !== (claim.edition_size != null ? String(claim.edition_size) : "");
   const seasonChanged = season !== getClaimSeason(claim);
 
   const editionSizeNum =
@@ -1031,6 +1043,9 @@ function CoreInformationSection({
       );
       setSeason(getClaimSeason(nextClaim));
       onUpdated(nextClaim);
+      if (editionSizeChanged) {
+        onEditionSizeSaved();
+      }
       setToast({ message: "Core information updated", type: "success" });
     } catch (e) {
       const msg = getErrorMessage(e, "Update failed");
@@ -1099,7 +1114,7 @@ function CoreInformationSection({
         </div>
       </div>
       {coreError && (
-        <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+        <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
           {coreError}
         </p>
       )}
@@ -1191,6 +1206,19 @@ function MetadataSection({
       if (currentAttributesSnapshot === nextAttributesSnapshot) {
         delete body.attributes;
       }
+      if (body.attributes) {
+        const existingSeasonAttribute = (claim.attributes ?? []).find(
+          (attribute) =>
+            attribute.trait_type?.trim().toLowerCase() === "type - season"
+        );
+        const nextHasSeasonAttribute = body.attributes.some(
+          (attribute) =>
+            attribute.trait_type?.trim().toLowerCase() === "type - season"
+        );
+        if (existingSeasonAttribute && !nextHasSeasonAttribute) {
+          body.attributes = [...body.attributes, existingSeasonAttribute];
+        }
+      }
       const nextClaim = await patchClaim(
         claimId,
         body as MintingClaimUpdateRequest
@@ -1244,7 +1272,7 @@ function MetadataSection({
         />
       </div>
       {traitsError && (
-        <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+        <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
           {traitsError}
         </p>
       )}
@@ -1438,7 +1466,7 @@ function ArweaveSection({
             </p>
           )}
           {error && (
-            <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+            <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
               {error}
             </p>
           )}
@@ -1465,7 +1493,13 @@ function ArweaveSection({
   );
 }
 
-function DistributionSection({ claimId }: { claimId: number }) {
+function DistributionSection({
+  claimId,
+  summariesRefreshNonce,
+}: {
+  claimId: number;
+  summariesRefreshNonce: number;
+}) {
   const [photos, setPhotos] = useState<DistributionPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1547,7 +1581,7 @@ function DistributionSection({ claimId }: { claimId: number }) {
     return () => {
       isActive = false;
     };
-  }, [claimId]);
+  }, [claimId, summariesRefreshNonce]);
 
   useEffect(() => {
     let isActive = true;
@@ -1577,7 +1611,7 @@ function DistributionSection({ claimId }: { claimId: number }) {
     return () => {
       isActive = false;
     };
-  }, [claimId]);
+  }, [claimId, summariesRefreshNonce]);
 
   function getPhotoFileName(link: string): string {
     const withoutHash = link.split("#")[0] ?? link;
@@ -1802,7 +1836,7 @@ function DistributionSection({ claimId }: { claimId: number }) {
       )}
 
       {!loading && error && (
-        <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+        <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
           {error}
         </p>
       )}
@@ -1863,12 +1897,12 @@ function DistributionSection({ claimId }: { claimId: number }) {
 
       <div className="tw-mt-8 tw-space-y-7">
         {airdropSummariesError && (
-          <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+          <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
             {airdropSummariesError}
           </p>
         )}
         {allowlistSummariesError && (
-          <p className="tw-text-red-400 tw-mb-0 tw-text-sm" role="alert">
+          <p className="tw-text-rose-300 tw-mb-0 tw-text-sm" role="alert">
             {allowlistSummariesError}
           </p>
         )}

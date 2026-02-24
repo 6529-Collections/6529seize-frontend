@@ -3,9 +3,8 @@ import {
   ArrowsRightLeftIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { useAppKit } from "@reown/appkit/react";
 import { useState } from "react";
-import { useChainId, useChains } from "wagmi";
+import { useChainId, useChains, useSwitchChain } from "wagmi";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import PushNotificationSettings from "./PushNotificationSettings";
 import HeaderQRScanner from "./share/HeaderQRScanner";
@@ -22,9 +21,16 @@ export default function AppUserConnect({
   const chainId = useChainId();
   const currentChain =
     chains.find((c) => c.id === chainId)?.name ?? chainId.toString();
-  const { open: openAppKit } = useAppKit();
+  const { switchChain } = useSwitchChain();
 
   const qrScanner = <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />;
+
+  const onSwitchChain = () => {
+    const nextChain = chains.find((c) => c.id !== chainId);
+    if (nextChain) {
+      switchChain({ chainId: nextChain.id });
+    }
+  };
 
   const connectButton = (
     <button
@@ -51,12 +57,12 @@ export default function AppUserConnect({
       </button>
       {chains.length > 1 && (
         <button
-          onClick={() => openAppKit({ view: "Networks" })}
+          onClick={onSwitchChain}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
           aria-label="Switch Chain"
         >
           <ArrowsRightLeftIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-          <span>Chain: {currentChain} | Switch</span>
+          <span>Chain: {currentChain} | Change</span>
         </button>
       )}
       <button

@@ -1,17 +1,17 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
+import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
+import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
-import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
   CRAFT_CLAIMS_PAGE_SIZE,
   DROP_FORGE_SECTIONS,
 } from "@/components/drop-forge/drop-forge.constants";
-import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
-import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
@@ -151,7 +151,8 @@ export default function DropForgeClaimsListPageClient({
   const section =
     mode === "launch" ? DROP_FORGE_SECTIONS.LAUNCH : DROP_FORGE_SECTIONS.CRAFT;
   const { title, description } = section;
-  const HeaderIcon = mode === "launch" ? DropForgeLaunchIcon : DropForgeCraftIcon;
+  const HeaderIcon =
+    mode === "launch" ? DropForgeLaunchIcon : DropForgeCraftIcon;
   const hasAccess = mode === "launch" ? canAccessLaunchPage : canAccessCraft;
 
   const [page, setPage] = useState(1);
@@ -233,7 +234,7 @@ export default function DropForgeClaimsListPageClient({
       {data && (
         <>
           {data.claims.length === 0 && !loading ? (
-            <p className="tw-text-iron-400">No claims</p>
+            <p className="tw-text-iron-400">No claims found</p>
           ) : (
             <div className="tw-flex tw-flex-col tw-gap-4">
               {data.claims.map((claim) => (

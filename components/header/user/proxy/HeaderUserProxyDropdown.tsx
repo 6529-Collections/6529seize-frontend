@@ -12,10 +12,9 @@ import {
   faShuffle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useAppKit } from "@reown/appkit/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
-import { useChainId, useChains } from "wagmi";
+import { useChainId, useChains, useSwitchChain } from "wagmi";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
 export default function HeaderUserProxyDropdown({
@@ -42,7 +41,7 @@ export default function HeaderUserProxyDropdown({
   const chainId = useChainId();
   const currentChain =
     chains.find((c) => c.id === chainId)?.name ?? chainId.toString();
-  const { open: openAppKit } = useAppKit();
+  const { switchChain } = useSwitchChain();
 
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
@@ -69,6 +68,14 @@ export default function HeaderUserProxyDropdown({
 
   const [label, setLabel] = useState(getLabel());
   useEffect(() => setLabel(getLabel()), [profile, address]);
+
+  const onSwitchChain = () => {
+    const nextChain = chains.find((c) => c.id !== chainId);
+    if (nextChain) {
+      switchChain({ chainId: nextChain.id });
+      onClose();
+    }
+  };
 
   return (
     <div>
@@ -198,7 +205,7 @@ export default function HeaderUserProxyDropdown({
                     </button>
                     {chains.length > 1 && (
                       <button
-                        onClick={() => openAppKit({ view: "Networks" })}
+                        onClick={onSwitchChain}
                         type="button"
                         aria-label="Switch Chain"
                         title="Switch Chain"
@@ -209,7 +216,7 @@ export default function HeaderUserProxyDropdown({
                           height={16}
                           width={16}
                         />
-                        <span>Chain: {currentChain} | Switch</span>
+                        <span>Chain: {currentChain} | Change</span>
                       </button>
                     )}
                     <button
