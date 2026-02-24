@@ -11,7 +11,6 @@ type UserPageTabDefinition = {
   readonly badge?: string | undefined;
   readonly isVisible?:
     | ((context: UserPageVisibilityContext) => boolean)
-    | undefined
     | undefined;
 };
 
@@ -27,7 +26,7 @@ const TAB_DEFINITIONS = [
     route: "brain",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
-{
+  {
     id: "collected",
     title: "Collected",
     route: "collected",

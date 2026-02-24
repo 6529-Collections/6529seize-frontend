@@ -4,7 +4,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import Link from "next/link";
-import type { MouseEvent } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useId } from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -15,7 +15,7 @@ interface OverlappingAvatarItem {
   readonly ariaLabel?: string;
   readonly fallback?: string;
   readonly title?: string;
-  readonly tooltipContent?: React.ReactNode;
+  readonly tooltipContent?: ReactNode;
 }
 
 interface OverlappingAvatarsProps {

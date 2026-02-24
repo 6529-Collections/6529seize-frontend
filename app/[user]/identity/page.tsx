@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 type PageProps = {
   readonly params?: Promise<{ user: string }> | undefined;
@@ -10,7 +10,8 @@ function buildQueryString(
 ): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    const values = Array.isArray(value) ? value : value !== undefined ? [value] : [];
+    if (value === undefined) continue;
+    const values = Array.isArray(value) ? value : [value];
     values.forEach((v) => query.append(key, v));
   }
   return query.toString();
@@ -26,5 +27,5 @@ export default async function IdentityRedirectPage({
 
   const qs = resolvedSearchParams ? buildQueryString(resolvedSearchParams) : "";
   const destination = qs ? `/${user}?${qs}` : `/${user}`;
-  redirect(destination);
+  permanentRedirect(destination);
 }
