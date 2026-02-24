@@ -28,7 +28,7 @@ describe('UserPageHeaderStats', () => {
       />
     );
     expect(screen.getByRole('link', { name: 'fmt-10 TDH' })).toHaveAttribute('href', '/bob/collected');
-    expect(screen.getByRole('link', { name: 'fmt-20 Rep' })).toHaveAttribute('href', '/bob/identity');
+    expect(screen.getByRole('link', { name: 'fmt-20 Rep' })).toHaveAttribute('href', '/bob');
     expect(screen.getByRole('link', { name: 'fmt-3 TDH Rate' })).toHaveAttribute(
       'href',
       '/bob/stats?activity=tdh-history'

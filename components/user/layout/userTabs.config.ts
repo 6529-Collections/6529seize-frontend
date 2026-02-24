@@ -11,23 +11,22 @@ type UserPageTabDefinition = {
   readonly badge?: string | undefined;
   readonly isVisible?:
     | ((context: UserPageVisibilityContext) => boolean)
-    | undefined
     | undefined;
 };
 
 const TAB_DEFINITIONS = [
   {
+    id: "rep",
+    title: "Identity",
+    route: "",
+  },
+  {
     id: "brain",
     title: "Brain",
-    route: "",
+    route: "brain",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
   {
-    id: "rep",
-    title: "Identity",
-    route: "identity",
-  },
-{
     id: "collected",
     title: "Collected",
     route: "collected",
@@ -102,7 +101,7 @@ export const USER_PAGE_TAB_IDS = USER_PAGE_TABS.reduce((acc, tab) => {
   return acc;
 }, {} as { [K in Uppercase<UserPageTabKey>]: UserPageTabKey });
 
-export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "collected";
+export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "rep";
 
 export function getUserPageTabByRoute(route: string) {
   return USER_PAGE_TABS.find(

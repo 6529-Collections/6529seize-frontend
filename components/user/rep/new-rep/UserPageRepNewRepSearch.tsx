@@ -270,7 +270,7 @@ export default function UserPageRepNewRepSearch({
                   className="tw-hidden lg:tw-block tw-text-xs tw-font-medium tw-text-iron-500">
                   Grant Rep
                 </label>
-                <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-500 tw-font-medium">
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-500 tw-font-medium">
                   <span>
                     <span>Your available Rep:</span>
                     <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
