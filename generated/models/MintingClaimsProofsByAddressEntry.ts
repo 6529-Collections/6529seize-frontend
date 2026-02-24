@@ -11,11 +11,15 @@
  * Do not edit the class manually.
  */
 
-import { MemesMintingProofItem } from '../models/MemesMintingProofItem';
+import { MintingClaimsProofItem } from '../models/MintingClaimsProofItem';
 import { HttpFile } from '../http/http';
 
-export class MemesMintingProofsResponse {
-    'proofs': Array<MemesMintingProofItem>;
+export class MintingClaimsProofsByAddressEntry {
+    /**
+    * Wallet address
+    */
+    'address': string;
+    'proofs': Array<MintingClaimsProofItem>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,14 +27,20 @@ export class MemesMintingProofsResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
+            "name": "address",
+            "baseName": "address",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "proofs",
             "baseName": "proofs",
-            "type": "Array<MemesMintingProofItem>",
+            "type": "Array<MintingClaimsProofItem>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return MemesMintingProofsResponse.attributeTypeMap;
+        return MintingClaimsProofsByAddressEntry.attributeTypeMap;
     }
 
     public constructor() {

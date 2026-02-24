@@ -1,6 +1,7 @@
 "use client";
 
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -96,7 +97,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       onError: () => {
         setIsError(true);
       },
-      readMethod: "getClaim",
     });
 
   const [fee, setFee] = useState<number>(0);
@@ -197,6 +197,16 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       <Row className="pb-2">
         <Col className="d-flex align-items-center gap-2">
           <h2 className="mb-0">Mint {props.title}</h2>
+        </Col>
+      </Row>
+    );
+  }
+
+  function printTestnetIndicator() {
+    return (
+      <Row className="pb-2">
+        <Col className="d-flex justify-content-end">
+          <DropForgeTestnetIndicator />
         </Col>
       </Row>
     );
@@ -330,6 +340,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   if (isManifoldClaimFetching || !manifoldClaim) {
     return (
       <Container className="pt-4 pb-4 px-4">
+        {printTestnetIndicator()}
         {printTitle()}
         <Row className="pt-2">
           <Col className="d-flex align-items-center gap-3">
@@ -350,6 +361,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
   if (!instance || !nftImage) {
     return (
       <Container className="pt-4 pb-4 px-4">
+        {printTestnetIndicator()}
         {printTitle()}
         <Row>
           <Col>
@@ -362,6 +374,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
 
   return (
     <Container className="pt-4 pb-4 px-4">
+      {printTestnetIndicator()}
       <Row className="pb-3">
         {printImage()}
         {printActions(instance, manifoldClaim)}

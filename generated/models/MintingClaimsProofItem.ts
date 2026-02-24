@@ -13,23 +13,15 @@
 
 import { HttpFile } from '../http/http';
 
-export class MemesMintingRootItem {
+export class MintingClaimsProofItem {
     /**
-    * Phase name
+    * Hex merkle proof hashes
     */
-    'phase': string;
+    'merkle_proof': Array<string>;
     /**
-    * 0x-prefixed hex merkle root
+    * Spot index (value) for this proof
     */
-    'merkle_root': string;
-    /**
-    * Number of unique addresses in this phase
-    */
-    'addresses_count': number;
-    /**
-    * Sum of mint spots for this phase
-    */
-    'total_spots': number;
+    'value': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -37,32 +29,20 @@ export class MemesMintingRootItem {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "phase",
-            "baseName": "phase",
-            "type": "string",
+            "name": "merkle_proof",
+            "baseName": "merkle_proof",
+            "type": "Array<string>",
             "format": ""
         },
         {
-            "name": "merkle_root",
-            "baseName": "merkle_root",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "addresses_count",
-            "baseName": "addresses_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "total_spots",
-            "baseName": "total_spots",
+            "name": "value",
+            "baseName": "value",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return MemesMintingRootItem.attributeTypeMap;
+        return MintingClaimsProofItem.attributeTypeMap;
     }
 
     public constructor() {

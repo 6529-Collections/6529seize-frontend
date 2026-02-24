@@ -10,7 +10,7 @@ import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
-import type { MemesMintingProofItem } from "@/generated/models/MemesMintingProofItem";
+import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
@@ -43,7 +43,9 @@ export default function ManifoldMintingWidget(
 
   const [isError, setIsError] = useState<boolean>(false);
   const [fetchingMerkle, setFetchingMerkle] = useState<boolean>(false);
-  const [merkleProofs, setMerkleProofs] = useState<MemesMintingProofItem[]>([]);
+  const [merkleProofs, setMerkleProofs] = useState<MintingClaimsProofItem[]>(
+    []
+  );
   const [merkleProofsMints, setMerkleProofsMints] = useState<boolean[]>([]);
 
   const [mintCount, setMintCount] = useState<number>(0);
@@ -64,13 +66,12 @@ export default function ManifoldMintingWidget(
     if (mintForAddress && props.claim.merkleRoot) {
       setFetchingMerkle(true);
       getMemesMintingProofsByAddress(
-        props.contract,
         props.claim.instanceId,
         props.claim.merkleRoot,
         mintForAddress
       )
         .then((response) => {
-          const mappedProofs: MemesMintingProofItem[] = (
+          const mappedProofs: MintingClaimsProofItem[] = (
             response.proofs ?? []
           ).map((proof) => ({
             merkle_proof: proof.merkle_proof ?? [],
@@ -143,7 +144,7 @@ export default function ManifoldMintingWidget(
   }, [readContracts.data]);
 
   const getSelectedMerkleProofs = () => {
-    const selectedMerkleProofs: MemesMintingProofItem[] = [];
+    const selectedMerkleProofs: MintingClaimsProofItem[] = [];
     for (let i = 0; i < merkleProofsMints.length; i++) {
       const proof = merkleProofs[i];
       if (!proof) {

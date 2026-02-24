@@ -3,28 +3,23 @@ import {
   FIELD_TO_LABEL_MAP,
   getInitialTraitsValues,
 } from "@/components/waves/memes/traits/schema";
-import type { MemeClaim } from "@/generated/models/MemeClaim";
-import type { MemeClaimAttribute } from "@/generated/models/MemeClaimAttribute";
-import type { MemeClaimUpdateRequest } from "@/generated/models/MemeClaimUpdateRequest";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
+import type { MintingClaimAttribute } from "@/generated/models/MintingClaimAttribute";
+import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimUpdateRequest";
 
 const ATTRIBUTE_TRAIT_KEYS = (
   Object.keys(getInitialTraitsValues()) as (keyof TraitsData)[]
 ).filter((k) => k !== "title" && k !== "description");
 
-export function getClaimSeason(claim: MemeClaim): string {
-  const raw = (claim as unknown as Record<string, unknown>)["season"];
-  if (raw != null && typeof raw === "string" && raw.trim() !== "")
-    return raw.trim();
-  if (raw != null && (typeof raw === "number" || typeof raw === "boolean"))
-    return String(raw);
+export function getClaimSeason(claim: MintingClaim): string {
   const attr = (claim.attributes ?? []).find(
-    (a) => a.trait_type?.trim().toLowerCase() === "season"
+    (a) => a.trait_type?.trim().toLowerCase() === "type - season"
   );
   if (attr?.value != null) return String(attr.value).trim();
   return "";
 }
 
-export function claimToTraitsData(claim: MemeClaim): TraitsData {
+export function claimToTraitsData(claim: MintingClaim): TraitsData {
   const initial = getInitialTraitsValues();
   const traits: TraitsData = { ...initial };
   traits.title = claim.name ?? "";
@@ -89,7 +84,7 @@ export function traitsDataToUpdateRequest(
   traits: TraitsData,
   editionSize: number | null,
   previousTraits?: TraitsData
-): Partial<MemeClaimUpdateRequest> {
+): Partial<MintingClaimUpdateRequest> {
   const initial = getInitialTraitsValues();
   const normalizeValue = (
     key: keyof TraitsData,
@@ -131,11 +126,11 @@ export function traitsDataToUpdateRequest(
 
   const name = traits.title?.trim();
   const description = traits.description?.trim();
-  const body: Partial<MemeClaimUpdateRequest> = {};
+  const body: Partial<MintingClaimUpdateRequest> = {};
 
   if (hasChangedAttributeValues) {
     body.attributes = ATTRIBUTE_TRAIT_KEYS.map(
-      (key): MemeClaimAttribute => ({
+      (key): MintingClaimAttribute => ({
         trait_type: FIELD_TO_LABEL_MAP[key] ?? key,
         value:
           typeof normalizeValue(key, traits[key]) === "boolean"

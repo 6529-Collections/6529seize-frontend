@@ -11,15 +11,15 @@
  * Do not edit the class manually.
  */
 
-import { MemeClaimAnimationDetails } from '../models/MemeClaimAnimationDetails';
-import { MemeClaimAttribute } from '../models/MemeClaimAttribute';
-import { MemeClaimImageDetails } from '../models/MemeClaimImageDetails';
+import { MintingClaimAnimationDetails } from '../models/MintingClaimAnimationDetails';
+import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
+import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
 import { HttpFile } from '../http/http';
 
-export class MemeClaim {
+export class MintingClaim {
     'drop_id': string;
-    'meme_id': number;
-    'season': number;
+    'contract': string;
+    'claim_id': number;
     'image_location'?: string | null;
     'animation_location'?: string | null;
     'metadata_location'?: string | null;
@@ -28,10 +28,10 @@ export class MemeClaim {
     'description': string;
     'name': string;
     'image_url'?: string | null;
-    'attributes': Array<MemeClaimAttribute>;
-    'image_details'?: MemeClaimImageDetails;
+    'attributes': Array<MintingClaimAttribute>;
+    'image_details'?: MintingClaimImageDetails;
     'animation_url'?: string | null;
-    'animation_details'?: MemeClaimAnimationDetails | null;
+    'animation_details'?: MintingClaimAnimationDetails | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -45,16 +45,16 @@ export class MemeClaim {
             "format": ""
         },
         {
-            "name": "meme_id",
-            "baseName": "meme_id",
-            "type": "number",
-            "format": "int64"
+            "name": "contract",
+            "baseName": "contract",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "season",
-            "baseName": "season",
+            "name": "claim_id",
+            "baseName": "claim_id",
             "type": "number",
-            "format": "int32"
+            "format": "int64"
         },
         {
             "name": "image_location",
@@ -107,13 +107,13 @@ export class MemeClaim {
         {
             "name": "attributes",
             "baseName": "attributes",
-            "type": "Array<MemeClaimAttribute>",
+            "type": "Array<MintingClaimAttribute>",
             "format": ""
         },
         {
             "name": "image_details",
             "baseName": "image_details",
-            "type": "MemeClaimImageDetails",
+            "type": "MintingClaimImageDetails",
             "format": ""
         },
         {
@@ -125,12 +125,12 @@ export class MemeClaim {
         {
             "name": "animation_details",
             "baseName": "animation_details",
-            "type": "MemeClaimAnimationDetails",
+            "type": "MintingClaimAnimationDetails",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return MemeClaim.attributeTypeMap;
+        return MintingClaim.attributeTypeMap;
     }
 
     public constructor() {

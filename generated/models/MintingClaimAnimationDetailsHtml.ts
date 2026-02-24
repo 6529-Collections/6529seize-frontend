@@ -11,26 +11,32 @@
  * Do not edit the class manually.
  */
 
-import { MemeClaimAnimationDetailsGlb } from '../models/MemeClaimAnimationDetailsGlb';
-import { MemeClaimAnimationDetailsHtml } from '../models/MemeClaimAnimationDetailsHtml';
-import { MemeClaimAnimationDetailsVideo } from '../models/MemeClaimAnimationDetailsVideo';
 import { HttpFile } from '../http/http';
 
-/**
- * @type MemeClaimAnimationDetails
- * Type
- * @export
- */
-export type MemeClaimAnimationDetails = MemeClaimAnimationDetailsGlb | MemeClaimAnimationDetailsHtml | MemeClaimAnimationDetailsVideo;
+export class MintingClaimAnimationDetailsHtml {
+    'format': MintingClaimAnimationDetailsHtmlFormatEnum;
 
-/**
-* @type MemeClaimAnimationDetailsClass
-* @export
-*/
-export class MemeClaimAnimationDetailsClass {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
+
+    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "format",
+            "baseName": "format",
+            "type": "MintingClaimAnimationDetailsHtmlFormatEnum",
+            "format": ""
+        }    ];
+
+    static getAttributeTypeMap() {
+        return MintingClaimAnimationDetailsHtml.attributeTypeMap;
+    }
+
+    public constructor() {
+    }
 }
 
+export enum MintingClaimAnimationDetailsHtmlFormatEnum {
+    Html = 'HTML'
+}
 

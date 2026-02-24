@@ -10,12 +10,12 @@ interface Props {
 
 export default async function DropForgeLaunchClaimPage({ params }: Props) {
   const { id } = await params;
-  const memeId = parseInt(id, 10);
-  if (!Number.isFinite(memeId) || memeId < 0) {
+  const claimId = parseInt(id, 10);
+  if (!Number.isFinite(claimId) || claimId < 0) {
     return (
       <main className={`${styles["main"]} tailwind-scope`}>
         <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-          <p className="tw-text-red-400">Invalid claim ID</p>
+          <p className="tw-text-red-400">Invalid Claim ID</p>
         </div>
       </main>
     );
@@ -23,7 +23,7 @@ export default async function DropForgeLaunchClaimPage({ params }: Props) {
 
   return (
     <main className={`${styles["main"]} tailwind-scope`}>
-      <DropForgeLaunchClaimPageClient memeId={memeId} />
+      <DropForgeLaunchClaimPageClient claimId={claimId} />
     </main>
   );
 }
@@ -31,7 +31,7 @@ export default async function DropForgeLaunchClaimPage({ params }: Props) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   return getAppMetadata({
-    title: `Drop #${id} | Launch Drops`,
+    title: `Claim #${id} | Launch Claims`,
     description: DROP_FORGE_TITLE,
   });
 }

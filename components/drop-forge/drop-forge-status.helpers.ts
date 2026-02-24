@@ -1,5 +1,5 @@
 import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launchClaimHelpers";
-import type { MemeClaim } from "@/generated/models/MemeClaim";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 export type ClaimPrimaryStatusKey =
@@ -48,7 +48,7 @@ export function getClaimPrimaryStatus({
   claim,
   manifoldClaim,
 }: {
-  claim: MemeClaim;
+  claim: MintingClaim;
   manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
 }): ClaimPrimaryStatus {
   const initializedOnchain = !!manifoldClaim?.instanceId;

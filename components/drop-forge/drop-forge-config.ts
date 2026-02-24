@@ -1,8 +1,8 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useMemo } from "react";
+import { useChainId } from "wagmi";
 import { Chain, mainnet, sepolia } from "wagmi/chains";
 
 export const DROP_FORGE_TESTNET_CONTRACT =
@@ -18,9 +18,10 @@ export function useDropForgeMintingConfig(): {
   chain: Chain;
   contract: string;
 } {
-  return useMemo(() => {
-    const isTestnet = publicEnv.DROP_FORGE_TESTNET === true;
+  const chainId = useChainId();
+  const isTestnet = chainId === sepolia.id;
 
+  return useMemo(() => {
     if (isTestnet) {
       return {
         mode: DropForgeMintingMode.TESTNET,
@@ -34,5 +35,5 @@ export function useDropForgeMintingConfig(): {
       chain: mainnet,
       contract: MEMES_CONTRACT,
     };
-  }, []);
+  }, [isTestnet]);
 }

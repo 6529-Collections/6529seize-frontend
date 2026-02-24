@@ -11,28 +11,26 @@
  * Do not edit the class manually.
  */
 
-import { MemeClaim } from '../models/MemeClaim';
+import { MintingClaimAnimationDetailsGlb } from '../models/MintingClaimAnimationDetailsGlb';
+import { MintingClaimAnimationDetailsHtml } from '../models/MintingClaimAnimationDetailsHtml';
+import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
 import { HttpFile } from '../http/http';
 
-export class MemesMintingClaimsResponse {
-    'claims': Array<MemeClaim>;
+/**
+ * @type MintingClaimAnimationDetails
+ * Type
+ * @export
+ */
+export type MintingClaimAnimationDetails = MintingClaimAnimationDetailsGlb | MintingClaimAnimationDetailsHtml | MintingClaimAnimationDetailsVideo;
 
+/**
+* @type MintingClaimAnimationDetailsClass
+* @export
+*/
+export class MintingClaimAnimationDetailsClass {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
-
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "claims",
-            "baseName": "claims",
-            "type": "Array<MemeClaim>",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return MemesMintingClaimsResponse.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
 }
+
+

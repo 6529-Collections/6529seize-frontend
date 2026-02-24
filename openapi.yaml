@@ -2097,16 +2097,16 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
-  /memes-minting/{contract}/{card_id}/{merkle_root}/proofs:
+  /minting-claims/{contract}/{card_id}/{merkle_root}/proofs:
     get:
       tags:
-        - Memes minting
+        - Minting Claims
       summary: Get all merkle proofs for a card root
       description: >
         Returns allowlist merkle proofs for all addresses for the given
         contract, card and merkle root. Listing all addresses requires
         DISTRIBUTION_ADMIN_WALLETS.
-      operationId: getMemesMintingProofs
+      operationId: getMintingClaimsProofs
       parameters:
         - name: contract
           in: path
@@ -2136,7 +2136,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MemesMintingProofsByAddressResponse"
+                $ref: "#/components/schemas/MintingClaimsProofsByAddressResponse"
         "400":
           description: Invalid request (missing or invalid parameters)
         "403":
@@ -2145,15 +2145,15 @@ paths:
             merkle_root
         "404":
           description: No proofs found for the given contract/card/merkle_root
-  /memes-minting/{contract}/{card_id}/{merkle_root}/proofs/{address}:
+  /minting-claims/{contract}/{card_id}/{merkle_root}/proofs/{address}:
     get:
       tags:
-        - Memes minting
+        - Minting Claims
       summary: Get merkle proofs for an address in a card root
       description: >
         Returns allowlist merkle proofs for one address for the given contract,
         card and merkle root.
-      operationId: getMemesMintingProofsByAddress
+      operationId: getMintingClaimsProofsByAddress
       parameters:
         - name: contract
           in: path
@@ -2190,18 +2190,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MemesMintingProofsResponse"
+                $ref: "#/components/schemas/MintingClaimsProofsResponse"
         "400":
           description: Invalid request (missing or invalid parameters)
         "404":
           description: No proofs found for the given contract/card/merkle_root and address
-  /memes-minting/{contract}/{card_id}/roots:
+  /minting-claims/{contract}/{card_id}/roots:
     get:
       tags:
-        - Memes minting
+        - Minting Claims
       summary: Get merkle roots for a token
       description: Returns merkle roots (one per phase) for the given contract and card.
-      operationId: getMemesMintingRoots
+      operationId: getMintingClaimsRoots
       parameters:
         - name: contract
           in: path
@@ -2226,17 +2226,17 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/MemesMintingRootItem"
+                  $ref: "#/components/schemas/MintingClaimsRootItem"
         "400":
           description: Invalid request (missing or invalid parameters)
-  /memes-minting/{contract}/{card_id}/airdrops:
+  /minting-claims/{contract}/{card_id}/airdrops:
     get:
       tags:
-        - Memes minting
+        - Minting Claims
       summary: Get per-phase airdrop totals for a token
       description: |
         Returns per-phase airdrop totals for the given contract and card.
-      operationId: getMemesMintingAirdrops
+      operationId: getMintingClaimsAirdrops
       parameters:
         - name: contract
           in: path
@@ -2261,17 +2261,17 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ApiMemesMintingPhaseTotalItem"
+                  $ref: "#/components/schemas/ApiMintingClaimsPhaseTotalItem"
         "400":
           description: Invalid request (missing or invalid parameters)
-  /memes-minting/{contract}/{card_id}/allowlists:
+  /minting-claims/{contract}/{card_id}/allowlists:
     get:
       tags:
-        - Memes minting
+        - Minting Claims
       summary: Get per-phase allowlist totals for a token
       description: |
         Returns per-phase allowlist totals for the given contract and card.
-      operationId: getMemesMintingAllowlists
+      operationId: getMintingClaimsAllowlists
       parameters:
         - name: contract
           in: path
@@ -2296,19 +2296,26 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ApiMemesMintingPhaseTotalItem"
+                  $ref: "#/components/schemas/ApiMintingClaimsPhaseTotalItem"
         "400":
           description: Invalid request (missing or invalid parameters)
-  /memes-minting/claims:
+  /minting-claims/{contract}/claims:
     get:
       tags:
-        - Memes minting
-      summary: Get meme claims (paginated, admin only)
+        - Minting Claims
+      summary: Get minting claims (paginated, admin only)
       description: >
-        Returns a page of meme claims, ordered by meme_id descending. Default
-        page_size 10, max 20. Only DISTRIBUTION_ADMIN_WALLETS can call this.
-      operationId: getMemesMintingClaims
+        Returns a page of minting claims for the given contract, ordered by
+        claim_id descending. Default page_size 10, max 20. Only
+        DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: getMintingClaims
       parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
         - name: page
           in: query
           required: false
@@ -2332,22 +2339,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MemesMintingClaimsPageResponse"
+                $ref: "#/components/schemas/MintingClaimsPageResponse"
         "401":
           description: Unauthorized - authentication required
         "403":
           description: Forbidden - only distribution admins can access
-  /memes-minting/claims/{meme_id}:
+  /minting-claims/{contract}/claims/{claim_id}:
     get:
       tags:
-        - Memes minting
-      summary: Get meme claim by meme_id (admin only)
-      description: >-
-        Returns the meme claim for the given meme_id (card number). Only
+        - Minting Claims
+      summary: Get minting claim by claim_id (admin only)
+      description: >
+        Returns the minting claim for the given contract and claim_id. Only
         DISTRIBUTION_ADMIN_WALLETS can call this.
-      operationId: getMemesMintingClaimByMemeId
+      operationId: getMintingClaimById
       parameters:
-        - name: meme_id
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
           in: path
           required: true
           schema:
@@ -2359,7 +2372,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MemeClaim"
+                $ref: "#/components/schemas/MintingClaim"
         "401":
           description: Unauthorized - authentication required
         "403":
@@ -2370,14 +2383,21 @@ paths:
           description: Conflict - claim media upload already in progress
     patch:
       tags:
-        - Memes minting
-      summary: Update meme claim (admin only)
+        - Minting Claims
+      summary: Update minting claim (admin only)
       description: >
-        Partial update by meme_id. Any field can be provided; only provided
-        fields are updated. Only DISTRIBUTION_ADMIN_WALLETS can call this.
-      operationId: patchMemesMintingClaim
+        Partial update by contract and claim_id. Any field can be provided; only
+        provided fields are updated. Only DISTRIBUTION_ADMIN_WALLETS can call
+        this.
+      operationId: patchMintingClaim
       parameters:
-        - name: meme_id
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
           in: path
           required: true
           schema:
@@ -2387,34 +2407,39 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MemeClaimUpdateRequest"
+              $ref: "#/components/schemas/MintingClaimUpdateRequest"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MemeClaim"
+                $ref: "#/components/schemas/MintingClaim"
         "401":
           description: Unauthorized - authentication required
         "403":
           description: Forbidden - only distribution admins can access
         "404":
           description: Claim not found
-  /memes-minting/claims/{meme_id}/arweave-upload:
+  /minting-claims/{contract}/claims/{claim_id}/arweave-upload:
     post:
       tags:
-        - Memes minting
-      summary: Upload meme claim metadata and media to Arweave (admin only)
-      description: >-
+        - Minting Claims
+      summary: Upload minting claim metadata and media to Arweave (admin only)
+      description: >
         Uploads claim metadata and media (image, and animation if not HTML) to
-        Arweave, by meme_id, asynchronously via background queue. Requires claim
-        to have an image URL and valid metadata fields. If already synced or
-        already uploading returns 409. Only DISTRIBUTION_ADMIN_WALLETS can call
-        this.
-      operationId: postMemesMintingClaimArweaveUpload
+        Arweave asynchronously via background queue. Requires claim to have an
+        image URL and valid metadata fields. If already synced or already
+        uploading returns 409. Only DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: postMintingClaimArweaveUpload
       parameters:
-        - name: meme_id
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
           in: path
           required: true
           schema:
@@ -2426,7 +2451,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MemeClaim"
+                $ref: "#/components/schemas/MintingClaim"
         "400":
           description: Bad Request - claim data or media URL/content-type is invalid
         "401":
@@ -2437,6 +2462,26 @@ paths:
           description: Claim not found
         "409":
           description: Conflict - claim already synced or upload already in progress
+  /nft-link:
+    get:
+      tags:
+        - NFT Link
+      summary: Get marketplace data about NFT link
+      operationId: getNftLinkData
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ApiNftLinkResponse"
   /nft-owners:
     get:
       tags:
@@ -8456,24 +8501,6 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
-    ApiMemesMintingPhaseTotalItem:
-      type: object
-      required:
-        - phase
-        - addresses
-        - total
-      properties:
-        phase:
-          type: string
-          description: Phase name
-        addresses:
-          type: integer
-          format: int64
-          description: Number of unique addresses in this phase
-        total:
-          type: integer
-          format: int64
-          description: Sum of spots for this phase
     ApiMemesMintStat:
       type: object
       required:
@@ -8587,6 +8614,24 @@ components:
           type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
+    ApiMintingClaimsPhaseTotalItem:
+      type: object
+      required:
+        - phase
+        - addresses
+        - total
+      properties:
+        phase:
+          type: string
+          description: Phase name
+        addresses:
+          type: integer
+          format: int64
+          description: Number of unique addresses in this phase
+        total:
+          type: integer
+          format: int64
+          description: Sum of spots for this phase
     ApiMintMetrics:
       type: object
       required:
@@ -8764,6 +8809,74 @@ components:
         highest_offer_from:
           type: string
           nullable: true
+    ApiNftLinkData:
+      type: object
+      required:
+        - canonical_id
+        - platform
+        - chain
+        - contract
+        - token
+        - name
+        - description
+        - media_uri
+        - last_error_message
+        - price
+        - last_successfully_updated
+        - failed_since
+      properties:
+        canonical_id:
+          type: string
+        platform:
+          type: string
+        chain:
+          type: string
+          nullable: true
+        contract:
+          type: string
+          nullable: true
+        token:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        media_uri:
+          type: string
+          nullable: true
+        last_error_message:
+          type: string
+          nullable: true
+        price:
+          type: string
+          nullable: true
+        last_successfully_updated:
+          type: integer
+          format: int64
+          nullable: true
+        failed_since:
+          type: integer
+          format: int64
+          nullable: true
+    ApiNftLinkResponse:
+      type: object
+      required:
+        - is_enrichable
+        - validation_error
+        - data
+      properties:
+        is_enrichable:
+          type: boolean
+        validation_error:
+          type: string
+          nullable: true
+        data:
+          anyOf:
+            - $ref: "#/components/schemas/ApiNftLinkData"
+            - type: "null"
     ApiNftMedia:
       type: object
       required:
@@ -11220,25 +11333,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DistributionPhoto"
-    MemeClaim:
+    MintingClaim:
       type: object
       required:
         - drop_id
-        - meme_id
-        - season
+        - contract
+        - claim_id
         - description
         - name
         - attributes
       properties:
         drop_id:
           type: string
-        meme_id:
+        contract:
+          type: string
+        claim_id:
           type: integer
           format: int64
-        season:
-          type: integer
-          format: int32
-          minimum: 1
         image_location:
           type: string
           nullable: true
@@ -11253,7 +11364,6 @@ components:
         edition_size:
           type: integer
           format: int32
-          minimum: 300
           nullable: true
         description:
           type: string
@@ -11265,20 +11375,20 @@ components:
         attributes:
           type: array
           items:
-            $ref: "#/components/schemas/MemeClaimAttribute"
+            $ref: "#/components/schemas/MintingClaimAttribute"
         image_details:
-          $ref: "#/components/schemas/MemeClaimImageDetails"
+          $ref: "#/components/schemas/MintingClaimImageDetails"
           nullable: true
         animation_url:
           type: string
           nullable: true
         animation_details:
           oneOf:
-            - $ref: "#/components/schemas/MemeClaimAnimationDetailsVideo"
-            - $ref: "#/components/schemas/MemeClaimAnimationDetailsHtml"
-            - $ref: "#/components/schemas/MemeClaimAnimationDetailsGlb"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsVideo"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsHtml"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsGlb"
           nullable: true
-    MemeClaimAnimationDetailsGlb:
+    MintingClaimAnimationDetailsGlb:
       type: object
       required:
         - bytes
@@ -11294,7 +11404,7 @@ components:
             - GLB
         sha256:
           type: string
-    MemeClaimAnimationDetailsHtml:
+    MintingClaimAnimationDetailsHtml:
       type: object
       required:
         - format
@@ -11303,7 +11413,7 @@ components:
           type: string
           enum:
             - HTML
-    MemeClaimAnimationDetailsVideo:
+    MintingClaimAnimationDetailsVideo:
       type: object
       required:
         - bytes
@@ -11333,7 +11443,7 @@ components:
           type: array
           items:
             type: string
-    MemeClaimAttribute:
+    MintingClaimAttribute:
       type: object
       required:
         - trait_type
@@ -11349,7 +11459,7 @@ components:
           type: string
         max_value:
           type: number
-    MemeClaimImageDetails:
+    MintingClaimImageDetails:
       type: object
       required:
         - bytes
@@ -11371,33 +11481,7 @@ components:
         height:
           type: integer
           format: int32
-    MemeClaimUpdateRequest:
-      type: object
-      properties:
-        season:
-          type: integer
-          format: int32
-          minimum: 1
-        edition_size:
-          type: integer
-          format: int32
-          minimum: 300
-          nullable: true
-        description:
-          type: string
-        name:
-          type: string
-        image_url:
-          type: string
-          nullable: true
-        attributes:
-          type: array
-          items:
-            $ref: "#/components/schemas/MemeClaimAttribute"
-        animation_url:
-          type: string
-          nullable: true
-    MemesMintingClaimsPageResponse:
+    MintingClaimsPageResponse:
       type: object
       required:
         - claims
@@ -11409,7 +11493,7 @@ components:
         claims:
           type: array
           items:
-            $ref: "#/components/schemas/MemeClaim"
+            $ref: "#/components/schemas/MintingClaim"
         count:
           type: integer
           format: int64
@@ -11423,16 +11507,7 @@ components:
         next:
           type: boolean
           description: True if there is a next page
-    MemesMintingClaimsResponse:
-      type: object
-      required:
-        - claims
-      properties:
-        claims:
-          type: array
-          items:
-            $ref: "#/components/schemas/MemeClaim"
-    MemesMintingProofItem:
+    MintingClaimsProofItem:
       type: object
       required:
         - merkle_proof
@@ -11447,7 +11522,7 @@ components:
           type: integer
           format: int64
           description: Spot index (value) for this proof
-    MemesMintingProofsByAddressEntry:
+    MintingClaimsProofsByAddressEntry:
       type: object
       required:
         - address
@@ -11459,8 +11534,8 @@ components:
         proofs:
           type: array
           items:
-            $ref: "#/components/schemas/MemesMintingProofItem"
-    MemesMintingProofsByAddressResponse:
+            $ref: "#/components/schemas/MintingClaimsProofItem"
+    MintingClaimsProofsByAddressResponse:
       type: object
       required:
         - proofs_by_address
@@ -11468,8 +11543,8 @@ components:
         proofs_by_address:
           type: array
           items:
-            $ref: "#/components/schemas/MemesMintingProofsByAddressEntry"
-    MemesMintingProofsResponse:
+            $ref: "#/components/schemas/MintingClaimsProofsByAddressEntry"
+    MintingClaimsProofsResponse:
       type: object
       required:
         - proofs
@@ -11477,8 +11552,17 @@ components:
         proofs:
           type: array
           items:
-            $ref: "#/components/schemas/MemesMintingProofItem"
-    MemesMintingRootItem:
+            $ref: "#/components/schemas/MintingClaimsProofItem"
+    MintingClaimsResponse:
+      type: object
+      required:
+        - claims
+      properties:
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaim"
+    MintingClaimsRootItem:
       type: object
       required:
         - phase
@@ -11500,6 +11584,27 @@ components:
           type: integer
           format: int64
           description: Sum of mint spots for this phase
+    MintingClaimUpdateRequest:
+      type: object
+      properties:
+        edition_size:
+          type: integer
+          format: int32
+          nullable: true
+        description:
+          type: string
+        name:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimAttribute"
+        animation_url:
+          type: string
+          nullable: true
     NFTFinalSubscription:
       type: object
       required:

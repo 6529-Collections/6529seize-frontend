@@ -14,17 +14,17 @@
 import { HttpFile } from '../http/http';
 
 /**
- * @type MemeClaimAttributeValue
+ * @type MintingClaimAttributeValue
  * Type
  * @export
  */
-export type MemeClaimAttributeValue = number | string;
+export type MintingClaimAttributeValue = number | string;
 
 /**
-* @type MemeClaimAttributeValueClass
+* @type MintingClaimAttributeValueClass
 * @export
 */
-export class MemeClaimAttributeValueClass {
+export class MintingClaimAttributeValueClass {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;

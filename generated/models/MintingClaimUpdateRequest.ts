@@ -11,14 +11,16 @@
  * Do not edit the class manually.
  */
 
-import { MemeClaimAttributeValue } from '../models/MemeClaimAttributeValue';
+import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
 import { HttpFile } from '../http/http';
 
-export class MemeClaimAttribute {
-    'trait_type': string;
-    'value': MemeClaimAttributeValue;
-    'display_type'?: string;
-    'max_value'?: number;
+export class MintingClaimUpdateRequest {
+    'edition_size'?: number | null;
+    'description'?: string;
+    'name'?: string;
+    'image_url'?: string | null;
+    'attributes'?: Array<MintingClaimAttribute>;
+    'animation_url'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +28,44 @@ export class MemeClaimAttribute {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "trait_type",
-            "baseName": "trait_type",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "value",
-            "baseName": "value",
-            "type": "MemeClaimAttributeValue",
-            "format": ""
-        },
-        {
-            "name": "display_type",
-            "baseName": "display_type",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "max_value",
-            "baseName": "max_value",
+            "name": "edition_size",
+            "baseName": "edition_size",
             "type": "number",
+            "format": "int32"
+        },
+        {
+            "name": "description",
+            "baseName": "description",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "name",
+            "baseName": "name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "image_url",
+            "baseName": "image_url",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "attributes",
+            "baseName": "attributes",
+            "type": "Array<MintingClaimAttribute>",
+            "format": ""
+        },
+        {
+            "name": "animation_url",
+            "baseName": "animation_url",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return MemeClaimAttribute.attributeTypeMap;
+        return MintingClaimUpdateRequest.attributeTypeMap;
     }
 
     public constructor() {

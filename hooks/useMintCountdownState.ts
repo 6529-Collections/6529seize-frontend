@@ -54,7 +54,6 @@ export function useMintCountdownState(
     onError: () => {
       setErrorFromCallback(true);
     },
-    readMethod: "getClaim",
   });
 
   // Derive error state: callback fired AND (no data OR data has error)

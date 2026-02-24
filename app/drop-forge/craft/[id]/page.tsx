@@ -5,32 +5,32 @@ import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
 interface Props {
-  params: Promise<{ meme_id: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function DropForgeCraftClaimPage({ params }: Props) {
-  const { meme_id } = await params;
-  const memeId = parseInt(meme_id, 10);
-  if (!Number.isFinite(memeId) || memeId < 0) {
+  const { id } = await params;
+  const claimId = parseInt(id, 10);
+  if (!Number.isFinite(claimId) || claimId < 0) {
     return (
       <main className={`${styles["main"]} tailwind-scope`}>
         <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-          <p className="tw-text-red-400">Invalid claim ID</p>
+          <p className="tw-text-red-400">Invalid Claim ID</p>
         </div>
       </main>
     );
   }
   return (
     <main className={`${styles["main"]} tailwind-scope`}>
-      <DropForgeCraftClaimPageClient memeId={memeId} />
+      <DropForgeCraftClaimPageClient claimId={claimId} />
     </main>
   );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { meme_id } = await params;
+  const { id } = await params;
   return getAppMetadata({
-    title: `Drop #${meme_id} | Craft Drops`,
+    title: `Claim #${id} | Craft Claims`,
     description: DROP_FORGE_TITLE,
   });
 }

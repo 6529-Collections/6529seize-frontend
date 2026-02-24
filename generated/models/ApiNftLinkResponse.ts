@@ -11,21 +11,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiNftLinkData } from '../models/ApiNftLinkData';
 import { HttpFile } from '../http/http';
 
-export class ApiMemesMintingPhaseTotalItem {
-    /**
-    * Phase name
-    */
-    'phase': string;
-    /**
-    * Number of unique addresses in this phase
-    */
-    'addresses': number;
-    /**
-    * Sum of spots for this phase
-    */
-    'total': number;
+export class ApiNftLinkResponse {
+    'is_enrichable': boolean;
+    'validation_error': string | null;
+    'data': ApiNftLinkData | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -33,26 +25,26 @@ export class ApiMemesMintingPhaseTotalItem {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "phase",
-            "baseName": "phase",
+            "name": "is_enrichable",
+            "baseName": "is_enrichable",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "validation_error",
+            "baseName": "validation_error",
             "type": "string",
             "format": ""
         },
         {
-            "name": "addresses",
-            "baseName": "addresses",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "total",
-            "baseName": "total",
-            "type": "number",
-            "format": "int64"
+            "name": "data",
+            "baseName": "data",
+            "type": "ApiNftLinkData",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMemesMintingPhaseTotalItem.attributeTypeMap;
+        return ApiNftLinkResponse.attributeTypeMap;
     }
 
     public constructor() {

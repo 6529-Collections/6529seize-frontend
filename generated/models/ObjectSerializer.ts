@@ -109,11 +109,13 @@ export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
 export * from '../models/ApiMemesMintStatsTotals';
 export * from '../models/ApiMemesMintStatsYearly';
-export * from '../models/ApiMemesMintingPhaseTotalItem';
 export * from '../models/ApiMentionedWave';
 export * from '../models/ApiMintMetrics';
 export * from '../models/ApiMintMetricsPage';
+export * from '../models/ApiMintingClaimsPhaseTotalItem';
 export * from '../models/ApiNft';
+export * from '../models/ApiNftLinkData';
+export * from '../models/ApiNftLinkResponse';
 export * from '../models/ApiNftMedia';
 export * from '../models/ApiNftOwner';
 export * from '../models/ApiNftOwnerPage';
@@ -236,22 +238,22 @@ export * from '../models/DistributionPhotoCompleteRequestPhoto';
 export * from '../models/DistributionPhotoCompleteResponse';
 export * from '../models/DistributionPhotosPage';
 export * from '../models/GetWaveSubscription200Response';
-export * from '../models/MemeClaim';
-export * from '../models/MemeClaimAnimationDetails';
-export * from '../models/MemeClaimAnimationDetailsGlb';
-export * from '../models/MemeClaimAnimationDetailsHtml';
-export * from '../models/MemeClaimAnimationDetailsVideo';
-export * from '../models/MemeClaimAttribute';
-export * from '../models/MemeClaimAttributeValue';
-export * from '../models/MemeClaimImageDetails';
-export * from '../models/MemeClaimUpdateRequest';
-export * from '../models/MemesMintingClaimsPageResponse';
-export * from '../models/MemesMintingClaimsResponse';
-export * from '../models/MemesMintingProofItem';
-export * from '../models/MemesMintingProofsByAddressEntry';
-export * from '../models/MemesMintingProofsByAddressResponse';
-export * from '../models/MemesMintingProofsResponse';
-export * from '../models/MemesMintingRootItem';
+export * from '../models/MintingClaim';
+export * from '../models/MintingClaimAnimationDetails';
+export * from '../models/MintingClaimAnimationDetailsGlb';
+export * from '../models/MintingClaimAnimationDetailsHtml';
+export * from '../models/MintingClaimAnimationDetailsVideo';
+export * from '../models/MintingClaimAttribute';
+export * from '../models/MintingClaimAttributeValue';
+export * from '../models/MintingClaimImageDetails';
+export * from '../models/MintingClaimUpdateRequest';
+export * from '../models/MintingClaimsPageResponse';
+export * from '../models/MintingClaimsProofItem';
+export * from '../models/MintingClaimsProofsByAddressEntry';
+export * from '../models/MintingClaimsProofsByAddressResponse';
+export * from '../models/MintingClaimsProofsResponse';
+export * from '../models/MintingClaimsResponse';
+export * from '../models/MintingClaimsRootItem';
 export * from '../models/NFTFinalSubscription';
 export * from '../models/NFTFinalSubscriptionUpload';
 export * from '../models/NFTFinalSubscriptionUploadPage';
@@ -386,11 +388,13 @@ import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
 import { ApiMemesMintStatsTotals } from '../models/ApiMemesMintStatsTotals';
 import { ApiMemesMintStatsYearly } from '../models/ApiMemesMintStatsYearly';
-import { ApiMemesMintingPhaseTotalItem } from '../models/ApiMemesMintingPhaseTotalItem';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiMintMetrics } from '../models/ApiMintMetrics';
 import { ApiMintMetricsPage } from '../models/ApiMintMetricsPage';
+import { ApiMintingClaimsPhaseTotalItem } from '../models/ApiMintingClaimsPhaseTotalItem';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
+import { ApiNftLinkData } from '../models/ApiNftLinkData';
+import { ApiNftLinkResponse } from '../models/ApiNftLinkResponse';
 import { ApiNftMedia } from '../models/ApiNftMedia';
 import { ApiNftOwner } from '../models/ApiNftOwner';
 import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
@@ -513,22 +517,22 @@ import { DistributionPhotoCompleteRequestPhoto } from '../models/DistributionPho
 import { DistributionPhotoCompleteResponse } from '../models/DistributionPhotoCompleteResponse';
 import { DistributionPhotosPage } from '../models/DistributionPhotosPage';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
-import { MemeClaim } from '../models/MemeClaim';
-import { MemeClaimAnimationDetailsClass } from '../models/MemeClaimAnimationDetails';
-import { MemeClaimAnimationDetailsGlb , MemeClaimAnimationDetailsGlbFormatEnum    } from '../models/MemeClaimAnimationDetailsGlb';
-import { MemeClaimAnimationDetailsHtml, MemeClaimAnimationDetailsHtmlFormatEnum   } from '../models/MemeClaimAnimationDetailsHtml';
-import { MemeClaimAnimationDetailsVideo } from '../models/MemeClaimAnimationDetailsVideo';
-import { MemeClaimAttribute } from '../models/MemeClaimAttribute';
-import { MemeClaimAttributeValueClass } from '../models/MemeClaimAttributeValue';
-import { MemeClaimImageDetails } from '../models/MemeClaimImageDetails';
-import { MemeClaimUpdateRequest } from '../models/MemeClaimUpdateRequest';
-import { MemesMintingClaimsPageResponse } from '../models/MemesMintingClaimsPageResponse';
-import { MemesMintingClaimsResponse } from '../models/MemesMintingClaimsResponse';
-import { MemesMintingProofItem } from '../models/MemesMintingProofItem';
-import { MemesMintingProofsByAddressEntry } from '../models/MemesMintingProofsByAddressEntry';
-import { MemesMintingProofsByAddressResponse } from '../models/MemesMintingProofsByAddressResponse';
-import { MemesMintingProofsResponse } from '../models/MemesMintingProofsResponse';
-import { MemesMintingRootItem } from '../models/MemesMintingRootItem';
+import { MintingClaim } from '../models/MintingClaim';
+import { MintingClaimAnimationDetailsClass } from '../models/MintingClaimAnimationDetails';
+import { MintingClaimAnimationDetailsGlb , MintingClaimAnimationDetailsGlbFormatEnum    } from '../models/MintingClaimAnimationDetailsGlb';
+import { MintingClaimAnimationDetailsHtml, MintingClaimAnimationDetailsHtmlFormatEnum   } from '../models/MintingClaimAnimationDetailsHtml';
+import { MintingClaimAnimationDetailsVideo } from '../models/MintingClaimAnimationDetailsVideo';
+import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
+import { MintingClaimAttributeValueClass } from '../models/MintingClaimAttributeValue';
+import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
+import { MintingClaimUpdateRequest } from '../models/MintingClaimUpdateRequest';
+import { MintingClaimsPageResponse } from '../models/MintingClaimsPageResponse';
+import { MintingClaimsProofItem } from '../models/MintingClaimsProofItem';
+import { MintingClaimsProofsByAddressEntry } from '../models/MintingClaimsProofsByAddressEntry';
+import { MintingClaimsProofsByAddressResponse } from '../models/MintingClaimsProofsByAddressResponse';
+import { MintingClaimsProofsResponse } from '../models/MintingClaimsProofsResponse';
+import { MintingClaimsResponse } from '../models/MintingClaimsResponse';
+import { MintingClaimsRootItem } from '../models/MintingClaimsRootItem';
 import { NFTFinalSubscription } from '../models/NFTFinalSubscription';
 import { NFTFinalSubscriptionUpload } from '../models/NFTFinalSubscriptionUpload';
 import { NFTFinalSubscriptionUploadPage } from '../models/NFTFinalSubscriptionUploadPage';
@@ -596,9 +600,9 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWavesPinFilter",
     "ApiXTdhGrantStatus",
     "ApiXTdhGrantTargetChain",
-    "MemeClaimAnimationDetailsFormatEnum",
-    "MemeClaimAnimationDetailsGlbFormatEnum",
-    "MemeClaimAnimationDetailsHtmlFormatEnum",
+    "MintingClaimAnimationDetailsFormatEnum",
+    "MintingClaimAnimationDetailsGlbFormatEnum",
+    "MintingClaimAnimationDetailsHtmlFormatEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -703,11 +707,13 @@ let typeMap: {[index: string]: any} = {
     "ApiMemesMintStatsPage": ApiMemesMintStatsPage,
     "ApiMemesMintStatsTotals": ApiMemesMintStatsTotals,
     "ApiMemesMintStatsYearly": ApiMemesMintStatsYearly,
-    "ApiMemesMintingPhaseTotalItem": ApiMemesMintingPhaseTotalItem,
     "ApiMentionedWave": ApiMentionedWave,
     "ApiMintMetrics": ApiMintMetrics,
     "ApiMintMetricsPage": ApiMintMetricsPage,
+    "ApiMintingClaimsPhaseTotalItem": ApiMintingClaimsPhaseTotalItem,
     "ApiNft": ApiNft,
+    "ApiNftLinkData": ApiNftLinkData,
+    "ApiNftLinkResponse": ApiNftLinkResponse,
     "ApiNftMedia": ApiNftMedia,
     "ApiNftOwner": ApiNftOwner,
     "ApiNftOwnerPage": ApiNftOwnerPage,
@@ -812,22 +818,22 @@ let typeMap: {[index: string]: any} = {
     "DistributionPhotoCompleteResponse": DistributionPhotoCompleteResponse,
     "DistributionPhotosPage": DistributionPhotosPage,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
-    "MemeClaim": MemeClaim,
-    "MemeClaimAnimationDetails": MemeClaimAnimationDetailsClass,
-    "MemeClaimAnimationDetailsGlb": MemeClaimAnimationDetailsGlb,
-    "MemeClaimAnimationDetailsHtml": MemeClaimAnimationDetailsHtml,
-    "MemeClaimAnimationDetailsVideo": MemeClaimAnimationDetailsVideo,
-    "MemeClaimAttribute": MemeClaimAttribute,
-    "MemeClaimAttributeValue": MemeClaimAttributeValueClass,
-    "MemeClaimImageDetails": MemeClaimImageDetails,
-    "MemeClaimUpdateRequest": MemeClaimUpdateRequest,
-    "MemesMintingClaimsPageResponse": MemesMintingClaimsPageResponse,
-    "MemesMintingClaimsResponse": MemesMintingClaimsResponse,
-    "MemesMintingProofItem": MemesMintingProofItem,
-    "MemesMintingProofsByAddressEntry": MemesMintingProofsByAddressEntry,
-    "MemesMintingProofsByAddressResponse": MemesMintingProofsByAddressResponse,
-    "MemesMintingProofsResponse": MemesMintingProofsResponse,
-    "MemesMintingRootItem": MemesMintingRootItem,
+    "MintingClaim": MintingClaim,
+    "MintingClaimAnimationDetails": MintingClaimAnimationDetailsClass,
+    "MintingClaimAnimationDetailsGlb": MintingClaimAnimationDetailsGlb,
+    "MintingClaimAnimationDetailsHtml": MintingClaimAnimationDetailsHtml,
+    "MintingClaimAnimationDetailsVideo": MintingClaimAnimationDetailsVideo,
+    "MintingClaimAttribute": MintingClaimAttribute,
+    "MintingClaimAttributeValue": MintingClaimAttributeValueClass,
+    "MintingClaimImageDetails": MintingClaimImageDetails,
+    "MintingClaimUpdateRequest": MintingClaimUpdateRequest,
+    "MintingClaimsPageResponse": MintingClaimsPageResponse,
+    "MintingClaimsProofItem": MintingClaimsProofItem,
+    "MintingClaimsProofsByAddressEntry": MintingClaimsProofsByAddressEntry,
+    "MintingClaimsProofsByAddressResponse": MintingClaimsProofsByAddressResponse,
+    "MintingClaimsProofsResponse": MintingClaimsProofsResponse,
+    "MintingClaimsResponse": MintingClaimsResponse,
+    "MintingClaimsRootItem": MintingClaimsRootItem,
     "NFTFinalSubscription": NFTFinalSubscription,
     "NFTFinalSubscriptionUpload": NFTFinalSubscriptionUpload,
     "NFTFinalSubscriptionUploadPage": NFTFinalSubscriptionUploadPage,

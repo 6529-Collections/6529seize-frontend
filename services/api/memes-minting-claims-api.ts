@@ -1,22 +1,25 @@
-import { publicEnv } from "@/config/env";
-import type { MemeClaim } from "@/generated/models/MemeClaim";
-import type { MemeClaimUpdateRequest } from "@/generated/models/MemeClaimUpdateRequest";
-import type { MemesMintingClaimsPageResponse } from "@/generated/models/MemesMintingClaimsPageResponse";
-import type { MemesMintingProofsResponse } from "@/generated/models/MemesMintingProofsResponse";
-import type { MemesMintingRootItem } from "@/generated/models/MemesMintingRootItem";
+import { MEMES_CONTRACT } from "@/constants/constants";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
+import type { MintingClaimsPageResponse } from "@/generated/models/MintingClaimsPageResponse";
+import type { MintingClaimsProofsResponse } from "@/generated/models/MintingClaimsProofsResponse";
+import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
+import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimUpdateRequest";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
-import { commonApiFetch, commonApiPatch } from "@/services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPatch,
+  commonApiPostWithoutBodyAndResponse,
+} from "@/services/api/common-api";
 import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
-import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
-const CLAIMS_BASE = "memes-minting/claims";
+const MINTING_CLAIMS_BASE = `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}`;
+const MINTING_CLAIMS_BASE_CLAIMS = `${MINTING_CLAIMS_BASE}/claims`;
 const GENERATED_STORAGE_FIELDS = new Set<string>([
   "metadata_location",
   "image_location",
   "animation_location",
 ]);
 const ALLOWED_PATCH_FIELDS = new Set<string>([
-  "season",
   "edition_size",
   "description",
   "name",
@@ -25,7 +28,7 @@ const ALLOWED_PATCH_FIELDS = new Set<string>([
   "animation_url",
 ]);
 
-function validateClaimPatchBody(body: MemeClaimUpdateRequest): void {
+function validateClaimPatchBody(body: MintingClaimUpdateRequest): void {
   const payload = body as Record<string, unknown>;
   const keys = Object.keys(payload);
 
@@ -50,22 +53,12 @@ function validateClaimPatchBody(body: MemeClaimUpdateRequest): void {
   }
 }
 
-function getHeaders(): Record<string, string> {
-  const apiAuth = getStagingAuth();
-  const walletAuth = getAuthJwt();
-  return {
-    "Content-Type": "application/json",
-    ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
-    ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
-  };
-}
-
 export async function getClaimsPage(
   page: number,
   pageSize: number
-): Promise<MemesMintingClaimsPageResponse> {
-  return commonApiFetch<MemesMintingClaimsPageResponse>({
-    endpoint: CLAIMS_BASE,
+): Promise<MintingClaimsPageResponse> {
+  return commonApiFetch<MintingClaimsPageResponse>({
+    endpoint: MINTING_CLAIMS_BASE_CLAIMS,
     params: {
       page: String(page),
       page_size: String(pageSize),
@@ -73,18 +66,17 @@ export async function getClaimsPage(
   });
 }
 
-export async function getClaim(memeId: number): Promise<MemeClaim> {
-  return commonApiFetch<MemeClaim>({
-    endpoint: `${CLAIMS_BASE}/${memeId}`,
+export async function getClaim(claimId: number): Promise<MintingClaim> {
+  return commonApiFetch<MintingClaim>({
+    endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}`,
   });
 }
 
 export async function getMemesMintingRoots(
-  contract: string,
   cardId: number
-): Promise<MemesMintingRootItem[]> {
-  return commonApiFetch<MemesMintingRootItem[]>({
-    endpoint: `memes-minting/${contract}/${cardId}/roots`,
+): Promise<MintingClaimsRootItem[]> {
+  return commonApiFetch<MintingClaimsRootItem[]>({
+    endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/roots`,
   });
 }
 
@@ -99,31 +91,28 @@ export interface MemesMintingAirdropSummaryItem {
 }
 
 export async function getMemesMintingAirdrops(
-  contract: string,
   cardId: number
 ): Promise<MemesMintingAirdropSummaryItem[]> {
   return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
-    endpoint: `memes-minting/${contract}/${cardId}/airdrops`,
+    endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/airdrops`,
   });
 }
 
 export async function getMemesMintingAllowlists(
-  contract: string,
   cardId: number
 ): Promise<MemesMintingAirdropSummaryItem[]> {
   return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
-    endpoint: `memes-minting/${contract}/${cardId}/allowlists`,
+    endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/allowlists`,
   });
 }
 
 export async function getMemesMintingProofsByAddress(
-  contract: string,
   cardId: number,
   merkleRoot: string,
   address: string
-): Promise<MemesMintingProofsResponse> {
-  return commonApiFetch<MemesMintingProofsResponse>({
-    endpoint: `memes-minting/${encodeURIComponent(contract)}/${cardId}/${encodeURIComponent(
+): Promise<MintingClaimsProofsResponse> {
+  return commonApiFetch<MintingClaimsProofsResponse>({
+    endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/${encodeURIComponent(
       merkleRoot
     )}/proofs/${encodeURIComponent(address)}`,
   });
@@ -160,45 +149,26 @@ export async function getFinalSubscriptionsByPhase(
 }
 
 export async function patchClaim(
-  memeId: number,
-  body: MemeClaimUpdateRequest
-): Promise<MemeClaim> {
+  claimId: number,
+  body: MintingClaimUpdateRequest
+): Promise<MintingClaim> {
   validateClaimPatchBody(body);
-  return commonApiPatch<MemeClaimUpdateRequest, MemeClaim>({
-    endpoint: `${CLAIMS_BASE}/${memeId}`,
+  return commonApiPatch<MintingClaimUpdateRequest, MintingClaim>({
+    endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}`,
     body,
   });
 }
 
-export async function postArweaveUpload(memeId: number): Promise<void> {
-  const url = `${publicEnv.API_ENDPOINT}/api/${CLAIMS_BASE}/${memeId}/arweave-upload`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: getHeaders(),
-    body: "",
+export async function postArweaveUpload(claimId: number): Promise<void> {
+  return commonApiPostWithoutBodyAndResponse({
+    endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}/arweave-upload`,
   });
-  if (res.status === 409) {
-    throw new Error("Already published");
-  }
-  if (res.status === 403) {
-    throw new Error("Not authorized");
-  }
-  if (!res.ok) {
-    let errorMessage: string;
-    try {
-      const body = await res.json();
-      errorMessage = (body as { error?: string })?.error ?? res.statusText ?? "Request failed";
-    } catch {
-      errorMessage = res.statusText ?? "Request failed";
-    }
-    throw new Error(errorMessage);
-  }
 }
 
 export type ClaimMediaField = "image_url" | "animation_url";
 
 export async function uploadClaimMedia(
-  _memeId: number,
+  _claimId: number,
   _field: ClaimMediaField,
   file: File
 ): Promise<string> {

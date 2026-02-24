@@ -11,17 +11,21 @@
  * Do not edit the class manually.
  */
 
+import { MintingClaim } from '../models/MintingClaim';
 import { HttpFile } from '../http/http';
 
-export class MemesMintingProofItem {
+export class MintingClaimsPageResponse {
+    'claims': Array<MintingClaim>;
     /**
-    * Hex merkle proof hashes
+    * Total number of claims
     */
-    'merkle_proof': Array<string>;
+    'count': number;
+    'page': number;
+    'page_size': number;
     /**
-    * Spot index (value) for this proof
+    * True if there is a next page
     */
-    'value': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,20 +33,38 @@ export class MemesMintingProofItem {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "merkle_proof",
-            "baseName": "merkle_proof",
-            "type": "Array<string>",
+            "name": "claims",
+            "baseName": "claims",
+            "type": "Array<MintingClaim>",
             "format": ""
         },
         {
-            "name": "value",
-            "baseName": "value",
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "page_size",
+            "baseName": "page_size",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return MemesMintingProofItem.attributeTypeMap;
+        return MintingClaimsPageResponse.attributeTypeMap;
     }
 
     public constructor() {

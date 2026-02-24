@@ -21,22 +21,22 @@ import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePe
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
+import ClaimTraitsEditor from "@/components/waves/memes/MemesArtSubmissionTraits";
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 import ArtworkDetails from "@/components/waves/memes/submission/details/ArtworkDetails";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DistributionPhoto } from "@/entities/IDistribution";
-import type { MemeClaim } from "@/generated/models/MemeClaim";
-import type { MemeClaimUpdateRequest } from "@/generated/models/MemeClaimUpdateRequest";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
+import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimUpdateRequest";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { fetchAllPages } from "@/services/6529api";
 import {
   getClaim,
-  getMemesMintingAirdrops,
-  getMemesMintingAllowlists,
-  type MemesMintingAirdropSummaryItem,
+  getMemesMintingAirdrops as getClaimAirdropSummaries,
+  getMemesMintingAllowlists as getClaimAllowlistSummaries,
+  type MemesMintingAirdropSummaryItem as ClaimPhaseSummaryItem,
   patchClaim,
   postArweaveUpload,
   uploadClaimMedia,
@@ -65,7 +65,7 @@ const BTN_DANGER =
 
 type ClaimMediaType = "image" | "video" | "glb" | "html" | "unknown";
 
-function getClaimMediaType(claim: MemeClaim): ClaimMediaType {
+function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   if (!claim.image_url && !claim.image_details) return "unknown";
   if (!claim.animation_url || !claim.animation_details) return "image";
   const format = (claim.animation_details as { format?: string }).format;
@@ -111,16 +111,16 @@ function getErrorMessage(error: unknown, fallback: string): string {
 }
 
 export default function DropForgeCraftClaimPageClient({
-  memeId,
+  claimId,
 }: {
-  memeId: number;
+  claimId: number;
 }) {
   const { setToast } = useAuth();
   const { hasWallet, permissionsLoading, canAccessCraft } =
     useDropForgePermissions();
-  const pageTitle = `Craft Drop #${memeId}`;
+  const pageTitle = `Craft Claim #${claimId}`;
 
-  const [claim, setClaim] = useState<MemeClaim | null>(null);
+  const [claim, setClaim] = useState<MintingClaim | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageDirty, setImageDirty] = useState(false);
@@ -132,7 +132,7 @@ export default function DropForgeCraftClaimPageClient({
     setLoading(true);
     setError(null);
     try {
-      const c = await getClaim(memeId);
+      const c = await getClaim(claimId);
       setClaim(c);
     } catch (e) {
       const msg = getErrorMessage(e, "Failed to load claim");
@@ -148,7 +148,7 @@ export default function DropForgeCraftClaimPageClient({
     } finally {
       setLoading(false);
     }
-  }, [memeId, setToast]);
+  }, [claimId, setToast]);
 
   useEffect(() => {
     if (!hasWallet || !canAccessCraft) return;
@@ -177,7 +177,7 @@ export default function DropForgeCraftClaimPageClient({
             className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
           >
             <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-            Back to Drops list
+            Back to Claims list
           </Link>
           <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
             <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
@@ -201,7 +201,7 @@ export default function DropForgeCraftClaimPageClient({
             className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
           >
             <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-            Back to Drops list
+            Back to Claims list
           </Link>
           <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
             <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
@@ -226,7 +226,7 @@ export default function DropForgeCraftClaimPageClient({
   const coreInformationHeaderPills = (
     <span className="tw-inline-flex tw-items-center tw-gap-2">
       <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
-        SZN {claim.season ?? "—"}
+        SZN {getClaimSeason(claim) || "—"}
       </span>
       <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
         Edition Size {claim.edition_size ?? "—"}
@@ -242,7 +242,7 @@ export default function DropForgeCraftClaimPageClient({
           className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
         >
           <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-          Back to Drops list
+          Back to Claims list
         </Link>
         <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
           <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
@@ -257,7 +257,7 @@ export default function DropForgeCraftClaimPageClient({
         <DropForgeAccordionSection title="Image" defaultOpen>
           <ImageSection
             claim={claim}
-            memeId={memeId}
+            claimId={claimId}
             onUpdated={setClaim}
             onPendingChange={setImageDirty}
           />
@@ -266,7 +266,7 @@ export default function DropForgeCraftClaimPageClient({
         <DropForgeAccordionSection title="Animation" defaultOpen={hasAnimation}>
           <AnimationSection
             claim={claim}
-            memeId={memeId}
+            claimId={claimId}
             onUpdated={setClaim}
             onPendingChange={setAnimationDirty}
           />
@@ -280,7 +280,7 @@ export default function DropForgeCraftClaimPageClient({
         >
           <CoreInformationSection
             claim={claim}
-            memeId={memeId}
+            claimId={claimId}
             onUpdated={setClaim}
             onPendingChange={setCoreInfoDirty}
           />
@@ -289,7 +289,7 @@ export default function DropForgeCraftClaimPageClient({
         <DropForgeAccordionSection title="Metadata" defaultOpen>
           <MetadataSection
             claim={claim}
-            memeId={memeId}
+            claimId={claimId}
             onUpdated={setClaim}
             onPendingChange={setMetadataDirty}
           />
@@ -297,7 +297,7 @@ export default function DropForgeCraftClaimPageClient({
 
         <DropForgeAccordionSection title="Arweave" defaultOpen>
           <ArweaveSection
-            memeId={memeId}
+            claimId={claimId}
             claim={claim}
             onStatusRefresh={fetchClaim}
             hasPendingChanges={hasPendingPageChanges}
@@ -305,7 +305,7 @@ export default function DropForgeCraftClaimPageClient({
         </DropForgeAccordionSection>
 
         <DropForgeAccordionSection title="Distribution" defaultOpen={false}>
-          <DistributionSection memeId={memeId} />
+          <DistributionSection claimId={claimId} />
         </DropForgeAccordionSection>
       </div>
     </div>
@@ -314,13 +314,13 @@ export default function DropForgeCraftClaimPageClient({
 
 function ImageSection({
   claim,
-  memeId,
+  claimId,
   onUpdated,
   onPendingChange,
 }: {
-  claim: MemeClaim;
-  memeId: number;
-  onUpdated: (c: MemeClaim) => void;
+  claim: MintingClaim;
+  claimId: number;
+  onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
 }) {
   const { setToast } = useAuth();
@@ -343,7 +343,7 @@ function ImageSection({
 
   useEffect(() => {
     clearPendingImageSelection();
-  }, [claim.meme_id, claim.image_url]);
+  }, [claim.claim_id, claim.image_url]);
 
   useEffect(() => {
     return () => {
@@ -370,12 +370,12 @@ function ImageSection({
     setSaving(true);
     try {
       const imageUrlToSave = pendingImageFile
-        ? await uploadClaimMedia(memeId, "image_url", pendingImageFile)
+        ? await uploadClaimMedia(claimId, "image_url", pendingImageFile)
         : (claim.image_url ?? null);
-      const body: MemeClaimUpdateRequest = {
+      const body: MintingClaimUpdateRequest = {
         image_url: imageUrlToSave,
       };
-      const updated = await patchClaim(memeId, body);
+      const updated = await patchClaim(claimId, body);
       onUpdated(updated);
       clearPendingImageSelection();
       setToast({ message: "Image updated", type: "success" });
@@ -495,13 +495,13 @@ type AnimationReplaceMode = "choose" | "link" | null;
 
 function AnimationSection({
   claim,
-  memeId,
+  claimId,
   onUpdated,
   onPendingChange,
 }: {
-  claim: MemeClaim;
-  memeId: number;
-  onUpdated: (c: MemeClaim) => void;
+  claim: MintingClaim;
+  claimId: number;
+  onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
 }) {
   const { setToast } = useAuth();
@@ -569,7 +569,7 @@ function AnimationSection({
     setReplaceMode(null);
     setLinkInput("");
     setLinkError(null);
-  }, [claim.meme_id, claim.animation_url]);
+  }, [claim.claim_id, claim.animation_url]);
 
   useEffect(() => {
     return () => {
@@ -630,17 +630,17 @@ function AnimationSection({
       let animationUrlToSave: string | null = claim.animation_url ?? null;
       if (pendingAnimationFile) {
         animationUrlToSave = await uploadClaimMedia(
-          memeId,
+          claimId,
           "animation_url",
           pendingAnimationFile
         );
       } else if (pendingAnimation !== undefined) {
         animationUrlToSave = pendingAnimation;
       }
-      const body: MemeClaimUpdateRequest = {
+      const body: MintingClaimUpdateRequest = {
         animation_url: animationUrlToSave,
       };
-      const updated = await patchClaim(memeId, body);
+      const updated = await patchClaim(claimId, body);
       onUpdated(updated);
       clearPendingAnimationFileSelection();
       setPendingAnimation(undefined);
@@ -950,13 +950,13 @@ function AnimationSection({
 
 function CoreInformationSection({
   claim,
-  memeId,
+  claimId,
   onUpdated,
   onPendingChange,
 }: {
-  claim: MemeClaim;
-  memeId: number;
-  onUpdated: (c: MemeClaim) => void;
+  claim: MintingClaim;
+  claimId: number;
+  onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
 }) {
   const { setToast } = useAuth();
@@ -973,12 +973,13 @@ function CoreInformationSection({
     );
     setSeason(getClaimSeason(claim));
     setCoreError(null);
-  }, [claim.meme_id]);
+  }, [claim.claim_id]);
 
   const coreChanged =
     editionSize !==
       (claim.edition_size != null ? String(claim.edition_size) : "") ||
     season !== getClaimSeason(claim);
+  const seasonChanged = season !== getClaimSeason(claim);
 
   const editionSizeNum =
     editionSize !== "" && Number.isFinite(Number(editionSize))
@@ -1000,13 +1001,30 @@ function CoreInformationSection({
     setCoreError(null);
     setCoreSaving(true);
     try {
-      const body: Record<string, unknown> = {
+      const body: MintingClaimUpdateRequest = {
         edition_size: editionSizeNum,
-        season: seasonNum,
       };
+
+      if (seasonChanged) {
+        const withoutSeason = (claim.attributes ?? []).filter(
+          (attribute) =>
+            attribute.trait_type?.trim().toLowerCase() !== "type - season"
+        );
+        body.attributes =
+          seasonNum == null
+            ? withoutSeason
+            : [
+                ...withoutSeason,
+                {
+                  trait_type: "Type - Season",
+                  value: seasonNum,
+                  display_type: "number",
+                },
+              ];
+      }
       const nextClaim = await patchClaim(
-        memeId,
-        body as MemeClaimUpdateRequest
+        claimId,
+        body
       );
       setEditionSize(
         nextClaim.edition_size != null ? String(nextClaim.edition_size) : ""
@@ -1121,13 +1139,13 @@ function CoreInformationSection({
 
 function MetadataSection({
   claim,
-  memeId,
+  claimId,
   onUpdated,
   onPendingChange,
 }: {
-  claim: MemeClaim;
-  memeId: number;
-  onUpdated: (c: MemeClaim) => void;
+  claim: MintingClaim;
+  claimId: number;
+  onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
 }) {
   const { setToast } = useAuth();
@@ -1142,7 +1160,7 @@ function MetadataSection({
     setTraits(claimToTraitsData(claim));
     setTraitsError(null);
     setTraitsFormKey((prev) => prev + 1);
-  }, [claim.meme_id]);
+  }, [claim.claim_id]);
 
   const traitsChanged =
     JSON.stringify(traits) !== JSON.stringify(claimToTraitsData(claim));
@@ -1174,8 +1192,8 @@ function MetadataSection({
         delete body.attributes;
       }
       const nextClaim = await patchClaim(
-        memeId,
-        body as MemeClaimUpdateRequest
+        claimId,
+        body as MintingClaimUpdateRequest
       );
       setTraits(claimToTraitsData(nextClaim));
       onUpdated(nextClaim);
@@ -1215,7 +1233,7 @@ function MetadataSection({
         <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-mb-6 sm:tw-text-xl">
           Artwork Traits
         </h3>
-        <MemesArtSubmissionTraits
+        <ClaimTraitsEditor
           key={`metadata-traits-${traitsFormKey}`}
           traits={traits}
           setTraits={(partial) =>
@@ -1323,13 +1341,13 @@ function ArweaveLinkRow({ label, url }: { label: string; url: string }) {
 }
 
 function ArweaveSection({
-  memeId,
+  claimId,
   claim,
   onStatusRefresh,
   hasPendingChanges,
 }: {
-  memeId: number;
-  claim: MemeClaim;
+  claimId: number;
+  claim: MintingClaim;
   onStatusRefresh: () => Promise<void>;
   hasPendingChanges: boolean;
 }) {
@@ -1358,7 +1376,7 @@ function ArweaveSection({
     setError(null);
     setLoading(true);
     try {
-      await postArweaveUpload(memeId);
+      await postArweaveUpload(claimId);
       setToast({ message: "Publishing to Arweave started", type: "success" });
       await onStatusRefresh();
     } catch (e) {
@@ -1447,19 +1465,19 @@ function ArweaveSection({
   );
 }
 
-function DistributionSection({ memeId }: { memeId: number }) {
+function DistributionSection({ claimId }: { claimId: number }) {
   const [photos, setPhotos] = useState<DistributionPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [airdropSummaries, setAirdropSummaries] = useState<
-    MemesMintingAirdropSummaryItem[]
+    ClaimPhaseSummaryItem[]
   >([]);
   const [airdropSummariesLoading, setAirdropSummariesLoading] = useState(true);
   const [airdropSummariesError, setAirdropSummariesError] = useState<
     string | null
   >(null);
   const [allowlistSummaries, setAllowlistSummaries] = useState<
-    MemesMintingAirdropSummaryItem[] | null
+    ClaimPhaseSummaryItem[] | null
   >(null);
   const [allowlistSummariesLoading, setAllowlistSummariesLoading] =
     useState(true);
@@ -1475,7 +1493,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
     setLoading(true);
     setError(null);
 
-    const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${MEMES_CONTRACT}/${memeId}`;
+    const distributionPhotosUrl = `${publicEnv.API_ENDPOINT}/api/distribution_photos/${MEMES_CONTRACT}/${claimId}`;
 
     const loadDistributionPhotos = async () => {
       try {
@@ -1500,7 +1518,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
     return () => {
       isActive = false;
     };
-  }, [memeId]);
+  }, [claimId]);
 
   useEffect(() => {
     let isActive = true;
@@ -1508,7 +1526,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
     setAirdropSummariesError(null);
     const loadAirdropSummaries = async () => {
       try {
-        const summaries = await getMemesMintingAirdrops(MEMES_CONTRACT, memeId);
+        const summaries = await getClaimAirdropSummaries(claimId);
         if (!isActive) return;
         setAirdropSummaries(summaries);
       } catch (e) {
@@ -1529,7 +1547,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
     return () => {
       isActive = false;
     };
-  }, [memeId]);
+  }, [claimId]);
 
   useEffect(() => {
     let isActive = true;
@@ -1538,10 +1556,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
 
     const loadAllowlists = async () => {
       try {
-        const summaries = await getMemesMintingAllowlists(
-          MEMES_CONTRACT,
-          memeId
-        );
+        const summaries = await getClaimAllowlistSummaries(claimId);
         if (!isActive) return;
         setAllowlistSummaries(summaries);
       } catch (e) {
@@ -1562,7 +1577,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
     return () => {
       isActive = false;
     };
-  }, [memeId]);
+  }, [claimId]);
 
   function getPhotoFileName(link: string): string {
     const withoutHash = link.split("#")[0] ?? link;
@@ -1602,7 +1617,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
 
   function getPhaseSummary(
     section: DistributionSectionKey
-  ): MemesMintingAirdropSummaryItem | undefined {
+  ): ClaimPhaseSummaryItem | undefined {
     const aliases = phaseAliases[section];
     return airdropSummaries.find((item) =>
       aliases.includes(normalizeDistributionPhase(item.phase))
@@ -1611,7 +1626,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
 
   function getAllowlistSummaryForPhase(
     phase: "phase0" | "phase1" | "phase2" | "publicphase"
-  ): MemesMintingAirdropSummaryItem | null {
+  ): ClaimPhaseSummaryItem | null {
     if (!allowlistSummaries) return null;
     const targets: Record<typeof phase, string[]> = {
       phase0: ["phase0"],
@@ -1627,7 +1642,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
   }
 
   function getAllowlistAddresses(
-    summary: MemesMintingAirdropSummaryItem | null | undefined
+    summary: ClaimPhaseSummaryItem | null | undefined
   ): number | null {
     if (!summary) return null;
     const value = summary.addresses ?? summary.addresses_count;
@@ -1635,7 +1650,7 @@ function DistributionSection({ memeId }: { memeId: number }) {
   }
 
   function getAllowlistTotal(
-    summary: MemesMintingAirdropSummaryItem | null | undefined
+    summary: ClaimPhaseSummaryItem | null | undefined
   ): number | null {
     if (!summary) return null;
     const value = summary.total ?? summary.total_spots;

@@ -13,7 +13,7 @@
 
 import { HttpFile } from '../http/http';
 
-export class MemeClaimAnimationDetailsVideo {
+export class MintingClaimAnimationDetailsVideo {
     'bytes': number;
     'format': string;
     'duration': number;
@@ -71,7 +71,7 @@ export class MemeClaimAnimationDetailsVideo {
         }    ];
 
     static getAttributeTypeMap() {
-        return MemeClaimAnimationDetailsVideo.attributeTypeMap;
+        return MintingClaimAnimationDetailsVideo.attributeTypeMap;
     }
 
     public constructor() {

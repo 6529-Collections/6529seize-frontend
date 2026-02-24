@@ -5,6 +5,7 @@ import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
+import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
   CRAFT_CLAIMS_PAGE_SIZE,
   DROP_FORGE_SECTIONS,
@@ -16,7 +17,7 @@ import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePe
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import Pagination from "@/components/pagination/Pagination";
-import type { MemeClaim } from "@/generated/models/MemeClaim";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
@@ -46,7 +47,7 @@ function isVideoUrl(url: string | null | undefined): boolean {
   return u.includes(".mp4") || u.includes(".webm") || u.includes("video/");
 }
 
-function getImageFormat(claim: MemeClaim): string | null {
+function getImageFormat(claim: MintingClaim): string | null {
   const fromDetails = normalizeFormat(claim.image_details?.format);
   if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
   const ext = getUrlExtension(claim.image_url);
@@ -59,7 +60,7 @@ function getImageFormat(claim: MemeClaim): string | null {
 }
 
 function getAnimationInfo(
-  claim: MemeClaim
+  claim: MintingClaim
 ): { kind: MediaKind; subtype?: string | null } | null {
   if (!claim.animation_url) return null;
   const format = normalizeFormat(
@@ -77,7 +78,7 @@ function getAnimationInfo(
   return { kind: "video" };
 }
 
-function getMediaTypeLabel(claim: MemeClaim): string {
+function getMediaTypeLabel(claim: MintingClaim): string {
   const animationInfo = getAnimationInfo(claim);
   if (animationInfo) {
     if (animationInfo.kind === "html" || animationInfo.kind === "glb") {
@@ -93,7 +94,7 @@ function getMediaTypeLabel(claim: MemeClaim): string {
   return "—";
 }
 
-function ClaimCardThumbnail({ claim }: { claim: MemeClaim }) {
+function ClaimCardThumbnail({ claim }: { claim: MintingClaim }) {
   const animationInfo = getAnimationInfo(claim);
   const containerClass =
     "tw-relative tw-w-20 sm:tw-w-24 tw-flex-shrink-0 tw-self-stretch tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800";
@@ -155,7 +156,7 @@ export default function DropForgeClaimsListPageClient({
 
   const [page, setPage] = useState(1);
   const [data, setData] = useState<{
-    claims: MemeClaim[];
+    claims: MintingClaim[];
     count: number;
     page: number;
     page_size: number;
@@ -236,7 +237,7 @@ export default function DropForgeClaimsListPageClient({
           ) : (
             <div className="tw-flex tw-flex-col tw-gap-4">
               {data.claims.map((claim) => (
-                <ClaimCard key={claim.meme_id} claim={claim} mode={mode} />
+                <ClaimCard key={claim.claim_id} claim={claim} mode={mode} />
               ))}
             </div>
           )}
@@ -260,7 +261,7 @@ function ClaimCard({
   claim,
   mode,
 }: {
-  claim: MemeClaim;
+  claim: MintingClaim;
   mode: "craft" | "launch";
 }) {
   if (mode === "launch") {
@@ -277,7 +278,7 @@ function ClaimCardContent({
   claim,
   showLaunchFields,
 }: {
-  claim: MemeClaim;
+  claim: MintingClaim;
   showLaunchFields?: boolean;
 }) {
   const mediaTypeLabel = getMediaTypeLabel(claim);
@@ -288,8 +289,8 @@ function ClaimCardContent({
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-2 tw-self-stretch sm:tw-gap-3 sm:tw-pr-48">
         <div className="tw-font-mono tw-text-xs tw-tracking-wide tw-text-iron-400">
           {showLaunchFields
-            ? `#${claim.meme_id} | SEASON ${claim.season ?? "—"} | EDITION SIZE ${claim.edition_size ?? "—"}`
-            : `#${claim.meme_id}`}
+            ? `#${claim.claim_id} | SEASON ${getClaimSeason(claim) || "—"} | EDITION SIZE ${claim.edition_size ?? "—"}`
+            : `#${claim.claim_id}`}
         </div>
         <div className="tw-truncate tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50">
           {claim.name || "—"}
@@ -305,12 +306,12 @@ function ClaimCardContent({
   );
 }
 
-function CraftClaimCard({ claim }: { claim: MemeClaim }) {
+function CraftClaimCard({ claim }: { claim: MintingClaim }) {
   const primaryStatus = getClaimPrimaryStatus({ claim });
 
   return (
     <Link
-      href={`${getCardDetailsBasePath("craft")}/${claim.meme_id}`}
+      href={`${getCardDetailsBasePath("craft")}/${claim.claim_id}`}
       className={`${CARD_CLASS} tw-relative`}
     >
       <div className="tw-static tw-mb-3 tw-flex tw-flex-col tw-gap-2 sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 sm:tw-items-end">
@@ -326,8 +327,8 @@ function CraftClaimCard({ claim }: { claim: MemeClaim }) {
   );
 }
 
-function LaunchClaimCard({ claim }: { claim: MemeClaim }) {
-  const { claim: manifoldClaim } = useDropForgeManifoldClaim(claim.meme_id);
+function LaunchClaimCard({ claim }: { claim: MintingClaim }) {
+  const { claim: manifoldClaim } = useDropForgeManifoldClaim(claim.claim_id);
   const primaryStatus = getClaimPrimaryStatus({
     claim,
     manifoldClaim: manifoldClaim ?? null,
@@ -335,7 +336,7 @@ function LaunchClaimCard({ claim }: { claim: MemeClaim }) {
 
   return (
     <Link
-      href={`${getCardDetailsBasePath("launch")}/${claim.meme_id}`}
+      href={`${getCardDetailsBasePath("launch")}/${claim.claim_id}`}
       className={`${CARD_CLASS} tw-relative`}
     >
       <div className="tw-static tw-mb-3 tw-flex tw-flex-col tw-gap-2 sm:tw-absolute sm:tw-right-4 sm:tw-top-4 sm:tw-mb-0 sm:tw-items-end">

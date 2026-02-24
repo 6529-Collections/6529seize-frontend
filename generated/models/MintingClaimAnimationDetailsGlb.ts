@@ -13,8 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class MemeClaimAnimationDetailsHtml {
-    'format': MemeClaimAnimationDetailsHtmlFormatEnum;
+export class MintingClaimAnimationDetailsGlb {
+    'bytes': number;
+    'format': MintingClaimAnimationDetailsGlbFormatEnum;
+    'sha256': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -22,21 +24,33 @@ export class MemeClaimAnimationDetailsHtml {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
+            "name": "bytes",
+            "baseName": "bytes",
+            "type": "number",
+            "format": "int64"
+        },
+        {
             "name": "format",
             "baseName": "format",
-            "type": "MemeClaimAnimationDetailsHtmlFormatEnum",
+            "type": "MintingClaimAnimationDetailsGlbFormatEnum",
+            "format": ""
+        },
+        {
+            "name": "sha256",
+            "baseName": "sha256",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return MemeClaimAnimationDetailsHtml.attributeTypeMap;
+        return MintingClaimAnimationDetailsGlb.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum MemeClaimAnimationDetailsHtmlFormatEnum {
-    Html = 'HTML'
+export enum MintingClaimAnimationDetailsGlbFormatEnum {
+    Glb = 'GLB'
 }
 

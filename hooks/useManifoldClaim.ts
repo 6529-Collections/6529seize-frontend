@@ -132,24 +132,24 @@ export interface UseManifoldClaimResult {
 }
 
 export interface UseManifoldClaimParams {
-  chainId?: number;
+  chainId: number;
   contract: string;
   proxy: string;
   abi: Abi;
   identifier: number;
   onError?: () => void;
-  readMethod?: ManifoldClaimReadMethod;
 }
 
 export function useManifoldClaim({
-  chainId = mainnet.id,
+  chainId,
   contract,
   proxy,
   abi,
   identifier,
   onError,
-  readMethod = "getClaim",
 }: UseManifoldClaimParams): UseManifoldClaimResult {
+  const readMethod: ManifoldClaimReadMethod =
+    chainId === mainnet.id ? "getClaimForToken" : "getClaim";
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
   const [refetchInterval, setRefetchInterval] = useState<number>(5000);
 

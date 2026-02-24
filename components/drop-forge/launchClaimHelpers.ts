@@ -1,9 +1,10 @@
-import type { MemeClaim } from "@/generated/models/MemeClaim";
+import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
 
-export function isMissingRequiredLaunchInfo(claim: MemeClaim): boolean {
+export function isMissingRequiredLaunchInfo(claim: MintingClaim): boolean {
   const noImageLocation = !claim.image_location;
   const noMetadataLocation = !claim.metadata_location;
-  const noSeason = claim.season == null;
+  const noSeason = getClaimSeason(claim).trim() === "";
   const noEditionSize = claim.edition_size == null;
   const noAttributes =
     !Array.isArray(claim.attributes) || claim.attributes.length === 0;

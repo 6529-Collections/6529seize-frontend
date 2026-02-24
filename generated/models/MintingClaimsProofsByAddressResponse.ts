@@ -11,12 +11,11 @@
  * Do not edit the class manually.
  */
 
+import { MintingClaimsProofsByAddressEntry } from '../models/MintingClaimsProofsByAddressEntry';
 import { HttpFile } from '../http/http';
 
-export class MemeClaimAnimationDetailsGlb {
-    'bytes': number;
-    'format': MemeClaimAnimationDetailsGlbFormatEnum;
-    'sha256': string;
+export class MintingClaimsProofsByAddressResponse {
+    'proofs_by_address': Array<MintingClaimsProofsByAddressEntry>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,33 +23,16 @@ export class MemeClaimAnimationDetailsGlb {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "bytes",
-            "baseName": "bytes",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "format",
-            "baseName": "format",
-            "type": "MemeClaimAnimationDetailsGlbFormatEnum",
-            "format": ""
-        },
-        {
-            "name": "sha256",
-            "baseName": "sha256",
-            "type": "string",
+            "name": "proofs_by_address",
+            "baseName": "proofs_by_address",
+            "type": "Array<MintingClaimsProofsByAddressEntry>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return MemeClaimAnimationDetailsGlb.attributeTypeMap;
+        return MintingClaimsProofsByAddressResponse.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
-
-export enum MemeClaimAnimationDetailsGlbFormatEnum {
-    Glb = 'GLB'
-}
-

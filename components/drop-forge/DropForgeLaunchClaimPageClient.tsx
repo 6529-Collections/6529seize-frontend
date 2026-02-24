@@ -7,6 +7,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
+import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
@@ -19,7 +20,7 @@ import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launchClaimHelpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
+import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   MANIFOLD_LAZY_CLAIM_CONTRACT,
   MEMES_CONTRACT,
@@ -27,8 +28,8 @@ import {
   NULL_ADDRESS,
   NULL_MERKLE,
 } from "@/constants/constants";
-import type { MemeClaim } from "@/generated/models/MemeClaim";
-import type { MemesMintingRootItem } from "@/generated/models/MemesMintingRootItem";
+import type { MintingClaim } from "@/generated/models/MintingClaim";
+import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import {
   capitalizeEveryWord,
@@ -38,13 +39,13 @@ import {
 import { Time } from "@/helpers/time";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
-import { buildMemesPhases } from "@/hooks/useManifoldClaim";
+import { buildMemesPhases as buildClaimPhases } from "@/hooks/useManifoldClaim";
 import {
   getClaim,
   getDistributionAirdropsArtist,
   getDistributionAirdropsTeam,
   getFinalSubscriptionsByPhase,
-  getMemesMintingRoots,
+  getMemesMintingRoots as getClaimRoots,
 } from "@/services/api/memes-minting-claims-api";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -55,7 +56,7 @@ import { Chain, isAddress, parseEther } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 interface DropForgeLaunchClaimPageClientProps {
-  memeId: number;
+  claimId: number;
 }
 type LaunchPhaseKey =
   | "phase0"
@@ -153,9 +154,9 @@ function normalizeHexValue(value: string | null | undefined): string {
 }
 
 function getRootForPhase(
-  roots: MemesMintingRootItem[] | null,
+  roots: MintingClaimsRootItem[] | null,
   phase: "phase0" | "phase1" | "phase2" | "publicphase"
-): MemesMintingRootItem | null {
+): MintingClaimsRootItem | null {
   if (!roots) return null;
   const targets: Record<typeof phase, string[]> = {
     phase0: ["phase0"],
@@ -171,7 +172,7 @@ function getRootForPhase(
 }
 
 function getRootAddressesCount(
-  root: MemesMintingRootItem | null | undefined
+  root: MintingClaimsRootItem | null | undefined
 ): number | null {
   if (!root) return null;
   const value =
@@ -183,7 +184,7 @@ function getRootAddressesCount(
 }
 
 function getRootTotalSpots(
-  root: MemesMintingRootItem | null | undefined
+  root: MintingClaimsRootItem | null | undefined
 ): number | null {
   if (!root) return null;
   const value =
@@ -491,7 +492,7 @@ function getUrlExtension(url: string | null | undefined): string | null {
   return parts[parts.length - 1]?.toLowerCase() ?? null;
 }
 
-function getImageFormat(claim: MemeClaim): string | null {
+function getImageFormat(claim: MintingClaim): string | null {
   const fromDetails = normalizeFormat(claim.image_details?.format);
   if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
   const ext = getUrlExtension(claim.image_url);
@@ -504,7 +505,7 @@ function getImageFormat(claim: MemeClaim): string | null {
 }
 
 function getAnimationInfo(
-  claim: MemeClaim
+  claim: MintingClaim
 ): { kind: LaunchMediaKind; subtype?: string | null } | null {
   if (!claim.animation_url) return null;
   const format = normalizeFormat(
@@ -522,7 +523,7 @@ function getAnimationInfo(
   return { kind: "video" };
 }
 
-function getMediaTypeLabel(claim: MemeClaim, tab: LaunchMediaTab): string {
+function getMediaTypeLabel(claim: MintingClaim, tab: LaunchMediaTab): string {
   if (tab === "animation") {
     const animationInfo = getAnimationInfo(claim);
     if (!animationInfo) return "—";
@@ -540,7 +541,7 @@ function getMediaTypeLabel(claim: MemeClaim, tab: LaunchMediaTab): string {
   return "—";
 }
 
-function getAnimationMimeType(claim: MemeClaim): string | null {
+function getAnimationMimeType(claim: MintingClaim): string | null {
   const animationUrl = claim.animation_url ?? null;
   if (!animationUrl) return null;
   const format = (
@@ -682,19 +683,19 @@ function LaunchAccordionSection({
 }
 
 export default function DropForgeLaunchClaimPageClient({
-  memeId,
+  claimId,
 }: DropForgeLaunchClaimPageClientProps) {
-  const pageTitle = `Launch Claim #${memeId}`;
+  const pageTitle = `Launch Claim #${claimId}`;
   const { setToast } = useAuth();
   const {
-    contract: dropControlMintingContract,
-    chain: dropControlMintingChain,
+    contract: forgeMintingContract,
+    chain: forgeMintingChain,
   } = useDropForgeMintingConfig();
   const { hasWallet, permissionsLoading, canAccessLaunchPage } =
     useDropForgePermissions();
   const claimWrite = useWriteContract();
   const waitClaimWrite = useWaitForTransactionReceipt({
-    chainId: dropControlMintingChain.id,
+    chainId: forgeMintingChain.id,
     confirmations: 1,
     hash: claimWrite.data,
   });
@@ -704,9 +705,9 @@ export default function DropForgeLaunchClaimPageClient({
     claim: manifoldClaim,
     isFetching: onChainClaimFetching,
     refetch: refetchOnChainClaim,
-  } = useDropForgeManifoldClaim(memeId);
-  const [claim, setClaim] = useState<MemeClaim | null>(null);
-  const [roots, setRoots] = useState<MemesMintingRootItem[] | null>(null);
+  } = useDropForgeManifoldClaim(claimId);
+  const [claim, setClaim] = useState<MintingClaim | null>(null);
+  const [roots, setRoots] = useState<MintingClaimsRootItem[] | null>(null);
   const [, setRootsLoading] = useState(false);
   const [rootsError, setRootsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -784,7 +785,7 @@ export default function DropForgeLaunchClaimPageClient({
     setError(null);
     setRootsLoading(true);
     setRootsError(null);
-    getClaim(memeId)
+    getClaim(claimId)
       .then((res) => {
         if (!cancelled) {
           setClaim(res);
@@ -807,7 +808,7 @@ export default function DropForgeLaunchClaimPageClient({
         }
       });
 
-    getMemesMintingRoots(MEMES_CONTRACT, memeId)
+    getClaimRoots(claimId)
       .then((res) => {
         if (!cancelled) {
           setRoots(res);
@@ -833,14 +834,14 @@ export default function DropForgeLaunchClaimPageClient({
     return () => {
       cancelled = true;
     };
-  }, [hasWallet, canAccessLaunchPage, memeId, showErrorToast]);
+  }, [hasWallet, canAccessLaunchPage, claimId, showErrorToast]);
 
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage || claim?.media_uploading !== true)
       return;
     let cancelled = false;
     const id = setInterval(() => {
-      getClaim(memeId)
+      getClaim(claimId)
         .then((res) => {
           if (!cancelled) {
             setClaim(res);
@@ -867,7 +868,7 @@ export default function DropForgeLaunchClaimPageClient({
     hasWallet,
     canAccessLaunchPage,
     claim?.media_uploading,
-    memeId,
+    claimId,
     showErrorToast,
   ]);
 
@@ -888,7 +889,7 @@ export default function DropForgeLaunchClaimPageClient({
 
   useEffect(() => {
     setActiveMediaTab("image");
-  }, [memeId]);
+  }, [claimId]);
 
   useEffect(() => {
     if (!hasPublishedMetadata) {
@@ -910,7 +911,7 @@ export default function DropForgeLaunchClaimPageClient({
     setSubscriptionAirdropsByPhase({});
     setSubscriptionAirdropsLoadingByPhase({});
     setSubscriptionAirdropsErrorByPhase({});
-  }, [memeId]);
+  }, [claimId]);
 
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage) return;
@@ -922,8 +923,8 @@ export default function DropForgeLaunchClaimPageClient({
     setPhase0AirdropsError(null);
 
     Promise.all([
-      getDistributionAirdropsArtist(MEMES_CONTRACT, memeId),
-      getDistributionAirdropsTeam(MEMES_CONTRACT, memeId),
+      getDistributionAirdropsArtist(MEMES_CONTRACT, claimId),
+      getDistributionAirdropsTeam(MEMES_CONTRACT, claimId),
     ])
       .then(([artist, team]) => {
         if (cancelled) return;
@@ -953,7 +954,7 @@ export default function DropForgeLaunchClaimPageClient({
     selectedPhase,
     artistAirdrops,
     teamAirdrops,
-    memeId,
+    claimId,
   ]);
 
   const fetchSubscriptionAirdropsForPhase = useCallback(
@@ -970,7 +971,7 @@ export default function DropForgeLaunchClaimPageClient({
       try {
         const entries = await getFinalSubscriptionsByPhase(
           MEMES_CONTRACT,
-          memeId,
+          claimId,
           getSubscriptionPhaseName(phaseKey)
         );
         setSubscriptionAirdropsByPhase((prev) => ({
@@ -997,7 +998,7 @@ export default function DropForgeLaunchClaimPageClient({
         }));
       }
     },
-    [memeId]
+    [claimId]
   );
 
   useEffect(() => {
@@ -1104,14 +1105,14 @@ export default function DropForgeLaunchClaimPageClient({
     ]
   );
   const mintTimeline = useMemo(
-    () => (memeId > 0 ? getMintTimelineDetails(memeId) : null),
-    [memeId]
+    () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
+    [claimId]
   );
 
   const phaseData = useMemo(() => {
     const scheduleByPhaseId = new Map(
       (mintTimeline
-        ? buildMemesPhases(Time.millis(mintTimeline.instantUtc.getTime()))
+        ? buildClaimPhases(Time.millis(mintTimeline.instantUtc.getTime()))
         : []
       ).map((phase) => [phase.id, phase])
     );
@@ -1328,9 +1329,9 @@ export default function DropForgeLaunchClaimPageClient({
       claimWrite.writeContract({
         address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
         abi: MEMES_MANIFOLD_PROXY_ABI,
-        chainId: dropControlMintingChain.id,
+        chainId: forgeMintingChain.id,
         functionName: "updateClaim",
-        args: [dropControlMintingContract, BigInt(memeId), claimParameters],
+        args: [forgeMintingContract, BigInt(claimId), claimParameters],
       });
     } catch (error) {
       setClaimTxModal({
@@ -1344,9 +1345,9 @@ export default function DropForgeLaunchClaimPageClient({
     isInitialized,
     manifoldClaim,
     claimWrite,
-    dropControlMintingChain.id,
-    dropControlMintingContract,
-    memeId,
+    forgeMintingChain.id,
+    forgeMintingContract,
+    claimId,
     setToast,
   ]);
 
@@ -1354,7 +1355,7 @@ export default function DropForgeLaunchClaimPageClient({
     if (!hasWallet || !canAccessLaunchPage) return;
 
     try {
-      const refreshedClaim = await getClaim(memeId);
+      const refreshedClaim = await getClaim(claimId);
       setClaim(refreshedClaim);
       setError(null);
     } catch (e) {
@@ -1366,7 +1367,7 @@ export default function DropForgeLaunchClaimPageClient({
         showErrorToast(msg);
       }
     }
-  }, [hasWallet, canAccessLaunchPage, memeId, showErrorToast]);
+  }, [hasWallet, canAccessLaunchPage, claimId, showErrorToast]);
 
   const closeClaimTxModal = useCallback(() => {
     if (!claimTxModalClosable) return;
@@ -1532,9 +1533,9 @@ export default function DropForgeLaunchClaimPageClient({
         claimWrite.writeContract({
           address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
           abi: MEMES_MANIFOLD_PROXY_ABI,
-          chainId: dropControlMintingChain.id,
+          chainId: forgeMintingChain.id,
           functionName,
-          args: [dropControlMintingContract, BigInt(memeId), claimParameters],
+          args: [forgeMintingContract, BigInt(claimId), claimParameters],
         });
       } catch (error) {
         setClaimTxModal({
@@ -1551,9 +1552,9 @@ export default function DropForgeLaunchClaimPageClient({
       phasePricesEth,
       isInitialized,
       claimWrite,
-      dropControlMintingChain.id,
-      dropControlMintingContract,
-      memeId,
+      forgeMintingChain.id,
+      forgeMintingContract,
+      claimId,
       setToast,
     ]
   );
@@ -1622,11 +1623,11 @@ export default function DropForgeLaunchClaimPageClient({
         claimWrite.writeContract({
           address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
           abi: MEMES_MANIFOLD_PROXY_ABI,
-          chainId: dropControlMintingChain.id,
+          chainId: forgeMintingChain.id,
           functionName: "airdrop",
           args: [
-            dropControlMintingContract,
-            BigInt(memeId),
+            forgeMintingContract,
+            BigInt(claimId),
             recipients,
             amounts,
           ],
@@ -1643,9 +1644,9 @@ export default function DropForgeLaunchClaimPageClient({
       isInitialized,
       setToast,
       claimWrite,
-      dropControlMintingChain.id,
-      dropControlMintingContract,
-      memeId,
+      forgeMintingChain.id,
+      forgeMintingContract,
+      claimId,
     ]
   );
   const runResearchAirdropWrite = useCallback(() => {
@@ -1852,7 +1853,7 @@ export default function DropForgeLaunchClaimPageClient({
             headerRight={
               <div className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-2">
                 <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
-                  SZN {claim.season ?? "—"}
+                  SZN {getClaimSeason(claim) || "—"}
                 </span>
                 <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
                   Edition Size {claim.edition_size ?? "—"}
@@ -1930,7 +1931,7 @@ export default function DropForgeLaunchClaimPageClient({
                 <DropForgeFieldBox label="Cost (ETH)">
                   {fromGWEI(manifoldClaim.cost).toFixed(5)}
                 </DropForgeFieldBox>
-                <DropForgeFieldBox label="Meme Phase">
+                <DropForgeFieldBox label="Claim Phase">
                   {manifoldClaim.memePhase?.name ?? "—"}
                 </DropForgeFieldBox>
                 <DropForgeFieldBox label="Status">
@@ -2386,12 +2387,12 @@ export default function DropForgeLaunchClaimPageClient({
               )
             ) : (
               <p className="tw-mb-0 tw-text-white">
-                Finish drop crafting before launching:{" "}
+                Finish claim crafting before launching:{" "}
                 <Link
-                  href={`/drop-forge/craft/${memeId}`}
+                  href={`/drop-forge/craft/${claimId}`}
                   className="hover:tw-text-primary-200 tw-text-primary-300 tw-no-underline"
                 >
-                  Craft Drop #{memeId}
+                  Craft Claim #{claimId}
                 </Link>
               </p>
             )}
@@ -2400,7 +2401,7 @@ export default function DropForgeLaunchClaimPageClient({
       )}
       <ClaimTransactionModal
         state={claimTxModal}
-        chain={dropControlMintingChain}
+        chain={forgeMintingChain}
         onClose={closeClaimTxModal}
       />
     </div>
