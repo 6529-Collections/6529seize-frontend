@@ -19,7 +19,6 @@ import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
-import WaveDropActionsToggleLinkPreview from "./WaveDropActionsToggleLinkPreview";
 
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -100,7 +99,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       textArea.style.left = "-9999px";
       document.body.appendChild(textArea);
       textArea.select();
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Fallback for older browsers
       document.execCommand("copy");
       document.body.removeChild(textArea);
       setCopied(true);
@@ -245,13 +243,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             drop={drop}
             isMobile={true}
             onRated={closeMenu}
-          />
-        )}
-        {showOptions && (
-          <WaveDropActionsToggleLinkPreview
-            drop={extendedDrop}
-            isMobile={true}
-            onToggle={closeMenu}
           />
         )}
         {showOptions &&

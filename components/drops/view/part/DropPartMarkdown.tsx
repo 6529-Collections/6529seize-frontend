@@ -4,6 +4,7 @@ import {
   Children,
   memo,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   type ComponentPropsWithoutRef,
@@ -14,15 +15,23 @@ import Markdown, { type Components, type ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
+import { useQueryClient } from "@tanstack/react-query";
 import type { PluggableList } from "unified";
 
 import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useTweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import {
+  LinkPreviewProvider,
+  useLinkPreviewContext,
+  type LinkPreviewToggleControl,
+} from "@/components/waves/LinkPreviewContext";
+import { primeMarketplacePreviewCacheFromNftLinks } from "@/components/waves/marketplace/common";
 
 import {
   DropContentPartType,
@@ -238,41 +247,53 @@ export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
   readonly mentionedWaves: Array<ApiMentionedWave>;
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
+  readonly nftLinks?: readonly ApiDropNftLink[] | undefined;
   readonly partContent: string | null;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md" | undefined;
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
-  readonly marketplaceImageOnly?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
 }
 
 function DropPartMarkdown({
   mentionedUsers,
   mentionedWaves,
   referencedNfts,
+  nftLinks,
   partContent,
   onQuoteClick,
   textSize,
   currentDropId,
   hideLinkPreviews = false,
-  marketplaceImageOnly = false,
   embedPath,
   quotePath,
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
+  linkPreviewToggleControl,
 }: DropPartMarkdownProps) {
+  const queryClient = useQueryClient();
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const tweetPreviewMode = useTweetPreviewMode();
+  const { variant: linkPreviewVariant } = useLinkPreviewContext();
+
+  useLayoutEffect(() => {
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks,
+    });
+  }, [queryClient, nftLinks]);
 
   const textSizeClass = useMemo(() => {
     switch (textSize) {
       case "sm":
         return isMobile ? "tw-text-xs" : "tw-text-sm";
+      case "md":
       default:
         return "tw-text-md";
     }
@@ -292,6 +313,19 @@ function DropPartMarkdown({
     [quotePath]
   );
 
+  const inlineShowControl = useMemo(() => {
+    if (!linkPreviewToggleControl) {
+      return undefined;
+    }
+
+    return {
+      enabled: linkPreviewToggleControl.isHidden,
+      isLoading: linkPreviewToggleControl.isLoading,
+      onToggle: linkPreviewToggleControl.onToggle,
+      label: linkPreviewToggleControl.label,
+    };
+  }, [linkPreviewToggleControl]);
+
   const { renderAnchor, isSmartLink, renderImage } = useMemo(
     () =>
       createLinkRenderer({
@@ -299,22 +333,22 @@ function DropPartMarkdown({
         currentDropId,
         hideLinkPreviews,
         tweetPreviewMode,
-        marketplaceImageOnly,
         embedPath: normalizedEmbedPath,
         quotePath: normalizedQuotePath,
         embedDepth,
         maxEmbedDepth,
+        inlineShowControl,
       }),
     [
       onQuoteClick,
       currentDropId,
       hideLinkPreviews,
       tweetPreviewMode,
-      marketplaceImageOnly,
       normalizedEmbedPath,
       normalizedQuotePath,
       embedDepth,
       maxEmbedDepth,
+      inlineShowControl,
     ]
   );
 
@@ -404,14 +438,20 @@ function DropPartMarkdown({
   );
 
   return (
-    <Markdown
-      rehypePlugins={rehypePlugins}
-      remarkPlugins={remarkPlugins}
-      className="tw-w-full"
-      components={markdownComponents}
+    <LinkPreviewProvider
+      variant={linkPreviewVariant}
+      previewToggle={linkPreviewToggleControl}
+      inlineShowControl={inlineShowControl}
     >
-      {processedContent}
-    </Markdown>
+      <Markdown
+        rehypePlugins={rehypePlugins}
+        remarkPlugins={remarkPlugins}
+        className="tw-w-full"
+        components={markdownComponents}
+      >
+        {processedContent}
+      </Markdown>
+    </LinkPreviewProvider>
   );
 }
 

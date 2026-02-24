@@ -51,7 +51,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [registerRef]
   );
 
-  const { isMemesWave, isRankWave } = useWave(wave);
+  const { isMemesWave, isCurationWave, isRankWave } = useWave(wave);
 
   // Get unread indicator for messages
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
@@ -158,8 +158,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   return (
     <div
       ref={setMobileTabsRef}
-      className="tw-py-2 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-overflow-x-auto">
-      <div className="tw-flex tw-justify-start tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-py-1 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
+      className="tw-overflow-x-auto tw-px-2 tw-py-2 sm:tw-px-4 md:tw-px-6"
+    >
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-1 tw-overflow-x-auto tw-overflow-y-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 tw-py-1 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
         {waveActive && showStreamBack && !isApp && (
           <>
             <button
@@ -169,14 +170,15 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 );
                 onViewChange(BrainView.DEFAULT);
               }}
-              className={backButtonClasses}>
+              className={backButtonClasses}
+            >
               <ArrowLeftIcon className="tw-size-4 tw-text-iron-400" />
-              <span className="tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap tw-text-iron-400">
+              <span className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-iron-400 sm:tw-text-sm">
                 My Stream
               </span>
             </button>
             {/* Divider */}
-            <div className="tw-h-4 tw-w-px tw-bg-iron-700 tw-mx-1 tw-flex-shrink-0" />
+            <div className="tw-mx-1 tw-h-4 tw-w-px tw-flex-shrink-0 tw-bg-iron-700" />
           </>
         )}
         {!waveActive && showWavesTab && (
@@ -185,7 +187,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               tabRefs.current[BrainView.WAVES] = el;
             }}
             onClick={() => onViewChange(BrainView.WAVES)}
-            className={wavesButtonClasses}>
+            className={wavesButtonClasses}
+          >
             <span className={wavesButtonTextClasses}>Waves</span>
           </button>
         )}
@@ -195,11 +198,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               tabRefs.current[BrainView.MESSAGES] = el;
             }}
             onClick={() => onViewChange(BrainView.MESSAGES)}
-            className={messagesButtonClasses}>
+            className={messagesButtonClasses}
+          >
             <span className={messagesButtonTextClasses}>
               <span>Messages</span>
               {hasUnreadMessages && (
-                <div className="tw-absolute tw-rounded-full -tw-right-3 tw-top-0 tw-bg-red tw-h-2 tw-w-2"></div>
+                <div className="tw-absolute -tw-right-3 tw-top-0 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
               )}
             </span>
           </button>
@@ -209,7 +213,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             tabRefs.current[BrainView.DEFAULT] = el;
           }}
           onClick={onChatClick}
-          className={chatButtonClasses}>
+          className={chatButtonClasses}
+        >
           <span className={chatButtonTextClasses}>
             {waveActive ? "Chat" : "My Stream"}
           </span>
@@ -220,7 +225,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               tabRefs.current[BrainView.ABOUT] = el;
             }}
             onClick={() => onViewChange(BrainView.ABOUT)}
-            className={aboutButtonClasses}>
+            className={aboutButtonClasses}
+          >
             <span className={aboutButtonTextClasses}>About</span>
           </button>
         )}
@@ -234,14 +240,15 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 tabRefs.current[view] = el;
               }}
             />
-            {isMemesWave && (
+            {(isMemesWave || isCurationWave) && (
               <>
                 <button
                   ref={(el) => {
                     tabRefs.current[BrainView.MY_VOTES] = el;
                   }}
                   onClick={() => onViewChange(BrainView.MY_VOTES)}
-                  className={myVotesButtonClasses}>
+                  className={myVotesButtonClasses}
+                >
                   <span className={myVotesButtonTextClasses}>My Votes</span>
                 </button>
               </>
@@ -251,7 +258,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 tabRefs.current[BrainView.OUTCOME] = el;
               }}
               onClick={() => onViewChange(BrainView.OUTCOME)}
-              className={outcomeButtonClasses}>
+              className={outcomeButtonClasses}
+            >
               <span className={otucomeButtonTextClasses}>Outcome</span>
             </button>
             {isMemesWave && (
@@ -260,17 +268,19 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   tabRefs.current[BrainView.FAQ] = el;
                 }}
                 onClick={() => onViewChange(BrainView.FAQ)}
-                className={`tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1 tw-rounded-md ${
+                className={`tw-flex tw-flex-1 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-none tw-px-2 tw-py-1.5 tw-no-underline ${
                   activeView === BrainView.FAQ
                     ? "tw-bg-iron-800"
                     : "tw-bg-iron-950"
-                }`}>
+                }`}
+              >
                 <span
-                  className={`tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+                  className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold sm:tw-text-sm ${
                     activeView === BrainView.FAQ
                       ? "tw-text-iron-300"
                       : "tw-text-iron-400"
-                  }`}>
+                  }`}
+                >
                   FAQ
                 </span>
               </button>
@@ -283,11 +293,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               tabRefs.current[BrainView.NOTIFICATIONS] = el;
             }}
             onClick={onNotificationsClick}
-            className={notificationsButtonClasses}>
+            className={notificationsButtonClasses}
+          >
             <span className={notificationsButtonTextClasses}>
               Notifications
               {haveUnreadNotifications && (
-                <div className="tw-absolute tw-rounded-full -tw-right-1 -tw-top-1 tw-bg-red tw-h-2 tw-w-2"></div>
+                <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
               )}
             </span>
           </button>

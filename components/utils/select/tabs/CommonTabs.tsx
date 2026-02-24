@@ -16,6 +16,7 @@ export default function CommonTabs<T, U = unknown>(
   const sortDirection =
     "sortDirection" in props ? props.sortDirection : undefined;
   const disabled = "disabled" in props ? props.disabled ?? false : false;
+  const size = "size" in props ? props.size : undefined;
 
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -160,7 +161,7 @@ export default function CommonTabs<T, U = unknown>(
               }}
               disabled={disabled}
               fill={props.fill ?? true}
-
+              size={size}
             />
           ))}
         </div>

@@ -3,18 +3,12 @@ import { render } from "@testing-library/react";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import type { DropPartMarkdownProps } from "@/components/drops/view/part/DropPartMarkdown";
 
+let dropPartMarkdownRenderCount = 0;
+
 jest.mock("@/components/drops/view/part/DropPartMarkdown", () => {
   return function MockDropPartMarkdown(props: any) {
-    return (
-      <div
-        data-testid="drop-part-markdown"
-        data-marketplace-image-only={String(
-          Boolean(props.marketplaceImageOnly)
-        )}
-      >
-        {props.partContent}
-      </div>
-    );
+    dropPartMarkdownRenderCount += 1;
+    return <div data-testid="drop-part-markdown">{props.partContent}</div>;
   };
 });
 
@@ -27,6 +21,10 @@ describe("DropPartMarkdownWithPropLogger", () => {
     onQuoteClick: jest.fn(),
     textSize: "md",
   };
+
+  beforeEach(() => {
+    dropPartMarkdownRenderCount = 0;
+  });
 
   it("renders DropPartMarkdown component", () => {
     const { getByTestId } = render(
@@ -50,20 +48,6 @@ describe("DropPartMarkdownWithPropLogger", () => {
 
     expect(getByTestId("drop-part-markdown")).toHaveTextContent(
       "Custom content"
-    );
-  });
-
-  it("passes marketplaceImageOnly prop to DropPartMarkdown", () => {
-    const { getByTestId } = render(
-      <DropPartMarkdownWithPropLogger
-        {...baseProps}
-        marketplaceImageOnly={true}
-      />
-    );
-
-    expect(getByTestId("drop-part-markdown")).toHaveAttribute(
-      "data-marketplace-image-only",
-      "true"
     );
   });
 
@@ -265,5 +249,71 @@ describe("DropPartMarkdownWithPropLogger", () => {
     );
 
     expect(getByTestId("drop-part-markdown")).toBeInTheDocument();
+  });
+
+  it("does not re-render for equivalent linkPreviewToggleControl values", () => {
+    const onToggle = jest.fn();
+    const { rerender } = render(
+      <DropPartMarkdownWithPropLogger
+        {...baseProps}
+        linkPreviewToggleControl={{
+          canToggle: true,
+          isHidden: false,
+          isLoading: false,
+          label: "Hide link previews",
+          onToggle,
+        }}
+      />
+    );
+
+    expect(dropPartMarkdownRenderCount).toBe(1);
+
+    rerender(
+      <DropPartMarkdownWithPropLogger
+        {...baseProps}
+        linkPreviewToggleControl={{
+          canToggle: true,
+          isHidden: false,
+          isLoading: false,
+          label: "Hide link previews",
+          onToggle,
+        }}
+      />
+    );
+
+    expect(dropPartMarkdownRenderCount).toBe(1);
+  });
+
+  it("re-renders when linkPreviewToggleControl state changes", () => {
+    const onToggle = jest.fn();
+    const { rerender } = render(
+      <DropPartMarkdownWithPropLogger
+        {...baseProps}
+        linkPreviewToggleControl={{
+          canToggle: true,
+          isHidden: false,
+          isLoading: false,
+          label: "Hide link previews",
+          onToggle,
+        }}
+      />
+    );
+
+    expect(dropPartMarkdownRenderCount).toBe(1);
+
+    rerender(
+      <DropPartMarkdownWithPropLogger
+        {...baseProps}
+        linkPreviewToggleControl={{
+          canToggle: true,
+          isHidden: true,
+          isLoading: false,
+          label: "Show link previews",
+          onToggle,
+        }}
+      />
+    );
+
+    expect(dropPartMarkdownRenderCount).toBe(2);
   });
 });

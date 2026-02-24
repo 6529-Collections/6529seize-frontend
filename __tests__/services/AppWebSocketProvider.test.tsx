@@ -1,56 +1,64 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { AppWebSocketProvider } from '@/services/websocket/AppWebSocketProvider';
-import { WebSocketProvider } from '@/services/websocket/WebSocketProvider';
-import { useWebSocket } from '@/services/websocket/useWebSocket';
-import { useWebSocketHealth } from '@/services/websocket/useWebSocketHealth';
-import { getAuthJwt } from '@/services/auth/auth.utils';
-import { DEFAULT_WEBSOCKET_CONFIG } from '@/services/websocket/index';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
+import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
+import { useWebSocket } from "@/services/websocket/useWebSocket";
+import { useWebSocketHealth } from "@/services/websocket/useWebSocketHealth";
+import { getAuthJwt } from "@/services/auth/auth.utils";
+import { DEFAULT_WEBSOCKET_CONFIG } from "@/services/websocket/index";
 
 // Mock all dependencies
-jest.mock('@/services/websocket/WebSocketProvider');
-jest.mock('@/services/websocket/useWebSocket');
-jest.mock('@/services/websocket/useWebSocketHealth');
-jest.mock('@/services/auth/auth.utils');
+jest.mock("@/services/websocket/WebSocketProvider");
+jest.mock("@/services/websocket/useWebSocket");
+jest.mock("@/services/websocket/useWebSocketHealth");
+jest.mock("@/services/websocket/MarketplacePreviewWebSocketSync", () => ({
+  MarketplacePreviewWebSocketSync: () => null,
+}));
+jest.mock("@/services/auth/auth.utils");
 
 // Mock implementations - create fresh mock functions
 let mockConnect: jest.Mock;
 let mockDisconnect: jest.Mock;
-const mockWebSocketProvider = jest.fn(({ children }) => <div data-testid="websocket-provider">{children}</div>);
+const mockWebSocketProvider = jest.fn(({ children }) => (
+  <div data-testid="websocket-provider">{children}</div>
+));
 const mockUseWebSocket = useWebSocket as jest.Mock;
 const mockUseWebSocketHealth = useWebSocketHealth as jest.Mock;
 const mockGetAuthJwt = getAuthJwt as jest.Mock;
 const MockedWebSocketProvider = WebSocketProvider as jest.Mock;
 
-describe('AppWebSocketProvider', () => {
+describe("AppWebSocketProvider", () => {
   beforeEach(() => {
     // Create fresh mock functions for each test
     mockConnect = jest.fn();
     mockDisconnect = jest.fn();
-    
+
     jest.clearAllMocks();
-    
+
     // Reset all mocks to their default implementations
     MockedWebSocketProvider.mockImplementation(mockWebSocketProvider);
-    mockUseWebSocket.mockReturnValue({ connect: mockConnect, disconnect: mockDisconnect });
+    mockUseWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+    });
     mockUseWebSocketHealth.mockImplementation(() => {});
     mockGetAuthJwt.mockReturnValue(null);
   });
 
-  describe('Basic Rendering and Provider Structure', () => {
-    it('renders children within WebSocketProvider wrapper', () => {
+  describe("Basic Rendering and Provider Structure", () => {
+    it("renders children within WebSocketProvider wrapper", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child-component">Test Child</div>
         </AppWebSocketProvider>
       );
 
-      expect(screen.getByTestId('websocket-provider')).toBeInTheDocument();
-      expect(screen.getByTestId('child-component')).toBeInTheDocument();
-      expect(screen.getByText('Test Child')).toBeInTheDocument();
+      expect(screen.getByTestId("websocket-provider")).toBeInTheDocument();
+      expect(screen.getByTestId("child-component")).toBeInTheDocument();
+      expect(screen.getByText("Test Child")).toBeInTheDocument();
     });
 
-    it('passes default config to WebSocketProvider when no config provided', () => {
+    it("passes default config to WebSocketProvider when no config provided", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child" />
@@ -59,15 +67,15 @@ describe('AppWebSocketProvider', () => {
 
       // Verify the provider was called
       expect(MockedWebSocketProvider).toHaveBeenCalled();
-      
+
       // Check the config was passed correctly
       const call = MockedWebSocketProvider.mock.calls[0];
-      expect(call[0]).toHaveProperty('config', DEFAULT_WEBSOCKET_CONFIG);
+      expect(call[0]).toHaveProperty("config", DEFAULT_WEBSOCKET_CONFIG);
     });
 
-    it('passes custom config to WebSocketProvider when provided', () => {
+    it("passes custom config to WebSocketProvider when provided", () => {
       const customConfig = {
-        url: 'wss://custom.example.com',
+        url: "wss://custom.example.com",
         reconnectDelay: 5000,
         maxReconnectAttempts: 10,
       };
@@ -80,16 +88,16 @@ describe('AppWebSocketProvider', () => {
 
       // Verify the provider was called
       expect(MockedWebSocketProvider).toHaveBeenCalled();
-      
+
       // Check the custom config was passed correctly
       const call = MockedWebSocketProvider.mock.calls[0];
-      expect(call[0]).toHaveProperty('config', customConfig);
+      expect(call[0]).toHaveProperty("config", customConfig);
     });
   });
 
-  describe('WebSocketInitializer Component Behavior', () => {
-    it('uses lazy initialization - no immediate connection on mount with auth token', () => {
-      mockGetAuthJwt.mockReturnValue('valid-auth-token');
+  describe("WebSocketInitializer Component Behavior", () => {
+    it("uses lazy initialization - no immediate connection on mount with auth token", () => {
+      mockGetAuthJwt.mockReturnValue("valid-auth-token");
 
       render(
         <AppWebSocketProvider>
@@ -102,7 +110,7 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('uses lazy initialization - no immediate connection on mount when no auth token', () => {
+    it("uses lazy initialization - no immediate connection on mount when no auth token", () => {
       mockGetAuthJwt.mockReturnValue(null);
 
       render(
@@ -116,8 +124,8 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('uses lazy initialization - no immediate connection on mount when auth token is empty', () => {
-      mockGetAuthJwt.mockReturnValue('');
+    it("uses lazy initialization - no immediate connection on mount when auth token is empty", () => {
+      mockGetAuthJwt.mockReturnValue("");
 
       render(
         <AppWebSocketProvider>
@@ -130,8 +138,8 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('disconnects on component unmount', () => {
-      mockGetAuthJwt.mockReturnValue('valid-token');
+    it("disconnects on component unmount", () => {
+      mockGetAuthJwt.mockReturnValue("valid-token");
 
       const { unmount } = render(
         <AppWebSocketProvider>
@@ -149,7 +157,7 @@ describe('AppWebSocketProvider', () => {
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
     });
 
-    it('initializes health monitoring on mount', () => {
+    it("initializes health monitoring on mount", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child" />
@@ -161,8 +169,8 @@ describe('AppWebSocketProvider', () => {
     });
   });
 
-  describe('Hook Integration and Dependencies', () => {
-    it('uses useWebSocket hook for connection management', () => {
+  describe("Hook Integration and Dependencies", () => {
+    it("uses useWebSocket hook for connection management", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child" />
@@ -172,7 +180,7 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocket).toHaveBeenCalled();
     });
 
-    it('uses useWebSocketHealth hook for health monitoring', () => {
+    it("uses useWebSocketHealth hook for health monitoring", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child" />
@@ -182,7 +190,7 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('delegates auth token handling to health monitoring', () => {
+    it("delegates auth token handling to health monitoring", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child" />
@@ -195,11 +203,10 @@ describe('AppWebSocketProvider', () => {
     });
   });
 
-  describe('Error Handling and Edge Cases', () => {
-
-    it('handles useWebSocket hook throwing error gracefully', () => {
+  describe("Error Handling and Edge Cases", () => {
+    it("handles useWebSocket hook throwing error gracefully", () => {
       mockUseWebSocket.mockImplementation(() => {
-        throw new Error('useWebSocket must be used within a WebSocketProvider');
+        throw new Error("useWebSocket must be used within a WebSocketProvider");
       });
 
       // Should not crash, though the hook error will propagate
@@ -209,12 +216,12 @@ describe('AppWebSocketProvider', () => {
             <div data-testid="child" />
           </AppWebSocketProvider>
         );
-      }).toThrow('useWebSocket must be used within a WebSocketProvider');
+      }).toThrow("useWebSocket must be used within a WebSocketProvider");
     });
 
-    it('handles health monitoring errors gracefully', () => {
+    it("handles health monitoring errors gracefully", () => {
       mockUseWebSocketHealth.mockImplementation(() => {
-        throw new Error('Health monitoring unavailable');
+        throw new Error("Health monitoring unavailable");
       });
 
       // Should not crash the component
@@ -224,13 +231,13 @@ describe('AppWebSocketProvider', () => {
             <div data-testid="child" />
           </AppWebSocketProvider>
         );
-      }).toThrow('Health monitoring unavailable');
+      }).toThrow("Health monitoring unavailable");
     });
 
-    it('handles useWebSocket hook errors without crashing initializer', () => {
+    it("handles useWebSocket hook errors without crashing initializer", () => {
       mockUseWebSocket.mockReturnValue({
         connect: mockConnect,
-        disconnect: mockDisconnect
+        disconnect: mockDisconnect,
       });
 
       // No connection errors should occur during initialization since no immediate connection
@@ -245,9 +252,9 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('handles disconnect method throwing error without crashing', () => {
+    it("handles disconnect method throwing error without crashing", () => {
       mockDisconnect.mockImplementation(() => {
-        throw new Error('Disconnect failed');
+        throw new Error("Disconnect failed");
       });
 
       const { unmount } = render(
@@ -259,20 +266,19 @@ describe('AppWebSocketProvider', () => {
       // Should not crash during unmount
       expect(() => {
         unmount();
-      }).toThrow('Disconnect failed');
+      }).toThrow("Disconnect failed");
     });
   });
 
-  describe('Component Lifecycle and State Management', () => {
-
-    it('maintains stable component structure across re-renders', () => {
+  describe("Component Lifecycle and State Management", () => {
+    it("maintains stable component structure across re-renders", () => {
       const { rerender } = render(
         <AppWebSocketProvider>
           <div data-testid="child-1">Child 1</div>
         </AppWebSocketProvider>
       );
 
-      expect(screen.getByTestId('child-1')).toBeInTheDocument();
+      expect(screen.getByTestId("child-1")).toBeInTheDocument();
 
       rerender(
         <AppWebSocketProvider>
@@ -280,11 +286,11 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
-      expect(screen.getByTestId('child-2')).toBeInTheDocument();
-      expect(screen.queryByTestId('child-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId("child-2")).toBeInTheDocument();
+      expect(screen.queryByTestId("child-1")).not.toBeInTheDocument();
     });
 
-    it('handles multiple children correctly', () => {
+    it("handles multiple children correctly", () => {
       render(
         <AppWebSocketProvider>
           <div data-testid="child-1">Child 1</div>
@@ -293,15 +299,14 @@ describe('AppWebSocketProvider', () => {
         </AppWebSocketProvider>
       );
 
-      expect(screen.getByTestId('child-1')).toBeInTheDocument();
-      expect(screen.getByTestId('child-2')).toBeInTheDocument();
-      expect(screen.getByTestId('child-3')).toBeInTheDocument();
+      expect(screen.getByTestId("child-1")).toBeInTheDocument();
+      expect(screen.getByTestId("child-2")).toBeInTheDocument();
+      expect(screen.getByTestId("child-3")).toBeInTheDocument();
     });
   });
 
-  describe('Security and Authentication', () => {
-
-    it('delegates authentication logic to health monitoring', () => {
+  describe("Security and Authentication", () => {
+    it("delegates authentication logic to health monitoring", () => {
       // Test that authentication logic is handled by health monitoring, not initializer
       mockGetAuthJwt.mockReturnValue(null);
       render(
@@ -314,8 +319,8 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('delegates empty token handling to health monitoring', () => {
-      mockGetAuthJwt.mockReturnValue('');
+    it("delegates empty token handling to health monitoring", () => {
+      mockGetAuthJwt.mockReturnValue("");
       render(
         <AppWebSocketProvider>
           <div data-testid="child-empty" />
@@ -326,7 +331,7 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('delegates undefined token handling to health monitoring', () => {
+    it("delegates undefined token handling to health monitoring", () => {
       mockGetAuthJwt.mockReturnValue(undefined);
       render(
         <AppWebSocketProvider>
@@ -338,8 +343,8 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('delegates valid JWT token handling to health monitoring', () => {
-      const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+    it("delegates valid JWT token handling to health monitoring", () => {
+      const validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
       mockGetAuthJwt.mockReturnValue(validToken);
 
       render(
@@ -353,8 +358,8 @@ describe('AppWebSocketProvider', () => {
       expect(mockUseWebSocketHealth).toHaveBeenCalled();
     });
 
-    it('delegates valid simple token handling to health monitoring', () => {
-      const validToken = 'simple-string-token';
+    it("delegates valid simple token handling to health monitoring", () => {
+      const validToken = "simple-string-token";
       mockGetAuthJwt.mockReturnValue(validToken);
 
       render(

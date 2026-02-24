@@ -1,6 +1,6 @@
 "use client";
 
-import type { UserPageRepPropsRepRates } from "@/app/[user]/rep/page";
+import type { UserPageRepPropsRepRates } from "@/app/[user]/identity/page";
 import type {
   ApiProfileRepRatesState,
   ProfileActivityLog,
@@ -16,7 +16,7 @@ import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
 import { Time } from "@/helpers/time";
 import type { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
-import { RateMatter } from "@/types/enums";
+import { type ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
 
 import {
   type InfiniteData,
@@ -26,7 +26,6 @@ import {
 import Cookies from "js-cookie";
 import { createContext, useMemo } from "react";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
-import type { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import {
@@ -34,6 +33,7 @@ import {
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
+import type { SortDirection } from "@/entities/ISort";
 
 export enum QueryKey {
   PROFILE = "PROFILE",
@@ -105,6 +105,17 @@ export enum QueryKey {
   COMMUNITY_METRICS = "COMMUNITY_METRICS",
   COMMUNITY_METRICS_SERIES = "COMMUNITY_METRICS_SERIES",
   MINT_METRICS = "MINT_METRICS",
+  MARKETPLACE_PREVIEW = "MARKETPLACE_PREVIEW",
+}
+
+interface ProfileRatersParams {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly given: boolean;
+  readonly order: SortDirection;
+  readonly orderBy: ProfileRatersParamsOrderBy;
+  readonly handleOrWallet: string;
+  readonly matter: RateMatter;
 }
 
 interface InitProfileRatersParamsAndData {
@@ -124,13 +135,6 @@ interface InitProfileRepPageParams {
   readonly repGivenToUsers: InitProfileRatersParamsAndData;
   readonly repReceivedFromUsers: InitProfileRatersParamsAndData;
   readonly handleOrWallet: string;
-}
-
-interface InitProfileIdentityPageParams {
-  readonly profile: ApiIdentity;
-  readonly activityLogs: InitProfileActivityLogsParams;
-  readonly cicGivenToUsers: InitProfileRatersParamsAndData;
-  readonly cicReceivedFromUsers: InitProfileRatersParamsAndData;
 }
 
 type ReactQueryWrapperContextType = {
@@ -173,7 +177,6 @@ type ReactQueryWrapperContextType = {
   onProfileStatementRemove: (params: { profile: ApiIdentity }) => void;
   onIdentityFollowChange: () => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
-  initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
   initCommunityActivityPage: ({
     activityLogs,
   }: {
@@ -211,7 +214,6 @@ export const ReactQueryWrapperContext =
     onProfileStatementRemove: () => {},
     onIdentityFollowChange: () => {},
     initProfileRepPage: () => {},
-    initProfileIdentityPage: () => {},
     initCommunityActivityPage: () => {},
     waitAndInvalidateDrops: async () => {},
     addOptimisticDrop: async () => {},
@@ -766,22 +768,6 @@ const createReactQueryContextValue = (
     setProfileRaters(repReceivedFromUsers);
   };
 
-  const initProfileIdentityPage = ({
-    profile,
-    activityLogs,
-    cicGivenToUsers,
-    cicReceivedFromUsers,
-  }: InitProfileIdentityPageParams) => {
-    setProfile(profile);
-    initProfileActivityLogs({
-      params: activityLogs.params,
-      data: activityLogs.data,
-      disableActiveGroup: true,
-    });
-    setProfileRaters(cicGivenToUsers);
-    setProfileRaters(cicReceivedFromUsers);
-  };
-
   const initCommunityActivityPage = ({
     activityLogs,
   }: {
@@ -811,7 +797,10 @@ const createReactQueryContextValue = (
       (
         oldData: { pages: Page<ApiDrop>[]; pageParams: number[] } | undefined
       ): { pages: Page<ApiDrop>[]; pageParams: number[] } => {
-        if (!oldData?.pages.length) {
+        if (
+          typeof oldData?.pages.length !== "number" ||
+          oldData.pages.length === 0
+        ) {
           return {
             pageParams: [1],
             pages: [
@@ -991,7 +980,6 @@ const createReactQueryContextValue = (
     onProfileStatementAdd,
     onProfileStatementRemove,
     initProfileRepPage,
-    initProfileIdentityPage,
     initCommunityActivityPage,
     onGroupRemoved,
     onGroupChanged,

@@ -262,7 +262,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   }, [externalMimeType]);
 
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-gap-4">
+    <div className="tw-flex tw-min-h-0 tw-flex-col tw-gap-4 lg:tw-h-full">
       <div className="tw-w-full tw-max-w-md tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 tw-p-1">
         <TabToggle
           options={tabOptions}
@@ -279,7 +279,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           {...(!artworkUploaded && !prefersReducedMotion
             ? { whileHover: { scale: 1.002 } }
             : {})}
-          className={`tw-group tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 ${
+          className={`tw-group tw-relative tw-min-h-[280px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 sm:tw-min-h-[340px] lg:tw-h-full lg:tw-min-h-0 ${
             visualState === "dragging"
               ? "tw-border-2 tw-border-primary-500/60"
               : ""
@@ -333,7 +333,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       ) : (
         <div
           id="memes-art-submission-interactive-panel"
-          className={`tw-flex tw-flex-1 tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 tw-p-4`}
+          className={`tw-flex tw-min-h-[280px] tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-iron-800 tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 tw-p-4 sm:tw-min-h-[340px] lg:tw-min-h-0 lg:tw-flex-1`}
         >
           <div className="tw-flex tw-flex-col tw-gap-2">
             <span className="tw-text-sm tw-font-medium tw-text-iron-200">
@@ -401,7 +401,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             </button>
           </div>
 
-          <div className="tw-flex tw-min-h-[360px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950">
+          <div className="tw-flex tw-min-h-[260px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-950 sm:tw-min-h-[320px] lg:tw-min-h-[360px]">
             {isExternalMediaValid ? (
               <SandboxedExternalIframe
                 key={externalPreviewUrl}

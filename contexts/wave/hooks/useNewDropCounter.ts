@@ -2,10 +2,10 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { WsDropUpdateMessage} from "@/helpers/Types";
+import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -15,6 +15,14 @@ export interface MinimalWaveNewDropsCount {
   readonly latestDropTimestamp: number | null;
   readonly firstUnreadSerialNo: number | null;
 }
+
+interface UseNewDropCounterOptions {
+  readonly otherListWaveIds?: ReadonlySet<string> | undefined;
+  readonly unknownWaveRefetchCooldownMs?: number | undefined;
+}
+
+const DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS = 3000;
+const DEFAULT_OTHER_LIST_WAVE_IDS: ReadonlySet<string> = new Set<string>();
 
 export function getNewestTimestamp(
   cached: number | null | undefined = null,
@@ -46,14 +54,20 @@ export function getNewestTimestamp(
 function useNewDropCounter(
   activeWaveId: string | null,
   waves: ApiWave[],
-  refetchWaves: () => void
+  refetchWaves: () => void,
+  options: UseNewDropCounterOptions = {}
 ) {
   const { connectedProfile } = useContext(AuthContext);
+  const {
+    otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
+    unknownWaveRefetchCooldownMs = DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS,
+  } = options;
 
   // Keep track of new drop counts
   const [newDropsCounts, setNewDropsCounts] = useState<
     Record<string, MinimalWaveNewDropsCount>
   >({});
+  const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
 
   // Reset counts for a specific wave
   const resetWaveNewDropsCount = useCallback(
@@ -125,6 +139,21 @@ function useNewDropCounter(
         const wave = waves.find((w) => w.id === waveId);
 
         if (!wave) {
+          // If the opposite list already knows this wave, skip refetch for this list.
+          if (otherListWaveIds.has(waveId)) {
+            return;
+          }
+
+          // Prevent refetch storms on bursts of unknown-wave websocket events.
+          const now = Date.now();
+          if (
+            lastUnknownWaveRefetchAtRef.current !== null &&
+            now - lastUnknownWaveRefetchAtRef.current <
+              unknownWaveRefetchCooldownMs
+          ) {
+            return;
+          }
+          lastUnknownWaveRefetchAtRef.current = now;
           refetchWaves();
           return;
         }
@@ -193,7 +222,14 @@ function useNewDropCounter(
           };
         });
       },
-      [activeWaveId, connectedProfile, waves, refetchWaves]
+      [
+        activeWaveId,
+        connectedProfile,
+        waves,
+        refetchWaves,
+        otherListWaveIds,
+        unknownWaveRefetchCooldownMs,
+      ]
     ) // Make sure to include activeWaveId as a dependency
   );
 

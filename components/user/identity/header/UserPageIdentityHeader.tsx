@@ -1,7 +1,4 @@
-import UserPageRateWrapper from "@/components/user/utils/rate/UserPageRateWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { RateMatter } from "@/types/enums";
-import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 
 export default function UserPageIdentityHeader({
@@ -10,27 +7,16 @@ export default function UserPageIdentityHeader({
   readonly profile: ApiIdentity;
 }) {
   return (
-    <div>
-      <div className="tw-lg:justify-between tw-mt-6 lg:tw-mt-8 lg:tw-flex lg:tw-items-center">
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-flex-col">
-            <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100 sm:tw-text-2xl sm:tw-tracking-tight">
-              Network Identity Check (NIC)
-            </h2>
-            <p className="tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-200 sm:tw-text-base">
-              Does the network believe this profile accurately represents its
-              identity?
-            </p>
-          </div>
-          <UserPageIdentityHeaderCIC profile={profile} />
-          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
-            <UserPageIdentityHeaderCICRate
-              profile={profile}
-              isTooltip={false}
-            />
-          </UserPageRateWrapper>
-        </div>
+    <div className="tw-px-6 tw-pt-6">
+      <div className="tw-mb-6">
+        <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
+          Network Identity Check (NIC)
+        </h2>
+        <p className="tw-mb-0 tw-text-iron-500 tw-text-sm tw-font-normal tw-leading-relaxed">
+          Does the network believe this profile accurately represents its identity?
+        </p>
       </div>
+      <UserPageIdentityHeaderCIC profile={profile} />
     </div>
   );
 }

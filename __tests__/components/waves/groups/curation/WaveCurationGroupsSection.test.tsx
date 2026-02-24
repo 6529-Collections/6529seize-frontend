@@ -167,7 +167,6 @@ const renderSection = (wave = baseWave) =>
           onProfileStatementRemove: jest.fn(),
           onIdentityFollowChange: jest.fn(),
           initProfileRepPage: jest.fn(),
-          initProfileIdentityPage: jest.fn(),
           initCommunityActivityPage: jest.fn(),
           waitAndInvalidateDrops: jest.fn(),
           addOptimisticDrop: jest.fn(),

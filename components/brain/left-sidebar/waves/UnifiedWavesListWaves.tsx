@@ -1,15 +1,12 @@
 "use client";
 
 import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
 import JoinedToggle from "./JoinedToggle";
-import type {
-  VirtualItem} from "@/hooks/useVirtualizedWaves";
-import {
-  useVirtualizedWaves
-} from "@/hooks/useVirtualizedWaves";
+import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
+import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 // VirtualItem interface is now imported from useVirtualizedWaves
 
@@ -101,7 +98,15 @@ const UnifiedWavesListWaves = forwardRef<
   UnifiedWavesListWavesProps
 >(
   (
-    { waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders, isDirectMessage = false },
+    {
+      waves,
+      onHover,
+      scrollContainerRef,
+      hideToggle,
+      hidePin,
+      hideHeaders,
+      isDirectMessage = false,
+    },
     ref
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
@@ -145,36 +150,36 @@ const UnifiedWavesListWaves = forwardRef<
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedWaves.length > 0 && (
           <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
-              {pinnedWaves
-                .filter((wave): wave is MinimalWave => {
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid pinned wave object", wave);
-                    if (!validateWaveDetailed(wave)) {
-                      console.warn(
-                        "Pinned wave failed detailed validation:",
-                        wave
-                      );
-                    }
-                    return false;
+            {pinnedWaves
+              .filter((wave): wave is MinimalWave => {
+                if (!isValidWave(wave)) {
+                  console.warn("Invalid pinned wave object", wave);
+                  if (!validateWaveDetailed(wave)) {
+                    console.warn(
+                      "Pinned wave failed detailed validation:",
+                      wave
+                    );
                   }
-                  return true;
-                })
-                .map((wave) => (
-                  <div key={wave.id}>
-                    <BrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin}
-                      isDirectMessage={isDirectMessage}
-                    />
-                  </div>
-                ))}
-            </section>
+                  return false;
+                }
+                return true;
+              })
+              .map((wave) => (
+                <div key={wave.id}>
+                  <BrainLeftSidebarWave
+                    wave={wave}
+                    onHover={onHover}
+                    showPin={!hidePin}
+                    isDirectMessage={isDirectMessage}
+                  />
+                </div>
+              ))}
+          </section>
         )}
 
         {/* Add divider between pinned and regular waves */}
         {!hideHeaders && pinnedWaves.length > 0 && regularWaves.length > 0 && (
-          <div className="tw-border-t tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-b-0 tw-my-3" />
+          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
         )}
 
         {/* Conditionally show regular waves or maintain structure */}

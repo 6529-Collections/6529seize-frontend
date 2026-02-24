@@ -52,7 +52,7 @@ function DummyRepTab({ profile }: { readonly profile: any }) {
 }
 
 const buildFactory = () =>
-  createUserTabPage({ subroute: "rep", metaLabel: "Rep", Tab: DummyRepTab });
+  createUserTabPage({ subroute: "identity", metaLabel: "Identity", Tab: DummyRepTab });
 
 describe("rep page via createUserTabPage", () => {
   beforeEach(() => {
@@ -79,14 +79,14 @@ describe("rep page via createUserTabPage", () => {
     expect(userPageNeedsRedirect).toHaveBeenCalledWith({
       profile: expect.any(Object),
       req: { query: { user: "Alice", foo: "bar" } },
-      subroute: "rep",
+      subroute: "identity",
     });
     expect(redirectMock).not.toHaveBeenCalled();
   });
 
   it("redirects when userPageNeedsRedirect returns destination", async () => {
     (userPageNeedsRedirect as jest.Mock).mockReturnValue({
-      redirect: { destination: "/bob/rep" },
+      redirect: { destination: "/bob/identity" },
     });
 
     const { Page } = buildFactory();
@@ -96,7 +96,7 @@ describe("rep page via createUserTabPage", () => {
       searchParams: Promise.resolve({}),
     } as any);
 
-    expect(redirectMock).toHaveBeenCalledWith("/bob/rep");
+    expect(redirectMock).toHaveBeenCalledWith("/bob/identity");
   });
 
   it("generateMetadata uses helpers", async () => {
@@ -109,7 +109,7 @@ describe("rep page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "Rep"
+      "Identity"
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(

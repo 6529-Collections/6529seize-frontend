@@ -29,10 +29,12 @@ export default function UserPageRateWrapper({
   profile,
   type,
   children,
+  hideOwnProfileMessage = false,
 }: {
   readonly profile: ApiIdentity;
   readonly type: RateMatter;
   readonly children: React.ReactNode;
+  readonly hideOwnProfileMessage?: boolean;
 }) {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy, connectedProfile } = useContext(AuthContext);
@@ -109,6 +111,10 @@ export default function UserPageRateWrapper({
     setRaterContext(context);
     setRaterContextMessage(getRaterContextMessage(context));
   }, [connectedProfile, activeProfileProxy, address, profile, type]);
+
+  if (raterContext === RaterContext.MY_PROFILE && hideOwnProfileMessage) {
+    return null;
+  }
 
   if (raterContextMessage) {
     return <CommonInfoBox message={raterContextMessage} />;

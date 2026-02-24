@@ -37,7 +37,7 @@ export default function UserPageRepModifyModalHeader({
             </svg>
           </span>
         </div>
-        <p className="tw-mt-3 sm:tw-mt-0 tw-pr-8 tw-text-wrap tw-truncate md:tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
+        <p className="tw-mt-3 sm:tw-mt-0 tw-pr-8 tw-text-wrap tw-truncate md:tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-0">
           Add Rep to {handleOrWallet}
         </p>
       </div>

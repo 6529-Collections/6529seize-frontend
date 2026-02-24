@@ -2,6 +2,7 @@ import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import { buildResponse } from "@/app/api/open-graph/utils";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+import { asNonEmptyString } from "../opensea/shared";
 
 const MANIFOLD_CACHE_TTL_MS = 5 * 60 * 1000;
 const MANIFOLD_HOST = "manifold.xyz";
@@ -58,14 +59,6 @@ const extractListingContext = (url: URL): ListingContext | null => {
     creatorHandle,
     listingId,
   };
-};
-
-const asNonEmptyString = (value: unknown): string | undefined => {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
 };
 
 const asNumberishString = (value: unknown): string | undefined => {

@@ -91,6 +91,7 @@ export default function WaveDropReply({
               onClick={() => onReplyClick(drop.serial_no)}
               className="tw-min-w-0 tw-flex-1 tw-overflow-hidden"
               textClassName="tw-min-w-0 tw-overflow-hidden"
+              linkify={false}
             />
           </p>
         </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesList";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,10 +7,9 @@ import Link from "next/link";
 import React, { useEffect, useEffectEvent, useRef } from "react";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
-import type {
-  UnifiedWavesListWavesHandle,
-} from "./UnifiedWavesListWaves";
+import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -78,16 +76,16 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
   return (
     <div className="tw-mb-4">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
+      <div className="tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
         {!isApp && (
-          <div className="tw-px-4 tw-mb-4 tw-w-full">
+          <div className="tw-mb-4 tw-w-full tw-px-4">
             <Link
               href="/waves?create=wave"
-              className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300"
+              className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition-all tw-duration-300 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-ring-iron-700"
             >
               <FontAwesomeIcon
                 icon={faPlus}
-                className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
+                className="-tw-ml-1.5 tw-size-3.5 tw-flex-shrink-0"
               />
               <span className="tw-text-xs tw-font-semibold">Create Wave</span>
             </Link>

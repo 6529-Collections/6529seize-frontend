@@ -19,11 +19,19 @@ describe("UserPageRateWrapper", () => {
     wallets: [{ wallet: "0xabc" }],
   };
 
-  function renderWrapper(ctx: any, seize: any, type = RateMatter.NIC) {
+  function renderWrapper(
+    ctx: any,
+    seize: any,
+    type = RateMatter.NIC,
+    options?: { hideOwnProfileMessage?: boolean }
+  ) {
     useCtx.mockReturnValue(seize);
     return render(
       <AuthContext.Provider value={ctx as any}>
-        <UserPageRateWrapper profile={profile} type={type}>
+        <UserPageRateWrapper
+          profile={profile}
+          type={type}
+          hideOwnProfileMessage={options?.hideOwnProfileMessage}>
           <div data-testid="child" />
         </UserPageRateWrapper>
       </AuthContext.Provider>
@@ -47,4 +55,33 @@ describe("UserPageRateWrapper", () => {
     );
     expect(screen.getByTestId("child")).toBeInTheDocument();
   });
+
+  it.each([RateMatter.REP, RateMatter.NIC])(
+    "shows own-profile message by default (%s)",
+    (type) => {
+      renderWrapper(
+        { connectedProfile: { handle: "alice" }, activeProfileProxy: undefined },
+        { address: "0xabc" },
+        type
+      );
+      expect(screen.getByTestId("infobox")).toHaveTextContent(
+        "You can't"
+      );
+      expect(screen.queryByTestId("child")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([RateMatter.REP, RateMatter.NIC])(
+    "hides own-profile section when hideOwnProfileMessage is true (%s)",
+    (type) => {
+      renderWrapper(
+        { connectedProfile: { handle: "alice" }, activeProfileProxy: undefined },
+        { address: "0xabc" },
+        type,
+        { hideOwnProfileMessage: true }
+      );
+      expect(screen.queryByTestId("infobox")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("child")).not.toBeInTheDocument();
+    }
+  );
 });

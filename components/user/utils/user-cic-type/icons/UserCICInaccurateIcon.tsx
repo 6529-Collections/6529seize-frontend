@@ -1,8 +1,7 @@
-
-export default function UserCICAccurateIcon() {
+export default function UserCICInaccurateIcon() {
   return (
     <svg
-      className="tw-h-full tw-w-full tw-flex-shrink-0"
+      className="tw-h-full tw-w-full tw-flex-shrink-0 tw-align-top"
       viewBox="0 0 187 187"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

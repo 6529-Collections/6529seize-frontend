@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { SortDirection } from "@/entities/ISort";
-import { RepsTableSort } from "./UserPageRepRepsTable";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
+import { useEffect, useState } from "react";
+import { RepsTableSort } from "./UserPageRepRepsTable";
 
 export default function UserPageRepRepsTableHeaderSortableCell({
   type,
@@ -37,15 +37,16 @@ export default function UserPageRepRepsTableHeaderSortableCell({
   return (
     <th
       scope="col"
-      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+      className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-1.5 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 tw-border-0"
       onClick={() => onSortTypeClick(type)}>
       <span
         className={`${
-          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
+          isActive ? "tw-text-iron-500" : "group-hover:tw-text-iron-400"
         } tw-transition tw-duration-300 tw-ease-out`}>
         {SORT_TYPE_TO_TEXT[type]}
       </span>
-      <span className="-tw-mt-0.5 tw-ml-2">
+      {/* Sort icons intentionally hidden for this iteration. */}
+      <span className="-tw-mt-0.5 tw-ml-2 tw-hidden">
         <CommonTableSortIcon direction={sor} isActive={isActive} />
       </span>
     </th>

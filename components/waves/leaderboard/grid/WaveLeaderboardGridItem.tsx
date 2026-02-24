@@ -22,7 +22,6 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import Link from "next/link";
 import React, {
@@ -41,67 +40,6 @@ interface WaveLeaderboardGridItemProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const MANIFOLD_LISTING_PATH_PATTERN = /^\/@[^/]+\/id\/[^/?#]+\/?$/i;
-const SUPER_RARE_ARTWORK_PATH_PATTERN =
-  /^\/artwork\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
-const SUPER_RARE_ARTWORK_V2_PATH_PATTERN = /^\/artwork-v2\/[^/?#]+\/?$/i;
-const FOUNDATION_MINT_PATH_PATTERN =
-  /^\/mint\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
-const OPENSEA_ITEM_PATH_PATTERN =
-  /^\/item\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
-const OPENSEA_ASSET_PATH_PATTERN =
-  /^\/assets\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
-const TRANSIENT_NFT_PATH_PATTERN =
-  /^\/nfts\/[^/]+\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
-
-const getStandaloneHttpUrl = (content: string | null | undefined): string => {
-  if (!content) {
-    return "";
-  }
-
-  const trimmed = content.trim();
-  const match = trimmed.match(/^<?(https?:\/\/[^\s<>]+)>?$/i);
-  return match?.[1] ?? "";
-};
-
-const isMarketplaceLink = (href: string): boolean => {
-  try {
-    const url = new URL(href);
-    const hostname = url.hostname.toLowerCase();
-    const pathname = url.pathname;
-
-    if (matchesDomainOrSubdomain(hostname, "manifold.xyz")) {
-      return MANIFOLD_LISTING_PATH_PATTERN.test(pathname);
-    }
-
-    if (matchesDomainOrSubdomain(hostname, "superrare.com")) {
-      return (
-        SUPER_RARE_ARTWORK_PATH_PATTERN.test(pathname) ||
-        SUPER_RARE_ARTWORK_V2_PATH_PATTERN.test(pathname)
-      );
-    }
-
-    if (matchesDomainOrSubdomain(hostname, "foundation.app")) {
-      return FOUNDATION_MINT_PATH_PATTERN.test(pathname);
-    }
-
-    if (matchesDomainOrSubdomain(hostname, "opensea.io")) {
-      return (
-        OPENSEA_ITEM_PATH_PATTERN.test(pathname) ||
-        OPENSEA_ASSET_PATH_PATTERN.test(pathname)
-      );
-    }
-
-    if (matchesDomainOrSubdomain(hostname, "transient.xyz")) {
-      return TRANSIENT_NFT_PATH_PATTERN.test(pathname);
-    }
-
-    return false;
-  } catch {
-    return false;
-  }
-};
-
 export const WaveLeaderboardGridItem: React.FC<
   WaveLeaderboardGridItemProps
 > = ({ drop, mode, onDropClick }) => {
@@ -109,41 +47,21 @@ export const WaveLeaderboardGridItem: React.FC<
   const isContentOnlyMode = mode === "content_only";
   const activePart = drop.parts[0];
   const author = drop.author;
-  const authorHandle = author?.handle ?? null;
+  const authorHandle = author.handle ?? null;
   const primaryMedia = activePart?.media[0];
   const isCuratable = drop.context_profile_context?.curatable ?? false;
   const isCurated = drop.context_profile_context?.curated ?? false;
   const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
-  const isMarketplaceImageOnlyCard = useMemo(() => {
-    if (mode !== "content_only" || !!primaryMedia) {
-      return false;
-    }
 
-    const standaloneUrl = getStandaloneHttpUrl(activePart?.content);
-    if (!standaloneUrl) {
-      return false;
-    }
-
-    return isMarketplaceLink(standaloneUrl);
-  }, [activePart?.content, mode, primaryMedia]);
-  const cardClassName = (() => {
-    if (isCompactMode) {
-      return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
-    }
-
-    if (isMarketplaceImageOnlyCard) {
-      return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
-    }
-
-    return "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-2 tw-transition desktop-hover:hover:tw-border-iron-700";
-  })();
+  const cardClassName =
+    "tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700";
   const viewportClassName = isCompactMode
     ? "tw-relative tw-overflow-hidden tw-bg-iron-950"
-    : "tw-relative tw-overflow-hidden tw-max-h-[20rem]";
+    : "tw-relative tw-overflow-hidden tw-max-h-[20rem] tw-bg-iron-950";
   const contentSpacingClass = isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
   const mediaWrapperClass = isCompactMode
     ? "tw-overflow-hidden tw-rounded-lg tw-bg-iron-900"
-    : "tw-overflow-hidden";
+    : "tw-overflow-hidden tw-bg-iron-950";
   const isMobileScreen = useIsMobileScreen();
   const { hasTouchScreen } = useDeviceInfo();
   const { toggleCuration, isPending: isCurating } = useDropCurationMutation();
@@ -168,6 +86,7 @@ export const WaveLeaderboardGridItem: React.FC<
 
   const mediaUrl = primaryMedia?.url ?? previewImageUrl ?? null;
   const mediaMimeType = primaryMedia?.mime_type ?? "image/jpeg";
+  const shouldPadContentOnlyText = isContentOnlyMode && Boolean(mediaUrl);
 
   const getOverflowSnapshot = useCallback(() => {
     if (!viewportEl || !innerEl) {
@@ -305,19 +224,34 @@ export const WaveLeaderboardGridItem: React.FC<
               />
             </div>
           )}
-          {activePart && (
-            <LinkPreviewProvider variant="home">
-              <WaveDropPartContentMarkdown
-                mentionedUsers={drop.mentioned_users}
-                mentionedWaves={drop.mentioned_waves}
-                referencedNfts={drop.referenced_nfts}
-                part={activePart}
-                wave={drop.wave}
-                onQuoteClick={() => {}}
-                marketplaceImageOnly={mode === "content_only"}
-              />
-            </LinkPreviewProvider>
-          )}
+          {activePart &&
+            (shouldPadContentOnlyText ? (
+              <div className="tw-p-2">
+                <LinkPreviewProvider variant="home">
+                  <WaveDropPartContentMarkdown
+                    mentionedUsers={drop.mentioned_users}
+                    mentionedWaves={drop.mentioned_waves}
+                    referencedNfts={drop.referenced_nfts}
+                    part={activePart}
+                    wave={drop.wave}
+                    drop={drop}
+                    onQuoteClick={() => {}}
+                  />
+                </LinkPreviewProvider>
+              </div>
+            ) : (
+              <LinkPreviewProvider variant="home">
+                <WaveDropPartContentMarkdown
+                  mentionedUsers={drop.mentioned_users}
+                  mentionedWaves={drop.mentioned_waves}
+                  referencedNfts={drop.referenced_nfts}
+                  part={activePart}
+                  wave={drop.wave}
+                  drop={drop}
+                  onQuoteClick={() => {}}
+                />
+              </LinkPreviewProvider>
+            ))}
         </div>
         {showGradient && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-14 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/90 tw-to-transparent" />
@@ -357,7 +291,7 @@ export const WaveLeaderboardGridItem: React.FC<
       {isCompactMode && (
         <div
           data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
-          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3"
+          className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3 tw-pt-2"
         >
           <div className="tw-mb-1.5">
             {drop.title && (

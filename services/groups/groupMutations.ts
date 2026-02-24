@@ -32,22 +32,42 @@ export const toErrorMessage = (error: unknown): string => {
 const sanitiseGroupPayload = (
   payload: ApiCreateGroup,
   name: string
-): ApiCreateGroup => ({
-  ...payload,
-  name,
-  group: {
-    ...payload.group,
-    owns_nfts: [...payload.group.owns_nfts],
-    identity_addresses:
-      payload.group.identity_addresses?.length
-        ? [...payload.group.identity_addresses]
-        : null,
-    excluded_identity_addresses:
-      payload.group.excluded_identity_addresses?.length
-        ? [...payload.group.excluded_identity_addresses]
-        : null,
-  },
-});
+): ApiCreateGroup => {
+  const identityAddresses = payload.group.identity_addresses;
+  const excludedIdentityAddresses = payload.group.excluded_identity_addresses;
+  const rawBeneficiaryGrantId = payload.group.is_beneficiary_of_grant_id;
+  const trimmedBeneficiaryGrantId =
+    typeof rawBeneficiaryGrantId === "string"
+      ? rawBeneficiaryGrantId.trim()
+      : undefined;
+  const hasBeneficiaryGrantId =
+    typeof trimmedBeneficiaryGrantId === "string" &&
+    trimmedBeneficiaryGrantId.length > 0;
+  const groupWithoutGrantId = { ...payload.group };
+  delete groupWithoutGrantId.is_beneficiary_of_grant_id;
+
+  return {
+    ...payload,
+    name,
+    group: {
+      ...groupWithoutGrantId,
+      owns_nfts: [...payload.group.owns_nfts],
+      identity_addresses:
+        identityAddresses && identityAddresses.length > 0
+          ? [...identityAddresses]
+          : null,
+      excluded_identity_addresses:
+        excludedIdentityAddresses && excludedIdentityAddresses.length > 0
+          ? [...excludedIdentityAddresses]
+          : null,
+      ...(hasBeneficiaryGrantId
+        ? {
+            is_beneficiary_of_grant_id: trimmedBeneficiaryGrantId,
+          }
+        : {}),
+    },
+  };
+};
 
 export const validateGroupPayload = (
   payload: ApiCreateGroup
@@ -80,6 +100,9 @@ export const validateGroupPayload = (
     payload.group.cic.max !== null ||
     payload.group.cic.user_identity !== null;
   const hasNfts = payload.group.owns_nfts.length > 0;
+  const hasGrantBeneficiary =
+    typeof payload.group.is_beneficiary_of_grant_id === "string" &&
+    payload.group.is_beneficiary_of_grant_id.trim().length > 0;
 
   if (
     !(
@@ -89,7 +112,8 @@ export const validateGroupPayload = (
       hasTdh ||
       hasRep ||
       hasCic ||
-      hasNfts
+      hasNfts ||
+      hasGrantBeneficiary
     )
   ) {
     issues.push("NO_FILTERS");

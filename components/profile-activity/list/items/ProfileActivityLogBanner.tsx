@@ -23,7 +23,7 @@ export default function ProfileActivityLogBanner({
   return (
     <>
       <ProfileActivityLogItemAction action={isAdded ? "added" : "changed"} />
-      <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-300">
+      <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-font-medium tw-text-iron-300">
         {TITLE[log.type]}
       </span>
       {!isAdded && (

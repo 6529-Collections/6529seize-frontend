@@ -67,6 +67,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
           referencedNfts={drop.referenced_nfts}
           part={drop.parts[0]!}
           wave={drop.wave}
+          drop={drop}
           onQuoteClick={() => {}}
         />
         {showGradient && (

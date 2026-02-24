@@ -15,7 +15,7 @@ import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
-  readonly onCreateDrop: () => void;
+  readonly onCreateDrop?: (() => void) | undefined;
   readonly curatedByGroupId?: string | undefined;
 }
 

@@ -14,6 +14,7 @@
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
+import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropReaction } from '../models/ApiDropReaction';
@@ -66,6 +67,7 @@ export class ApiDropWithoutWave {
     'reactions': Array<ApiDropReaction>;
     'boosts': number;
     'hide_link_preview': boolean;
+    'nft_links'?: Array<ApiDropNftLink>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -232,6 +234,12 @@ export class ApiDropWithoutWave {
             "name": "hide_link_preview",
             "baseName": "hide_link_preview",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "nft_links",
+            "baseName": "nft_links",
+            "type": "Array<ApiDropNftLink>",
             "format": ""
         }    ];
 
