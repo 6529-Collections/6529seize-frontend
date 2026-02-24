@@ -26,7 +26,7 @@ export default function UserPageBrainWrapper({
       return;
     }
     if (connectedProfile || !address) {
-      router.push(`/${user}/identity`);
+      router.push(`/${user}`);
     }
   }, [connectedProfile, activeProfileProxy, address, showWaves]);
 

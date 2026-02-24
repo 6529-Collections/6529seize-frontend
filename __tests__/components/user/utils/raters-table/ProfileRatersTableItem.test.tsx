@@ -27,7 +27,7 @@ describe("ProfileRatersTableItem", () => {
       </table>
     );
     const link = screen.getByText("bob").closest("a")!;
-    expect(link).toHaveAttribute("href", "/bob/identity");
+    expect(link).toHaveAttribute("href", "/bob");
     expect(screen.getByText("+5")).toBeInTheDocument();
     expect(cicProps.level).toBe(3);
   });
