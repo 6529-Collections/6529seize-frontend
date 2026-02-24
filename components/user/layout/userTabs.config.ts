@@ -17,15 +17,15 @@ type UserPageTabDefinition = {
 
 const TAB_DEFINITIONS = [
   {
-    id: "brain",
-    title: "Brain",
-    route: "",
-    isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
-  },
-  {
     id: "rep",
     title: "Identity",
-    route: "identity",
+    route: "",
+  },
+  {
+    id: "brain",
+    title: "Brain",
+    route: "brain",
+    isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
 {
     id: "collected",
@@ -102,7 +102,7 @@ export const USER_PAGE_TAB_IDS = USER_PAGE_TABS.reduce((acc, tab) => {
   return acc;
 }, {} as { [K in Uppercase<UserPageTabKey>]: UserPageTabKey });
 
-export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "collected";
+export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "rep";
 
 export function getUserPageTabByRoute(route: string) {
   return USER_PAGE_TABS.find(

@@ -22,7 +22,7 @@ describe('UserSetUpProfileCta', () => {
     useCtx.mockReturnValue({ address: '0xabc' });
     renderWithProfile({ handle: null });
     expect(screen.getByRole('button')).toBeInTheDocument();
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/0xabc/identity');
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/0xabc');
   });
 
   it('returns null when address missing or handle exists', () => {

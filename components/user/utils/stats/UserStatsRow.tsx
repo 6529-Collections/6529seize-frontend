@@ -100,7 +100,7 @@ export default function UserStatsRow({
         </Link>
 
         <Link
-          href={`/${routeHandle}/identity`}
+          href={`/${routeHandle}`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
@@ -112,7 +112,7 @@ export default function UserStatsRow({
         </Link>
 
         <Link
-          href={`/${routeHandle}/identity`}
+          href={`/${routeHandle}`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>

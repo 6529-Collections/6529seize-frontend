@@ -8,6 +8,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { RateMatter } from "@/types/enums";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { MouseEvent } from "react";
 
 const STALE_TIME = 5 * 60 * 1000;
@@ -66,6 +67,10 @@ export default function TopRaterAvatars({
 
   const raterHandles = ratersPage?.data.map((r) => r.handle) ?? [];
 
+  const ratingByHandle = new Map(
+    ratersPage?.data.map((r) => [r.handle.toLowerCase(), r.rating]) ?? []
+  );
+
   const identityQueries = useQueries({
     queries: raterHandles.map((handle) => ({
       queryKey: [QueryKey.PROFILE, handle.toLowerCase()],
@@ -83,6 +88,15 @@ export default function TopRaterAvatars({
     .map((q) => {
       const identity = q.data!;
       const target = identity.handle ?? identity.primary_wallet;
+      const rating = target
+        ? ratingByHandle.get(target.toLowerCase())
+        : undefined;
+      const tooltipContent =
+        rating !== undefined ? (
+          <span>
+            {target} &middot; {formatNumberWithCommas(rating)}
+          </span>
+        ) : undefined;
       return {
         key: target,
         pfpUrl: identity.pfp ?? null,
@@ -92,6 +106,7 @@ export default function TopRaterAvatars({
           ? identity.handle.charAt(0).toUpperCase()
           : "?",
         title: target,
+        tooltipContent,
       };
     });
 

@@ -38,7 +38,7 @@ const renderTabs = (
   country: string = "US"
 ) => {
   (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
-  (usePathname as jest.Mock).mockReturnValue("/[user]/identity");
+  (usePathname as jest.Mock).mockReturnValue("/[user]");
   (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
   (useParams as jest.Mock).mockReturnValue({ user: "testuser" });
   capacitorMock.mockReturnValue({ isIos });

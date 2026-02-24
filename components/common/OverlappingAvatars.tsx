@@ -15,6 +15,7 @@ interface OverlappingAvatarItem {
   readonly ariaLabel?: string;
   readonly fallback?: string;
   readonly title?: string;
+  readonly tooltipContent?: React.ReactNode;
 }
 
 interface OverlappingAvatarsProps {
@@ -116,7 +117,7 @@ export default function OverlappingAvatars({
                 delayShow={250}
                 style={TOOLTIP_STYLES}
               >
-                {item.title}
+                {item.tooltipContent ?? item.title}
               </Tooltip>
             </span>
           );
