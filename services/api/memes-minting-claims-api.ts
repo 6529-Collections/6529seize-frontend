@@ -23,6 +23,7 @@ const ALLOWED_PATCH_FIELDS = new Set<string>([
   "edition_size",
   "description",
   "name",
+  "external_url",
   "image_url",
   "attributes",
   "animation_url",

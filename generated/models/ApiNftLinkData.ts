@@ -27,9 +27,9 @@ export class ApiNftLinkData {
     'price': string | null;
     'last_successfully_updated': number | null;
     'failed_since': number | null;
-     'media_preview': ApiNftLinkMediaPreview | null;
+    'media_preview': ApiNftLinkMediaPreview | null;
 
-     static readonly discriminator: string | undefined = undefined;
+    static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
@@ -105,13 +105,13 @@ export class ApiNftLinkData {
             "baseName": "failed_since",
             "type": "number",
             "format": "int64"
-         },
-         {
-             "name": "media_preview",
-             "baseName": "media_preview",
-             "type": "ApiNftLinkMediaPreview",
-             "format": ""
-         }    ];
+        },
+        {
+            "name": "media_preview",
+            "baseName": "media_preview",
+            "type": "ApiNftLinkMediaPreview",
+            "format": ""
+        }    ];
 
     static getAttributeTypeMap() {
         return ApiNftLinkData.attributeTypeMap;

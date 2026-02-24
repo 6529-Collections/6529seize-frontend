@@ -50,7 +50,7 @@ function getTopUpModalEmoji(
 ): string {
   if (status === "success") return "/emojis/sgt_saluting_face.webp";
   if (status === "error") return "/emojis/sgt_sob.webp";
-  return "/emojis/sgt_grimacing.webp";
+  return "/emojis/sgt_flushed.webp";
 }
 
 export default function UserPageSubscriptionsTopUp() {

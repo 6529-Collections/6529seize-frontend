@@ -1166,6 +1166,7 @@ function MetadataSection({
   const { setToast } = useAuth();
   const initialTraits = useMemo(() => claimToTraitsData(claim), [claim]);
   const [traits, setTraits] = useState<TraitsData>(initialTraits);
+  const [externalUrl, setExternalUrl] = useState(claim.external_url ?? "");
   const [traitsSaving, setTraitsSaving] = useState(false);
   const [traitsError, setTraitsError] = useState<string | null>(null);
   const [traitsFormKey, setTraitsFormKey] = useState(0);
@@ -1173,16 +1174,23 @@ function MetadataSection({
 
   useEffect(() => {
     setTraits(claimToTraitsData(claim));
+    setExternalUrl(claim.external_url ?? "");
     setTraitsError(null);
     setTraitsFormKey((prev) => prev + 1);
   }, [claim.claim_id]);
 
+  const normalizedExistingExternalUrl = (claim.external_url ?? "").trim();
+  const normalizedNextExternalUrl = externalUrl.trim();
+  const externalUrlChanged =
+    normalizedNextExternalUrl !== normalizedExistingExternalUrl;
+
   const traitsChanged =
     JSON.stringify(traits) !== JSON.stringify(claimToTraitsData(claim));
+  const metadataChanged = traitsChanged || externalUrlChanged;
 
   useEffect(() => {
-    onPendingChange(traitsChanged);
-  }, [traitsChanged, onPendingChange]);
+    onPendingChange(metadataChanged);
+  }, [metadataChanged, onPendingChange]);
 
   useEffect(() => {
     return () => onPendingChange(false);
@@ -1206,6 +1214,10 @@ function MetadataSection({
       if (currentAttributesSnapshot === nextAttributesSnapshot) {
         delete body.attributes;
       }
+      if (externalUrlChanged) {
+        body.external_url =
+          normalizedNextExternalUrl === "" ? null : normalizedNextExternalUrl;
+      }
       if (body.attributes) {
         const existingSeasonAttribute = (claim.attributes ?? []).find(
           (attribute) =>
@@ -1224,6 +1236,7 @@ function MetadataSection({
         body as MintingClaimUpdateRequest
       );
       setTraits(claimToTraitsData(nextClaim));
+      setExternalUrl(nextClaim.external_url ?? "");
       onUpdated(nextClaim);
       setToast({ message: "Metadata updated", type: "success" });
     } catch (e) {
@@ -1257,6 +1270,27 @@ function MetadataSection({
         }
       />
 
+      <div className="tw-group tw-relative tw-mt-2">
+        <div className="tw-relative">
+          <label
+            htmlFor="metadata-external-url"
+            className="tw-pointer-events-none tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-bg-iron-900 tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-all group-focus-visible-within:tw-text-primary-400"
+          >
+            External URL
+          </label>
+          <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
+            <input
+              id="metadata-external-url"
+              type="url"
+              value={externalUrl}
+              onChange={(e) => setExternalUrl(e.target.value)}
+              placeholder="https://..."
+              className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="tw-mt-6 tw-space-y-4">
         <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100 sm:tw-mb-6 sm:tw-text-xl">
           Artwork Traits
@@ -1280,7 +1314,7 @@ function MetadataSection({
         <button
           ref={traitsSaveButtonRef}
           type="submit"
-          disabled={traitsSaving || !traitsChanged}
+          disabled={traitsSaving || !metadataChanged}
           className={`${BTN_SAVE} tw-w-full`}
         >
           {traitsSaving ? (
@@ -1294,9 +1328,10 @@ function MetadataSection({
         </button>
         <button
           type="button"
-          disabled={!traitsChanged}
+          disabled={!metadataChanged}
           onClick={() => {
             setTraits(claimToTraitsData(claim));
+            setExternalUrl(claim.external_url ?? "");
             setTraitsError(null);
             setTraitsFormKey((prev) => prev + 1);
           }}

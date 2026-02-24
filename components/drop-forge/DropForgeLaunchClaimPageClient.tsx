@@ -6,8 +6,8 @@ import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
@@ -42,10 +42,10 @@ import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { buildMemesPhases as buildClaimPhases } from "@/hooks/useManifoldClaim";
 import {
   getClaim,
+  getMemesMintingRoots as getClaimRoots,
   getDistributionAirdropsArtist,
   getDistributionAirdropsTeam,
   getFinalSubscriptionsByPhase,
-  getMemesMintingRoots as getClaimRoots,
 } from "@/services/api/memes-minting-claims-api";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -320,7 +320,7 @@ function formatDateTimeLocalInput(date: Date): string {
 function getClaimTxModalEmoji(status: ClaimTxModalStatus): string {
   if (status === "success") return "/emojis/sgt_saluting_face.webp";
   if (status === "error") return "/emojis/sgt_sob.webp";
-  return "/emojis/sgt_grimacing.webp";
+  return "/emojis/sgt_flushed.webp";
 }
 
 function ClaimTransactionModal({
@@ -687,10 +687,8 @@ export default function DropForgeLaunchClaimPageClient({
 }: DropForgeLaunchClaimPageClientProps) {
   const pageTitle = `Launch Claim #${claimId}`;
   const { setToast } = useAuth();
-  const {
-    contract: forgeMintingContract,
-    chain: forgeMintingChain,
-  } = useDropForgeMintingConfig();
+  const { contract: forgeMintingContract, chain: forgeMintingChain } =
+    useDropForgeMintingConfig();
   const { hasWallet, permissionsLoading, canAccessLaunchPage } =
     useDropForgePermissions();
   const claimWrite = useWriteContract();
@@ -708,7 +706,7 @@ export default function DropForgeLaunchClaimPageClient({
   } = useDropForgeManifoldClaim(claimId);
   const [claim, setClaim] = useState<MintingClaim | null>(null);
   const [roots, setRoots] = useState<MintingClaimsRootItem[] | null>(null);
-  const [, setRootsLoading] = useState(false);
+  const [rootsLoading, setRootsLoading] = useState(false);
   const [rootsError, setRootsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -743,6 +741,8 @@ export default function DropForgeLaunchClaimPageClient({
   const [claimTxModal, setClaimTxModal] = useState<ClaimTxModalState | null>(
     null
   );
+  const handledClaimWriteSuccessTxHashRef = useRef<string | null>(null);
+  const handledClaimWriteErrorTxHashRef = useRef<string | null>(null);
   const lastErrorToastRef = useRef<{ message: string; ts: number } | null>(
     null
   );
@@ -1255,6 +1255,62 @@ export default function DropForgeLaunchClaimPageClient({
     manifoldClaim,
     isInitialized,
   ]);
+  const selectedPhaseDiffs = useMemo(() => {
+    const emptyDiffs = {
+      editionSize: false,
+      cost: false,
+      merkleRoot: false,
+      startDate: false,
+      endDate: false,
+    };
+
+    if (
+      !selectedPhaseIsUpdateAction ||
+      !selectedPhaseComparableConfig ||
+      !claim ||
+      !manifoldClaim ||
+      !isInitialized
+    ) {
+      return emptyDiffs;
+    }
+
+    return {
+      editionSize:
+        claim.edition_size != null && manifoldClaim.totalMax != null
+          ? claim.edition_size !== manifoldClaim.totalMax
+          : false,
+      cost:
+        selectedPhaseComparableConfig.costWei != null && manifoldClaim.costWei != null
+          ? selectedPhaseComparableConfig.costWei !== manifoldClaim.costWei
+          : false,
+      merkleRoot:
+        selectedPhaseComparableConfig.merkleRoot != null &&
+        manifoldClaim.merkleRoot != null
+          ? normalizeHexValue(selectedPhaseComparableConfig.merkleRoot) !==
+            normalizeHexValue(manifoldClaim.merkleRoot)
+          : false,
+      startDate:
+        selectedPhaseComparableConfig.startDate != null &&
+        manifoldClaim.startDate != null
+          ? selectedPhaseComparableConfig.startDate !== manifoldClaim.startDate
+          : false,
+      endDate:
+        selectedPhaseComparableConfig.endDate != null &&
+        manifoldClaim.endDate != null
+          ? selectedPhaseComparableConfig.endDate !== manifoldClaim.endDate
+          : false,
+    };
+  }, [
+    selectedPhaseIsUpdateAction,
+    selectedPhaseComparableConfig,
+    claim,
+    manifoldClaim,
+    isInitialized,
+  ]);
+  const changedFieldBoxClassName =
+    "tw-ring-rose-500/70 hover:tw-ring-rose-400/70";
+  const changedFieldBoxLabelClassName =
+    "tw-text-rose-300 tw-ring-rose-500/70";
   const selectedPhaseActionDisabled =
     (claimWritePending || !selectedPhaseConfig
       ? true
@@ -1625,12 +1681,7 @@ export default function DropForgeLaunchClaimPageClient({
           abi: MEMES_MANIFOLD_PROXY_ABI,
           chainId: forgeMintingChain.id,
           functionName: "airdrop",
-          args: [
-            forgeMintingContract,
-            BigInt(claimId),
-            recipients,
-            amounts,
-          ],
+          args: [forgeMintingContract, BigInt(claimId), recipients, amounts],
         });
       } catch (error) {
         setClaimTxModal({
@@ -1701,6 +1752,8 @@ export default function DropForgeLaunchClaimPageClient({
   useEffect(() => {
     const txHash = claimWrite.data;
     if (!txHash || !waitClaimWrite.isSuccess) return;
+    if (handledClaimWriteSuccessTxHashRef.current === txHash) return;
+    handledClaimWriteSuccessTxHashRef.current = txHash;
     void refetchOnChainClaim();
     setClaimTxModal((prev) => ({
       status: "success",
@@ -1712,6 +1765,8 @@ export default function DropForgeLaunchClaimPageClient({
   useEffect(() => {
     const txHash = claimWrite.data;
     if (!txHash || !waitClaimWrite.error) return;
+    if (handledClaimWriteErrorTxHashRef.current === txHash) return;
+    handledClaimWriteErrorTxHashRef.current = txHash;
     setClaimTxModal((prev) => ({
       status: "error",
       txHash,
@@ -1875,6 +1930,23 @@ export default function DropForgeLaunchClaimPageClient({
                 <span className="tw-whitespace-pre-wrap tw-break-words">
                   {claim.description || "—"}
                 </span>
+              </DropForgeFieldBox>
+              <DropForgeFieldBox
+                label="External URL"
+                className="sm:tw-col-span-2"
+              >
+                {claim.external_url ? (
+                  <a
+                    href={claim.external_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:tw-text-primary-200 tw-break-all tw-text-primary-300 tw-no-underline"
+                  >
+                    {claim.external_url}
+                  </a>
+                ) : (
+                  "—"
+                )}
               </DropForgeFieldBox>
             </div>
           </LaunchAccordionSection>
@@ -2136,7 +2208,15 @@ export default function DropForgeLaunchClaimPageClient({
                         <DropForgeFieldBox label="Remaining Editions">
                           {manifoldClaim?.remaining ?? "—"}
                         </DropForgeFieldBox>
-                        <DropForgeFieldBox label="Cost (ETH)">
+                        <DropForgeFieldBox
+                          label="Cost (ETH)"
+                          className={selectedPhaseDiffs.cost ? changedFieldBoxClassName : ""}
+                          labelClassName={
+                            selectedPhaseDiffs.cost
+                              ? changedFieldBoxLabelClassName
+                              : ""
+                          }
+                        >
                           <input
                             type="number"
                             inputMode="decimal"
@@ -2163,43 +2243,75 @@ export default function DropForgeLaunchClaimPageClient({
                         <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 lg:tw-grid-cols-2 lg:tw-gap-x-5">
                           <DropForgeFieldBox
                             label="Merkle Root"
+                            className={
+                              selectedPhaseDiffs.merkleRoot
+                                ? changedFieldBoxClassName
+                                : ""
+                            }
+                            labelClassName={
+                              selectedPhaseDiffs.merkleRoot
+                                ? changedFieldBoxLabelClassName
+                                : ""
+                            }
                             contentClassName="tw-break-all tw-text-sm"
                           >
                             <span>
-                              {selectedPhaseConfig?.root?.merkle_root ?? (
-                                <span className="tw-text-rose-300">
-                                  missing
-                                </span>
+                              {rootsLoading && !selectedPhaseConfig?.root ? (
+                                <span className="tw-text-iron-400">loading</span>
+                              ) : (
+                                selectedPhaseConfig?.root?.merkle_root ?? (
+                                  <span className="tw-text-rose-300">
+                                    missing
+                                  </span>
+                                )
                               )}
                             </span>
                           </DropForgeFieldBox>
                           <DropForgeFieldBox label="Address Count / Total Spots">
-                            <span className="tw-inline-flex tw-items-center">
-                              <span>
-                                {getRootAddressesCount(
-                                  selectedPhaseConfig?.root
-                                ) ?? (
-                                  <span className="tw-text-rose-300">
-                                    missing
-                                  </span>
-                                )}
+                            {rootsLoading && !selectedPhaseConfig?.root ? (
+                              <span className="tw-text-iron-400">
+                                loading / loading
                               </span>
-                              <span className="tw-px-1">/</span>
-                              <span>
-                                {getRootTotalSpots(
-                                  selectedPhaseConfig?.root
-                                ) ?? (
-                                  <span className="tw-text-rose-300">
-                                    missing
-                                  </span>
-                                )}
+                            ) : (
+                              <span className="tw-inline-flex tw-items-center">
+                                <span>
+                                  {getRootAddressesCount(
+                                    selectedPhaseConfig?.root
+                                  ) ?? (
+                                    <span className="tw-text-rose-300">
+                                      missing
+                                    </span>
+                                  )}
+                                </span>
+                                <span className="tw-px-1">/</span>
+                                <span>
+                                  {getRootTotalSpots(
+                                    selectedPhaseConfig?.root
+                                  ) ?? (
+                                    <span className="tw-text-rose-300">
+                                      missing
+                                    </span>
+                                  )}
+                                </span>
                               </span>
-                            </span>
+                            )}
                           </DropForgeFieldBox>
                         </div>
                       ) : null}
                       <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
-                        <DropForgeFieldBox label="Phase Start">
+                        <DropForgeFieldBox
+                          label="Phase Start"
+                          className={
+                            selectedPhaseDiffs.startDate
+                              ? changedFieldBoxClassName
+                              : ""
+                          }
+                          labelClassName={
+                            selectedPhaseDiffs.startDate
+                              ? changedFieldBoxLabelClassName
+                              : ""
+                          }
+                        >
                           <input
                             type="datetime-local"
                             value={
@@ -2222,7 +2334,19 @@ export default function DropForgeLaunchClaimPageClient({
                             className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500"
                           />
                         </DropForgeFieldBox>
-                        <DropForgeFieldBox label="Phase End">
+                        <DropForgeFieldBox
+                          label="Phase End"
+                          className={
+                            selectedPhaseDiffs.endDate
+                              ? changedFieldBoxClassName
+                              : ""
+                          }
+                          labelClassName={
+                            selectedPhaseDiffs.endDate
+                              ? changedFieldBoxLabelClassName
+                              : ""
+                          }
+                        >
                           <input
                             type="datetime-local"
                             value={
@@ -2374,7 +2498,9 @@ export default function DropForgeLaunchClaimPageClient({
                                   }
                                   className={`${BTN_SUBSCRIPTIONS_AIRDROP} lg:tw-self-end`}
                                 >
-                                  {`Airdrop Subscriptions x${section.airdropCount.toLocaleString()}`}
+                                  {section.airdropCount > 0
+                                    ? `Airdrop Subscriptions x${section.airdropCount.toLocaleString()}`
+                                    : "Airdrop Subscriptions"}
                                 </button>
                               </div>
                             </div>
@@ -2387,7 +2513,9 @@ export default function DropForgeLaunchClaimPageClient({
               )
             ) : (
               <p className="tw-mb-0 tw-text-white">
-                Finish claim crafting before launching:{" "}
+                {primaryStatus?.key === "publishing"
+                  ? "Publishing to Arweave: "
+                  : "Finish claim crafting before launching: "}
                 <Link
                   href={`/drop-forge/craft/${claimId}`}
                   className="hover:tw-text-primary-200 tw-text-primary-300 tw-no-underline"

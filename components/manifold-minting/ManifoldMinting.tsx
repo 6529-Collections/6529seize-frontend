@@ -337,7 +337,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     );
   }
 
-  if (isManifoldClaimFetching || !manifoldClaim) {
+  if (!manifoldClaim) {
     return (
       <Container className="pt-4 pb-4 px-4">
         {printTestnetIndicator()}
