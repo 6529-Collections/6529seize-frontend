@@ -5,6 +5,17 @@ type PageProps = {
   readonly searchParams?: Promise<Record<string, string | string[] | undefined>> | undefined;
 };
 
+function buildQueryString(
+  params: Record<string, string | string[] | undefined>
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    const values = Array.isArray(value) ? value : value !== undefined ? [value] : [];
+    values.forEach((v) => query.append(key, v));
+  }
+  return query.toString();
+}
+
 export default async function IdentityRedirectPage({
   params,
   searchParams,
@@ -13,20 +24,7 @@ export default async function IdentityRedirectPage({
   const user = resolvedParams?.user ?? "";
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
-  const query = new URLSearchParams();
-  if (resolvedSearchParams) {
-    for (const [key, value] of Object.entries(resolvedSearchParams)) {
-      if (value === undefined) continue;
-      if (Array.isArray(value)) {
-        for (const v of value) {
-          query.append(key, v);
-        }
-      } else {
-        query.append(key, value);
-      }
-    }
-  }
-
-  const qs = query.toString();
-  redirect(`/${user}${qs ? `?${qs}` : ""}`);
+  const qs = resolvedSearchParams ? buildQueryString(resolvedSearchParams) : "";
+  const destination = qs ? `/${user}?${qs}` : `/${user}`;
+  redirect(destination);
 }

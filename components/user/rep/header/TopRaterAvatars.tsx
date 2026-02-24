@@ -92,11 +92,11 @@ export default function TopRaterAvatars({
         ? ratingByHandle.get(target.toLowerCase())
         : undefined;
       const tooltipContent =
-        rating !== undefined ? (
+        rating === undefined ? undefined : (
           <span>
             {target} &middot; {formatNumberWithCommas(rating)}
           </span>
-        ) : undefined;
+        );
       return {
         key: target,
         pfpUrl: identity.pfp ?? null,
