@@ -41,6 +41,11 @@ and on-chain transaction status updates for the current drop.
 - Active public phase:
   - Mint controls appear after recipient selection.
   - Users can set mint count and see total ETH cost before submitting.
+- Project description panel:
+  - The mint NFT description initially shows as a 3-line preview.
+  - The `+ SHOW MORE` button appears only when the description exceeds that preview.
+  - Expanding with `+ SHOW MORE` reveals the full description and changes the label to `- SHOW LESS`.
+  - Collapsing again reuses `- SHOW LESS`/`+ SHOW MORE` to return to the preview.
 - Active allowlist phase:
   - The panel shows `Allowlist Spots`, plus `Minted` and `Available Mints`.
   - Mint count is selected from available spots.
@@ -62,6 +67,8 @@ and on-chain transaction status updates for the current drop.
   hidden until a wallet is selected.
 - If no allowlist spots exist for the selected address, the panel shows
   `No spots in current phase for this address`.
+- If the minted asset description is short enough to fit in the preview, the expand/collapse
+  button is not shown.
 - Once claim status is ended/finalized, mint-connect and mint-action controls
   no longer render.
 - Mint action buttons become active at the exact phase start timestamp and stop
