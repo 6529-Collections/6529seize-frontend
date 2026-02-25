@@ -16,24 +16,6 @@ import React, {
 import { useSelector } from "react-redux";
 
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-
-import CreateDropActions from "./CreateDropActions";
-import { CreateDropContentFiles } from "./CreateDropContentFiles";
-import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
-
-import type { CreateDropInputHandles } from "./CreateDropInput";
-
-import CreateDropInput from "./CreateDropInput";
-import CreateDropMetadata from "./CreateDropMetadata";
-import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
-import { CreateDropSubmit } from "./CreateDropSubmit";
-
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -67,8 +49,20 @@ import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
+import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
+import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
+import CreateDropActions from "./CreateDropActions";
+import { CreateDropContentFiles } from "./CreateDropContentFiles";
+import CreateDropContentRequirements from "./CreateDropContentRequirements";
+import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
+import CreateDropInput from "./CreateDropInput";
+import CreateDropMetadata from "./CreateDropMetadata";
+import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
+import { CreateDropSubmit } from "./CreateDropSubmit";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
 import {
@@ -79,6 +73,7 @@ import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
 
 import type { DropMutationBody } from "./CreateDrop";
+import type { CreateDropInputHandles } from "./CreateDropInput";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import type { EditorState } from "lexical";
 

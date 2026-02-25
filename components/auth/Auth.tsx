@@ -1,9 +1,5 @@
 "use client";
 
-import styles from "./Auth.module.scss";
-
-import type { TypeOptions } from "react-toastify";
-
 import "react-toastify/dist/ReactToastify.css";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -58,7 +54,11 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 
+import styles from "./Auth.module.scss";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
+
+
+import type { TypeOptions } from "react-toastify";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {

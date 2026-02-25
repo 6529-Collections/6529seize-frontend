@@ -46,26 +46,19 @@ import { MentionNode } from "../drops/create/lexical/nodes/MentionNode";
 import { WaveMentionNode } from "../drops/create/lexical/nodes/WaveMentionNode";
 import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
-import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
-import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
-
-import NewWaveMentionsPlugin from "../drops/create/lexical/plugins/waves/WaveMentionsPlugin";
-import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
-
-
-import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
-import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
-
-
-import type { NewWaveMentionsPluginHandles } from "../drops/create/lexical/plugins/waves/WaveMentionsPlugin";
-
-import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
-import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
-
+import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
+import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
+import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import NewWaveMentionsPlugin from "../drops/create/lexical/plugins/waves/WaveMentionsPlugin";
 
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 
+import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
+import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type { NewWaveMentionsPluginHandles } from "../drops/create/lexical/plugins/waves/WaveMentionsPlugin";
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import type { EditorState } from "lexical";
 import type { FocusEvent } from "react";

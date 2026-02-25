@@ -22,18 +22,18 @@ import OnCyberIcon from "./OnCyberIcon";
 import OpenseaIcon from "./OpenseaIcon";
 import PepeWTFIcon from "./PepeWTFIcon";
 import PhoneIcon from "./PhoneIcon";
-import TikTokIcon from "./TikTokIcon";
 import RedditIcon from "./RedditIcon";
-import WeiboIcon from "./WeiboIcon";
 import SubstackIcon from "./SubstackIcon";
-import YoutubeIcon from "./YoutubeIcon";
 import SuperRareIcon from "./SuperRareIcon";
 import TelegramIcon from "./TelegramIcon";
 import TheLineIcon from "./TheLineIcon";
+import TikTokIcon from "./TikTokIcon";
 import TransientIcon from "./TransientIcon";
 import WebsiteIcon from "./WebsiteIcon";
 import WeChatIcon from "./WeChatIcon";
+import WeiboIcon from "./WeiboIcon";
 import XIcon from "./XIcon";
+import YoutubeIcon from "./YoutubeIcon";
 
 export default function SocialStatementIcon({
   statementType,
