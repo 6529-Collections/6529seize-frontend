@@ -65,6 +65,9 @@ paragraph.
   safe `rel` attributes for external navigation.
 - Linkified URLs stop event propagation, so clicking a URL does not trigger
   drop-card click-through navigation.
+- Consecutive reply cards that are grouped together can suppress repeated
+  parent-drop preview headers, so a short sequence from the same author to the
+  same parent stays visually compact.
 - Selecting text in a drop body suppresses click-through navigation so users
   can copy text without opening drop details. Structured timeline copy behavior
   is covered in [Wave Drop Selection Copy](feature-selection-copy.md).
