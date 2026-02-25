@@ -18,7 +18,6 @@ import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRepHeader from "./header/UserPageRepHeader";
 import UserPageRepMobile from "./UserPageRepMobile";
-import UserPageRepReps from "./reps/UserPageRepReps";
 export default function UserPageRep({
   profile,
   initialActivityLogParams,
@@ -65,7 +64,7 @@ export default function UserPageRep({
           {/* Left Column - Rep Content */}
           <div className="tw-min-w-0">
             <UserPageRepHeader repRates={repRates ?? null} profile={profile} />
-            <UserPageRepReps repRates={repRates ?? null} profile={profile} />
+            {/* <UserPageRepReps repRates={repRates ?? null} profile={profile} /> */}
             <div className="tw-mt-6 lg:tw-mt-8">
               <UserPageCombinedActivityLog
                 initialActivityLogParams={initialActivityLogParams}

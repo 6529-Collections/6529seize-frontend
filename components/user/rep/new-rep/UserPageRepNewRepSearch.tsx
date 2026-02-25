@@ -262,14 +262,9 @@ export default function UserPageRepNewRepSearch({
       <div className="tw-w-full">
         <div className="tw-w-full">
           <div ref={listRef} className="tw-w-full">
-            <div className="tw-w-full tw-relative lg:tw-rounded-xl tw-bg-iron-950 lg:tw-border lg:tw-border-solid lg:tw-border-white/5 lg:tw-px-4 lg:tw-py-5">
+            <div className="tw-w-full tw-relative tw-bg-iron-950">
               <div
                 className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-y-1.5 tw-gap-x-4">
-                <label
-                  htmlFor="search-rep"
-                  className="tw-hidden lg:tw-block tw-text-xs tw-font-medium tw-text-iron-500">
-                  Grant Rep
-                </label>
                 <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-500 tw-font-medium">
                   <span>
                     <span>Your available Rep:</span>
@@ -291,10 +286,10 @@ export default function UserPageRepNewRepSearch({
                   </span>
                 </div>
               </div>
-              <div className="tw-flex tw-flex-col lg:tw-flex-row tw-items-stretch lg:tw-items-end tw-gap-3 tw-mt-3">
+              <div className="tw-flex tw-flex-col tw-items-stretch tw-gap-3 tw-mt-3">
                 <form
                   onSubmit={onSearchSubmit}
-                  className="tw-w-full lg:tw-flex-1 xl:tw-min-w-[250px] tw-relative">
+                  className="tw-w-full tw-relative">
                   <div className="tw-w-full tw-relative">
                     <svg
                       className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
@@ -345,7 +340,7 @@ export default function UserPageRepNewRepSearch({
                     )}
                   </AnimatePresence>
                 </form>
-                <div className="tw-relative tw-flex tw-w-full lg:tw-w-32 xl:tw-w-36">
+                <div className="tw-relative tw-flex tw-w-full">
                   <UserPageRateInput
                     value={amountStr}
                     onChange={setAmountStr}
