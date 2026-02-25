@@ -43,7 +43,7 @@ hover-triggered summary card on desktop.
 
 - Mentioning an existing wave from inside a standard thread composer.
 - Mentioning a wave in wave-storm multi-part input.
-- Opening an existing mention in a drop card to jump to `/waves?wave=<wave_id>`.
+- Opening an existing mention in a drop card to jump to `/waves/{waveId}`.
 - Adding NFT references after mentions using `$[nft_name]`.
 
 ## Edge Cases

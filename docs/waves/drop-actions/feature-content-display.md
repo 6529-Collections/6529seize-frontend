@@ -42,7 +42,7 @@ paragraph.
 - Fenced markdown code blocks render inline in the post body and keep a
   code-style presentation instead of collapsing into plain paragraph text.
 - Wave mention tokens like `#[wave_name]` render as inline links to
-  `/waves?wave=<wave_id>` when wave mention metadata is present.
+  `/waves/{waveId}` when wave mention metadata is present.
 - Mention links can include a small wave avatar icon inline when wave profile picture
   metadata is available.
 - On hover-capable devices, these links can open a wave summary card that

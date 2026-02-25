@@ -71,9 +71,10 @@ Wave drop actions provide two different link behaviors:
 - Clicking a quote from the same thread jumps to the quoted serial in-place.
 - Clicking a quote from another thread routes to that thread and targets the
   quoted serial.
-- Quote links using either `/waves/{waveId}?serialNo={serialNo}` or
-  `/waves?wave={waveId}&serialNo={serialNo}` resolve to the same serial-target
-  jump behavior.
+- Quote links using canonical `/waves/{waveId}?serialNo={serialNo}` resolve to the
+  expected serial-target jump behavior. Legacy links in the
+  `/waves?wave={waveId}&serialNo={serialNo}` format are also normalized to that
+  target.
 - In-thread links where `drop` or `serialNo` points to the currently opened drop
   render as a normal anchor instead of opening a nested drop card.
 - Temporary drops disable `Copy link` and show an unavailable state.
