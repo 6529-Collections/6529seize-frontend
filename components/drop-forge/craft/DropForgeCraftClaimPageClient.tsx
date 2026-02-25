@@ -91,8 +91,18 @@ function formatNullableEditionSize(value: number | null | undefined): string {
 
 function isVideoUrl(url: string | null | undefined): boolean {
   if (!url) return false;
-  const u = url.toLowerCase();
-  return u.includes(".mp4") || u.includes(".webm") || u.includes("video/");
+  const raw = url.trim();
+  if (raw.length === 0) return false;
+  if (raw.toLowerCase().startsWith("data:video/")) return true;
+
+  const hasVideoExtension = (value: string) =>
+    /\.(mp4|webm)(?:$|[?#])/.test(value.toLowerCase());
+
+  try {
+    return hasVideoExtension(new URL(raw).pathname);
+  } catch {
+    return hasVideoExtension(raw);
+  }
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -577,10 +587,11 @@ function AnimationSection({
     }
     if (!animationDisplayUrl) return null;
     const lowered = animationDisplayUrl.toLowerCase();
-    if (mediaType === "video" || isAnimationVideoUrl) return "video/mp4";
-    if (mediaType === "glb" || lowered.endsWith(".glb"))
-      return "model/gltf-binary";
+    if (lowered.endsWith(".glb")) return "model/gltf-binary";
     if (lowered.endsWith(".gltf")) return "model/gltf+json";
+    if (mediaType === "glb")
+      return "model/gltf-binary";
+    if (mediaType === "video" || isAnimationVideoUrl) return "video/mp4";
     if (
       mediaType === "html" ||
       canonicalizeInteractiveMediaUrl(animationDisplayUrl) !== null

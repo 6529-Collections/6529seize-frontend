@@ -14,7 +14,7 @@ import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsPro
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
-import { Chain } from "viem";
+import type { Chain } from "viem";
 import {
   useReadContract,
   useReadContracts,
@@ -25,6 +25,8 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
+
+const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 
 export default function ManifoldMintingWidget(
   props: Readonly<{
@@ -93,6 +95,8 @@ export default function ManifoldMintingWidget(
     props.claim.merkleRoot,
     props.contract,
     props.claim.instanceId,
+    props.claim.phase,
+    mintWrite,
   ]);
 
   function getReadContractsParams() {
@@ -178,7 +182,7 @@ export default function ManifoldMintingWidget(
     args.push(...mintArgs, mintForAddress);
 
     const functionName = isProxy
-      ? getProxyMintFunctionName()
+      ? MINT_PROXY_FUNCTION_NAME
       : getDirectMintFunctionName();
 
     return {
@@ -210,10 +214,6 @@ export default function ManifoldMintingWidget(
     }
 
     return mintArgs;
-  };
-
-  const getProxyMintFunctionName = () => {
-    return "mintProxy";
   };
 
   const getDirectMintFunctionName = () => {

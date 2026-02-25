@@ -146,7 +146,7 @@ interface SetupOptions {
   nftsRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   wavesRefetch?: jest.Mock<Promise<unknown>, []> | undefined;
   sidebarSections?: typeof defaultSidebarSections | undefined;
-  dropForgePermissions?: Record<string, unknown> | undefined;
+  dropForgePermissions?: typeof DEFAULT_DROP_FORGE_PERMISSIONS | undefined;
 }
 
 function setup(options: SetupOptions = {}) {

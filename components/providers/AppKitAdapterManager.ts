@@ -138,7 +138,10 @@ export class AppKitAdapterManager {
     if (!Array.isArray(newWallets)) {
       throw new AdapterError("ADAPTER_009: newWallets must be an array");
     }
-    if (newChains !== undefined && !Array.isArray(newChains)) {
+    if (
+      newChains !== undefined &&
+      (!Array.isArray(newChains) || newChains.length === 0)
+    ) {
       throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
     }
   }
@@ -172,11 +175,11 @@ export class AppKitAdapterManager {
     currentAddresses: Set<string>,
     newAddresses: Set<string>
   ): boolean {
-    for (const addr of Array.from(newAddresses)) {
+    for (const addr of newAddresses) {
       if (!currentAddresses.has(addr)) return true;
     }
 
-    for (const addr of Array.from(currentAddresses)) {
+    for (const addr of currentAddresses) {
       if (!newAddresses.has(addr)) return true;
     }
 
@@ -188,6 +191,11 @@ export class AppKitAdapterManager {
     isCapacitor = false,
     chains: Chain[] = [mainnet]
   ): WagmiAdapter {
+    if (!Array.isArray(chains) || chains.length === 0) {
+      throw new AdapterError(
+        "ADAPTER_021: chains must be a non-empty array"
+      );
+    }
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");
     }

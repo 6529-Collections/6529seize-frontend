@@ -32,6 +32,7 @@ import {
   MEMES_DEPLOYER,
   NULL_ADDRESS,
   NULL_MERKLE,
+  RESEARCH_AIRDROP_ADDRESS,
 } from "@/constants/constants";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
@@ -70,8 +71,6 @@ interface ClaimTxModalState {
 }
 
 const DEFAULT_PHASE_PRICE_ETH = "0.06529";
-const RESEARCH_AIRDROP_ADDRESS = "0xc2ce4ccef11a8171f443745cea3bceeaadd750c7";
-
 type LaunchMediaTab = "image" | "animation";
 
 function getSelectedPhaseFormValues({
@@ -218,6 +217,8 @@ export default function DropForgeLaunchClaimPageClient({
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage) return;
     let cancelled = false;
+    setClaim(null);
+    setRoots(null);
     setLoading(true);
     setError(null);
     setRootsLoading(true);

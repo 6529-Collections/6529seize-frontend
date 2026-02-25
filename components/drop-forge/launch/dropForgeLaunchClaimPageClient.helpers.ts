@@ -12,18 +12,37 @@ type LaunchPhaseKey =
 type ClaimTxModalStatus = "confirm_wallet" | "submitted" | "success" | "error";
 type LaunchMediaTab = "image" | "animation";
 type LaunchMediaKind = "image" | "video" | "glb" | "html" | "unknown";
-type MintingClaimsRootItemWithAliases = MintingClaimsRootItem & {
-  addresses_count?: number;
-  addresses?: number;
-  total_spots?: number;
-  total?: number;
-};
 
 export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
   if (!value) return null;
-  const millis = new Date(value).getTime();
-  if (Number.isNaN(millis)) return null;
-  return Math.floor(millis / 1000);
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/
+  );
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, second] = match;
+  const y = Number(year);
+  const mo = Number(month);
+  const d = Number(day);
+  const h = Number(hour);
+  const mi = Number(minute);
+  const s = Number(second ?? "0");
+
+  if ([y, mo, d, h, mi, s].some(Number.isNaN)) return null;
+
+  const parsed = new Date(y, mo - 1, d, h, mi, s);
+  if (
+    parsed.getFullYear() !== y ||
+    parsed.getMonth() !== mo - 1 ||
+    parsed.getDate() !== d ||
+    parsed.getHours() !== h ||
+    parsed.getMinutes() !== mi ||
+    parsed.getSeconds() !== s
+  ) {
+    return null;
+  }
+
+  return Math.floor(parsed.getTime() / 1000);
 }
 
 
@@ -81,18 +100,18 @@ export function getRootForPhase(
 }
 
 export function getRootAddressesCount(
-  root: MintingClaimsRootItemWithAliases | null | undefined
+  root: MintingClaimsRootItem | null | undefined
 ): number | null {
   if (!root) return null;
-  const value = root.addresses_count ?? root.addresses;
+  const value = root.addresses_count;
   return typeof value === "number" ? value : null;
 }
 
 export function getRootTotalSpots(
-  root: MintingClaimsRootItemWithAliases | null | undefined
+  root: MintingClaimsRootItem | null | undefined
 ): number | null {
   if (!root) return null;
-  const value = root.total_spots ?? root.total;
+  const value = root.total_spots;
   return typeof value === "number" ? value : null;
 }
 
@@ -281,7 +300,6 @@ export function getAnimationInfo(
   if (ext === "glb") return { kind: "glb" };
   if (ext === "mp4") return { kind: "video", subtype: "MP4" };
   if (ext === "webm") return { kind: "video", subtype: "WEBM" };
-  if (isVideoUrl(claim.animation_url)) return { kind: "video" };
   return { kind: "video" };
 }
 
