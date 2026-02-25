@@ -45,6 +45,9 @@ paragraph.
   collapsing into a single paragraph break.
 - In memes wave leaderboard, participation, and winner cards, newline breaks in
   drop descriptions are rendered as separate lines.
+- Image attachments show a loading placeholder while the source resolves; on touch
+  devices this placeholder is static to keep gesture scrolling smooth, while
+  desktop and other non-touch layouts can show the animated pulse style.
 - Same-origin links that include a `drop` query parameter (for example
   `/?drop=...` or `/waves/...?...&drop=...`) are rebased to the current thread
   route before rendering, so drop cards and their copy/open actions stay in the
