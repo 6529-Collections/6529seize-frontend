@@ -7,6 +7,9 @@ screens, with app-shell header controls handling in-context title and back actio
 
 - [Sidebar Navigation](feature-sidebar-navigation.md): route-level move between
   destinations, mobile drawer behavior, and desktop fixed rail.
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): fixed bottom app-shell
+  destination switching for `Discover`, `Waves`, `Messages`, `Home`,
+  `Network`, `Collections`, and `Notifications`.
 - [Internal Link Navigation](feature-internal-link-navigation.md): in-content links and
   hash-position navigation behavior.
 - [Header Search Modal](feature-header-search-modal.md): global search entry and result navigation.
@@ -25,6 +28,7 @@ screens, with app-shell header controls handling in-context title and back actio
 
 - [Internal Link Navigation](feature-internal-link-navigation.md)
 - [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Mobile Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md)
 - [App Header Context](feature-app-header-context.md)

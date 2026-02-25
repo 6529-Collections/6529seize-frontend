@@ -7,6 +7,9 @@ visible. On small screens, the same navigation is opened as an off-canvas menu
 from the header menu button. Desktop layout keeps the sidebar rail and
 main-content column visually stable when moving between pages that do and do
 not need vertical scrolling.
+On mobile app builds, quick access to core destinations is handled by the fixed
+bottom app bar; this page covers sidebar behavior, while destination switching in
+the app shell is documented in `feature-mobile-bottom-navigation.md`.
 On desktop, a subtle divider on the sidebar edge keeps the rail visually
 separate from the main content column.
 
@@ -33,7 +36,8 @@ separate from the main content column.
    `Notifications`) or expand a section (`Network`, `Collections`, `Tools`,
    `About`).
 3. Select a destination link.
-4. Use bottom controls for profile access, sharing, and wallet/user actions.
+4. On web small-screen layouts, continue to use overlay sidebar controls for
+   profile access, sharing, and wallet/user actions.
 5. Continue navigating with active-route highlighting and expanded section
    state.
 
@@ -77,6 +81,8 @@ separate from the main content column.
 - On `/waves` and `/messages`, when an inline right sidebar is open, the left
   wave list stays compact and shows a temporary expand control to restore full
   width quickly.
+- In mobile app shells, use the fixed bottom destination bar for primary section
+  switching instead of sidebar-driven deep navigation.
 
 ## Edge Cases
 
@@ -142,6 +148,7 @@ separate from the main content column.
 - [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Wave Left Sidebar Expand Control](../waves/sidebars/feature-left-sidebar-expand-control.md)
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Docs Home](../README.md)
 - [Profile Tabs](../profiles/navigation/feature-tabs.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)

@@ -18,6 +18,7 @@ metadata and actions visible earlier in the viewport.
 
 ## Entry Points
 - Open `Discover` from main site navigation.
+- In mobile app mode, open `Discover` from the fixed bottom app navigation.
 - Open `/waves` and browse or search for waves.
 - Open a profile and switch to the `Waves` tab.
 
