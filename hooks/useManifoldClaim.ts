@@ -182,6 +182,11 @@ export function useManifoldClaim({
     [contract]
   );
 
+  const shouldFetchForIdentifier =
+    claim == null ||
+    claim.identifier !== identifier ||
+    !claim.isFinalized;
+
   const readContract = useReadContract({
     address: proxy as `0x${string}`,
     abi,
@@ -191,11 +196,7 @@ export function useManifoldClaim({
         !!proxy &&
         !!abi &&
         identifier >= 0 &&
-        (claim
-          ? claim.identifier === identifier
-            ? !claim.isFinalized
-            : true
-          : true),
+        shouldFetchForIdentifier,
       refetchInterval: refetchInterval,
     },
     chainId,
