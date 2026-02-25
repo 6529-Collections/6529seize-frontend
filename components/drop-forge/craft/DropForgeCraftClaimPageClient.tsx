@@ -1804,9 +1804,13 @@ function DistributionSection({
   function getAggregatedAirdropSummary(
     keyword: "team" | "artist"
   ): { addresses: number; total: number } | null {
-    const matching = airdropSummaries.filter((item) =>
-      normalizeDistributionPhase(item.phase).includes(keyword)
-    );
+    const matching = airdropSummaries.filter((item) => {
+      const tokens = normalizeDistributionPhase(item.phase)
+        .split("+")
+        .map((token) => token.trim())
+        .filter(Boolean);
+      return tokens.length === 1 && tokens[0] === keyword;
+    });
 
     if (matching.length === 0) {
       return null;
@@ -1816,7 +1820,7 @@ function DistributionSection({
       (acc, item) => ({
         addresses:
           acc.addresses + Number(item.addresses ?? item.addresses_count ?? 0),
-        total: acc.total + Number(item.total ?? item.total_airdrops ?? 0),
+        total: acc.total + Number(item.total_airdrops ?? item.total ?? 0),
       }),
       { addresses: 0, total: 0 }
     );
@@ -1891,7 +1895,7 @@ function DistributionSection({
         Number(airdrop?.addresses ?? airdrop?.addresses_count ?? 0) +
         Number(getAllowlistAddresses(allowlist) ?? 0),
       total:
-        Number(airdrop?.total ?? airdrop?.total_airdrops ?? 0) +
+        Number(airdrop?.total_airdrops ?? airdrop?.total ?? 0) +
         Number(getAllowlistTotal(allowlist) ?? 0),
     };
 

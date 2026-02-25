@@ -99,7 +99,7 @@ function ClaimCardThumbnail({ claim }: Readonly<{ claim: MintingClaim }>) {
       <div className={containerClass}>
         <img
           src={claim.image_url}
-          alt=""
+          alt={claim.name?.trim() ? `${claim.name} thumbnail` : `Claim #${claim.claim_id} thumbnail`}
           className="tw-h-full tw-w-full tw-object-cover"
         />
       </div>

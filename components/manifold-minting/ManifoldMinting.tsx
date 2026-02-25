@@ -30,7 +30,7 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { Chain } from "viem";
+import type { Chain } from "viem";
 import type {
   ArweaveAttribute,
   ArweaveMetadata,

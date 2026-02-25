@@ -11,6 +11,7 @@ import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
+  DROP_FORGE_PATH,
   DROP_FORGE_SECTIONS,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
@@ -138,26 +139,31 @@ interface RankedPageMatch {
 }
 
 const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
-  "/drop-forge": ["Drop Control"],
-  "/drop-forge/craft": ["Drop Control Craft"],
-  "/drop-forge/launch": ["Drop Control Launch"],
+  [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
+  [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
+  [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
 };
 
 const getPageMatchPriority = (
   normalizedTitle: string,
   hrefSegments: string[],
   normalizedBreadcrumbs: string[],
+  normalizedSearchTerms: string[],
   normalizedQuery: string
 ): number => {
   if (normalizedTitle === normalizedQuery) return 0;
   if (hrefSegments.includes(normalizedQuery)) return 1;
-  if (normalizedTitle.startsWith(normalizedQuery)) return 2;
-  if (normalizedBreadcrumbs.includes(normalizedQuery)) return 3;
-  if (normalizedTitle.includes(normalizedQuery)) return 4;
-  if (hrefSegments.some((segment) => segment.includes(normalizedQuery))) {
+  if (normalizedSearchTerms.includes(normalizedQuery)) return 2;
+  if (normalizedTitle.startsWith(normalizedQuery)) return 3;
+  if (normalizedBreadcrumbs.includes(normalizedQuery)) return 4;
+  if (normalizedSearchTerms.some((term) => term.includes(normalizedQuery))) {
     return 5;
   }
-  return 6;
+  if (normalizedTitle.includes(normalizedQuery)) return 6;
+  if (hrefSegments.some((segment) => segment.includes(normalizedQuery))) {
+    return 7;
+  }
+  return 8;
 };
 
 const pageMatchesQuery = (
@@ -278,7 +284,7 @@ export default function HeaderSearchModal({
     const pages: SidebarPageEntry[] = [
       {
         name: DROP_FORGE_TITLE,
-        href: "/drop-forge",
+        href: DROP_FORGE_PATH,
         section: "About",
         icon: DropForgeIcon,
       },
@@ -475,6 +481,7 @@ export default function HeaderSearchModal({
             normalizedTitle,
             hrefSegments,
             normalizedBreadcrumbs,
+            normalizedSearchTerms,
             normalizedQuery
           ),
         });

@@ -2,6 +2,7 @@ import HeaderSearchModal from "@/components/header/header-search/HeaderSearchMod
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
 let clickAwayCb: () => void;
 let escapeCb: () => void;
@@ -175,17 +176,7 @@ function setup(options: SetupOptions = {}) {
   capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(sidebarSections);
   useDropForgePermissionsMock.mockReturnValue(
-    dropForgePermissions ?? {
-      hasWallet: false,
-      permissionsLoading: false,
-      canAccessLanding: false,
-      canAccessCraft: false,
-      canAccessLaunch: false,
-      canAccessLaunchPage: false,
-      isDistributionAdmin: false,
-      isClaimsAdmin: false,
-      isDropForgeAdmin: false,
-    }
+    dropForgePermissions ?? { ...DEFAULT_DROP_FORGE_PERMISSIONS }
   );
   useWaves.mockReturnValue(
     wavesReturn ?? {
@@ -318,7 +309,7 @@ describe("HeaderSearchModal", () => {
     });
 
     const input = screen.getByRole("textbox", { name: "Search" });
-    fireEvent.change(input, { target: { value: "drop control" } });
+    fireEvent.change(input, { target: { value: "drop forge" } });
 
     const renderedItems = screen
       .getAllByTestId("item")

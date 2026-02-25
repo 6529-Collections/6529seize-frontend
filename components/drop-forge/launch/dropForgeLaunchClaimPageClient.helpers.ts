@@ -306,13 +306,12 @@ export function getMediaTypeLabel(claim: MintingClaim, tab: LaunchMediaTab): str
 export function getAnimationMimeType(claim: MintingClaim): string | null {
   const animationUrl = claim.animation_url ?? null;
   if (!animationUrl) return null;
-  const format = (
+  const normalizedFormat = (
     claim.animation_details as { format?: string } | null | undefined
-  )?.format;
-  if (format === "HTML") return "text/html";
-  if (format === "GLB") return "model/gltf-binary";
-  if (format) {
-    const normalizedFormat = format.toUpperCase();
+  )?.format?.toUpperCase();
+  if (normalizedFormat === "HTML") return "text/html";
+  if (normalizedFormat === "GLB") return "model/gltf-binary";
+  if (normalizedFormat) {
     const formatMimeMap: Record<string, string> = {
       WEBM: "video/webm",
       MP4: "video/mp4",

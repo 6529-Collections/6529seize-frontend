@@ -341,6 +341,8 @@ export default function DropForgeLaunchClaimPageClient({
   }, [hasPublishedMetadata, isInitialized]);
 
   useEffect(() => {
+    setPhaseAllowlistWindows({});
+    setPhasePricesEth({});
     setArtistAirdrops(null);
     setTeamAirdrops(null);
     setPhase0AirdropsError(null);

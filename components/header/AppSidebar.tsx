@@ -11,7 +11,10 @@ import {
   WrenchIcon,
 } from "@heroicons/react/24/outline";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
-import { DROP_FORGE_TITLE } from "@/components/drop-forge/drop-forge.constants";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
@@ -130,7 +133,7 @@ export default function AppSidebar({
       const aboutIndex = updatedMenu.findIndex((item) => item.label === "About");
       const dropForgeItem = {
         label: DROP_FORGE_TITLE,
-        path: "/drop-forge",
+        path: DROP_FORGE_PATH,
         icon: DropForgeIcon,
       };
 

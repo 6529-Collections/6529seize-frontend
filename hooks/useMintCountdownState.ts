@@ -9,7 +9,7 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Abi } from "viem";
 
 export interface CountdownData {
@@ -39,6 +39,12 @@ export function useMintCountdownState(
   opts: UseMintCountdownStateOptions
 ): MintCountdownState {
   const [errorFromCallback, setErrorFromCallback] = useState(false);
+  const {
+    contract,
+    chainId,
+    abi = MEMES_MANIFOLD_PROXY_ABI,
+    hideMintBtn,
+  } = opts;
 
   // Reset error state when nftId changes (during render, not in effect)
   const [prevNftId, setPrevNftId] = useState(nftId);
@@ -47,15 +53,17 @@ export function useMintCountdownState(
     setErrorFromCallback(false);
   }
 
+  const handleManifoldClaimError = useCallback(() => {
+    setErrorFromCallback(true);
+  }, []);
+
   const { claim: manifoldClaim } = useManifoldClaim({
-    chainId: opts.chainId,
-    contract: opts.contract,
+    chainId,
+    contract,
     proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
-    abi: opts.abi ?? MEMES_MANIFOLD_PROXY_ABI,
+    abi,
     identifier: nftId,
-    onError: () => {
-      setErrorFromCallback(true);
-    },
+    onError: handleManifoldClaimError,
   });
 
   // Derive error state: callback fired AND (no data OR data has error)
@@ -65,7 +73,7 @@ export function useMintCountdownState(
   const { isIos } = useCapacitor();
   const { country } = useCookieConsent();
 
-  const showMintBtn = !opts.hideMintBtn && !(isIos && country !== "US");
+  const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
 
   return useMemo((): MintCountdownState => {
     if (isError) {

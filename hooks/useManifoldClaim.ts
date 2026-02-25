@@ -100,6 +100,7 @@ export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
 }
 
 export interface ManifoldClaim {
+  identifier: number;
   instanceId: number;
   location: string;
   total: number;
@@ -190,7 +191,11 @@ export function useManifoldClaim({
         !!proxy &&
         !!abi &&
         identifier >= 0 &&
-        !claim?.isFinalized,
+        (claim
+          ? claim.identifier === identifier
+            ? !claim.isFinalized
+            : true
+          : true),
       refetchInterval: refetchInterval,
     },
     chainId,
@@ -220,6 +225,7 @@ export function useManifoldClaim({
       const memePhase = getMemePhase(phase, startDate, endDate);
       const remaining = Number(claimData.totalMax) - Number(claimData.total);
       const newClaim: ManifoldClaim = {
+        identifier,
         instanceId: instanceId,
         location: String(claimData.location ?? ""),
         total: Number(claimData.total),

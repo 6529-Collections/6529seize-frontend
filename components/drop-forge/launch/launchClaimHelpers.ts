@@ -17,7 +17,7 @@ export function isMissingRequiredLaunchInfo(claim: MintingClaim): boolean {
       return false;
     });
   const animationRequiredButMissingLocation =
-    !!claim.animation_url && !claim.animation_location?.trim();
+    !!claim.animation_url?.trim() && !claim.animation_location?.trim();
 
   return (
     noImageLocation ||

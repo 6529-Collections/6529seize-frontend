@@ -425,7 +425,11 @@ export default function ManifoldMintingWidget(
   }
 
   const getValue = () => {
-    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(mintCount);
+    const safeCount =
+      Number.isFinite(mintCount) && !Number.isNaN(mintCount)
+        ? Math.max(0, Math.trunc(mintCount))
+        : 0;
+    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(safeCount);
   };
 
   function printMint(available?: number) {

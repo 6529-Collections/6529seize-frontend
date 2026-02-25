@@ -9,7 +9,10 @@ import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { DROP_FORGE_TITLE } from "@/components/drop-forge/drop-forge.constants";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
@@ -73,12 +76,11 @@ const WebSidebarNav = React.forwardRef<
     { event: "keydown" }
   );
 
-  const allSections = useSidebarSections(
+  const sections = useSidebarSections(
     appWalletsSupported,
     capacitor.isIos,
     country
   );
-  const sections = useMemo(() => allSections, [allSections]);
   const sectionMap = useSectionMap(sections);
   const networkSection = sectionMap.get("network");
   const collectionsSection = sectionMap.get("collections");
@@ -350,11 +352,11 @@ const WebSidebarNav = React.forwardRef<
                 {section.key === "about" && showDropForge && (
                   <li>
                     <WebSidebarNavItem
-                      href="/drop-forge"
+                      href={DROP_FORGE_PATH}
                       icon={DropForgeIcon}
                       active={
-                        pathname === "/drop-forge" ||
-                        pathname?.startsWith("/drop-forge/")
+                        pathname === DROP_FORGE_PATH ||
+                        pathname?.startsWith(`${DROP_FORGE_PATH}/`)
                       }
                       collapsed={isCollapsed}
                       label={DROP_FORGE_TITLE}

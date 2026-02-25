@@ -5,6 +5,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useClickAway, useKey, useKeyPressEvent } from "react-use";
 import type { Handler, KeyFilter } from "react-use/lib/useKey";
+import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../../helpers/dropForgePermissions";
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
 jest.mock("react-use");
@@ -160,15 +161,7 @@ beforeEach(() => {
   capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(defaultSidebarSections);
   useDropForgePermissionsMock.mockReturnValue({
-    hasWallet: false,
-    permissionsLoading: false,
-    canAccessLanding: false,
-    canAccessCraft: false,
-    canAccessLaunch: false,
-    canAccessLaunchPage: false,
-    isDistributionAdmin: false,
-    isClaimsAdmin: false,
-    isDropForgeAdmin: false,
+    ...DEFAULT_DROP_FORGE_PERMISSIONS,
   });
 });
 

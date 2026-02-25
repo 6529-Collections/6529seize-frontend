@@ -192,7 +192,7 @@ export class AppKitAdapterManager {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");
     }
 
-    const cacheKey = this.getCacheKey(appWallets, chains);
+    const cacheKey = this.getCacheKey(appWallets, chains, isCapacitor);
 
     if (this.adapterCache.has(cacheKey)) {
       const cachedAdapter = this.adapterCache.get(cacheKey);
@@ -259,7 +259,11 @@ export class AppKitAdapterManager {
     }
   }
 
-  private getCacheKey(wallets: AppWallet[], chains: Chain[] = [mainnet]): string {
+  private getCacheKey(
+    wallets: AppWallet[],
+    chains: Chain[] = [mainnet],
+    isCapacitor = false
+  ): string {
     if (!Array.isArray(wallets)) {
       throw new AdapterError(
         "ADAPTER_013: Cannot generate cache key: wallets must be an array"
@@ -279,7 +283,9 @@ export class AppKitAdapterManager {
 
     const walletsKey =
       sortedAddresses.length === 0 ? "empty-wallets" : sortedAddresses.join(",");
-    return `${walletsKey}|chains:${chainIdentifiers.join(",")}`;
+    return `${walletsKey}|chains:${chainIdentifiers.join(",")}|platform:${
+      isCapacitor ? "capacitor" : "web"
+    }`;
   }
 
   private getSortedChainIdentifiers(chains: Chain[]): string[] {
