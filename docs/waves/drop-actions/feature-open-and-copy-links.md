@@ -7,6 +7,7 @@ Parent: [Waves Index](../README.md)
 Wave drop actions provide two different link behaviors:
 
 - `Open drop` opens the selected drop inside the current thread context.
+- When available, opening a drop from the current list uses that rendered drop data first so the overlay appears immediately, then updates with any newer server data.
 - `Copy link` copies a shareable URL that targets a specific drop serial in its
   wave or DM thread.
 - The single-drop view uses a shared overlay where drop details stay visible while
@@ -36,6 +37,8 @@ Wave drop actions provide two different link behaviors:
 2. Choose one of these actions:
    - `Open drop`: opens drop details in the current route context by setting a
      `drop` query parameter.
+   - If the drop row is already rendered in the same leaderboard/list context,
+     the panel uses its current data to open instantly.
    - `Copy link`: copies an absolute URL targeting that drop's serial number.
 3. Share or open the copied URL:
    - Wave thread links target `/waves/{waveId}?serialNo={serialNo}`.
@@ -111,8 +114,8 @@ Wave drop actions provide two different link behaviors:
 
 - If clipboard access is blocked or denied, copy feedback is not guaranteed to
   appear; users can retry after browser permission/context issues are resolved.
-- If drop details fail to load after `Open drop`, users remain in the thread
-  and can retry opening the drop.
+- If details for an opened drop are not yet up to date, the overlay shows the
+  latest available data first and refreshes from the API in the background.
 - If serial-target jumping stalls, the temporary scrolling overlay clears and
   normal scrolling remains available.
 - If a target serial cannot be resolved immediately, users stay in the thread
