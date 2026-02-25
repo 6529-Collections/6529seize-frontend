@@ -3,7 +3,7 @@ import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { render, screen } from "@testing-library/react";
 
 jest.mock(
-  "@/components/manifoldMinting/ManifoldMintingConnect",
+  "@/components/manifold-minting/ManifoldMintingConnect",
   () => (props: any) => {
     props.onMintFor("0x1");
     return <div />;
@@ -51,6 +51,7 @@ describe("ManifoldMintingWidget", () => {
     render(
       <ManifoldMintingWidget
         contract="0x"
+        chain={{ id: 1 } as any}
         proxy="0x"
         abi={[]}
         claim={claim}

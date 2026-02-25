@@ -202,7 +202,10 @@ function summarizeAirdrops(entries: PhaseAirdrop[] | null): {
   }
 
   const uniqueWallets = new Set(
-    entries.map((item) => item.wallet.toLowerCase())
+    entries
+      .map((item) => item.wallet?.trim())
+      .filter((wallet): wallet is string => Boolean(wallet))
+      .map((wallet) => wallet.toLowerCase())
   );
   const totalAirdrops = entries.reduce(
     (sum, item) => sum + Number(item.amount ?? 0),
@@ -345,7 +348,7 @@ function ClaimTransactionModal({
 
   return createPortal(
     <div
-      className="tw-fixed tw-inset-0 tw-z-[1100] tw-relative tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
+      className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
     >
       {closable ? (
         <button
@@ -556,12 +559,34 @@ function getAnimationMimeType(claim: MintingClaim): string | null {
   )?.format;
   if (format === "HTML") return "text/html";
   if (format === "GLB") return "model/gltf-binary";
-  if (format) return "video/mp4";
+  if (format) {
+    const normalizedFormat = format.toUpperCase();
+    const formatMimeMap: Record<string, string> = {
+      WEBM: "video/webm",
+      MP4: "video/mp4",
+      MOV: "video/quicktime",
+      M4V: "video/x-m4v",
+    };
+    return formatMimeMap[normalizedFormat] ?? "video/mp4";
+  }
   if (isVideoUrl(animationUrl)) return "video/mp4";
   if (animationUrl.toLowerCase().endsWith(".glb")) return "model/gltf-binary";
   if (animationUrl.toLowerCase().endsWith(".gltf")) return "model/gltf+json";
   if (animationUrl.toLowerCase().endsWith(".html")) return "text/html";
   return "video/mp4";
+}
+
+function getSafeExternalUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return null;
+    }
+    return url.toString();
+  } catch {
+    return null;
+  }
 }
 
 function toArweaveUrl(location: string | null | undefined): string | null {
@@ -762,19 +787,8 @@ export default function DropForgeLaunchClaimPageClient({
     [setToast]
   );
 
-  const permissionFallback = DropForgePermissionFallback({
-    title: pageTitle,
-    permissionsLoading,
-    hasWallet,
-    hasAccess: canAccessLaunchPage,
-    titleIcon: DropForgeLaunchIcon,
-    titleRight: (
-      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-        <DropForgeExplorerLink />
-        <DropForgeTestnetIndicator />
-      </div>
-    ),
-  });
+  const shouldShowPermissionFallback =
+    permissionsLoading || !hasWallet || !canAccessLaunchPage;
 
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage) return;
@@ -1359,7 +1373,10 @@ export default function DropForgeLaunchClaimPageClient({
       manifoldClaim.costWei == null ||
       manifoldClaim.paymentReceiver == null ||
       manifoldClaim.erc20 == null ||
-      manifoldClaim.signingAddress == null
+      manifoldClaim.signingAddress == null ||
+      manifoldClaim.totalMax == null ||
+      manifoldClaim.startDate == null ||
+      manifoldClaim.endDate == null
     ) {
       setToast({
         message: "On-chain claim parameters are not available yet",
@@ -1780,8 +1797,22 @@ export default function DropForgeLaunchClaimPageClient({
     }));
   }, [claimWrite.data, waitClaimWrite.error]);
 
-  if (permissionFallback) {
-    return permissionFallback;
+  if (shouldShowPermissionFallback) {
+    return (
+      <DropForgePermissionFallback
+        title={pageTitle}
+        permissionsLoading={permissionsLoading}
+        hasWallet={hasWallet}
+        hasAccess={canAccessLaunchPage}
+        titleIcon={DropForgeLaunchIcon}
+        titleRight={
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+            <DropForgeExplorerLink />
+            <DropForgeTestnetIndicator />
+          </div>
+        }
+      />
+    );
   }
 
   return (
@@ -1946,14 +1977,18 @@ export default function DropForgeLaunchClaimPageClient({
                 className="sm:tw-col-span-2"
               >
                 {claim.external_url ? (
-                  <a
-                    href={claim.external_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:tw-text-primary-200 tw-break-all tw-text-primary-300 tw-no-underline"
-                  >
-                    {claim.external_url}
-                  </a>
+                  getSafeExternalUrl(claim.external_url) ? (
+                    <a
+                      href={getSafeExternalUrl(claim.external_url) ?? undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:tw-text-primary-200 tw-break-all tw-text-primary-300 tw-no-underline"
+                    >
+                      {claim.external_url}
+                    </a>
+                  ) : (
+                    <span className="tw-break-all">{claim.external_url}</span>
+                  )
                 ) : (
                   "—"
                 )}

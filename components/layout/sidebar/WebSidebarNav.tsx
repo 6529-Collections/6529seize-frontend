@@ -50,7 +50,7 @@ const WebSidebarNav = React.forwardRef<
   const { address } = useSeizeConnectContext();
   const { seizeSettings } = useSeizeSettings();
   const { appWalletsSupported } = useAppWallets();
-  const isDropForgeAdmin = useIsDropForgeAdmin();
+  const { isDropForgeAdmin } = useIsDropForgeAdmin();
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );

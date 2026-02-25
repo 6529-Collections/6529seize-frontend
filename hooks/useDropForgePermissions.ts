@@ -9,13 +9,18 @@ import { useMemo } from "react";
 export function useDropForgePermissions() {
   const { address, connectionState } = useSeizeConnectContext();
   const { seizeSettings, isLoaded } = useSeizeSettings();
-  const isDropForgeAdmin = useIsDropForgeAdmin();
+  const {
+    isDropForgeAdmin,
+    isFetching: isDropForgeAdminFetching,
+  } = useIsDropForgeAdmin();
 
   return useMemo(() => {
     const hasWallet = !!address;
     const isWalletInitializing = connectionState === "initializing";
     const permissionsLoading =
-      isWalletInitializing || (hasWallet && !isLoaded);
+      isWalletInitializing ||
+      (hasWallet && !isLoaded) ||
+      (hasWallet && isDropForgeAdminFetching);
     const isDistributionAdmin =
       hasWallet &&
       seizeSettings.distribution_admin_wallets.some((w) =>
@@ -43,5 +48,12 @@ export function useDropForgePermissions() {
       isClaimsAdmin,
       isDropForgeAdmin,
     };
-  }, [address, connectionState, isLoaded, isDropForgeAdmin, seizeSettings]);
+  }, [
+    address,
+    connectionState,
+    isLoaded,
+    isDropForgeAdmin,
+    isDropForgeAdminFetching,
+    seizeSettings,
+  ]);
 }

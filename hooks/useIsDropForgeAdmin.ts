@@ -6,7 +6,10 @@ import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-co
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useReadContract } from "wagmi";
 
-export function useIsDropForgeAdmin(): boolean {
+export function useIsDropForgeAdmin(): {
+  isDropForgeAdmin: boolean;
+  isFetching: boolean;
+} {
   const { address } = useSeizeConnectContext();
   const { contract, chain } = useDropForgeMintingConfig();
 
@@ -15,7 +18,13 @@ export function useIsDropForgeAdmin(): boolean {
     chainId: chain.id,
     abi: MEMES_MANIFOLD_PROXY_ABI,
     functionName: "owner",
+    query: {
+      enabled: !!address,
+    },
   });
 
-  return areEqualAddresses(readResult.data, address);
+  return {
+    isDropForgeAdmin: areEqualAddresses(readResult.data, address),
+    isFetching: Boolean(address) && (readResult.isLoading || readResult.isFetching),
+  };
 }

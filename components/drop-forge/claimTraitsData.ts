@@ -43,6 +43,12 @@ function normalizeTraitPrimitive(
     if (typeof rawValue === "number" && Number.isFinite(rawValue)) {
       return rawValue;
     }
+    if (rawValue == null) {
+      return fallbackValue;
+    }
+    if (typeof rawValue === "string" && rawValue.trim() === "") {
+      return fallbackValue;
+    }
     const parsed = Number(rawValue);
     return Number.isFinite(parsed) ? parsed : fallbackValue;
   };

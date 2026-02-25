@@ -4,6 +4,12 @@ import ManifoldMintingConnect from "@/components/manifold-minting/ManifoldMintin
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  __esModule: true,
+  CookieConsentProvider: ({ children }: any) => <>{children}</>,
+  useCookieConsent: jest.fn(() => ({ country: "US" })),
+}));
+
 jest.mock("@/components/header/user/HeaderUserConnect", () => () => (
   <div data-testid="header-connect" />
 ));

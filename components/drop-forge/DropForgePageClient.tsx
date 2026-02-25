@@ -20,15 +20,15 @@ export default function DropForgePageClient() {
     canAccessLaunch,
   } = useDropForgePermissions();
 
-  const permissionFallback = DropForgePermissionFallback({
-    title: DROP_FORGE_TITLE,
-    permissionsLoading,
-    hasWallet,
-    hasAccess: canAccessLanding,
-  });
-
-  if (permissionFallback) {
-    return permissionFallback;
+  if (permissionsLoading || !hasWallet || !canAccessLanding) {
+    return (
+      <DropForgePermissionFallback
+        title={DROP_FORGE_TITLE}
+        permissionsLoading={permissionsLoading}
+        hasWallet={hasWallet}
+        hasAccess={canAccessLanding}
+      />
+    );
   }
 
   return (

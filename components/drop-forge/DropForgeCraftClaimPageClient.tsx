@@ -188,17 +188,17 @@ export default function DropForgeCraftClaimPageClient({
     fetchClaim();
   }, [hasWallet, canAccessCraft, fetchClaim]);
 
-  const permissionFallback = DropForgePermissionFallback({
-    title: pageTitle,
-    permissionsLoading,
-    hasWallet,
-    hasAccess: canAccessCraft,
-    titleIcon: DropForgeCraftIcon,
-    titleRight: <DropForgeTestnetIndicator className="tw-flex-shrink-0" />,
-  });
-
-  if (permissionFallback) {
-    return permissionFallback;
+  if (permissionsLoading || !hasWallet || !canAccessCraft) {
+    return (
+      <DropForgePermissionFallback
+        title={pageTitle}
+        permissionsLoading={permissionsLoading}
+        hasWallet={hasWallet}
+        hasAccess={canAccessCraft}
+        titleIcon={DropForgeCraftIcon}
+        titleRight={<DropForgeTestnetIndicator className="tw-flex-shrink-0" />}
+      />
+    );
   }
 
   if (loading && !claim) {
@@ -1042,6 +1042,22 @@ function CoreInformationSection({
   async function handleCoreSave(e: React.FormEvent) {
     e.preventDefault();
     setCoreError(null);
+    if (
+      editionSize !== "" &&
+      (editionSizeNum == null ||
+        !Number.isInteger(editionSizeNum) ||
+        editionSizeNum <= 0)
+    ) {
+      setCoreError("Edition size must be a positive integer");
+      return;
+    }
+    if (
+      season !== "" &&
+      (seasonNum == null || !Number.isInteger(seasonNum) || seasonNum <= 0)
+    ) {
+      setCoreError("Season must be a positive integer");
+      return;
+    }
     setCoreSaving(true);
     try {
       const body: MintingClaimUpdateRequest = {
@@ -1215,9 +1231,25 @@ function MetadataSection({
   const externalUrlChanged =
     normalizedNextExternalUrl !== normalizedExistingExternalUrl;
 
-  const traitsChanged =
-    JSON.stringify(traits) !== JSON.stringify(claimToTraitsData(claim));
-  const metadataChanged = traitsChanged || externalUrlChanged;
+  const currentTraits = useMemo(() => claimToTraitsData(claim), [claim]);
+  const draftMetadataBody = useMemo(() => {
+    const body = traitsDataToUpdateRequest(traits, null, currentTraits);
+    const currentAttributesSnapshot = JSON.stringify(
+      traitsDataToUpdateRequest(currentTraits, null).attributes ?? []
+    );
+    const nextAttributesSnapshot = JSON.stringify(
+      traitsDataToUpdateRequest(traits, null).attributes ?? []
+    );
+    if (currentAttributesSnapshot === nextAttributesSnapshot) {
+      delete body.attributes;
+    }
+    if (externalUrlChanged) {
+      body.external_url =
+        normalizedNextExternalUrl === "" ? null : normalizedNextExternalUrl;
+    }
+    return body;
+  }, [currentTraits, externalUrlChanged, normalizedNextExternalUrl, traits]);
+  const metadataChanged = Object.keys(draftMetadataBody).length > 0;
 
   useEffect(() => {
     onPendingChange(metadataChanged);
@@ -1230,24 +1262,18 @@ function MetadataSection({
   async function handleTraitsSave(e: React.FormEvent) {
     e.preventDefault();
     setTraitsError(null);
-    const currentTraits = claimToTraitsData(claim);
     const previouslyFocused =
       typeof document === "undefined" ? null : document.activeElement;
     setTraitsSaving(true);
     try {
-      const body = traitsDataToUpdateRequest(traits, null, currentTraits);
-      const currentAttributesSnapshot = JSON.stringify(
-        traitsDataToUpdateRequest(currentTraits, null).attributes ?? []
-      );
-      const nextAttributesSnapshot = JSON.stringify(
-        traitsDataToUpdateRequest(traits, null).attributes ?? []
-      );
-      if (currentAttributesSnapshot === nextAttributesSnapshot) {
-        delete body.attributes;
-      }
-      if (externalUrlChanged) {
-        body.external_url =
-          normalizedNextExternalUrl === "" ? null : normalizedNextExternalUrl;
+      const body = {
+        ...draftMetadataBody,
+        ...(draftMetadataBody.attributes
+          ? { attributes: [...draftMetadataBody.attributes] }
+          : {}),
+      };
+      if (Object.keys(body).length === 0) {
+        return;
       }
       if (body.attributes) {
         const existingSeasonAttribute = (claim.attributes ?? []).find(
@@ -2096,7 +2122,7 @@ function DistributionPhotoLightbox({
 
   return createPortal(
     <div
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-relative tw-flex tw-items-center tw-justify-center"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-flex tw-items-center tw-justify-center"
     >
       <button
         type="button"

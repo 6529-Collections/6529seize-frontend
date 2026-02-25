@@ -50,6 +50,8 @@ function getTopUpModalEmoji(
 ): string {
   if (status === "success") return "/emojis/sgt_saluting_face.webp";
   if (status === "error") return "/emojis/sgt_sob.webp";
+  if (status === "confirm_wallet") return "/emojis/sgt_flushed.webp";
+  if (status === "submitted") return "/emojis/sgt_flushed.webp";
   return "/emojis/sgt_flushed.webp";
 }
 
@@ -201,7 +203,8 @@ export default function UserPageSubscriptionsTopUp() {
             <span>Error</span>
             <img
               src={getTopUpModalEmoji("error")}
-              alt="error"
+              alt=""
+              role="presentation"
               className="tw-h-6 tw-w-6"
             />
           </p>
@@ -215,7 +218,8 @@ export default function UserPageSubscriptionsTopUp() {
         <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
           <img
             src={getTopUpModalEmoji("confirm_wallet")}
-            alt="confirm_wallet"
+            alt=""
+            role="presentation"
             className="tw-h-6 tw-w-6"
           />
           <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
@@ -232,7 +236,8 @@ export default function UserPageSubscriptionsTopUp() {
           <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
             <img
               src={getTopUpModalEmoji("submitted")}
-              alt="submitted"
+              alt=""
+              role="presentation"
               className="tw-h-6 tw-w-6"
             />
             Transaction Submitted
@@ -264,7 +269,8 @@ export default function UserPageSubscriptionsTopUp() {
           <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
             <img
               src={getTopUpModalEmoji("success")}
-              alt="success"
+              alt=""
+              role="presentation"
               className="tw-h-6 tw-w-6"
             />
             Top Up Successful!

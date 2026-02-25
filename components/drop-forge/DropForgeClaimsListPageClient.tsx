@@ -211,17 +211,17 @@ export default function DropForgeClaimsListPageClient({
     return () => clearInterval(id);
   }, [hasWallet, hasAccess, hasUploadingClaims, fetchPage, page]);
 
-  const permissionFallback = DropForgePermissionFallback({
-    title,
-    permissionsLoading,
-    hasWallet,
-    hasAccess,
-    titleIcon: HeaderIcon,
-    titleRight: <DropForgeTestnetIndicator className="tw-flex-shrink-0" />,
-  });
-
-  if (permissionFallback) {
-    return permissionFallback;
+  if (permissionsLoading || !hasWallet || !hasAccess) {
+    return (
+      <DropForgePermissionFallback
+        title={title}
+        permissionsLoading={permissionsLoading}
+        hasWallet={hasWallet}
+        hasAccess={hasAccess}
+        titleIcon={HeaderIcon}
+        titleRight={<DropForgeTestnetIndicator className="tw-flex-shrink-0" />}
+      />
+    );
   }
 
   return (

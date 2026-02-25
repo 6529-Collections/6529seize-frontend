@@ -175,7 +175,9 @@ export default function ManifoldMintingConnect(
     if (country === "US") {
       return (
         <Link
-          href={globalThis.location.href}
+          href={
+            typeof window !== "undefined" ? window.location.href : "https://6529.io"
+          }
           className="text-center pt-2 pb-2"
           target="_blank" rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>

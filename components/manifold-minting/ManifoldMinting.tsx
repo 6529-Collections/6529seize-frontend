@@ -145,15 +145,16 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     };
   }, [instance, props.contract, props.title]);
 
-  const artist = useMemo(
-    () => ({
-      name: getTraitValue(instance?.asset.attributes, "Artist") ?? undefined,
-      handle:
-        getTraitValue(instance?.asset.attributes, "SEIZE Artist Profile") ??
-        undefined,
-    }),
-    [instance?.asset.attributes]
-  );
+  const artist = useMemo(() => {
+    const name = getTraitValue(instance?.asset.attributes, "Artist") ?? undefined;
+    const handle =
+      getTraitValue(instance?.asset.attributes, "SEIZE Artist Profile") ??
+      undefined;
+    if (!name && !handle) {
+      return undefined;
+    }
+    return { name, handle };
+  }, [instance?.asset.attributes]);
 
   useEffect(() => {
     if (instance) {

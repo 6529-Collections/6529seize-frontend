@@ -64,6 +64,7 @@ export default function ManifoldMintingWidget(
     }
 
     if (mintForAddress && props.claim.merkleRoot) {
+      setIsError(false);
       setFetchingMerkle(true);
       getMemesMintingProofsByAddress(
         props.claim.instanceId,
@@ -87,7 +88,12 @@ export default function ManifoldMintingWidget(
           setFetchingMerkle(false);
         });
     }
-  }, [mintForAddress, props.claim.merkleRoot, props.contract, props.claim.instanceId]);
+  }, [
+    mintForAddress,
+    props.claim.merkleRoot,
+    props.contract,
+    props.claim.instanceId,
+  ]);
 
   function getReadContractsParams() {
     const params: any = [];

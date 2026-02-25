@@ -16,7 +16,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 jest.mock(
-  "@/components/manifoldMinting/ManifoldMintingConnect",
+  "@/components/manifold-minting/ManifoldMintingConnect",
   () =>
     function MockConnect(props: any) {
       return (
@@ -40,6 +40,7 @@ const reset = jest.fn();
 
 const baseProps = {
   contract: "0xC",
+  chain: { id: 1 },
   proxy: "0xP",
   abi: [],
   claim: {

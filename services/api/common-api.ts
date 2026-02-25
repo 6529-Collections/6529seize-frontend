@@ -45,8 +45,7 @@ const handleApiError = async (res: Response): Promise<never> => {
       body?.error ??
       body?.message ??
       body?.details?.[0]?.message ??
-      res.statusText ??
-      "Something went wrong";
+      (res.statusText || "Something went wrong");
   } catch {
     try {
       const rawContent = await res.text();

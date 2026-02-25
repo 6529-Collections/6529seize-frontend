@@ -13,12 +13,7 @@ export default async function TheMemesMintPage() {
   const nft = await commonApiFetch<NFTWithMemesExtendedData>({
     endpoint: `memes_latest`,
     headers,
-    // Temporary override for mint target while backend response is being validated.
-    // }).then(async (responseExtended) => responseExtended);
-  }).then(async (responseExtended) => {
-    responseExtended.id = 462;
-    return responseExtended;
-  });
+  }).then(async (responseExtended) => responseExtended);
 
   return (
     <main className={styles["main"]}>

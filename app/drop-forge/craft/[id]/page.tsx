@@ -33,8 +33,12 @@ export async function generateMetadata({
   params,
 }: Readonly<Props>): Promise<Metadata> {
   const { id } = await params;
+  const claimId = Number.parseInt(id, 10);
   return getAppMetadata({
-    title: `Claim #${id} | Craft Claims`,
+    title:
+      Number.isFinite(claimId) && claimId >= 0
+        ? `Claim #${claimId} | Craft Claims`
+        : "Invalid Claim | Craft Claims",
     description: DROP_FORGE_TITLE,
   });
 }
