@@ -6,9 +6,10 @@ Standard wave drop cards render the full post body inline. Long posts are not
 collapsed behind a `Show full post` control, so reading a long drop does not
 require an in-card expand action. Image attachments follow the same inline card
 flow, with higher-resolution image loading in single-drop detail contexts and
-fullscreen controls in the image viewer modal. In memes-specific drop cards,
-description text keeps authored newline breaks instead of collapsing into one
-paragraph.
+fullscreen controls in the image viewer modal. Compact reply rows are rendered in a
+fixed-height container so grouped replies stay visually stable while they load.
+In memes-specific drop cards, description text keeps authored newline breaks
+instead of collapsing into one paragraph.
 
 ## Location in the Site
 
@@ -74,6 +75,9 @@ paragraph.
 - Consecutive reply cards that are grouped together can suppress repeated
   parent-drop preview headers, so a short sequence from the same author to the
   same parent stays visually compact.
+- Reply rows stay in a fixed 24-pixel row while loading and show reply text within a
+  single-line constrained space; long replies still open the full target drop when
+  activated.
 - Selecting text in a drop body suppresses click-through navigation so users
   can copy text without opening drop details. Structured timeline copy behavior
   is covered in [Wave Drop Selection Copy](feature-selection-copy.md).

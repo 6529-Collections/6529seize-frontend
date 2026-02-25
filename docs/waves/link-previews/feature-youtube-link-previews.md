@@ -3,8 +3,10 @@
 ## Overview
 
 Wave drop markdown renders supported YouTube links as inline preview cards
-instead of plain URL text. The preview card shows a thumbnail, video title, and
-channel name, with a play action that swaps the thumbnail for an inline player.
+instead of plain URL text. In chat and message surfaces, the card is rendered in
+a fixed-height frame so drops keep stable spacing while metadata loads or fails.
+The preview card shows a thumbnail, video title, and channel name, with a play
+action that swaps the thumbnail for an inline player.
 
 ## Location in the Site
 
@@ -21,11 +23,13 @@ channel name, with a play action that swaps the thumbnail for an inline player.
 ## User Journey
 
 1. Open a wave or direct-message thread with a YouTube URL in drop text.
-2. The URL renders as a preview card frame while metadata loads.
+2. The URL renders as a fixed-size preview card frame while metadata loads.
 3. The card updates to show thumbnail, title, and channel once metadata is
    available.
-4. Select the preview card play action to load the inline YouTube player.
-5. Continue reading the thread with playback inside the same drop card.
+4. If metadata cannot be resolved, users see a fallback card with a direct link
+   and message text inside the same preview frame.
+5. Select the preview card play action to load the inline YouTube player.
+6. Continue reading the thread with playback inside the same drop card.
 
 ## Common Scenarios
 
@@ -44,6 +48,9 @@ channel name, with a play action that swaps the thumbnail for an inline player.
 
 - Invalid or unsupported YouTube paths stay as regular links instead of preview
   cards.
+- If preview loading fails, fallback text is `Failed to load YouTube preview`.
+- If preview data is unavailable (`null` response), fallback text is
+  `YouTube preview unavailable`.
 - Multiple supported YouTube links in the same drop each render their own
   preview card.
 - If link previews are hidden for a drop, YouTube URLs render as plain links
@@ -51,7 +58,7 @@ channel name, with a play action that swaps the thumbnail for an inline player.
 
 ## Failure and Recovery
 
-- While preview data is loading, users see a placeholder card.
+- While preview data is loading, users see a fixed-height placeholder card.
 - If preview loading fails, the card falls back to an external link state with
   a failure message.
 - If preview data is unavailable, the card falls back to an external link state

@@ -3,9 +3,10 @@
 ## Overview
 
 Wave drop markdown renders many non-embedded links as rich preview cards instead
-of plain URL text. These generic cards use fetched page metadata (title,
-description, domain, and image when available) and keep standard link actions
-next to the card.
+of plain URL text. In chat/message layouts, these generic cards are constrained to
+a fixed preview frame so list spacing stays stable while loading and on content
+errors. The cards use fetched page metadata (title, description, domain, and
+image when available) and keep standard link actions next to the card.
 
 ## Location in the Site
 
@@ -39,6 +40,8 @@ next to the card.
 - Metadata fields that include long unbroken URL-like text (for example hashes
   or long path/query segments) wrap inside the card so preview width stays
   aligned with the drop and adjacent action buttons remain visible.
+- In chat/message contexts, preview rows reserve a fixed frame size during loading
+  to avoid layout jumps in active timelines.
 - Dedicated preview handlers take priority for known providers (for example
   YouTube, Twitter/X, TikTok, Farcaster, Google Workspace, Wikimedia, NFT
   marketplaces, Art Blocks, ENS targets, Compound links, and `pepe.wtf`), so
@@ -61,7 +64,7 @@ next to the card.
 
 ## Failure and Recovery
 
-- While metadata is loading, users see a skeleton placeholder.
+- While metadata is loading, users see a fixed-height skeleton placeholder.
 - If metadata fetch fails or returns no useful preview content, the UI falls
   back to a clickable link state instead of a rich metadata card.
 - If preview visibility toggling fails, the drop returns to its prior state and
