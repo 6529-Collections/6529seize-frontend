@@ -16,6 +16,7 @@ browsable without one oversized index page.
 - [Leaderboard](leaderboard/README.md): leaderboard states, timeline context, and top-voter lists.
 - [Sidebars](sidebars/README.md): right-sidebar tabs/group management plus Brain/DM sidebar metadata.
 - [Memes](memes/README.md): Memes flow metadata, submission workflow, and leaderboard-related posting behavior.
+- [Outcomes](feature-outcome-lists.md): outcome cards, winner rows, and outcome distribution loading.
 
 ## Flows
 
