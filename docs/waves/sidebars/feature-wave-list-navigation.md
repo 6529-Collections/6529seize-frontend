@@ -29,6 +29,8 @@ wave again clears the active selection and returns to the section home view.
 4. Click the same active row again to clear selection and return to `/waves` or
    `/messages`.
 5. Use back/forward browser controls to move through previously selected waves.
+6. When a wave row has unread metadata, selection also carries a `divider` query
+   value so the thread can open near the first unread boundary.
 
 ## Common Scenarios
 
@@ -38,6 +40,7 @@ wave again clears the active selection and returns to the section home view.
   page refresh.
 - Hovering a wave row on desktop before clicking to warm route data for faster
   transitions.
+- Opening an unread wave from the list can restore divider context for that thread.
 
 ## Edge Cases
 

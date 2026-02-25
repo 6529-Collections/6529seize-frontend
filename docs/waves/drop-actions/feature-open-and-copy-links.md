@@ -39,8 +39,9 @@ Wave drop actions provide two different link behaviors:
    - Wave thread links target `/waves/{waveId}?serialNo={serialNo}`.
    - Direct-message links target `/messages?wave={waveId}&serialNo={serialNo}`.
 4. When a thread opens with `serialNo`, the chat jumps/highlights the target.
-5. After the jump is initialized, serial-target query parameters are cleared
-   from the URL so normal thread browsing can continue.
+5. When a thread opens with `serialNo` and optional `divider`, the jump initializes
+   and both `serialNo` and `divider` query parameters are cleared from the URL so
+   normal thread browsing can continue.
 6. In app-shell contexts, opening a drop presents a full-viewport single-drop
   panel:
    - On desktop: the drop remains on the left and discussion can be toggled into

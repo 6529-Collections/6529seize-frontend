@@ -12,6 +12,7 @@ Drop action docs cover interaction behavior on posted drops.
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)
+- [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
 - [Wave Drop Media Download](feature-media-download.md)
 

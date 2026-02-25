@@ -6,6 +6,8 @@ Wave chat keeps users anchored to the newest messages when they are already at t
 bottom, while avoiding forced jumps when they scroll away to read older content.
 On Apple mobile clients, newly arrived messages can be queued as pending while
 users continue reading older messages.
+If a wave opens with unread metadata, the chat can also show a `New Messages`
+divider and jump control anchored to the first unread serial.
 When users jump to a specific drop serial, chat also briefly highlights the
 targeted drop so it is easier to locate in the list.
 
@@ -37,7 +39,9 @@ targeted drop so it is easier to locate in the list.
    of auto-jumping.
 6. If the thread opens (or jumps) to a targeted serial number, chat scrolls to
    that drop and applies a temporary highlight that fades out.
-7. On Apple mobile clients, when you are not at the bottom and new messages
+7. If the wave opens with unread context, a divider and floating jump control
+   mark the first unread boundary.
+8. On Apple mobile clients, when you are not at the bottom and new messages
    arrive, a counter appears on the bottom control and tapping it reveals pending
    messages, then re-pins to latest.
 
@@ -51,11 +55,15 @@ targeted drop so it is easier to locate in the list.
   loaded messages and clears when that page finishes loading.
 - When jumping to a targeted serial number, the target drop is briefly
   highlighted to help users confirm they reached the intended message.
+- With unread context, the divider row marks where new content starts, and the
+  jump control points to that serial boundary.
 - On Apple mobile clients, newly arrived messages can be held behind a pending
   counter; tapping the bottom control reveals them and re-pins to latest.
 - If pending message count is large, the control label caps at `99+`.
 - While reading older content on Apple mobile, the most recently visible serial
   remains visible while newer serials queue as pending.
+- If a thread opens from a link with `serialNo` plus optional `divider`, the
+  divider context is applied and those query params are cleared after initialization.
 
 ## Edge Cases
 
@@ -79,6 +87,8 @@ targeted drop so it is easier to locate in the list.
   clears automatically and normal chat interactions continue.
 - In environments with limited browser observer support, serial-target jumps still
   complete and targeted-drop highlighting remains temporary.
+- If `serialNo` and `divider` jump params fail to target visible data immediately,
+  users can continue reading while the jump control remains available.
 
 ## Limitations / Notes
 

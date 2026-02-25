@@ -5,6 +5,8 @@ The Brain and direct-message wave lists show a `Last drop:` label below each
 wave name so users can quickly see when the latest content arrived. The label
 uses the freshest timestamp known to the client from server snapshots and live
 events, so it does not roll back to an older time after newer activity appears.
+Unread badges reflect unread-drop counts and are hidden for muted waves, which
+show a muted bell icon instead.
 
 ## Location in the Site
 - Desktop Brain sidebar from the `Brain` tab on `/` and `/{user}`
@@ -22,16 +24,21 @@ events, so it does not roll back to an older time after newer activity appears.
    immediately to the newest value and keeps counting elapsed time.
 3. As users move between views, each wave row keeps showing the latest known
    drop time for quick triage before opening the wave.
+4. Muted rows open normally, with muted-status iconography replacing the unread count
+   badge in the sidebar list.
 
 ## Common Scenarios
 - A new drop arrives while Brain is open: unread badges increase and `Last
   drop` updates immediately.
+- Muted waves can still refresh `Last drop` timing while unread counts remain
+  muted-state specific.
 - Wave data refreshes with a newer timestamp while the row is already visible: the
   `Last drop` value updates right away, then continues to advance each minute.
 - A pinned wave updates from another participant: the list entry shows the newer
   time without waiting for a full reload.
 - DM waves receive new messages: DM list entries follow the same `Last drop`
   update behavior as other Brain wave entries.
+- Unread badge values are capped at `99+` and can be suppressed on muted waves.
 
 ## Edge Cases
 - A live event arrives after a server snapshot: the label keeps the newer value
