@@ -14,44 +14,42 @@ groups exist, filter the leaderboard to a single group.
 ## Entry Points
 
 - Open a wave and select the `Leaderboard` tab.
-- Use the sort tabs or `Sort` dropdown to change ordering.
-- If curation groups are available, use the `Group` tabs or dropdown to filter.
+- Use the `Sort` dropdown to change ordering.
+- If curation groups are available, use the desktop `Group` tabs or mobile `Group`
+  dropdown to filter submissions.
 
 ## User Journey
 
 1. Open a wave with a `Leaderboard` tab.
 2. Review the header controls above the leaderboard results.
-3. Select a sort option to reorder the current leaderboard view.
-4. (Optional) Select a group filter to show only submissions in that group.
-5. Switch between sorts or groups to compare ordering.
+3. Use `Sort` to reorder the current leaderboard view.
+4. (Optional) Use the `Group` control to narrow the leaderboard to one group.
+5. Switch between sorts or groups to compare ordering and composition.
 
 ## Common Scenarios
 
-- Sort options appear in this order: `Current Vote`, `Projected Vote`, `Hot`,
-  `Newest`.
+- The `Sort` dropdown contains: `Current Vote`, `Projected Vote`, `Hot`, `Newest`.
 - `Current Vote` orders drops by the current vote ranking for the wave.
 - `Projected Vote` orders drops by the leaderboard's projected vote data.
 - `Hot` surfaces drops that are trending within the wave.
 - `Newest` orders drops by the most recent submissions.
-- `All submissions` resets the group filter to the full leaderboard.
-- On small screens, sort controls render as a `Sort` dropdown while group controls
-  use a compact `Group` selector; wide layouts use inline sort tabs.
-- On narrow and compact layouts, sort and group controls remain in a single row with
-  labels preserved.
-- On wide layouts, group options can render as inline tabs while narrow layouts use
-  a compact dropdown.
-- Selected group filters are preserved in the wave URL using the
-  `curated_by_group` query parameter.
-- If a saved group filter no longer resolves to a valid curation group, the
-  filter resets to `All submissions`.
+- Sort control is rendered as a dropdown on both mobile and desktop.
+- Group filtering includes `All submissions` plus each available curation group.
+- On desktop (`md` and up), group filters render as inline tabs.
+- On small screens (`< md`), group filters render as a `Group` dropdown.
+- Group tabs show compact group styling and keep the active tab visually selected.
+- On mobile, both controls remain in a compact row and keep readable labels.
+- If a saved group filter no longer resolves to a valid curation group, the filter
+  resets to `All submissions`.
 
 ## Edge Cases
 
 - Sort and group combinations can legitimately produce empty leaderboards.
-- If a wave has no curation groups, the group filter does not appear.
-- Waves with many groups may show a long list in the `Group` dropdown.
-- On very small screens, all sort and group labels remain visible in a single line
-  using the same spacing as the page controls.
+- If a wave has no curation groups, only the `Sort` dropdown is shown.
+- Waves with many groups may show a longer list in the small-screen `Group`
+  dropdown.
+- On very small screens, controls remain single-row and avoid truncating their label
+  text with a compact width.
 
 ## Failure and Recovery
 
@@ -64,6 +62,8 @@ groups exist, filter the leaderboard to a single group.
 - Sorting and filtering only change the leaderboard presentation; they do not
   change votes or wave configuration.
 - Sort labels describe ordering, not guaranteed ranking formulas.
+- Group names and membership are determined by the curation-group configuration for the
+  active wave.
 
 ## Related Pages
 
