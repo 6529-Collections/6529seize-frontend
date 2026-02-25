@@ -7,6 +7,10 @@ On desktop web, `Enter` submits when the draft is submittable, while
 `Shift+Enter` inserts a newline. Repeated `Shift+Enter` presses keep intentional
 blank spacing in published markdown drops.
 
+In storm-composition mode (multi-part submissions), `Enter` finalizes the current
+draft part when prior parts already exist. That adds the current part to the draft
+queue and keeps the composer open for additional parts.
+
 ## Location in the Site
 
 - Wave detail threads: `/waves/{waveId}`
@@ -25,6 +29,11 @@ blank spacing in published markdown drops.
 2. Press `Shift+Enter` to insert a new line in the draft.
 3. Continue editing, including multi-line content when needed.
 4. Press `Enter` to submit when the draft is valid and submittable.
+5. If composing a multi-part storm drop and there is already at least one prior
+   part, press `Enter` to finalize the current part and immediately continue with
+   another part.
+6. With existing storm parts and an empty composer, press `Enter` to submit the
+   full storm as a complete drop.
 
 ## Common Scenarios
 
@@ -36,6 +45,10 @@ blank spacing in published markdown drops.
   paragraph instead of keeping heading formatting.
 - When autocomplete is open for mentions, hashtags, or wave mentions, `Enter`
   confirms the highlighted suggestion instead of submitting immediately.
+- In storm-composition flows, `Enter` adds a new part first when the active
+  draft has content.
+- In storm-composition flows, `Enter` with no active draft content submits all
+  queued parts as the final post.
 
 ## Edge Cases
 
@@ -46,6 +59,10 @@ blank spacing in published markdown drops.
 - If the draft has no submit-ready content, `Enter` does not post.
 - On mobile web or Capacitor clients, composer keyboard submit shortcuts are not
   used.
+- If a required part is still being edited and cannot be finalized due missing
+   requirement checks, `Enter` keeps the composer in edit mode.
+- If a storm composer has existing parts but no active draft content, `Enter`
+  submits the entire storm and exits composer as a single submission.
 
 ## Failure and Recovery
 
