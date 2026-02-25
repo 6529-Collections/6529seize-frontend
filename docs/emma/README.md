@@ -6,6 +6,7 @@ EMMA docs cover user-facing behavior in the distribution-plan workspace under
 ## Pages
 
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
+- [The Memes Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
 
 ## Related Pages
 

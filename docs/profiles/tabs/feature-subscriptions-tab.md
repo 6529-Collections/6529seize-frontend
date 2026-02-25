@@ -4,7 +4,7 @@
 
 The `Subscriptions` tab shows a profile's subscription status and history for
 upcoming drops. Eligible users can update subscription settings, top up ETH,
-and manage per-drop upcoming subscriptions.
+set edition preference, and manage per-drop upcoming subscription counts.
 
 ## Location in the Site
 
@@ -28,6 +28,7 @@ and manage per-drop upcoming subscriptions.
 3. If viewing your own connected profile (without proxy mode), update:
    - subscription mode (`Manual` or `Automatic`)
    - edition preference (`One edition` or `All eligible`)
+   - edition preference count (`1` to total eligible count)
    - top-up amount using preset or custom card-count options
 4. Review and optionally update upcoming drop subscriptions.
 5. Use history accordions to review redeemed subscriptions, logs, and top-ups.
@@ -37,12 +38,16 @@ and manage per-drop upcoming subscriptions.
 - Own profile management:
   - refresh current balance
   - change airdrop address via delegation link
-  - toggle mode and edition preference
+  - toggle mode and set edition preference (`One edition` / `All eligible`)
   - top up using quick options such as `1 Card`, `Remaining SZN`, `Remaining Year`,
     and `Remaining Epoch`
+  - set per-drop subscription quantity from `1` up to your eligibility count
   - reveal `Show Deep Time Subscriptions` to include `Remaining Period`,
     `Remaining Era`, and `Remaining Eon`
   - enter a custom card count with `Other`
+- Read-only viewing for minting-day controls:
+  - the first upcoming row cannot be toggled or re-quantified when it is
+    `Minting Today`
 - Read-only viewing for another profile:
   - settings are visible but edit controls are disabled
   - top-up section is not shown
@@ -64,6 +69,10 @@ and manage per-drop upcoming subscriptions.
   early by local timezone/time-of-day.
 - Top-up action requires selecting a valid option before `Send` is enabled.
 - Per-drop subscription count is capped by the profile's eligibility count.
+- `Mode` and `Upcoming Drops` rows show updated UTC last-update/time context:
+  - `Mode` includes the last settings update timestamp when available.
+  - The first upcoming row displays current phase/position, airdrop address,
+    and currently subscribed quantity for that drop.
 
 ## Failure and Recovery
 
@@ -85,6 +94,8 @@ and manage per-drop upcoming subscriptions.
 - Top-ups send ETH to the configured subscriptions contract and chain only.
 - Preset top-up options depend on currently remaining mint counts and can change
   over time.
+- Edition preference changes affect whether subscriptions are requested for one
+  eligible edition or all eligible editions.
 
 ## Related Pages
 
