@@ -10,6 +10,8 @@ while users read older messages.
 
 On mobile, the same control combines with the bottom pending-message control so both
 actions stay within reach.
+On desktop, the control can be dismissed with a close action, a right-swipe
+gesture, or Escape (unless focus is inside a dialog).
 
 ## Location in the Site
 
@@ -42,6 +44,9 @@ actions stay within reach.
 6. Once you return to the unread divider position, the control auto-hides.
 7. Sending a new message clears the divider state for the active chat.
 
+- You can dismiss the control without jumping by swiping it right or pressing
+  Escape.
+
 ## Common Scenarios
 
 - A row opened from a muted-but-following wave still navigates as usual; only
@@ -50,6 +55,8 @@ actions stay within reach.
   preserves an unread anchor near the intended boundary after initial hydration.
 - On iOS mobile, unread and pending-message controls can be shown together as a
   compact combined control group.
+- On desktop, the close action is available to hide the unread control temporarily,
+  and swiping right from the unread control dismisses it without changing scroll.
 - If new messages arrive while the divider stays out of view, the control remains
   available without forcing automatic scroll jumps.
 - If users read past the divider position, the control auto-dismisses.
@@ -63,6 +70,8 @@ actions stay within reach.
   and resolves as data renders.
 - If users navigate in and out of the unread boundary, the control can reappear or hide
   based on current scroll position and divider context.
+- Dismissing the control removes it only for that current unread boundary.
+  It can reappear when the divider changes or the thread is reopened.
 
 ## Failure and Recovery
 
@@ -72,6 +81,8 @@ actions stay within reach.
 - If unread jump actions stall on a large list, users can manually scroll and retry
   via the floating control.
 - If unread metadata arrives late, the divider may appear after initial hydration.
+- If you dismiss the control and need it again for the same boundary, reopen the
+  same thread (or navigate away and back) to clear the dismissal state.
 
 ## Limitations / Notes
 

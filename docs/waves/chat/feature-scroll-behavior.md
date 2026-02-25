@@ -13,6 +13,9 @@ If a wave opens with unread metadata, the message list can also show a `New
 Messages` divider at the unread boundary.
 A floating control jumps to that point and keeps unread navigation available while
 users read older messages.
+If unread navigation and pending-message reveal are both active, the controls are
+shown together in a compact stacked pair near the bottom to keep both actions
+reachable.
 Jumps can resolve targets outside the currently loaded message window by loading
 a focused set of surrounding drops first.
 During jump and top-pagination flows, long embedded Twitter/X previews can enter
@@ -74,6 +77,11 @@ less disruptive.
 - If pending message count is large, the control label caps at `99+`.
 - While reading older content on Apple mobile, the most recently visible serial
   remains visible while newer serials queue as pending.
+- If unread and pending controls are both active, they are combined so both actions
+  remain reachable from one area.
+- The unread jump control can be dismissed by swiping it right or pressing Escape.
+  When dismissed, chat navigation continues normally and the control stays away
+  until unread context changes.
 - If a thread opens from a link with `serialNo` plus `divider`, the divider context
   is applied and those query params are cleared after initialization.
 - If a thread opens with only `serialNo`, the divider still uses the current unread
@@ -95,6 +103,8 @@ less disruptive.
 - On non-Apple clients, pending messages are not hidden behind a pending counter.
 - On mobile app clients with keyboard focus, the scroll container contracts so
   composing does not force an extra trailing blank area.
+- If both controls are active together, they can appear as a compact stacked control
+  cluster at the bottom instead of two separate overlays.
 
 ## Failure and Recovery
 
