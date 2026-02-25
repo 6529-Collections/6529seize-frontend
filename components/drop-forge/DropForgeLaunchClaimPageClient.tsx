@@ -1161,6 +1161,7 @@ export default function DropForgeLaunchClaimPageClient({
     [phaseData, selectedPhase]
   );
   const isMetadataOnlyUpdateMode = primaryStatus?.key === "live_needs_update";
+  const safeClaimExternalUrl = claim ? getSafeExternalUrl(claim.external_url) : null;
 
   useEffect(() => {
     setPhaseAllowlistWindows((prev) => {
@@ -1976,22 +1977,26 @@ export default function DropForgeLaunchClaimPageClient({
                 label="External URL"
                 className="sm:tw-col-span-2"
               >
-                {claim.external_url ? (
-                  getSafeExternalUrl(claim.external_url) ? (
+                {(() => {
+                  if (!claim.external_url) {
+                    return "—";
+                  }
+                  if (!safeClaimExternalUrl) {
+                    return (
+                      <span className="tw-break-all">{claim.external_url}</span>
+                    );
+                  }
+                  return (
                     <a
-                      href={getSafeExternalUrl(claim.external_url) ?? undefined}
+                      href={safeClaimExternalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:tw-text-primary-200 tw-break-all tw-text-primary-300 tw-no-underline"
                     >
                       {claim.external_url}
                     </a>
-                  ) : (
-                    <span className="tw-break-all">{claim.external_url}</span>
-                  )
-                ) : (
-                  "—"
-                )}
+                  );
+                })()}
               </DropForgeFieldBox>
             </div>
           </LaunchAccordionSection>

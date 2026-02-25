@@ -171,13 +171,13 @@ export default function ManifoldMintingConnect(
     return <>{mintForFren ? printMintForFren() : printMintForMe()}</>;
   }
 
+  const mintOn6529Href = globalThis.window?.location?.href ?? "https://6529.io";
+
   if (isIos) {
     if (country === "US") {
       return (
         <Link
-          href={
-            typeof window !== "undefined" ? window.location.href : "https://6529.io"
-          }
+          href={mintOn6529Href}
           className="text-center pt-2 pb-2"
           target="_blank" rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>
