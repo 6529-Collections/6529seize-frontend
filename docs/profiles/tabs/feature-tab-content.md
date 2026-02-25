@@ -36,13 +36,11 @@ and navigation.
   [xTDH Profile Tab](feature-xtdh-tab.md).
 - The `xTDH` tab is currently labeled Beta.
 - Tab availability can vary by runtime context (feature flags/device/country).
-
-## Not Yet Documented
-
-- TODO: Document proxy-management success/failure flows in the Proxy tab.
-- TODO: Document groups membership and setup flows in the Groups tab.
-- TODO: Document Waves tab behavior, entry requirements, and fallbacks.
-- TODO: Document Followers tab states and interactions.
+- Dedicated coverage exists for these behavior areas:
+  - [Profile Proxy Tab](feature-proxy-tab.md)
+  - [Profile Groups Tab](feature-groups-tab.md)
+  - [Profile Waves Tab](feature-waves-tab.md)
+  - [Profile Followers Tab](feature-followers-tab.md)
 
 ## Related Pages
 

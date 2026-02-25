@@ -9,7 +9,11 @@ This subarea documents user-visible behavior inside profile tabs.
 - [Profile Brain Tab](feature-brain-tab.md)
 - [Profile Identity Tab](feature-identity-tab.md)
 - [Profile Identity Statements](feature-identity-statements.md)
+- [Profile Proxy Tab](feature-proxy-tab.md)
+- [Profile Groups Tab](feature-groups-tab.md)
 - [Collected Tab and Transfer Controls](feature-collected-tab.md)
+- [Profile Followers Tab](feature-followers-tab.md)
+- [Profile Waves Tab](feature-waves-tab.md)
 - [Profile Stats Tab](feature-stats-tab.md)
 - [Profile Subscriptions Tab](feature-subscriptions-tab.md)
 - [Profile xTDH Tab](feature-xtdh-tab.md)
@@ -17,7 +21,7 @@ This subarea documents user-visible behavior inside profile tabs.
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Profile Navigation Flow](../navigation/flow-navigation.md)
 
 ## Troubleshooting
 
@@ -25,8 +29,7 @@ This subarea documents user-visible behavior inside profile tabs.
 
 ## Stubs
 
-- Profile Tab Content (`feature-tab-content.md`): TODO coverage for Proxy, Groups,
-  Waves, and Followers tab-specific behavior.
+- None.
 
 ## Related Areas
 

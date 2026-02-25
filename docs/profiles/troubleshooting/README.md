@@ -7,11 +7,11 @@ and profile-load failures.
 
 ## Features
 
-- No dedicated feature page documented yet.
+- [Profile Route and Tab Behavior](../navigation/feature-tabs.md)
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Profile Navigation Flow](../navigation/flow-navigation.md)
 
 ## Troubleshooting
 

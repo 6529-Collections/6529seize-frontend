@@ -10,11 +10,11 @@ This subarea covers profile-adjacent informational routes in the About section.
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Primary Address Reference Table Flow](flow-primary-address-reference-table.md)
 
 ## Troubleshooting
 
-- No dedicated troubleshooting page documented yet.
+- [Primary Address Reference Table Troubleshooting](troubleshooting-primary-address-reference-table.md)
 
 ## Stubs
 

@@ -28,5 +28,5 @@ normalization, and the shared profile header behavior.
 
 - [Profiles Index](../README.md)
 - [Profile Tabs Index](../tabs/README.md)
-- [Navigation Index](../README.md)
+- [Navigation Index](../../navigation/README.md)
 - [Shared Index](../../shared/README.md)

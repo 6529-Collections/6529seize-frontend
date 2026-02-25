@@ -11,7 +11,7 @@ oversized index.
 - [Navigation](navigation/README.md): profile route model, tab availability,
   canonical redirects, and header behavior.
 - [Tabs](tabs/README.md): per-tab behavior for Brain, Identity (Rep + NIC),
-  Collected, Stats, Subscriptions, plus tab-content coverage tracking.
+  Collected, Proxy, Groups, Followers, Waves, Stats, Subscriptions, and xTDH.
 - [About](about/README.md): `/about/primary-address` behavior and reference-table
   expectations.
 
@@ -25,8 +25,8 @@ oversized index.
 
 ## Stubs
 
-- [Profile Tab Content](tabs/feature-tab-content.md): tracks not-yet-documented
-  behavior for Proxy, Groups, Waves, and Followers tabs.
+- [Profile Tab Content](tabs/feature-tab-content.md): profile-level tab behavior
+  cross-links and route overview.
 
 ## Related Areas
 
