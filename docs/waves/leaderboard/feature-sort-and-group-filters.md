@@ -38,6 +38,12 @@ groups exist, filter the leaderboard to a single group.
   `Sort` and `Group`.
 - On narrow layouts, control labels stay on one line so the full option text remains
   readable without wrapping.
+- On wide layouts, group options can render as inline tabs while narrow layouts use
+  a compact dropdown.
+- Selected group filters are preserved in the wave URL using the
+  `curated_by_group` query parameter.
+- If a saved group filter no longer resolves to a valid curation group, the
+  filter resets to `All submissions`.
 
 ## Edge Cases
 

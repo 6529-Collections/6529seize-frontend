@@ -14,6 +14,7 @@ and to include or exclude individual identities without leaving the current
 wave view.
 
 For non-chat waves, the same panel also includes `Curation Groups` management.
+Curated groups drive curation tagging in curation-capable leaderboard waves.
 
 ## Location in the Site
 
@@ -67,6 +68,8 @@ For non-chat waves, the same panel also includes `Curation Groups` management.
 - Identity suggestions open after at least 3 typed characters.
 - Keyboard navigation is supported in identity suggestions (`ArrowUp`,
   `ArrowDown`, `Enter`).
+- Curation groups are managed separately from access scope rows and do not alter
+  general wave visibility by themselves.
 
 ## Failure and Recovery
 
