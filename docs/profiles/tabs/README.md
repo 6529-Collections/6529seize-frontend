@@ -11,6 +11,7 @@ This subarea documents user-visible behavior inside profile tabs.
 - [Collected Tab and Transfer Controls](feature-collected-tab.md)
 - [Profile Stats Tab](feature-stats-tab.md)
 - [Profile Subscriptions Tab](feature-subscriptions-tab.md)
+- [Profile xTDH Tab](feature-xtdh-tab.md)
 - [Profile Tab Content](feature-tab-content.md)
 
 ## Flows
@@ -23,8 +24,8 @@ This subarea documents user-visible behavior inside profile tabs.
 
 ## Stubs
 
-- [Profile Tab Content](feature-tab-content.md): TODO coverage for xTDH,
-  Proxy, Groups, Waves, and Followers tab-specific behavior.
+- [Profile Tab Content](feature-tab-content.md): TODO coverage for Proxy, Groups,
+  Waves, and Followers tab-specific behavior.
 
 ## Related Areas
 

@@ -26,7 +26,7 @@ oversized index.
 ## Stubs
 
 - [Profile Tab Content](tabs/feature-tab-content.md): tracks not-yet-documented
-  behavior for xTDH, Proxy, Groups, Waves, and Followers tabs.
+  behavior for Proxy, Groups, Waves, and Followers tabs.
 
 ## Related Areas
 

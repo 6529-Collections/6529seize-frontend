@@ -22,7 +22,7 @@ and navigation.
   [Profile Brain Tab](feature-brain-tab.md).
 - Identity statement behavior is documented in
   [Profile Identity Statements](feature-identity-statements.md).
-- Identity, xTDH, Stats, Subscriptions, Proxy, Groups, Waves, and Followers each
+- Identity, Stats, xTDH, Subscriptions, Proxy, Groups, Waves, and Followers each
   have their own dedicated tab view.
 - Stats tab behavior is documented in
   [Profile Stats Tab](feature-stats-tab.md).
@@ -30,12 +30,13 @@ and navigation.
   [Profile Subscriptions Tab](feature-subscriptions-tab.md).
 - Collected tab behavior is documented in
   [Profile Collected Tab](feature-collected-tab.md).
+- xTDH tab behavior is documented in
+  [xTDH Profile Tab](feature-xtdh-tab.md).
 - The `xTDH` tab is currently labeled Beta.
 - Tab availability can vary by runtime context (feature flags/device/country).
 
 ## Not Yet Documented
 
-- TODO: Document expected outcomes and limitations for the xTDH tab.
 - TODO: Document proxy-management success/failure flows in the Proxy tab.
 - TODO: Document groups membership and setup flows in the Groups tab.
 - TODO: Document Waves tab behavior, entry requirements, and fallbacks.

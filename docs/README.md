@@ -37,8 +37,10 @@ This guide documents current user-facing behavior.
   [Notifications Feed](notifications/feature-notifications-feed.md)
 - Create or edit a network group:
   [Group Creation and Edit Flow](groups/feature-group-create-and-edit.md)
-- Understand current TDH calculation and boosters:
-  [TDH Boost Rules](network/feature-tdh-boost-rules.md)
+- Understand current TDH and xTDH calculation/overview:
+  [TDH Boost Rules](network/feature-tdh-boost-rules.md),
+  [xTDH Network Overview](network/feature-xtdh-network-overview.md),
+  [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md)
 - Understand profile tabs and deep-link behavior:
   [Profile Tabs](profiles/navigation/feature-tabs.md)
 - Troubleshoot profile load/tab issues:

@@ -8,6 +8,8 @@ metric definitions.
 
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
+- [xTDH Network Overview](feature-xtdh-network-overview.md)
+- [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 - [Network Definitions](feature-network-definitions.md)
 - [Health and Network Stats](feature-health-and-network-stats.md)
 
@@ -16,4 +18,5 @@ metric definitions.
 - [Docs Home](../README.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
+- [xTDH Profile Tab](../profiles/tabs/feature-xtdh-tab.md)
 - [Groups Index](../groups/README.md)
