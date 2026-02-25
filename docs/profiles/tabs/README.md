@@ -25,7 +25,7 @@ This subarea documents user-visible behavior inside profile tabs.
 
 ## Stubs
 
-- [Profile Tab Content](feature-tab-content.md): TODO coverage for Proxy, Groups,
+- Profile Tab Content (`feature-tab-content.md`): TODO coverage for Proxy, Groups,
   Waves, and Followers tab-specific behavior.
 
 ## Related Areas
