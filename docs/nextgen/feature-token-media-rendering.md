@@ -11,22 +11,28 @@ render output, and switch to large-resolution downloads with zoom controls.
 ## Location in the Site
 
 - NextGen featured slideshow cards: `/nextgen`
-- NextGen collection slideshow cards: `/nextgen/collection/{collection}`
+- NextGen collection slideshow cards:
+  `/nextgen/collection/{collection}`,
+  `/nextgen/collection/{collection}/about`,
+  `/nextgen/collection/{collection}/provenance`, and
+  `/nextgen/collection/{collection}/top-trait-sets`
 - NextGen collection art list cards: `/nextgen/collection/{collection}/art`
-- NextGen token art panel: `/nextgen/token/{token}`
+- NextGen token art panel route family: `/nextgen/token/{token}` and
+  `/nextgen/token/{token}/{view}`
 
 ## Entry Points
 
 - Open NextGen featured or collection pages and select a token card.
 - Open the collection art route directly, then select a token card.
-- Open a token route directly using `/nextgen/token/{token}`.
+- Open a token route directly using `/nextgen/token/{token}` (or any
+  `/nextgen/token/{token}/{view}` variant).
 
 ## User Journey
 
-1. A NextGen token surface renders token media inside a bounded frame.
+1. A NextGen token surface renders media inside a bounded frame.
 2. Card/list views show token previews and link to the token route.
-3. On `/nextgen/token/{token}`, users can switch between `2K`, high-res
-   (`8K` on mobile, `16K` on desktop), and `Live` view.
+3. On token routes, users can switch between `2K`, high-res (`8K` on mobile,
+   `16K` on desktop), and `Live` view.
 4. In high-res mode, users can zoom with controls and pan while zoomed in.
 5. Users can open the currently selected source in a new tab, download assets,
    and enter fullscreen.
@@ -37,6 +43,8 @@ render output, and switch to large-resolution downloads with zoom controls.
 - Token `2K` mode uses the token image source and scales to the available frame
   without fixed-card dimensions.
 - Token high-res mode shows a loading overlay before exposing zoom controls.
+- Download controls expose fixed resolution options (`1K`, `2K`, `4K`, `8K`,
+  `16K`), with unavailable sizes disabled as `Coming Soon`.
 - Fullscreen mode expands the art container while keeping the mode controls.
 
 ## Edge Cases
@@ -45,6 +53,8 @@ render output, and switch to large-resolution downloads with zoom controls.
 - Zoom controls appear only after the high-res image finishes its first render.
 - Resetting zoom returns scale to the default centered position.
 - Exiting high-res mode clears zoom controls until high-res is loaded again.
+- If token API data is unavailable or pending, the token route falls back to an
+  on-chain panel instead of this media renderer.
 
 ## Failure and Recovery
 

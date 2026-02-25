@@ -10,12 +10,17 @@ navigation controls and a direct path to the full art view.
 ## Location in the Site
 
 - NextGen featured collection page: `/nextgen`
-- NextGen collection page: `/nextgen/collection/{collection}`
+- NextGen collection overview/tab routes (slideshow shown only when
+  `mint_count > 0`): `/nextgen/collection/{collection}`,
+  `/nextgen/collection/{collection}/about`,
+  `/nextgen/collection/{collection}/provenance`, and
+  `/nextgen/collection/{collection}/top-trait-sets`
+- Full collection art route linked from slideshow: `/nextgen/collection/{collection}/art`
 
 ## Entry Points
 
 - Open the NextGen featured route `/nextgen`.
-- Open any collection route `/nextgen/collection/{collection}`.
+- Open a collection overview/tab route listed above.
 - Use `View All` in the slideshow header to open:
   `/nextgen/collection/{collection}/art`.
 
@@ -24,8 +29,9 @@ navigation controls and a direct path to the full art view.
 1. Open a page containing the slideshow.
 2. Scroll to the slideshow section.
 3. Browse token cards with carousel navigation arrows.
-4. Use the play/pause control (when present) to override autoplay behavior.
-5. Select `View All` to move from carousel preview to the full collection art
+4. Open a token card to jump to `/nextgen/token/{token}`.
+5. Use the play/pause control (when present) to override autoplay behavior.
+6. Select `View All` to move from carousel preview to the full collection art
    view.
 
 ## Common Scenarios
@@ -42,15 +48,18 @@ navigation controls and a direct path to the full art view.
 
 - The play/pause control only appears when more than one token is displayed.
 - Collection pages only render this slideshow when the collection has minted
-  tokens.
+  tokens (`mint_count > 0`).
+- The carousel starts at slide index 2 when enough tokens are available.
 - The initial token order is randomized by the collection token endpoint.
 
 ## Failure and Recovery
 
-- If token loading fails or returns no tokens, the section can appear empty.
+- If token loading fails or returns no tokens, the section can appear empty
+  without an inline error message.
 - Scrolling the section out of view pauses autoplay; returning to view resumes
   autoplay unless manually paused.
-- Refreshing the page retries token loading.
+- There is no explicit retry button inside the slideshow shell.
+- Refreshing or reopening the route retries token loading.
 
 ## Limitations / Notes
 
