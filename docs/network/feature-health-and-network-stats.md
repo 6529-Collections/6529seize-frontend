@@ -45,5 +45,6 @@ the dedicated network TDH/community stats route.
 
 - [Network Index](README.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
+- [Community Metrics Dashboard](feature-community-metrics-dashboard.md)
 - [Network Definitions](feature-network-definitions.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)

@@ -1,8 +1,8 @@
 # Network
 
-Network docs cover the metrics and scoring pages reachable from the `Network`
-section of the sidebar, including current TDH rules, archived TDH versions, and
-metric definitions.
+Network docs cover the scoring and metrics pages reachable from the `Network`
+section of the sidebar, including community-wide metrics, health, and TDH reference
+material.
 
 ## Pages
 
@@ -11,6 +11,7 @@ metric definitions.
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
+- [Community Metrics Dashboard](feature-community-metrics-dashboard.md)
 - [Network Definitions](feature-network-definitions.md)
 - [Health and Network Stats](feature-health-and-network-stats.md)
 
