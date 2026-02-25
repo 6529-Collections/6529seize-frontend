@@ -33,6 +33,8 @@ direct-message thread.
   centered spinner.
 - If no drops are available, the page shows `No Drops to show`.
 - While older drops are loading during scroll, the page shows `Loading more drops...`.
+- On touch-capable devices, profile feeds use standard page scrolling so older drops can
+  be reached with normal upward swipes.
 
 ## Edge Cases
 
@@ -51,6 +53,8 @@ direct-message thread.
   refreshing retries the request.
 - If loading additional pages fails while scrolling, already loaded drops stay
   visible; refresh and retry.
+- On touch devices, users can also continue to scroll after interruptions once the
+  route has re-rendered.
 
 ## Limitations / Notes
 
