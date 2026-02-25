@@ -30,8 +30,7 @@ same menu from the drop header action button because long-press is disabled.
 3. When the hold duration is long enough, or the header button opens, the action
    menu opens.
 4. Select a menu action (`Reply`, `Open`, `Copy link`, `Mark as unread`,
-   `Delete`, `Hide/Show link previews`, `Download media`, and other actions
-   available for that context).
+   `Delete`, `Download media`, and other actions available for that context).
 5. Confirm the action to continue in the same thread.
 
 ## Common Scenarios
@@ -45,6 +44,8 @@ same menu from the drop header action button because long-press is disabled.
   the same area of the app.
 - Non-hover action set content is shared with the desktop `More` menu so users
   can expect the same actions on each surface.
+- `Hide link previews` and `Show link previews` are no longer available from this
+  menu; use the link-level controls in the drop body.
 
 ## Edge Cases
 
