@@ -34,13 +34,20 @@ compact drop cards and temporary unsent drops keep those controls disabled.
    - quick-react from recent emojis,
    - open emoji picker and choose an emoji, or
    - tap an existing reaction chip.
-3. The selected reaction state and counts update immediately on the drop.
-4. If the request succeeds, the new reaction state remains.
-5. If the request fails, the drop restores the previous reaction state and
+3. For existing reaction chips, up to three responders are previewed directly in the tooltip.
+4. If a reaction has additional responders, `and N others` appears; clicking it opens the **Reactions** detail panel.
+5. On touch devices, pressing and holding a reaction chip opens the same detail panel.
+6. In the detail panel:
+   - the left side lists all reaction types with totals,
+   - selecting a reaction updates the user list on the right,
+   - each row shows a profile avatar (when available) and display name.
+7. The selected reaction state and counts update immediately on the drop.
+8. If the request succeeds, the new reaction state remains.
+9. If the request fails, the drop restores the previous reaction state and
    shows an error toast.
-6. For rating, adjust the value with `+` / `-` controls and submit with clap.
-7. The drop rating totals update immediately, then stay on success or revert on
-   failure.
+10. For rating, adjust the value with `+` / `-` controls and submit with clap.
+11. The drop rating totals update immediately, then stay on success or revert on
+    failure.
 
 ## Common Scenarios
 
@@ -49,6 +56,10 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 - Reaction chips show emoji plus count; selecting a chip toggles participation.
 - Tooltip summaries show up to a few reacting profiles and expose an overflow
   path to a full reaction-detail dialog.
+- Display names in the tooltip are clickable profile links where handles exist, and
+  plain profile identifiers are shown when a handle is unavailable.
+- In the detail panel, users can switch between reaction types to review who reacted
+  with each reaction.
 - Repeated clap taps in a short burst are batched into one rating submission.
 
 ## Edge Cases
@@ -58,6 +69,8 @@ compact drop cards and temporary unsent drops keep those controls disabled.
   be reacted to.
 - On touch devices, long press opens reaction details instead of toggling.
 - If a reaction count reaches zero after removal, that reaction chip disappears.
+- If the reaction list is long, the detail panel still uses one selected reaction
+  and lets you switch between all options.
 - Rating controls clamp to each drop's allowed min/max range.
 
 ## Failure and Recovery
@@ -76,6 +89,8 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 - This page covers wave drop action controls, not the standalone vote
   slider/numeric vote module.
 - Reaction quick-action options depend on locally stored recent reactions.
+- Direct links in reaction details require a profile handle; entries without handles
+  appear as plain identifiers.
 
 ## Related Pages
 
