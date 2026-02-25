@@ -1,10 +1,13 @@
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import type { WaveGroupType } from "../WaveGroup.types";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
+
+
 import { buildWaveUpdateBody } from "./buttons/utils/waveGroupEdit";
 import WaveGroupRemoveModal from "./WaveGroupRemoveModal";
+
+import type { WaveGroupType } from "../WaveGroup.types";
 
 export default function WaveGroupRemove({
   wave,

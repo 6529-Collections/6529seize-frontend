@@ -1,27 +1,30 @@
 "use client";
 
-import type { FormEvent } from "react";
-import { useContext, useEffect, useState } from "react";
-import type { ApiProfileRaterCicState } from "@/entities/IProfile";
-import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import { AuthContext } from "@/components/auth/Auth";
-import {
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useState } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-
-import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
+import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import {
+  commonApiFetch,
+  commonApiPost,
+} from "@/services/api/common-api";
+
+import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
+
+
+import type { FormEvent } from "react";
 
 const CIC_SPAN_CLASS_NAME =
   "tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-black/40 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/[0.15] tw-px-3";

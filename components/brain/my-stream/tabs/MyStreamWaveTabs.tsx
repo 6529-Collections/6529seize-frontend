@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
-import { useLayout } from "../layout/LayoutContext";
-import { useWave } from "@/hooks/useWave";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
-import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
-import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
-import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useWave } from "@/hooks/useWave";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
+
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useLayout } from "../layout/LayoutContext";
+
+import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
+import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
+
+
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;

@@ -1,4 +1,5 @@
 import { extractAlchemyMetadata } from "./shared";
+
 import type { AlchemyNftMetadata } from "./shared";
 
 const FETCH_TIMEOUT_MS = 8000;

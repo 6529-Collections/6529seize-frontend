@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { MIN_MINUTES, MAX_HOURS } from '../types';
+
+import { MAX_HOURS, MIN_MINUTES } from '../types';
 
 interface ValidationFeedbackProps {
   /** Error message to display, if any */

@@ -1,28 +1,32 @@
 "use client";
 
-import React, { type JSX, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { type JSX, useMemo } from "react";
+import { createBreakpoint } from "react-use";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import { useSetWaveData } from "@/contexts/TitleContext";
-import { useContentTab } from "../ContentTabContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import MyStreamWaveChat from "./MyStreamWaveChat";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useWaveViewMode } from "@/hooks/useWaveViewMode";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
+import { useContentTab } from "../ContentTabContext";
+
+import MyStreamWaveChat from "./MyStreamWaveChat";
+import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { WaveWinners } from "@/components/waves/winners/WaveWinners";
-import { MyStreamWaveTab } from "@/types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
-import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { createBreakpoint } from "react-use";
-import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
-import { useWaveViewMode } from "@/hooks/useWaveViewMode";
-import { useWave } from "@/hooks/useWave";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+
 
 interface MyStreamWaveProps {
   readonly waveId: string;

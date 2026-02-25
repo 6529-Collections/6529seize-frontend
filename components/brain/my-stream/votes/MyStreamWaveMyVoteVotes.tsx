@@ -1,7 +1,8 @@
 import React from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface MyStreamWaveMyVoteVotesProps {
   readonly drop: ExtendedDrop;

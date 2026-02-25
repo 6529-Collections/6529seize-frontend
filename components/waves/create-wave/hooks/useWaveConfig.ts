@@ -1,6 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { Time } from "@/helpers/time";
+import type {
+  CREATE_WAVE_VALIDATION_ERROR} from "@/helpers/waves/create-wave.validation";
+import {
+  getCreateWaveValidationErrors
+} from "@/helpers/waves/create-wave.validation";
 import type {
   CreateWaveConfig,
   CreateWaveOutcomeType,
@@ -9,17 +20,9 @@ import {
   CreateWaveGroupConfigType,
   CreateWaveStep
 } from "@/types/waves.types";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { Time } from "@/helpers/time";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+
 import type { Period } from "../types/period";
-import type {
-  CREATE_WAVE_VALIDATION_ERROR} from "@/helpers/waves/create-wave.validation";
-import {
-  getCreateWaveValidationErrors
-} from "@/helpers/waves/create-wave.validation";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
 
 interface EndDateConfig {
   time: number | null;

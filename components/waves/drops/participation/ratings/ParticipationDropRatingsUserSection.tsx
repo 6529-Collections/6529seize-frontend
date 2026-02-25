@@ -4,7 +4,8 @@ import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
-import type { RatingsSectionProps, RatingsData, ThemeColors } from "./types";
+
+import type { RatingsData, RatingsSectionProps, ThemeColors } from "./types";
 
 interface ParticipationDropRatingsUserSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;

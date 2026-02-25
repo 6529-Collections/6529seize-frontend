@@ -1,6 +1,7 @@
+import { XtdhStatCard } from "./XtdhStatCard";
+
 import type { XtdhMetricsProps } from "../types";
 
-import { XtdhStatCard } from "./XtdhStatCard";
 
 export function XtdhMetricsSection({
   multiplier,

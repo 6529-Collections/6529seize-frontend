@@ -1,23 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./Leaderboard.module.scss";
+import {
+  faSquareCaretDown,
+  faSquareCaretUp,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { cicToType, numberWithCommas } from "@/helpers/Helpers";
-import Pagination from "../pagination/Pagination";
-import { SortDirection } from "@/entities/ISort";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import type { CICType } from "@/entities/IProfile";
-import { LeaderboardCollector } from "./LeaderboardCollector";
+import { SortDirection } from "@/entities/ISort";
+import { cicToType, numberWithCommas } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import Pagination from "../pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
-import { commonApiFetch } from "@/services/api/common-api";
-import {
-  faSquareCaretUp,
-  faSquareCaretDown,
-} from "@fortawesome/free-solid-svg-icons";
+
+import styles from "./Leaderboard.module.scss";
+import { LeaderboardCollector } from "./LeaderboardCollector";
+
+
+
 
 interface Props {
   contract: string;

@@ -1,16 +1,9 @@
 "use client";
 
-import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useCapacitor from "@/hooks/useCapacitor";
-import { commonApiPost } from "@/services/api/common-api";
-import type { DeviceInfo } from "@capacitor/device";
 import { Device } from "@capacitor/device";
-import type { PushNotificationSchema } from "@capacitor/push-notifications";
 import { PushNotifications } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import React, {
   createContext,
   useCallback,
@@ -19,8 +12,19 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+
+import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { commonApiPost } from "@/services/api/common-api";
+
 import { useAuth } from "../auth/Auth";
+
 import { getStableDeviceId } from "./stable-device-id";
+
+import type { DeviceInfo } from "@capacitor/device";
+import type { PushNotificationSchema } from "@capacitor/push-notifications";
 
 const MAX_REGISTRATION_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;

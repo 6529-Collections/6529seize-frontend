@@ -1,5 +1,8 @@
 "use client";
 
+import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import {
   useCallback,
   useContext,
@@ -8,44 +11,42 @@ import {
   useRef,
   useState,
 } from "react";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
-import type { ApiGroup } from "@/generated/models/ApiGroup";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
-import type { ApiWaveCurationGroupRequest } from "@/generated/models/ApiWaveCurationGroupRequest";
+
 import { AuthContext } from "@/components/auth/Auth";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import SelectGroupModalWrapper from "@/components/utils/select-group/SelectGroupModalWrapper";
+import {
+  createPublishedGroupForIdentityChange,
+  IdentityGroupWorkflowMode,
+} from "@/components/waves/specs/groups/group/edit/buttons/utils/identityGroupWorkflow";
 import WaveGroupManageIdentitiesModal, {
-  WaveGroupManageIdentitiesMode,
   type WaveGroupManageIdentitiesConfirmEvent,
+  WaveGroupManageIdentitiesMode,
 } from "@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal";
 import WaveGroupRemoveModal from "@/components/waves/specs/groups/group/edit/WaveGroupRemoveModal";
 import WaveGroupScope from "@/components/waves/specs/groups/group/WaveGroupScope";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import type { ApiGroup } from "@/generated/models/ApiGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
+import type { ApiWaveCurationGroupRequest } from "@/generated/models/ApiWaveCurationGroupRequest";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import {
+  getWaveCurationGroupsQueryKey,
+  useWaveCurationGroups,
+} from "@/hooks/waves/useWaveCurationGroups";
 import {
   commonApiDelete,
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
-import {
-  getWaveCurationGroupsQueryKey,
-  useWaveCurationGroups,
-} from "@/hooks/waves/useWaveCurationGroups";
 import { toErrorMessage } from "@/services/groups/groupMutations";
-import {
-  createPublishedGroupForIdentityChange,
-  IdentityGroupWorkflowMode,
-} from "@/components/waves/specs/groups/group/edit/buttons/utils/identityGroupWorkflow";
 
 interface WaveCurationGroupMenuProps {
   readonly disabled: boolean;

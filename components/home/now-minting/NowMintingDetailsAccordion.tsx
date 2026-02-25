@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { printMintDate } from "@/helpers/Helpers";
 import Link from "next/link";
+
+import { printMintDate } from "@/helpers/Helpers";
 
 interface NowMintingDetailsAccordionProps {
   readonly nftId: number;

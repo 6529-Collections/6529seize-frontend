@@ -1,24 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./Leaderboard.module.scss";
+import {
+  faSquareCaretDown,
+  faSquareCaretUp,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { numberWithCommas } from "@/helpers/Helpers";
-import Pagination from "../pagination/Pagination";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import { SortDirection } from "@/entities/ISort";
+import { numberWithCommas } from "@/helpers/Helpers";
+
+import Pagination from "../pagination/Pagination";
+
+import styles from "./Leaderboard.module.scss";
 import { LeaderboardCollector } from "./LeaderboardCollector";
-import type {
-  NftTDHRanked} from "./NFTLeaderboard";
 import {
   fetchNftTdhResults,
   PAGE_SIZE,
   setScrollPosition,
 } from "./NFTLeaderboard";
-import {
-  faSquareCaretUp,
-  faSquareCaretDown,
-} from "@fortawesome/free-solid-svg-icons";
+
+import type {
+  NftTDHRanked} from "./NFTLeaderboard";
 
 interface Props {
   contract: string;

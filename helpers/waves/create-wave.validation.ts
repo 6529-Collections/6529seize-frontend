@@ -1,6 +1,5 @@
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { assertUnreachable } from "../AllowlistToolHelpers";
 import type {
   CreateWaveApprovalConfig,
   CreateWaveConfig,
@@ -13,6 +12,8 @@ import type {
   WaveOverviewConfig,
 } from "@/types/waves.types";
 import { CreateWaveStep } from "@/types/waves.types";
+
+import { assertUnreachable } from "../AllowlistToolHelpers";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",

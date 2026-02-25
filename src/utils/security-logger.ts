@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+
 import type { SecurityEventContext, SecurityEventType } from "../types/security";
 
 /**

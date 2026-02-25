@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
 import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useRef } from "react";
+
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 
 interface SingleWaveDropVoteInputProps {

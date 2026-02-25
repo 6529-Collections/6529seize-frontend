@@ -1,18 +1,19 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMutation } from "@tanstack/react-query";
+import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
+import ActionButton from "@/components/utils/button/ActionButton";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
 } from "@/services/api/common-api";
-import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
-import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import ActionButton from "@/components/utils/button/ActionButton";
 
 enum WaveItemFollowState {
   FOLLOWING = "FOLLOWING",

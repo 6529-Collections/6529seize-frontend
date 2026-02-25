@@ -1,18 +1,20 @@
 "use client";
 
-import styles from "./Address.module.scss";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { Dropdown } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   containsEmojis,
   formatAddress,
   parseEmojis,
 } from "@/helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef, useState } from "react";
-import { Dropdown } from "react-bootstrap";
-import Link from "next/link";
-import { faCopy } from "@fortawesome/free-solid-svg-icons";
-import { Tooltip } from "react-tooltip";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+
+import styles from "./Address.module.scss";
 
 export function WalletAddress(props: {
   wallet: string;

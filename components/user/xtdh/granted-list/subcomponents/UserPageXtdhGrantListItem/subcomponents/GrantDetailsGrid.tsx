@@ -1,5 +1,6 @@
-import type { GrantDetails } from "../types";
 import { GrantDetailsRow } from "./GrantDetailsRow";
+
+import type { GrantDetails } from "../types";
 
 export function GrantDetailsGrid({
   details,

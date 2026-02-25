@@ -1,4 +1,5 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
 import type { MediaItem } from "./media-utils";
 
 interface MediaThumbnailProps {

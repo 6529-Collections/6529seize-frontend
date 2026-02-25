@@ -1,8 +1,10 @@
-import UserStatsRow from "../user/utils/stats/UserStatsRow";
 import { useQuery } from "@tanstack/react-query";
+
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { commonApiFetch } from "@/services/api/common-api";
+
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import UserStatsRow from "../user/utils/stats/UserStatsRow";
 
 export default function AppSidebarUserStats({
   handle,

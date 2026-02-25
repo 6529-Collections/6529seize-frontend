@@ -1,20 +1,25 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
-import GroupCreateConfig from "./config/GroupCreateConfig";
+
+import { AuthContext } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
+import { commonApiFetch } from "@/services/api/common-api";
+
 import GroupCreateActions from "./actions/GroupCreateActions";
+import GroupCreateConfig from "./config/GroupCreateConfig";
+import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
-import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
-import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { commonApiFetch } from "@/services/api/common-api";
-import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
-import { AuthContext } from "@/components/auth/Auth";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
+
+
 
 export default function GroupCreate({
   edit,

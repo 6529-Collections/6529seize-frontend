@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import React, {
   useCallback,
   useContext,
@@ -8,27 +9,27 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { motion } from "framer-motion";
-import { AuthContext } from "@/components/auth/Auth";
-import { TabToggle } from "@/components/common/TabToggle";
-import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 
+import { AuthContext } from "@/components/auth/Auth";
+import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { TabToggle } from "@/components/common/TabToggle";
+import { SUBMISSION_FILE_INPUT_ACCEPT } from "@/constants/submission-media.constants";
+
+import BrowserWarning from "./file-upload/components/BrowserWarning";
 import FilePreview from "./file-upload/components/FilePreview";
 import UploadArea from "./file-upload/components/UploadArea";
-import BrowserWarning from "./file-upload/components/BrowserWarning";
-
-import useFileUploader from "./file-upload/hooks/useFileUploader";
-import useDragAndDrop from "./file-upload/hooks/useDragAndDrop";
 import useAccessibility from "./file-upload/hooks/useAccessibility";
-
-import type { MemesArtSubmissionFileProps } from "./file-upload/reducers/types";
+import useDragAndDrop from "./file-upload/hooks/useDragAndDrop";
+import useFileUploader from "./file-upload/hooks/useFileUploader";
 import { isBrowserSupported } from "./file-upload/utils/browserDetection";
-import { SUBMISSION_FILE_INPUT_ACCEPT } from "@/constants/submission-media.constants";
 import {
   ALLOWED_INTERACTIVE_MEDIA_MIME_TYPES,
   DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE,
   INTERACTIVE_MEDIA_PROVIDERS,
 } from "./submission/constants/media";
+
+import type { MemesArtSubmissionFileProps } from "./file-upload/reducers/types";
+
 
 const renderPreviewMessage = (primary: string, secondary: string) => (
   <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-text-center tw-text-sm tw-text-iron-400">

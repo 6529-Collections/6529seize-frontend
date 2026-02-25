@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
+import React from "react";
+
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
 type IconComp = React.ComponentType<{ className?: string | undefined }>;

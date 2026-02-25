@@ -1,5 +1,6 @@
-import type { FC } from "react";
 import type { LightDropSummary } from "@/helpers/waves/drop.helpers";
+
+import type { FC } from "react";
 
 interface LightDropProps {
   readonly drop: LightDropSummary;

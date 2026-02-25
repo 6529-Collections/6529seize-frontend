@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, type JSX } from "react";
+import React, { type JSX, useState } from "react";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";

@@ -1,12 +1,14 @@
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import {
+  type MutableRefObject,
   useCallback,
   useEffect,
   useRef,
   useState,
-  type MutableRefObject,
 } from "react";
+
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+
 import { delay } from "../utils/delay";
 
 type VirtualizedWaveDropsResult = ReturnType<typeof useVirtualizedWaveDrops>;

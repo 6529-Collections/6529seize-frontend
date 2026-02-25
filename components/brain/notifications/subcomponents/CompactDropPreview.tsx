@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactElement } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
+
+import type { ReactElement } from "react";
 
 const COMPACT_PX = 256;
 const COMPACT_THRESHOLD_PX = COMPACT_PX * 1.5;

@@ -1,8 +1,10 @@
 import React from "react";
-import CustomTooltip from "./CustomTooltip";
+
 import WaveProfileTooltip from "@/components/waves/utils/profile/WaveProfileTooltip";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+import CustomTooltip from "./CustomTooltip";
 
 interface WaveProfileTooltipWrapperProps {
   readonly waveId: string;

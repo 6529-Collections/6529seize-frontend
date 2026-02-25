@@ -1,10 +1,11 @@
 "use client"
 
 import { useSetTitle } from "@/contexts/TitleContext";
+
 import {
-  formatDate,
   DownloadsLayout,
   DownloadsTable,
+  formatDate,
 } from "./CommunityDownloadsHelpers";
 
 interface TeamDownload {

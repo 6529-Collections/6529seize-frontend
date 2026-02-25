@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { Tooltip } from "react-tooltip";
+
 import type { DropMetadata } from "@/entities/IDrop";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 interface WaveDropMetadataProps {
   readonly metadata: DropMetadata[];

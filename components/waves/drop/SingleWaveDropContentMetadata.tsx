@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 interface SingleWaveDropContentMetadataProps {
   readonly drop: ApiDrop;

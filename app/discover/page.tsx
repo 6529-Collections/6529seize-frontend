@@ -1,5 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import Waves from "@/components/waves/Waves";
+
 import type { Metadata } from "next";
 
 export default function DiscoverPage() {

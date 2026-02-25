@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import OpenGraphPreview from "./OpenGraphPreview";
-import GoogleWorkspaceCard from "./GoogleWorkspaceCard";
 import {
   fetchLinkPreview,
   type GoogleWorkspaceLinkPreview,
 } from "@/services/api/link-preview-api";
+
+import GoogleWorkspaceCard from "./GoogleWorkspaceCard";
+import OpenGraphPreview from "./OpenGraphPreview";
 
 interface GoogleWorkspacePreviewProps {
   readonly href: string;

@@ -1,5 +1,6 @@
-import type { ReactNode, ComponentProps } from "react";
 import { Tooltip } from "react-tooltip";
+
+import type { ComponentProps, ReactNode } from "react";
 
 export type WaveTooltipPlacement = ComponentProps<typeof Tooltip>["place"];
 

@@ -1,6 +1,7 @@
-import { Col, Container, Row } from "react-bootstrap";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 interface Props {
   file: string;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
+
 import useCapacitor from "./useCapacitor";
 
 export enum DeepLinkScope {

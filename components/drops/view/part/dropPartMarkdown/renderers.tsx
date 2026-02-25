@@ -1,16 +1,18 @@
-import type { ReactElement } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { SeizeQuoteLinkInfo } from "@/helpers/SeizeLinkParser";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-
-import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
-import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
-import WaveDropQuoteWithSerialNo from "@/components/waves/drops/WaveDropQuoteWithSerialNo";
 import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
+import WaveDropQuoteWithSerialNo from "@/components/waves/drops/WaveDropQuoteWithSerialNo";
+import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import type { SeizeQuoteLinkInfo } from "@/helpers/SeizeLinkParser";
+
+
 import { ensureTwitterLink } from "./twitter";
+
+import type { ReactElement } from "react";
 
 interface SeizeQuoteRenderOptions {
   readonly embedPath?: readonly string[] | undefined;

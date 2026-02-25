@@ -1,7 +1,7 @@
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import {
-  multipartUploadCore,
   getContentType,
+  multipartUploadCore,
 } from "@/services/uploads/multipartUploadCore";
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024;

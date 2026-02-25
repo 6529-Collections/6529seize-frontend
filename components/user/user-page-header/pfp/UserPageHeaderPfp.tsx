@@ -1,5 +1,6 @@
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Image from "next/image";
+
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export default function UserPageHeaderPfp({

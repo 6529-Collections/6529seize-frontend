@@ -1,5 +1,6 @@
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
 import CreateWaveDropsType from "./CreateWaveDropsType";
 
 export enum ExtendedWaveParticipationRequirement {

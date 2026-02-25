@@ -3,15 +3,17 @@ import { buildResponse } from "@/app/api/open-graph/utils";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+
 import { fetchAlchemyMetadataCandidate } from "../opensea/alchemy";
 import {
-  OPEN_SEA_IMAGE_CANDIDATE_SOURCES,
-  OPEN_SEA_IMAGE_SOURCE_READERS,
   asNonEmptyString,
   createRequestId,
   getObjectKeys,
+  OPEN_SEA_IMAGE_CANDIDATE_SOURCES,
+  OPEN_SEA_IMAGE_SOURCE_READERS,
   toObjectRecord,
 } from "../opensea/shared";
+
 import type { AlchemyNftMetadata, TokenUriMetadata } from "../opensea/shared";
 
 const TRANSIENT_CACHE_TTL_MS = 5 * 60 * 1000;

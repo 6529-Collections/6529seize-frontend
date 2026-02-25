@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
 import type {
   ContractOverview,
   SupportedChain,
   TokenMetadata,
 } from "@/types/nft";
+
+import type { ReactNode } from "react";
 
 export type {
   ContractOverview,

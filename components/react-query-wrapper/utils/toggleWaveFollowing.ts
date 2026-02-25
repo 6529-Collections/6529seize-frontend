@@ -1,8 +1,11 @@
-import type { QueryClient } from "@tanstack/react-query";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
+
+import { QueryKey } from "../ReactQueryWrapper";
 
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "./query-utils";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { QueryKey } from "../ReactQueryWrapper";
+
+import type { QueryClient } from "@tanstack/react-query";
 
 export const toggleWaveFollowing = ({
   waveId,

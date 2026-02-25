@@ -1,5 +1,7 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useContext,
@@ -8,24 +10,26 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CSSProperties } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import type { NotificationDisplayItem } from "@/types/feed.types";
-import type { NotificationFilter } from "../NotificationsCauseFilter";
-import { useSetTitle } from "@/contexts/TitleContext";
+
+
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import { useLayout } from "../../my-stream/layout/LayoutContext";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import type { NotificationDisplayItem } from "@/types/feed.types";
+
+import { useLayout } from "../../my-stream/layout/LayoutContext";
 import {
   DEFAULT_ERROR_MESSAGE,
   LOAD_TIMEOUT_MESSAGE,
   LOAD_TIMEOUT_MS,
 } from "../utils/constants";
 import { getNotificationErrorDetails } from "../utils/getNotificationErrorDetails";
+
+import type { NotificationFilter } from "../NotificationsCauseFilter";
+import type { CSSProperties } from "react";
 
 interface NotificationsContentState {
   readonly isLoadingProfile: boolean;

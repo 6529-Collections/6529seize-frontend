@@ -1,17 +1,20 @@
 "use client";
 
+import { useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import Toggle from "react-toggle";
+
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "@/constants/constants";
-import { useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import Toggle from "react-toggle";
+
 import {
   getCookieConsentByName,
   useCookieConsent,
 } from "../cookies/CookieConsentContext";
+
 import styles from "./About.module.scss";
 
 export default function AboutCookiePolicy() {

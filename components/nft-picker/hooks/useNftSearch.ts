@@ -1,11 +1,13 @@
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import { isValidEthAddress } from "@/helpers/Helpers";
 import {
+  primeContractCache,
   useCollectionSearch,
   useContractOverviewQuery,
-  primeContractCache,
 } from "@/hooks/useAlchemyNftQueries";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+
 import type { Suggestion, SupportedChain } from "../types";
 
 type UseNftSearchProps = {

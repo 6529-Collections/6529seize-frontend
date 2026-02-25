@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import {
-  useEffect,
-  useState,
   type ReactElement,
   type ReactNode,
+  useEffect,
+  useState,
 } from "react";
 
 import { fetchFarcasterPreview } from "@/services/api/farcaster";
 import type {
-  FarcasterPreviewResponse,
+  FarcasterCastEmbed,
   FarcasterCastPreview,
   FarcasterChannelPreview,
   FarcasterFramePreview,
+  FarcasterPreviewResponse,
   FarcasterProfilePreview,
   FarcasterUnavailablePreview,
   FarcasterUnsupportedPreview,
-  FarcasterCastEmbed,
 } from "@/types/farcaster.types";
 
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";

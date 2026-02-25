@@ -1,5 +1,6 @@
 import { publicEnv } from "@/config/env";
 import type { PageSSRMetadata } from "@/helpers/Types";
+
 import type { Metadata } from "next";
 
 export function getAppMetadata(

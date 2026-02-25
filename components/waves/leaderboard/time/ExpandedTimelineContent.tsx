@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
+import React, { useState } from "react";
+
 import type { DecisionPoint } from "@/helpers/waves/time.types";
+
 import { HorizontalTimeline } from "./HorizontalTimeline";
 
 interface ExpandedTimelineContentProps {

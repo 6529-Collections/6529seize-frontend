@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
+
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+
+import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
 
 interface WaveDropDeleteButtonProps {
   readonly drop: ApiDrop;

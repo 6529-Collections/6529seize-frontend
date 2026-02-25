@@ -1,6 +1,6 @@
+import { formatStatFloor } from "@/helpers/Helpers";
 import type { GlobalTdhStats } from "@/hooks/useGlobalTdhStats";
 
-import { formatStatFloor } from "@/helpers/Helpers";
 import type { XtdhStatsProps } from "./XtdhStats";
 
 export function buildGlobalXtdhStatsContent(data: GlobalTdhStats): XtdhStatsProps {

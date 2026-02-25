@@ -1,5 +1,6 @@
 import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import type { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
 import type { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
@@ -15,8 +16,8 @@ import {
   CreateWaveOutcomeType,
   CreateWaveStep
 } from "@/types/waves.types";
+
 import { assertUnreachable } from "../AllowlistToolHelpers";
-import type { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
 
 /**
  * Converts time-weighted voting settings to milliseconds, ensuring it's within acceptable range

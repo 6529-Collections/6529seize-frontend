@@ -1,13 +1,14 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
 
 import { faCheck, faCopy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useMemo, useState } from "react";
+
+import { formatBigIntWithSeparators, formatCanonical } from "../utils";
 
 import type { ParseError, TokenRange } from "../types";
-import { formatBigIntWithSeparators, formatCanonical } from "../utils";
+import type { KeyboardEvent } from "react";
 
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);

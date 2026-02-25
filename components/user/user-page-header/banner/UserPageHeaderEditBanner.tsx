@@ -1,13 +1,19 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsBackground from "@/components/user/settings/UserSettingsBackground";
 import UserSettingsBannerImageInput from "@/components/user/settings/UserSettingsBannerImageInput";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -16,11 +22,6 @@ import {
   getBannerImageUrl,
 } from "@/helpers/profile-banner.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 
 type BannerEditMode = "gradient" | "image";
 const bannerTabs: CommonSelectItem<BannerEditMode>[] = [

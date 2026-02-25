@@ -1,35 +1,39 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  useEffect,
-  useRef,
-  useState,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
+  useState,
 } from "react";
+import { useKeyPressEvent } from "react-use";
+
+import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import type { CreateDropConfig } from "@/entities/IDrop";
-import CreateDropStormParts from "./CreateDropStormParts";
-import { AnimatePresence, motion } from "framer-motion";
-import CreateDropContent from "./CreateDropContent";
-import CreateCurationDropContent from "./CreateCurationDropContent";
-import { useMutation } from "@tanstack/react-query";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { AuthContext } from "../auth/Auth";
-import { useProgressiveDebounce } from "@/hooks/useProgressiveDebounce";
-import { useKeyPressEvent } from "react-use";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { CurationComposerVariant } from "./PrivilegedDropCreator";
-import { DropMode } from "./PrivilegedDropCreator";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
+import { useProgressiveDebounce } from "@/hooks/useProgressiveDebounce";
 import { useWave } from "@/hooks/useWave";
+import { commonApiPost } from "@/services/api/common-api";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
+import { AuthContext } from "../auth/Auth";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
+
+import CreateCurationDropContent from "./CreateCurationDropContent";
+import CreateDropContent from "./CreateDropContent";
+import CreateDropStormParts from "./CreateDropStormParts";
+import { DropMode } from "./PrivilegedDropCreator";
+
+import type { CurationComposerVariant } from "./PrivilegedDropCreator";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;

@@ -4,22 +4,25 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import type {
-  NextGenCollection,
-  NextgenAllowlist,
-  NextgenAllowlistCollection,
-} from "@/entities/INextgen";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import { Time } from "@/helpers/time";
-import { commonApiFetch } from "@/services/api/common-api";
+
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import Pagination from "@/components/pagination/Pagination";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
+import type {
+  NextgenAllowlist,
+  NextgenAllowlistCollection,
+  NextGenCollection,
+} from "@/entities/INextgen";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
+import { commonApiFetch } from "@/services/api/common-api";
+
 import NextGenCollectionHeader from "../NextGenCollectionHeader";
+
 import { getJsonData } from "./NextGenMintWidget";
 
 const PdfViewer = dynamic(() => import("../../../../pdfViewer/PdfViewer"), {

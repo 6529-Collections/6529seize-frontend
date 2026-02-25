@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+
 import { publicEnv } from "@/config/env";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { MemeSeason } from "@/entities/ISeason";
@@ -9,14 +13,13 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { LeaderboardFocus } from "@/types/enums";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
+
 import styles from "./Leaderboard.module.scss";
 import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
 import LeaderboardInteractionsComponent from "./LeaderboardInteractions";

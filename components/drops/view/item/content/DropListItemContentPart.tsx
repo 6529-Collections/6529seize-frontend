@@ -1,10 +1,11 @@
+import { DropContentPartType } from "@/components/drops/view/part/DropPartMarkdown";
 import type { MentionedUser, ReferencedNft } from "@/entities/IDrop";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import DropListItemContentNft from "./nft-tag/DropListItemContentNft";
+
 import DropListItemContentMention from "./DropListItemContentMention";
 import DropListItemContentWaveMention from "./DropListItemContentWaveMention";
-import { DropContentPartType } from "@/components/drops/view/part/DropPartMarkdown";
+import DropListItemContentNft from "./nft-tag/DropListItemContentNft";
 
 interface DropListItemContentMentionProps {
   readonly type: DropContentPartType.MENTION;

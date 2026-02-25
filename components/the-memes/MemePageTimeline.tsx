@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFT, NFTHistory } from "@/entities/INFT";
 import { fetchAllPages } from "@/services/6529api";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+
 import Timeline from "../timeline/Timeline";
 
 export function MemePageTimeline(props: {

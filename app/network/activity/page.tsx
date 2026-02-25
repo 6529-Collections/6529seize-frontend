@@ -1,14 +1,18 @@
-import { getUserProfileActivityLogs } from "@/helpers/server.helpers";
-import type { CountlessPage } from "@/helpers/Types";
+import { notFound } from "next/navigation";
+
+import { getAppMetadata } from "@/components/providers/metadata";
 import type { ProfileActivityLog } from "@/entities/IProfile";
-import CommunityActivityPageClient from "./page.client";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import {
   convertActivityLogParams,
   INITIAL_ACTIVITY_LOGS_PARAMS,
 } from "@/helpers/profile-logs.helpers";
-import { getAppMetadata } from "@/components/providers/metadata";
-import { notFound } from "next/navigation";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { getUserProfileActivityLogs } from "@/helpers/server.helpers";
+import type { CountlessPage } from "@/helpers/Types";
+
+import CommunityActivityPageClient from "./page.client";
+
+
 
 export default async function CommunityActivityPage() {
   try {

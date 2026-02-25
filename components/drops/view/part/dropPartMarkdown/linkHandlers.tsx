@@ -1,28 +1,32 @@
-import type {
-  AnchorHTMLAttributes,
-  ClassAttributes,
-  ImgHTMLAttributes,
-  ReactElement,
-} from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import type { ExtraProps } from "react-markdown";
 
+
+import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
+import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPreviewContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
-import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
-import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPreviewContext";
+
 import DropPartMarkdownImage from "../DropPartMarkdownImage";
-import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
-import type { LinkHandler } from "./linkTypes";
 import {
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
   shouldUseOpenGraphPreview,
 } from "./linkUtils";
+
+import type { LinkHandler } from "./linkTypes";
+import type {
+  AnchorHTMLAttributes,
+  ClassAttributes,
+  ImgHTMLAttributes,
+  ReactElement,
+} from "react";
+import type { ExtraProps } from "react-markdown";
 
 interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;

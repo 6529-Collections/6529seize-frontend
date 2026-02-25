@@ -1,19 +1,22 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   forwardRef,
   useCallback,
   useImperativeHandle,
   useState,
 } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
-import WaveGroupEdit from "./WaveGroupEdit";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { WaveGroupType } from "../WaveGroup.types";
+
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
+
+import WaveGroupEdit from "./WaveGroupEdit";
+
+import type { WaveGroupType } from "../WaveGroup.types";
+import type {
+  ReactNode} from "react";
 
 export type WaveGroupEditButtonHandle = {
   open: () => void;

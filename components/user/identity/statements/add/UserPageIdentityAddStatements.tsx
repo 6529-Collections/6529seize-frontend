@@ -1,9 +1,11 @@
 "use client";
 
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
 
 export enum STATEMENT_ADD_VIEW {

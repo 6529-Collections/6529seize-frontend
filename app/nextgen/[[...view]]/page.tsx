@@ -2,9 +2,11 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { Metadata } from "next";
+
 import NextGenPageClient from "./NextGenPageClient";
 import { getNextGenView } from "./view-utils";
+
+import type { Metadata } from "next";
 
 async function fetchFeaturedNextGenCollection(
   headers: Record<string, string>

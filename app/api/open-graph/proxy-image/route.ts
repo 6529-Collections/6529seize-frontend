@@ -1,12 +1,13 @@
-import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
 import {
-  UrlGuardError,
   fetchPublicUrl,
-  parsePublicUrl,
   type FetchPublicUrlOptions,
+  parsePublicUrl,
+  UrlGuardError,
 } from "@/lib/security/urlGuard";
+
+import type { NextRequest} from "next/server";
 
 const IMAGE_PROXY_TIMEOUT_MS = 5000;
 const ALLOWED_HOST_SUFFIXES = ["sinaimg.cn"] as const;

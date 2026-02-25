@@ -1,6 +1,7 @@
-import type { AnimatePresenceProps } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
 import React from "react";
+
+import type { AnimatePresenceProps } from "framer-motion";
 
 export default function CommonAnimationWrapper({
   children,

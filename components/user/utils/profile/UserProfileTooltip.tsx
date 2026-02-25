@@ -1,24 +1,32 @@
+import { useQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useMemo, useState } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
 import DropPfp from "@/components/drops/create/utils/DropPfp";
-import { useIdentity } from "@/hooks/useIdentity";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
-import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
-import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
 import type {
   ApiProfileRepRatesState,
   CicStatement} from "@/entities/IProfile";
 import {
   CLASSIFICATIONS
 } from "@/entities/IProfile";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { AuthContext } from "@/components/auth/Auth";
-import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import UserStatsRow, { UserStatsRowSize } from "../stats/UserStatsRow";
+import UserCICAndLevel, { UserCICAndLevelSize } from "../UserCICAndLevel";
+
+import UserProfileTooltipTopRep from "./UserProfileTooltipTopRep";
+
+
+
+
+
 
 export default function UserProfileTooltip({
   user,

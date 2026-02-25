@@ -1,5 +1,6 @@
 import { useWaveDataFetching } from "./useWaveDataFetching";
 import { useWavePagination } from "./useWavePagination";
+
 import type { WaveDataStoreUpdater } from "./types";
 
 /**

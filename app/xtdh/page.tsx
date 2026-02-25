@@ -1,5 +1,6 @@
-import XtdhPage from "@/components/xtdh/XtdhPage";
 import { getAppMetadata } from "@/components/providers/metadata";
+import XtdhPage from "@/components/xtdh/XtdhPage";
+
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 

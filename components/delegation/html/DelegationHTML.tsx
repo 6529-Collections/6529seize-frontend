@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./DelegationHTML.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
+import styles from "./DelegationHTML.module.scss";
 
 interface Props {
   path?: string | undefined;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Col } from "react-bootstrap";
+
 import DotLoader from "../dotLoader/DotLoader";
 
 interface ActivityHeaderProps {

@@ -2,9 +2,12 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import type { FC } from "react";
+
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+
 import AppSidebarUserInfo from "./AppSidebarUserInfo";
+
+import type { FC } from "react";
 
 interface AppSidebarHeaderProps {
   readonly onClose: () => void;

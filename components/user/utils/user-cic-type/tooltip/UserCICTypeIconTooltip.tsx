@@ -1,5 +1,8 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CIC_META } from "@/components/user/utils/user-cic-status/UserCICStatus";
@@ -11,8 +14,7 @@ import { amIUser, cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
 export default function UserCICTypeIconTooltip({

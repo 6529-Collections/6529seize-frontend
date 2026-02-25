@@ -1,13 +1,16 @@
 "use client";
 
-import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useState, type JSX } from "react";
-import ProxyActionRowDataMode from "./ProxyActionRowDataMode";
+import { type JSX, useState } from "react";
+
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
+
 import ProfileProxyCreditEdit from "../action/utils/credit/ProfileProxyCreditEdit";
 import ProfileProxyEndTimeEdit from "../action/utils/time/ProfileProxyEndTimeEdit";
+
+import ProxyActionRowDataMode from "./ProxyActionRowDataMode";
 
 export enum PROXY_ACTION_ROW_VIEW_MODE {
   DATA = "DATA",

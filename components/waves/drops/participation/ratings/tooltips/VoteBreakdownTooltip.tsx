@@ -1,15 +1,18 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Image from "next/image";
+
+import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import type { RatingsData } from "../types";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useAuth } from "@/components/auth/Auth";
 import { useIdentity } from "@/hooks/useIdentity";
+
+import type { RatingsData } from "../types";
+
 
 interface VoteBreakdownTooltipProps {
   readonly drop: ApiDrop;

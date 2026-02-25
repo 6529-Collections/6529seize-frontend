@@ -1,5 +1,7 @@
-import RestrictedPageClient from './page.client';
 import { getAppMetadata } from '@/components/providers/metadata';
+
+import RestrictedPageClient from './page.client';
+
 import type { Metadata } from 'next';
 
 export default function RestrictedPage() {

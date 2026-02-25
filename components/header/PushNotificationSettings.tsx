@@ -1,13 +1,14 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Toggle from "react-toggle";
+
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { getStableDeviceId } from "@/components/notifications/stable-device-id";
 import type { ApiPushNotificationSettings } from "@/generated/models/ApiPushNotificationSettings";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
-import Toggle from "react-toggle";
 
 interface PushNotificationSettingsProps {
   readonly isOpen: boolean;

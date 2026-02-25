@@ -1,5 +1,6 @@
-import { publicEnv } from "@/config/env";
 import { NextResponse } from "next/server";
+
+import { publicEnv } from "@/config/env";
 
 export async function GET() {
   // Disable caching so the client always hits the edge/server

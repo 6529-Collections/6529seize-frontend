@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
+
 import type { MutableRefObject } from 'react';
 
 interface UseWaveNameTruncationOptions {

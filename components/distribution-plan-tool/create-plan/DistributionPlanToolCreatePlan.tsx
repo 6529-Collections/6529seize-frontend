@@ -1,11 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
+
 import CreateDistributionPlan from "./CreateDistributionPlan";
-import { useRouter } from "next/navigation";
 
 export default function DistributionPlanToolCreatePlan() {
   const [isNewPlanModalOpen, setIsNewPlanModalOpen] = useState(false);

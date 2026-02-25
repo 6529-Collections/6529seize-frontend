@@ -1,15 +1,8 @@
 /** @api */
-import { isValidEthAddress } from "@/helpers/Helpers";
-
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { isValidEthAddress } from "@/helpers/Helpers";
 import type { ContractOverview } from "@/types/nft";
-import type {
-  AlchemyContractMetadataResponse,
-  AlchemySearchResponse,
-  ContractOverviewParams,
-  SearchContractsParams,
-  SearchContractsResult,
-} from "./types";
+
 import {
   ensureQuery,
   normaliseAddress,
@@ -17,6 +10,14 @@ import {
   processSearchResponse,
   resolveNetwork,
 } from "./utils";
+
+import type {
+  AlchemyContractMetadataResponse,
+  AlchemySearchResponse,
+  ContractOverviewParams,
+  SearchContractsParams,
+  SearchContractsResult,
+} from "./types";
 
 /** @api */
 export async function searchNftCollections(

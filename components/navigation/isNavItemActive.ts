@@ -1,5 +1,6 @@
-import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+
+import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 
 export const isNavItemActive = (
   item: NavItemData,

@@ -1,6 +1,7 @@
 "use client";
 
 import XtdhReceivedSection from "../../received";
+
 import type { ReactElement } from "react";
 
 interface UserXtdhReceivedSectionProps {

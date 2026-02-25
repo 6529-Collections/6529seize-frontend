@@ -1,14 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { Col, Container, Row } from "react-bootstrap";
+
 import { useSetTitle } from "@/contexts/TitleContext";
+import { capitalizeEveryWord } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { AboutSection } from "@/types/enums";
-import { useRouter } from "next/navigation";
+
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 // Section components
-import { capitalizeEveryWord } from "@/helpers/Helpers";
-import { Col, Container, Row } from "react-bootstrap";
+
+
 import AboutApply from "./AboutApply";
 import AboutContactUs from "./AboutContactUs";
 import AboutCookiePolicy from "./AboutCookiePolicy";

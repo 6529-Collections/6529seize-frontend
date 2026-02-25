@@ -1,7 +1,9 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
 import { getSelectableIdentity } from "./getSelectableIdentity";
 
 export default function CommonProfileSearchItem({

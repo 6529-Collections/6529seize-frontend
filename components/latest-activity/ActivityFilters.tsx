@@ -1,8 +1,9 @@
 "use client";
 
+import { Col } from "react-bootstrap";
+
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { ContractFilter, TypeFilter } from "@/hooks/useActivityData";
-import { Col } from "react-bootstrap";
 
 interface ActivityFiltersProps {
   readonly typeFilter: TypeFilter;

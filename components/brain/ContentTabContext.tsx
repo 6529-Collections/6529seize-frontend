@@ -1,17 +1,19 @@
 "use client";
 
-import type { ReactNode } from "react";
 import React, {
   createContext,
-  useState,
-  useEffect,
-  useContext,
   useCallback,
+  useContext,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
-import { MyStreamWaveTab } from "@/types/waves.types";
+
 import useLocalPreference from "@/hooks/useLocalPreference";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
+import type { ReactNode } from "react";
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",

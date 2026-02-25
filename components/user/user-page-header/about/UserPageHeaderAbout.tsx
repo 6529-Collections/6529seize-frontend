@@ -1,11 +1,13 @@
 "use client";
 
-import type { CicStatement } from "@/entities/IProfile";
 import { useEffect, useState } from "react";
+
 import PencilIcon from "@/components/utils/icons/PencilIcon";
-import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
-import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
+import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
+import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 
 enum AboutStatementView {
   STATEMENT = "STATEMENT",

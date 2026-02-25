@@ -1,9 +1,10 @@
-import Link from "next/link";
 import Image from "next/image";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { parseIpfsUrl } from "@/helpers/Helpers";
+import Link from "next/link";
+
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { parseIpfsUrl } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface NotificationHeaderProps {
   readonly author: ApiProfileMin;

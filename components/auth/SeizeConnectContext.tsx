@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  useAppKit,
+  useAppKitAccount,
+  useAppKitState,
+  useDisconnect,
+  useWalletInfo,
+} from "@reown/appkit/react";
 import React, {
   createContext,
   useCallback,
@@ -9,6 +16,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { getAddress, isAddress } from "viem";
 
 import { getNodeEnv, publicEnv } from "@/config/env";
 import { getWalletAddress, removeAuthJwt } from "@/services/auth/auth.utils";
@@ -20,16 +28,9 @@ import {
   logError,
   logSecurityEvent,
 } from "@/src/utils/security-logger";
-import {
-  useAppKit,
-  useAppKitAccount,
-  useAppKitState,
-  useDisconnect,
-  useWalletInfo,
-} from "@reown/appkit/react";
-import { getAddress, isAddress } from "viem";
-import { WalletErrorBoundary } from "./error-boundary";
 import { isSafeWalletInfo } from "@/utils/wallet-detection";
+
+import { WalletErrorBoundary } from "./error-boundary";
 
 // Custom error types for better error handling
 class WalletConnectionError extends Error {

@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode, FC } from "react";
 import { createContext, useContext } from "react";
+
+import type { FC, ReactNode } from "react";
 
 const CompactModeContext = createContext<boolean>(false);
 

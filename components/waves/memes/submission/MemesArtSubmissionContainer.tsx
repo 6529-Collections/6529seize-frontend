@@ -1,14 +1,15 @@
 "use client";
 
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { motion } from "framer-motion";
-import type { FC } from "react";
-import { useCallback, useEffect, useState } from "react";
+
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { MemesSubmissionPreviewScreen } from "./preview/MemesSubmissionPreviewScreen";
@@ -16,8 +17,10 @@ import AdditionalInfoStep from "./steps/AdditionalInfoStep";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { SubmissionStep } from "./types/Steps";
-import type { SubmissionPhase } from "./ui/SubmissionProgress";
 import { buildPreviewDrop } from "./utils/buildPreviewDrop";
+
+import type { SubmissionPhase } from "./ui/SubmissionProgress";
+import type { FC } from "react";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;

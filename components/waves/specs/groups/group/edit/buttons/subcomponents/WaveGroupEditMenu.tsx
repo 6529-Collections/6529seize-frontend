@@ -1,18 +1,23 @@
 "use client";
 
-import { useMemo, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
-import type { ApiWave } from "@/generated/models/ApiWave";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMemo, useRef } from "react";
+
+import { CompactMenu, CompactMenuItem } from "@/components/compact-menu";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import type { WaveGroupType } from "../../../WaveGroup.types";
+import type { ApiWave } from "@/generated/models/ApiWave";
+
+
 import WaveGroupEditButton, {
   type WaveGroupEditButtonHandle,
 } from "../../WaveGroupEditButton";
 import WaveGroupRemoveButton, {
   type WaveGroupRemoveButtonHandle,
 } from "../../WaveGroupRemoveButton";
-import { CompactMenu, CompactMenuItem } from "@/components/compact-menu";
+
+import type { WaveGroupType } from "../../../WaveGroup.types";
+
 
 const GROUP_OPTIONS_LABEL = "Group options";
 

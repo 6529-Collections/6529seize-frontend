@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
 
 export default function UserPageIdentityHeaderCICRateStats({
   isTooltip,

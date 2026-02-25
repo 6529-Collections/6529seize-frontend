@@ -1,17 +1,19 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
 import UserCICStatus from "@/components/user/utils/user-cic-status/UserCICStatus";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
+import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+
 import TopRaterAvatars from "../../rep/header/TopRaterAvatars";
 
 const TOP_RATERS_COUNT = 5;

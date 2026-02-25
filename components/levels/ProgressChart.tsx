@@ -1,18 +1,20 @@
 "use client";
 
-import { Line } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
   CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
+  Chart as ChartJS,
   Filler,
-  Tooltip,
+  LinearScale,
+  LineElement,
   LogarithmicScale,
+  PointElement,
+  Tooltip,
 } from "chart.js";
-import levels from "@/constants/levels.json";
 import { useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
+
+import levels from "@/constants/levels.json";
+
 
 ChartJS.register(
   CategoryScale,

@@ -1,8 +1,11 @@
+import React from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
-import React from "react";
+
 import { getWaveDropEligibility } from "../dropEligibility";
+
 import { WaveLeaderboardCurationEmptyState } from "./WaveLeaderboardCurationEmptyState";
 import { WaveLeaderboardDefaultEmptyState } from "./WaveLeaderboardDefaultEmptyState";
 import { WaveLeaderboardMemesEmptyState } from "./WaveLeaderboardMemesEmptyState";

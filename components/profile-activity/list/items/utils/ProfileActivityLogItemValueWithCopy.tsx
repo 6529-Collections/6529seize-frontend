@@ -1,8 +1,9 @@
 "use client";
 
-import { Tooltip } from "react-tooltip";
 import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
+
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 

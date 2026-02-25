@@ -1,4 +1,5 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 
 export default function UserPageIdentityHeader({

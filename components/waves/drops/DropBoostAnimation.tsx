@@ -1,9 +1,10 @@
 "use client";
 
-import BoostIcon from "@/components/common/icons/BoostIcon";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+
+import BoostIcon from "@/components/common/icons/BoostIcon";
 
 interface BoostAnimationState {
   readonly id: string;

@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
 
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
-
-import type { ContractOverview, SupportedChain } from "@/types/nft";
-import type { ApiXTdhGrantToken } from "@/generated/models/ApiXTdhGrantToken";
 import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import type { ApiXTdhGrantToken } from "@/generated/models/ApiXTdhGrantToken";
+import type { ContractOverview, SupportedChain } from "@/types/nft";
+
+import type { ReactNode } from "react";
 
 export interface UserPageXtdhGrantListItemProps {
   readonly grant: ApiXTdhGrant;

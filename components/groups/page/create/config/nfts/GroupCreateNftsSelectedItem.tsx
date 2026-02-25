@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   GRADIENT_CONTRACT,
@@ -9,7 +11,6 @@ import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 import type { ApiNftsPage } from "@/generated/models/ApiNftsPage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
 
 export default function GroupCreateNftsSelectedItem({
   nft,

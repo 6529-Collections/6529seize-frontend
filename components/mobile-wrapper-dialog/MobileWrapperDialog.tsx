@@ -1,4 +1,3 @@
-import useCapacitor from "@/hooks/useCapacitor";
 import {
   Dialog,
   DialogPanel,
@@ -7,6 +6,8 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { Fragment } from "react";
+
+import useCapacitor from "@/hooks/useCapacitor";
 
 export default function MobileWrapperDialog({
   title,

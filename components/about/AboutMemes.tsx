@@ -1,7 +1,8 @@
-import { AboutSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+
+import { AboutSection } from "@/types/enums";
 
 export default function AboutMemes() {
   return (

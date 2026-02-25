@@ -1,14 +1,17 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
-import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
+
 import { AuthContext } from "@/components/auth/Auth";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { RateMatter } from "@/types/enums";
+
 import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
 import UserPageRepNewRep from "../new-rep/UserPageRepNewRep";
-import { RateMatter } from "@/types/enums";
+
+import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 
 export default function UserPageRepReps({
   repRates,

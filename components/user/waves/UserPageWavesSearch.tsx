@@ -1,13 +1,14 @@
 "use client"
 
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   CREATE_DIRECT_MESSAGE_SEARCH_PATH,
   CREATE_WAVE_SEARCH_PATH,
 } from "@/components/waves/Waves";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function UserPageWavesSearch({

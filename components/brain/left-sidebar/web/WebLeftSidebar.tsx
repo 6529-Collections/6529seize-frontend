@@ -1,11 +1,14 @@
 "use client";
 
+import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
+import { usePathname } from "next/navigation";
 import React, { useRef } from "react";
+
+import { useSidebarState } from "../../../../hooks/useSidebarState";
+
 import WebBrainLeftSidebarWaves from "./WebBrainLeftSidebarWaves";
 import WebDirectMessagesList from "./WebDirectMessagesList";
-import { usePathname } from "next/navigation";
-import { useSidebarState } from "../../../../hooks/useSidebarState";
-import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
+
 
 /**
  * WebLeftSidebar

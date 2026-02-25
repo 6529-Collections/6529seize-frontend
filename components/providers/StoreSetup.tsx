@@ -1,6 +1,7 @@
 "use client";
 
 import { Provider } from "react-redux";
+
 import { makeStore } from "@/store/store";
 
 const store = makeStore();

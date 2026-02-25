@@ -3,6 +3,7 @@ import type {
   ProfileActivityLogBanner2Edit,
 } from "@/entities/IProfile";
 import { ProfileActivityLogType } from "@/types/enums";
+
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 const TITLE: Record<

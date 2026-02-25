@@ -1,19 +1,24 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { memo, useRef } from "react";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
-import DropPfp from "@/components/drops/create/utils/DropPfp";
-import DropAuthor from "@/components/drops/create/utils/author/DropAuthor";
 import Link from "next/link";
-import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useRouter } from "next/navigation";
+import { memo, useRef } from "react";
+
+import DropAuthor from "@/components/drops/create/utils/author/DropAuthor";
+import DropPfp from "@/components/drops/create/utils/DropPfp";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { getWavePathRoute, getWaveRoute } from "@/helpers/navigation.helpers";
-import DropPartContent from "./DropPartContent";
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+
+
+
 import { DropPartSize } from "./DropPart.types";
+import DropPartContent from "./DropPartContent";
+
+import type { ReactNode } from "react";
 
 interface DropPartPropsMedia {
   readonly mimeType: string;

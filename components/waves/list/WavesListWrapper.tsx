@@ -1,18 +1,21 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
-import WaveItem from "./WaveItem";
-import { AuthContext } from "@/components/auth/Auth";
-import type { WavesOverviewParams } from "@/types/waves.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useContext, useEffect, useState } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { commonApiFetch } from "@/services/api/common-api";
+import type { WavesOverviewParams } from "@/types/waves.types";
+
+import WaveItem from "./WaveItem";
+
 
 const LABELS: Record<ApiWavesOverviewType, string> = {
   [ApiWavesOverviewType.Latest]: "Latest",

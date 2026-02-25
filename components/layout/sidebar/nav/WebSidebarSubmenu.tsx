@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+
 import type { SidebarSection } from "@/components/navigation/navTypes";
 
 interface WebSidebarSubmenuProps {

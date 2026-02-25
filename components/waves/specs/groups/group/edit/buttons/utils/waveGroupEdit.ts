@@ -1,9 +1,10 @@
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveGroupType } from "../../../WaveGroup.types";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
+
+import { WaveGroupType } from "../../../WaveGroup.types";
 import {
   getGroupIdByType,
   updateGroupIdByType,

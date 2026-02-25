@@ -6,8 +6,8 @@ import {
   formatTdhRatePerToken,
   getTargetTokensCountInfo,
 } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
-import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
+import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
 import type { ContractOverview, SupportedChain } from "@/types/nft";
 
@@ -17,6 +17,7 @@ import {
   getContractAddress,
   mapGrantChainToSupportedChain,
 } from "./formatters";
+
 import type { GrantDetails, GrantItemVariant } from "./types";
 
 

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { TimeWeightedVotingConfig, TimeUnit } from "./types";
+import { useCallback, useEffect, useState } from "react";
+
+import { AveragingIntervalInput, TimeWeightedToggle } from "./components";
 import {
-  convertToMinutes,
   convertFromMinutes,
+  convertToMinutes,
   ensureValueInBounds,
 } from "./utils";
-import { TimeWeightedToggle, AveragingIntervalInput } from "./components";
+
+import type { TimeUnit, TimeWeightedVotingConfig } from "./types";
 
 /**
  * Props for the TimeWeightedVoting component

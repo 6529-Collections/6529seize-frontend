@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext } from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import type { DropLocation } from "./Drop";
 
 interface DropContextType {

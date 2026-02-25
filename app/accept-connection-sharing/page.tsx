@@ -1,6 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+
 import AcceptConnectionSharingPageClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export default function AcceptConnectionSharingPage() {
   return <AcceptConnectionSharingPageClient />;

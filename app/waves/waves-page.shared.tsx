@@ -1,23 +1,26 @@
 import {
-  QueryClient,
   dehydrate,
   HydrationBoundary,
+  QueryClient,
 } from "@tanstack/react-query";
-import { cache } from "react";
 import { cookies } from "next/headers";
-import type { Metadata } from "next";
+import { cache } from "react";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
 import { getAppMetadata } from "@/components/providers/metadata";
-import WavesPageClient from "./page.client";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
+import { formatCount } from "@/helpers/format.helpers";
+import { formatAddress } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchWavesOverview } from "@/helpers/stream.helpers";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
-import { formatAddress } from "@/helpers/Helpers";
-import { formatCount } from "@/helpers/format.helpers";
-import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import WavesPageClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export type WavesSearchParams = Record<string, string | string[] | undefined>;
 

@@ -1,5 +1,6 @@
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { useMemo } from "react";
+
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function CommunityMembersTableSkeleton({
   rows = 10,

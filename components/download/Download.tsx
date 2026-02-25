@@ -1,15 +1,16 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useDownloader from "react-use-downloader";
-import styles from "./Download.module.scss";
 import {
+  faCheckCircle,
   faDownload,
   faXmarkCircle,
-  faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
+import useDownloader from "react-use-downloader";
+
+import styles from "./Download.module.scss";
 
 interface Props {
   href: string;

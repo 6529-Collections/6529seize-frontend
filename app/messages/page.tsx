@@ -1,5 +1,7 @@
-import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+
 import { getAppMetadata } from "@/components/providers/metadata";
+
 import MessagesPageClient from "./page.client";
 
 export default async function MessagesPage({

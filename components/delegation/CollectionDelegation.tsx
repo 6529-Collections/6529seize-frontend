@@ -1,34 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react";
-import {
-  Accordion,
-  Col,
-  Container,
-  Form,
-  FormCheck,
-  Row,
-  Table,
-} from "react-bootstrap";
-import {
-  useChainId,
-  useEnsName,
-  useReadContract,
-  useReadContracts,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
-import styles from "./Delegation.module.scss";
 
-import { DELEGATION_ABI } from "@/abis/abis";
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-  NULL_ADDRESS,
-} from "@/constants/constants";
-import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
-import { DelegationCenterSection } from "@/types/enums";
 import {
   faCircleArrowLeft,
   faEdit,
@@ -40,17 +12,46 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react";
+import {
+  Accordion,
+  Col,
+  Container,
+  Form,
+  FormCheck,
+  Row,
+  Table,
+} from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+import {
+  useChainId,
+  useEnsName,
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+
+import { DELEGATION_ABI } from "@/abis/abis";
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+  NULL_ADDRESS,
+} from "@/constants/constants";
+import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { DelegationCenterSection } from "@/types/enums";
+
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { Spinner } from "../dotLoader/DotLoader";
+
 import {
+  type ContractDelegation,
+  type ContractWalletDelegation,
   getDelegationsFromData,
   getParams,
   getReadParams,
-  type ContractDelegation,
-  type ContractWalletDelegation,
 } from "./CollectionDelegation.utils";
-import type { DelegationCollection } from "./delegation-constants";
 import {
   ALL_USE_CASES,
   ANY_COLLECTION_PATH,
@@ -61,6 +62,7 @@ import {
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
+import styles from "./Delegation.module.scss";
 import { DelegationToast } from "./DelegationCenterMenu";
 import DelegationWallet from "./DelegationWallet";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
@@ -69,6 +71,8 @@ import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 import UpdateDelegationComponent from "./UpdateDelegation";
+
+import type { DelegationCollection } from "./delegation-constants";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;

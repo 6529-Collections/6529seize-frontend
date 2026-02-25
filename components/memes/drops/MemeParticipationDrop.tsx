@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useState } from "react";
+
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
@@ -12,7 +14,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useCallback, useState } from "react";
+
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";

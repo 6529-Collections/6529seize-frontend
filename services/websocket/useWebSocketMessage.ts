@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
+
+import type { WsMessageType } from "@/helpers/Types";
+
 import { useWebSocket } from "./useWebSocket";
 import { WebSocketStatus } from "./WebSocketTypes";
-import type { WsMessageType } from "@/helpers/Types";
 
 /**
  * Hook to subscribe to a specific WebSocket message type using a callback pattern

@@ -1,7 +1,8 @@
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import { buildResponse } from "@/app/api/open-graph/utils";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+
 import { asNonEmptyString } from "../opensea/shared";
 
 const MANIFOLD_CACHE_TTL_MS = 5 * 60 * 1000;

@@ -1,7 +1,8 @@
-import type { Action, PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
+
 import type { AppState } from "./store";
+import type { Action, PayloadAction } from "@reduxjs/toolkit";
 
 interface EditState {
   editingDropId: string | null;

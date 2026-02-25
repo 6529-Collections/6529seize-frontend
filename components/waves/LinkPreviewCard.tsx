@@ -2,18 +2,19 @@
 
 import { type ReactElement, useEffect, useState } from "react";
 
+import { fetchLinkPreview } from "@/services/api/link-preview-api";
+
+import EnsPreviewCard from "./ens/EnsPreviewCard";
+import { type EnsPreview, isEnsPreview } from "./ens/types";
+import {
+  type LinkPreviewVariant,
+  useLinkPreviewVariant,
+} from "./LinkPreviewContext";
 import OpenGraphPreview, {
   hasOpenGraphContent,
   LinkPreviewCardLayout,
   type OpenGraphPreviewData,
 } from "./OpenGraphPreview";
-import { fetchLinkPreview } from "@/services/api/link-preview-api";
-import EnsPreviewCard from "./ens/EnsPreviewCard";
-import { isEnsPreview, type EnsPreview } from "./ens/types";
-import {
-  useLinkPreviewVariant,
-  type LinkPreviewVariant,
-} from "./LinkPreviewContext";
 
 interface LinkPreviewCardProps {
   readonly href: string;

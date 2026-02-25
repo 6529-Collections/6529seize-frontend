@@ -1,12 +1,5 @@
 "use client";
 
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "@/constants/constants";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
-import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
@@ -17,10 +10,21 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import type { DelegationCollection } from "./delegation-constants";
+
+import {
+  DELEGATION_ALL_ADDRESS,
+  DELEGATION_CONTRACT,
+} from "@/constants/constants";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { useEnsResolution } from "@/hooks/useEnsResolution";
+
+
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
+
+import type { DelegationCollection } from "./delegation-constants";
 
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>

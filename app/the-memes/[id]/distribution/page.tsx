@@ -1,4 +1,3 @@
-import styles from "@/styles/Home.module.scss";
 
 import DistributionComponent from "@/components/distribution/Distribution";
 import {
@@ -6,6 +5,8 @@ import {
   MEME_FOCUS,
 } from "@/components/the-memes/MemeShared";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
 
 export default function MemeDistributionPage() {

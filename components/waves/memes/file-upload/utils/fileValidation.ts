@@ -4,16 +4,18 @@
  * Functions for validating files, checking formats, and testing compatibility.
  */
 
-import { COMPATIBILITY_CHECK_TIMEOUT_MS, FILE_SIZE_LIMIT } from "./constants";
-import { getFileExtension, getBrowserSpecificMessage } from "./formatHelpers";
-import type {
-  FileValidationResult,
-  VideoCompatibilityResult,
-} from "../reducers/types";
 import {
   SUBMISSION_IMAGE_MIME_TYPES,
   SUBMISSION_INTERACTIVE_MIME_TYPES,
 } from "@/constants/submission-media.constants";
+
+import { COMPATIBILITY_CHECK_TIMEOUT_MS, FILE_SIZE_LIMIT } from "./constants";
+import { getBrowserSpecificMessage, getFileExtension } from "./formatHelpers";
+
+import type {
+  FileValidationResult,
+  VideoCompatibilityResult,
+} from "../reducers/types";
 
 /**
  * Comprehensive file validation with proper typing

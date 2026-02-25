@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useDrop } from "@/hooks/useDrop";

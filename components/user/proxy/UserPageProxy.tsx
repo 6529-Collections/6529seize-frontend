@@ -1,5 +1,9 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { type JSX, useContext, useEffect, useMemo, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
@@ -8,9 +12,7 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useContext, useEffect, useMemo, useState, type JSX } from "react";
+
 import ProxyCreate from "./create/ProxyCreate";
 import ProxyList from "./list/ProxyList";
 export enum ProxyMode {

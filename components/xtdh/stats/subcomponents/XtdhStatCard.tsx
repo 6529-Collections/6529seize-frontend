@@ -1,5 +1,6 @@
-import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { useId } from "react";
+
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 
 interface XtdhStatCardProps {
   readonly label: string;

@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
-import FormSection from "../ui/FormSection";
-import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { type AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
-import { validateStrictAddress } from "../utils/addressValidation";
+import React, { useCallback, useMemo, useState } from "react";
+
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+
+import { TraitWrapper } from "../../traits/TraitWrapper";
+import { AIRDROP_TOTAL, type AirdropEntry } from "../types/OperationalData";
+import FormSection from "../ui/FormSection";
+import { validateStrictAddress } from "../utils/addressValidation";
+
 
 interface AirdropConfigProps {
   readonly entries: AirdropEntry[];

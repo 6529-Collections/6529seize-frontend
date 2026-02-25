@@ -1,10 +1,10 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageStats from "@/components/user/stats/UserPageStats";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   USER_PAGE_TAB_IDS,
   USER_PAGE_TAB_MAP,
 } from "@/components/user/layout/userTabs.config";
+import UserPageStats from "@/components/user/stats/UserPageStats";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 function StatsTab({ profile }: { readonly profile: ApiIdentity }) {
   return <UserPageStats profile={profile} />;

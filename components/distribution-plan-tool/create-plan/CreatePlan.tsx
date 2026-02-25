@@ -1,11 +1,8 @@
 "use client";
 
-import { useContext, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  DistributionPlanToolContext,
-  DistributionPlanToolStep,
-} from "../DistributionPlanToolContext";
+import { useRouter } from "next/navigation";
+import { useContext, useEffect } from "react";
 
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolLoader, {
@@ -13,8 +10,12 @@ import AllowlistToolLoader, {
 } from "@/components/allowlist-tool/common/AllowlistToolLoader";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { makeErrorToast } from "@/services/distribution-plan.utils";
-import { useRouter } from "next/navigation";
+
 import StepHeader from "../common/StepHeader";
+import {
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
+} from "../DistributionPlanToolContext";
 
 export default function CreatePlan({ id }: { readonly id: string }) {
   const router = useRouter();

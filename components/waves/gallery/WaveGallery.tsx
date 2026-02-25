@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useCallback } from "react";
+
+import InfiniteScrollTrigger from "@/components/utils/infinite-scroll/InfiniteScrollTrigger";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { WaveGalleryItem } from "./WaveGalleryItem";
 import { useWaveGalleryDrops } from "@/hooks/useWaveGalleryDrops";
-import InfiniteScrollTrigger from "@/components/utils/infinite-scroll/InfiniteScrollTrigger";
+
+import { WaveGalleryItem } from "./WaveGalleryItem";
 
 interface WaveGalleryProps {
   readonly wave: ApiWave;

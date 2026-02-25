@@ -20,6 +20,13 @@ import {
   Row,
 } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+
+import DotLoader from "@/components/dotLoader/DotLoader";
+import {
+  formatNameForUrl,
+  NextGenListFilters,
+  NextGenTokenListedType,
+} from "@/components/nextGen/nextgen_helpers";
 import type {
   NextGenCollection,
   TraitValuePair,
@@ -29,12 +36,7 @@ import { SortDirection } from "@/entities/ISort";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import {
-  NextGenListFilters,
-  NextGenTokenListedType,
-  formatNameForUrl,
-} from "@/components/nextGen/nextgen_helpers";
+
 import styles from "../NextGen.module.scss";
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
 import NextGenTokenList from "../NextGenTokenList";

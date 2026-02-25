@@ -1,5 +1,6 @@
-import YoutubePreview from "../youtubePreview";
 import { parseYoutubeLink } from "../youtube";
+import YoutubePreview from "../youtubePreview";
+
 import type { LinkHandler } from "../linkTypes";
 
 export const createYoutubeHandler = (): LinkHandler => ({

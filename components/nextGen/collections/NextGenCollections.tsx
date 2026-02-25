@@ -1,12 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+
 import Pagination from "@/components/pagination/Pagination";
 import { publicEnv } from "@/config/env";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fetchUrl } from "@/services/6529api";
-import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+
 import styles from "./NextGen.module.scss";
 import NextGenCollectionPreview from "./NextGenCollectionPreview";
 

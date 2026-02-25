@@ -1,10 +1,5 @@
 "use client";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import type { CollectedCollectionType } from "@/entities/IProfile";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import styles from "@/styles/Home.module.scss";
-import { ContractType } from "@/types/enums";
 import {
   faMinusCircle,
   faPlusCircle,
@@ -12,6 +7,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { CollectedCollectionType } from "@/entities/IProfile";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import styles from "@/styles/Home.module.scss";
+import { ContractType } from "@/types/enums";
+
 import TransferModal from "./TransferModal";
 import {
   buildTransferKey,

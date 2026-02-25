@@ -1,9 +1,12 @@
-import Image from "next/image";
 import clsx from "clsx";
-import DistributionPlanVerifiedIcon from "../../distribution-plan-tool/common/DistributionPlanVerifiedIcon";
-import type { Suggestion } from "../types";
+import Image from "next/image";
+
 import { shortenAddress } from "@/helpers/address.helpers";
+
+import DistributionPlanVerifiedIcon from "../../distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import { formatFloor } from "../utils/formatting";
+
+import type { Suggestion } from "../types";
 
 interface NftSuggestItemProps {
   readonly suggestion: Suggestion;

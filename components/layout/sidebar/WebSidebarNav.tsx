@@ -1,5 +1,16 @@
 "use client";
 
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { usePathname } from "next/navigation";
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
+import { useKey } from "react-use";
+
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -15,16 +26,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
-import React, {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from "react";
-import { useKey } from "react-use";
+
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";

@@ -1,14 +1,11 @@
 "use client";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import type {
-  MenuTextMatch} from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import {
   LexicalTypeaheadMenuPlugin,
   MenuOption,
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import type { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -20,10 +17,15 @@ import {
 import * as ReactDOM from "react-dom";
 
 import { $createMentionNode } from "@/components/drops/create/lexical/nodes/MentionNode";
-import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
+import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 import type { MentionedUser } from "@/entities/IDrop";
 import { useIdentitiesSearch } from "@/hooks/useIdentitiesSearch";
-import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
+
+import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
+
+import type {
+  MenuTextMatch} from "@lexical/react/LexicalTypeaheadMenuPlugin";
+import type { TextNode } from "lexical";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";

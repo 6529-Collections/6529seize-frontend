@@ -1,10 +1,14 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { useContext, useEffect, useMemo, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type {
   ApiProfileRepRatesState,
   RatingWithProfileInfoAndLevel,
@@ -16,15 +20,14 @@ import { amIUser, formatNumberWithCommas } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { useContext, useEffect, useMemo, useState } from "react";
+
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatementsAddButton from "../identity/statements/add/UserPageIdentityStatementsAddButton";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
+
 import TopRaterAvatars from "./header/TopRaterAvatars";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import UserPageRepRepsTable from "./reps/table/UserPageRepRepsTable";

@@ -3,11 +3,11 @@
  * This module provides fail-fast role validation functionality
  */
 
-import type { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
 import { 
-  MissingActiveProfileError, 
-  InvalidRoleStateError 
+  InvalidRoleStateError, 
+  MissingActiveProfileError 
 } from '@/errors/authentication';
+import type { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
 
 /**
  * validateRoleForAuthentication - FAIL-FAST role validation for authentication

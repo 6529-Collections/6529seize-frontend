@@ -6,6 +6,11 @@
  *
  */
 
+
+import { $applyNodeReplacement, DecoratorNode } from "lexical";
+import * as React from "react";
+import { type JSX, Suspense } from "react";
+
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -16,10 +21,6 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from "lexical";
-
-import { $applyNodeReplacement, DecoratorNode } from "lexical";
-import * as React from "react";
-import { Suspense, type JSX } from "react";
 
 const ImageComponent = React.lazy(() => import("./ImageComponent"));
 

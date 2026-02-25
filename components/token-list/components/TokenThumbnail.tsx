@@ -1,7 +1,9 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
-import Spinner from "@/components/utils/Spinner";
+
 import type { TokenMetadata } from "@/components/nft-picker/NftPicker.types";
+import Spinner from "@/components/utils/Spinner";
+
+import type { ReactNode } from "react";
 
 type TokenThumbnailProps = Readonly<{
   metadata?: TokenMetadata | undefined;

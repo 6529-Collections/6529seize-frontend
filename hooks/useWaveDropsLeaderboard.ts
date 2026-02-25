@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDebounce } from "react-use";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   getDefaultQueryRetry,
@@ -11,13 +19,7 @@ import {
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDebounce } from "react-use";
+
 import useCapacitor from "./useCapacitor";
 
 export enum WaveDropsLeaderboardSort {

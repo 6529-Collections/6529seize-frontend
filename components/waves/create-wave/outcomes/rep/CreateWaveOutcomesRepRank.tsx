@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
 import type {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeConfigWinnersConfig} from "@/types/waves.types";
@@ -8,9 +11,9 @@ import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
-import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
+
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+
 
 export default function CreateWaveOutcomesRepRank({
   onOutcome,

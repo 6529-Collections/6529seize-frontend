@@ -7,20 +7,22 @@ import { useContext, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+
 import UserFollowBtn from "../utils/UserFollowBtn";
+
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import UserPageHeaderBanner from "./banner/UserPageHeaderBanner";
 import UserPageHeaderName from "./name/UserPageHeaderName";

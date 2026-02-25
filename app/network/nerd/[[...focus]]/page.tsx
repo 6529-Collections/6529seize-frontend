@@ -1,6 +1,8 @@
 import { LeaderboardFocus } from "@/types/enums";
-import type { Metadata } from "next";
+
 import CommunityNerdPageClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,

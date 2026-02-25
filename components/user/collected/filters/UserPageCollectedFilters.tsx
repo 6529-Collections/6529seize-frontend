@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useRef, useState } from "react";
+
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import type {
@@ -14,20 +21,16 @@ import {
 } from "@/entities/IProfile";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  faChevronLeft,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { RefObject} from "react";
-import { useEffect, useRef, useState } from "react";
-import type { ProfileCollectedFilters } from "../UserPageCollected";
+
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
 import UserPageCollectedFiltersNativeDropdown from "./UserPageCollectedFiltersNativeDropdown";
 import UserPageCollectedFiltersNetworkCollection from "./UserPageCollectedFiltersNetworkCollection";
 import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSortBy from "./UserPageCollectedFiltersSortBy";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
+
+import type { ProfileCollectedFilters } from "../UserPageCollected";
+import type { RefObject} from "react";
 
 enum MainTab {
   NATIVE = "NATIVE",

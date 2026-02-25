@@ -1,11 +1,13 @@
 
 "use client";
+import { useParams, useRouter } from "next/navigation";
+import { useContext, useEffect } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useParams, useRouter } from "next/navigation";
-import { useContext, useEffect } from "react";
+
 import UserPageDrops from "./UserPageDrops";
 
 export default function UserPageBrainWrapper({

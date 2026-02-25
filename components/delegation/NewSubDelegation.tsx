@@ -6,7 +6,7 @@ import { Col, Container, Form, Row } from "react-bootstrap";
 import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import type { DelegationCollection } from "./delegation-constants";
+
 import { SUB_DELEGATION_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import {
@@ -18,6 +18,8 @@ import {
   DelegationFormOriginalDelegatorFormGroup,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
+
+import type { DelegationCollection } from "./delegation-constants";
 
 interface Props {
   address: string;

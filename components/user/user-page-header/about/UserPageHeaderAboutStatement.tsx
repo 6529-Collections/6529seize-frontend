@@ -1,7 +1,8 @@
 "use client";
 
-import type { CicStatement } from "@/entities/IProfile";
 import { useState } from "react";
+
+import type { CicStatement } from "@/entities/IProfile";
 
 export default function UserPageHeaderAboutStatement({
   statement,

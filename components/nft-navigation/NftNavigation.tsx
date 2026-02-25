@@ -1,4 +1,3 @@
-import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 import {
   faChevronCircleLeft,
   faChevronCircleRight,
@@ -6,8 +5,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useMemo } from "react";
+
+import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
+
+import type { ReadonlyURLSearchParams } from "next/navigation";
 
 export default function NftNavigation(
   props: Readonly<{

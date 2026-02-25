@@ -3,6 +3,7 @@ import type {
 import {
   CLASSIFICATIONS
 } from "@/entities/IProfile";
+
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 export default function ProfileActivityLogClassification({

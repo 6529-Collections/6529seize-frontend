@@ -1,4 +1,3 @@
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   faCircle,
   faDotCircle,
@@ -7,6 +6,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 type KnownGrantStatus = ApiXTdhGrantStatus;
 

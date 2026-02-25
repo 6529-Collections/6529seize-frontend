@@ -1,5 +1,12 @@
 "use client";
 
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
+import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useMemo } from "react";
+
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -11,16 +18,12 @@ import {
   useSubmissionDrops,
   useUserArtSubmissions,
 } from "@/hooks/useUserArtSubmissions";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useMemo } from "react";
+
 import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
 } from "../drop/SingleWaveDropVote";
+
 import { SubmissionPosition } from "./SubmissionPosition";
 
 interface ArtistActiveSubmissionContentProps {

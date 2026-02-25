@@ -1,5 +1,7 @@
 import TikTokCard from "@/components/waves/TikTokCard";
+
 import { parseTikTokLink } from "../tiktok";
+
 import type { LinkHandler } from "../linkTypes";
 
 export const createTikTokHandler = (): LinkHandler => ({

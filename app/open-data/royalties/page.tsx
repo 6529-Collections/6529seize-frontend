@@ -1,6 +1,7 @@
-import styles from "@/styles/Home.module.scss";
 import CommunityDownloadsRoyalties from "@/components/community-downloads/CommunityDownloadsRoyalties";
 import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
 
 export default function RoyaltiesDownloads() {

@@ -1,5 +1,7 @@
-import AccessPageClient from "./page.client";
 import { getAppMetadata } from "@/components/providers/metadata";
+
+import AccessPageClient from "./page.client";
+
 import type { Metadata } from "next";
 
 export default function AccessPage() {

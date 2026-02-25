@@ -1,14 +1,16 @@
 "use client";
 
+import Link from "next/link";
+import { memo, useCallback, useState } from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import Link from "next/link";
-import { memo, useCallback, useState } from "react";
-import type { DropInteractionParams } from "../Drop";
+
+
 import { DropLocation } from "../Drop";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -19,7 +21,10 @@ import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropRatings from "../WaveDropRatings";
 import WaveDropReactions from "../WaveDropReactions";
 import WaveDropReply from "../WaveDropReply";
+
 import WinnerDropBadge from "./WinnerDropBadge";
+
+import type { DropInteractionParams } from "../Drop";
 
 const getRankColorsByRank = (
   rank: number | null

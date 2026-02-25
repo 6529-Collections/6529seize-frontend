@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import type { Transaction } from "@/entities/ITransaction";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import {
   formatAddress,
   getProfileTargetRoute,
 } from "@/helpers/Helpers";
+
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
-import { usePathname } from "next/navigation";
-import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
   transaction,

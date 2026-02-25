@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
+  type MarketplacePreviewData,
   matchesMarketplacePreviewCanonicalId,
   patchFromMediaLinkUpdate,
-  type MarketplacePreviewData,
 } from "@/components/waves/marketplace/common";
 import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
+
 import { useWebSocketMessage } from "./useWebSocketMessage";
 
 const isMediaLinkUpdatedData = (

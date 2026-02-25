@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import MemeDropTrait from "./MemeDropTrait";
+import { MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS } from "@/components/waves/memes/submission/types/OperationalData";
 import {
   FIELD_TO_LABEL_MAP,
   MEME_TRAITS_SORT_ORDER,
 } from "@/components/waves/memes/traits/schema";
-import { MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS } from "@/components/waves/memes/submission/types/OperationalData";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+
+import MemeDropTrait from "./MemeDropTrait";
 
 interface MemeDropTraitsProps {
   readonly drop: ApiDrop;

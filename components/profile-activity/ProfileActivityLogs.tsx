@@ -1,26 +1,29 @@
 "use client";
 
-import type { ProfileActivityLog } from "@/entities/IProfile";
-import type { CountlessPage } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
-import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
+import { useSelector } from "react-redux";
 
+import type { ProfileActivityLog } from "@/entities/IProfile";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
+import type { CountlessPage } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import { selectActiveGroupId } from "@/store/groupSlice";
 import {
   ProfileActivityFilterTargetType,
   type ProfileActivityLogType,
   RateMatter,
 } from "@/types/enums";
-import { useSelector } from "react-redux";
+
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
-import type { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
+
+import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
+import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
+
+import type { CommonSelectItem } from "../utils/select/CommonSelect";
 
 export interface ActivityLogParams {
   readonly page: number;

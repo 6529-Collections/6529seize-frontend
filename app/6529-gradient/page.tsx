@@ -2,6 +2,7 @@ import GradientsComponent from "@/components/6529Gradient/6529Gradient";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
 
 export default function GradientsPage() {

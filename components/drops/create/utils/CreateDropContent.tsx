@@ -1,30 +1,5 @@
 "use client";
 
-import type { InitialConfigType } from "@lexical/react/LexicalComposer";
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import type { EditorState } from "lexical";
-import { RootNode } from "lexical";
-import { MentionNode } from "../lexical/nodes/MentionNode";
-import { HashtagNode } from "../lexical/nodes/HashtagNode";
-import { WaveMentionNode } from "../lexical/nodes/WaveMentionNode";
-import ExampleTheme from "../lexical/ExampleTheme";
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import type { NewMentionsPluginHandles } from "../lexical/plugins/mentions/MentionsPlugin";
-import NewMentionsPlugin from "../lexical/plugins/mentions/MentionsPlugin";
-import type { NewHastagsPluginHandles } from "../lexical/plugins/hashtags/HashtagsPlugin";
-import NewHashtagsPlugin from "../lexical/plugins/hashtags/HashtagsPlugin";
-import type { NewWaveMentionsPluginHandles } from "../lexical/plugins/waves/WaveMentionsPlugin";
-import NewWaveMentionsPlugin from "../lexical/plugins/waves/WaveMentionsPlugin";
-import type {
-  CreateDropConfig,
-  MentionedUser,
-  MentionedWave,
-  ReferencedNft,
-} from "@/entities/IDrop";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
@@ -37,11 +12,16 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { CreateDropType, CreateDropViewType } from "../types";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import type { ClearEditorPluginHandles } from "../lexical/plugins/ClearEditorPlugin";
-import ClearEditorPlugin from "../lexical/plugins/ClearEditorPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { RootNode } from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -50,10 +30,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../lexical/transformers/WaveMentionTransformer";
-import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+
 import CreateDropContentMissingMediaWarning from "./storm/CreateDropContentMissingMediaWarning";
 import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import CreateDropContentMissingMetadataWarning from "./storm/CreateDropContentMissingMetadataWarning";
@@ -71,6 +48,33 @@ import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 import PlainTextPastePlugin from "../lexical/plugins/PlainTextPastePlugin";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import type {
+  CreateDropConfig,
+  MentionedUser,
+  MentionedWave,
+  ReferencedNft,
+} from "@/entities/IDrop";
+import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
+import ExampleTheme from "../lexical/ExampleTheme";
+import { HashtagNode } from "../lexical/nodes/HashtagNode";
+import { MentionNode } from "../lexical/nodes/MentionNode";
+import { WaveMentionNode } from "../lexical/nodes/WaveMentionNode";
+import ClearEditorPlugin from "../lexical/plugins/ClearEditorPlugin";
+import NewHashtagsPlugin from "../lexical/plugins/hashtags/HashtagsPlugin";
+import NewMentionsPlugin from "../lexical/plugins/mentions/MentionsPlugin";
+import NewWaveMentionsPlugin from "../lexical/plugins/waves/WaveMentionsPlugin";
+import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
+import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
+import { WAVE_MENTION_TRANSFORMER } from "../lexical/transformers/WaveMentionTransformer";
+
+import type { ClearEditorPluginHandles } from "../lexical/plugins/ClearEditorPlugin";
+import type { NewHastagsPluginHandles } from "../lexical/plugins/hashtags/HashtagsPlugin";
+import type { NewMentionsPluginHandles } from "../lexical/plugins/mentions/MentionsPlugin";
+import type { NewWaveMentionsPluginHandles } from "../lexical/plugins/waves/WaveMentionsPlugin";
+import type { InitialConfigType } from "@lexical/react/LexicalComposer";
+import type { EditorState } from "lexical";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;

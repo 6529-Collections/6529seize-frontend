@@ -1,6 +1,8 @@
-import { AboutSection } from "@/types/enums";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+
+import { AboutSection } from "@/types/enums";
+
 import styles from "./About.module.scss";
 
 export default function AboutPrivacyPolicy() {

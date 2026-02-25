@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+
 import { getAuthJwt, WALLET_AUTH_COOKIE } from "../auth/auth.utils";
+
 import { useWebSocket } from "./useWebSocket";
 import { WebSocketStatus } from "./WebSocketTypes";
 

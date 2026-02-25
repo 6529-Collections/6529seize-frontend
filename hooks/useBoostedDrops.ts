@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Page } from "@/helpers/Types";
-import { TimeWindow, TIME_WINDOW_MS } from "@/types/boosted-drops.types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { TIME_WINDOW_MS, TimeWindow } from "@/types/boosted-drops.types";
 
 interface UseBoostedDropsProps {
   readonly limit?: number;

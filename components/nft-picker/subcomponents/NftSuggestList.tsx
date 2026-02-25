@@ -1,10 +1,12 @@
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-import type { Suggestion } from "../types";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
+
+import { NftSuggestFooter } from "./NftSuggestFooter";
 import { NftSuggestHiddenSelect } from "./NftSuggestHiddenSelect";
 import { NftSuggestVirtualList } from "./NftSuggestVirtualList";
-import { NftSuggestFooter } from "./NftSuggestFooter";
+
+import type { Suggestion } from "../types";
 
 interface NftSuggestListProps {
   readonly items: Suggestion[];

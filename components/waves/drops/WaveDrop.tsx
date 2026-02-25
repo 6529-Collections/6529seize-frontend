@@ -1,10 +1,14 @@
 "use client";
 
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createBreakpoint } from "react-use";
+
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
@@ -12,12 +16,9 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { createBreakpoint } from "react-use";
-import type { DropInteractionParams } from "./Drop";
+
+
 import { DropLocation } from "./Drop";
-import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
@@ -28,6 +29,9 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import WaveDropRatings from "./WaveDropRatings";
 import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
+
+import type { DropInteractionParams } from "./Drop";
+import type { BoostAnimationState } from "./DropBoostAnimation";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,

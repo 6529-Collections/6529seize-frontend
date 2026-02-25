@@ -1,14 +1,16 @@
 "use client";
 
-import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import {
+  type RefObject,
   useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
-  type RefObject,
 } from "react";
+
+import { useGlobalRefresh } from "@/contexts/RefreshContext";
+
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 
 const PULL_THRESHOLD = 80;

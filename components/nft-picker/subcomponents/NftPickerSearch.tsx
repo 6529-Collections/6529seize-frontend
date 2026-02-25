@@ -1,8 +1,10 @@
 "use client";
 
-import { type RefObject, type ChangeEvent, type KeyboardEvent } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { type ChangeEvent, type KeyboardEvent, type RefObject } from "react";
+
 import { NftSuggestList } from "./NftSuggestList";
+
 import type { Suggestion } from "../types";
 
 interface NftPickerSearchProps {

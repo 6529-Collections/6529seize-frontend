@@ -5,14 +5,16 @@ import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import NotificationDrop from "./NotificationDrop";
-import NotificationHeader from "./NotificationHeader";
-import NotificationTimestamp from "./NotificationTimestamp";
 import {
   getIsDirectMessage,
   useWaveNavigation,
 } from "../utils/navigationUtils";
+
+import NotificationDrop from "./NotificationDrop";
+import NotificationHeader from "./NotificationHeader";
+import NotificationTimestamp from "./NotificationTimestamp";
 
 interface NotificationWithDropProps {
   readonly drop: ApiDrop;

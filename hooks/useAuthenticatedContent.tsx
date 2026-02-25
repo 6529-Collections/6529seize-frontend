@@ -1,9 +1,10 @@
 "use client";
 
 import { useContext, useMemo } from "react";
+
 import { AuthContext } from "../components/auth/Auth";
-import { useLayout } from "../components/brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "../components/auth/SeizeConnectContext";
+import { useLayout } from "../components/brain/my-stream/layout/LayoutContext";
 
 type ContentState =
   | "not-authenticated"

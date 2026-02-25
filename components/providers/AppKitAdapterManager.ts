@@ -1,3 +1,7 @@
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { mainnet } from "viem/chains";
+import { coinbaseWallet } from "wagmi/connectors";
+
 import { CW_PROJECT_ID } from "@/constants/constants";
 import {
   AdapterCacheError,
@@ -10,11 +14,10 @@ import {
 } from "@/src/errors/wallet-validation";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet } from "viem/chains";
-import type { CreateConnectorFn } from "wagmi";
-import { coinbaseWallet } from "wagmi/connectors";
+
 import type { AppWallet } from "../app-wallets/AppWalletsContext";
+import type { CreateConnectorFn } from "wagmi";
+
 
 type ConnectionState = "connecting" | "connected" | "disconnected";
 

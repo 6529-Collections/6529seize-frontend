@@ -1,6 +1,8 @@
-import { useId, type ChangeEvent } from "react";
-import type { Suggestion } from "../types";
+import { type ChangeEvent, useId } from "react";
+
 import { getSuggestionOptionLabel } from "../utils/formatting";
+
+import type { Suggestion } from "../types";
 
 interface NftSuggestNativeSelectProps {
   readonly items: Suggestion[];

@@ -1,17 +1,18 @@
-import React from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { Tooltip } from "react-tooltip";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { Tooltip } from "react-tooltip";
+
+import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;

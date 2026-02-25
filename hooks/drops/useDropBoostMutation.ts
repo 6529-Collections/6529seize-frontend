@@ -1,6 +1,10 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useContext, useRef } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -9,9 +13,7 @@ import {
   commonApiDelete,
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useContext, useRef } from "react";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
 
 interface BoostMutationParams {
   readonly drop: ExtendedDrop;

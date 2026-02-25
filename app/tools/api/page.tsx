@@ -1,8 +1,10 @@
+import { Col, Container, Row } from "react-bootstrap";
+
 import CodeExample from "@/components/code-example/CodeExample";
 import { getAppMetadata } from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
-import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutApi() {
   const nodeJsAuthExample = `import { Wallet } from 'ethers';

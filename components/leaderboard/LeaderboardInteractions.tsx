@@ -1,22 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./Leaderboard.module.scss";
-import { numberWithCommas } from "@/helpers/Helpers";
-import { SortDirection } from "@/entities/ISort";
-import { LeaderboardCollector } from "./LeaderboardCollector";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import type { MemeSeason } from "@/entities/ISeason";
-import type { Collector, Content } from "./Leaderboard";
-import LeaderboardSort from "./LeaderboardSort";
-import type {
-  LeaderboardInteractions} from "./leaderboard_helpers";
+import { SortDirection } from "@/entities/ISort";
+import { numberWithCommas } from "@/helpers/Helpers";
+
+import styles from "./Leaderboard.module.scss";
 import {
   LEADERBOARD_PAGE_SIZE,
   LeaderboardInteractionsSort,
   useFetchLeaderboard,
 } from "./leaderboard_helpers";
+import { LeaderboardCollector } from "./LeaderboardCollector";
 import LeaderboardFooter from "./LeaderboardDownload";
+import LeaderboardSort from "./LeaderboardSort";
+
+import type { Collector, Content } from "./Leaderboard";
+import type {
+  LeaderboardInteractions} from "./leaderboard_helpers";
+
 
 interface Props {
   block: number | undefined;

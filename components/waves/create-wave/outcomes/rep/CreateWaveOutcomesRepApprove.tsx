@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
+import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig} from "@/types/waves.types";
 import {
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
-import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
-import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+
 
 export default function CreateWaveOutcomesRepApprove({
   waveType,

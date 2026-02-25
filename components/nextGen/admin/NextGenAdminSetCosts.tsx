@@ -1,11 +1,12 @@
 "use client";
 
-import { ANY_COLLECTION } from "@/components/delegation/delegation-constants";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { ANY_COLLECTION } from "@/components/delegation/delegation-constants";
+
 import { FunctionSelectors } from "../nextgen_contracts";
-import type { MintingDetails } from "../nextgen_entities";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -17,11 +18,14 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+
 import { printAdminErrors } from "./NextGenAdmin";
 import {
   NextGenAdminHeadingRow,
   NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
+
+import type { MintingDetails } from "../nextgen_entities";
 
 interface Props {
   close: () => void;

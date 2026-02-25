@@ -1,9 +1,13 @@
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
 import { AnimatePresence, motion } from "framer-motion";
-import GroupCreateIdentitiesSearchItemsContent from "./GroupCreateIdentitiesSearchItemsContent";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { commonApiFetch } from "@/services/api/common-api";
+
+
+import GroupCreateIdentitiesSearchItemsContent from "./GroupCreateIdentitiesSearchItemsContent";
+
 
 function GroupCreateIdentitiesSearchItems({
   open,

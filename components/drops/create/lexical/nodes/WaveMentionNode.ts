@@ -7,6 +7,7 @@
  */
 
 import {
+  $applyNodeReplacement,
   type DOMConversionMap,
   type DOMConversionOutput,
   type DOMExportOutput,
@@ -15,7 +16,6 @@ import {
   type NodeKey,
   type SerializedTextNode,
   type Spread,
-  $applyNodeReplacement,
   TextNode,
 } from "lexical";
 

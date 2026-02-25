@@ -1,5 +1,6 @@
-import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 import { useQuery } from "@tanstack/react-query";
+
+import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 
 export function useResolvedIpfsUrl(src?: string | null) {
   return useQuery<string | null>({

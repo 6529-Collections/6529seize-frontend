@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
-import { Period } from "@/helpers/Types";
 import { useAnimate } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+
+import { Period } from "@/helpers/Types";
+
 
 interface DecisionPointDropdownProps {
   readonly value: Period;

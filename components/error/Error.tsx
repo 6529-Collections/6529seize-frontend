@@ -1,6 +1,5 @@
 "use client";
 
-import { useTitle } from "@/contexts/TitleContext";
 import {
   faChevronDown,
   faChevronUp,
@@ -12,6 +11,8 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useCopyToClipboard } from "react-use";
+
+import { useTitle } from "@/contexts/TitleContext";
 
 type ErrorComponentProps = {
   readonly stackTrace?: string | null | undefined;

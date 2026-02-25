@@ -1,8 +1,12 @@
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { FC } from "react";
+
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+
+import type { FC } from "react";
+
 
 interface SingleWaveDropPositionProps {
   readonly rank: number | null;

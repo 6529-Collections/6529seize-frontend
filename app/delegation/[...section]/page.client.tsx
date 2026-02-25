@@ -1,11 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import DelegationCenterMenu from "@/components/delegation/DelegationCenterMenu";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import { DelegationCenterSection } from "@/types/enums";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function DelegationPageClient(props: {
   readonly section: DelegationCenterSection;

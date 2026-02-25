@@ -1,12 +1,13 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import Leaderboard from "@/components/leaderboard/Leaderboard";
 import { useTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import { LeaderboardFocus } from "@/types/enums";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 export default function CommunityNerdPageClient({
   focus: initialFocus,

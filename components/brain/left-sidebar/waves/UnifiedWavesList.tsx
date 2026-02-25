@@ -1,15 +1,18 @@
 "use client";
 
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useEffect, useEffectEvent, useRef } from "react";
+
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
-import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];

@@ -1,6 +1,7 @@
-import type { FC } from "react";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+
+import type { FC } from "react";
 
 interface SingleWaveDropVoteStatsProps {
   readonly currentRating: number;

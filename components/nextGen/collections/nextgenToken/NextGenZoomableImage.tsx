@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+
+import DotLoader from "@/components/dotLoader/DotLoader";
 import type { NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { get8KUrl, get16KUrl } from "./NextGenTokenImage";
-import Image from "next/image";
-import DotLoader from "@/components/dotLoader/DotLoader";
+
+import { get16KUrl, get8KUrl } from "./NextGenTokenImage";
 
 export const MAX_ZOOM_SCALE = 20;
 export const MIN_ZOOM_SCALE = 1;

@@ -1,10 +1,3 @@
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
-import type { CollectedCard } from "@/entities/IProfile";
-import { CollectedCollectionType } from "@/entities/IProfile";
-import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
-import { ContractType } from "@/types/enums";
 import {
   faCheck,
   faMinusCircle,
@@ -15,6 +8,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useId, useState } from "react";
 import { Tooltip } from "react-tooltip";
+
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import type { CollectedCard } from "@/entities/IProfile";
+import { CollectedCollectionType } from "@/entities/IProfile";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { ContractType } from "@/types/enums";
+
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
 export default function UserPageCollectedCard({

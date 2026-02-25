@@ -1,6 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
-import type { ReactNode } from "react";
 import { Fragment } from "react";
+
+import type { ReactNode } from "react";
 
 export default function SeasonsGridDropdownMobileWrapper({
   isOpen,

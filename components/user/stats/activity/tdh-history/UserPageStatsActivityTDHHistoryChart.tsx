@@ -1,5 +1,3 @@
-import { Line } from "react-chartjs-2";
-
 import {
     BarElement,
     CategoryScale,
@@ -10,6 +8,8 @@ import {
     PointElement,
     Tooltip,
 } from "chart.js";
+import { Line } from "react-chartjs-2";
+
 import type { ChartProps } from "./UserPageStatsActivityTDHHistoryCharts";
 
 ChartJS.register(

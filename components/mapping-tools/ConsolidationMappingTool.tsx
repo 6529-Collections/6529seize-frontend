@@ -1,13 +1,15 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import type { Consolidation } from "@/entities/IDelegation";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import { fetchAllPages } from "@/services/6529api";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
+import { publicEnv } from "@/config/env";
+import type { Consolidation } from "@/entities/IDelegation";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { fetchAllPages } from "@/services/6529api";
+
 import styles from "./MappingTool.module.scss";
 
 const csvParser = require("csv-parser");

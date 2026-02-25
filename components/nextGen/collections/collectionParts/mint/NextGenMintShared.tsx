@@ -1,10 +1,12 @@
-import styles from "@/components/nextGen/collections/NextGen.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import { Form, Row, Col } from "react-bootstrap";
-import { useEnsName } from "wagmi";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Col, Form, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { useEnsName } from "wagmi";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import styles from "@/components/nextGen/collections/NextGen.module.scss";
+
 
 function NextGenMintAddressOption(props: Readonly<{ address: string }>) {
   const ens = useEnsName({

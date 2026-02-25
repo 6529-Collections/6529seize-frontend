@@ -4,20 +4,22 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useXtdhTokensQuery } from "@/hooks/useXtdhTokensQuery";
 
+import { XtdhReceivedCollectionCard } from "../collection-card-content";
 import { useXtdhTokensFilters } from "../hooks/useXtdhTokensFilters";
 import { XtdhTokensControls } from "../tokens-controls";
-import { XtdhReceivedCollectionCard } from "../collection-card-content";
+
 import { useCollectionContractDetails } from "./hooks/useCollectionContractDetails";
 import { useXtdhTokenSelection } from "./hooks/useXtdhTokenSelection";
-import { XtdhTokensList } from "./XtdhTokensList";
 import { CollectionBreadcrumbs } from "./subcomponents/CollectionBreadcrumbs";
 import { CollectionLoadMore } from "./subcomponents/CollectionLoadMore";
 import { XtdhTokenListItem } from "./subcomponents/XtdhTokenListItem";
 import { XtdhTokenContributorsPanel } from "./token-contributors";
+import { getTokenLabel } from "./utils/getTokenLabel";
+import { XtdhTokensList } from "./XtdhTokensList";
+
 import type {
   XtdhCollectionTokensPanelProps,
 } from "./types";
-import { getTokenLabel } from "./utils/getTokenLabel";
 
 const TOKENS_PAGE_SIZE = 25;
 

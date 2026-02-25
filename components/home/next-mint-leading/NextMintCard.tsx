@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
@@ -10,7 +12,6 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import Link from "next/link";
 
 interface NextMintCardProps {
   readonly drop: ApiDrop;

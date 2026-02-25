@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { RatingStats } from "@/entities/IProfile";
+
 import UserPageRepModifyModal from "@/components/user/rep/modify-rep/UserPageRepModifyModal";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import type { RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 export default function UserPageRepRepsTableItem({
   rep,

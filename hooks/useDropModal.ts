@@ -1,11 +1,12 @@
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { useEffect, useCallback } from "react";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export function useDropModal() {
   const searchParams = useSearchParams();

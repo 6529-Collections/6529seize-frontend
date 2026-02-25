@@ -1,5 +1,6 @@
-import { Row, Col } from "react-bootstrap";
 import Link from "next/link";
+import { Col, Row } from "react-bootstrap";
+
 import useCapacitor from "@/hooks/useCapacitor";
 
 export default function AppWalletsUnsupported() {

@@ -1,11 +1,13 @@
+import { memo, useMemo } from "react";
+
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
-  type NotificationDisplayItem,
   isGroupedReactionsItem,
+  type NotificationDisplayItem,
 } from "@/types/feed.types";
-import { memo, useMemo } from "react";
+
 import NotificationDropReactedGroup from "./drop-reacted/NotificationDropReactedGroup";
 import NotificationItem from "./NotificationItem";
 

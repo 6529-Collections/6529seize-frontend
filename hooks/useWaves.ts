@@ -1,15 +1,14 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-
 import { useContext, useMemo, useState } from "react";
-
 import { useDebounce } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
 interface SearchWavesParams {
   readonly author?: string | undefined;
   readonly name?: string | undefined;

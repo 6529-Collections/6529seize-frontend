@@ -1,11 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
-import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+
 import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ProcessedContent } from "@/components/waves/drops/media-utils";
+import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export function useWaveLatestDrop(waveId: string, enabled: boolean = true) {
   return useQuery({

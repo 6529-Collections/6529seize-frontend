@@ -1,5 +1,7 @@
 "use client";
 
+import { forwardRef, useImperativeHandle, useRef } from "react";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type {
   CreateDropConfig,
@@ -10,14 +12,15 @@ import type {
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import type { EditorState } from "lexical";
-import { forwardRef, useImperativeHandle, useRef } from "react";
+
 import { CreateDropType, CreateDropViewType } from "../types";
-import type { CreateDropContentHandles } from "../utils/CreateDropContent";
 import CreateDropContent from "../utils/CreateDropContent";
 import { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
+
+import type { CreateDropContentHandles } from "../utils/CreateDropContent";
+import type { EditorState } from "lexical";
 
 export interface CreateDropCompactHandles {
   clearEditorState: () => void;

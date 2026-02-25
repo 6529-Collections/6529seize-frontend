@@ -2,16 +2,17 @@
 
 import { notFound } from "next/navigation";
 
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import type { CountlessPage } from "@/helpers/Types";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import { getRandomColor } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import type { CountlessPage } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import UserPageHeaderClient from "./UserPageHeaderClient";
-import { getRandomColor } from "@/helpers/Helpers";
+
 
 async function fetchStatements(
   handleOrWallet: string,

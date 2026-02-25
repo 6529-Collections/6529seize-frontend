@@ -1,16 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import type { INotificationWaveCreated } from "@/types/feed.types";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import WaveHeaderFollow, {
   WaveFollowBtnSize,
 } from "@/components/waves/header/WaveHeaderFollow";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { commonApiFetch } from "@/services/api/common-api";
+import type { INotificationWaveCreated } from "@/types/feed.types";
+
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 

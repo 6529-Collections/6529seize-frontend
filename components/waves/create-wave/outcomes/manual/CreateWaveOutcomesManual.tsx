@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig} from "@/types/waves.types";
 import {
-  CreateWaveOutcomeType,
   CreateWaveOutcomeConfigWinnersCreditValueType,
+  CreateWaveOutcomeType,
 } from "@/types/waves.types";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+
 
 export default function CreateWaveOutcomesManual({
   waveType,

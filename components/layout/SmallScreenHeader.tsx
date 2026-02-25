@@ -1,9 +1,10 @@
 "use client";
 
-import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+
+import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 
 interface SmallScreenHeaderProps {
   readonly onMenuToggle: () => void;

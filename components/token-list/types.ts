@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
 import type {
   SupportedChain,
   TokenMetadata,
   TokenRange,
 } from "@/components/nft-picker/NftPicker.types";
+
+import type { ReactNode } from "react";
 
 export type TokenListAction = {
   label: string;

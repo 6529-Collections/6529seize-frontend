@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
-import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+
 import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
+import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+
+import UserPageStatsTagsSet from "./UserPageStatsTagsSet";
 
 export interface UserPageStatsTag {
   readonly id: string;

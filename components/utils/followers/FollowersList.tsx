@@ -1,4 +1,5 @@
 import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+
 import Follower from "./Follower";
 
 export default function FollowersList({

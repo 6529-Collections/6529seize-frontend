@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+
 import { resolveIpfsUrl } from "@/components/ipfs/IPFSContext";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import type { BaseNFT } from "@/entities/INFT";
 import { useIdentity } from "@/hooks/useIdentity";
-import Image from "next/image";
-import Link from "next/link";
 
 interface NowMintingHeaderProps {
   readonly cardNumber: number;

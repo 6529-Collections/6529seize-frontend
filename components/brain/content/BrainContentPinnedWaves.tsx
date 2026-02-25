@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import BrainContentPinnedWave from "./BrainContentPinnedWave";
-import { usePinnedWaves } from "@/hooks/usePinnedWaves";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import React, { useEffect, useRef, useState } from "react";
+
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { usePinnedWaves } from "@/hooks/usePinnedWaves";
+
+import BrainContentPinnedWave from "./BrainContentPinnedWave";
 
 const BrainContentPinnedWaves: React.FC = () => {
   const router = useRouter();

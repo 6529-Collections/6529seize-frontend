@@ -1,26 +1,29 @@
 "use client";
 
-import type {
-  KeyboardEvent,
-  MouseEvent,
-  ReactNode} from "react";
-import {
-  useCallback,
-  useId,
-} from "react";
 import {
   ChatBubbleLeftRightIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  useCallback,
+  useId,
+} from "react";
+import { Tooltip } from "react-tooltip";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+
 import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { Tooltip } from "react-tooltip";
+
+import type {
+  KeyboardEvent,
+  MouseEvent,
+  ReactNode} from "react";
 
 const LEVEL_CLASSES: ReadonlyArray<{
   readonly minLevel: number;

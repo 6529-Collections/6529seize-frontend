@@ -1,17 +1,19 @@
 "use client";
 
+import { UserIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+
 import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import HeaderShare from "../../header/share/HeaderShare";
+
+import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
-import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarUser from "./WebSidebarUser";
-import { UserIcon } from "@heroicons/react/24/outline";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;

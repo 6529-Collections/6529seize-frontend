@@ -1,5 +1,7 @@
 import React from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { SingleWaveDropAuthor } from "./SingleWaveDropAuthor";
 
 interface SingleWaveDropInfoAuthorSectionProps {

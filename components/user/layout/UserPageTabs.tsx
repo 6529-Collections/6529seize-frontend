@@ -1,8 +1,5 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import useCapacitor from "@/hooks/useCapacitor";
 import {
   faChevronLeft,
   faChevronRight,
@@ -22,14 +19,19 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import useCapacitor from "@/hooks/useCapacitor";
+
 import UserPageTab from "./UserPageTab";
 import {
   DEFAULT_USER_PAGE_TAB,
+  getUserPageTabByRoute,
   USER_PAGE_TABS,
   type UserPageTabConfig,
   type UserPageTabKey,
   type UserPageVisibilityContext,
-  getUserPageTabByRoute,
 } from "./userTabs.config";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;

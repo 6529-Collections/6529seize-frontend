@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   keepPreviousData,
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useEffect, useState } from "react";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   getDefaultQueryRetry,
   WAVE_LOGS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseWaveActivityLogsProps {
   readonly waveId: string;

@@ -1,11 +1,13 @@
 import React, { useCallback } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
-import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
+
+import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
+
 
 interface WaveLeaderboardRightSidebarActivityLogsProps {
   readonly wave: ApiWave;

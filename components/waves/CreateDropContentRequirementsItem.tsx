@@ -1,6 +1,7 @@
 import React from "react";
-import { DropRequirementType } from "./CreateDropContentRequirements";
 import { Tooltip } from "react-tooltip";
+
+import { DropRequirementType } from "./CreateDropContentRequirements";
 
 interface CreateDropContentRequirementsItemProps {
   readonly isValid: boolean;

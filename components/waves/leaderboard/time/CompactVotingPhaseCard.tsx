@@ -1,4 +1,5 @@
 import React from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
 import { useWaveTimers } from "@/hooks/useWaveTimers";

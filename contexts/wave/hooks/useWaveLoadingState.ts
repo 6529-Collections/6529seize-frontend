@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useRef } from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+
 import type { LoadingState } from "./types";
 
 export function useWaveLoadingState() {

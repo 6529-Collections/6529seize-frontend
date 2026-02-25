@@ -1,5 +1,7 @@
 import React from "react";
+
 import type { TimeLeft } from "@/helpers/waves/time.utils";
+
 import { TimeUnitDisplay } from "./TimeUnitDisplay";
 
 interface CompactTimeCountdownProps {

@@ -1,11 +1,13 @@
-import type { MouseEvent } from "react";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+
+import { getMarketplaceUrlKind } from "./urlKind";
+
 import type {
   MarketplaceBrand,
   ResolvedPreviewHref,
 } from "./MarketplaceItemPreviewCard.types";
-import { getMarketplaceUrlKind } from "./urlKind";
+import type { MouseEvent } from "react";
 
 interface BuildMarketplaceCtaLabelParams {
   readonly normalizedPrice: string;

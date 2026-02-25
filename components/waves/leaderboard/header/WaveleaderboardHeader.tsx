@@ -1,23 +1,28 @@
 "use client";
 
+import { PlusIcon } from "@heroicons/react/24/solid";
+import React, { useContext, useMemo } from "react";
+import { Tooltip } from "react-tooltip";
+
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { PlusIcon } from "@heroicons/react/24/solid";
-import React, { useContext, useMemo } from "react";
-import { Tooltip } from "react-tooltip";
+
 import { getWaveDropEligibility } from "../dropEligibility";
-import type { LeaderboardViewMode } from "../types";
-import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
+
 import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
+import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
+import { resolveWaveLeaderboardHeaderControlModes } from "./waveLeaderboardHeaderControls";
 import {
   WAVE_LEADERBOARD_SORT_ITEMS,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
-import { resolveWaveLeaderboardHeaderControlModes } from "./waveLeaderboardHeaderControls";
+
+import type { LeaderboardViewMode } from "../types";
+
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;

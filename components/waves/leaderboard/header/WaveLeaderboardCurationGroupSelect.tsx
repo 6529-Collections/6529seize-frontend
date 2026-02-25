@@ -1,16 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-import { createBreakpoint } from "react-use";
 import { useQueries } from "@tanstack/react-query";
 import Image from "next/image";
-import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { useMemo } from "react";
+import { createBreakpoint } from "react-use";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "@/services/api/common-api";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface WaveLeaderboardCurationGroupSelectProps {
   readonly groups: readonly ApiWaveCurationGroup[];

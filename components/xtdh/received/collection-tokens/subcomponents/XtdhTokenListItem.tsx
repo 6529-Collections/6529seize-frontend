@@ -2,16 +2,18 @@ import clsx from "clsx";
 
 import type { TokenMetadata } from "@/types/nft";
 
+import { XtdhRatePill } from "../../collection-card-content/subcomponents/XtdhRatePill";
+import { XtdhContributorSummary } from "../../subcomponents/XtdhContributorSummary";
 import {
   formatCount,
   formatXtdhRate,
   formatXtdhValue,
 } from "../../utils/formatters";
-import { XtdhContributorSummary } from "../../subcomponents/XtdhContributorSummary";
-import { XtdhRatePill } from "../../collection-card-content/subcomponents/XtdhRatePill";
 import { getTokenLabel } from "../utils/getTokenLabel";
-import type { ApiXtdhToken } from "../types";
+
 import { XtdhTokenListItemThumbnail } from "./XtdhTokenListItemThumbnail";
+
+import type { ApiXtdhToken } from "../types";
 
 interface XtdhTokenListItemProps {
   readonly token: ApiXtdhToken;

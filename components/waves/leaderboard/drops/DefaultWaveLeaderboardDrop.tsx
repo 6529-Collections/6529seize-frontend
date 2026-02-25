@@ -1,11 +1,14 @@
 "use client";
 
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
-import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -14,9 +17,9 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import React, { useState } from "react";
-import { createPortal } from "react-dom";
+
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
+
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";

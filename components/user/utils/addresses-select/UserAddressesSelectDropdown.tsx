@@ -1,13 +1,18 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { formatAddress } from "@/helpers/Helpers";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { RefObject} from "react";
-import { useEffect, useMemo, useState } from "react";
+
 import UserAddressesSelectDropdownItem from "./UserAddressesSelectDropdownItem";
+
+import type { RefObject} from "react";
+
+
 
 type SelectedType = string | null;
 

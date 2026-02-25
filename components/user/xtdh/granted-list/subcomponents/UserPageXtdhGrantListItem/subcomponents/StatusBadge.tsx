@@ -1,7 +1,9 @@
-import clsx from "clsx";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import clsx from "clsx";
+
 import type { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+
 import { getStatusVisuals } from "../statusVisuals";
 
 export function StatusBadge({

@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
+import React, { useContext } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface WaveDropMobileMenuEditProps {
   readonly drop: ApiDrop;

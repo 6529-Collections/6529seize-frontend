@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { WavesOverviewParams } from "@/types/waves.types";
-import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { commonApiFetch } from "@/services/api/common-api";
+import type { WavesOverviewParams } from "@/types/waves.types";
 
 interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;

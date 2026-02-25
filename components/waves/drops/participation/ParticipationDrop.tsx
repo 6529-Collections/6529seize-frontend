@@ -1,11 +1,16 @@
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams, DropLocation } from "../Drop";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import React from "react";
-import DefaultParticipationDrop from "./DefaultParticipationDrop";
+
 import MemeParticipationDrop from "@/components/memes/drops/MemeParticipationDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
+import DefaultParticipationDrop from "./DefaultParticipationDrop";
+
+import type { DropInteractionParams, DropLocation } from "../Drop";
+
+
 
 interface ParticipationDropProps {
   readonly drop: ExtendedDrop;

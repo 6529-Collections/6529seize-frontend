@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 
 export interface VirtualItem {

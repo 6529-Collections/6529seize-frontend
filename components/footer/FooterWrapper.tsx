@@ -1,7 +1,9 @@
 "use client";
 
-import Footer from "@/components/footer/Footer";
 import { usePathname } from "next/navigation";
+
+import Footer from "@/components/footer/Footer";
+
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 export default function FooterWrapper() {

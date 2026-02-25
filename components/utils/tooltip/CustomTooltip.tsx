@@ -1,16 +1,18 @@
 "use client"
 
-import type {
-  MutableRefObject} from "react";
 import React, {
-  useState,
-  useEffect,
-  useRef,
   useCallback,
-  useLayoutEffect
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
 } from "react";
 import { createPortal } from "react-dom";
+
 import styles from "./CustomTooltip.module.scss";
+
+import type {
+  MutableRefObject} from "react";
 
 interface CustomTooltipProps {
   readonly children: React.ReactElement;

@@ -1,29 +1,35 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
 import { FunctionSelectors } from "../nextgen_contracts";
-import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import {
   getCollectionIdsForAddress,
-  useCoreContractWrite,
-  useCollectionInfo,
-  useCollectionLibraryAndScript,
   useCollectionAdmin,
   useCollectionIndex,
+  useCollectionInfo,
+  useCollectionLibraryAndScript,
+  useCoreContractWrite,
   useFunctionAdmin,
   useGlobalAdmin,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
-import type { Info, LibraryScript } from "../nextgen_entities";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+
+
 import { printAdminErrors } from "./NextGenAdmin";
 import {
-  NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
+  NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
+import type { Info, LibraryScript } from "../nextgen_entities";
+
 
 export enum UpdateType {
   UPDATE_INFO,

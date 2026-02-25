@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -20,15 +30,6 @@ import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import type { MemeLabSort } from "@/types/enums";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 interface Meme {
   meme: number;

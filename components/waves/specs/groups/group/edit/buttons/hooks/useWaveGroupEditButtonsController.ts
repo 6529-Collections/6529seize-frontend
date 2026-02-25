@@ -1,26 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MutableRefObject, ReactNode } from "react";
-import type { TypeOptions } from "react-toastify";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { QueryClient } from "@tanstack/react-query";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   createGroup,
   publishGroup,
+  toErrorMessage,
   validateGroupPayload,
   type ValidationIssue,
-  toErrorMessage,
 } from "@/services/groups/groupMutations";
+
 import { WaveGroupType } from "../../../WaveGroup.types";
 import {
   buildWaveUpdateBody,
@@ -28,6 +28,10 @@ import {
   getScopedGroup,
   isGroupAuthor,
 } from "../utils/waveGroupEdit";
+
+import type { QueryClient } from "@tanstack/react-query";
+import type { MutableRefObject, ReactNode } from "react";
+import type { TypeOptions } from "react-toastify";
 
 const WAVE_GROUP_LABELS = {
   VIEW: "View",

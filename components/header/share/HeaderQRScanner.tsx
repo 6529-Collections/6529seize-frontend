@@ -1,10 +1,5 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
-import { publicEnv } from "@/config/env";
-import { areEqualURLS } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   CapacitorBarcodeScanner,
   CapacitorBarcodeScannerTypeHint,
@@ -12,6 +7,12 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { useAuth } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
+import { areEqualURLS } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 
 export default function HeaderQRScanner({
   onScanSuccess,

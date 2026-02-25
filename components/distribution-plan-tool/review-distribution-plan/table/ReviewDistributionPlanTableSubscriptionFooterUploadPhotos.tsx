@@ -1,5 +1,8 @@
 "use client";
 
+import { useRef, useState } from "react";
+import { Button, Col, Container, Modal, Row } from "react-bootstrap";
+
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
@@ -7,8 +10,6 @@ import {
   formatAddress,
   isValidPositiveInteger,
 } from "@/helpers/Helpers";
-import { useRef, useState } from "react";
-import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 
 export function UploadDistributionPhotosModal(
   props: Readonly<{

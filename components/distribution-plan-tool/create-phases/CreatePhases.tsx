@@ -1,17 +1,24 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
+
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
+
+import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
+import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
+import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
+import StepHeader from "../common/StepHeader";
 import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
-import CreatePhasesTable from "./table/CreatePhasesTable";
-import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
-import StepHeader from "../common/StepHeader";
+
 import CreatePhasesForm from "./form/CreatePhasesForm";
-import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
-import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
-import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
+import CreatePhasesTable from "./table/CreatePhasesTable";
+
+
+
+
 export interface CreatePhasesPhase {
   readonly id: string;
   readonly name: string;

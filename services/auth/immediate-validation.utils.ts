@@ -1,13 +1,14 @@
-import { validateJwt } from "./jwt-validation.utils";
-import { validateRoleForAuthentication } from "@/utils/role-validation";
+import { getNodeEnv, publicEnv } from "@/config/env";
 import {
   AuthenticationRoleError,
-  RoleValidationError,
+  InvalidRoleStateError,
   MissingActiveProfileError,
-  InvalidRoleStateError
+  RoleValidationError
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { validateRoleForAuthentication } from "@/utils/role-validation";
+
+import { validateJwt } from "./jwt-validation.utils";
 
 interface ImmediateValidationParams {
   currentAddress: string;

@@ -1,11 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
-import GroupCreate from "./create/GroupCreate";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { type JSX, useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
-import GroupsPageListWrapper from "./GroupsPageListWrapper";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useSetTitle } from "@/contexts/TitleContext";
+
+import GroupCreate from "./create/GroupCreate";
+import GroupsPageListWrapper from "./GroupsPageListWrapper";
+
 
 enum GroupsViewMode {
   CREATE = "CREATE",

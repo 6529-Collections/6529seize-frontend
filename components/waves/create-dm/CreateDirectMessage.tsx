@@ -1,5 +1,8 @@
 "use client";
 
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -13,9 +16,7 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
+
 import CreateWaveFlow from "../create-wave/CreateWaveFlow";
 export default function CreateDirectMessage({
   profile,

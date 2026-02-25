@@ -1,10 +1,12 @@
 "use client";
 
 import MarketplaceItemPreviewCard from "../MarketplaceItemPreviewCard";
+
 import MarketplacePreviewPlaceholder from "./MarketplacePreviewPlaceholder";
 import MarketplaceUnavailableCard from "./MarketplaceUnavailableCard";
-import type { MarketplaceTypePreviewProps } from "./common";
 import { useMarketplacePreviewState } from "./useMarketplacePreviewState";
+
+import type { MarketplaceTypePreviewProps } from "./common";
 
 export default function MarketplaceOpenseaItemPreview({
   href,

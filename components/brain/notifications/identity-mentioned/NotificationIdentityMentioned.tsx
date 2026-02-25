@@ -4,6 +4,7 @@ import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { INotificationIdentityMentioned } from "@/types/feed.types";
+
 import NotificationWithDrop from "../subcomponents/NotificationWithDrop";
 
 export default function NotificationIdentityMentioned({

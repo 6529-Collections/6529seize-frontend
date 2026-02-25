@@ -1,13 +1,15 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import { useTitle } from "@/contexts/TitleContext";
 import type { Gas } from "@/entities/IGas";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+
 import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,

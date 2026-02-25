@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useId } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette, faTrophy } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useId } from "react";
 import { Tooltip } from "react-tooltip";
+
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 const TOOLTIP_STYLES = {
   backgroundColor: "#1F2937",

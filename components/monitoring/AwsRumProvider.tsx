@@ -1,9 +1,11 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import type { AwsRumConfig } from "aws-rum-web";
 import { AwsRum } from "aws-rum-web";
 import { useEffect } from "react";
+
+import { publicEnv } from "@/config/env";
+
+import type { AwsRumConfig } from "aws-rum-web";
 
 interface AwsRumProviderProps {
   readonly children: React.ReactNode;

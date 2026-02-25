@@ -1,11 +1,12 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import RememePage from "@/components/rememes/RememePage";
 import { publicEnv } from "@/config/env";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { Rememe } from "@/entities/INFT";
 import { formatAddress } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import styles from "@/styles/Home.module.scss";
-import type { DBResponse } from "@/entities/IDBResponse";
-import type { Rememe } from "@/entities/INFT";
+
 import type { Metadata } from "next";
 
 export default async function ReMeme({

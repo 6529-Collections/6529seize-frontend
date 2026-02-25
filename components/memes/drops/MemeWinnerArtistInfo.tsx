@@ -1,13 +1,14 @@
 import Link from "next/link";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { getTimeAgoShort } from "@/helpers/Helpers";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;

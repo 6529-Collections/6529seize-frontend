@@ -1,6 +1,7 @@
-import GroupCreateIdentitiesSearch from "./GroupCreateIdentitiesSearch";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+
+import GroupCreateIdentitiesSearch from "./GroupCreateIdentitiesSearch";
 
 export default function GroupCreateIdentitiesSelect({
   onIdentitySelect,

@@ -1,11 +1,13 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
 import { useCallback, useEffect, useState } from "react";
+
+import { publicEnv } from "@/config/env";
 import type { CICType } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
 import { cicToType } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+
 import { Collector, Content } from "./Leaderboard";
 
 export const LEADERBOARD_PAGE_SIZE = 50;

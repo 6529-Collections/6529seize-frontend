@@ -1,7 +1,8 @@
+import { Col, Container, Row } from "react-bootstrap";
+
 import CommunityStatsComponent from "@/components/communityStats/CommunityStats";
 import { getAppMetadata } from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
-import { Col, Container, Row } from "react-bootstrap";
 
 export default function CommunityStatsPage() {
   return (

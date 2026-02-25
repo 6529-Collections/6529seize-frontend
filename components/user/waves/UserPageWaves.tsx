@@ -1,5 +1,7 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
@@ -8,7 +10,7 @@ import CommonIntersectionElement from "@/components/utils/CommonIntersectionElem
 import WaveItem from "@/components/waves/list/WaveItem";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useWaves } from "@/hooks/useWaves";
-import { useContext, useEffect, useState } from "react";
+
 import UserPageWavesSearch from "./UserPageWavesSearch";
 
 export default function UserPageWaves({

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import React, { useCallback, useMemo, useRef } from "react";
+
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface ArtworkDetailsProps {
   readonly title: string;

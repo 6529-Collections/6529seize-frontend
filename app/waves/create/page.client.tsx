@@ -1,10 +1,12 @@
 "use client";
 
-import WavesLayout from "@/components/waves/layout/WavesLayout";
-import CreateWave from "@/components/waves/create-wave/CreateWave";
-import { useAuth } from "@/components/auth/Auth";
-import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
 import { useRouter } from "next/navigation";
+
+import { useAuth } from "@/components/auth/Auth";
+import CreateWave from "@/components/waves/create-wave/CreateWave";
+import WavesLayout from "@/components/waves/layout/WavesLayout";
+import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
+
 
 export default function WavesCreatePageClient() {
   const router = useRouter();

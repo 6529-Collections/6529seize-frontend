@@ -1,12 +1,12 @@
+import { EmptyState } from "@/components/common/EmptyState";
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 
-import { EmptyState } from "@/components/common/EmptyState";
+import { XtdhReceivedCollectionCard } from "../collection-card-content";
 import {
   InlineRetry,
   ListError,
   ListMessage,
 } from "../collection-tokens/subcomponents/XtdhTokensFallbacks";
-import { XtdhReceivedCollectionCard } from "../collection-card-content";
 
 type ApiXtdhCollection = Omit<
   ApiXTdhCollectionsPage["data"][number],

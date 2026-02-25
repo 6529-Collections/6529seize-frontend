@@ -1,8 +1,9 @@
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CollectionSort } from "@/entities/IProfile";
 import type { ApiXTdhTokensPage } from "@/generated/models/ApiXTdhTokensPage";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 interface UseXtdhTokensQueryProps {
   readonly identity: string;

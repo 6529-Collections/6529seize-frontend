@@ -1,13 +1,15 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import FollowersListWrapper from "@/components/utils/followers/FollowersListWrapper";
+import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
-import { useEffect, useState } from "react";
-import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
-import FollowersListWrapper from "@/components/utils/followers/FollowersListWrapper";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
 
 const REQUEST_SIZE = 100;
 

@@ -1,14 +1,16 @@
 "use client";
 
-import type React from "react";
 import { useCallback, useReducer } from "react";
+
 import {
   fileUploaderReducer,
   initialFileUploaderState,
 } from "../reducers/fileUploadReducer";
-import { validateFile, testVideoCompatibility } from "../utils/fileValidation";
 import { PROCESSING_TIMEOUT_MS } from "../utils/constants";
+import { testVideoCompatibility, validateFile } from "../utils/fileValidation";
+
 import type { FileUploaderAction, FileUploaderState } from "../reducers/types";
+import type React from "react";
 
 /**
  * Interface for the return value of the useFileUploader hook

@@ -1,5 +1,6 @@
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { Tooltip } from "react-tooltip";
+
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 enum RoyaltiesType {

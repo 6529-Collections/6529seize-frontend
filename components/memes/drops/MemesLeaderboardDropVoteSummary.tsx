@@ -1,10 +1,11 @@
+import Link from "next/link";
+import React from "react";
+import { Tooltip } from "react-tooltip";
+
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
-import React from "react";
-import { Tooltip } from "react-tooltip";
 
 interface MemesLeaderboardDropVoteSummaryProps {
   readonly current: number;

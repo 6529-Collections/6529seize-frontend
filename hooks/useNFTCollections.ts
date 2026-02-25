@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
+
 import { publicEnv } from "@/config/env";
-import type { NFT } from "@/entities/INFT";
 import type { NextGenCollection } from "@/entities/INextgen";
+import type { NFT } from "@/entities/INFT";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useEffect, useState } from "react";
 
 interface UseNFTCollectionsReturn {
   // Data

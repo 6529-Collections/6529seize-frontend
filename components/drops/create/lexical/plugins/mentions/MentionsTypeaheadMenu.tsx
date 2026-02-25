@@ -1,9 +1,12 @@
 "use client";
 
-import { useKeyPressEvent } from "react-use";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MentionTypeaheadOption } from "./MentionsPlugin";
+import { useKeyPressEvent } from "react-use";
+
 import MentionsTypeaheadMenuItem from "./MentionsTypeaheadMenuItem";
+
+import type { MentionTypeaheadOption } from "./MentionsPlugin";
+
 
 export default function MentionsTypeaheadMenu({
   selectedIndex,

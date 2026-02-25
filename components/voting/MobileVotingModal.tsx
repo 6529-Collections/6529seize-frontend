@@ -1,7 +1,9 @@
 import React from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
+
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 
 interface MobileVotingModalProps {
   readonly drop: ExtendedDrop;

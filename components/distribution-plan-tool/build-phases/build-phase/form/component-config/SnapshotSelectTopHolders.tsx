@@ -1,24 +1,29 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+
 import {
     AllowlistOperationCode,
     Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { useContext, useEffect, useState } from "react";
-import type {
-    PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
+
+
 import {
     TopHolderType,
 } from "../BuildPhaseFormConfigModal";
-import type {
-    BuildPhaseFormConfigModalSidebarOption,
-} from "./BuildPhaseFormConfigModalSidebar";
+
 import BuildPhaseFormConfigModalSidebar from "./BuildPhaseFormConfigModalSidebar";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
+
+import type {
+    PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
+import type {
+    BuildPhaseFormConfigModalSidebarOption,
+} from "./BuildPhaseFormConfigModalSidebar";
 
 export default function SnapshotSelectTopHolders({
   onSelectTopHoldersSkip,

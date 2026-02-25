@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -6,9 +8,10 @@ import type {
   INotificationGeneric,
   TypedNotification,
 } from "@/types/feed.types";
-import { memo } from "react";
+
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
+import NotificationDropReacted from "./drop-reacted/NotificationDropReacted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
 import NotificationGeneric from "./generic/NotificationGeneric";
 import NotificationIdentityMentioned from "./identity-mentioned/NotificationIdentityMentioned";
@@ -18,7 +21,6 @@ import NotificationPriorityAlert from "./priority-alert/NotificationPriorityAler
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
 
 import type { JSX } from "react";
-import NotificationDropReacted from "./drop-reacted/NotificationDropReacted";
 
 function NotificationItemComponent({
   notification,

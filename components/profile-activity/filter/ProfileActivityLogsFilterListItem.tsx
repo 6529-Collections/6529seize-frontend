@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
 import type { ProfileActivityLogType } from "@/types/enums";
-import { useEffect, useState } from "react";
+
 import ProfileActivityLogsIcon from "../icons/ProfileActivityLogsIcon";
 
 export default function ProfileActivityLogsFilterListItem({

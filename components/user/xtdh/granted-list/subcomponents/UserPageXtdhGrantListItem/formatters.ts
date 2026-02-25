@@ -1,8 +1,8 @@
-import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
-import type { SupportedChain } from "@/types/nft";
-import { isValidEthAddress } from "@/helpers/Helpers";
-import { shortenAddress as shortenGenericAddress } from "@/helpers/address.helpers";
 import { getTargetTokensCountInfo } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
+import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
+import { shortenAddress as shortenGenericAddress } from "@/helpers/address.helpers";
+import { isValidEthAddress } from "@/helpers/Helpers";
+import type { SupportedChain } from "@/types/nft";
 
 import type { TokenPanelState } from "./types";
 

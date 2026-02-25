@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useMemo } from "react";
-import type { ApiDropPart } from "@/generated/models/ApiDropPart";
-import WaveDropPartContentMedias from "./WaveDropPartContentMedias";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+
 import type { ReferencedNft } from "@/entities/IDrop";
-import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { ImageScale } from "@/helpers/image.helpers";
+
+import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
+import WaveDropPartContentMedias from "./WaveDropPartContentMedias";
 
 interface WaveDropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];

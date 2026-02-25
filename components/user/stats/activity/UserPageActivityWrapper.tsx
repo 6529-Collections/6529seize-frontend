@@ -1,8 +1,10 @@
 "use client";
 
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageStatsActivityDistributions from "./distributions/UserPageStatsActivityDistributions";
 import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import type { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import type {
@@ -9,7 +11,7 @@ import {
     TopHolderType,
 } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
-import { useEffect, useState } from "react";
+
 import FinalizeSnapshotsTableRow from "./FinalizeSnapshotsTableRow";
 
 export interface FinalizeSnapshotRow {

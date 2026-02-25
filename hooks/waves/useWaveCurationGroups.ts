@@ -1,9 +1,10 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
 
 export const getWaveCurationGroupsQueryKey = (waveId: string) =>
   [QueryKey.WAVE_CURATION_GROUPS, { wave_id: waveId }] as const;

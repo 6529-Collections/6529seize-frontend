@@ -1,18 +1,21 @@
 "use client";
 
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { DropLocation } from "@/components/waves/drops/Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
+
+
 import DropsList from "./DropsList";
 
 const REQUEST_SIZE = 10;

@@ -1,22 +1,25 @@
 "use client";
 
-import React, { useMemo, useEffect, useCallback, type JSX } from "react";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { type JSX, useCallback, useEffect, useMemo } from "react";
+
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,
 } from "@/components/waves/header/WaveHeader";
+import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
+import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
+import { WaveSmallLeaderboard } from "@/components/waves/small-leaderboard/WaveSmallLeaderboard";
 import { WaveWinnersSmall } from "@/components/waves/winners/WaveWinnersSmall";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
+
+import { Mode, SidebarTab } from "./BrainRightSidebar";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
-import { Mode, SidebarTab } from "./BrainRightSidebar";
-import { WaveSmallLeaderboard } from "@/components/waves/small-leaderboard/WaveSmallLeaderboard";
-import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 
 interface WaveContentProps {
   readonly wave: ApiWave;

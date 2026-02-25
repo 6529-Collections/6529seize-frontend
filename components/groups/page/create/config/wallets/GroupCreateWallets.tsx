@@ -1,19 +1,23 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleExclamation,
   faTrash,
   faWallet,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext, useEffect, useRef, useState } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { dedupeWallets, walletListsMatch } from "@/helpers/WalletHelpers";
-import { AuthContext } from "@/components/auth/Auth";
+
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
+
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
-import { useContext, useEffect, useRef, useState } from "react";
+
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",

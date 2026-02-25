@@ -1,24 +1,26 @@
-import React, { useState } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
-import { useContentTab } from "@/components/brain/ContentTabContext";
-import { useSidebarState } from "../../../../hooks/useSidebarState";
 import {
-  ChevronDoubleLeftIcon,
   ArrowLeftIcon,
-  MagnifyingGlassIcon,
   ChatBubbleLeftIcon,
+  ChevronDoubleLeftIcon,
+  MagnifyingGlassIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-import WavePicture from "../../../waves/WavePicture";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 import { createBreakpoint } from "react-use";
+
+import { useContentTab } from "@/components/brain/ContentTabContext";
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
-import { MyStreamWaveTab } from "@/types/waves.types";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
-import type { WaveViewMode } from "@/hooks/useWaveViewMode";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import type { WaveViewMode } from "@/hooks/useWaveViewMode";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
+import { useSidebarState } from "../../../../hooks/useSidebarState";
+import WavePicture from "../../../waves/WavePicture";
+import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 interface MyStreamWaveTabsDefaultProps {

@@ -2,23 +2,23 @@
 
 import { FocusTrap } from "focus-trap-react";
 import {
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 
 import {
+  type ArtBlocksMeta,
   fetchArtBlocksMeta,
   inferSeries,
-  type ArtBlocksMeta,
 } from "@/src/services/api/artblocks";
 import {
+  type ArtBlocksTokenIdentifier,
   buildLiveUrl,
   buildMediaUrl,
-  type ArtBlocksTokenIdentifier,
 } from "@/src/services/artblocks/url";
 
 interface ArtBlocksTokenCardProps {

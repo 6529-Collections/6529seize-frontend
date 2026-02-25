@@ -1,4 +1,6 @@
 "use client";
+import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
+import { ethers } from "ethers";
 import React, {
   createContext,
   useCallback,
@@ -7,11 +9,12 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
-import { ethers } from "ethers";
-import { encryptData } from "./app-wallet-helpers";
+
+
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
+
+import { encryptData } from "./app-wallet-helpers";
 
 export interface AppWallet {
   name: string;

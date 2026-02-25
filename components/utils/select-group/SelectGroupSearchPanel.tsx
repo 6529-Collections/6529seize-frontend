@@ -1,15 +1,17 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { GroupsRequestParams } from "@/entities/IGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
 import SelectGroupModalHeader from "./SelectGroupModalHeader";
-import SelectGroupModalSearch from "./SelectGroupModalSearch";
 import SelectGroupModalItems from "./SelectGroupModalItems";
+import SelectGroupModalSearch from "./SelectGroupModalSearch";
 
 const DEFAULT_CONTAINER_CLASSES =
   "sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500";

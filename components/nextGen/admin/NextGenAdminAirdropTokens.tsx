@@ -1,24 +1,28 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   getCollectionIdsForAddress,
+  useCollectionAdmin,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useMinterContractWrite,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
-import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+
 import { printAdminErrors } from "./NextGenAdmin";
 import {
-  NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
+  NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
 interface Props {
   close: () => void;
 }

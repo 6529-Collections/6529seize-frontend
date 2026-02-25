@@ -1,10 +1,11 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
+import { faAward } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
-import { faAward } from "@fortawesome/free-solid-svg-icons";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 interface WaveWinnersDropOutcomeProps {
   readonly winner: ApiWaveDecisionWinner;

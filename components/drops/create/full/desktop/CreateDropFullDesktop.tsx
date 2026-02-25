@@ -1,5 +1,7 @@
 "use client";
 
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+
 import {
   CreateDropType,
   CreateDropViewType,
@@ -19,9 +21,10 @@ import type {
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import type { EditorState } from "lexical";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
+
+import type { EditorState } from "lexical";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",

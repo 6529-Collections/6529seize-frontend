@@ -1,19 +1,21 @@
+import Link from "next/link";
+import React, { useMemo } from "react";
+import { Tooltip } from "react-tooltip";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
-import Link from "next/link";
-import React, { useMemo } from "react";
-import { Tooltip } from "react-tooltip";
+
 import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 

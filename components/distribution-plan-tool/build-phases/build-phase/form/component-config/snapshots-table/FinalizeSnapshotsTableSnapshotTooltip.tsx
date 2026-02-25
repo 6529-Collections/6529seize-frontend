@@ -1,7 +1,8 @@
 import { Pool } from "@/components/allowlist-tool/allowlist-tool.types";
-import FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot from "./FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
 import FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot from "./FinalizeSnapshotsTableSnapshotTooltipCustomSnapshot";
+import FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot from "./FinalizeSnapshotsTableSnapshotTooltipDefaultSnapshot";
 
 export default function FinalizeSnapshotsTableSnapshotTooltip({
   snapshotId,

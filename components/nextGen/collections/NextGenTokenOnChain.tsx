@@ -1,26 +1,29 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import { useEnsName, useReadContract } from "wagmi";
-import type { NextGenCollection } from "@/entities/INextgen";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import styles from "./NextGen.module.scss";
 
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { mainnet } from "viem/chains";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import { useIdentity } from "@/hooks/useIdentity";
+import { useEnsName, useReadContract } from "wagmi";
+
 import Address from "@/components/address/Address";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import DotLoader from "@/components/dotLoader/DotLoader";
+import type { NextGenCollection } from "@/entities/INextgen";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useIdentity } from "@/hooks/useIdentity";
+
+import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
+
+import styles from "./NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;

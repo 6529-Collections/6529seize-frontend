@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type JSX } from "react";
-import { CreateWaveStepStatus } from "@/types/waves.types";
+import { type JSX, useState } from "react";
 import { useDebounce } from "react-use";
+
+import { CreateWaveStepStatus } from "@/types/waves.types";
 
 export default function CreateWavesMainStepIcon({
   stepStatus,

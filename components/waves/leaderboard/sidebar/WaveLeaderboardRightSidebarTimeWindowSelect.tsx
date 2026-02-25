@@ -1,7 +1,8 @@
 "use client";
 
 import { memo } from "react";
-import { TimeWindow, TIME_WINDOW_LABELS } from "@/types/boosted-drops.types";
+
+import { TIME_WINDOW_LABELS, TimeWindow } from "@/types/boosted-drops.types";
 
 interface WaveLeaderboardRightSidebarTimeWindowSelectProps {
   readonly value: TimeWindow;

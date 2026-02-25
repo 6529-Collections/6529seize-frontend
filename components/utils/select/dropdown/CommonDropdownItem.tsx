@@ -1,11 +1,13 @@
 "use client";
 
-import { cloneElement, isValidElement, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { cloneElement, isValidElement, useEffect, useState } from "react";
+
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
-import type { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "@/entities/ISort";
+
+import type { CommonSelectItemProps } from "../CommonSelect";
 
 export default function CommonDropdownItem<T, U = unknown>(
   props: Readonly<CommonSelectItemProps<T, U>>

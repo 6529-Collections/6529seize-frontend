@@ -1,4 +1,5 @@
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+
 import { formatCompactNumber } from "../utils/formatNumbers";
 
 interface MetricSparklineProps {

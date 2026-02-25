@@ -1,14 +1,15 @@
 "use client";
 
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { useEmoji } from "@/contexts/EmojiContext";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
+
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useEmoji } from "@/contexts/EmojiContext";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropReaction } from "@/hooks/drops/useDropReaction";
 
 const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;

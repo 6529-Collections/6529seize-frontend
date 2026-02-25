@@ -1,13 +1,17 @@
 "use client";
 
-import { ProxyMode } from "../UserPageProxy";
-import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useState } from "react";
+
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import ProxyListItem from "./ProxyListItem";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+
+import { ProxyMode } from "../UserPageProxy";
+
+import ProxyListItem from "./ProxyListItem";
+
 
 export enum ProfileProxyListType {
   ALL = "ALL",

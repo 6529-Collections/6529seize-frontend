@@ -1,5 +1,11 @@
 "use client";
 
+import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
+import { faCompress } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AnimatePresence, motion } from "framer-motion";
+import { type MouseEvent, useCallback, useMemo, useState } from "react";
+
 import Download from "@/components/download/Download";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
@@ -16,11 +22,7 @@ import {
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
-import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
-import { faCompress } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useMemo, useState, type MouseEvent } from "react";
+
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";

@@ -1,17 +1,18 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
-import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+
+import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { AuthContext } from "@/components/auth/Auth";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiAvailableRatingCredit } from "@/generated/models/ApiAvailableRatingCredit";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiAvailableRatingCredit } from "@/generated/models/ApiAvailableRatingCredit";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 export default function GroupCardActionStats({
   matter,
   membersCount,

@@ -1,13 +1,16 @@
 "use client";
 
-import type { ApiWaveScope } from "@/generated/models/ApiWaveScope";
-import WaveGroupTitle from "./WaveGroupTitle";
-import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+
+import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import WaveGroupScope from "./WaveGroupScope";
+import WaveGroupTitle from "./WaveGroupTitle";
+
 import type { WaveGroupType } from "./WaveGroup.types";
 
 export default function WaveGroup({

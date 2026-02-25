@@ -1,8 +1,10 @@
 "use client";
 
-import type { TraitsData } from "../submission/types/TraitsData";
 import React, { useCallback, useRef } from "react";
+
 import { TraitWrapper } from "./TraitWrapper";
+
+import type { TraitsData } from "../submission/types/TraitsData";
 
 interface DropdownTraitProps {
   readonly label: string;

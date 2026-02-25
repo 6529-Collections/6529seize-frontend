@@ -1,14 +1,16 @@
 "use client";
 
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
+
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "@/services/api/common-api";
 import type { RatingWithProfileInfoAndLevel } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { Page } from "@/helpers/Types";
-import OverlappingAvatars from "@/components/common/OverlappingAvatars";
-import { RateMatter } from "@/types/enums";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import type { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { RateMatter } from "@/types/enums";
+
 import type { MouseEvent } from "react";
 
 const STALE_TIME = 5 * 60 * 1000;

@@ -1,20 +1,21 @@
 "use client";
 
-import useCapacitor from "@/hooks/useCapacitor";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toPng } from "html-to-image";
 import Link from "next/link";
 import {
+  type FormEvent,
   memo,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type FormEvent,
 } from "react";
-import type { DisplayTz, SeasonMintScanResult } from "./meme-calendar.helpers";
+
+import useCapacitor from "@/hooks/useCapacitor";
+
 import {
   displayedSeasonNumberFromIndex,
   formatFullDate,
@@ -29,6 +30,9 @@ import {
   printCalendarInvites,
   ymd,
 } from "./meme-calendar.helpers";
+
+import type { DisplayTz, SeasonMintScanResult } from "./meme-calendar.helpers";
+
 
 /**
  * Layout wrapper: global Local/UTC toggle + two cards

@@ -3,10 +3,13 @@
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { NotificationDisplayItem } from "@/types/feed.types";
-import type { ReactNode } from "react";
+
 import MyStreamNoItems from "../../my-stream/layout/MyStreamNoItems";
 import NotificationsWrapper from "../NotificationsWrapper";
+
 import NotificationsStateMessage from "./NotificationsStateMessage";
+
+import type { ReactNode } from "react";
 
 interface NotificationsContentProps {
   readonly isLoadingProfile: boolean;

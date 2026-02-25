@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import styles from "./LFGSlideshow.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
-import { commonApiFetch } from "@/services/api/common-api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
+
 import type { ApiNftMedia } from "@/generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
-import { Button } from "react-bootstrap";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import styles from "./LFGSlideshow.module.scss";
+
+
 
 const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";

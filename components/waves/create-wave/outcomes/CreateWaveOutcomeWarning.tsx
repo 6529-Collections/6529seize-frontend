@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
+
 import CreateWaveWarning from "../utils/CreateWaveWarning";
 
 export default function CreateWaveOutcomeWarning({

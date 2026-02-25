@@ -1,4 +1,5 @@
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+
 import type { CreateDropMetadataType } from "../CreateDropContent";
 
 export interface MissingRequirements {

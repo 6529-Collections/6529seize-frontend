@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+
+import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountHeader";
 import type {
   NFT_ACCOUNTS_STATEMENT_TYPE} from "@/helpers/Types";
 import {
   STATEMENT_GROUP,
   STATEMENT_TYPE,
 } from "@/helpers/Types";
-import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+
+import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountHeader";
 import UserPageIdentityAddStatementsNFTAccountItems from "./UserPageIdentityAddStatementsNFTAccountItems";
 
 export default function UserPageIdentityAddStatementsNFTAccounts({

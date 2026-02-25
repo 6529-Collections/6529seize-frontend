@@ -1,13 +1,14 @@
 import type {
-  FieldValidationContext,
-  FieldValidationResult,
-} from "./validationTypes";
-import type {
-  NumberFieldDefinition,
-  DropdownFieldDefinition} from "@/components/waves/memes/traits/schema";
+  DropdownFieldDefinition,
+  NumberFieldDefinition} from "@/components/waves/memes/traits/schema";
 import {
   FieldType
 } from "@/components/waves/memes/traits/schema";
+
+import type {
+  FieldValidationContext,
+  FieldValidationResult,
+} from "./validationTypes";
 
 /**
  * Validates a text field

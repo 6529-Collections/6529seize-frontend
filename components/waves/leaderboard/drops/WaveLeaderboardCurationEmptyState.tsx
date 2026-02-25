@@ -1,4 +1,5 @@
 import React from "react";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 interface WaveLeaderboardCurationEmptyStateProps {

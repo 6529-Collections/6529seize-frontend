@@ -1,8 +1,9 @@
 import Link from "next/link";
+
 import { FallbackImage } from "@/components/common/FallbackImage";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import WaveProfileTooltipWrapper from "@/components/utils/tooltip/WaveProfileTooltipWrapper";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 
 export default function DropListItemContentWaveMention({

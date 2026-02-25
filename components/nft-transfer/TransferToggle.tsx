@@ -1,9 +1,11 @@
 "use client";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef } from "react";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
 import { useTransfer } from "./TransferState";
 
 export default function TransferToggle() {

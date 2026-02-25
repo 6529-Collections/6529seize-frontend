@@ -1,12 +1,13 @@
 "use client"
 
 import React, { useMemo } from "react";
-import { useWaveData } from "@/hooks/useWaveData";
-import useCapacitor from "@/hooks/useCapacitor";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useWaveData } from "@/hooks/useWaveData";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 interface BrainContentInputProps {
   readonly activeDrop: ActiveDropState | null;

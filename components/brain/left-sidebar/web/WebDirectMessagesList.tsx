@@ -1,12 +1,14 @@
 "use client";
 
-import useCreateModalState from "@/hooks/useCreateModalState";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import React, { useContext, useRef, type ReactNode } from "react";
+import React, { type ReactNode, useContext, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+
+import useCreateModalState from "@/hooks/useCreateModalState";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import { AuthContext } from "../../../auth/Auth";
@@ -17,8 +19,10 @@ import PrimaryButton from "../../../utils/button/PrimaryButton";
 import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
-import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
+
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
+
+import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
 
 interface WebDirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;

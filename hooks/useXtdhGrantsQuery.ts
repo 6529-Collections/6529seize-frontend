@@ -1,28 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
 import {
-  keepPreviousData,
   type InfiniteData,
-  type UseInfiniteQueryResult,
+  keepPreviousData,
   useInfiniteQuery,
+  type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
-import { commonApiFetch } from "@/services/api/common-api";
+import {
+  areAllGrantedStatusesNormalized,
+  DEFAULT_FILTER_STATUSES,
+  DEFAULT_STATUS,
+  normalizeGrantedStatuses,
+  serializeNormalizedUserPageXtdhGrantedListStatuses,
+} from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import type {
   GrantedFilterStatuses,
   GrantedSortField,
 } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
-import {
-  DEFAULT_STATUS,
-  DEFAULT_FILTER_STATUSES,
-  normalizeGrantedStatuses,
-  serializeNormalizedUserPageXtdhGrantedListStatuses,
-  areAllGrantedStatusesNormalized,
-} from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import type { SortDirection } from "@/entities/ISort";
+import type { ApiXTdhGrantsPage } from "@/generated/models/ApiXTdhGrantsPage";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseXtdhGrantsQueryParams {
   readonly grantor: string;

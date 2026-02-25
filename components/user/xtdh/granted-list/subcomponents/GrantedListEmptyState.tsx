@@ -1,5 +1,5 @@
 import { EmptyState } from "@/components/common/EmptyState";
-import { STATUS_LABELS, areAllGrantedStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
+import { areAllGrantedStatuses, STATUS_LABELS } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import type { GrantedFilterStatuses } from "@/components/user/xtdh/user-page-xtdh-granted-list/types";
 
 interface GrantedListEmptyStateProps {

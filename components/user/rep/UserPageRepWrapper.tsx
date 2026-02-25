@@ -1,10 +1,13 @@
 "use client";
 
+import { useParams } from "next/navigation";
+
+import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useParams } from "next/navigation";
-import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
+
 import UserPageRep from "./UserPageRep";
 export default function UserPageRepWrapper({
   profile: initialProfile,

@@ -1,6 +1,8 @@
-import { renderGifEmbed } from "../renderers";
-import type { LinkHandler } from "../linkTypes";
 import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
+
+import { renderGifEmbed } from "../renderers";
+
+import type { LinkHandler } from "../linkTypes";
 
 const TENOR_HOST = "media.tenor.com";
 

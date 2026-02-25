@@ -1,6 +1,6 @@
-import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import IdentitySearch from "@/components/utils/input/identity/IdentitySearch";
 import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 export default function CreateWaveVotingRep({
   category,

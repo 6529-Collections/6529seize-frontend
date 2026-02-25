@@ -1,8 +1,9 @@
 "use client";
 
-import styles from "./CollectionsDropdown.module.scss";
-import { Dropdown } from "react-bootstrap";
 import { useRouter } from "next/navigation";
+import { Dropdown } from "react-bootstrap";
+
+import styles from "./CollectionsDropdown.module.scss";
 
 type CollectionType =
   | "memes"

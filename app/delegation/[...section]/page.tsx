@@ -1,7 +1,9 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DelegationCenterSection } from "@/types/enums";
-import type { Metadata } from "next";
+
 import DelegationPageClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export default async function DelegationPage({
   params,

@@ -1,11 +1,7 @@
 "use client";
 
-import { CONSENT_EULA_COOKIE } from "@/constants/constants";
-import useCapacitor from "@/hooks/useCapacitor";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { Device } from "@capacitor/device";
 import Cookies from "js-cookie";
-import type { ReactNode } from "react";
 import React, {
   createContext,
   useContext,
@@ -13,8 +9,16 @@ import React, {
   useMemo,
   useState,
 } from "react";
+
+import { CONSENT_EULA_COOKIE } from "@/constants/constants";
+import useCapacitor from "@/hooks/useCapacitor";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+
 import { AuthContext } from "../auth/Auth";
+
 import EULAModal from "./EULAModal";
+
+import type { ReactNode } from "react";
 
 type EULAConsentContextType = {
   consent: () => void;

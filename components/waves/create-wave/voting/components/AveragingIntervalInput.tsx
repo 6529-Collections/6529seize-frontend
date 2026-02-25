@@ -1,10 +1,13 @@
 "use client"
 
 import { memo, useCallback } from 'react';
-import type { TimeUnit} from '../types';
+
 import { MIN_MINUTES } from '../types';
+
 import TimeUnitSelector from './TimeUnitSelector';
 import ValidationFeedback from './ValidationFeedback';
+
+import type { TimeUnit} from '../types';
 
 interface AveragingIntervalInputProps {
   /** Current value of the averaging interval */

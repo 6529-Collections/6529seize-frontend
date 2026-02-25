@@ -2,6 +2,7 @@ import type { ActivityLogParamsConverted } from "@/components/profile-activity/P
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
+
 import type { Page } from "./Types";
 
 export const getUserProfile = async ({

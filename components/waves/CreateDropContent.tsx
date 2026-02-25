@@ -1,6 +1,42 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import throttle from "lodash/throttle";
+import dynamic from "next/dynamic";
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useSelector } from "react-redux";
+
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+
+import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
+import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
+
+import CreateDropActions from "./CreateDropActions";
+import { CreateDropContentFiles } from "./CreateDropContentFiles";
+import CreateDropContentRequirements from "./CreateDropContentRequirements";
+import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
+
+import type { CreateDropInputHandles } from "./CreateDropInput";
+
+import CreateDropInput from "./CreateDropInput";
+import CreateDropMetadata from "./CreateDropMetadata";
+import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
+import { CreateDropSubmit } from "./CreateDropSubmit";
+
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type {
   CreateDropConfig,
   CreateDropPart,
@@ -11,68 +47,40 @@ import type {
 } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import type { DropPrivileges } from "@/hooks/useDropPriviledges";
-import { selectEditingDropId } from "@/store/editSlice";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { AnimatePresence, motion } from "framer-motion";
-import type { EditorState } from "lexical";
-import dynamic from "next/dynamic";
-import React, {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { useSelector } from "react-redux";
-import { AuthContext } from "../auth/Auth";
-import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-import CreateDropActions from "./CreateDropActions";
-import { CreateDropContentFiles } from "./CreateDropContentFiles";
-import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
-import type { CreateDropInputHandles } from "./CreateDropInput";
-import CreateDropInput from "./CreateDropInput";
-import CreateDropMetadata from "./CreateDropMetadata";
-import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
-import { CreateDropSubmit } from "./CreateDropSubmit";
-
-import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
-import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useWave } from "@/hooks/useWave";
 import { useWebSocket } from "@/services/websocket";
-import throttle from "lodash/throttle";
+import { selectEditingDropId } from "@/store/editSlice";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
+import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
+import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
+
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
-import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
 import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
 } from "./utils/createDropContentSubmission";
-import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+
+import type { DropMutationBody } from "./CreateDrop";
+import type { MissingRequirements } from "./utils/getMissingRequirements";
+import type { EditorState } from "lexical";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(

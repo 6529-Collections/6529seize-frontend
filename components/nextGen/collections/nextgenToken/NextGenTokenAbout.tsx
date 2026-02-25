@@ -1,6 +1,13 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
+
+import { faFire } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -28,13 +35,9 @@ import {
 import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import { faFire } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
+
+import styles from "../NextGen.module.scss";
+
 import { displayScore } from "./NextGenTokenProperties";
 
 interface Props {

@@ -1,7 +1,9 @@
-import type { ErrorInfo, ReactNode } from "react";
 import { Component } from "react";
-import { sanitizeErrorMessage, logError } from "@/src/utils/security-logger";
+
 import { removeAuthJwt } from "@/services/auth/auth.utils";
+import { logError, sanitizeErrorMessage } from "@/src/utils/security-logger";
+
+import type { ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;

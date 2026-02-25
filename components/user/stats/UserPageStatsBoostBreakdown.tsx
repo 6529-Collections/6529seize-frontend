@@ -1,9 +1,10 @@
-import type { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
+
+import type { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function UserPageStatsBoostBreakdown({
   tdh,

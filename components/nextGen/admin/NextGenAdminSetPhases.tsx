@@ -1,14 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { NULL_MERKLE } from "@/constants/constants";
 import type { NextgenAllowlistCollection } from "@/entities/INextgen";
 import { NextgenAllowlistCollectionType } from "@/entities/INextgen";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
+
 import { FunctionSelectors } from "../nextgen_contracts";
-import type { PhaseTimes } from "../nextgen_entities";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -20,12 +22,15 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+
 import { printAdminErrors } from "./NextGenAdmin";
 import styles from "./NextGenAdmin.module.scss";
 import {
   NextGenAdminHeadingRow,
   NextGenCollectionIdFormGroup,
 } from "./NextGenAdminShared";
+
+import type { PhaseTimes } from "../nextgen_entities";
 interface Props {
   close: () => void;
 }

@@ -1,5 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import { useCopyToClipboard } from "react-use";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+
 import { DELEGATION_ABI } from "@/abis/abis";
 import { useAuth } from "@/components/auth/Auth";
 import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
@@ -14,10 +19,7 @@ import {
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
-import { useCopyToClipboard } from "react-use";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({

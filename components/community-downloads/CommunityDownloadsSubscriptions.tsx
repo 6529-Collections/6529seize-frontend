@@ -1,11 +1,13 @@
 "use client";
 
-import Pagination from "@/components/pagination/Pagination";
-import { MEMES_CONTRACT } from "@/constants/constants";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
 
+import Pagination from "@/components/pagination/Pagination";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { commonApiFetch } from "@/services/api/common-api";
+
+
 import {
   DownloadsLayout,
   DownloadsTable,

@@ -1,14 +1,15 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useId, useMemo, useState } from "react";
+import { Tooltip } from "react-tooltip";
+
 import { useAuth } from "@/components/auth/Auth";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import EnsAddressDisplay from "@/components/utils/input/ens-address/EnsAddressDisplay";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useId, useMemo, useState } from "react";
-import { Tooltip } from "react-tooltip";
 
 interface AirdropEntry {
   readonly address: string;

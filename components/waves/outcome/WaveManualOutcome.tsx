@@ -1,12 +1,14 @@
 "use client";
 
-import type { FC} from "react";
+import { ChevronDownIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { TrophyIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { WaveOutcomeDistributionState } from "@/types/waves.types";
+
+import type { FC} from "react";
 
 interface WaveManualOutcomeProps {
   readonly outcome: ApiWaveOutcome;

@@ -1,13 +1,15 @@
 "use client";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { publicEnv } from "@/config/env";
-import { NULL_ADDRESS } from "@/constants/constants";
-import { postData } from "@/services/6529api";
 import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useReadContract, useSignMessage } from "wagmi";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { publicEnv } from "@/config/env";
+import { NULL_ADDRESS } from "@/constants/constants";
+import { postData } from "@/services/6529api";
+
 import {
   FunctionSelectors,
   NEXTGEN_CHAIN_ID,
@@ -24,6 +26,7 @@ import {
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+
 import { printAdminErrors } from "./NextGenAdmin";
 import styles from "./NextGenAdmin.module.scss";
 import {

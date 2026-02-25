@@ -1,5 +1,7 @@
 "use client";
 
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   CreateDropType,
@@ -19,10 +21,11 @@ import type {
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import type { EditorState } from "lexical";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
 import CreateDropFullMobileWrapper from "./CreateDropFullMobileWrapper";
+
+import type { EditorState } from "lexical";
 
 enum TITLE_STATE {
   BUTTON = "BUTTON",

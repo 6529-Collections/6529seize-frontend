@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
+
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import type { ApiWave } from "@/generated/models/ApiWave";
+
 import WaveHeaderPictureEditModal from "./WaveHeaderPictureEditModal";
 
 export default function WaveHeaderPictureEdit({

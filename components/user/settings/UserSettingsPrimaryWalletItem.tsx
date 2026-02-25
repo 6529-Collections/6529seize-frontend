@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { areEqualAddresses, formatStatFloor } from "@/helpers/Helpers";
+
 import type { ApiWallet } from "@/generated/models/ApiWallet";
+import { areEqualAddresses, formatStatFloor } from "@/helpers/Helpers";
 
 export default function UserSettingsPrimaryWalletItem({
   wallet,

@@ -1,11 +1,13 @@
 "use client";
 
+import { useContext, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import BoostIcon from "@/components/common/icons/BoostIcon";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
+
 import type { FC } from "react";
-import { useContext, useState } from "react";
 
 interface WaveDropMobileMenuBoostProps {
   readonly drop: ExtendedDrop;

@@ -1,3 +1,5 @@
+import { notFound, redirect } from "next/navigation";
+
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
@@ -8,8 +10,8 @@ import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
 
 type TabProps = { readonly profile: ApiIdentity };
 

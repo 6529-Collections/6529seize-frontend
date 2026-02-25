@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+
 import TDHMainPage from "./page.client";
 
 export default function TDH() {

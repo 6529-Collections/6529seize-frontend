@@ -1,7 +1,10 @@
 import { useMemo } from "react";
-import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
+
 import type { SupportedChain, TokenMetadata } from "@/components/nft-picker/NftPicker.types";
+import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
+
 import { EMPTY_METADATA_MAP } from "../utils";
+
 import type { TokenWindowEntry } from "../types";
 
 type TokenMetadataWindowParams = Readonly<{

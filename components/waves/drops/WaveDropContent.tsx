@@ -1,11 +1,13 @@
 import React from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import WaveDropPart from "./WaveDropPart";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+
+import WaveDropPart from "./WaveDropPart";
 
 interface WaveDropContentProps {
   readonly drop: ExtendedDrop;

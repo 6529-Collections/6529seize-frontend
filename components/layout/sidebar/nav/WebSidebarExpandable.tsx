@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import WebSidebarNavItem from "./WebSidebarNavItem";
-import WebSidebarExpandableGroup from "./WebSidebarExpandableGroup";
+import Link from "next/link";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+
 import type { SidebarSection } from "@/components/navigation/navTypes";
+
+import WebSidebarExpandableGroup from "./WebSidebarExpandableGroup";
+import WebSidebarNavItem from "./WebSidebarNavItem";
 
 interface WebSidebarExpandableProps {
   readonly section: SidebarSection;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { useEffect, useEffectEvent } from "react";
 import { Form } from "react-bootstrap";
+
+import { useEnsResolution } from "@/hooks/useEnsResolution";
 
 interface EnsAddressInputProps {
   readonly value?: string;

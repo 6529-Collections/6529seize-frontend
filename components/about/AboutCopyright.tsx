@@ -1,4 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
+
 import styles from "./About.module.scss";
 
 export default function AboutCopyright() {

@@ -1,21 +1,24 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import { useClickAway, useKeyPressEvent } from "react-use";
+
 import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
-import { useRepAllocation } from "@/hooks/useRepAllocation";
+
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
   readonly category: string;

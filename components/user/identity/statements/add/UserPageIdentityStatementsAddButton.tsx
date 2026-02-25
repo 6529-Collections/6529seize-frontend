@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,

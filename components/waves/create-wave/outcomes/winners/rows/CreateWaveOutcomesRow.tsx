@@ -4,6 +4,7 @@ import type {
 import {
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
+
 import CreateWaveOutcomesRowCIC from "./cic/CreateWaveOutcomesRowCIC";
 import CreateWaveOutcomesRowManual from "./manual/CreateWaveOutcomesRowManual";
 import CreateWaveOutcomesRowRep from "./rep/CreateWaveOutcomesRowRep";

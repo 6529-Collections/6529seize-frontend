@@ -2,6 +2,7 @@ import MemeLabComponent from "@/components/memelab/MemeLab";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
 
 export default function MemeLab() {

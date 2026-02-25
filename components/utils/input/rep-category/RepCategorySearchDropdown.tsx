@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+
 import RepCategorySearchItem from "./RepCategorySearchItem";
 
 export default function RepCategorySearchDropdown({

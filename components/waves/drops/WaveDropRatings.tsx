@@ -1,8 +1,9 @@
 import React from "react";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropRatingsProps {
   readonly drop: ApiDrop;

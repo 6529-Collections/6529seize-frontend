@@ -1,16 +1,19 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { useContext, useEffect, useState } from "react";
+
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
-import TopRaterAvatars from "./TopRaterAvatars";
 import {
   getCanEditRep,
   sortRepsByRatingAndContributors,
 } from "../UserPageRep.helpers";
+
+import TopRaterAvatars from "./TopRaterAvatars";
 
 const TOP_REPS_COUNT = 5;
 

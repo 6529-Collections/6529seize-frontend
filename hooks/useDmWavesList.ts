@@ -4,8 +4,10 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { useWavesOverview } from "./useWavesOverview";
+
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+
+import { useWavesOverview } from "./useWavesOverview";
 
 const useDmWavesList = () => {
   const {

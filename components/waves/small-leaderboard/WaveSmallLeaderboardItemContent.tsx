@@ -1,15 +1,18 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Tooltip } from "react-tooltip";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   ExtendedDrop,
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Tooltip } from "react-tooltip";
-import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
+
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
-import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
+import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
+
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;

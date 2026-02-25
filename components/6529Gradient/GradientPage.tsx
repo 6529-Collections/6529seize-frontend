@@ -1,6 +1,8 @@
 "use client";
 
-import styles from "./6529Gradient.module.scss";
+
+import { useCallback, useContext, useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 
 import Address from "@/components/address/Address";
 import { AuthContext } from "@/components/auth/Auth";
@@ -29,8 +31,8 @@ import {
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
 import { ContractType } from "@/types/enums";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+
+import styles from "./6529Gradient.module.scss";
 
 interface NftWithOwner extends NFT {
   owner: string;

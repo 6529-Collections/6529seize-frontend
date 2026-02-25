@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import clsx from "clsx";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import HeaderSearchModal from "./HeaderSearchModal";
-import { useKey } from "react-use";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import { useEffect, useRef, useState } from "react";
+import { useKey } from "react-use";
+
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+import HeaderSearchModal from "./HeaderSearchModal";
+
+
 
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;

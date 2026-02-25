@@ -1,19 +1,20 @@
 "use client";
 
 import {
+  type ReactNode,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
-import { TweetContainer, enrichTweet, useTweet } from "react-tweet";
+import { enrichTweet, TweetContainer, useTweet } from "react-tweet";
 
 import styles from "./ExpandableTweetPreview.module.css";
-import CompactControls from "./ExpandableTweetPreviewCompactControls";
 import CompactTweetContent from "./ExpandableTweetPreviewCompactContent";
+import CompactControls from "./ExpandableTweetPreviewCompactControls";
 import ExpandedTweetContent from "./ExpandableTweetPreviewExpandedContent";
 import MeasurementShell from "./ExpandableTweetPreviewMeasurementShell";
+
 import type { EnrichedTweet } from "./ExpandableTweetPreview.types";
 import type { TweetPreviewMode } from "./TweetPreviewModeContext";
 

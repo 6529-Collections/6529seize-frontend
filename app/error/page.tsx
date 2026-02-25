@@ -1,6 +1,7 @@
+import { Suspense } from "react";
+
 import ErrorComponent from "@/components/error/Error";
 import styles from "@/styles/Home.module.scss";
-import { Suspense } from "react";
 
 type ErrorPageProps = {
   readonly searchParams?: Promise<{ readonly stack?: string | undefined }> | undefined;

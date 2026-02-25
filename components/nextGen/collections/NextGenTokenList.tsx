@@ -1,23 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
+
+import DotLoader from "@/components/dotLoader/DotLoader";
+import Pagination from "@/components/pagination/Pagination";
 import type {
   NextGenCollection,
   NextGenToken,
   TraitValuePair,
 } from "@/entities/INextgen";
-import { useEffect, useState } from "react";
-import Pagination from "@/components/pagination/Pagination";
+import type { SortDirection } from "@/entities/ISort";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import DotLoader from "@/components/dotLoader/DotLoader";
+
 import {
   NextGenListFilters,
   NextGenTokenListedType,
   NextGenTokenRarityType,
 } from "../nextgen_helpers";
-import type { SortDirection } from "@/entities/ISort";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+
+import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
 
 interface Props {
   collection: NextGenCollection;

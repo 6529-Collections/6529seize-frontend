@@ -1,4 +1,5 @@
 import { Tooltip } from "react-tooltip";
+
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 
 export default function CreateDropContentMissingMediaWarning({

@@ -246,6 +246,43 @@ const rules = {
 
   // Organization
   "import/first": "off",
+  "import/order": [
+    "error",
+    {
+      groups: [
+        "builtin",
+        "external",
+        "internal",
+        "parent",
+        "sibling",
+        "index",
+        "object",
+        "type",
+      ],
+      pathGroups: [
+        {
+          pattern: "@/**",
+          group: "internal",
+          position: "before",
+        },
+      ],
+      pathGroupsExcludedImportTypes: ["builtin"],
+      "newlines-between": "always",
+      alphabetize: {
+        order: "asc",
+        caseInsensitive: true,
+      },
+    },
+  ],
+  "sort-imports": [
+    "error",
+    {
+      ignoreCase: true,
+      ignoreDeclarationSort: true,
+      ignoreMemberSort: false,
+      allowSeparatedGroups: true,
+    },
+  ],
   "import/no-useless-path-segments": ["off", { noUselessIndex: true }],
 
   // -------------------------------------------------------------------------

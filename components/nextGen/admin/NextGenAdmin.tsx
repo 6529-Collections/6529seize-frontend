@@ -1,49 +1,53 @@
 "use client";
 
-import { Container, Row, Col, Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import styles from "./NextGenAdmin.module.scss";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
+import { useSetTitle } from "@/contexts/TitleContext";
+
+import { FunctionSelectors } from "../nextgen_contracts";
 import {
-  useGlobalAdmin,
-  useFunctionAdmin,
-  useCollectionIndex,
-  useCollectionAdmin,
   isCollectionAdmin,
   isCollectionArtist,
+  useCollectionAdmin,
   useCollectionArtist,
+  useCollectionIndex,
+  useFunctionAdmin,
+  useGlobalAdmin,
   useParsedCollectionIndex,
 } from "../nextgen_helpers";
-import { FunctionSelectors } from "../nextgen_contracts";
-import NextGenAdminSetData from "./NextGenAdminSetData";
-import NextGenAdminSetCosts from "./NextGenAdminSetCosts";
-import NextGenAdminSetPhases from "./NextGenAdminSetPhases";
-import NextGenAdminRegisterAdmin, {
-  ADMIN_TYPE,
-} from "./NextGenAdminRegisterAdmin";
-import NextGenAdminArtistSignCollection from "./NextGenAdminArtistSignCollection";
+
+import styles from "./NextGenAdmin.module.scss";
+import NextGenAdminAcceptAddressesAndPercentages from "./NextGenAdminAcceptAddressesAndPercentages";
+import NextGenAdminAddRandomizer from "./NextGenAdminAddRandomizer";
 import NextGenAdminAirdropTokens from "./NextGenAdminAirdropTokens";
+import NextGenAdminArtistSignCollection from "./NextGenAdminArtistSignCollection";
+import NextGenAdminChangeMetadataView from "./NextGenAdminChangeMetadataView";
+import NextGenAdminCreateCollection from "./NextGenAdminCreateCollection";
+import NextGenAdminInitializeBurn from "./NextGenAdminInitializeBurn";
+import NextGenAdminInitializeExternalBurnSwap from "./NextGenAdminInitializeExternalBurnSwap";
+import NextGenAdminMintAndAuction from "./NextGenAdminMintAndAuction";
+import NextGenAdminPayArtist from "./NextGenAdminPayArtist";
 import NextGenAdminProposeAddressesAndPercentages, {
   ProposalType,
 } from "./NextGenAdminProposeAddressesAndPercentages";
-import NextGenAdminSetSplits from "./NextGenAdminSetSplits";
-import NextGenAdminChangeMetadataView from "./NextGenAdminChangeMetadataView";
-import NextGenAdminUpdateImagesAttributes from "./NextGenAdminUpdateImagesAttributes";
-import NextGenAdminAddRandomizer from "./NextGenAdminAddRandomizer";
+import NextGenAdminRegisterAdmin, {
+  ADMIN_TYPE,
+} from "./NextGenAdminRegisterAdmin";
+import NextGenAdminSetCosts from "./NextGenAdminSetCosts";
+import NextGenAdminSetData from "./NextGenAdminSetData";
 import NextGenAdminSetFinalSupply from "./NextGenAdminSetFinalSupply";
-import NextGenAdminInitializeBurn from "./NextGenAdminInitializeBurn";
-import NextGenAdminAcceptAddressesAndPercentages from "./NextGenAdminAcceptAddressesAndPercentages";
-import NextGenAdminPayArtist from "./NextGenAdminPayArtist";
-import NextGenAdminMintAndAuction from "./NextGenAdminMintAndAuction";
-import NextGenAdminInitializeExternalBurnSwap from "./NextGenAdminInitializeExternalBurnSwap";
-import NextGenAdminCreateCollection from "./NextGenAdminCreateCollection";
+import NextGenAdminSetPhases from "./NextGenAdminSetPhases";
+import NextGenAdminSetSplits from "./NextGenAdminSetSplits";
 import NextGenAdminUpdateCollection, {
   UpdateType,
 } from "./NextGenAdminUpdateCollection";
+import NextGenAdminUpdateImagesAttributes from "./NextGenAdminUpdateImagesAttributes";
 import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
-import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useSetTitle } from "@/contexts/TitleContext";
+
 
 enum Focus {
   GLOBAL = "global",

@@ -1,9 +1,10 @@
 "use client";
 
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 
 export default function HeaderProxyNewModal({
   connectedProfile,

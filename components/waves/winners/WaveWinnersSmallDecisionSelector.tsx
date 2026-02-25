@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { useAnimate } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
 
 interface DecisionPoint {
   id: string;

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
+import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getMediaType } from "@/components/nft-image/utils/media-type";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
 
 interface NowMintingArtworkProps {
   readonly nft: NFTWithMemesExtendedData;

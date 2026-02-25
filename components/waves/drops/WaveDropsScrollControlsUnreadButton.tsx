@@ -1,9 +1,11 @@
 "use client";
 
-import type { MouseEvent } from "react";
 import { useCallback } from "react";
+
 import { useSwipeDismiss } from "./useSwipeDismiss";
 import { formatCountLabel } from "./wave-drops-scroll-controls.utils";
+
+import type { MouseEvent } from "react";
 
 interface WaveDropsScrollControlsUnreadButtonProps {
   readonly unreadDividerSerialNo: number | null;

@@ -1,8 +1,8 @@
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import GroupItem from "@/components/groups/select/item/GroupItem";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
 export default function SelectGroupModalItems({
   groups,

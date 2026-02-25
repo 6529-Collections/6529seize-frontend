@@ -6,6 +6,7 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { INotificationAllDrops } from "@/types/feed.types";
+
 import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";

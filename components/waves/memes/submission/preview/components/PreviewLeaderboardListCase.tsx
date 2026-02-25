@@ -1,6 +1,8 @@
 import { MemesLeaderboardDrop } from "@/components/memes/drops/MemesLeaderboardDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { PREVIEW_CASE_WIDTHS } from "../presentation/presets";
+
 import { PreviewCaseSection } from "./PreviewCaseSection";
 import { PreviewWidthFrame } from "./PreviewWidthFrame";
 

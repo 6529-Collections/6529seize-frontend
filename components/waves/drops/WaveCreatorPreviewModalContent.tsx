@@ -1,17 +1,20 @@
 "use client";
 
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { useWaves } from "@/hooks/useWaves";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { WaveCreatorPreviewItem } from "./WaveCreatorPreviewItem";
-import { shortenAddress } from "@/helpers/address.helpers";
-import { useRouter } from "next/navigation";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { shortenAddress } from "@/helpers/address.helpers";
+import { useWaves } from "@/hooks/useWaves";
+
+import { WaveCreatorPreviewItem } from "./WaveCreatorPreviewItem";
+
 
 interface WaveCreatorPreviewModalContentProps {
   readonly user: ApiProfileMin;

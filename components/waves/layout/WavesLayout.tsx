@@ -1,13 +1,15 @@
 "use client";
 
-import type { ReactNode} from "react";
 import { useMemo } from "react";
+
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
+
+import type { ReactNode} from "react";
 
 // Main layout content that uses the Layout context
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {

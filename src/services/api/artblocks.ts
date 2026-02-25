@@ -1,4 +1,4 @@
-import { buildTokenApiUrl, type ArtBlocksTokenIdentifier } from "../artblocks/url";
+import { type ArtBlocksTokenIdentifier, buildTokenApiUrl } from "../artblocks/url";
 
 export type ArtBlocksMeta = {
   projectName?: string | undefined;

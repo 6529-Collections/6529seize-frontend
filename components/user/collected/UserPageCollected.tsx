@@ -1,5 +1,14 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import TransferPanel from "@/components/nft-transfer/TransferPanel";
 import { useTransfer } from "@/components/nft-transfer/TransferState";
@@ -19,14 +28,7 @@ import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
 import UserPageCollectedNetworkCards from "./cards/UserPageCollectedNetworkCards";
 import {

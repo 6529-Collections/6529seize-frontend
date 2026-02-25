@@ -3,6 +3,7 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
+
 import type { Metadata } from "next";
 
 export async function fetchCollection(

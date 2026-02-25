@@ -12,7 +12,7 @@ import type {
   INotificationDropReacted,
   INotificationDropVoted,
 } from "@/types/feed.types";
-import ReactionEmojiPreview from "./ReactionEmojiPreview";
+
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";
@@ -21,6 +21,8 @@ import {
   getIsDirectMessage,
   useWaveNavigation,
 } from "../utils/navigationUtils";
+
+import ReactionEmojiPreview from "./ReactionEmojiPreview";
 
 export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";

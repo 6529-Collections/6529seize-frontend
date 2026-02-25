@@ -1,10 +1,11 @@
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
 } from "@/types/waves.types";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import CreateWaveOutcomesRepRank from "./CreateWaveOutcomesRepRank";
+
 import CreateWaveOutcomesRepApprove from "./CreateWaveOutcomesRepApprove";
+import CreateWaveOutcomesRepRank from "./CreateWaveOutcomesRepRank";
 
 import type { JSX } from "react";
 

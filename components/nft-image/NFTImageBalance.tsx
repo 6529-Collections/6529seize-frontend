@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useNftBalance } from "@/hooks/useNftBalance";
+
 import styles from "./NFTImage.module.scss";
 
 interface Props {

@@ -1,23 +1,24 @@
 "use client";
 
+import clsx from "clsx";
 import Image from "next/image";
 import { useMemo } from "react";
-import clsx from "clsx";
-
-import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
-import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
-import { isValidEthAddress } from "@/helpers/Helpers";
-import { shortenAddress } from "@/helpers/address.helpers";
 
 import {
   formatFloorPrice,
   formatTotalSupply,
 } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/formatters";
+import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
+import { shortenAddress } from "@/helpers/address.helpers";
+import { isValidEthAddress } from "@/helpers/Helpers";
+import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
+
 import {
   formatCount,
   formatXtdhRate,
   formatXtdhValue,
 } from "../utils/formatters";
+
 import { XtdhRatePill } from "./subcomponents/XtdhRatePill";
 
 type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];

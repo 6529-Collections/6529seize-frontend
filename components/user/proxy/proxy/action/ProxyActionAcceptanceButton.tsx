@@ -1,26 +1,27 @@
 "use client";
 
-import { useContext, useState } from "react";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
-import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
+import { useContext, useState } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import type {
   AcceptActionRequest} from "@/generated/models/AcceptActionRequest";
 import {
   AcceptActionRequestActionEnum,
 } from "@/generated/models/AcceptActionRequest";
-import { commonApiPost } from "@/services/api/common-api";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import {
   haveSeenProfileProxyActionAcceptanceModal,
   setSeenProfileProxyActionAcceptanceModal,
 } from "@/helpers/profile-proxy.helpers";
-import HeaderProxyNewModal from "@/components/header/proxy/HeaderProxyNewModal";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import { commonApiPost } from "@/services/api/common-api";
 
 export default function ProxyActionAcceptanceButton({
   action,

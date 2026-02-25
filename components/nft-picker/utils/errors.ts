@@ -1,5 +1,6 @@
-import type { ParseError } from "../types";
 import { MAX_ENUMERATION } from "./constants";
+
+import type { ParseError } from "../types";
 
 type RangeTooLargeError = Error & {
   code: "range-too-large";

@@ -1,7 +1,7 @@
 "use client";
 
-import styles from "./AppWallet.module.scss";
-import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import {
   faCircleArrowLeft,
   faCopy,
@@ -11,32 +11,35 @@ import {
   faFileDownload,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import type { ReactNode} from "react";
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useBalance, useChainId } from "wagmi";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 import { sepolia } from "viem/chains";
+import { useBalance, useChainId } from "wagmi";
 
-import type { AppWallet } from "./AppWalletsContext";
-import { useAppWallets } from "./AppWalletsContext";
 
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   areEqualAddresses,
   fromGWEI,
   getAddressEtherscanLink,
 } from "@/helpers/Helpers";
+
 import { useAuth } from "../auth/Auth";
-import DotLoader, { Spinner } from "../dotLoader/DotLoader";
-import { UnlockAppWalletModal } from "./AppWalletModal";
-import { decryptData } from "./app-wallet-helpers";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import AppWalletAvatar from "./AppWalletAvatar";
-import AppWalletsUnsupported from "./AppWalletsUnsupported";
-import { Share } from "@capacitor/share";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import DotLoader, { Spinner } from "../dotLoader/DotLoader";
+
+import { decryptData } from "./app-wallet-helpers";
+import styles from "./AppWallet.module.scss";
+import AppWalletAvatar from "./AppWalletAvatar";
+import { UnlockAppWalletModal } from "./AppWalletModal";
+import { useAppWallets } from "./AppWalletsContext";
+import AppWalletsUnsupported from "./AppWalletsUnsupported";
+
+import type { AppWallet } from "./AppWalletsContext";
+import type { ReactNode} from "react";
 
 const MNEMONIC_NA = "N/A";
 

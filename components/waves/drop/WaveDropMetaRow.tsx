@@ -1,8 +1,11 @@
+import { type ReactNode } from "react";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { type ReactNode } from "react";
+
 import WaveDropTime from "../drops/time/WaveDropTime";
+
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { WinnerBadge } from "./WinnerBadge";

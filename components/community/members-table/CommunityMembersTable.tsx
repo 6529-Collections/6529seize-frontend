@@ -1,6 +1,7 @@
-import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { SortDirection } from "@/entities/ISort";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+
 import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";

@@ -1,11 +1,5 @@
 "use client";
 
-import { FallbackImage } from "@/components/common/FallbackImage";
-import { fullScreenSupported } from "@/helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useInView } from "@/hooks/useInView";
 import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -18,6 +12,13 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+
+import { FallbackImage } from "@/components/common/FallbackImage";
+import { fullScreenSupported } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useInView } from "@/hooks/useInView";
 
 const tooltipProps = {
   delayShow: 250,

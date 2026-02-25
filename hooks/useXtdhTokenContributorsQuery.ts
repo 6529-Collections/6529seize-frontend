@@ -1,19 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
 import {
-  keepPreviousData,
   type InfiniteData,
-  type UseInfiniteQueryResult,
+  keepPreviousData,
   useInfiniteQuery,
+  type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiXTdhContributionsPage } from "@/generated/models/ApiXTdhContributionsPage";
-import type {
-  XtdhTokensOrder,
-  XtdhTokensSortField,
-} from "@/hooks/useXtdhTokensQuery";
 import {
   DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY,
   DEFAULT_TOKEN_CONTRIBUTORS_SORT_DIRECTION,
@@ -21,6 +16,11 @@ import {
   type XtdhTokenContributorsGroupBy,
 } from "@/components/xtdh/received/constants";
 import { SortDirection } from "@/entities/ISort";
+import type { ApiXTdhContributionsPage } from "@/generated/models/ApiXTdhContributionsPage";
+import type {
+  XtdhTokensOrder,
+  XtdhTokensSortField,
+} from "@/hooks/useXtdhTokensQuery";
 import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseXtdhTokenContributorsQueryParams {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useSetTitle } from "@/contexts/TitleContext";
-import styles from "@/styles/Home.module.scss";
 import Image from "next/image";
 import { Col, Container, Row } from "react-bootstrap";
+
+import { useSetTitle } from "@/contexts/TitleContext";
+import styles from "@/styles/Home.module.scss";
 
 export default function BuidlPage() {
   useSetTitle("BUIDL");

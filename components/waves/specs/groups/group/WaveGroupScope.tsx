@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import {
   getScaledImageUri,

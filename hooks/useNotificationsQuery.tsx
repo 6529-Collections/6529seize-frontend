@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo } from "react";
+
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -8,12 +15,6 @@ import type {
   NotificationDisplayItem,
   TypedNotificationsResponse,
 } from "@/types/feed.types";
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo } from "react";
 
 interface UseNotificationsQueryProps {
   /**

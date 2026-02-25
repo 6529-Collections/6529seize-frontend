@@ -1,7 +1,8 @@
 import Image from "next/image";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Link from "next/link";
+
 import { isGradientsContract } from "@/helpers/Helpers";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 export default function NFTMarketplaceLinks({
   contract,

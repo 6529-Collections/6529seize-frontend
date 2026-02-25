@@ -1,7 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   createContext,
@@ -11,6 +9,10 @@ import React, {
   useRef,
   useState,
 } from "react";
+
+import { publicEnv } from "@/config/env";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+
 import { useMyStreamOptional } from "./wave/MyStreamContext";
 
 type TitleContextType = {

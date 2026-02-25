@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserStatsRow from "../../utils/stats/UserStatsRow";
 
 

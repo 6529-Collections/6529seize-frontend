@@ -1,18 +1,19 @@
-import { useEffect, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useEffect, useRef } from "react";
 
-import {
-  ROW_HEIGHT,
-  GRID_ROW_HEIGHT,
-  DEFAULT_OVERSCAN,
-  getVisibleWindowBounds,
-} from "./utils";
-import type { VirtualizedTokenListContentProps } from "./types";
-import { usePersistentScrollOffset } from "./hooks/usePersistentScrollOffset";
-import { useVisibleTokenWindow } from "./hooks/useVisibleTokenWindow";
-import { useTokenMetadataWindow } from "./hooks/useTokenMetadataWindow";
 import { GridRow } from "./components/GridRow";
 import { TokenRow } from "./components/TokenRow";
+import { usePersistentScrollOffset } from "./hooks/usePersistentScrollOffset";
+import { useTokenMetadataWindow } from "./hooks/useTokenMetadataWindow";
+import { useVisibleTokenWindow } from "./hooks/useVisibleTokenWindow";
+import {
+  DEFAULT_OVERSCAN,
+  getVisibleWindowBounds,
+  GRID_ROW_HEIGHT,
+  ROW_HEIGHT,
+} from "./utils";
+
+import type { VirtualizedTokenListContentProps } from "./types";
 
 export function VirtualizedTokenListContent({
   contractAddress,
@@ -46,7 +47,7 @@ export function VirtualizedTokenListContent({
   const rowCount = isGrid ? Math.ceil(totalCount / columns) : totalCount;
   const rowHeight = isGrid ? GRID_ROW_HEIGHT : ROW_HEIGHT;
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => scrollContainerRef.current,

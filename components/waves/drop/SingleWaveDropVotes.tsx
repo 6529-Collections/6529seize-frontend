@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import type { ApiDrop } from "@/generated/models/ObjectSerializer";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -8,7 +10,6 @@ import {
     WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import React from "react";
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;

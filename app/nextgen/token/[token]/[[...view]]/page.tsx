@@ -1,11 +1,14 @@
+import { notFound } from "next/navigation";
+
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { NextgenCollectionView } from "@/types/enums";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,

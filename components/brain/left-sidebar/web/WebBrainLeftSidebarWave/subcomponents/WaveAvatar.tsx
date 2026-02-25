@@ -1,7 +1,8 @@
-import WavePicture from "@/components/waves/WavePicture";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import WavePicture from "@/components/waves/WavePicture";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface WaveAvatarProps {
   readonly isActive: boolean;

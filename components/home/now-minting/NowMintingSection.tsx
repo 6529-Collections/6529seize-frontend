@@ -1,6 +1,7 @@
 "use client";
 
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
+
 import NowMintingArtwork from "./NowMintingArtwork";
 import NowMintingDetails from "./NowMintingDetails";
 

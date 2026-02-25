@@ -1,17 +1,22 @@
 "use client"
 
 import { useCallback } from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useWaveLoadingState } from "./useWaveLoadingState";
-import { useWaveAbortController } from "./useWaveAbortController";
-import type { WaveDataStoreUpdater } from "./types";
+
 import {
-  fetchWaveMessages,
-  formatWaveMessages,
   createEmptyWaveMessages,
   fetchNewestWaveMessages,
+  fetchWaveMessages,
+  formatWaveMessages,
 } from "../utils/wave-messages-utils";
 import { useWaveEligibility } from "../WaveEligibilityContext";
+
+import { useWaveAbortController } from "./useWaveAbortController";
+import { useWaveLoadingState } from "./useWaveLoadingState";
+
+import type { WaveDataStoreUpdater } from "./types";
+
 
 // Define the limit constant used by the fetch utility
 const FETCH_NEWEST_LIMIT = 50;

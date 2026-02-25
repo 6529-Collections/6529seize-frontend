@@ -4,6 +4,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useCommunityMetricsSeries } from "@/hooks/useCommunityMetricsSeries";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
+
 import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";

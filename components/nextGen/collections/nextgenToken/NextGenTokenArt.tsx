@@ -13,16 +13,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+
 import Lightbulb from "./Lightbulb";
 import styles from "./NextGenToken.module.scss";
 import {
   NextGenTokenDownloadDropdownItem,
   Resolution,
 } from "./NextGenTokenDownload";
-import { NextGenTokenImage, get16KUrl, get8KUrl } from "./NextGenTokenImage";
+import { get16KUrl, get8KUrl, NextGenTokenImage } from "./NextGenTokenImage";
 import NextGenZoomableImage, {
   MAX_ZOOM_SCALE,
   MIN_ZOOM_SCALE,

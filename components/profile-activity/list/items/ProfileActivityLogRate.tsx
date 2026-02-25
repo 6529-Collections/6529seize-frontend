@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
@@ -7,8 +10,7 @@ import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 enum ProfileActivityLogRateType {

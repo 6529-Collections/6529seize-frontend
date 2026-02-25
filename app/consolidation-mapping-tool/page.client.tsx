@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import ConsolidationMappingTool from "@/components/mapping-tools/ConsolidationMappingTool";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 export default function ConsolidationMappingToolPage() {
   useSetTitle("Consolidation Mapping Tool | Tools");

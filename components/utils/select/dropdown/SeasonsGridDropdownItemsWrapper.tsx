@@ -1,10 +1,12 @@
 "use client";
 
-import type { ReactNode, RefObject} from "react";
 import { useEffect, useState } from "react";
 import { createBreakpoint } from "react-use";
+
 import SeasonsGridDropdownDesktopWrapper from "./SeasonsGridDropdownDesktopWrapper";
 import SeasonsGridDropdownMobileWrapper from "./SeasonsGridDropdownMobileWrapper";
+
+import type { ReactNode, RefObject} from "react";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 

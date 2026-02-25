@@ -1,19 +1,22 @@
 "use client";
 
-import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
-import { useCallback } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ChatBubbleLeftRightIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+
 import WaveItemFollow from "./WaveItemFollow";
+
+import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
 
 const LEVEL_CLASSES: ReadonlyArray<{
   readonly minLevel: number;

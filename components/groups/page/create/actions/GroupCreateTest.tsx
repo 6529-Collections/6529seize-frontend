@@ -1,20 +1,21 @@
 "use client";
 
-import { useContext, useState } from "react";
-import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import { AuthContext } from "@/components/auth/Auth";
+import { faUsers } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { faUsers } from "@fortawesome/free-solid-svg-icons";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useContext, useState } from "react";
+
 import type { CommunityMembersQuery } from "@/app/network/page";
+import { AuthContext } from "@/components/auth/Auth";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "@/entities/ISort";
-import type { Page } from "@/helpers/Types";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { Page } from "@/helpers/Types";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export default function GroupCreateTest({
   groupConfig,

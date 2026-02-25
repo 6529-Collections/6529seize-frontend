@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useInView } from "@/hooks/useInView";
+
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
+import { useInView } from "@/hooks/useInView";
+import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 
 interface Props {
   readonly src: string;

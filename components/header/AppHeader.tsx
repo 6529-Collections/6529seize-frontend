@@ -1,13 +1,5 @@
 "use client";
 
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
-import { useIdentity } from "@/hooks/useIdentity";
-import { useWave } from "@/hooks/useWave";
-import { useWaveById } from "@/hooks/useWaveById";
-import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import {
   Bars3Icon,
   ChatBubbleLeftIcon,
@@ -16,10 +8,21 @@ import {
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
+
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import { useWave } from "@/hooks/useWave";
+import { useWaveById } from "@/hooks/useWaveById";
+import { useWaveViewMode } from "@/hooks/useWaveViewMode";
+
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
+
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";

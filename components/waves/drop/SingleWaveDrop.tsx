@@ -1,8 +1,10 @@
 import React from "react";
+
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { DefaultSingleWaveDrop } from "./DefaultSingleWaveDrop";
 import { MemesSingleWaveDrop } from "./MemesSingleWaveDrop";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 
 interface SingleWaveDropProps {
   readonly drop: ExtendedDrop;

@@ -2,6 +2,7 @@ import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMe
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageStatsActivityWalletTableRow from "./row/UserPageStatsActivityWalletTableRow";
 
 export default function UserPageStatsActivityWalletTable({

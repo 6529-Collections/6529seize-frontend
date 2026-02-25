@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import type { CommonSelectProps } from "../CommonSelect";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import CommonTabsTab from "./CommonTabsTab";
+
+import type { CommonSelectProps } from "../CommonSelect";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+
 
 export default function CommonTabs<T, U = unknown>(
   props: Readonly<CommonSelectProps<T, U>>

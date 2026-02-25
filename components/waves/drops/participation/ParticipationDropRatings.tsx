@@ -1,5 +1,7 @@
 import React from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+
 import ParticipationDropRatingsContainer from "./ratings/ParticipationDropRatingsContainer";
 
 interface ParticipationDropRatingsProps {

@@ -1,15 +1,17 @@
 "use client";
 
+import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+
+import { useSidebarState } from "../../../hooks/useSidebarState";
 
 import { WaveContent } from "./WaveContent";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useSidebarState } from "../../../hooks/useSidebarState";
-import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 
 interface BrainRightSidebarProps {
   readonly waveId: string | null | undefined;

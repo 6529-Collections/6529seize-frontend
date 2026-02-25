@@ -1,6 +1,14 @@
 "use client";
 
+import { useCallback, useRef } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
+import {
+  cloneReactionEntries,
+  findReactionIndex,
+  removeUserFromReactions,
+  toProfileMin,
+} from "@/components/waves/drops/reaction-utils";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -9,13 +17,6 @@ import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
-import { useCallback, useRef } from "react";
-import {
-  cloneReactionEntries,
-  findReactionIndex,
-  removeUserFromReactions,
-  toProfileMin,
-} from "@/components/waves/drops/reaction-utils";
 
 interface UseDropReactionResult {
   readonly react: (reactionCode: string) => Promise<void>;

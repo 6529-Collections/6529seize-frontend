@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
 
 import clsx from "clsx";
-
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useId, useMemo, useState } from "react";
 
 import type { GoogleWorkspaceLinkPreview } from "@/services/api/link-preview-api";
+
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 
 interface GoogleWorkspaceCardProps {

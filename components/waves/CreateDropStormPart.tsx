@@ -1,7 +1,9 @@
 import React from "react";
+
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+
 import DropPartMarkdown from "../drops/view/part/DropPartMarkdown";
 
 interface CreateDropStormPartProps {

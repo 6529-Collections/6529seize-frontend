@@ -1,16 +1,18 @@
 "use client";
 
-import { useContext, useState } from "react";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import ProxyCreateActionSelectType from "./select-type/ProxyCreateActionSelectType";
-import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
-import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import ProxyCreateActionConfig from "./config/ProxyCreateActionConfig";
-import type { CreateProxyAction } from "@/entities/IProxy";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "@/services/api/common-api";
+import { useContext, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
+import type { CreateProxyAction } from "@/entities/IProxy";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { commonApiPost } from "@/services/api/common-api";
+
+import ProxyCreateActionConfig from "./config/ProxyCreateActionConfig";
+import ProxyCreateActionSelectType from "./select-type/ProxyCreateActionSelectType";
 
 export default function ProxyCreateAction({
   profileProxy,

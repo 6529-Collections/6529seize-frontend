@@ -1,5 +1,10 @@
 "use client";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import { WaveGallery } from "@/components/waves/gallery";
@@ -7,7 +12,6 @@ import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/Mob
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
-import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -19,13 +23,11 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
+import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+
 import { useLayout } from "./layout/LayoutContext";
 
 interface InitialDropState {

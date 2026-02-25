@@ -1,4 +1,5 @@
 import { Tooltip } from "react-tooltip";
+
 import { formatLargeNumber } from "@/helpers/Helpers";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 

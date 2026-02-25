@@ -1,11 +1,6 @@
 "use client";
 
-import { CompactModeProvider } from "@/contexts/CompactModeContext";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Transition } from "@headlessui/react";
-import { markDropOpenReady } from "@/utils/monitoring/dropOpenTiming";
 import {
   ArrowLeftIcon,
   ChatBubbleLeftRightIcon,
@@ -17,6 +12,14 @@ import React, {
   useRef,
   useState,
 } from "react";
+
+import { CompactModeProvider } from "@/contexts/CompactModeContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { markDropOpenReady } from "@/utils/monitoring/dropOpenTiming";
+
+
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 
 interface SingleWaveDropWrapperProps {

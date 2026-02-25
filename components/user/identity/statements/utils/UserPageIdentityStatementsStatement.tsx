@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import { useCopyToClipboard } from "react-use";
+
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import OutsideLinkIcon from "@/components/utils/icons/OutsideLinkIcon";
@@ -7,9 +11,7 @@ import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { STATEMENT_META } from "@/helpers/Types";
-import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
-import { useCopyToClipboard } from "react-use";
+
 import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteStatementButton";
 
 export default function UserPageIdentityStatementsStatement({

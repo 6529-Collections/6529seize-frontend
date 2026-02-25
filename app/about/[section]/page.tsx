@@ -1,12 +1,15 @@
-import styles from "@/styles/Home.module.scss";
+import { notFound, redirect } from "next/navigation";
 import { Col, Container, Row } from "react-bootstrap";
+
 
 import About from "@/components/about/About";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
+import styles from "@/styles/Home.module.scss";
 import { AboutSection } from "@/types/enums";
+
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+
 
 interface Props {
   params: Promise<{ section: string }>;

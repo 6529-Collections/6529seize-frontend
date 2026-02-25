@@ -1,5 +1,5 @@
-import { Col, Container, Row } from "react-bootstrap";
 import Image from "next/image";
+import { Col, Container, Row } from "react-bootstrap";
 
 export default function AboutMemeLab() {
   return (

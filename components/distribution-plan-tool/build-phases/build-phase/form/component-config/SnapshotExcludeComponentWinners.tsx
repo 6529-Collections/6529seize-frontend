@@ -1,21 +1,25 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
+
 import type {
   AllowlistToolSelectMenuMultipleOption,
 } from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
 import AllowlistToolSelectMenuMultiple from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
-import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
-import type {
-  PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+
 import {
   PhaseConfigStep
 } from "../BuildPhaseFormConfigModal";
-import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
+import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
+
+import type {
+  PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
 
 const SELECT_ALL_OPTION: AllowlistToolSelectMenuMultipleOption = {
   title: "Exclude All Prior Groups",

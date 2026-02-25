@@ -1,14 +1,5 @@
 "use client";
 
-import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropId } from "@/generated/models/ApiDropId";
-import type { Drop } from "@/helpers/waves/drop.helpers";
-import useCapacitor from "@/hooks/useCapacitor";
-import useDmWavesList from "@/hooks/useDmWavesList";
-import useWavesList from "@/hooks/useWavesList";
-import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import type { ReactNode } from "react";
 import React, {
   createContext,
   useCallback,
@@ -18,16 +9,28 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { WaveMessages } from "./hooks/types";
+
+import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropId } from "@/generated/models/ApiDropId";
+import type { Drop } from "@/helpers/waves/drop.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import useDmWavesList from "@/hooks/useDmWavesList";
+import useWavesList from "@/hooks/useWavesList";
+import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
+
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
-import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
-import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
+import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+
+import type { WaveMessages } from "./hooks/types";
+import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
+import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
 import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
-import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import type { ReactNode } from "react";
 
 // Define nested structures for context data
 interface WavesContextData {

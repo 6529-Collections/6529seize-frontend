@@ -1,8 +1,9 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { useId, useState } from "react";
+
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import type { ComponentPropsWithoutRef, FocusEvent, MouseEvent } from "react";
 
 interface TooltipIconButtonProps

@@ -1,13 +1,14 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
+
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import {
-  WAVE_VOTING_LABELS,
-  WAVE_VOTE_STATS_LABELS,
-} from "@/helpers/waves/waves.constants";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  WAVE_VOTE_STATS_LABELS,
+  WAVE_VOTING_LABELS,
+} from "@/helpers/waves/waves.constants";
 
 interface WaveDropVoteSummaryProps {
   readonly drop: ExtendedDrop;

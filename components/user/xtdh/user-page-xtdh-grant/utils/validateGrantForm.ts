@@ -1,4 +1,5 @@
 import { isAddress } from "viem";
+
 import type { GrantValidationParams, GrantValidationResult } from "../types";
 
 const isSelectionError = (

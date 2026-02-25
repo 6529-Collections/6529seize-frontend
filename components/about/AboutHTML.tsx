@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import styles from "./About.module.scss";
+
 import { fetchAboutSectionFile } from "./about.helpers";
+import styles from "./About.module.scss";
 
 interface Props {
   path: string;

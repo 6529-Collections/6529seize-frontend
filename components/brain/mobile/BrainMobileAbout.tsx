@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import WaveHeader, {
   WaveHeaderPinnedSide,
 } from "@/components/waves/header/WaveHeader";
 import type { ApiWave } from "@/generated/models/ApiWave";
-
 import { commonApiFetch } from "@/services/api/common-api";
+
+import { useLayout } from "../my-stream/layout/LayoutContext";
 import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
-import { useLayout } from "../my-stream/layout/LayoutContext";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;

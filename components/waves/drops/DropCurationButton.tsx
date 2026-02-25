@@ -1,9 +1,10 @@
 "use client";
 
 import {
-  useDropCurationMutation,
   type DropCurationTarget,
+  useDropCurationMutation,
 } from "@/hooks/drops/useDropCurationMutation";
+
 import type { MouseEvent } from "react";
 
 interface DropCurationButtonProps extends DropCurationTarget {

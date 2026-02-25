@@ -1,19 +1,20 @@
+import { faEye, faTrophy } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CalendarDaysIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import React from "react";
+import { Tooltip } from "react-tooltip";
+
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { useUserWinningArtworks } from "@/hooks/useUserWinningArtworks";
-import type {
-  ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { Time } from "@/helpers/time";
 import {
   convertApiDropToExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrophy, faEye } from "@fortawesome/free-solid-svg-icons";
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
-import { Time } from "@/helpers/time";
-import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import Link from "next/link";
-import { Tooltip } from "react-tooltip";
+import type {
+  ExtendedDrop} from "@/helpers/waves/drop.helpers";
+import { useUserWinningArtworks } from "@/hooks/useUserWinningArtworks";
 
 interface ArtistWinningArtworksContentProps {
   readonly user: ApiProfileMin;

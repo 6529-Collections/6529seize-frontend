@@ -1,9 +1,11 @@
+import { sha256 } from "ethereum-cryptography/sha256.js";
+import { utf8ToBytes } from "ethereum-cryptography/utils.js";
+
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ApiLightDrop } from "@/generated/models/ApiLightDrop";
-import { sha256 } from "ethereum-cryptography/sha256.js";
-import { utf8ToBytes } from "ethereum-cryptography/utils.js";
+
 import { getRandomObjectId } from "../AllowlistToolHelpers";
 import { parseIpfsUrl } from "../Helpers";
 

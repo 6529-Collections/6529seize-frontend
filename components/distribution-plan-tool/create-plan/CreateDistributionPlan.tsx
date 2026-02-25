@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
-import { useState } from "react";
+
 import DistributionPlanPrimaryBtn from "../common/DistributionPlanPrimaryBtn";
 
 export default function CreateDistributionPlan({

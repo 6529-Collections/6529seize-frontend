@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { commonApiFetch } from "@/services/api/common-api";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 const fetchNowMinting = () =>
   commonApiFetch<NFTWithMemesExtendedData>({

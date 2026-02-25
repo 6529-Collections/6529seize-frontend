@@ -1,9 +1,17 @@
 "use client";
 
 import type { TypeOptions} from "react-toastify";
+
 import { Slide, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createContext, useState } from "react";
+
+import {
+  distributionPlanApiFetch,
+  distributionPlanApiPost,
+} from "@/services/distribution-plan-api";
+
+import RunOperations from "./run-operations/RunOperations";
 
 import type {
   AllowlistCustomTokenPool,
@@ -13,11 +21,6 @@ import type {
   AllowlistTokenPool,
   AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
-import RunOperations from "./run-operations/RunOperations";
-import {
-  distributionPlanApiFetch,
-  distributionPlanApiPost,
-} from "@/services/distribution-plan-api";
 
 export enum DistributionPlanToolStep {
   CREATE_PLAN = "CREATE_PLAN",

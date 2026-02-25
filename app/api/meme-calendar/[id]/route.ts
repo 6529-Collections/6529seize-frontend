@@ -1,9 +1,11 @@
+import { NextResponse } from "next/server";
+
 import {
   getMintTimelineDetails,
   toISO,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d*$/;
 

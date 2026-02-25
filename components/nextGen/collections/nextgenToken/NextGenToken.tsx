@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  faChevronCircleLeft,
+  faChevronCircleRight,
+  faFire,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import { NEXTGEN_CONTRACT } from "@/constants/constants";
@@ -12,19 +23,11 @@ import { CollectedCollectionType } from "@/entities/IProfile";
 import { areEqualAddresses, isNullAddress } from "@/helpers/Helpers";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ContractType, NextgenCollectionView } from "@/types/enums";
-import {
-  faChevronCircleLeft,
-  faChevronCircleRight,
-  faFire,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
+
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
 import styles from "../NextGen.module.scss";
+
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import NextGenTokenArt from "./NextGenTokenArt";
 import NextgenTokenRarity, {

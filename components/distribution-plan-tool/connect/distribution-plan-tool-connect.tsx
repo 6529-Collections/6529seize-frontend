@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   assertUnreachable,
   isEthereumAddress,
 } from "@/helpers/AllowlistToolHelpers";
-import DistributionPlanToolNotConnected from "./distribution-plan-tool-not-connected";
+
 import DistributionPlanToolConnected from "./distribution-plan-tool-connected";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import DistributionPlanToolNotConnected from "./distribution-plan-tool-not-connected";
 
 enum DistributionPlanAuth {
   NOT_CONNECTED = "NOT_CONNECTED",

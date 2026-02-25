@@ -1,11 +1,12 @@
 "use client";
 
-import type { FC} from "react";
-import { useState, useEffect } from "react";
 import { FocusTrap } from "focus-trap-react";
-import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
+import { useEffect, useState } from "react";
 
 import PrimaryButton from "../utils/button/PrimaryButton";
+import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
+
+import type { FC} from "react";
 
 interface TermsOfServiceModalProps {
   readonly isOpen: boolean;

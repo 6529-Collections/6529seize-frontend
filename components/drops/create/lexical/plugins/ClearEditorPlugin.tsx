@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getRoot, $createParagraphNode } from "lexical";
+import { $createParagraphNode, $getRoot } from "lexical";
 import { forwardRef, useImperativeHandle } from "react";
 
 export interface ClearEditorPluginHandles {

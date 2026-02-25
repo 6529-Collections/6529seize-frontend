@@ -1,5 +1,13 @@
 "use client";
 
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+
 import DatePickerModal from "@/components/datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
 import { publicEnv } from "@/config/env";
@@ -10,14 +18,9 @@ import {
   DateIntervalsSelection,
   GasRoyaltiesCollectionFocus,
 } from "@/types/enums";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
+
 import DotLoader from "../dotLoader/DotLoader";
+
 import styles from "./GasRoyalties.module.scss";
 
 interface HeaderProps {

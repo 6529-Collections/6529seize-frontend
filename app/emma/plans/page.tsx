@@ -2,6 +2,7 @@ import DistributionPlanToolCreatePlan from "@/components/distribution-plan-tool/
 import DistributionPlanToolPlans from "@/components/distribution-plan-tool/plans/DistributionPlanToolPlans";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
 import { getAppMetadata } from "@/components/providers/metadata";
+
 import type { Metadata } from "next";
 
 export default function DistributionPlanToolPlansPage() {

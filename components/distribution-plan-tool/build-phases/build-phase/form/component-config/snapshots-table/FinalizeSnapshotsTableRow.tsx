@@ -1,10 +1,14 @@
+import { Tooltip } from "react-tooltip";
+
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
-import { Tooltip } from "react-tooltip";
-import type { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
+
+
 import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
 import FinalizeSnapshotsTableExcludedSnapshotsTooltip from "./FinalizeSnapshotsTableExcludedSnapshotsTooltip";
 import FinalizeSnapshotsTableSnapshotTooltip from "./FinalizeSnapshotsTableSnapshotTooltip";
+
+import type { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
 
 export default function FinalizeSnapshotsTableRow({
   row,

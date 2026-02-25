@@ -1,24 +1,28 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { ReactNode } from "react";
-import { useCallback, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import BottomNavigation from "../navigation/BottomNavigation";
-import { useViewContext } from "../navigation/ViewContext";
+import { useCallback, useRef } from "react";
+import { useSelector } from "react-redux";
+
+import { useHeaderContext } from "@/contexts/HeaderContext";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { selectEditingDropId } from "@/store/editSlice";
+
+import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
-import { useHeaderContext } from "@/contexts/HeaderContext";
-import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
-import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
-import { useSelector } from "react-redux";
-import { selectEditingDropId } from "@/store/editSlice";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
-import useCapacitor from "@/hooks/useCapacitor";
+import BottomNavigation from "../navigation/BottomNavigation";
+import { useViewContext } from "../navigation/ViewContext";
 import PullToRefresh from "../providers/PullToRefresh";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+
+
+import type { ReactNode } from "react";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,

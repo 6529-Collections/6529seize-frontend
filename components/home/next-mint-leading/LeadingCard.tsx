@@ -1,10 +1,13 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -12,8 +15,6 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;

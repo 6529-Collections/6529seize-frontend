@@ -1,19 +1,22 @@
 "use client";
 
-import UserPageStatsCollected from "./UserPageStatsCollected";
-import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
-import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
-import UserPageStatsTags from "./tags/UserPageStatsTags";
-import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
-import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useEffect, useMemo, useState } from "react";
+import { isAddress } from "viem";
+
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
-import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
-import { useEffect, useMemo, useState } from "react";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
+
+import UserAddressesSelectDropdown from "../utils/addresses-select/UserAddressesSelectDropdown";
+
+import UserPageActivityWrapper from "./activity/UserPageActivityWrapper";
+import UserPageStatsTags from "./tags/UserPageStatsTags";
 import { getStatsPath } from "./userPageStats.helpers";
-import { isAddress } from "viem";
+import UserPageStatsActivityOverview from "./UserPageStatsActivityOverview";
+import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
+import UserPageStatsCollected from "./UserPageStatsCollected";
 
 type Props = {
   readonly profile: ApiIdentity;

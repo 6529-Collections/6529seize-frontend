@@ -1,14 +1,16 @@
 "use client";
 
-import { DELEGATION_ABI } from "@/abis/abis";
-import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
-import { isValidEthAddress } from "@/helpers/Helpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import type { DelegationCollection } from "./delegation-constants";
+
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
+import { isValidEthAddress } from "@/helpers/Helpers";
+
+
 import { DELEGATION_USE_CASES } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
@@ -23,6 +25,8 @@ import {
   DelegationSubmitGroups,
   DelegationTokenSelection,
 } from "./DelegationFormParts";
+
+import type { DelegationCollection } from "./delegation-constants";
 
 interface Props {
   address: string;

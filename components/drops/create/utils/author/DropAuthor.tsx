@@ -1,11 +1,13 @@
-import { getTimeAgoShort } from "@/helpers/Helpers";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import DropAuthorHandle from "./DropAuthorHandle";
+import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+
+import DropAuthorHandle from "./DropAuthorHandle";
+
 
 interface DropAuthorProps {
   readonly profile: ProfileMinWithoutSubs;

@@ -1,8 +1,9 @@
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import dynamic from "next/dynamic";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ImageScale } from "@/helpers/image.helpers";
+
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";

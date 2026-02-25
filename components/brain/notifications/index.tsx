@@ -1,13 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
+
+import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useMemo } from "react";
-import NotificationsCauseFilter from "./NotificationsCauseFilter";
+
 import { useNotificationsController } from "./hooks/useNotificationsController";
 import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
+import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import NotificationsContent from "./subcomponents/NotificationsContent";
-import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
+
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;

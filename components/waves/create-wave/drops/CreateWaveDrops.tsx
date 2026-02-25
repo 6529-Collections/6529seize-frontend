@@ -5,9 +5,10 @@ import type {
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
 } from "@/types/waves.types";
+
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
-import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
 import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
+import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
 
 export default function CreateWaveDrops({
   waveType,

@@ -1,9 +1,11 @@
 "use client";
 
 import React, { type ReactNode, useMemo } from "react";
+
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
+
 import WebSidebar from "./sidebar/WebSidebar";
 
 const DESKTOP_MAX_WIDTH = 1324;

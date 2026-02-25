@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { SingleWaveDrop } from "@/components/waves/drop/SingleWaveDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useDropModal } from "@/hooks/useDropModal";
-import { useEffect } from "react";
 
 export default function UserPageDropModal() {
   const { activeDrop, isDropOpen, onDropClose } = useDropModal();

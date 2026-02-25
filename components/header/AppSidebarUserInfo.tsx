@@ -1,9 +1,12 @@
+import Image from "next/image";
+
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useIdentity } from "@/hooks/useIdentity";
-import Image from "next/image";
+
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import UserLevel from "../user/utils/level/UserLevel";
+
 import AppSidebarUserStats from "./AppSidebarUserStats";
 
 export default function AppSidebarUserInfo() {

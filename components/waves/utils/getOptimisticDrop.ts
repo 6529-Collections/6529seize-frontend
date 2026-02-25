@@ -3,11 +3,11 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
+import type { ApiIdentity } from "@/generated/models/ObjectSerializer";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 

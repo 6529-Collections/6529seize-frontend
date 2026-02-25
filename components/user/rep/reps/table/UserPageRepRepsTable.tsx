@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import type { RatingStats } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
 import UserPageRepRepsTableBody from "./UserPageRepRepsTableBody";
 import UserPageRepRepsTableHeader from "./UserPageRepRepsTableHeader";
-import { SortDirection } from "@/entities/ISort";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 export enum RepsTableSort {
   REP = "REP",
   RATERS = "RATERS",

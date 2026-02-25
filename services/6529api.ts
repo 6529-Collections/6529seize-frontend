@@ -1,7 +1,9 @@
+import Cookies from "js-cookie";
+
 import type { Paginated } from "@/components/pagination/Pagination";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
-import Cookies from "js-cookie";
+
 import { getStagingAuth } from "./auth/auth.utils";
 
 function buildAuthHeaders(init?: HeadersInit): Headers {

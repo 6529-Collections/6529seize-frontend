@@ -2,10 +2,10 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  COMMAND_PRIORITY_LOW,
-  PASTE_COMMAND,
   $getSelection,
   $isRangeSelection,
+  COMMAND_PRIORITY_LOW,
+  PASTE_COMMAND,
 } from "lexical";
 import { useEffect } from "react";
 

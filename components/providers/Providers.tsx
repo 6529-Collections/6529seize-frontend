@@ -17,8 +17,10 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
+
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
+
 import CapacitorSetup from "./CapacitorSetup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import QueryClientSetup from "./QueryClientSetup";

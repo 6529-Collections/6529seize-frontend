@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 const IPFS_URL_PATTERN = /ipfs:\/\/[^\s"'`]+/g;

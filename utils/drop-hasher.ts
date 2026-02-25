@@ -1,5 +1,6 @@
-import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { sha256 } from "js-sha256";
+
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 
 export class DropHasher {
   public hash({

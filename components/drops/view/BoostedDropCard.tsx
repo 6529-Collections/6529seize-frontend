@@ -1,19 +1,20 @@
 "use client";
 
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
+import { memo, useCallback, useContext, useMemo } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import BoostIcon from "@/components/common/icons/BoostIcon";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import { buildProcessedContent } from "@/components/waves/drops/media-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
-import { memo, useCallback, useContext, useMemo } from "react";
 
 interface BoostedDropCardProps {
   readonly drop: ApiDrop;

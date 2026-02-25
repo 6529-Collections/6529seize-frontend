@@ -1,8 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { useSetTitle } from "@/contexts/TitleContext";
-import useCapacitor from "@/hooks/useCapacitor";
 import {
   BellIcon,
   ChartBarIcon,
@@ -11,6 +8,11 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useSetTitle } from "@/contexts/TitleContext";
+import useCapacitor from "@/hooks/useCapacitor";
+
 import type { ReactNode } from "react";
 
 interface DownloadCardProps {

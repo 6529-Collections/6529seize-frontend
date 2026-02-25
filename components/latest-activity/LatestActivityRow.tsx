@@ -1,3 +1,17 @@
+import {
+  faCartPlus,
+  faExchange,
+  faExternalLinkSquare,
+  faFire,
+  faGasPump,
+  faParachuteBox,
+  faShoppingCart,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { Tooltip } from "react-tooltip";
+
 import { MANIFOLD } from "@/constants/constants";
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { NFTLite } from "@/entities/INFT";
@@ -16,19 +30,7 @@ import {
   isNullAddress,
   numberWithCommas,
 } from "@/helpers/Helpers";
-import {
-  faCartPlus,
-  faExchange,
-  faExternalLinkSquare,
-  faFire,
-  faGasPump,
-  faParachuteBox,
-  faShoppingCart,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { Tooltip } from "react-tooltip";
+
 import Address from "../address/Address";
 import {
   getNextGenIconUrl,
@@ -36,6 +38,7 @@ import {
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
+
 import styles from "./LatestActivity.module.scss";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {

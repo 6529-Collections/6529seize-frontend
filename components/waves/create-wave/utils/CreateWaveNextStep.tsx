@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreateWaveStep } from "@/types/waves.types";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import { CreateWaveStep } from "@/types/waves.types";
 
 enum CreateWaveNextStepType {
   NEXT = "NEXT",

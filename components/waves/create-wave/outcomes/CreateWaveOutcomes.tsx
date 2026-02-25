@@ -1,17 +1,19 @@
-import CreateWaveOutcomeTypes from "./CreateWaveOutcomeTypes";
-import CreateWaveOutcomesManual from "./manual/CreateWaveOutcomesManual";
-import CreateWaveOutcomesRep from "./rep/CreateWaveOutcomesRep";
-import CreateWaveOutcomesCIC from "./cic/CreateWaveOutcomesCIC";
-import CreateWaveOutcomesRows from "./winners/rows/CreateWaveOutcomesRows";
+import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
+import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import type {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig} from "@/types/waves.types";
 import {
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
-import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
-import type { ApiWaveType } from "@/generated/models/ApiWaveType";
-import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+
+import CreateWaveOutcomesCIC from "./cic/CreateWaveOutcomesCIC";
+import CreateWaveOutcomeTypes from "./CreateWaveOutcomeTypes";
+import CreateWaveOutcomesManual from "./manual/CreateWaveOutcomesManual";
+import CreateWaveOutcomesRep from "./rep/CreateWaveOutcomesRep";
+import CreateWaveOutcomesRows from "./winners/rows/CreateWaveOutcomesRows";
+
 
 import type { JSX } from "react";
 

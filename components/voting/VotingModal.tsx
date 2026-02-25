@@ -1,9 +1,11 @@
 "use client";
 
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 

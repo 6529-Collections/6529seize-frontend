@@ -3,6 +3,7 @@ import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
+
 import NowMintingCountdown from "./NowMintingCountdown";
 import NowMintingDetailsAccordion from "./NowMintingDetailsAccordion";
 import NowMintingHeader from "./NowMintingHeader";

@@ -1,18 +1,22 @@
 "use client";
 
+import React, { useCallback, useMemo } from "react";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import MemesArtSubmissionFile from "@/components/waves/memes/MemesArtSubmissionFile";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
-import React, { useCallback, useMemo } from "react";
+
+import ArtworkDetails from "../details/ArtworkDetails";
+import SubmissionProgress from "../ui/SubmissionProgress";
+import { useTraitsValidation } from "../validation";
+
 import type {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
 } from "../constants/media";
-import ArtworkDetails from "../details/ArtworkDetails";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
-import SubmissionProgress from "../ui/SubmissionProgress";
-import { useTraitsValidation } from "../validation";
+
 
 /**
  * Required fields for submission

@@ -1,21 +1,24 @@
 "use client";
 
 import { useContext, useMemo } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { getTimeAgo, numberWithCommas } from "@/helpers/Helpers";
-import WaveHeaderFollow from "./WaveHeaderFollow";
+
 import { AuthContext } from "@/components/auth/Auth";
-import WaveHeaderOptions from "./options/WaveHeaderOptions";
-import WaveHeaderName from "./name/WaveHeaderName";
-import WaveHeaderFollowers from "./WaveHeaderFollowers";
-import WaveHeaderDescription from "./WaveHeaderDescription";
-import WaveHeaderPinButton from "./WaveHeaderPinButton";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ObjectSerializer";
-import WavePicture from "../WavePicture";
+import { getTimeAgo, numberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+
+import WaveNotificationSettings from "../specs/WaveNotificationSettings";
+import WavePicture from "../WavePicture";
+
+import WaveHeaderName from "./name/WaveHeaderName";
+import WaveHeaderOptions from "./options/WaveHeaderOptions";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
+import WaveHeaderDescription from "./WaveHeaderDescription";
+import WaveHeaderFollow from "./WaveHeaderFollow";
+import WaveHeaderFollowers from "./WaveHeaderFollowers";
+import WaveHeaderPinButton from "./WaveHeaderPinButton";
 
 export enum WaveHeaderPinnedSide {
   LEFT = "LEFT",

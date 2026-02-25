@@ -1,6 +1,8 @@
 "use client";
 
+import { $isListItemNode, $isListNode } from "@lexical/list";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $isHeadingNode } from "@lexical/rich-text";
 import {
   $createParagraphNode,
   $getSelection,
@@ -11,8 +13,7 @@ import {
   KEY_ENTER_COMMAND,
 } from "lexical";
 import { useEffect } from "react";
-import { $isListItemNode, $isListNode } from "@lexical/list";
-import { $isHeadingNode } from "@lexical/rich-text";
+
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 

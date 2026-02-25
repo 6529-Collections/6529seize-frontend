@@ -3,8 +3,10 @@
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import UserSettingsPrimaryWalletItem from "./UserSettingsPrimaryWalletItem";
+
 import type { ApiWallet } from "@/generated/models/ApiWallet";
+
+import UserSettingsPrimaryWalletItem from "./UserSettingsPrimaryWalletItem";
 
 export default function UserSettingsPrimaryWallet({
   wallets,

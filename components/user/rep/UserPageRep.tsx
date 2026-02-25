@@ -1,5 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -7,18 +11,16 @@ import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
-import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
+
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
+import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
-import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRepHeader from "./header/UserPageRepHeader";
-import UserPageRepMobile from "./UserPageRepMobile";
 import UserPageRepReps from "./reps/UserPageRepReps";
+import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
+import UserPageRepMobile from "./UserPageRepMobile";
 export default function UserPageRep({
   profile,
   initialActivityLogParams,

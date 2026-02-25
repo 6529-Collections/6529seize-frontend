@@ -1,13 +1,15 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+import { useInterval } from "react-use";
+
 import type { DistributionPlanTokenPoolDownload } from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   AllowlistOperationCode,
   DistributionPlanTokenPoolDownloadStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
-import { useInterval } from "react-use";
+
 import DistributionPlanEmptyTablePlaceholder from "../common/DistributionPlanEmptyTablePlaceholder";
 import DistributionPlanNextStepBtn from "../common/DistributionPlanNextStepBtn";
 import DistributionPlanStepWrapper from "../common/DistributionPlanStepWrapper";
@@ -16,6 +18,7 @@ import {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
+
 import CreateSnapshotForm from "./form/CreateSnapshotForm";
 import CreateSnapshotTable from "./table/CreateSnapshotTable";
 

@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
 import { TabToggle } from "@/components/common/TabToggle";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { MyStreamWaveTab } from "@/types/waves.types";
-import { useContentTab, WaveVotingState } from "../ContentTabContext";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { Time } from "@/helpers/time";
 import { useWave } from "@/hooks/useWave";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
-import { Time } from "@/helpers/time";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
+import { useContentTab, WaveVotingState } from "../ContentTabContext";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;

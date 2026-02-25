@@ -1,10 +1,5 @@
 "use client";
 
-import styles from "./AppWallet.module.scss";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   faCheckCircle,
   faCircleArrowLeft,
@@ -12,9 +7,18 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ethers } from "ethers";
-import { CreateAppWalletModal } from "./AppWalletModal";
-import { useAuth } from "../auth/Auth";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+
+
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+
+import { useAuth } from "../auth/Auth";
+
+import styles from "./AppWallet.module.scss";
+import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 

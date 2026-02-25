@@ -1,14 +1,15 @@
 "use client";
 
+import { useContext, useRef } from "react";
+import { createPortal } from "react-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
-import { useContext, useRef } from "react";
-import { createPortal } from "react-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function GroupCardDeleteModal({
   group,

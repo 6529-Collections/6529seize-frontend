@@ -1,10 +1,12 @@
 "use client";
 
-import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
-import type { ProfileActivityLogType } from "@/types/enums";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
+import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
+import type { ProfileActivityLogType } from "@/types/enums";
+
 import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 
 export default function ProfileActivityLogsFilter({

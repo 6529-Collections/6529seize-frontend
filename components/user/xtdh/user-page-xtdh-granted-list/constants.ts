@@ -1,5 +1,5 @@
-import { SortDirection } from "@/entities/ISort";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import { SortDirection } from "@/entities/ISort";
 
 import type {
   GrantedActiveFilter,

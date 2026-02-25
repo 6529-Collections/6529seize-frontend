@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import MyStreamWave from "../brain/my-stream/MyStreamWave";
-import BrainContent from "../brain/content/BrainContent";
-import { useAuth } from "../auth/Auth";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
-import PrimaryButton from "../utils/button/PrimaryButton";
-import useCreateModalState from "@/hooks/useCreateModalState";
+import React from "react";
+
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import useCreateModalState from "@/hooks/useCreateModalState";
+
+import useDeviceInfo from "../../hooks/useDeviceInfo";
+import { useAuth } from "../auth/Auth";
+import BrainContent from "../brain/content/BrainContent";
+import MyStreamWave from "../brain/my-stream/MyStreamWave";
+import PrimaryButton from "../utils/button/PrimaryButton";
+
 
 const WavesView: React.FC = () => {
   const myStream = useMyStreamOptional();

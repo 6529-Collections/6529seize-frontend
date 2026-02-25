@@ -1,7 +1,9 @@
-import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import { GRANTED_ACTIVE_FILTERS } from "../constants";
-import type { GrantedActiveFilter } from "../types";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+
+import { GRANTED_ACTIVE_FILTERS } from "../constants";
+
+import type { GrantedActiveFilter } from "../types";
 
 interface UserPageXtdhGrantedListSubFiltersProps {
   readonly activeSubFilter: GrantedActiveFilter;

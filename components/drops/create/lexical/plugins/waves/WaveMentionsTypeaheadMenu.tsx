@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import type { WaveMentionTypeaheadOption } from "./WaveMentionsPlugin";
+
 import WaveMentionsTypeaheadMenuItem from "./WaveMentionsTypeaheadMenuItem";
+
+import type { WaveMentionTypeaheadOption } from "./WaveMentionsPlugin";
 
 export default function WaveMentionsTypeaheadMenu({
   selectedIndex,

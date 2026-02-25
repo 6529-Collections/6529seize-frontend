@@ -1,7 +1,8 @@
 "use client";
 
-import { useResolvedIpfsUrl } from "@/hooks/useResolvedIpfsUrl";
 import Image from "next/image";
+
+import { useResolvedIpfsUrl } from "@/hooks/useResolvedIpfsUrl";
 
 function getLevelBgColor(level: number) {
   if (level >= 80) return "tw-bg-[#55B075] tw-text-black";

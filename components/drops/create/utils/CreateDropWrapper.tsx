@@ -1,19 +1,20 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   forwardRef,
+  type JSX,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
-  type JSX,
 } from "react";
-import type { CreateDropCompactHandles } from "../compact/CreateDropCompact";
-import CreateDropCompact from "../compact/CreateDropCompact";
+import { createBreakpoint } from "react-use";
 
-import type { CreateDropFullHandles } from "../full/CreateDropFull";
-import CreateDropFull from "../full/CreateDropFull";
-import type { EditorState } from "lexical";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import type {
   CreateDropConfig,
   DropMetadata,
@@ -21,25 +22,28 @@ import type {
   MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
-import { createBreakpoint } from "react-use";
-import type { CreateDropType } from "../types";
-import { CreateDropViewType } from "../types";
-import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../lexical/transformers/WaveMentionTransformer";
-import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
-import { useQuery } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
+import { commonApiFetch } from "@/services/api/common-api";
 import { WalletValidationError } from "@/src/errors/wallet";
-import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+
+import CreateDropCompact from "../compact/CreateDropCompact";
+import CreateDropFull from "../full/CreateDropFull";
+import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
+import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
+import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
+import { CreateDropViewType } from "../types";
+
+import type { CreateDropCompactHandles } from "../compact/CreateDropCompact";
+import type { CreateDropFullHandles } from "../full/CreateDropFull";
+import type { CreateDropType } from "../types";
+import type { EditorState } from "lexical";
+
+import { WAVE_MENTION_TRANSFORMER } from "../lexical/transformers/WaveMentionTransformer";
+import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
+
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",

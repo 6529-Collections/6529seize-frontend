@@ -6,8 +6,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { ReactNode } from "react";
+
 import CompactDropPreview from "./CompactDropPreview";
+
+import type { ReactNode } from "react";
 
 function wrapDropContentInCompact(content: ReactNode) {
   return (

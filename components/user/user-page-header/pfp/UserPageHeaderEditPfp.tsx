@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useIpfsService } from "@/components/ipfs/IPFSContext";
 import {
@@ -22,11 +27,9 @@ import {
   commonApiPostForm,
 } from "@/services/api/common-api";
 import { getUploadErrorMessage } from "@/services/api/upload-error";
-import { useMutation, useQuery } from "@tanstack/react-query";
+
 import type { FormEvent} from "react";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
+
 export default function UserPageHeaderEditPfp({
   profile,
   onClose,

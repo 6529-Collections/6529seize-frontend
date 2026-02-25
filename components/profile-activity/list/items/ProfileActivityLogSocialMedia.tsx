@@ -1,9 +1,10 @@
+import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import type {
   ProfileActivityLogSocialsEdit} from "@/entities/IProfile";
 import {
   PROFILE_ACTIVITY_LOG_ACTION_STR
 } from "@/entities/IProfile";
-import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
+
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 import ProfileActivityLogItemValueWithCopy from "./utils/ProfileActivityLogItemValueWithCopy";
 

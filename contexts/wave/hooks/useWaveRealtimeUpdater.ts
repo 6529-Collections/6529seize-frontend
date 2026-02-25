@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useEffect, useRef } from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { WsDropUpdateMessage} from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
@@ -10,8 +12,9 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useEffect, useRef } from "react";
+
 import { useWaveEligibility } from "../WaveEligibilityContext";
+
 import type { WaveDataStoreUpdater } from "./types";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {

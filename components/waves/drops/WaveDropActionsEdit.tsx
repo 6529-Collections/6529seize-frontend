@@ -1,8 +1,9 @@
 "use client";
 
-import { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
+import { useContext } from "react";
 import { Tooltip } from "react-tooltip";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 

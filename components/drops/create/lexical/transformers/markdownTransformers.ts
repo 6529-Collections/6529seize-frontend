@@ -1,4 +1,4 @@
-import { TRANSFORMERS, type Transformer } from "@lexical/markdown";
+import { type Transformer, TRANSFORMERS } from "@lexical/markdown";
 
 const UNDERSCORE_TAGS = new Set(["__", "___", "_"]);
 

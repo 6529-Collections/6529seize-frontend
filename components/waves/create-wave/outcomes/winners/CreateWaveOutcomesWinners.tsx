@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import type {
   CreateWaveOutcomeConfigWinner,
   CreateWaveOutcomeConfigWinnersConfig} from "@/types/waves.types";
@@ -8,6 +9,7 @@ import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
+
 import CreateWaveOutcomesWinnersAddWinner from "./CreateWaveOutcomesWinnersAddWinner";
 import CreateWaveOutcomesWinnersRows from "./CreateWaveOutcomesWinnersRows";
 

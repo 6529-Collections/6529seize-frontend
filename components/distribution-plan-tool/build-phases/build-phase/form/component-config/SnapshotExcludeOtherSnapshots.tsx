@@ -1,29 +1,32 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
-import type {
-  AllowlistToolSelectMenuMultipleOption,
-} from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
-import AllowlistToolSelectMenuMultiple from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
-import type {
-  DistributionPlanSnapshot,
-  PhaseGroupSnapshotConfig,
-  PhaseGroupSnapshotConfigExcludeSnapshot,
-} from "../BuildPhaseFormConfigModal";
-import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
-import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+
 import type {
   CustomTokenPoolParamsToken} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   AllowlistOperationCode,
   Pool,
 } from "@/components/allowlist-tool/allowlist-tool.types";
+import AllowlistToolSelectMenuMultiple from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import type {
+  AllowlistToolSelectMenuMultipleOption,
+} from "@/components/allowlist-tool/common/select-menu-multiple/AllowlistToolSelectMenuMultiple";
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
-import ComponentConfigMeta from "./ComponentConfigMeta";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
-import { useQuery } from "@tanstack/react-query";
+
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import ComponentConfigMeta from "./ComponentConfigMeta";
+import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
+
+import type {
+  DistributionPlanSnapshot,
+  PhaseGroupSnapshotConfig,
+  PhaseGroupSnapshotConfigExcludeSnapshot,
+} from "../BuildPhaseFormConfigModal";
 
 const POOL_TYPE_TO_STRING: Record<Pool, string> = {
   [Pool.CUSTOM_TOKEN_POOL]: "Custom Snapshot",

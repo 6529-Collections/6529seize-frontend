@@ -5,7 +5,9 @@ import type {
   CreateWaveGroupConfigType,
   WaveGroupsConfig,
 } from "@/types/waves.types";
+
 import CreateWaveWarning from "../utils/CreateWaveWarning";
+
 import CreateWaveGroup from "./CreateWaveGroup";
 
 export default function CreateWaveGroups({

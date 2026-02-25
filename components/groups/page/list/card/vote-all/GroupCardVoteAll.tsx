@@ -1,27 +1,30 @@
 "use client";
 
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
-import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+
+import type { CommunityMembersQuery } from "@/app/network/page";
 import { AuthContext } from "@/components/auth/Auth";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { CreditDirection } from "../GroupCard";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import type { Page } from "@/helpers/Types";
-import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-
-import GroupCardActionWrapper from "../GroupCardActionWrapper";
-import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
-import GroupCardActionStats from "../utils/GroupCardActionStats";
-import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
-import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import type { ApiBulkRateRequest } from "@/generated/models/ApiBulkRateRequest";
 import type { ApiBulkRateResponse } from "@/generated/models/ApiBulkRateResponse";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import type { Page } from "@/helpers/Types";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+
+import { CreditDirection } from "../GroupCard";
+import GroupCardActionWrapper from "../GroupCardActionWrapper";
+import GroupCardActionStats from "../utils/GroupCardActionStats";
+
+import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
+
 
 export default function GroupCardVoteAll({
   matter,

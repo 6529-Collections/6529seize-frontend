@@ -1,18 +1,19 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { ApiQuotedDrop } from "@/generated/models/ApiQuotedDrop";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
-import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+
 import DropPart from "@/components/drops/view/part/DropPart";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import type { ApiQuotedDrop } from "@/generated/models/ApiQuotedDrop";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface PartConfigWave {
   readonly name: string;

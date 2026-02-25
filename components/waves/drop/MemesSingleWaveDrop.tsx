@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
 import { useSingleWaveDropData } from "./useSingleWaveDropData";

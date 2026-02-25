@@ -1,7 +1,9 @@
 import React from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { WaveSmallLeaderboardTopThreeDrop } from "./WaveSmallLeaderboardTopThreeDrop";
+
 import { WaveSmallLeaderboardDefaultDrop } from "./WaveSmallLeaderboardDefaultDrop";
+import { WaveSmallLeaderboardTopThreeDrop } from "./WaveSmallLeaderboardTopThreeDrop";
 
 interface MemesWaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;

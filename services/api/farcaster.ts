@@ -1,5 +1,5 @@
-import type { FarcasterPreviewResponse } from "@/types/farcaster.types";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import type { FarcasterPreviewResponse } from "@/types/farcaster.types";
 
 const FARCASTER_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const FARCASTER_PREVIEW_CACHE_MAX_ITEMS = 200;

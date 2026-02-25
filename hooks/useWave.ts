@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
+
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
+import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import { Time } from "@/helpers/time";
 import { calculateLastDecisionTime } from "@/helpers/waves/time.utils";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
-import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 
 /**
  * Possible states of a wave's submission period

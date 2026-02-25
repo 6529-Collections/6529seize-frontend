@@ -1,11 +1,14 @@
+import emojiRegex from "emoji-regex";
+import { goerli, mainnet, sepolia } from "wagmi/chains";
+
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "@/components/nextGen/nextgen_contracts";
 import {
   DEFAULT_USER_PAGE_TAB,
-  type UserPageTabKey,
   getUserPageTabById,
+  type UserPageTabKey,
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
@@ -21,10 +24,10 @@ import { VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DateIntervalsSelection } from "@/types/enums";
-import emojiRegex from "emoji-regex";
-import { goerli, mainnet, sepolia } from "wagmi/chains";
-import type { PageSSRMetadata } from "./Types";
+
 import { Period } from "./Types";
+
+import type { PageSSRMetadata } from "./Types";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 

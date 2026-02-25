@@ -1,12 +1,15 @@
 import { Tooltip } from "react-tooltip";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { RatingsSectionProps, RatingsData } from "./types";
-import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
+
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+
+import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
+
+import type { RatingsData, RatingsSectionProps } from "./types";
 
 interface ParticipationDropRatingsTotalSectionProps
   extends RatingsSectionProps {

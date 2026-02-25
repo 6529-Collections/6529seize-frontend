@@ -1,4 +1,16 @@
 import { jwtDecode } from "jwt-decode";
+
+import {
+  AuthenticationRoleError,
+  InvalidRoleStateError,
+  MissingActiveProfileError,
+  RoleValidationError,
+  TokenRefreshCancelledError,
+} from "@/errors/authentication";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import { logErrorSecurely } from "@/utils/error-sanitizer";
+
 import {
   getRefreshToken,
   getWalletAddress,
@@ -7,16 +19,6 @@ import {
   syncWalletRoleWithServer,
 } from "./auth.utils";
 import { redeemRefreshTokenWithRetries } from "./token-refresh.utils";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import { logErrorSecurely } from "@/utils/error-sanitizer";
-import {
-  TokenRefreshCancelledError,
-  AuthenticationRoleError,
-  RoleValidationError,
-  MissingActiveProfileError,
-  InvalidRoleStateError,
-} from "@/errors/authentication";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 
 interface JwtPayload {
   id: string;

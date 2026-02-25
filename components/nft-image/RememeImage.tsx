@@ -1,8 +1,10 @@
-import styles from "./NFTImage.module.scss";
-import { Col } from "react-bootstrap";
-import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";
+import { Col } from "react-bootstrap";
+
+import type { Rememe } from "@/entities/INFT";
 import { parseIpfsUrl, parseIpfsUrlToGateway } from "@/helpers/Helpers";
+
+import styles from "./NFTImage.module.scss";
 
 interface Props {
   nft: Rememe;

@@ -1,14 +1,17 @@
 "use client";
 
-import { DistributionPlanTokenPoolDownloadStatus } from "@/components/allowlist-tool/allowlist-tool.types";
-import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
-import DistributionPlanDeleteOperationButton from "@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton";
-import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
-import type { CreateSnapshotSnapshot } from "../CreateSnapshots";
+
+import { DistributionPlanTokenPoolDownloadStatus } from "@/components/allowlist-tool/allowlist-tool.types";
+import DistributionPlanDeleteOperationButton from "@/components/distribution-plan-tool/common/DistributionPlanDeleteOperationButton";
+import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
+import { truncateTextMiddle } from "@/helpers/AllowlistToolHelpers";
+
 import CreateSnapshotTableRowDownload from "./CreateSnapshotTableRowDownload";
+
+import type { CreateSnapshotSnapshot } from "../CreateSnapshots";
 
 export default function CreateSnapshotTableRow({
   snapshot,

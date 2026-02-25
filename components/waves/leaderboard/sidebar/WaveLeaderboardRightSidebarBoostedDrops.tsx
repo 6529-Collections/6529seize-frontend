@@ -1,13 +1,16 @@
 "use client";
 
-import { memo, useState, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
+
+import BoostIcon from "@/components/common/icons/BoostIcon";
+import BoostedDropCard from "@/components/drops/view/BoostedDropCard";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { TimeWindow } from "@/types/boosted-drops.types";
-import BoostedDropCard from "@/components/drops/view/BoostedDropCard";
-import BoostIcon from "@/components/common/icons/BoostIcon";
+
 import { WaveLeaderboardRightSidebarTimeWindowSelect } from "./WaveLeaderboardRightSidebarTimeWindowSelect";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+
 
 interface WaveLeaderboardRightSidebarBoostedDropsProps {
   readonly wave: ApiWave;

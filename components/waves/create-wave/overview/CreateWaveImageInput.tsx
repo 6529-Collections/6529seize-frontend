@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 
 const ACCEPTED_FORMATS = [

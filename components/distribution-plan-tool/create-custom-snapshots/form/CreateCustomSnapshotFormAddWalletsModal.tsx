@@ -1,4 +1,5 @@
 import type { CustomTokenPoolParamsToken } from "@/components/allowlist-tool/allowlist-tool.types";
+
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 import CreateCustomSnapshotFormUpload from "./CreateCustomSnapshotFormUpload";
 

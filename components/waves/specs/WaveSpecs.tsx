@@ -1,8 +1,9 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
 import WaveAuthor from "./WaveAuthor";
-import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
+import WaveTypeIcon from "./WaveTypeIcon";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;

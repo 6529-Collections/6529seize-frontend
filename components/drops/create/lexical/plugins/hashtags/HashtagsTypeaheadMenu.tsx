@@ -1,9 +1,12 @@
 "use client";
 
-import { useKeyPressEvent } from "react-use";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { HashtagsTypeaheadOption } from "./HashtagsPlugin";
+import { useKeyPressEvent } from "react-use";
+
 import HashtagsTypeaheadMenuItem from "./HashtagsTypeaheadMenuItem";
+
+import type { HashtagsTypeaheadOption } from "./HashtagsPlugin";
+
 
 export default function HashtagsTypeaheadMenu({
   selectedIndex,

@@ -1,5 +1,6 @@
-import type { ContentSegment } from "./media-utils";
 import MediaThumbnail from "./MediaThumbnail";
+
+import type { ContentSegment } from "./media-utils";
 
 interface ContentSegmentComponentProps {
   readonly segment: ContentSegment;

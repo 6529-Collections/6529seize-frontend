@@ -1,36 +1,39 @@
 "use client";
 
-import React, {
-  useContext,
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-} from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
-import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
+import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import { WaveLeaderboardDrops } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrops";
 import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery";
 import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
+import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import {
   isLeaderboardViewMode,
   type LeaderboardViewMode,
 } from "@/components/waves/leaderboard/types";
-import { useWave } from "@/hooks/useWave";
-import { AuthContext } from "@/components/auth/Auth";
-import { useLayout } from "./layout/LayoutContext";
-import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import useLocalPreference from "@/hooks/useLocalPreference";
+import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useLocalPreference from "@/hooks/useLocalPreference";
+import { useWave } from "@/hooks/useWave";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveCurationGroups } from "@/hooks/waves/useWaveCurationGroups";
-import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
+
+import { useLayout } from "./layout/LayoutContext";
+
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;

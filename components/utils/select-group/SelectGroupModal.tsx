@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+
 import SelectGroupSearchPanel from "./SelectGroupSearchPanel";
 export default function SelectGroupModal({
   onClose,

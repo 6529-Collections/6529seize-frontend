@@ -1,19 +1,22 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
+import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   forwardRef,
   useCallback,
   useImperativeHandle,
   useState,
 } from "react";
-import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { WaveGroupType } from "../WaveGroup.types";
-import WaveGroupRemove from "./WaveGroupRemove";
+
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
+
+import WaveGroupRemove from "./WaveGroupRemove";
+
+import type { WaveGroupType } from "../WaveGroup.types";
+import type {
+  ReactNode} from "react";
 
 export type WaveGroupRemoveButtonHandle = {
   open: () => void;

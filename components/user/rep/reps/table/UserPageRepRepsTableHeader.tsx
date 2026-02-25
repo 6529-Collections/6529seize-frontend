@@ -1,7 +1,9 @@
 "use client";
 
-import type { SortDirection } from "@/entities/ISort";
 import { useEffect, useState } from "react";
+
+import type { SortDirection } from "@/entities/ISort";
+
 import { RepsTableSort } from "./UserPageRepRepsTable";
 import UserPageRepRepsTableHeaderSortableCell from "./UserPageRepRepsTableHeaderSortableCell";
 

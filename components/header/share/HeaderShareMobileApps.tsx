@@ -1,6 +1,7 @@
-import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
 import Image from "next/image";
 import Link from "next/link";
+
+import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
 
 export function ShareMobileApp({
   platform,

@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
+import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 
 const GALLERY_DROPS_LIMIT = 20;

@@ -1,9 +1,10 @@
 "use client";
 
+import React from "react";
+
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import React from "react";
 
 interface WaveleaderboardSortProps {
   readonly sort: WaveDropsLeaderboardSort;

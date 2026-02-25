@@ -1,12 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
+
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { selectActiveGroupId, setActiveGroupId } from "@/store/groupSlice";
+
 import NetworkPageLayoutApp from "./NetworkPageLayoutApp";
+
+import type { ReactNode } from "react";
 
 export default function NetworkPageLayout({
   children,

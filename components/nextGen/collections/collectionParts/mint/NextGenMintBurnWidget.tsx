@@ -1,7 +1,13 @@
 "use client";
 
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+import { useChainId, useWriteContract } from "wagmi";
+
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
 import styles from "@/components/nextGen/collections/NextGen.module.scss";
 import {
   NEXTGEN_CHAIN_ID,
@@ -19,18 +25,14 @@ import {
   getStatusFromDates,
   useMintSharedState,
 } from "@/components/nextGen/nextgen_helpers";
+import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
 import { publicEnv } from "@/config/env";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { areEqualAddresses, getNetworkName } from "@/helpers/Helpers";
 import { fetchOwnerNfts } from "@/hooks/useAlchemyNftQueries";
 import { fetchUrl } from "@/services/6529api";
 import type { OwnerNft } from "@/services/alchemy/types";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
-import { useChainId, useWriteContract } from "wagmi";
+
 import { Spinner } from "./NextGenMint";
 import { NextGenMintingFor } from "./NextGenMintShared";
 

@@ -1,11 +1,14 @@
 "use client";
 
-import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import React, { useCallback, useState } from "react";
+
+import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+
 import { TraitWrapper } from "../../traits/TraitWrapper";
-import type { PaymentInfo } from "../types/OperationalData";
 import FormSection from "../ui/FormSection";
 import { validateStrictAddress } from "../utils/addressValidation";
+
+import type { PaymentInfo } from "../types/OperationalData";
 
 interface PaymentConfigProps {
   readonly paymentInfo: PaymentInfo;

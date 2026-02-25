@@ -1,16 +1,18 @@
+import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+
+import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
 import { formatNumberWithCommas, getTimeAgoShort } from "@/helpers/Helpers";
-import Link from "next/link";
-import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
 
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
-import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;

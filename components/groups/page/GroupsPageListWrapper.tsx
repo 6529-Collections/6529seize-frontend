@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   startTransition,
   useCallback,
@@ -9,12 +11,12 @@ import {
   useRef,
   useState,
 } from "react";
-import GroupsList from "./list/GroupsList";
-import { AuthContext } from "@/components/auth/Auth";
-import { useRouter } from "next/navigation";
-import { usePathname, useSearchParams } from "next/navigation";
-import type { GroupsRequestParams } from "@/entities/IGroup";
 import { useDebounce } from "react-use";
+
+import { AuthContext } from "@/components/auth/Auth";
+import type { GroupsRequestParams } from "@/entities/IGroup";
+
+import GroupsList from "./list/GroupsList";
 
 const IDENTITY_SEARCH_PARAM = "identity";
 const GROUP_NAME_SEARCH_PARAM = "group";

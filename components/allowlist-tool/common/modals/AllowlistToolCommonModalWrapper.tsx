@@ -4,6 +4,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
 import AllowlistToolAnimationOpacity from "../animation/AllowlistToolAnimationOpacity";
 import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
 

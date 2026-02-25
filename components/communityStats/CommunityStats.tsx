@@ -1,11 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { useSetTitle } from "@/contexts/TitleContext";
-import type { DBResponse } from "@/entities/IDBResponse";
-import type { GlobalTDHHistory } from "@/entities/ITDH";
-import { numberWithCommas } from "@/helpers/Helpers";
-import { fetchUrl } from "@/services/6529api";
 import {
   BarElement,
   CategoryScale,
@@ -19,6 +13,13 @@ import {
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
+
+import { publicEnv } from "@/config/env";
+import { useSetTitle } from "@/contexts/TitleContext";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { GlobalTDHHistory } from "@/entities/ITDH";
+import { numberWithCommas } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
 
 ChartJS.register(
   CategoryScale,

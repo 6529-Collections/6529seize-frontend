@@ -1,16 +1,19 @@
 "use client";
 
-import React from "react";
-import { useSearchParams } from "next/navigation";
-import MyStreamWave from "../brain/my-stream/MyStreamWave";
-import BrainContent from "../brain/content/BrainContent";
-import PrimaryButton from "../utils/button/PrimaryButton";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
-import { useAuth } from "../auth/Auth";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
+import { useSearchParams } from "next/navigation";
+import React from "react";
+
 import useCreateModalState from "@/hooks/useCreateModalState";
+
+import useDeviceInfo from "../../hooks/useDeviceInfo";
+import { useAuth } from "../auth/Auth";
+import BrainContent from "../brain/content/BrainContent";
+import MyStreamWave from "../brain/my-stream/MyStreamWave";
+import PrimaryButton from "../utils/button/PrimaryButton";
+import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModal";
+
 
 const MessagesView: React.FC = () => {
   const searchParams = useSearchParams();

@@ -1,15 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { useSetTitle } from "@/contexts/TitleContext";
-import type { DBResponse } from "@/entities/IDBResponse";
-import type { NFT } from "@/entities/INFT";
-import type { ConsolidatedTDH } from "@/entities/ITDH";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
-import { fetchUrl, postData } from "@/services/6529api";
-import { commonApiFetch } from "@/services/api/common-api";
 import {
   faCheckCircle,
   faTimesCircle,
@@ -20,11 +10,25 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { useSignMessage } from "wagmi";
+
+import { publicEnv } from "@/config/env";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useSetTitle } from "@/contexts/TitleContext";
+import type { DBResponse } from "@/entities/IDBResponse";
+import type { NFT } from "@/entities/INFT";
+import type { ConsolidatedTDH } from "@/entities/ITDH";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
+import { fetchUrl, postData } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
+
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import type { ProcessedRememe } from "./RememeAddComponent";
+
 import RememeAddComponent from "./RememeAddComponent";
 import styles from "./Rememes.module.scss";
+
+import type { ProcessedRememe } from "./RememeAddComponent";
 
 interface CheckList {
   status: boolean;

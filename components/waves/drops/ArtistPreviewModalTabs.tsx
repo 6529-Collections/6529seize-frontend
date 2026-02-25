@@ -1,4 +1,5 @@
 import React from "react";
+
 import type { ModalTab } from "./ArtistPreviewModal";
 
 interface ArtistPreviewModalTabsProps {

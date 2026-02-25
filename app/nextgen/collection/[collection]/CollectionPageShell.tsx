@@ -1,11 +1,13 @@
 "use client";
 
-import styles from "@/styles/Home.module.scss";
+import { NextGenCollectionHead } from "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import type { NextGenCollection } from "@/entities/INextgen";
-import { NextGenCollectionHead } from "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader";
-import type { ReactNode } from "react";
+import styles from "@/styles/Home.module.scss";
+
 import { useShallowRedirect } from "./useShallowRedirect";
+
+import type { ReactNode } from "react";
 
 export default function CollectionPageShell({
   collection,

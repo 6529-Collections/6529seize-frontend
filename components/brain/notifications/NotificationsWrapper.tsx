@@ -1,15 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+
+import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { NotificationDisplayItem } from "@/types/feed.types";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import type { NotificationDisplayItem } from "@/types/feed.types";
+
 import NotificationItems from "./NotificationItems";
-import { useRouter } from "next/navigation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+
 
 type WaveWithChatScope = ExtendedDrop["wave"] & {
   chat?:

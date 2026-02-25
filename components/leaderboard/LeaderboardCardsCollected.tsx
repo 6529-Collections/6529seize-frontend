@@ -1,14 +1,14 @@
 "use client";
 
+import { useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import { numberWithCommas } from "@/helpers/Helpers";
-import { useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import type { Collector, Content } from "./Leaderboard";
+
+
 import styles from "./Leaderboard.module.scss";
-import type {
-  LeaderboardMetrics} from "./leaderboard_helpers";
 import {
   LeaderboardCardsCollectedSort,
   useFetchLeaderboard,
@@ -16,6 +16,10 @@ import {
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import LeaderboardFooter from "./LeaderboardDownload";
 import LeaderboardSort from "./LeaderboardSort";
+
+import type { Collector, Content } from "./Leaderboard";
+import type {
+  LeaderboardMetrics} from "./leaderboard_helpers";
 
 const PAGE_SIZE = 50;
 

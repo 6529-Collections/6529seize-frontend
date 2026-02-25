@@ -1,8 +1,11 @@
 import clsx from "clsx";
-import type { CSSProperties, ReactNode } from "react";
+
 import type { TokenMetadata } from "@/components/nft-picker/NftPicker.types";
-import type { TokenListAction, TokenWindowEntry } from "../types";
+
 import { TokenThumbnail } from "./TokenThumbnail";
+
+import type { TokenListAction, TokenWindowEntry } from "../types";
+import type { CSSProperties, ReactNode } from "react";
 
 type TokenRowProps = Readonly<{
   token: TokenWindowEntry;

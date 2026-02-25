@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+
 import type { TraitsData } from "../submission/types/TraitsData";
 
 /**

@@ -1,6 +1,6 @@
-import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 
 export default function GroupCreateDirection({
   direction,

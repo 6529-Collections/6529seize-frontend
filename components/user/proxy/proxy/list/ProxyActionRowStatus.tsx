@@ -1,9 +1,10 @@
+import { Tooltip } from "react-tooltip";
+
 import {
   ProfileProxyActionStatus,
   ProfileProxySide,
 } from "@/entities/IProxy";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { Tooltip } from "react-tooltip";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
   [ProfileProxyActionStatus.ACTIVE]:

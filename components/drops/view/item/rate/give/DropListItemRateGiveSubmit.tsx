@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -9,9 +13,6 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to rate",

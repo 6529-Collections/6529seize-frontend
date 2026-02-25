@@ -1,6 +1,7 @@
 import type { RatingStats } from "@/entities/IProfile";
-import UserPageRepRepsTableItem from "./UserPageRepRepsTableItem";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+import UserPageRepRepsTableItem from "./UserPageRepRepsTableItem";
 
 export default function UserPageRepRepsTableBody({
   reps,

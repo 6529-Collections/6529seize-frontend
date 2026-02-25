@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import Address from "@/components/address/Address";
 import { useAuth } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
@@ -13,16 +23,9 @@ import type { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+
 import YouOwnNftBadge from "../you-own-nft-badge/YouOwnNftBadge";
+
 import styles from "./6529Gradient.module.scss";
 
 enum Sort {

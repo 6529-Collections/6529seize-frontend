@@ -1,42 +1,54 @@
 "use client";
 
-import type { ReactNode } from "react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import BrainMobileTabs from "./mobile/BrainMobileTabs";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import BrainDesktopDrop from "./BrainDesktopDrop";
-import BrainMobileAbout from "./mobile/BrainMobileAbout";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useWaveData } from "@/hooks/useWaveData";
-import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
-import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
-import { WaveWinners } from "../waves/winners/WaveWinners";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
-import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
-import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
-import { useWave } from "@/hooks/useWave";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useAuth } from "@/components/auth/Auth";
+import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
+import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import BrainMobileWaves from "./mobile/BrainMobileWaves";
-import BrainMobileMessages from "./mobile/BrainMobileMessages";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import BrainNotifications from "./notifications/NotificationsContainer";
+import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
-import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
-import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
-import { useAuth } from "@/components/auth/Auth";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWave } from "@/hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
+import { useWaveTimers } from "@/hooks/useWaveTimers";
+import { commonApiFetch } from "@/services/api/common-api";
+import BrainMobileTabs from "./mobile/BrainMobileTabs";
+
+
+
+import BrainDesktopDrop from "./BrainDesktopDrop";
+import BrainMobileAbout from "./mobile/BrainMobileAbout";
+
+
+import BrainMobileWaves from "./mobile/BrainMobileWaves";
+import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
+import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
+import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
+
+import { WaveWinners } from "../waves/winners/WaveWinners";
+
+
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+
+import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
+import BrainMobileMessages from "./mobile/BrainMobileMessages";
+import BrainNotifications from "./notifications/NotificationsContainer";
+
+
+import type { ReactNode } from "react";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
