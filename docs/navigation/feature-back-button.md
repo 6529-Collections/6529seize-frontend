@@ -34,6 +34,9 @@ current state.
    - Open drop: removes the `drop` parameter and keeps you in the same thread.
    - Inside a wave: clears the active wave and returns to `/waves` for public
      waves or `/messages` for direct messages.
+   - If current view state does not map to a route-specific action, the app
+     resolves back behavior from the current pathname (`/waves`, `/messages`,
+     `/notifications`) to avoid leaving an empty detail surface.
    - Otherwise, falls back to browser back history.
 4. The button shows loading feedback while navigation is in progress.
 
@@ -54,6 +57,9 @@ current state.
 - On profile routes, back is only shown when history is available.
 - In-app wave list back navigation uses the wave type (public/group vs. direct
   message) to determine the right section target.
+- If users are already on `/notifications` and return to it from a stale internal
+  wave view, back moves to the notifications section home rather than a blank
+  view.
 - If the current wave disappears from server responses, returning clears active
   state and drops you to the related section home route.
 
@@ -61,6 +67,8 @@ current state.
 
 - If `drop` closing fails to apply instantly, the route cleanup still removes the
   `drop` parameter and keeps the context.
+- If a non-wave path (`/waves`, `/messages`, `/notifications`) is re-entered after
+  stale state, back returns to that section's home route instead of an empty view.
 - If navigation fails, the button re-renders and users can retry with another
   back action or browser controls.
 

@@ -4,7 +4,9 @@
 
 Single-drop views show a voting summary strip with current totals, projected
 totals (when available), and a `Vote` action that opens the dedicated voting
-modal. This surface does not include an inline voting countdown.
+modal. The voting modal opens as a full-screen overlay over current content and
+locks page scroll while open. This surface does not include an inline voting
+countdown.
 
 ## Location in the Site
 
@@ -27,8 +29,9 @@ modal. This surface does not include an inline voting countdown.
    - projected count tooltip when projection differs from current total, and
    - `Vote` action when voting is available to the viewer.
 3. Select `Vote` to open `Vote for this artwork`.
-4. Choose slider or numeric input and submit.
-5. After a successful vote, the modal closes and the summary updates.
+4. The overlay opens with focus moved into the modal.
+5. Choose slider or numeric input and submit.
+6. After a successful vote, the modal closes and the summary updates.
 
 ## Common Scenarios
 
@@ -39,6 +42,7 @@ modal. This surface does not include an inline voting countdown.
 - After voting ends (or for winner drops), viewers who voted see a `Your votes`
   value in the summary strip.
 - Mobile users get the same voting form inside the mobile dialog layout.
+- Desktop users get the same form in a full-viewport modal with backdrop.
 
 ## Edge Cases
 
@@ -47,12 +51,15 @@ modal. This surface does not include an inline voting countdown.
 - If projected totals are unavailable, only the current total is shown.
 - Negative prior votes are shown with a leading minus sign in the `Your votes`
   field.
+- While open, page background scrolling is disabled so background content stays
+  fixed.
 
 ## Failure and Recovery
 
 - If authentication is interrupted during submit, the vote dialog remains open
   so the user can retry.
 - If vote submission fails, the dialog stays open and an error toast is shown.
+- Focus returns to the control that opened the dialog after the modal closes.
 - Closing the dialog with `Esc`, backdrop click, or cancel keeps the user on
   the same drop detail context.
 
