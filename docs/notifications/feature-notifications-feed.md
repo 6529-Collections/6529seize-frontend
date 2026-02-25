@@ -74,8 +74,8 @@ single follow action for the grouped actors.
 - Each row with an associated identity now opens with a standardized header that
   includes the actor profile chip and follow action.
 - Seeing a `sent a priority alert 🚨` notification row that includes a full linked
-  drop preview and allows reply/quote actions.
-- Selecting reply/quote controls in a priority alert and opening the related wave with
+  drop preview and allows reply action.
+- Selecting the reply control in a priority alert opens the related wave with
   the targeted serial context.
 - Seeing a priority alert notification with no linked drop and still understanding who
   sent it from the text header.
@@ -152,8 +152,8 @@ single follow action for the grouped actors.
   return errors.
 - Priority alerts render as `sent a priority alert 🚨` and show the first related
   drop when one is present.
-- Priority alert reply/quote actions open the related wave route at the selected
-  serial context and preserve DM routing context.
+- Priority alert reply action opens the related wave route at the selected serial
+  context and preserves DM routing context.
 
 ## Related Pages
 

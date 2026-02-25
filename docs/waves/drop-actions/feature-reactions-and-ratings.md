@@ -3,9 +3,10 @@
 ## Overview
 
 Wave drop cards support emoji reactions and rating actions directly in the drop
-controls. Reaction and rating changes appear immediately on the drop while the
-request is in flight, then stay if the request succeeds or roll back if it
-fails.
+controls. Quick-react buttons show the top recent reactions for this user and
+update as usage changes, while the full picker remains available for any emoji.
+Reaction and rating changes appear immediately on the drop while the request is in
+flight, then stay if the request succeeds or roll back if it fails.
 
 Only full-size drop cards expose enabled reaction and rating actions. Light
 compact drop cards and temporary unsent drops keep those controls disabled.
@@ -31,7 +32,7 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 
 1. Open a wave or direct-message thread and locate a drop.
 2. Choose a reaction path:
-   - quick-react from recent emojis,
+- quick-react from recent emojis (including frequently used reactions),
    - open emoji picker and choose an emoji, or
    - tap an existing reaction chip.
 3. For existing reaction chips, up to three responders are previewed directly in the tooltip.
