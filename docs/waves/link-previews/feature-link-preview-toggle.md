@@ -52,6 +52,8 @@ state until the drop is fully saved.
   additional navigation.
 - If a drop has multiple links and previews are hidden, `Show link previews` appears
   once next to the first hidden link to avoid repeating the control.
+- While the action is processing, the control remains in the row and shows a loading
+  state, then returns to normal after the backend confirms the change.
 
 ## Edge Cases
 
@@ -61,6 +63,8 @@ state until the drop is fully saved.
   preview cards) do not surface the toggle control.
 - Temporary (unsent) drops show a disabled toggle state and cannot be changed.
 - Repeated taps/clicks while the request is in flight are ignored.
+- The control does not remount or reset label while parent drop content rerenders
+  for unchanged link-preview state (no visible flicker).
 - When hidden, only one inline `Show link previews` control is displayed, even for
   drops with multiple plain links.
 
