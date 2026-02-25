@@ -6,6 +6,8 @@ Wave pages can expose a tab strip that switches the main content panel between
 wave sections such as `Chat`, `Leaderboard`, `Winners`, and other
 wave-dependent views.
 
+In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
+
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
@@ -34,6 +36,8 @@ wave-dependent views.
 5. The main content panel updates in place while staying on the same route.
 6. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
    an inline media format badge when that drop includes media metadata.
+   For non-image media, that thumbnail comes from a `preview_image` metadata value
+   when present, and media interactions stay disabled in the row.
 7. If the active tab is no longer valid when entering a new wave, the active tab
    resets to that wave’s first available tab.
 
@@ -45,6 +49,8 @@ wave-dependent views.
 - In curation waves, use available tabs without an `Outcome` tab.
 - In the `My Votes` tab, users can quickly scan entries by format: image,
   video, or interactive media is indicated with a small badge at the title row.
+- In `My Votes`, non-image drops show a static preview thumbnail in the row when
+  `preview_image` metadata is valid.
 
 ## Edge Cases
 
@@ -56,6 +62,10 @@ wave-dependent views.
   assistive technologies.
 - For memes waves, available tabs are evaluated to prefer `Leaderboard` first; if it
   is unavailable, `Chat` becomes the fallback tab.
+- In `My Votes`, non-image rows suppress inline media interaction even when the row
+  includes video, audio, or HTML media.
+- If `preview_image` is missing or invalid, the row still shows the drop by using
+  its standard media source and keeping interaction disabled.
 
 ## Failure and Recovery
 
@@ -67,6 +77,8 @@ wave-dependent views.
   remains available.
 - If a `My Votes` row has no preview media available, users still get row metadata
   (title, author, and vote score) and can open the drop.
+- If metadata parsing for `preview_image` fails, `My Votes` entries continue to render
+  with the row’s media source and remain navigable to the drop detail.
 
 ## Limitations / Notes
 
