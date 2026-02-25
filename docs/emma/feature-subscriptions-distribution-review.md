@@ -4,8 +4,8 @@
 
 The EMMA plan review table includes a dedicated subscription review workflow for
 The Memes plans. Admin users can confirm a token ID, download subscription
-lists, upload photos and automatic airdrops, and finalize distribution state
-from the plan review area.
+lists, upload photos and automatic airdrops, finalize distribution state, and
+publish finalized allowlists to GitHub from the plan review area.
 
 ## Location in the Site
 
@@ -29,6 +29,10 @@ from the plan review area.
    - an admin footer with reset, upload, and finalize actions.
 4. Download phase CSVs directly from the matching phase row.
 5. Use footer actions to manage distribution assets and finalization.
+6. Once the distribution is normalized and required assets are uploaded, use
+   `Publish to GitHub` to export allowlist payload files.
+7. Keep the publish modal open to check progress, success details, or retry on
+   failure.
 
 ## Common Scenarios
 
@@ -48,6 +52,16 @@ from the plan review area.
   - `Upload Automatic Airdrops` accepts a CSV with `address,value` rows.
   - `Finalize Distribution` runs the normalize step and updates the normalized
     indicator (`✅` or `❌`).
+  - `Publish to GitHub` runs only when all conditions are met:
+    - distribution is normalized
+    - at least one photo is uploaded
+    - at least one automatic airdrop entry is uploaded
+  - On publish success, users see:
+    - a status message
+    - a `View <folder> on GitHub` link to the repository folder
+    - a list of deleted files (if any)
+    - a list of uploaded files (if any)
+  - On publish failure, users see the error in the modal and can retry.
 - Use the footer status counters as a quick state check:
   - photos uploaded count
   - automatic airdrops addresses + total count
@@ -63,12 +77,19 @@ from the plan review area.
   - automatic airdrops CSV parser errors report parse/format/validation issues.
   - photo uploads require valid image files and enforce size/type limits before
     upload.
+- `Publish to GitHub` is disabled while the distribution is not ready:
+  - not normalized
+  - no photos uploaded
+  - no automatic airdrops uploaded
+- The publish modal cannot be closed while the publish request is in flight.
 
 ## Failure and Recovery
 
 - Network/request failures show toast errors and keep previous UI state visible.
 - Modal flows surface error copy for CSV or file validation failures, and users can
   retry after fixing the input or network issue.
+- `Publish to GitHub` failures show the API/backend error message in the modal and
+  keep the workflow available for retry.
 
 ## Limitations / Notes
 
