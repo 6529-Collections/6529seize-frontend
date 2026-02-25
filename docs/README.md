@@ -41,6 +41,8 @@ This guide documents current user-facing behavior.
   [TDH Boost Rules](network/feature-tdh-boost-rules.md),
   [xTDH Network Overview](network/feature-xtdh-network-overview.md),
   [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md)
+- Explore live identity rankings and sorting/filtering:
+  [Network Identities Leaderboard](network/feature-network-identities-leaderboard.md)
 - Understand profile tabs and deep-link behavior:
   [Profile Tabs](profiles/navigation/feature-tabs.md)
 - Troubleshoot profile load/tab issues:

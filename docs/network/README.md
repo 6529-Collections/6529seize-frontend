@@ -8,6 +8,7 @@ metric definitions.
 
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
+- [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 - [Network Definitions](feature-network-definitions.md)
