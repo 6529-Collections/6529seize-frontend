@@ -26,27 +26,41 @@ function normalizeTraitPrimitive(
   value: unknown,
   numberFallback: number
 ): TraitPrimitive {
-  if (typeof initialValue === "boolean") {
-    if (typeof value === "boolean") return value;
-    if (typeof value === "string") {
-      const normalized = value.trim().toLowerCase();
+  const normalizeBooleanValue = (rawValue: unknown): boolean => {
+    if (typeof rawValue === "boolean") return rawValue;
+    if (typeof rawValue === "string") {
+      const normalized = rawValue.trim().toLowerCase();
       if (normalized === "yes" || normalized === "true") return true;
       if (normalized === "no" || normalized === "false") return false;
     }
-    return Boolean(value);
+    return Boolean(rawValue);
+  };
+
+  const normalizeNumberValue = (
+    rawValue: unknown,
+    fallbackValue: number
+  ): number => {
+    if (typeof rawValue === "number" && Number.isFinite(rawValue)) {
+      return rawValue;
+    }
+    const parsed = Number(rawValue);
+    return Number.isFinite(parsed) ? parsed : fallbackValue;
+  };
+
+  const isPrimitiveValue = (rawValue: unknown): rawValue is TraitPrimitive =>
+    typeof rawValue === "string" ||
+    typeof rawValue === "number" ||
+    typeof rawValue === "boolean";
+
+  if (typeof initialValue === "boolean") {
+    return normalizeBooleanValue(value);
   }
 
   if (typeof initialValue === "number") {
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : numberFallback;
+    return normalizeNumberValue(value, numberFallback);
   }
 
-  if (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
+  if (isPrimitiveValue(value)) {
     return value;
   }
   return "";

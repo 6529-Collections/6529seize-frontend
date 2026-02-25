@@ -2064,8 +2064,7 @@ export default function DropForgeLaunchClaimPageClient({
             )}
           </LaunchAccordionSection>
           <div className="tw-flex tw-flex-col tw-gap-3">
-            {hasPublishedMetadata ? (
-              isMetadataOnlyUpdateMode ? (
+            {hasPublishedMetadata && isMetadataOnlyUpdateMode && (
                 <div className="tw-space-y-4">
                   <div className="tw-text-base tw-font-semibold tw-text-white">
                     Metadata Changed
@@ -2126,7 +2125,8 @@ export default function DropForgeLaunchClaimPageClient({
                     </button>
                   </div>
                 </div>
-              ) : (
+            )}
+            {hasPublishedMetadata && !isMetadataOnlyUpdateMode && (
                 <>
                   <label
                     htmlFor="phase-selection"
@@ -2519,8 +2519,8 @@ export default function DropForgeLaunchClaimPageClient({
                     </div>
                   )}
                 </>
-              )
-            ) : (
+            )}
+            {!hasPublishedMetadata && (
               <p className="tw-mb-0 tw-text-white">
                 {primaryStatus?.key === "publishing"
                   ? "Publishing to Arweave: "

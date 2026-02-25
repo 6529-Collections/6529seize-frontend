@@ -81,6 +81,10 @@ function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   return "image";
 }
 
+function formatNullableEditionSize(value: number | null | undefined): string {
+  return value == null ? "" : String(value);
+}
+
 function isVideoUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   const u = url.toLowerCase();
@@ -367,6 +371,11 @@ function ImageSection({
   const [formError, setFormError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageUrl = pendingImagePreviewUrl ?? claim.image_url ?? null;
+  const hasImage = imageUrl !== null;
+  let imagePreviewMimeType = "image/jpeg";
+  if (pendingImageFile?.type?.includes("image")) {
+    imagePreviewMimeType = pendingImageFile.type;
+  }
 
   function clearPendingImageSelection() {
     setPendingImageFile(null);
@@ -436,38 +445,23 @@ function ImageSection({
   return (
     <div>
       <div className="tw-mb-6 tw-flex tw-w-full tw-flex-col tw-gap-2">
-        <div
-          className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800"
-          onClick={!imageUrl ? () => imageInputRef.current?.click() : undefined}
-          role={!imageUrl ? "button" : undefined}
-          tabIndex={!imageUrl ? 0 : -1}
-          onKeyDown={
-            !imageUrl
-              ? (event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    imageInputRef.current?.click();
-                  }
-                }
-              : undefined
-          }
-        >
-          {imageUrl ? (
+        {hasImage ? (
+          <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
             <MediaDisplay
-              media_mime_type={
-                pendingImageFile?.type?.includes("image")
-                  ? pendingImageFile.type
-                  : "image/jpeg"
-              }
+              media_mime_type={imagePreviewMimeType}
               media_url={imageUrl}
             />
-          ) : (
-            <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-text-iron-500">
-              <span>No image</span>
-              <span className="tw-text-sm">Click to Upload</span>
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => imageInputRef.current?.click()}
+            className="tw-relative tw-flex tw-aspect-video tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-500 tw-ring-1 tw-ring-iron-800"
+          >
+            <span>No image</span>
+            <span className="tw-text-sm">Click to Upload</span>
+          </button>
+        )}
         <input
           ref={imageInputRef}
           type="file"
@@ -475,7 +469,7 @@ function ImageSection({
           className="tw-hidden"
           onChange={handleUpload}
         />
-        {imageUrl && (
+        {hasImage && (
           <button
             type="button"
             disabled={saving}
@@ -558,12 +552,14 @@ function AnimationSection({
   const mediaType = getClaimMediaType(claim);
   const hasAnimation = Boolean(claim.animation_url);
   const imageUrl = claim.image_url ?? null;
-  const animationDisplayUrl =
-    pendingAnimationFile && pendingAnimationPreviewUrl
-      ? pendingAnimationPreviewUrl
-      : pendingAnimation === undefined
-        ? claim.animation_url
-        : pendingAnimation;
+  let animationDisplayUrl: string | null | undefined;
+  if (pendingAnimationFile && pendingAnimationPreviewUrl) {
+    animationDisplayUrl = pendingAnimationPreviewUrl;
+  } else if (pendingAnimation === undefined) {
+    animationDisplayUrl = claim.animation_url;
+  } else {
+    animationDisplayUrl = pendingAnimation;
+  }
   const isAnimationVideoUrl = Boolean(
     animationDisplayUrl && isVideoUrl(animationDisplayUrl)
   );
@@ -718,6 +714,102 @@ function AnimationSection({
     pendingAnimationFile === null;
   const showChoice = showAddFlow && replaceMode === "choose";
   const showAddLink = showAddFlow && replaceMode === "link";
+  const showAnimationControls =
+    hasAnimation || pendingAnimation !== undefined || pendingAnimationFile !== null;
+  const animationActionLabel =
+    pendingAnimation === null ? "Add animation" : "Replace";
+
+  const renderReplaceControls = () => {
+    if (replaceMode === null) {
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => setReplaceMode("choose")}
+            className={BTN_PRIMARY}
+          >
+            {animationActionLabel}
+          </button>
+          {pendingAnimation !== null && (
+            <button
+              type="button"
+              onClick={handleRemoveAnimation}
+              className={BTN_DANGER}
+            >
+              Remove animation
+            </button>
+          )}
+        </>
+      );
+    }
+
+    if (replaceMode === "choose") {
+      return (
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
+          <button
+            type="button"
+            onClick={() => animationInputRef.current?.click()}
+            className={BTN_PRIMARY}
+          >
+            Upload from device
+          </button>
+          <button
+            type="button"
+            onClick={() => setReplaceMode("link")}
+            className={BTN_SUCCESS}
+          >
+            Paste link
+          </button>
+          <button
+            type="button"
+            onClick={() => setReplaceMode(null)}
+            className={BTN_TERTIARY}
+          >
+            Cancel
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <input
+          type="text"
+          value={linkInput}
+          onChange={(e) => {
+            setLinkInput(e.target.value);
+            setLinkError(null);
+          }}
+          placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
+          className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
+        />
+        {linkError && (
+          <p
+            className="tw-text-rose-300 tw-mb-0 tw-w-full tw-text-sm"
+            role="alert"
+          >
+            {linkError}
+          </p>
+        )}
+        <div className="tw-flex tw-flex-wrap tw-gap-2">
+          <button type="button" onClick={applyLink} className={BTN_SUCCESS}>
+            Use link
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setReplaceMode(null);
+              setLinkInput("");
+              setLinkError(null);
+            }}
+            className={BTN_TERTIARY}
+          >
+            Cancel
+          </button>
+        </div>
+      </>
+    );
+  };
 
   return (
     <div>
@@ -775,9 +867,7 @@ function AnimationSection({
             </div>
           </div>
         )}
-        {(hasAnimation ||
-          pendingAnimation !== undefined ||
-          pendingAnimationFile !== null) && (
+        {showAnimationControls && (
           <>
             <DropForgeMediaTypePill
               label={animationPreviewLabel}
@@ -848,95 +938,9 @@ function AnimationSection({
           </div>
         )}
 
-        {(hasAnimation ||
-          pendingAnimation !== undefined ||
-          pendingAnimationFile !== null) && (
+        {showAnimationControls && (
           <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {replaceMode === null ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setReplaceMode("choose")}
-                  className={BTN_PRIMARY}
-                >
-                  {pendingAnimation === null ? "Add animation" : "Replace"}
-                </button>
-                {pendingAnimation !== null && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveAnimation}
-                    className={BTN_DANGER}
-                  >
-                    Remove animation
-                  </button>
-                )}
-              </>
-            ) : replaceMode === "choose" ? (
-              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-800 tw-p-3">
-                <button
-                  type="button"
-                  onClick={() => animationInputRef.current?.click()}
-                  className={BTN_PRIMARY}
-                >
-                  Upload from device
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReplaceMode("link")}
-                  className={BTN_SUCCESS}
-                >
-                  Paste link
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReplaceMode(null)}
-                  className={BTN_TERTIARY}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <>
-                <input
-                  type="text"
-                  value={linkInput}
-                  onChange={(e) => {
-                    setLinkInput(e.target.value);
-                    setLinkError(null);
-                  }}
-                  placeholder="https://ipfs.io/ipfs/… or https://arweave.net/…"
-                  className="tw-w-full tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 placeholder:tw-text-iron-500 focus:tw-border-iron-600 focus:tw-outline-none"
-                />
-                {linkError && (
-                  <p
-                    className="tw-text-rose-300 tw-mb-0 tw-w-full tw-text-sm"
-                    role="alert"
-                  >
-                    {linkError}
-                  </p>
-                )}
-                <div className="tw-flex tw-flex-wrap tw-gap-2">
-                  <button
-                    type="button"
-                    onClick={applyLink}
-                    className={BTN_SUCCESS}
-                  >
-                    Use link
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReplaceMode(null);
-                      setLinkInput("");
-                      setLinkError(null);
-                    }}
-                    className={BTN_TERTIARY}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            )}
+            {renderReplaceControls()}
           </div>
         )}
       </div>
@@ -999,7 +1003,7 @@ function CoreInformationSection({
 }>) {
   const { setToast } = useAuth();
   const [editionSize, setEditionSize] = useState(
-    claim.edition_size != null ? String(claim.edition_size) : ""
+    formatNullableEditionSize(claim.edition_size)
   );
   const [season, setSeason] = useState(() => getClaimSeason(claim));
   const [coreSaving, setCoreSaving] = useState(false);
@@ -1007,7 +1011,7 @@ function CoreInformationSection({
 
   useEffect(() => {
     setEditionSize(
-      claim.edition_size != null ? String(claim.edition_size) : ""
+      formatNullableEditionSize(claim.edition_size)
     );
     setSeason(getClaimSeason(claim));
     setCoreError(null);
@@ -1066,7 +1070,7 @@ function CoreInformationSection({
         body
       );
       setEditionSize(
-        nextClaim.edition_size != null ? String(nextClaim.edition_size) : ""
+        formatNullableEditionSize(nextClaim.edition_size)
       );
       setSeason(getClaimSeason(nextClaim));
       onUpdated(nextClaim);
@@ -1165,7 +1169,7 @@ function CoreInformationSection({
           disabled={!coreChanged}
           onClick={() => {
             setEditionSize(
-              claim.edition_size != null ? String(claim.edition_size) : ""
+              formatNullableEditionSize(claim.edition_size)
             );
             setSeason(getClaimSeason(claim));
             setCoreError(null);
@@ -1889,25 +1893,22 @@ function DistributionSection({
           {photos.map((photo) => (
             <div
               key={photo.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => setExpandedPhoto(photo)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setExpandedPhoto(photo);
-                }
-              }}
-              className="tw-relative tw-cursor-zoom-in tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
+              className="tw-relative tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-1.5"
             >
-              <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
-                <img
-                  src={photo.link}
-                  alt={getPhotoFileName(photo.link)}
-                  loading="lazy"
-                  className="tw-h-full tw-w-full tw-object-contain"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setExpandedPhoto(photo)}
+                className="tw-block tw-w-full tw-cursor-zoom-in tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0"
+              >
+                <div className="tw-aspect-[4/3] tw-overflow-hidden tw-rounded-md tw-bg-iron-950">
+                  <img
+                    src={photo.link}
+                    alt={getPhotoFileName(photo.link)}
+                    loading="lazy"
+                    className="tw-h-full tw-w-full tw-object-contain"
+                  />
+                </div>
+              </button>
               <a
                 href={photo.link}
                 target="_blank"

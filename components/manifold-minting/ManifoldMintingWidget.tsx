@@ -170,7 +170,9 @@ export default function ManifoldMintingWidget(
 
     args.push(...mintArgs, mintForAddress);
 
-    const functionName = getMintFunctionName(isProxy);
+    const functionName = isProxy
+      ? getProxyMintFunctionName()
+      : getDirectMintFunctionName();
 
     return {
       functionName,
@@ -203,14 +205,15 @@ export default function ManifoldMintingWidget(
     return mintArgs;
   };
 
-  const getMintFunctionName = (isProxy: boolean) => {
-    if (isProxy) {
-      return "mintProxy";
-    } else if (mintCount > 1) {
+  const getProxyMintFunctionName = () => {
+    return "mintProxy";
+  };
+
+  const getDirectMintFunctionName = () => {
+    if (mintCount > 1) {
       return "mintBatch";
-    } else {
-      return "mint";
     }
+    return "mint";
   };
 
   const isMintDebugEnabled = searchParams?.get("mintdebug") === "1";
