@@ -7,6 +7,7 @@ Composer docs cover editing and submission behavior before drops are posted.
 ## Features
 
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
+- [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 - [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)

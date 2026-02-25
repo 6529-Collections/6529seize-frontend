@@ -28,7 +28,10 @@ to explicit no-drop states instead of staying in a loading state.
 ## Common Scenarios
 
 - Default leaderboard list shows wave-specific empty messaging and optional
-  create-drop calls to action.
+  create-drop actions when entry is allowed.
+- Curation leaderboards can show `No curated drops yet` with curation-specific
+  eligibility guidance.
+- Memes leaderboards can show `No artwork submissions yet`.
 - Grid and gallery views show `No drops to show` when no matching leaderboard
   drops are available.
 - Small leaderboard surfaces show `No drops have been made yet in this wave`
@@ -42,6 +45,8 @@ to explicit no-drop states instead of staying in a loading state.
 - Sort modes and curation filters can produce valid empty states.
 - `My realtime vote` style filtering can produce an empty display even when raw
   leaderboard rows exist.
+- Empty-state `Drop` controls can be hidden or disabled when the current user is
+  not eligible to submit.
 
 ## Failure and Recovery
 
@@ -62,6 +67,7 @@ to explicit no-drop states instead of staying in a loading state.
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
 - [Wave Content Tabs](../discovery/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)

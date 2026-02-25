@@ -3,9 +3,9 @@
 ## Overview
 
 Wave drop markdown renders supported NFT marketplace URLs as dedicated
-marketplace cards instead of generic metadata cards. These cards prioritize
-visual media, title, and marketplace call-to-action behavior for listing-style
-links.
+marketplace cards instead of generic metadata cards. Cards prioritize media and
+listing context (title and price when available), and include direct open/copy
+actions in full-card layouts.
 
 ## Location in the Site
 
@@ -28,10 +28,12 @@ links.
 ## User Journey
 
 1. Open a thread with a supported marketplace URL in drop text.
-2. The URL renders as a marketplace preview frame while data is resolved.
-3. The card fills with available media, title, and marketplace CTA details.
-4. Use open/copy link actions from the card frame without leaving the thread
+2. As the card approaches viewport, a loading placeholder appears.
+3. Marketplace preview data resolves and fills card media/title/price details.
+4. Use open/copy actions from the card frame without leaving the thread
    unless you choose to open the marketplace destination.
+5. If newer marketplace enrichment arrives later, card fields can refresh
+   in-place.
 
 ## Common Scenarios
 
@@ -41,6 +43,10 @@ links.
   same marketplace card frame with provider-specific metadata when available.
 - Multiple supported marketplace links inside one drop render as separate
   cards.
+- If drop payload already includes marketplace enrichment metadata, cards can
+  render details faster before network fallback completes.
+- When NFT-link enrichment is partial, missing fields can be filled from Open
+  Graph metadata as fallback.
 
 ## Edge Cases
 
@@ -50,13 +56,21 @@ links.
   generic preview handling.
 - If previews are hidden for a drop, marketplace links stay plain until
   previews are shown again.
+- OpenSea overlay-style preview images are filtered so card media can use
+  cleaner NFT media sources when available.
+- If card content is still outside viewport, users can continue scrolling and
+  the card will resolve when near view.
 
 ## Failure and Recovery
 
-- If marketplace preview data fails to resolve, the card switches to a
+- If marketplace enrichment fails, card loading falls back to Open Graph
+  metadata where possible.
+- If both enrichment and fallback cannot produce media, the card switches to a
   `Preview unavailable` state while keeping direct navigation to the original
   link.
-- Users can retry by reloading the thread or reopening the wave.
+- If metadata updates arrive later (for example background enrichment), cards can
+  refresh automatically without manual reopen.
+- Users can always retry by reloading the thread or reopening the wave.
 
 ## Limitations / Notes
 
@@ -67,6 +81,7 @@ links.
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Curation URL Submissions](../composer/feature-curation-url-submissions.md)
 - [Wave Drop External Link Previews](feature-external-link-previews.md)
 - [Wave Drop Art Blocks Token Previews](feature-art-blocks-token-previews.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)

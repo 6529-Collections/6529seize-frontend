@@ -2,9 +2,9 @@
 
 ## Overview
 
-Wave drop composer metadata can be submitted as standalone content. A drop can
-be sent with populated metadata even when the editor body and file uploads are
-empty.
+Standard wave drop composer metadata can be submitted as standalone content. A
+drop can be sent with populated metadata even when the editor body and file
+uploads are empty.
 
 ## Location in the Site
 
@@ -61,12 +61,15 @@ empty.
   existing parts, or populated metadata).
 - Metadata values reset with the rest of composer state after successful
   submission.
+- Curation URL composer flows use URL-only submission and do not expose this
+  metadata panel.
 - This page covers metadata behavior in the wave composer, not creation-time
   wave requirement setup.
 
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Creation Drop Settings](../create/feature-drops-step.md)
