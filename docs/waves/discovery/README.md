@@ -8,6 +8,7 @@ Discovery docs cover how users find and browse waves before entering a thread.
 
 - [Wave Discover Cards](feature-discover-cards.md)
 - [Wave Content Tabs](feature-content-tabs.md)
+- [Wave My Votes Tab](feature-my-votes-tab.md)
 
 ## Flows
 

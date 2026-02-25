@@ -103,3 +103,4 @@ restores it whenever that wave is opened again and the tab is still available.
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Docs Home](../../README.md)
+- [Wave My Votes Tab](feature-my-votes-tab.md)
