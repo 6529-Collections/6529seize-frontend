@@ -25,6 +25,7 @@ targeted drop so it is easier to locate in the list.
   serial (for example `serialNo=...`).
 - Use in-thread jump actions that target a specific serial number (for example
   search results, unread controls, or boosted/activity jump actions).
+- Use boosted-drop cards in the message list to jump directly to a trending post.
 
 ## User Journey
 
@@ -107,6 +108,7 @@ targeted drop so it is easier to locate in the list.
 - [Waves Index](../README.md)
 - [Wave Drop Open and Copy Links](../drop-actions/feature-open-and-copy-links.md)
 - [Wave Chat Typing Indicator](feature-typing-indicator.md)
+- [Wave Drop Boosting](../drop-actions/feature-drop-boosting.md)
 - [Profiles Index](../../profiles/README.md)
 - [Profile Brain Tab](../../profiles/tabs/feature-brain-tab.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

@@ -85,4 +85,5 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Drop Media Download](feature-media-download.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
+- [Wave Drop Boosting](feature-drop-boosting.md)
 - [Docs Home](../../README.md)
