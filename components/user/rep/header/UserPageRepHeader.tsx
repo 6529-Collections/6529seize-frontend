@@ -1,15 +1,12 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import type {
-  ApiProfileRepRatesState,
-  RatingStats,
-} from "@/entities/IProfile";
+import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useContext, useEffect, useState } from "react";
-import TopRaterAvatars from "./TopRaterAvatars";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
+import TopRaterAvatars from "./TopRaterAvatars";
 import {
   getCanEditRep,
   sortRepsByRatingAndContributors,
@@ -60,9 +57,14 @@ export default function UserPageRepHeader({
     );
   }, [connectedProfile, profile, activeProfileProxy]);
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [editCategory, setEditCategory] = useState<string | null>(null);
 
-  const selectedRep = topReps.find((r) => r.category === selectedCategory);
+  const openEditCategory = (category: string) => {
+    if (!canEditRep) {
+      return;
+    }
+    setEditCategory(category);
+  };
 
   return (
     <>
@@ -110,20 +112,35 @@ export default function UserPageRepHeader({
                 {topReps.map((rep) => (
                   <div
                     key={rep.category}
-                    className="group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-transition-colors tw-cursor-pointer hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60"
+                    className={`group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-transition-colors ${
+                      canEditRep
+                        ? "tw-cursor-pointer hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60"
+                        : "tw-cursor-default"
+                    }`}
                   >
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCategory(rep.category)}
-                      className="tw-inline-flex tw-items-center tw-gap-2.5 tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit tw-cursor-pointer focus:tw-outline-none"
-                    >
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                        {rep.category}
-                      </span>
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
-                        {formatNumberWithCommas(rep.rating)}
-                      </span>
-                    </button>
+                    {canEditRep ? (
+                      <button
+                        type="button"
+                        onClick={() => openEditCategory(rep.category)}
+                        className="tw-inline-flex tw-items-center tw-gap-2.5 tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit tw-cursor-pointer focus:tw-outline-none"
+                      >
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                          {rep.category}
+                        </span>
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
+                          {formatNumberWithCommas(rep.rating)}
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="tw-inline-flex tw-items-center tw-gap-2.5">
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                          {rep.category}
+                        </span>
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
+                          {formatNumberWithCommas(rep.rating)}
+                        </span>
+                      </div>
+                    )}
                     <span className="tw-text-xs tw-text-iron-600">·</span>
                     <TopRaterAvatars
                       handleOrWallet={profile.handle ?? ""}
@@ -142,14 +159,11 @@ export default function UserPageRepHeader({
         </div>
       </div>
 
-      {selectedCategory && selectedRep && (
+      {canEditRep && editCategory && (
         <UserPageRepModifyModal
           profile={profile}
-          category={selectedCategory}
-          canEditRep={canEditRep}
-          categoryRep={selectedRep.rating}
-          contributorCount={selectedRep.contributor_count}
-          onClose={() => setSelectedCategory(null)}
+          category={editCategory}
+          onClose={() => setEditCategory(null)}
         />
       )}
     </>

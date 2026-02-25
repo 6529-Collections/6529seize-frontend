@@ -4,8 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "@/components/auth/Auth";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getCanEditRep } from "../UserPageRep.helpers";
 import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
 import UserPageRepNewRep from "../new-rep/UserPageRepNewRep";
 import { RateMatter } from "@/types/enums";
@@ -36,11 +36,34 @@ export default function UserPageRepReps({
     [repRates?.rating_stats]
   );
 
+  const getCanEditRep = ({
+    myProfile,
+    targetProfile,
+  }: {
+    myProfile: ApiIdentity | null;
+    targetProfile: ApiIdentity;
+  }) => {
+    if (!myProfile?.handle) {
+      return false;
+    }
+    if (activeProfileProxy) {
+      if (profile.handle === activeProfileProxy.created_by.handle) {
+        return false;
+      }
+      return activeProfileProxy.actions.some(
+        (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
+      );
+    }
+    if (myProfile.handle === targetProfile.handle) {
+      return false;
+    }
+    return true;
+  };
+
   const [canEditRep, setCanEditRep] = useState<boolean>(
     getCanEditRep({
       myProfile: connectedProfile,
       targetProfile: profile,
-      activeProfileProxy,
     })
   );
 
@@ -49,10 +72,9 @@ export default function UserPageRepReps({
       getCanEditRep({
         myProfile: connectedProfile,
         targetProfile: profile,
-        activeProfileProxy,
       })
     );
-  }, [connectedProfile, profile, activeProfileProxy]);
+  }, [connectedProfile, profile]);
 
   return (
     <div className="tw-mt-6 lg:tw-mt-8">
