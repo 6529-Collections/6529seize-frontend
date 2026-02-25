@@ -28,7 +28,9 @@ recent mint volume in a dedicated Mint Stats card.
 4. Review activity cards for daily and weekly windows: Posters, Posts,
    Submissions, Voters, Vote Volume, Active Votes, Network TDH, TDH Utilization
    %, xTDH Granted, Identities, Active Identities, and Consolidations Formed.
-5. For each card that has trend data, a sparkline strip is shown under the card.
+5. For each card that has trend data, a sparkline strip is shown under the
+   card in chronological order (oldest values on the left, newest values on the
+   right).
 6. Hover values or sparkline bars to see exact values and dates.
 7. Select the Network TDH card to open Network Stats for deeper detail.
 
@@ -51,6 +53,9 @@ recent mint volume in a dedicated Mint Stats card.
 - Invalid or negative metric values are treated as `0` for display and
   comparisons.
 - Large values are compacted (`K`, `M`, `B`) while tooltips show full counts.
+- Sparkline bars follow the same sequence as the data returned for that card:
+  if a metric has dates, each tooltip line matches the corresponding bar and
+  date pair.
 - Trend bars are fetched as 31-day series data; if those values are unavailable,
   cards render without bars.
 - If no mint data is returned, the Mint Stats card shows `No mint data available`.
