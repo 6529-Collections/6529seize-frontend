@@ -8,6 +8,7 @@ Chat docs cover realtime conversation behavior inside wave and DM timelines.
 
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
 - [Wave Chat Typing Indicator](feature-typing-indicator.md)
+- [Wave Chat Android Keyboard Layout](feature-android-keyboard-layout.md)
 
 ## Flows
 
