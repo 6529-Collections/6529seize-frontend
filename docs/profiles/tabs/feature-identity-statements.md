@@ -27,6 +27,8 @@ those statements are shown on the profile.
 2. Review consolidated addresses and existing statements grouped by category.
 3. If you are editing your own eligible profile, select `Add`.
 4. Choose a statement group, then choose the specific statement type.
+   - For `NFT Accounts`, choose from marketplace profiles like `SuperRare`, `Foundation`,
+     `OpenSea`, `Art Blocks`, `OnCyber`, `The Line`, `Manifold`, and `Transient`.
 5. Enter a value and select `Save`.
 6. Use row actions to open (for URL-capable types), copy, or delete statements.
 
@@ -37,6 +39,8 @@ those statements are shown on the profile.
   - Add/delete actions are hidden.
 - Profile owner management:
   - Add one statement at a time from the add modal.
+  - New NFT account options now include `Manifold` and `Transient` entries, with URL placeholders
+    prefilled as `https://manifold.xyz/` and `https://transient.xyz/`.
   - Save to append the statement to its category list.
 - URL statement input normalization:
   - If a pasted or typed value starts with repeated `http://` or `https://`
@@ -44,7 +48,8 @@ those statements are shown on the profile.
   - The resulting single prefix follows the last repeated protocol in the
     input.
 - Statement row actions:
-  - `Open` appears for URL-capable statement types.
+  - `Open` appears for URL-capable statement types, including marketplace types like
+    `Manifold` and `Transient`.
   - `Copy` temporarily swaps value text to `Copied!` before restoring.
 
 ## Edge Cases
