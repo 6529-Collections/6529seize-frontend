@@ -80,10 +80,10 @@ Wave drop actions provide two different link behaviors:
 - If a same-origin shared link carries both `drop` and `serialNo`, the
   `drop` target takes precedence and renders as a drop preview/open flow rather
   than a quote jump card.
-- If a same-origin quote link points back to the currently rendered drop
-  (including `serialNo` self-references), quote-card rendering is skipped to
-  avoid recursive nesting, and the link remains a standard URL in the message
-  body.
+- If a same-origin quote link would revisit a drop already in the current
+  quote-preview chain (including `serialNo` self-references), quote-card
+  rendering is skipped to avoid recursive nesting, and the link remains a
+  standard URL in the message body.
 - Serial links that include trailing slashes in query values (for example
   `serialNo=10/`) are normalized and still jump to the intended drop.
 - Desktop copy actions can still resolve DM routing when DM context is known
