@@ -5,7 +5,8 @@
 Wave drop markdown renders supported NFT marketplace URLs as dedicated
 marketplace cards instead of generic metadata cards. Cards prioritize media and
 listing context (title and price when available), and include direct open/copy
-actions in full-card layouts.
+actions in full-card layouts. When NFT-link enrichment includes a ready media
+preview, cards prefer those optimized preview images before raw NFT media URLs.
 
 ## Location in the Site
 
@@ -47,6 +48,11 @@ actions in full-card layouts.
   cards.
 - If drop payload already includes marketplace enrichment metadata, cards can
   render details faster before network fallback completes.
+- If NFT-link enrichment includes `media_preview` with `READY` status, card
+  media uses this URL order: `card_url -> small_url -> thumb_url` before
+  falling back to `media_uri`.
+- If `media_preview` does not include a MIME type, the card infers media type
+  from the selected URL extension when possible.
 - When NFT-link enrichment is partial, missing fields can be filled from Open
   Graph metadata as fallback.
 
@@ -58,6 +64,9 @@ actions in full-card layouts.
   generic preview handling.
 - If previews are hidden for a drop, marketplace links stay plain until
   previews are shown again.
+- `media_preview` only drives card media when its status is `READY`; other
+  statuses (`PENDING`, `PROCESSING`, `FAILED`, `SKIPPED`) keep `media_uri` as
+  the media source fallback.
 - OpenSea overlay-style preview images are filtered so card media can use
   cleaner NFT media sources when available.
 - Cards do not wait for a near-viewport trigger; once the drop card is
@@ -67,6 +76,9 @@ actions in full-card layouts.
 
 - If marketplace enrichment fails, card loading falls back to Open Graph
   metadata where possible.
+- If a `READY` `media_preview` payload is present but has no usable preview
+  URL, cards fall back to `media_uri` and then continue normal fallback
+  handling.
 - If both enrichment and fallback cannot produce media, the card switches to a
   `Preview unavailable` state while keeping direct navigation to the original
   link.
@@ -79,6 +91,8 @@ actions in full-card layouts.
 - Marketplace-card activation is path-specific, not host-only.
 - Card detail quality depends on public marketplace metadata and network
   responses.
+- Optimized preview-image usage depends on enrichment availability and
+  `media_preview` status from upstream marketplace data.
 
 ## Related Pages
 
