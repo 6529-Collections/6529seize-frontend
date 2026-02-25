@@ -8,9 +8,12 @@ jest.mock("@tanstack/react-query", () => {
   return {
     ...actual,
     useQuery: jest.fn(() => ({ data: null })),
+    useQueries: jest.fn(() => []),
     useMutation: jest.fn(() => ({ mutateAsync: jest.fn(), reset: jest.fn() })),
   };
 });
+
+jest.mock("@/components/user/rep/rep-category-modal/RepCategoryRatersList", () => () => null);
 
 describe("UserPageRepModifyModal", () => {
   const onClose = jest.fn();
@@ -20,7 +23,7 @@ describe("UserPageRepModifyModal", () => {
   function renderModal() {
     return renderWithAuth(
       <ReactQueryWrapperContext.Provider value={{ onProfileRepModify: jest.fn() } as any}>
-        <UserPageRepModifyModal onClose={onClose} profile={profile} category={category} />
+        <UserPageRepModifyModal onClose={onClose} profile={profile} category={category} canEditRep={true} />
       </ReactQueryWrapperContext.Provider>
     );
   }
