@@ -33,6 +33,9 @@ inline emoji and keeps typing flow continuous.
 - Emoji picker selections can produce the same inline result as typed
   shortcodes.
 - Multiple valid shortcodes in the same draft can each convert inline.
+- In mobile composer mode, the emoji picker opens in the full-screen picker surface so
+  users can scroll through emoji groups and pick a symbol without losing composer
+  focus or triggering unrelated page movement.
 
 ## Edge Cases
 
@@ -41,6 +44,9 @@ inline emoji and keeps typing flow continuous.
   text until completed.
 - If conversion happens while the caret is inside the shortcode, the caret is
   repositioned after the inserted emoji so typing can continue.
+- On mobile, the emoji picker interaction stays scoped to the modal surface while
+  selecting emojis, so accidental scroll or zoom interactions stay off the composer
+  thread.
 
 ## Failure and Recovery
 
@@ -56,6 +62,8 @@ inline emoji and keeps typing flow continuous.
   emoji entries.
 - Shortcode matching uses word-style IDs (letters, numbers, underscore).
 - This page covers composer behavior, not drop reaction emoji controls.
+- Emoji picker symbols are rendered at a fixed base size for touch-friendly visual
+  legibility in composer surfaces.
 
 ## Related Pages
 

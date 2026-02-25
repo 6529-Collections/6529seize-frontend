@@ -56,6 +56,8 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 - Selecting a new emoji replaces the viewer's prior reaction on that drop.
 - Selecting the same reaction again removes the viewer's reaction.
 - Reaction chips show emoji plus count; selecting a chip toggles participation.
+- On mobile, opening the emoji picker lets users browse and select emojis without the
+  drop list or page scrolling in response to their touch-drag gesture.
 - Tooltip summaries show up to a few reacting profiles and expose an overflow
   path to a full reaction-detail dialog.
 - Display names in the tooltip are clickable profile links where handles exist, and
@@ -71,6 +73,8 @@ compact drop cards and temporary unsent drops keep those controls disabled.
   be reacted to.
 - On non-hover devices, long press opens reaction details instead of toggling.
 - If a reaction count reaches zero after removal, that reaction chip disappears.
+- On mobile, the full-screen reaction picker keeps touch-move interaction inside the
+  picker so the parent feed does not scroll during emoji selection.
 - If the reaction list is long, the detail panel still uses one selected reaction
   and lets you switch between all options.
 - Rating controls clamp to each drop's allowed min/max range.
@@ -93,6 +97,8 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 - Reaction quick-action options depend on locally stored recent reactions.
 - Direct links in reaction details require a profile handle; entries without handles
   appear as plain identifiers.
+- Reaction picker symbols use a fixed-size emoji rendering baseline to keep the picker
+  selection grid readable and consistent.
 
 ## Related Pages
 
