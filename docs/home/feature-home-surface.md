@@ -12,6 +12,11 @@ The homepage `/` has been redesigned into a stacked surface with multiple functi
 6. Explore Waves.
 
 The page is now visually separated into full-width section groups and intentionally hides some cards when source data is unavailable.
+The homepage latest-drop area renders one of two card states:
+
+- A current mint countdown/state card when the featured mint is active or unresolved.
+- A next-drop preview card when a current mint has ended and a next winner exists.
+
 The homepage now-minting section uses multi-card placeholders while its data is loading so the section layout remains stable before active card data resolves.
 
 ## Location in the Site
@@ -28,7 +33,9 @@ The homepage now-minting section uses multi-card placeholders while its data is 
 
 1. Open `/`.
 2. The hero header displays the brand label and primary headline without a descriptive subtitle line.
-3. The latest-drop block loads mint state, countdown, and action surfaces as defined by its current state.
+3. The latest-drop block resolves to one of two modes:
+   - **Mint card mode**: shows mint title, countdown/status, and minting stats from the current collection card.
+   - **Next Drop mode**: when a current mint has completed and a next winner is available, the latest-drop block swaps to a `Next Drop` card that shows scheduled mint time, artwork/media, and next-card metadata.
 4. The `NEXT MINT` tile in the latest-drop block shows the next scheduled mint start date and time from the shared mint schedule in local timezone.
 5. The informational center text and quote block render after latest-drop.
 6. The Coming up section loads the next queued card set and current leaders.
@@ -39,7 +46,9 @@ The homepage now-minting section uses multi-card placeholders while its data is 
 
 - First-load with data available:
   - Hero header and latest-drop are visible immediately.
+  - If the current mint is active, latest-drop shows its current mint countdown and status.
   - Mission section appears as supporting copy.
+  - When current mint has ended and a next winner is available, latest-drop shows a `Next Drop` preview card with image, author, and wave metadata.
   - Coming up, Boosted Drops, and Explore Waves sections show after their respective feed data arrives.
 - Boosted Drops feed appears:
   - Cards are presented in a fixed 1/2/3-column responsive grid (mobile / tablet / desktop), with no horizontal-scrolling row behavior.
@@ -64,6 +73,8 @@ The homepage now-minting section uses multi-card placeholders while its data is 
 - If hot-waves data is unavailable or empty, Explore Waves is omitted.
 - If the network request errors for Explore Waves, that section is omitted rather than rendering a persistent error card.
 - The redesigned homepage no longer renders the previous submission carousel segment in this slot.
+- In the latest-drop area, the "next-drop" fallback card appears only when the current mint is finished and replacement drop data is available; if no next-drop is ready, the site keeps the mint countdown card in its completion state instead.
+- In Coming up, the next-winner card appears ahead of current leaderboard entries when the mint is finished; the leaderboard list adjusts so it still shows a total of two or three cards (including the replacement card).
 - Message links in Explore Waves previews are non-actionable in the compact list; users open links by navigating into the wave detail context.
 
 ## Failure and Recovery
