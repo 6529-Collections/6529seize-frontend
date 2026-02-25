@@ -7,8 +7,11 @@ Parent: [Notifications Index](README.md)
 The `/notifications` route shows an authenticated feed of account activity in
 My Stream. The screen first resolves profile/auth readiness, then lets users
 filter by cause, receive and open priority alerts, and load older notification
-pages while
-scrolling.
+pages while scrolling.
+
+When multiple users react to the same drop, those events are combined into one
+`New reactions` row. The row shows actor avatars, grouped reaction types, and a
+single follow action for the grouped actors.
 
 ## Location in the Site
 
@@ -34,12 +37,12 @@ scrolling.
    `Switch to primary profile`.
 5. Once ready, the page shows a centered `Loading notifications...` state until
    the first list result is available.
-6. Use the filter row (`All`, `Mentions`, `Replies`, `Identity`, `Reactions`,
-   `Invites`) to focus the list.
-7. Review notification rows, including grouped reaction rows labeled
+6. Review notification rows, including grouped reaction rows labeled
    `New reactions`.
-8. If a priority alert has a related drop, open that row to view the drop and jump to
-   the drop context.
+7. In a `New reactions` row, review each reaction cluster and actor avatars; if
+   useful, tap `Follow All` to follow the non-followed actors.
+8. If a priority alert has a related drop, open that row to view the drop and jump
+   to the drop context.
 9. Scroll upward to load older notifications; older rows are appended without
    replacing already visible content.
 10. If a priority alert has no related drops, review the header text-only entry for
@@ -56,6 +59,8 @@ scrolling.
   `Reconnect wallet` recovery actions.
 - Seeing grouped reaction notifications for a single drop instead of separate
   duplicate rows.
+- Using `Follow All` in a reaction group to follow multiple actors at once, or
+  seeing `Following All` when everyone is already followed.
 - Changing cause filters while current rows stay visible until refreshed filter
   results replace them.
 - Loading older notifications while scrolling and seeing
@@ -98,6 +103,10 @@ scrolling.
   default `All` scope; they are not grouped under a dedicated cause chip yet.
 - Inline follow actions in applicable rows follow the actor’s current follow state
   and remain in place while scrolling older notifications.
+- Grouped reaction rows are created from all reaction notifications on the current
+  page for the same drop.
+- Identities without handles can still appear as reactors, but they are omitted from
+  batch follow actions because profile follow requires a handle.
 
 ## Failure and Recovery
 
@@ -110,6 +119,8 @@ scrolling.
 - If fetches fail after rows are already visible, existing rows stay in place
   and the failure is surfaced as toast messaging rather than replacing the feed
   with a full-page error state.
+- If `Follow All` partly succeeds, successful follows apply and a single error toast
+  lists failed requests.
 - If a priority alert has no related drops, the row renders a text-only header
   with timestamp for immediate understanding.
 
@@ -127,8 +138,10 @@ scrolling.
 - During live wave/DM activity, only the currently open thread is auto-marked
   as read; notifications from other threads remain unread until users open those
   threads or review them in `/notifications`.
-- Grouped reaction rows mark their grouped items as read when users open the
-  related drop.
+- Opening a grouped reaction row drop marks all grouped reaction entries in that
+  row as read.
+- Batch follow actions can still partially fail when some profile follow endpoints
+  return errors.
 - Priority alerts render as `sent a priority alert 🚨` and show the first related
   drop when one is present.
 - Priority alert reply/quote actions open the related wave route at the selected
