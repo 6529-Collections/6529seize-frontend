@@ -7,6 +7,7 @@ This covers:
 
 - `500`-style runtime error screens from route, layout, and global error boundaries.
 - `404` screens for missing routes.
+- Optional Sentry error monitoring integration when configured for the environment.
 
 The error screen includes a support contact and optional diagnostics actions for recoverable
 errors.
@@ -21,6 +22,8 @@ errors.
   - Errors inside the main layout wrapper.
 - Manual diagnostic URL for shared route-level errors:
   - `/error?stack=<encoded-message>`
+- Manual Sentry telemetry test page:
+  - `/sentry-example-page` triggers a sample frontend and API error path.
 
 ## Entry Points
 
@@ -38,6 +41,8 @@ errors.
 4. If rendering fails:
    - the app shows the error page with a support email and optional stack trace
      tools.
+   - if monitoring is enabled, the same exception is also sent to the configured
+     Sentry project.
 
 ## Common Scenarios
 
@@ -61,6 +66,12 @@ errors.
   - `Try Again` resets only when reset is available from the active error boundary
     (for example, route and layout errors).
   - Without a reset action, users can refresh, reopen the route, or contact support.
+- Error capture behavior:
+  - Runtime errors displayed in these pages are sent to Sentry when
+    `SENTRY_DSN` is configured.
+  - If browser/network restrictions prevent outbound Sentry requests, the error
+    UI still appears and users can recover normally, but external reporting may be
+    delayed or unavailable.
 
 ## Edge Cases
 
@@ -76,6 +87,7 @@ errors.
 - The page does not render home or back links.
 - Support contact shown on error screens is:
   - `support@6529.io`.
+- No user-facing change is made when Sentry is disabled (missing `SENTRY_DSN`).
 - Copy behavior is disabled for a short duration after each copy action.
 
 ## Related Pages
