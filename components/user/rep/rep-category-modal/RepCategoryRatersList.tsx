@@ -15,7 +15,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const PAGE_SIZE = 5;
 const STALE_TIME = 5 * 60 * 1000;
@@ -57,8 +57,10 @@ export default function RepCategoryRatersList({
     staleTime: STALE_TIME,
   });
 
-  const raterHandles =
-    ratersPage?.data.map((r) => r.handle).filter(Boolean) ?? [];
+  const raterHandles = useMemo(
+    () => ratersPage?.data.map((r) => r.handle).filter(Boolean) ?? [],
+    [ratersPage]
+  );
 
   const identityQueries = useQueries({
     queries: raterHandles.map((handle) => ({
@@ -72,16 +74,14 @@ export default function RepCategoryRatersList({
     })),
   });
 
-  const identityByHandle = new Map<string, ApiIdentity>();
-  for (const q of identityQueries) {
-    if (q.data) {
-      const key =
-        q.data.handle?.toLowerCase() ??
-        q.data.primary_wallet?.toLowerCase() ??
-        "";
-      if (key) identityByHandle.set(key, q.data);
-    }
-  }
+  const identityByHandle = useMemo(() => {
+    const map = new Map<string, ApiIdentity>();
+    raterHandles.forEach((handle, i) => {
+      const data = identityQueries[i]?.data;
+      if (data) map.set(handle.toLowerCase(), data);
+    });
+    return map;
+  }, [raterHandles, identityQueries]);
 
   const totalPages =
     ratersPage && ratersPage.count > 0
@@ -170,14 +170,14 @@ function RaterRow({
       href={profileLink}
       className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-1 tw-py-3 tw-no-underline tw-transition-colors hover:tw-bg-iron-800/40 tw-rounded-lg"
     >
-      <div className="tw-flex tw-items-center tw-gap-3 tw-min-w-0">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-min-w-0">
         <ProfileAvatar
           pfpUrl={pfpUrl}
           alt={displayHandle}
           size={ProfileBadgeSize.SMALL}
         />
         <div className="tw-flex tw-items-center tw-gap-2 tw-min-w-0">
-          <span className="tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
+          <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-200">
             {displayHandle}
           </span>
           <UserCICAndLevel
@@ -188,7 +188,7 @@ function RaterRow({
       </div>
       <span
         className={`tw-flex-shrink-0 tw-text-sm tw-font-semibold ${
-          rater.rating >= 0 ? "tw-text-green-400" : "tw-text-rose-400"
+          rater.rating >= 0 ? "tw-text-emerald-400" : "tw-text-rose-400"
         }`}
       >
         {rater.rating > 0 ? "+" : ""}

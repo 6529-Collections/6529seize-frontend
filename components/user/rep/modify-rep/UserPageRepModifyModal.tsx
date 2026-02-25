@@ -115,7 +115,7 @@ export default function UserPageRepModifyModal({
                 </div>
                 <div className="tw-h-8 tw-w-px tw-bg-iron-800" />
                 <div>
-                  <div className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+                  <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                     Raters
                   </div>
                   <div className="tw-text-lg tw-font-semibold tw-text-iron-100">
