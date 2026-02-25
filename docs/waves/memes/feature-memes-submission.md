@@ -8,6 +8,9 @@ The Memes submission flow is a three-step modal flow:
 - Artwork.
 - Additional Information.
 
+Before final submit, users can open a read-only preview to see how the submission would
+appear in leaderboard list and gallery cards.
+
 Artists can submit artwork by file upload or by referencing interactive media through
 IPFS or Arweave. The submission flow validates required fields, shows upload,
 signing, and progress states, and only allows completion when all required fields
@@ -43,6 +46,9 @@ from the connected profile’s primary wallet.
 4. If interactive media validates, the preview is shown.
 5. Move to Additional Information and complete required operational inputs.
 6. Open `Preview` to review the draft in full.
+   - Use `Preview` after required fields are valid to open the read-only card preview.
+   - Use `Back to Edit` to return to Additional Information with all current inputs preserved.
+   - Use `Submit Artwork` from preview to complete final submission.
 7. Submit and complete state progression:
    `uploading` → `processing` → `success`.
 8. Open the single-drop view to inspect:
@@ -69,6 +75,10 @@ from the connected profile’s primary wallet.
   - On mobile and small screens, the submission modal stays inside the device viewport and does not expand past visible height.
   - The Artwork step content scrolls internally, so the long form remains usable without leaving the modal or clipping controls.
   - Upload and interactive media areas keep a minimum height on small screens to avoid collapsing controls while a user is selecting files.
+- Previewing:
+  - The `Preview` action is available once additional information fields pass validation.
+  - The preview screen renders leaderboard list and gallery card previews so artists can validate typography, framing, and card structure before submitting.
+  - `Back to Edit` returns to the existing draft so artists can refine copy, media, and metadata quickly.
 - Additional Info: Airdrop Distribution:
   - One distribution row is auto-prefilled from the connected wallet with a total of
     `20` tokens.
@@ -107,6 +117,9 @@ from the connected profile’s primary wallet.
   user explicitly clears URL mode.
 - If interactive hash validation fails, the user stays on the Artwork step until fixed.
 - Switching back to upload restores previously prepared local state.
+- Preview mode behavior:
+  - Card clicks are intentionally non-actionable in preview; it is for layout verification only.
+  - Preview screens use temporary score and rating values to mimic live leaderboard appearance.
 - Very small/mobile viewports:
   - If the content does not fit vertically, the modal content area scrolls while keeping action controls available.
   - Artwork and interactive panels preserve usable height by enforcing minimum panel heights, reducing UI jitter as users tap fields, tabs, and upload controls.
@@ -139,6 +152,8 @@ from the connected profile’s primary wallet.
   file type.
 - If required fields in Additional Information fail validation, `Preview` and `Submit
   Artwork` stay disabled until corrected.
+- If you open Preview and then return to edit, your draft remains in the form state.
+- If the previewed card looks incorrect, return to edit and update fields before submitting.
 - If signing or API submission fails, users can retry from the same submission state.
 - If a required field remains missing (payment, artist text, commentary, or preview
   image), users must correct it before submission can continue.
@@ -160,6 +175,7 @@ from the connected profile’s primary wallet.
   - `Supporting Media`: 4 files max
   - `Preview`: 1 file max
   - `Promo Video`: 1 file max
+- Preview reflects a local draft render and does not indicate final on-chain or ranking results.
 
 ## Related Pages
 
