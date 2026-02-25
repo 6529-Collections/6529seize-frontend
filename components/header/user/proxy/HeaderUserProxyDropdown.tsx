@@ -70,8 +70,12 @@ export default function HeaderUserProxyDropdown({
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
   const onSwitchChain = () => {
-    const nextChain = chains.find((c) => c.id !== chainId);
-    if (nextChain) {
+    if (chains.length < 2) return;
+    const currentIndex = chains.findIndex((c) => c.id === chainId);
+    const nextIndex =
+      currentIndex === -1 ? 0 : (currentIndex + 1) % chains.length;
+    const nextChain = chains[nextIndex];
+    if (nextChain && nextChain.id !== chainId) {
       switchChain({ chainId: nextChain.id });
       onClose();
     }
@@ -203,7 +207,7 @@ export default function HeaderUserProxyDropdown({
                       <FontAwesomeIcon icon={faRepeat} height={16} width={16} />
                       <span>Switch Account</span>
                     </button>
-                    {chains.length > 1 && (
+                    {isConnected && chains.length > 1 && (
                       <button
                         onClick={onSwitchChain}
                         type="button"

@@ -52,8 +52,12 @@ export function getClaimPrimaryStatus({
   manifoldClaim?: Pick<ManifoldClaim, "instanceId" | "location"> | null;
 }): ClaimPrimaryStatus {
   const initializedOnchain = !!manifoldClaim?.instanceId;
-  const hasLocalMetadata = claim.metadata_location != null;
-  const chainMatchesLocal = manifoldClaim?.location === claim.metadata_location;
+  const localMetadata = claim.metadata_location?.trim() ?? "";
+  const hasLocalMetadata = localMetadata.length > 0;
+  const onchainLocation = manifoldClaim?.location?.trim() ?? "";
+  const chainMatchesLocal =
+    onchainLocation.length > 0 && onchainLocation === localMetadata;
+  const isCraftContext = manifoldClaim === undefined;
   const missingLaunchInfo = isMissingRequiredLaunchInfo(claim);
 
   if (claim.media_uploading === true) {
@@ -75,12 +79,19 @@ export function getClaimPrimaryStatus({
   }
 
   if (hasLocalMetadata && !initializedOnchain && !missingLaunchInfo) {
-    return {
-      key: "published",
-      label: "Published",
-      tone: "success",
-      reason: "Published to Arweave and ready for onchain initialization",
-    };
+    return isCraftContext
+      ? {
+          key: "published",
+          label: "Published",
+          tone: "success",
+          reason: "Published to Arweave and ready for onchain initialization",
+        }
+      : {
+          key: "pending_initialization",
+          label: "Pending Initialization",
+          tone: "pending",
+          reason: "Ready to initialize onchain",
+        };
   }
 
   if (!initializedOnchain && missingLaunchInfo === true) {
@@ -89,15 +100,6 @@ export function getClaimPrimaryStatus({
       label: "Pending Initialization — Missing Info",
       tone: "pending",
       reason: "Not onchain yet. Required launch fields are missing",
-    };
-  }
-
-  if (!initializedOnchain && hasLocalMetadata && missingLaunchInfo === false) {
-    return {
-      key: "pending_initialization",
-      label: "Pending Initialization",
-      tone: "pending",
-      reason: "Ready to initialize onchain",
     };
   }
 

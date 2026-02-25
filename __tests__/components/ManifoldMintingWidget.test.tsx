@@ -4,10 +4,15 @@ import { render, screen } from "@testing-library/react";
 
 jest.mock(
   "@/components/manifold-minting/ManifoldMintingConnect",
-  () => (props: any) => {
-    props.onMintFor("0x1");
-    return <div />;
-  }
+  () =>
+    function MockConnect(props: any) {
+      const React = require("react");
+      const onMintFor = props.onMintFor;
+      React.useEffect(() => {
+        onMintFor("0x1");
+      }, [onMintFor]);
+      return <div />;
+    }
 );
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({

@@ -2,6 +2,7 @@
 
 import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
+  MEMES_CONTRACT,
   NULL_ADDRESS,
   NULL_MERKLE,
 } from "@/constants/constants";
@@ -165,7 +166,7 @@ export function useManifoldClaim({
 
   const getMemePhase = useCallback(
     (phase: ManifoldPhase, start: number, end: number) => {
-      if (!areEqualAddresses(contract, contract)) {
+      if (!areEqualAddresses(contract, MEMES_CONTRACT)) {
         return undefined;
       }
 

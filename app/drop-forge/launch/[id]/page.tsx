@@ -12,8 +12,9 @@ export default async function DropForgeLaunchClaimPage({
   params,
 }: Readonly<Props>) {
   const { id } = await params;
-  const claimId = Number.parseInt(id, 10);
-  if (!Number.isFinite(claimId) || claimId < 0) {
+  const isNumericId = /^\d+$/.test(id);
+  const claimId = isNumericId ? Number(id) : Number.NaN;
+  if (!Number.isSafeInteger(claimId) || claimId < 0) {
     return (
       <main className={`${styles["main"]} tailwind-scope`}>
         <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">

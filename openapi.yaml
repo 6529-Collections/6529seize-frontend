@@ -2182,8 +2182,7 @@ paths:
           required: true
           description: Wallet address
           schema:
-            type: string
-            pattern: ^0x[a-fA-F0-9]{40}$
+            $ref: "#/components/schemas/ApiEthereumAddress"
       responses:
         "200":
           description: successful operation
@@ -8093,6 +8092,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiEthereumAddress:
+      type: string
+      pattern: ^0x[a-fA-F0-9]{40}$
     ApiFeedItem:
       type: object
       required:
@@ -9807,11 +9809,11 @@ components:
         distribution_admin_wallets:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/ApiEthereumAddress"
         claims_admin_wallets:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/ApiEthereumAddress"
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id

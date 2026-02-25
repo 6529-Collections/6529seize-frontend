@@ -20,7 +20,8 @@ import {
 import { Capacitor } from "@capacitor/core";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Chain, mainnet, sepolia } from "viem/chains";
+import type { Chain } from "viem";
+import { mainnet, sepolia } from "viem/chains";
 import { WagmiProvider } from "wagmi";
 
 /**

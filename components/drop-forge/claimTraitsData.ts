@@ -28,10 +28,14 @@ function normalizeTraitPrimitive(
 ): TraitPrimitive {
   const normalizeBooleanValue = (rawValue: unknown): boolean => {
     if (typeof rawValue === "boolean") return rawValue;
+    if (rawValue === 1) return true;
+    if (rawValue === 0) return false;
     if (typeof rawValue === "string") {
       const normalized = rawValue.trim().toLowerCase();
       if (normalized === "yes" || normalized === "true") return true;
       if (normalized === "no" || normalized === "false") return false;
+      if (normalized === "1") return true;
+      if (normalized === "0") return false;
     }
     return Boolean(rawValue);
   };

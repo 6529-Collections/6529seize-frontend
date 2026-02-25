@@ -2,7 +2,6 @@
 
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
@@ -10,13 +9,11 @@ import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import { areEqualAddresses } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useIsDropForgeAdmin } from "@/hooks/useIsDropForgeAdmin";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -47,10 +44,8 @@ const WebSidebarNav = React.forwardRef<
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
-  const { address } = useSeizeConnectContext();
-  const { seizeSettings } = useSeizeSettings();
   const { appWalletsSupported } = useAppWallets();
-  const { isDropForgeAdmin } = useIsDropForgeAdmin();
+  const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );
@@ -76,23 +71,6 @@ const WebSidebarNav = React.forwardRef<
     () => setIsSearchOpen(true),
     { event: "keydown" }
   );
-
-  const showDropForge = useMemo(() => {
-    if (!address) return false;
-    if (
-      seizeSettings.distribution_admin_wallets.some((w) =>
-        areEqualAddresses(w, address)
-      )
-    )
-      return true;
-    if (
-      seizeSettings.claims_admin_wallets.some((w) =>
-        areEqualAddresses(w, address)
-      )
-    )
-      return true;
-    return isDropForgeAdmin;
-  }, [address, isDropForgeAdmin, seizeSettings]);
 
   const allSections = useSidebarSections(
     appWalletsSupported,

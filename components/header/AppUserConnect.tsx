@@ -26,8 +26,12 @@ export default function AppUserConnect({
   const qrScanner = <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />;
 
   const onSwitchChain = () => {
-    const nextChain = chains.find((c) => c.id !== chainId);
-    if (nextChain) {
+    if (chains.length < 2) return;
+    const currentIndex = chains.findIndex((c) => c.id === chainId);
+    const nextIndex =
+      currentIndex === -1 ? 0 : (currentIndex + 1) % chains.length;
+    const nextChain = chains[nextIndex];
+    if (nextChain && nextChain.id !== chainId) {
       switchChain({ chainId: nextChain.id });
     }
   };

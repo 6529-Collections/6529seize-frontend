@@ -115,6 +115,11 @@ export function initializeAppKit(
  * Builds the AppKit configuration object
  */
 function buildAppKitConfig(adapter: WagmiAdapter, chains: Chain[]) {
+  if (chains.length === 0) {
+    throw new Error(
+      "AppKit initialization requires at least one configured chain."
+    );
+  }
   return {
     adapters: [adapter] as ChainAdapter[],
     networks: chains as [AppKitNetwork, ...AppKitNetwork[]],

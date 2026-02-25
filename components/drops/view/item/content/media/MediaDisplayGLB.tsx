@@ -51,10 +51,20 @@ export default function MediaDisplayGLB({
   }, [isActive, hasTouchScreen]);
 
   useEffect(() => {
-    if (disableMediaInteractions) return;
-    if (!modelRef.current) return;
+    if (disableMediaInteractions) {
+      setIsActive(false);
+      if (modelRef.current) {
+        modelRef.current.removeAttribute("camera-controls");
+      }
+      return;
+    }
+    const modelViewer = modelRef.current;
+    if (!modelViewer) return;
     setIsActive(true);
-    modelRef.current.setAttribute("camera-controls", "");
+    modelViewer.setAttribute("camera-controls", "");
+    return () => {
+      modelViewer.removeAttribute("camera-controls");
+    };
   }, [disableMediaInteractions, src]);
 
   const handleCubeToggle = (e: React.MouseEvent) => {

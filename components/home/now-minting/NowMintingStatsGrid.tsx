@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/auth/Auth";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   formatClaimCost,
@@ -22,13 +23,14 @@ export default function NowMintingStatsGrid({
   floorPrice,
 }: NowMintingStatsGridProps) {
   const { claim: manifoldClaim } = useDropForgeManifoldClaim(nftId);
+  const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;
   const isStatusLoading = !manifoldClaim;
 
   const { connectedProfile } = useAuth();
   const { balance, isLoading: isBalanceLoading } = useNftBalance({
     consolidationKey: connectedProfile?.consolidation_key ?? null,
-    contract: MEMES_CONTRACT,
+    contract: contract ?? MEMES_CONTRACT,
     tokenId: nftId,
   });
 

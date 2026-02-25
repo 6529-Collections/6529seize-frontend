@@ -83,28 +83,55 @@ export async function getMemesMintingRoots(
 
 export interface MemesMintingAirdropSummaryItem {
   phase: string;
-  addresses: number;
-  total: number;
+  addresses?: number;
+  total?: number;
   // Backward-compat for older backend payloads.
   addresses_count?: number;
   total_airdrops?: number;
   total_spots?: number;
 }
 
+export interface NormalizedMemesMintingAirdropSummaryItem
+  extends MemesMintingAirdropSummaryItem {
+  addresses: number;
+  total: number;
+}
+
+function toFiniteNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeAirdropSummary(
+  item: MemesMintingAirdropSummaryItem
+): NormalizedMemesMintingAirdropSummaryItem {
+  return {
+    ...item,
+    phase: String(item.phase ?? ""),
+    addresses: toFiniteNumber(item.addresses ?? item.addresses_count, 0),
+    total: toFiniteNumber(
+      item.total ?? item.total_airdrops ?? item.total_spots,
+      0
+    ),
+  };
+}
+
 export async function getMemesMintingAirdrops(
   cardId: number
-): Promise<MemesMintingAirdropSummaryItem[]> {
-  return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
+): Promise<NormalizedMemesMintingAirdropSummaryItem[]> {
+  const rows = await commonApiFetch<MemesMintingAirdropSummaryItem[]>({
     endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/airdrops`,
   });
+  return rows.map(normalizeAirdropSummary);
 }
 
 export async function getMemesMintingAllowlists(
   cardId: number
-): Promise<MemesMintingAirdropSummaryItem[]> {
-  return commonApiFetch<MemesMintingAirdropSummaryItem[]>({
+): Promise<NormalizedMemesMintingAirdropSummaryItem[]> {
+  const rows = await commonApiFetch<MemesMintingAirdropSummaryItem[]>({
     endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/allowlists`,
   });
+  return rows.map(normalizeAirdropSummary);
 }
 
 export async function getMemesMintingProofsByAddress(

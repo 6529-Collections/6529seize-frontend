@@ -11,7 +11,7 @@ import {
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { Chain } from "viem/chains";
+import { Chain, mainnet } from "viem/chains";
 import type { CreateConnectorFn } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
 import type { AppWallet } from "../app-wallets/AppWalletsContext";
@@ -45,9 +45,14 @@ export class AppKitAdapterManager {
 
   createAdapter(
     appWallets: AppWallet[],
-    isCapacitor: boolean,
-    chains: Chain[]
+    isCapacitor = false,
+    chains: Chain[] = [mainnet]
   ): WagmiAdapter {
+    if (!Array.isArray(chains) || chains.length === 0) {
+      throw new AdapterError(
+        "ADAPTER_021: chains must be a non-empty array"
+      );
+    }
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_007: appWallets must be an array");
     }
@@ -146,8 +151,8 @@ export class AppKitAdapterManager {
 
   createAdapterWithCache(
     appWallets: AppWallet[],
-    isCapacitor: boolean,
-    chains: Chain[]
+    isCapacitor = false,
+    chains: Chain[] = [mainnet]
   ): WagmiAdapter {
     if (!Array.isArray(appWallets)) {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");

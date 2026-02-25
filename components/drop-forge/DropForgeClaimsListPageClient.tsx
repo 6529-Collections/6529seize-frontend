@@ -22,7 +22,7 @@ import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const CARD_CLASS =
   "tw-flex tw-min-h-[7rem] tw-rounded-xl tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-800 hover:tw-ring-iron-600 tw-p-4 sm:tw-p-5 tw-no-underline tw-transition-all tw-duration-300";
@@ -174,21 +174,26 @@ export default function DropForgeClaimsListPageClient({
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const latestRequestId = useRef(0);
 
   const fetchPage = useCallback(
     async (p: number) => {
+      const requestId = ++latestRequestId.current;
       setLoading(true);
       setError(null);
       try {
         const res = await getClaimsPage(p, CRAFT_CLAIMS_PAGE_SIZE);
+        if (requestId !== latestRequestId.current) return;
         setData(res);
       } catch (e) {
+        if (requestId !== latestRequestId.current) return;
         const msg = e instanceof Error ? e.message : "Failed to load claims";
         setError(msg);
         if (msg.toLowerCase() !== "not authorized") {
           setToast({ message: msg, type: "error" });
         }
       } finally {
+        if (requestId !== latestRequestId.current) return;
         setLoading(false);
       }
     },
