@@ -27,9 +27,9 @@ The homepage now-minting section uses multi-card placeholders while its data is 
 ## User Journey
 
 1. Open `/`.
-2. The page renders the hero header and latest-drop area.
-3. The hero header displays the brand label and primary headline without a descriptive subtitle line.
-4. The latest-drop block loads mint state, countdown, and action surfaces as defined by its current state.
+2. The hero header displays the brand label and primary headline without a descriptive subtitle line.
+3. The latest-drop block loads mint state, countdown, and action surfaces as defined by its current state.
+4. The `NEXT MINT` tile in the latest-drop block shows the next scheduled mint start date and time from the shared mint schedule in local timezone.
 5. The informational center text and quote block render after latest-drop.
 6. The Coming up section loads the next queued card set and current leaders.
 7. Boosted Drops renders a capped set of boosted cards from the global boosted-feed source.
@@ -59,6 +59,7 @@ The homepage now-minting section uses multi-card placeholders while its data is 
 ## Edge Cases
 
 - Latest-drop loading or errors continue to be handled in the existing Now Minting surfaces.
+- On the `/` latest-drop card, the `NEXT MINT` timestamp can differ from the displayed card’s created-at value because it is derived from the shared mint schedule.
 - If boosted-feed data is unavailable or empty, the Boosted Drops section is omitted.
 - If hot-waves data is unavailable or empty, Explore Waves is omitted.
 - If the network request errors for Explore Waves, that section is omitted rather than rendering a persistent error card.
