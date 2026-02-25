@@ -8,6 +8,8 @@ time. It supports two modes:
 - Single-block prediction for one target timestamp.
 - Inclusion-based prediction for blocks that include selected number sequences
   within a time window.
+- Result rows can open details with copy actions and Etherscan countdown links
+  for matching blocks.
 
 ## Location in the Site
 
@@ -30,7 +32,9 @@ time. It supports two modes:
 5. Select `Submit`.
 6. Review either the single closest predicted block or the grouped inclusion
    results table, depending on inputs.
-7. Open a block on Etherscan or copy block values from the row-detail modal.
+7. Open an inclusion result row to view matched blocks in a details modal.
+8. Use the copy icon for a block value (the UI confirms with `Copied`) or open
+   the Etherscan countdown link for that block.
 
 ## Common Scenarios
 
@@ -42,6 +46,8 @@ time. It supports two modes:
   counts.
 - Open a result row to view all matching blocks and copy individual block
   numbers.
+- Use the block detail links to move from predicted values to Etherscan
+  verification.
 
 ## Edge Cases
 
@@ -52,14 +58,17 @@ time. It supports two modes:
 - The maximum built-in window is `2 days`.
 - Inclusion-mode responses can return an empty list; in that case no table rows
   appear.
+- The details modal appears only after selecting an inclusion-results row.
 
 ## Failure and Recovery
 
 - `Submit` remains disabled until both date and time are filled.
-- If prediction requests fail, loading stops and prior results remain cleared;
-  users can retry with the same inputs.
-- The page does not render an inline API-failure panel; retrying the request is
-  the primary recovery path.
+- Requests use `/other/predict-block-number` (single prediction) and
+  `/other/predict-block-numbers` (inclusion mode).
+- If either request fails, loading stops and results remain empty for that
+  submit attempt.
+- The page does not render an inline API-failure panel or toast for request
+  failures; retrying (or refreshing and retrying) is the primary recovery path.
 
 ## Limitations / Notes
 
@@ -68,6 +77,8 @@ time. It supports two modes:
 - Inclusion mode supports numeric sequence matching only (no wildcard or range
   syntax).
 - The tool documents and links the canonical path `/tools/block-finder`.
+- Troubleshooting often requires checking backend health for the two prediction
+  endpoints above.
 
 ## Related Pages
 

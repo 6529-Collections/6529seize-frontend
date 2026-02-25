@@ -17,18 +17,31 @@ to create wave drops with embedded media using multipart upload.
 - Open `/tools/api` directly.
 - Open the external API reference from the link on the page.
 
+## Terminology Snapshot
+
+The page includes a key-terminology glossary used by the examples and endpoint
+descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
+`Groups`, `REP`, and `NIC`.
+
 ## User Journey
 
 1. Open `/tools/api` and review terminology used across API endpoints.
 2. Follow the authentication flow: request nonce, sign it with wallet, submit
-   signature, and receive a bearer token. Both EOA and Safe (contract) wallets
-   are supported for this signature step.
-3. Use that token for protected API requests.
-4. For media drops, start multipart upload with file name and MIME type.
-5. Request signed upload URLs for each part and upload file bytes.
-6. Collect ETags from each successful part upload.
-7. Complete multipart upload to receive a media URL.
-8. Submit drop payload with the media URL and target `wave_id`.
+   signature, and receive a bearer token.
+3. In the auth example, include `short_nonce=true` on nonce request, read
+   `nonce` and `server_signature` from that nonce response, then submit the
+   signed payload to login with `server_signature`.
+4. Use that token for protected API requests.
+5. For media drops, start multipart upload (`/api/drop-media/multipart-upload`)
+   with file name and MIME type.
+6. Request signed upload URLs for each part
+   (`/api/drop-media/multipart-upload/part`) using `upload_id`, `key`, and
+   `part_no`, then upload file bytes.
+7. Collect ETags from each successful part upload and keep only valid values.
+8. Complete multipart upload (`/api/drop-media/multipart-upload/completion`)
+   with `upload_id`, `key`, and `parts` to receive a `media_url`.
+9. Submit drop payload with the `media_url` and target `wave_id` (replace the
+   example placeholder before sending).
 
 ## Common Scenarios
 
@@ -38,13 +51,13 @@ to create wave drops with embedded media using multipart upload.
 - Upload larger media as multiple parts by repeating part URL retrieval and
   upload steps before completion.
 - Use the page examples as a starting point for scripting with Node.js.
+- Use the glossary section first when mapping API terms to UI concepts.
 
 ## Edge Cases
 
 - Non-standard file extensions can resolve to a generic content type, which may
   affect downstream media behavior.
-- Safe and contract-wallet signatures are accepted during auth where signatures do
-  not follow the short EOA format.
+- Auth examples explicitly warn against hardcoding private keys.
 - Multipart completion requires matching ETags for every uploaded part; missing
   values block completion.
 - Drop creation requires a valid target `wave_id`; placeholder values must be
@@ -56,6 +69,8 @@ to create wave drops with embedded media using multipart upload.
 
 - If nonce/login requests fail, token generation does not complete; retry after
   confirming wallet address and signature flow.
+- If nonce response fields are incomplete (for example missing
+  `server_signature`), rerun the nonce/sign/login sequence with fresh values.
 - If part upload fails, retry that part and keep the ETag returned by the
   successful upload response.
 - If authentication is retried from the same session, request a fresh nonce and
