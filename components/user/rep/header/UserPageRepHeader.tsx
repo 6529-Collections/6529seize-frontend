@@ -12,7 +12,7 @@ import {
   sortRepsByRatingAndContributors,
 } from "../UserPageRep.helpers";
 
-const TOP_REPS_COUNT = 4;
+const TOP_REPS_COUNT = 5;
 
 export default function UserPageRepHeader({
   repRates,
@@ -145,7 +145,7 @@ export default function UserPageRepHeader({
                     <TopRaterAvatars
                       handleOrWallet={profile.handle ?? ""}
                       category={rep.category}
-                      count={3}
+                      count={5}
                     />
                     <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
                       {formatNumberWithCommas(rep.contributor_count)}{" "}
