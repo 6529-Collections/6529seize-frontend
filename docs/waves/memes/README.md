@@ -6,7 +6,7 @@ Memes docs focus on artwork submission behavior for meme-type waves.
 
 ## Features
 
-- [Memes Submission Workflows](feature-memes-submission.md): submit artwork via file upload or interactive HTML, and complete required additional info before posting.
+- [Memes Submission Workflows](feature-memes-submission.md): submit artwork via file upload or interactive HTML, including distribution, payment, and allowlist fields in the additional information step.
 
 ## Flows
 
