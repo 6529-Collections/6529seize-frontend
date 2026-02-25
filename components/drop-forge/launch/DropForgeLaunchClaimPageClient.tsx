@@ -1229,6 +1229,12 @@ export default function DropForgeLaunchClaimPageClient({
       runClaimWriteForPhase,
     });
   }, [selectedPhaseConfig, runClaimWriteForPhase, isInitialized]);
+  const selectedPhasePriceValue =
+    selectedPhase ? (phasePricesEth[selectedPhase] ?? "") : "";
+  const selectedPhaseWindowStartValue =
+    selectedPhase ? (phaseAllowlistWindows[selectedPhase]?.start ?? "") : "";
+  const selectedPhaseWindowEndValue =
+    selectedPhase ? (phaseAllowlistWindows[selectedPhase]?.end ?? "") : "";
 
   useEffect(() => {
     if (claimWrite.error) {
@@ -1329,21 +1335,13 @@ export default function DropForgeLaunchClaimPageClient({
         selectedPhaseDiffs={selectedPhaseDiffs}
         changedFieldBoxClassName={changedFieldBoxClassName}
         changedFieldBoxLabelClassName={changedFieldBoxLabelClassName}
-        selectedPhasePriceValue={
-          selectedPhase ? (phasePricesEth[selectedPhase] ?? "") : ""
-        }
+        selectedPhasePriceValue={selectedPhasePriceValue}
         onSelectedPhasePriceChange={handleSelectedPhasePriceChange}
         isPublicPhaseSelected={isPublicPhaseSelected}
         rootsLoading={rootsLoading}
         selectedPhaseConfig={selectedPhaseConfig}
-        selectedPhaseWindowStartValue={
-          selectedPhase
-            ? (phaseAllowlistWindows[selectedPhase]?.start ?? "")
-            : ""
-        }
-        selectedPhaseWindowEndValue={
-          selectedPhase ? (phaseAllowlistWindows[selectedPhase]?.end ?? "") : ""
-        }
+        selectedPhaseWindowStartValue={selectedPhaseWindowStartValue}
+        selectedPhaseWindowEndValue={selectedPhaseWindowEndValue}
         onSelectedPhaseStartChange={handleSelectedPhaseStartChange}
         onSelectedPhaseEndChange={handleSelectedPhaseEndChange}
         selectedPhaseActionDisabled={selectedPhaseActionDisabled}

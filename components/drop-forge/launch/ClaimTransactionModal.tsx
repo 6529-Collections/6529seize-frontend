@@ -26,12 +26,12 @@ export default function ClaimTransactionModal({
   chain: Chain;
   onClose: () => void;
 }>) {
+  const titleId = useId();
   if (!state) return null;
 
   const closable = state.status === "success" || state.status === "error";
   const txUrl = state.txHash ? getTransactionLink(chain.id, state.txHash) : null;
   const modalTitle = state.actionLabel ?? "Onchain Action";
-  const titleId = useId();
 
   if (typeof document === "undefined") return null;
 
@@ -48,11 +48,17 @@ export default function ClaimTransactionModal({
       ) : (
         <div className="tw-absolute tw-inset-0" aria-hidden="true" />
       )}
-      <div
-        role="dialog"
+      <dialog
+        open
         aria-modal="true"
         aria-labelledby={titleId}
-        className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
+        onCancel={(event) => {
+          event.preventDefault();
+          if (closable) {
+            onClose();
+          }
+        }}
+        className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
       >
         <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
           <h2
@@ -165,7 +171,7 @@ export default function ClaimTransactionModal({
             </div>
           ) : null}
         </div>
-      </div>
+      </dialog>
     </div>,
     document.body
   );
