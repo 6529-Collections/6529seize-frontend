@@ -43,6 +43,10 @@ paragraph.
   code-style presentation instead of collapsing into plain paragraph text.
 - Wave mention tokens like `#[wave_name]` render as inline links to
   `/waves?wave=<wave_id>` when wave mention metadata is present.
+- Mention links can include a small wave avatar icon inline when wave profile picture
+  metadata is available.
+- On hover-capable devices, these links can open a wave summary card that
+  includes the wave name, author, and drop/joined metrics.
 - Consecutive blank lines in markdown remain visually separated instead of
   collapsing into a single paragraph break.
 - In memes wave leaderboard, participation, and winner cards, newline breaks in
@@ -61,6 +65,8 @@ paragraph.
   `https://` links become directly tappable in the post body.
 - `#[name]` tokens without matching wave metadata remain plain text, while matching
   wave mention tokens become tappable links.
+- When plain-text normalization applies, `#[name]` is rendered as `#name` so
+  users can still read the intended keyword even without link metadata.
 - Clicking a linkified URL opens the destination in a new browser tab and uses
   safe `rel` attributes for external navigation.
 - Linkified URLs stop event propagation, so clicking a URL does not trigger
@@ -98,6 +104,7 @@ paragraph.
 - Homepage Explore Waves previews keep URL text non-clickable to preserve compact preview behavior.
 - URLs next to sentence punctuation can still render as clickable links while
   the trailing punctuation remains plain text, preserving the tap target.
+- On touch-only devices, mentions remain inline links without the desktop hover card.
 - After text selection is cleared, click-through behavior returns to normal in
   contexts that support opening drop details from card body clicks.
 - If fullscreen is opened from the image viewer modal, fullscreen targets the

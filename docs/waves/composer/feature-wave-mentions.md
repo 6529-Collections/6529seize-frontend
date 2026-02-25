@@ -9,6 +9,8 @@ Wave composers support two token types for references in post text:
 
 Wave mentions are saved as clickable links after submit, so users can jump to the
 mentioned wave directly from a drop body.
+Mention links show a compact wave icon when one is available and expose a
+hover-triggered summary card on desktop.
 
 ## Location in the Site
 
@@ -35,7 +37,7 @@ mentioned wave directly from a drop body.
 4. The composer inserts a wave mention token in the format `#[wave_name_in_content]`.
 5. Continue editing and submit the drop.
 6. The rendered drop displays that mention as a link that opens the mentioned
-   wave.
+   wave and, on hover-capable devices, opens a wave summary tooltip.
 
 ## Common Scenarios
 
@@ -49,7 +51,9 @@ mentioned wave directly from a drop body.
 - In code blocks, mention suggestions are disabled so `#` and `$` remain literal
   text until users leave code context.
 - `#` suggestions are context-aware; ambiguous or non-matching wave names remain
-  plain text.
+  plain text as `#wave_name_in_content` and do not open as links.
+- When a wave mention is successfully resolved for rendering, it includes a small
+  wave avatar preview inline before the wave name when available.
 - If a wave name includes `]`, it is sanitized on insert so the token remains parseable.
 - If the mention list is not yet available, you can still submit, but only typed
   tokens that match tracked mentions are promoted to links.
@@ -65,6 +69,8 @@ mentioned wave directly from a drop body.
 ## Limitations / Notes
 
 - Wave mentions require matching mention metadata to render as links.
+- Mention links that do not have resolved metadata render inline as plain
+  `#` text and do not use hover cards.
 - `#[name]` tokens now represent wave mentions; they are not used for NFTs.
 - NFT references use the `[...]` pattern with a leading `$` (for example
   `$[pixel-pie]`).
