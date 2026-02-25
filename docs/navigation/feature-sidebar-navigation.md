@@ -49,7 +49,12 @@ separate from the main content column.
 - Opening `Network -> Metrics` to access `Health`, `Definitions`, `Levels`,
   and `Network Stats`.
 - Expanding `Tools` to access delegation routes, API, EMMA, Block Finder, and
-  open data routes, including `Memes Subscriptions`.
+  open data routes, including:
+  - `Network Metrics`
+  - `Rememes`
+  - `Team`
+  - `Royalties`
+  - `Meme Subscriptions`.
 - Opening `Tools -> Delegation Center` to reach
   `/delegation/delegation-center`.
 - Opening `Tools -> EMMA` to reach `/emma` and continue into `/emma/plans`.
@@ -70,7 +75,11 @@ separate from the main content column.
 
 - `Subscriptions`-related links are hidden on iOS when country is not `US`:
   - `Tools -> The Memes Tools -> Subscriptions Report`
+  - `Tools -> Open Data -> Network Metrics`
   - `Tools -> Open Data -> Meme Subscriptions`
+  - `Tools -> Open Data -> Rememes`
+  - `Tools -> Open Data -> Team`
+  - `Tools -> Open Data -> Royalties`
   - `About -> NFTs -> Subscriptions`
 - `App Wallets` appears only when app-wallet support is enabled.
 - `Profile` link in sidebar footer appears only when a wallet is connected.
@@ -127,6 +136,6 @@ separate from the main content column.
 - [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Docs Home](../README.md)
-- [Profile Tabs](../profiles/feature-profile-tabs.md)
-- [Profile Navigation Flow](../profiles/flow-profile-navigation.md)
+- [Profile Tabs](../profiles/navigation/feature-tabs.md)
+- [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Network Index](../network/README.md)

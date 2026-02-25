@@ -68,5 +68,5 @@ tables and list views.
 - [Shared Index](README.md)
 - [NFT Activity Feed](../realtime/feature-nft-activity-feed.md)
 - [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
-- [Profile Stats Tab](../profiles/feature-profile-stats-tab.md)
+- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
 - [Wave Leaderboard Drop States](../waves/leaderboard/feature-drop-states.md)

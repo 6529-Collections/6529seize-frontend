@@ -69,12 +69,12 @@ users can deep-link to a specific profile section.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Header Summary](feature-profile-header-summary.md)
-- [Profile Brain Tab](feature-profile-brain-tab.md)
-- [Profile Identity Statements](feature-profile-identity-statements.md)
-- [Profile Tab Content](feature-profile-tab-content.md)
-- [Profile Stats Tab](feature-profile-stats-tab.md)
-- [Profile Subscriptions Tab](feature-profile-subscriptions-tab.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
+- [Profiles Index](../README.md)
+- [Profile Header Summary](feature-header-summary.md)
+- [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Profile Identity Statements](../tabs/feature-identity-statements.md)
+- [Profile Tab Content](../tabs/feature-tab-content.md)
+- [Profile Stats Tab](../tabs/feature-stats-tab.md)
+- [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
+- [Profile Navigation Flow](flow-navigation.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

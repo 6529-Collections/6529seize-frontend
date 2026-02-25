@@ -14,6 +14,7 @@ This guide documents current user-facing behavior.
 - [Notifications](notifications/README.md): `/notifications` feed behavior and state handling.
 - [API Tool](api-tool/README.md): `/tools/*` user flows, including API guide and Block Finder.
 - [EMMA](emma/README.md): `/emma/*` distribution-plan and custom snapshot behavior.
+- [Open Data](open-data/README.md): `/open-data` data export hub and consolidated network metrics route.
 - [Delegation](delegation/README.md): `/delegation/*` layout and action-route behavior.
 - [Groups](groups/README.md): `/network/groups` browse, filter, and create/edit flows.
 - [Network](network/README.md): TDH rules, metric definitions, and health/network-stats routes.
@@ -39,9 +40,11 @@ This guide documents current user-facing behavior.
 - Understand current TDH calculation and boosters:
   [TDH Boost Rules](network/feature-tdh-boost-rules.md)
 - Understand profile tabs and deep-link behavior:
-  [Profile Tabs](profiles/feature-profile-tabs.md)
+  [Profile Tabs](profiles/navigation/feature-tabs.md)
 - Troubleshoot profile load/tab issues:
-  [Profile Troubleshooting](profiles/troubleshooting-profile-pages.md)
+  [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
+- Move multiple owned cards from a collected profile tab:
+  [Collected Tab and Transfer Controls](profiles/tabs/feature-collected-tab.md)
 - Start with wave creation behavior:
   [Wave Creation Index](waves/create/README.md)
 - Start with wave chat behavior:
@@ -50,23 +53,27 @@ This guide documents current user-facing behavior.
   [Wave Composer Index](waves/composer/README.md)
 - Start with wave drop actions:
   [Wave Drop Actions Index](waves/drop-actions/README.md)
+- Handle mobile app handoff links:
+  [Mobile App Landing Page](navigation/feature-mobile-app-landing.md)
 - Start with wave link previews:
   [Wave Link Previews Index](waves/link-previews/README.md)
 - Start with wave leaderboards:
   [Wave Leaderboard Index](waves/leaderboard/README.md)
 - Start with wave sidebar behavior:
   [Wave Sidebar Index](waves/sidebars/README.md)
+- Start with Memes submission flow:
+  [Memes Submission Workflow](waves/memes/feature-memes-submission.md)
 - Follow The Memes mint behavior:
-  [The Memes Mint Flow](media/feature-the-memes-mint-flow.md)
+  [The Memes Mint Flow](media/memes/feature-mint-flow.md)
 - Understand The Memes countdown states:
-  [Now Minting Countdown](media/feature-now-minting-countdown.md)
+  [Now Minting Countdown](media/memes/feature-now-minting-countdown.md)
 - Review realtime auth/live-update behavior:
   [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
 
 ## Troubleshooting
 
 - Profile pages:
-  [Profile Troubleshooting](profiles/troubleshooting-profile-pages.md)
+  [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
 - Legacy URL behavior:
   [Legacy Route Redirects](shared/feature-legacy-route-redirects.md)
 - Delegation actions with partial docs coverage:

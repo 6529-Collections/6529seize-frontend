@@ -61,9 +61,9 @@ direct-message thread.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Tab Content](feature-profile-tab-content.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
-- [Loading Status Indicators](../shared/feature-loading-status-indicators.md)
+- [Profiles Index](../README.md)
+- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Tab Content](feature-tab-content.md)
+- [Profile Navigation Flow](../navigation/flow-navigation.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

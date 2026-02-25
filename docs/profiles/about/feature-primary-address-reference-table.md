@@ -61,7 +61,7 @@ address differs from the default consolidation outcome.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Delegation Action Flows](../delegation/feature-delegation-action-flows.md)
-- [Docs Home](../README.md)
+- [Profiles Index](../README.md)
+- [Profile Tabs](../navigation/feature-tabs.md)
+- [Delegation Action Flows](../../delegation/feature-delegation-action-flows.md)
+- [Docs Home](../../README.md)

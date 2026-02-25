@@ -15,5 +15,5 @@ metric definitions.
 
 - [Docs Home](../README.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Profile Stats Tab](../profiles/feature-profile-stats-tab.md)
+- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
 - [Groups Index](../groups/README.md)

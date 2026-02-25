@@ -105,9 +105,9 @@ live/upcoming countdown, completion, or error.
 
 ## Related Pages
 
-- [Media Index](README.md)
-- [The Memes Mint Flow](feature-the-memes-mint-flow.md)
-- [Memes Minting Calendar](feature-memes-minting-calendar.md)
-- [NFT Media Source Fallbacks](feature-nft-media-source-fallbacks.md)
-- [NFT Balance Indicators](feature-nft-balance-indicators.md)
-- [Docs Home](../README.md)
+- [Media Index](../README.md)
+- [The Memes Mint Flow](feature-mint-flow.md)
+- [Memes Minting Calendar](feature-minting-calendar.md)
+- [NFT Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)
+- [NFT Balance Indicators](../nft/feature-balance-indicators.md)
+- [Docs Home](../../README.md)

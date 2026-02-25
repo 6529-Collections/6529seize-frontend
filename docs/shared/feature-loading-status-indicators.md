@@ -64,7 +64,7 @@ current speech.
 ## Related Pages
 
 - [Docs Home](../README.md)
-- [Profile Brain Tab](../profiles/feature-profile-brain-tab.md)
+- [Profile Brain Tab](../profiles/tabs/feature-brain-tab.md)
 - [Notifications Feed](../notifications/feature-notifications-feed.md)
 - [Wave Chat Scroll Behavior](../waves/chat/feature-scroll-behavior.md)
 - [NFT Activity Feed](../realtime/feature-nft-activity-feed.md)

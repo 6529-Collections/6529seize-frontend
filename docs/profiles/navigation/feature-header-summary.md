@@ -31,8 +31,10 @@ identity context, quick stats links, and profile actions.
 - Display name priority is handle first, then display name, then wallet-based
   fallback text.
 - The metadata row can show classification and `Profile enabled: <Month Year>`.
-- About text appears when a bio statement exists; profile owners with edit
-  access can still open About editing even without an existing statement.
+- About area is visible when at least one of these is true:
+  - a BIO statement is present in loaded profile data
+  - the viewer can edit the profile, which keeps an empty About panel visible for
+    adding content
 - Viewing someone else's profile while signed in with a handle can show
   `Follow` and direct-message actions.
 - Viewing your own profile with no active proxy context enables profile editing
@@ -51,9 +53,10 @@ identity context, quick stats links, and profile actions.
 ## Failure and Recovery
 
 - If header-side data requests fail, the profile page still loads:
-  - About text can be missing until retry.
   - Profile-enabled date can be omitted.
   - Followers count can fall back to `0`.
+  - About text can reflect the latest successful data request; refresh the route
+    to retry when expected details are missing.
 - If direct-message creation fails, an error toast is shown and users can retry
   the action.
 - If the profile cannot be resolved, users see the `USER OR PAGE` not-found
@@ -68,8 +71,8 @@ identity context, quick stats links, and profile actions.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Tab Content](feature-profile-tab-content.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
+- [Profiles Index](../README.md)
+- [Profile Tabs](feature-tabs.md)
+- [Profile Navigation Flow](flow-navigation.md)
+- [Profile Tab Content](../tabs/feature-tab-content.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

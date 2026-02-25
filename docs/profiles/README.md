@@ -1,25 +1,36 @@
 # Profiles
 
-Profile pages live under `/{user}` and expose tabbed views for identity,
-collections, activity, proxy settings, groups, and follower context.
-Profiles docs also cover the primary-address reference table exposed at
-`/about/primary-address`.
+## Overview
 
-## Pages
+Profiles docs are split into focused subareas so routing, tab behavior,
+about-route references, and troubleshooting can scale without a single
+oversized index.
 
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Header Summary](feature-profile-header-summary.md)
-- [Profile Brain Tab](feature-profile-brain-tab.md)
-- [Profile Identity Statements](feature-profile-identity-statements.md)
-- [Profile Tab Content](feature-profile-tab-content.md)
-- [Profile Stats Tab](feature-profile-stats-tab.md)
-- [Profile Subscriptions Tab](feature-profile-subscriptions-tab.md)
-- [Primary Address Reference Table](feature-primary-address-reference-table.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
+## Features
 
-## Related Pages
+- [Navigation](navigation/README.md): profile route model, tab availability,
+  canonical redirects, and header behavior.
+- [Tabs](tabs/README.md): per-tab behavior for Brain, Identity, Collected,
+  Stats, Subscriptions, plus tab-content coverage tracking.
+- [About](about/README.md): `/about/primary-address` behavior and reference-table
+  expectations.
+
+## Flows
+
+- [Profile Navigation Flow](navigation/flow-navigation.md)
+
+## Troubleshooting
+
+- [Profile Troubleshooting](troubleshooting/troubleshooting-routes-and-tabs.md)
+
+## Stubs
+
+- [Profile Tab Content](tabs/feature-tab-content.md): tracks not-yet-documented
+  behavior for xTDH, Proxy, Groups, Waves, and Followers tabs.
+
+## Related Areas
 
 - [Docs Home](../README.md)
 - [Network Index](../network/README.md)
 - [Shared Index](../shared/README.md)
+- [Waves Index](../waves/README.md)

@@ -1,25 +1,35 @@
 # Media
 
-Media docs cover NFT artwork rendering behavior (including media-source
-fallbacks), signed-in ownership indicators (balance text and badge markers),
-NFT detail-page marketplace shortcut links, 6529 Gradient list sorting/loading
-behavior, The Memes card tab/deep-link behavior, The Memes now-minting
-countdown across supported pages, the dedicated `/the-memes/mint` action flow,
-and the Memes minting calendar route/controls, including fallback next-mint
-panels on unresolved The Memes card/distribution routes.
+## Overview
 
-## Pages
+Media docs are organized into focused subareas for NFT ownership/actions, The
+Memes mint/calendar surfaces, and shared rendering behavior.
 
-- [NFT Media Source Fallbacks](feature-nft-media-source-fallbacks.md)
-- [NFT Balance Indicators](feature-nft-balance-indicators.md)
-- [NFT Marketplace Shortcut Links](feature-nft-marketplace-links.md)
-- [6529 Gradient List Sorting and Loading](feature-6529-gradient-list-sorting-and-loading.md)
-- [The Memes Card Tabs and Focus Links](feature-the-memes-card-tabs-and-focus-links.md)
-- [Now Minting Countdown](feature-now-minting-countdown.md)
-- [The Memes Mint Flow](feature-the-memes-mint-flow.md)
-- [Memes Minting Calendar](feature-memes-minting-calendar.md)
+## Features
 
-## Related Pages
+- [NFT](nft/README.md): ownership indicators, source fallbacks, marketplace
+  shortcuts, and transfer flows.
+- [Memes](memes/README.md): card tabs/deep links, mint flow, countdown, and
+  minting calendar behavior.
+- [Rendering](rendering/README.md): interactive HTML sandbox rendering and 6529
+  Gradient list behavior.
+
+## Flows
+
+- No dedicated flow page documented yet.
+
+## Troubleshooting
+
+- No dedicated troubleshooting page documented yet.
+
+## Stubs
+
+- None.
+
+## Related Areas
 
 - [Docs Home](../README.md)
-- [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
+- [Navigation Index](../navigation/README.md)
+- [Profiles Index](../profiles/README.md)
+- [Waves Index](../waves/README.md)
+- [NextGen Index](../nextgen/README.md)

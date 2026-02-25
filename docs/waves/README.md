@@ -15,6 +15,7 @@ browsable without one oversized index page.
 - [Link Previews](link-previews/README.md): preview-card behavior for external domains/providers.
 - [Leaderboard](leaderboard/README.md): leaderboard states, timeline context, and top-voter lists.
 - [Sidebars](sidebars/README.md): right-sidebar tabs/group management plus Brain/DM sidebar metadata.
+- [Memes](memes/README.md): Memes flow metadata, submission workflow, and leaderboard-related posting behavior.
 
 ## Flows
 

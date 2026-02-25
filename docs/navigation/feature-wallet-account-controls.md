@@ -108,5 +108,5 @@ disconnect, and manage proxy profile context from sidebar user menus.
 
 - [Navigation Index](README.md)
 - [Sidebar Navigation](feature-sidebar-navigation.md)
-- [Profile Navigation Flow](../profiles/flow-profile-navigation.md)
+- [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Docs Home](../README.md)

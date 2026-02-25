@@ -68,8 +68,8 @@ opened.
 
 ## Related Pages
 
-- [Media Index](README.md)
-- [NFT Balance Indicators](feature-nft-balance-indicators.md)
-- [NFT Media Source Fallbacks](feature-nft-media-source-fallbacks.md)
-- [Memes Minting Calendar](feature-memes-minting-calendar.md)
-- [Docs Home](../README.md)
+- [Media Index](../README.md)
+- [NFT Balance Indicators](../nft/feature-balance-indicators.md)
+- [NFT Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)
+- [Memes Minting Calendar](feature-minting-calendar.md)
+- [Docs Home](../../README.md)

@@ -108,5 +108,5 @@ one shared results panel, with `All` previews and per-category filtering tabs.
 - [Navigation Index](README.md)
 - [Sidebar Navigation](feature-sidebar-navigation.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
-- [Profile Navigation Flow](../profiles/flow-profile-navigation.md)
+- [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Docs Home](../README.md)

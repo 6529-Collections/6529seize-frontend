@@ -78,8 +78,11 @@ profile link lands somewhere unexpected.
     indicates no data for the current filters or a failed fetch; refresh and
     retry.
 - Header summary data:
-  - If About text, followers count, or profile-enabled date looks stale or
-    incomplete, refresh the route to retry header-side data requests.
+  - If followers count or profile-enabled date looks stale or incomplete, refresh
+    the route to retry header-side data requests.
+  - If About text is missing on a profile you cannot edit, verify the profile has
+    a BIO statement and refresh the route if a recent profile update should be
+    visible.
 - Subscriptions tab:
   - If a save action fails, settings remain unchanged and an error toast is
     shown; re-authenticate and retry.
@@ -95,8 +98,8 @@ profile link lands somewhere unexpected.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Header Summary](feature-profile-header-summary.md)
-- [Profile Brain Tab](feature-profile-brain-tab.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
+- [Profiles Index](../README.md)
+- [Profile Header Summary](../navigation/feature-header-summary.md)
+- [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Navigation Flow](../navigation/flow-navigation.md)

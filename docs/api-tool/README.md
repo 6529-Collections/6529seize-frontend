@@ -13,5 +13,5 @@ the API guide, Block Finder, and The Memes subscriptions report.
 
 - [Docs Home](../README.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Profile Subscriptions Tab](../profiles/feature-profile-subscriptions-tab.md)
+- [Profile Subscriptions Tab](../profiles/tabs/feature-subscriptions-tab.md)
 - [Waves Index](../waves/README.md)

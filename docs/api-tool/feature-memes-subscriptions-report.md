@@ -65,7 +65,7 @@ redeemed subscription counts for The Memes cards.
 
 - [API Tool Index](README.md)
 - [Block Finder](feature-block-finder.md)
-- [Profile Subscriptions Tab](../profiles/feature-profile-subscriptions-tab.md)
+- [Profile Subscriptions Tab](../profiles/tabs/feature-subscriptions-tab.md)
 - [Pagination Controls](../shared/feature-pagination-controls.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Docs Home](../README.md)

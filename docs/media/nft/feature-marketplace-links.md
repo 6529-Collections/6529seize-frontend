@@ -67,8 +67,8 @@ token IDs.
 
 ## Related Pages
 
-- [Media Index](README.md)
-- [NFT Balance Indicators](feature-nft-balance-indicators.md)
-- [NFT Media Source Fallbacks](feature-nft-media-source-fallbacks.md)
-- [The Memes Card Tabs and Focus Links](feature-the-memes-card-tabs-and-focus-links.md)
-- [Docs Home](../README.md)
+- [Media Index](../README.md)
+- [NFT Balance Indicators](feature-balance-indicators.md)
+- [NFT Media Source Fallbacks](feature-media-source-fallbacks.md)
+- [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
+- [Docs Home](../../README.md)

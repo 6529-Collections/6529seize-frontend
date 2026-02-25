@@ -120,9 +120,9 @@ available yet.
 
 ## Related Pages
 
-- [Media Index](README.md)
-- [The Memes Card Tabs and Focus Links](feature-the-memes-card-tabs-and-focus-links.md)
+- [Media Index](../README.md)
+- [The Memes Card Tabs and Focus Links](feature-card-tabs-and-focus-links.md)
 - [Now Minting Countdown](feature-now-minting-countdown.md)
-- [The Memes Mint Flow](feature-the-memes-mint-flow.md)
-- [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Docs Home](../README.md)
+- [The Memes Mint Flow](feature-mint-flow.md)
+- [Sidebar Navigation](../../navigation/feature-sidebar-navigation.md)
+- [Docs Home](../../README.md)

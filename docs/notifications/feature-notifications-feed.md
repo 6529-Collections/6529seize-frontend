@@ -6,7 +6,8 @@ Parent: [Notifications Index](README.md)
 
 The `/notifications` route shows an authenticated feed of account activity in
 My Stream. The screen first resolves profile/auth readiness, then lets users
-filter by cause, open related drops, and load older notification pages while
+filter by cause, receive and open priority alerts, and load older notification
+pages while
 scrolling.
 
 ## Location in the Site
@@ -37,9 +38,12 @@ scrolling.
    `Invites`) to focus the list.
 7. Review notification rows, including grouped reaction rows labeled
    `New reactions`.
-8. Open drop content to jump to the related wave or direct-message thread.
+8. If a priority alert has a related drop, open that row to view the drop and jump to
+   the drop context.
 9. Scroll upward to load older notifications; older rows are appended without
    replacing already visible content.
+10. If a priority alert has no related drops, review the header text-only entry for
+   who sent the alert and when.
 
 ## Common Scenarios
 
@@ -60,6 +64,12 @@ scrolling.
 - Flick-scrolling on touch devices and continuing through the feed smoothly
   while older rows load.
 - Opening a notification drop and navigating into the relevant wave thread.
+- Seeing a `sent a priority alert 🚨` notification row that includes a full linked
+  drop preview and allows reply/quote actions.
+- Selecting reply/quote controls in a priority alert and opening the related wave with
+  the targeted serial context.
+- Seeing a priority alert notification with no linked drop and still understanding who
+  sent it from the text header.
 - Staying at the newest end of the feed and seeing new rows remain in view
   without manual re-scrolling.
 - Seeing `No notifications found` with `Explore Waves` / `Create a Wave` calls
@@ -79,6 +89,8 @@ scrolling.
   back to the primary profile.
 - If users are not authenticated, the route shows wallet-connect guidance before
   notification content.
+- Priority alerts currently appear in the feed by default and are included in the
+  default `All` scope; they are not grouped under a dedicated cause chip yet.
 
 ## Failure and Recovery
 
@@ -91,6 +103,8 @@ scrolling.
 - If fetches fail after rows are already visible, existing rows stay in place
   and the failure is surfaced as toast messaging rather than replacing the feed
   with a full-page error state.
+- If a priority alert has no related drops, the row renders a text-only header
+  with timestamp for immediate understanding.
 
 ## Limitations / Notes
 
@@ -108,6 +122,10 @@ scrolling.
   threads or review them in `/notifications`.
 - Grouped reaction rows mark their grouped items as read when users open the
   related drop.
+- Priority alerts render as `sent a priority alert 🚨` and show the first related
+  drop when one is present.
+- Priority alert reply/quote actions open the related wave route at the selected
+  serial context and preserve DM routing context.
 
 ## Related Pages
 

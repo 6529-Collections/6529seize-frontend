@@ -76,8 +76,8 @@ asset URL is unavailable.
 
 ## Related Pages
 
-- [Media Index](README.md)
-- [NFT Balance Indicators](feature-nft-balance-indicators.md)
-- [The Memes Card Tabs and Focus Links](feature-the-memes-card-tabs-and-focus-links.md)
-- [Now Minting Countdown](feature-now-minting-countdown.md)
-- [Docs Home](../README.md)
+- [Media Index](../README.md)
+- [NFT Balance Indicators](feature-balance-indicators.md)
+- [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
+- [Now Minting Countdown](../memes/feature-now-minting-countdown.md)
+- [Docs Home](../../README.md)

@@ -68,5 +68,5 @@ render output, and switch to large-resolution downloads with zoom controls.
 
 - [NextGen Index](README.md)
 - [NextGen Collection Slideshow](feature-collection-slideshow.md)
-- [NFT Media Source Fallbacks](../media/feature-nft-media-source-fallbacks.md)
+- [NFT Media Source Fallbacks](../media/nft/feature-media-source-fallbacks.md)
 - [Docs Home](../README.md)

@@ -74,4 +74,4 @@ rules are currently active.
 - [Network Definitions](feature-network-definitions.md)
 - [Health and Network Stats](feature-health-and-network-stats.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Profile Stats Tab](../profiles/feature-profile-stats-tab.md)
+- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)

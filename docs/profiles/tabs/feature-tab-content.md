@@ -17,23 +17,24 @@ and navigation.
 ## Known Behavior
 
 - Shared header behavior for all profile tabs is documented in
-  [Profile Header Summary](feature-profile-header-summary.md).
+  [Profile Header Summary](../navigation/feature-header-summary.md).
 - Brain tab behavior is documented in
-  [Profile Brain Tab](feature-profile-brain-tab.md).
+  [Profile Brain Tab](feature-brain-tab.md).
 - Identity statement behavior is documented in
-  [Profile Identity Statements](feature-profile-identity-statements.md).
-- Identity, Collected, xTDH, Stats, Subscriptions, Proxy, Groups, Waves, and
-  Followers each have their own dedicated tab view.
+  [Profile Identity Statements](feature-identity-statements.md).
+- Identity, xTDH, Stats, Subscriptions, Proxy, Groups, Waves, and Followers each
+  have their own dedicated tab view.
 - Stats tab behavior is documented in
-  [Profile Stats Tab](feature-profile-stats-tab.md).
+  [Profile Stats Tab](feature-stats-tab.md).
 - Subscriptions tab behavior is documented in
-  [Profile Subscriptions Tab](feature-profile-subscriptions-tab.md).
+  [Profile Subscriptions Tab](feature-subscriptions-tab.md).
+- Collected tab behavior is documented in
+  [Profile Collected Tab](feature-collected-tab.md).
 - The `xTDH` tab is currently labeled Beta.
 - Tab availability can vary by runtime context (feature flags/device/country).
 
 ## Not Yet Documented
 
-- TODO: Document filter/sort and pagination behavior for the Collected tab.
 - TODO: Document expected outcomes and limitations for the xTDH tab.
 - TODO: Document proxy-management success/failure flows in the Proxy tab.
 - TODO: Document groups membership and setup flows in the Groups tab.
@@ -42,12 +43,12 @@ and navigation.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Header Summary](feature-profile-header-summary.md)
-- [Profile Brain Tab](feature-profile-brain-tab.md)
-- [Profile Identity Statements](feature-profile-identity-statements.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Stats Tab](feature-profile-stats-tab.md)
-- [Profile Subscriptions Tab](feature-profile-subscriptions-tab.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
+- [Profiles Index](../README.md)
+- [Profile Header Summary](../navigation/feature-header-summary.md)
+- [Profile Brain Tab](feature-brain-tab.md)
+- [Profile Identity Statements](feature-identity-statements.md)
+- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Stats Tab](feature-stats-tab.md)
+- [Profile Subscriptions Tab](feature-subscriptions-tab.md)
+- [Profile Navigation Flow](../navigation/flow-navigation.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

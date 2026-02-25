@@ -98,8 +98,8 @@ and on-chain transaction status updates for the current drop.
 
 ## Related Pages
 
-- [Media Index](README.md)
+- [Media Index](../README.md)
 - [Now Minting Countdown](feature-now-minting-countdown.md)
-- [Memes Minting Calendar](feature-memes-minting-calendar.md)
-- [The Memes Card Tabs and Focus Links](feature-the-memes-card-tabs-and-focus-links.md)
-- [Docs Home](../README.md)
+- [Memes Minting Calendar](feature-minting-calendar.md)
+- [The Memes Card Tabs and Focus Links](feature-card-tabs-and-focus-links.md)
+- [Docs Home](../../README.md)

@@ -18,14 +18,16 @@ events, so it does not roll back to an older time after newer activity appears.
 ## User Journey
 1. The sidebar loads wave metadata and renders `Last drop: ... ago` for entries
    with timestamps.
-2. When a new drop arrives from live events, the label updates to that newer
-   timestamp.
+2. When a new drop or refresh updates a wave timestamp, the label recalculates
+   immediately to the newest value and keeps counting elapsed time.
 3. As users move between views, each wave row keeps showing the latest known
    drop time for quick triage before opening the wave.
 
 ## Common Scenarios
 - A new drop arrives while Brain is open: unread badges increase and `Last
   drop` updates immediately.
+- Wave data refreshes with a newer timestamp while the row is already visible: the
+  `Last drop` value updates right away, then continues to advance each minute.
 - A pinned wave updates from another participant: the list entry shows the newer
   time without waiting for a full reload.
 - DM waves receive new messages: DM list entries follow the same `Last drop`
@@ -36,6 +38,8 @@ events, so it does not roll back to an older time after newer activity appears.
   and never regresses to an older timestamp.
 - Server data has no timestamp but a live event has one: the label still appears
   from the live event value.
+- Repeated renders with unchanged timestamps refresh elapsed time once per minute so
+  users see the wording evolve (`5m ago`, `6m ago`) without leaving the page.
 - Server refresh and live updates overlap: the label reflects whichever timestamp
   is newest.
 

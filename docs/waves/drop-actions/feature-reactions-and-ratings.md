@@ -7,6 +7,9 @@ controls. Reaction and rating changes appear immediately on the drop while the
 request is in flight, then stay if the request succeeds or roll back if it
 fails.
 
+Only full-size drop cards expose enabled reaction and rating actions. Light
+compact drop cards and temporary unsent drops keep those controls disabled.
+
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
@@ -51,6 +54,8 @@ fails.
 ## Edge Cases
 
 - Temporary (unsent) drops disable reaction and rating actions.
+- Light compact drops disable reaction and rating actions; only full drops can
+  be reacted to.
 - On touch devices, long press opens reaction details instead of toggling.
 - If a reaction count reaches zero after removal, that reaction chip disappears.
 - Rating controls clamp to each drop's allowed min/max range.

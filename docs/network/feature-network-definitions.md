@@ -59,4 +59,4 @@ stats and network pages.
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
 - [Health and Network Stats](feature-health-and-network-stats.md)
-- [Profile Stats Tab](../profiles/feature-profile-stats-tab.md)
+- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)

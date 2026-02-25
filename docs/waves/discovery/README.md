@@ -24,4 +24,4 @@ Discovery docs cover how users find and browse waves before entering a thread.
 ## Related Areas
 
 - [Waves Index](../README.md)
-- [Profile Navigation Flow](../../profiles/flow-profile-navigation.md)
+- [Profile Navigation Flow](../../profiles/navigation/flow-navigation.md)

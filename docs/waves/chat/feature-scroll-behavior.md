@@ -2,10 +2,12 @@
 
 ## Overview
 
-Wave chat keeps users anchored to the newest messages when they are already at
-the bottom, while avoiding forced jumps when they scroll away to read older
-content. When users jump to a specific drop serial, chat also briefly
-highlights the targeted drop so it is easier to locate in the list.
+Wave chat keeps users anchored to the newest messages when they are already at the
+bottom, while avoiding forced jumps when they scroll away to read older content.
+On Apple mobile clients, newly arrived messages can be queued as pending while
+users continue reading older messages.
+When users jump to a specific drop serial, chat also briefly highlights the
+targeted drop so it is easier to locate in the list.
 
 ## Location in the Site
 
@@ -27,14 +29,17 @@ highlights the targeted drop so it is easier to locate in the list.
 1. Open a wave or direct-message thread.
 2. The chat loads newest messages first and shows the list bottom as the live
    point.
-3. Scroll upward to read older messages; older pages load as you reach the top
-   of the loaded list.
+3. Scroll upward to read older messages; older pages load as you reach the top of
+   the loaded list.
 4. If you are pinned to the bottom, incoming temporary posts keep the view at
    the newest message.
-5. If you are reading older content, chat avoids snapping you back; you can
-   return to the latest messages with the bottom control.
+5. If you are reading older content, chat stays at your reading position instead
+   of auto-jumping.
 6. If the thread opens (or jumps) to a targeted serial number, chat scrolls to
    that drop and applies a temporary highlight that fades out.
+7. On Apple mobile clients, when you are not at the bottom and new messages
+   arrive, a counter appears on the bottom control and tapping it reveals pending
+   messages, then re-pins to latest.
 
 ## Common Scenarios
 
@@ -49,6 +54,8 @@ highlights the targeted drop so it is easier to locate in the list.
 - On Apple mobile clients, newly arrived messages can be held behind a pending
   counter; tapping the bottom control reveals them and re-pins to latest.
 - If pending message count is large, the control label caps at `99+`.
+- While reading older content on Apple mobile, the most recently visible serial
+  remains visible while newer serials queue as pending.
 
 ## Edge Cases
 
@@ -70,8 +77,8 @@ highlights the targeted drop so it is easier to locate in the list.
   can retry by scrolling again or refreshing.
 - If a targeted jump/scroll operation stalls, the temporary scrolling overlay
   clears automatically and normal chat interactions continue.
-- In environments with limited browser observer support, serial-target jumps
-  still complete and targeted-drop highlighting remains temporary.
+- In environments with limited browser observer support, serial-target jumps still
+  complete and targeted-drop highlighting remains temporary.
 
 ## Limitations / Notes
 
@@ -88,5 +95,5 @@ highlights the targeted drop so it is easier to locate in the list.
 - [Wave Drop Open and Copy Links](../drop-actions/feature-open-and-copy-links.md)
 - [Wave Chat Typing Indicator](feature-typing-indicator.md)
 - [Profiles Index](../../profiles/README.md)
-- [Profile Brain Tab](../../profiles/feature-profile-brain-tab.md)
+- [Profile Brain Tab](../../profiles/tabs/feature-brain-tab.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

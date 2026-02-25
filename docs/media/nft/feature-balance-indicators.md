@@ -89,7 +89,7 @@ balance text can still show a badge-based ownership marker.
 
 ## Related Pages
 
-- [Media Index](README.md)
-- [The Memes Card Tabs and Focus Links](feature-the-memes-card-tabs-and-focus-links.md)
-- [NFT Media Source Fallbacks](feature-nft-media-source-fallbacks.md)
-- [Docs Home](../README.md)
+- [Media Index](../README.md)
+- [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
+- [NFT Media Source Fallbacks](feature-media-source-fallbacks.md)
+- [Docs Home](../../README.md)

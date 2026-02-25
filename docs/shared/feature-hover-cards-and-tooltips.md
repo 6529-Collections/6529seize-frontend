@@ -77,4 +77,4 @@ card is open.
 - [Wave Discover Cards](../waves/discovery/feature-discover-cards.md)
 - [Brain Wave List Name Tooltips](../waves/sidebars/feature-brain-list-name-tooltips.md)
 - [Health and Network Stats](../network/feature-health-and-network-stats.md)
-- [Profile Stats Tab](../profiles/feature-profile-stats-tab.md)
+- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)

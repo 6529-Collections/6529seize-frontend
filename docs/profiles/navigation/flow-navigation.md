@@ -57,11 +57,11 @@ and what happens when the current route is not canonical.
 - Visibility rules are evaluated at runtime, so the same profile can expose
   different tab sets on different devices or contexts.
 - Deep links are stable for the supported tab routes listed in
-  [Profile Tabs](feature-profile-tabs.md).
+  [Profile Tabs](feature-tabs.md).
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Header Summary](feature-profile-header-summary.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
+- [Profiles Index](../README.md)
+- [Profile Header Summary](feature-header-summary.md)
+- [Profile Tabs](feature-tabs.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

@@ -69,4 +69,4 @@ can differ.
 - [Docs Home](../README.md)
 - [Shared Index](README.md)
 - [Loading Status Indicators](feature-loading-status-indicators.md)
-- [NFT Media Source Fallbacks](../media/feature-nft-media-source-fallbacks.md)
+- [NFT Media Source Fallbacks](../media/nft/feature-media-source-fallbacks.md)

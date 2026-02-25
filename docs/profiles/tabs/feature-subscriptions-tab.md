@@ -88,9 +88,9 @@ and manage per-drop upcoming subscriptions.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Tab Content](feature-profile-tab-content.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
-- [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
+- [Profiles Index](../README.md)
+- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Tab Content](feature-tab-content.md)
+- [Profile Navigation Flow](../navigation/flow-navigation.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Memes Subscriptions Report](../../api-tool/feature-memes-subscriptions-report.md)

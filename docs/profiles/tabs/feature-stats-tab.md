@@ -4,6 +4,9 @@
 
 The `Stats` tab shows collection and activity metrics for a profile. Users can
 view consolidated numbers across all wallets or scope the view to one wallet.
+Wallet activity rows now resolve supported contract types to token detail routes so
+users can open matching pages directly for The Memes, MemeLab, NextGen, and 6529
+Gradient.
 
 ## Location in the Site
 
@@ -38,9 +41,14 @@ view consolidated numbers across all wallets or scope the view to one wallet.
 6. In `Wallet Activity`, review the relative timestamp shown on each
    transaction row (for example `3 minutes ago`); on desktop hover, the same
    label shows a full local date/time tooltip.
-7. Keep the tab open to see wallet-activity relative timestamps refresh
+7. Open the token label on supported rows to jump to:
+   - `/the-memes/{id}`
+   - `/meme-lab/{id}`
+   - `/nextgen/token/{id}`
+   - `/6529-gradient/{id}`
+8. Keep the tab open to see wallet-activity relative timestamps refresh
    automatically every minute without a page reload.
-8. Share the resulting URL to preserve current tab/filter context.
+9. Share the resulting URL to preserve current tab/filter context.
 
 ## Common Scenarios
 
@@ -50,6 +58,8 @@ view consolidated numbers across all wallets or scope the view to one wallet.
 - Filter wallet activity by event type (Airdrops, Mints, Sales, Purchases,
   Transfers, Burns).
 - Click the same wallet-activity filter again to reset back to `All`.
+- Open a Memes, MemeLab, NextGen, or 6529 Gradient row and confirm the row
+  label links to the token detail route and uses the matching thumbnail image.
 - Use pagination to browse older transactions or distributions.
 - Use `Wallet Activity` relative time labels for quick recency checks, then
   hover a timestamp to confirm exact local date/time.
@@ -69,6 +79,8 @@ view consolidated numbers across all wallets or scope the view to one wallet.
 - When per-season rows are shown, available season entries can expand over time
   (for example, through `SZN12`) as TDH breakdown data evolves.
 - `TDH History` can show `No TDH history found` when history is unavailable.
+- If Memes/MemeLab metadata is delayed, wallet rows may still show the row without
+  full token naming and icon details until metadata resolves.
 
 ## Failure and Recovery
 
@@ -82,6 +94,9 @@ view consolidated numbers across all wallets or scope the view to one wallet.
   the page resynchronizes the displayed ages.
 - If summary fetches fail, summary tables remain visible with placeholder values
   (for example `-`); refreshing retries requests.
+- If collection metadata fetches fail for wallet activity lookups, rows still render
+  with contract/action values while labels/icons may be temporarily less
+  informative.
 
 ## Limitations / Notes
 
@@ -97,12 +112,12 @@ view consolidated numbers across all wallets or scope the view to one wallet.
 
 ## Related Pages
 
-- [Profiles Index](README.md)
-- [Profile Header Summary](feature-profile-header-summary.md)
-- [Profile Tabs](feature-profile-tabs.md)
-- [Profile Tab Content](feature-profile-tab-content.md)
-- [TDH Boost Rules](../network/feature-tdh-boost-rules.md)
-- [Network Definitions](../network/feature-network-definitions.md)
-- [Pagination Controls](../shared/feature-pagination-controls.md)
-- [Profile Navigation Flow](flow-profile-navigation.md)
-- [Profile Troubleshooting](troubleshooting-profile-pages.md)
+- [Profiles Index](../README.md)
+- [Profile Header Summary](../navigation/feature-header-summary.md)
+- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Tab Content](feature-tab-content.md)
+- [TDH Boost Rules](../../network/feature-tdh-boost-rules.md)
+- [Network Definitions](../../network/feature-network-definitions.md)
+- [Pagination Controls](../../shared/feature-pagination-controls.md)
+- [Profile Navigation Flow](../navigation/flow-navigation.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
