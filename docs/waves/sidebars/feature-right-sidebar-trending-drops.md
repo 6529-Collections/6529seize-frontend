@@ -14,8 +14,7 @@ directly to a boosted drop from the sidebar.
   `/messages?wave={waveId}`).
 - `About` content inside the right sidebar, both for rank waves and non-rank waves
   that show the same `About` layout.
-- The section is shown when the page provides a drop click handler (standard wave
-  sidebar pages).
+- The section is shown when the right sidebar About content is available for a wave.
 
 ## Entry Points
 
@@ -45,6 +44,9 @@ directly to a boosted drop from the sidebar.
 - Selecting a longer window surfaces drops that gained boosts earlier in the
   selected period.
 - Empty states show a neutral "No boosted drops yet" message.
+- Jumping to a referenced drop uses shared chat serial navigation:
+  - In-frame targets scroll immediately.
+  - Off-frame targets load nearby chat pages until the target is reachable.
 
 ## Edge Cases
 
