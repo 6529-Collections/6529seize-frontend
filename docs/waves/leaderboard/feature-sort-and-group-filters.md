@@ -34,10 +34,10 @@ groups exist, filter the leaderboard to a single group.
 - `Hot` surfaces drops that are trending within the wave.
 - `Newest` orders drops by the most recent submissions.
 - `All submissions` resets the group filter to the full leaderboard.
-- On narrow layouts, sort and group controls may collapse into dropdowns labeled
-  `Sort` and `Group`.
-- On narrow layouts, control labels stay on one line so the full option text remains
-  readable without wrapping.
+- On small screens, sort controls render as a `Sort` dropdown while group controls
+  use a compact `Group` selector; wide layouts use inline sort tabs.
+- On narrow and compact layouts, sort and group controls remain in a single row with
+  labels preserved.
 - On wide layouts, group options can render as inline tabs while narrow layouts use
   a compact dropdown.
 - Selected group filters are preserved in the wave URL using the
