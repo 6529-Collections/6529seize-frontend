@@ -1,28 +1,14 @@
 # Navigation
 
-Navigation is handled through a shared sidebar system across desktop and small
-screens, with app-shell header controls handling in-context title and back actions.
+Navigation docs cover route switching across desktop/sidebar layouts, app-shell
+header controls, search entry points, and mobile app bottom-navigation behavior.
 
 ## Overview
 
-- [Sidebar Navigation](feature-sidebar-navigation.md): route-level move between
-  destinations, mobile drawer behavior, and desktop fixed rail.
-- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): fixed bottom app-shell
-  destination switching for `Discover`, `Waves`, `Messages`, `Home`,
-  `Network`, `Collections`, and `Notifications`.
-- [Internal Link Navigation](feature-internal-link-navigation.md): in-content links and
-  hash-position navigation behavior.
-- [Header Search Modal](feature-header-search-modal.md): global search entry and result navigation.
-- [App Header Context](feature-app-header-context.md): title and identity rendering
-  based on current route.
-- [Back Button](feature-back-button.md): context-aware backward actions for waves,
-  create flows, and profile stacks.
-- [Mobile Pull-to-Refresh](feature-mobile-pull-to-refresh.md): why pull-to-refresh
-  is enabled in the app shell and how it refreshes cached content.
-- [Wallet and Account Controls](feature-wallet-account-controls.md): account menu and
-  connect/disconnect actions.
-- [Mobile App Landing Page](feature-mobile-app-landing.md): native launch fallback
-  behavior.
+- Primary route navigation uses the web sidebar on desktop/small-screen web
+  layouts and a fixed bottom bar in native-app layouts.
+- Contextual controls (search, back, account menus, pull-to-refresh) layer on
+  top of route navigation and can change by platform and session state.
 
 ## Features
 
@@ -39,23 +25,22 @@ screens, with app-shell header controls handling in-context title and back actio
 
 ## Flows
 
+- [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 
 ## Troubleshooting
 
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Profile Troubleshooting](../profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
 
 ## Stubs
 
 - None.
 
-
 ## Related Areas
 
 - [Docs Home](../README.md)
+- [Profiles Index](../profiles/README.md)
+- [Waves Index](../waves/README.md)
 - [Notifications Index](../notifications/README.md)
-- [Delegation Index](../delegation/README.md)
-- [API Tool Index](../api-tool/README.md)
-- [EMMA Index](../emma/README.md)
-- [Network Index](../network/README.md)
-- [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
+- [Shared Index](../shared/README.md)

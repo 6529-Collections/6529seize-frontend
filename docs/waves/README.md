@@ -21,11 +21,13 @@ browsable without one oversized index page.
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Wave Participation Flow](flow-wave-participation.md): end-to-end journey from
+  wave discovery to in-thread actions and shared links.
 
 ## Troubleshooting
 
-- No dedicated troubleshooting page documented yet.
+- [Wave Troubleshooting](troubleshooting-wave-navigation-and-posting.md):
+  route, tab, posting, and drop-link recovery guidance.
 
 ## Stubs
 

@@ -15,11 +15,13 @@ Leaderboard docs cover ranking and timeline behavior in voting surfaces.
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Wave Participation Flow](../flow-wave-participation.md): canonical end-to-end
+  wave navigation and interaction flow.
 
 ## Troubleshooting
 
-- No dedicated troubleshooting page documented yet.
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md):
+  route, jump, and posting recovery guidance.
 
 ## Stubs
 

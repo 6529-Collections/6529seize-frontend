@@ -2,126 +2,87 @@
 
 ## Overview
 
-Wallet and account controls let users connect a wallet, switch accounts,
-disconnect, and manage proxy profile context from sidebar user menus.
-The app also handles Safe (Gnosis Safe) wallets with contract-wallet signing
-behavior where required for auth and mutation flows.
+Wallet and account controls cover connect/disconnect actions, account switching,
+proxy-profile selection, and session-level actions exposed from sidebar user
+menus in web and app layouts.
 
 ## Location in the Site
 
-- Desktop: bottom section of the primary left sidebar.
-- Small screens: menu overlay opened from the header button.
-- Additional connect surfaces: reusable `Connect` button shown in auth-gated
-  flows.
+- Desktop/small-screen web sidebar user area.
+- App sidebar account section (opened from app header menu).
+- Connected-user dropdown actions (including proxy selection) in sidebar user
+  menus.
 
 ## Entry Points
 
-- Desktop (disconnected): click `Connect Wallet` at the bottom of the sidebar.
-- Desktop (connected): click the sidebar user row to open the user menu.
-- Small screens: open the menu from the header, then use account controls at
-  the bottom section.
-- Proxy users: open the user menu and select a proxy profile entry.
+- Disconnected web sidebar:
+  select `Connect` from the user area.
+- Connected web sidebar:
+  select the user row to open account/proxy actions.
+- App layout:
+  open the header menu and use account controls in the bottom account section.
 
 ## User Journey
 
-1. User starts disconnected and opens a wallet connect action.
-2. Wallet provider flow completes and the sidebar updates to connected state.
-3. User identity UI appears (avatar/placeholder, label, level, and profile
-   link behavior).
-4. User opens the account menu to run actions such as connect/disconnect,
-   switch account, logout, or proxy selection.
-5. User returns to navigation with updated account context.
+1. Start disconnected and open a connect action.
+2. Complete wallet connection and return to navigation with connected state.
+3. Open account controls to manage session actions:
+   - connect/disconnect,
+   - switch account,
+   - disconnect and logout,
+   - select active proxy profile when available.
+4. Continue routing with updated profile/account context.
 
 ## Common Scenarios
 
-- Connect from sidebar:
-  - `Connect` opens the wallet connection flow.
-- Connect on native mobile app:
-  - In native app sessions, the wallet chooser includes `Coinbase Wallet` as
-    a supported connection option.
+- Connect from web sidebar:
+  select `Connect`; connected state replaces the connect action with user menu
+  controls.
+- Connect from app sidebar:
+  select `Connect` in the account section.
 - Switch account:
-  - `Switch Account` disconnects and reopens the connect flow.
-- Safe wallet behavior:
-  - If your connected wallet is a Safe (or Gnosis Safe), the app treats signature
-    prompts as contract-wallet signatures and tracks that context for backend
-    validation.
-  - Safe-wallet users can complete the same connect/disconnect actions as other
-    wallets; no separate manual auth mode is required.
+  select `Switch Account` to disconnect current session and reopen connect flow.
 - Disconnect/logout:
-  - `Disconnect Wallet` ends wallet connection.
-  - `Disconnect & Logout` clears authenticated session state.
-  - `Disconnect & Logout` also clears active proxy-role session context used by
-    connection-sharing links.
-- Proxy context:
-  - Menu lists available proxy profiles and marks the active proxy.
-  - Selecting a proxy switches active identity context for user actions.
-- Label fallback behavior:
-  - Preferred label is profile handle when available.
-  - For proxy identities without a handle, the label falls back to the proxy
-    owner's primary address.
-  - For non-proxy identities without a handle, the label falls back to the
-    connected wallet address.
-  - Long or address-like labels can be visually truncated in compact sidebar
-    space.
+  select `Disconnect Wallet` (desktop dropdown) or `Disconnect & Logout`
+  (desktop/app controls) to end active session state.
+- Proxy selection:
+  choose a proxy profile from the user dropdown to switch active identity
+  context.
+- App-only account actions:
+  use `Push Notifications` settings and QR-scanner account flows in app sidebar.
 
 ## Edge Cases
 
-- While identity data is loading, user sections show placeholder/skeleton UI.
-- If a profile image uses an IPFS URL, the sidebar resolves it to a
-  gateway-backed URL; if resolution fails or the image is missing, a default
-  avatar placeholder is shown.
-- In collapsed desktop sidebar mode, account controls become icon-first and use
-  tooltips for labels.
-- Wallet provider availability can differ between web and native app sessions.
-- Wallet connection UI can depend on third-party provider assets (including
-  hosted fonts); restrictive network policies can cause partial or degraded
-  modal rendering.
-- Restored wallet-connected state depends on wallet/session data in browser
-  local storage.
-- Contract-wallet signatures can be longer than standard EOA signatures; users
-  should use the wallet app confirmation flow as usual for Safe prompts.
-- App-wallet connector setup can fail if stored wallet records are malformed
-  (for example missing key material or invalid mnemonic format), even when the
-  wallet still appears in local app-wallet lists.
-- `Profile` routing uses handle-first navigation and falls back to wallet route
-  when needed.
-- Account menu options can differ by connection state (for example, `Connect
-  Wallet` vs `Disconnect Wallet`).
+- While identity data is loading, sidebar account surfaces show placeholder
+  skeletons.
+- If handle data is unavailable, account labels fall back to wallet/address-based
+  text.
+- In collapsed desktop mode, account controls are icon-first and rely on
+  tooltips for quick affordance hints.
+- `Profile` shortcut routing in sidebar is shown only when connected and uses
+  handle-first fallback-to-wallet resolution.
+- Proxy actions appear only when proxy profiles are available for the session.
 
 ## Failure and Recovery
 
-- If wallet-connected UI throws a runtime error, users see a recovery card with
-  `Connection Problem`.
-- Recovery actions:
-  - `Try Again` retries rendering wallet-connected UI.
-  - `Clear Storage & Reload` clears local storage/auth state and reloads the
-    app.
-- If a wallet-app handoff is canceled or the wallet app is unavailable,
-  connection does not complete and the user remains disconnected.
-- If network or enterprise filtering blocks wallet-provider asset domains, the
-  wallet chooser can fail to render fully; retry on an unrestricted network or
-  after local allow-list updates.
-- If users return with missing local wallet/session storage (for example, after
-  storage cleanup or from an older cookie-only wallet session), account
-  controls start disconnected; reconnect wallet to restore active session
-  context.
-- If app-wallet connector setup rejects malformed stored wallet data, users stay
-  disconnected and may see an authentication-style error message; remove and
-  re-import the affected app wallet (or use `Clear Storage & Reload`) before
-  retrying connection.
-- If wallet/profile data is temporarily unavailable, users can retry by
-  reconnecting or reopening account controls after data reloads.
+- If connect flow is canceled or wallet handoff is declined, account state
+  stays disconnected; retry from the same connect surface.
+- If wallet UI fails at runtime, the wallet error boundary shows `Connection
+  Problem` with `Try Again` and `Clear Storage & Reload`.
+- If account state looks stale after switching/disconnecting, run
+  `Disconnect & Logout`, then reconnect.
 
 ## Limitations / Notes
 
-- Account actions depend on wallet connection state.
-- Proxy actions appear only when proxy profiles are available.
-- Some connect/disconnect outcomes depend on external wallet provider behavior.
-- Native app wallet options depend on the wallet apps installed on the device.
+- Available wallet providers and connection UX depend on platform and wallet-app
+  availability.
+- Some account actions differ by layout (desktop dropdown vs app sidebar).
+- Proxy behavior depends on current authenticated profile-proxy permissions.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
 - [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Docs Home](../README.md)

@@ -25,7 +25,7 @@ the keyboard.
 
 1. Keyboard is hidden.
 2. The user focuses an input in the mobile app shell.
-3. The app detects keyboard visibility on Android or iOS.
+3. The app detects keyboard visibility using native keyboard listeners.
 4. The bottom navigation hides and layout spacing removes fixed keyboard reserves.
 5. The content area recalculates with reduced bottom spacing.
 6. The user can compose without a large dead zone between input and the keyboard.
@@ -50,8 +50,7 @@ the keyboard.
 
 - If the native keyboard listener is unavailable, app behavior falls back to static
   spacing.
-- If focus and blur happen quickly, keyboard transitions are debounced so the UI
-  settles before major reflow.
+- On Android, rapid show/hide keyboard events are debounced before layout updates.
 - On routes without active inputs, behavior stays in the non-keyboard state.
 - Web and non-keyboard app routes do not trigger this mobile keyboard layout mode.
 

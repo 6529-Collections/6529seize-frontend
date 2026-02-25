@@ -30,8 +30,10 @@ This guide documents current user-facing behavior.
 
 - Use search from anywhere in the app:
   [Header Search Modal](navigation/feature-header-search-modal.md)
-- Understand sidebar desktop/mobile behavior:
-  [Sidebar Navigation](navigation/feature-sidebar-navigation.md)
+- Understand navigation entry/switching and sidebar behavior:
+  [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md),
+  [Sidebar Navigation](navigation/feature-sidebar-navigation.md),
+  [Navigation and Shell Controls Troubleshooting](navigation/troubleshooting-navigation-and-shell-controls.md)
 - Manage wallet connection and account actions:
   [Wallet and Account Controls](navigation/feature-wallet-account-controls.md)
 - Use notifications filtering and scrolling behavior:

@@ -2,87 +2,80 @@
 
 ## Overview
 
-The header back button is context-sensitive. It appears only where a predictable,
-in-app backward action is available and performs different actions based on the
-current state.
+The app-header back button is context-aware. It appears only when the app has a
+predictable in-app backward action and runs route-specific logic before falling
+back to navigation-history behavior.
 
 ## Location in the Site
 
-- Header across the app shell.
-- Wave routes such as `/waves/{waveId}`.
-- Message routes such as `/messages`, `/messages?wave={id}`.
-- Create flows at `/waves/create` and `/messages/create`.
-- Profile route contexts where browser history is available.
+- App header on wave/detail contexts.
+- Create routes: `/waves/create` and `/messages/create`.
+- Wave/message thread contexts that include an active wave.
+- Profile routes (`/{user}`) when in-app history provides a valid back target.
 
 ## Entry Points
 
-- Open a wave page.
-- Open a create flow.
-- Open a wave drop with an open `drop` query parameter.
-- Open a profile page with valid browser back context.
+- Open a wave thread.
+- Open a create route.
+- Open a route with an active `drop` query parameter.
+- Open a profile route after navigating from another in-app route.
 
 ## User Journey
 
-1. Header renders the back button when one of these contexts is active:
-   - inside a wave,
-   - on a create route,
-   - on a profile route with prior history.
+1. Header shows `Back` when one of these conditions is true:
+   - active wave context is present,
+   - current route is `/waves/create` or `/messages/create`,
+   - current route is a profile route and history can go back.
 2. User selects `Back`.
-3. The app applies the matching action:
-   - Create route: returns to the base route for that section (`/waves` or
-     `/messages`).
-   - Open drop: removes the `drop` parameter and keeps you in the same thread.
-   - Inside a wave: clears the active wave and returns to `/waves` for public
-     waves or `/messages` for direct messages.
-   - If current view state does not map to a route-specific action, the app
-     resolves back behavior from the current pathname (`/waves`, `/messages`,
-     `/notifications`) to avoid leaving an empty detail surface.
-   - Otherwise, falls back to browser back history.
-4. The button shows loading feedback while navigation is in progress.
+3. The app applies the first matching rule:
+   - `/waves/create` -> `/waves`
+   - `/messages/create` -> `/messages`
+   - active `drop` query -> remove `drop` while keeping current thread context
+   - active wave context -> clear active wave and return to section home
+     (`/waves` or `/messages`)
+4. If no route-specific rule matches, the app falls back to navigation-history
+   `goBack`.
 
 ## Common Scenarios
 
-- Leaving wave detail back to list: select `Back` from `/waves/{waveId}` or
-  `/messages?wave={id}` and return to the section root.
-- Exiting create flow: select `Back` from `/waves/create` or `/messages/create` to
-  return to the corresponding section list.
-- Dismissing an open drop panel: select `Back` while `?drop=` is present to close
-  the panel and return to the same wave thread context.
-- Returning from profile pages: back appears when your navigation stack has a prior
-  in-app state and hides when it does not.
+- Leave create flow:
+  use `Back` from `/waves/create` or `/messages/create` to return to the
+  section list.
+- Close a focused drop:
+  when `?drop=` is present, `Back` removes that query state and stays in the
+  same route context.
+- Leave active wave/thread:
+  `Back` clears the active thread and returns to `/waves` or `/messages`
+  depending on wave type.
+- Leave a profile route:
+  if a prior in-app route exists, `Back` returns there.
 
 ## Edge Cases
 
-- A second click while navigation is loading is ignored.
-- On profile routes, back is only shown when history is available.
-- In-app wave list back navigation uses the wave type (public/group vs. direct
-  message) to determine the right section target.
-- If users are already on `/notifications` and return to it from a stale internal
-  wave view, back moves to the notifications section home rather than a blank
-  view.
-- If the current wave disappears from server responses, returning clears active
-  state and drops you to the related section home route.
+- Repeat clicks during fallback history loading are ignored.
+- Profile routes do not show `Back` when in-app history has no valid prior
+  target.
+- If active wave metadata disappears while viewing a thread, wave state is
+  cleared and routing falls back to section-home behavior.
 
 ## Failure and Recovery
 
-- If `drop` closing fails to apply instantly, the route cleanup still removes the
-  `drop` parameter and keeps the context.
-- If a non-wave path (`/waves`, `/messages`, `/notifications`) is re-entered after
-  stale state, back returns to that section's home route instead of an empty view.
-- If navigation fails, the button re-renders and users can retry with another
-  back action or browser controls.
+- If drop query cleanup does not apply immediately, retry once; the route rule
+  still removes `drop` in-place.
+- If no in-app history target exists, use sidebar/bottom-navigation controls to
+  return to the desired section root.
+- If route transition stalls, reload the current route and retry the action.
 
 ## Limitations / Notes
 
-- Back behavior is route-aware and does not always mirror the browser history stack
-  one-to-one; wave exits are intentionally section-aware (`/waves` vs
-  `/messages`).
-- In the deepest fallback case, browser history handles the step when no in-app
-  rule is matched.
+- Back behavior is intentionally context-aware and is not a strict one-to-one
+  wrapper over browser history.
+- A loading spinner appears only during fallback history navigation.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
+- [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [App Header Context](feature-app-header-context.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
