@@ -19,6 +19,7 @@ Link preview docs cover how URLs render as cards in wave and DM drops.
 - [Wave Drop Art Blocks Token Previews](feature-art-blocks-token-previews.md)
 - [Wave Drop Twitter/X Link Previews](feature-twitter-link-previews.md)
 - [Wave Drop YouTube Link Previews](feature-youtube-link-previews.md)
+- [Wave Drop Tenor GIF Previews](feature-tenor-gif-previews.md)
 
 ## Flows
 

@@ -5,6 +5,10 @@
 Wave post cards and homepage boosted cards render supported Twitter/X status links as
 inline tweet previews instead of plain URL text.
 
+In standard chat and message surfaces, tweet previews are constrained to the full
+available width with a desktop max-width cap so previews stay narrower than wide
+screens and avoid dominating list rows.
+
 The preview component measures tweet height so most short tweets stay fully expanded,
 while long tweets can be shown compactly with a `Show full tweet` action. This keeps
 message and card layouts stable in dense lists.
@@ -53,6 +57,8 @@ external-link state.
   previews are enabled.
 - During message loading from jump-to-serial or older-page scroll operations, newly
   inserted drops can keep long tweets in compact mode until users choose to expand.
+- In homepage and leaderboard card contexts, tweet previews keep the shared width
+  rule and still allow the `Show full tweet` control.
 
 ## Edge Cases
 
@@ -90,6 +96,7 @@ external-link state.
 - [Waves Index](../README.md)
 - [Wave Drop External Link Previews](feature-external-link-previews.md)
 - [Wave Drop YouTube Link Previews](feature-youtube-link-previews.md)
+- [Wave Drop Tenor GIF Previews](feature-tenor-gif-previews.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Docs Home](../../README.md)

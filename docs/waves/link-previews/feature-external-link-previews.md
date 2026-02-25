@@ -44,7 +44,8 @@ image when available) and keep standard link actions next to the card.
   to avoid layout jumps in active timelines.
 - Dedicated preview handlers take priority for known providers (for example
   YouTube, Twitter/X, TikTok, Farcaster, Google Workspace, Wikimedia, NFT
-  marketplaces, Art Blocks, ENS targets, Compound links, and `pepe.wtf`), so
+  marketplaces, Art Blocks, ENS targets, Compound links, `media.tenor.com` GIFs, and
+  `pepe.wtf`), so
   those links render provider-specific cards instead of the generic metadata
   card.
 - If previews are hidden for a drop, links render as plain anchors until the
@@ -57,7 +58,8 @@ image when available) and keep standard link actions next to the card.
 - Some host families are intentionally excluded from this generic card path
   because they use dedicated preview behavior (for example YouTube, Twitter/X,
   TikTok, Farcaster, Google Workspace, Wikimedia, NFT marketplace links, Art
-  Blocks token links, ENS targets, Compound links, and `pepe.wtf` links).
+  Blocks token links, ENS targets, Compound links, `media.tenor.com` GIF links,
+  and `pepe.wtf` links).
 - Multiple eligible links in one drop render as separate preview cards.
 - Long unbroken metadata tokens can wrap mid-token to avoid horizontal card
   overflow in narrow layouts.
@@ -91,6 +93,7 @@ image when available) and keep standard link actions next to the card.
 - [Wave Drop Compound Link Previews](feature-compound-link-previews.md)
 - [Wave Drop Pepe.wtf Link Previews](feature-pepe-link-previews.md)
 - [Wave Drop Art Blocks Token Previews](feature-art-blocks-token-previews.md)
+- [Wave Drop Tenor GIF Previews](feature-tenor-gif-previews.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Docs Home](../../README.md)
