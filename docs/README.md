@@ -78,5 +78,5 @@ This guide documents current user-facing behavior.
   [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
 - Legacy URL behavior:
   [Legacy Route Redirects](shared/feature-legacy-route-redirects.md)
-- Delegation actions with partial docs coverage:
-  [Delegation Action Flows](delegation/feature-delegation-action-flows.md)
+- Delegation routes and action-state troubleshooting:
+  [Delegation Routes and Action States](delegation/troubleshooting-delegation-routes-and-actions.md)
