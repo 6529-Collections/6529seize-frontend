@@ -65,6 +65,9 @@ Wave drop actions provide two different link behaviors:
 - In-thread links where `drop` or `serialNo` points to the currently opened drop
   render as a normal anchor instead of opening a nested drop card.
 - Temporary drops disable `Copy link` and show an unavailable state.
+- Action controls are isolated from surrounding drop-click behavior: tapping or
+  clicking `Copy link`, open, or preview links performs only that action and
+  does not also trigger parent drop navigation.
 
 ## Edge Cases
 
@@ -80,6 +83,8 @@ Wave drop actions provide two different link behaviors:
 - If a same-origin shared link carries both `drop` and `serialNo`, the
   `drop` target takes precedence and renders as a drop preview/open flow rather
   than a quote jump card.
+- Links that include a `drop` query parameter are handled by the drop flow, not
+  the quote parser, so they do not recurse into nested quote-chain rendering.
 - If a same-origin quote link would revisit a drop already in the current
   quote-preview chain (including `serialNo` self-references), quote-card
   rendering is skipped to avoid recursive nesting, and the link remains a
