@@ -9,17 +9,20 @@ users continue reading older messages.
 On Android and iOS mobile clients, chat layout height is recalculated while the
 keyboard is open to avoid extra bottom whitespace and keep the composer area in
 the usable viewport.
-If a wave opens with unread metadata, the chat can also show a `New Messages`
-divider and jump control anchored to the first unread serial.
-When users jump to a specific drop serial, chat also briefly highlights the
-targeted drop so it is easier to locate in the list.
+If a wave opens with unread metadata, the message list can also show a `New
+Messages` divider at the unread boundary.
+A floating control jumps to that point and keeps unread navigation available while
+users read older messages.
 Jumps can resolve targets outside the currently loaded message window by loading
 a focused set of surrounding drops first.
+During jump and top-pagination flows, long embedded Twitter/X previews can enter
+as compact cards with an inline `Show full tweet` action so message insertion is
+less disruptive.
 
 ## Location in the Site
 
-- Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- `/waves/{waveId}`
+- `/messages?wave={waveId}`
 - This behavior applies to the main message list in wave chat views.
 
 ## Entry Points
@@ -46,12 +49,13 @@ a focused set of surrounding drops first.
 6. If the thread opens (or jumps) to a targeted serial number, chat scrolls to
    that drop and applies a temporary highlight that fades out.
    If needed, surrounding drops are loaded so the target can become visible.
-7. If the wave opens with unread context, a divider and floating jump control
+7. If long Twitter/X tweet previews arrive with newly loaded jumps or page fetches,
+   they can render compactly first and expand with `Show full tweet`.
+8. If the thread opens with unread context, a divider and floating jump control
    mark the first unread boundary.
-8. On Apple and Android mobile clients, when you are not at the bottom and new
-   messages
-   arrive, a counter appears on the bottom control and tapping it reveals pending
-   messages, then re-pins to latest.
+9. On Apple and Android mobile clients, when you are not at the bottom and new
+   messages arrive, a counter appears on the bottom control and tapping it reveals
+   pending messages, then re-pins to latest.
 
 ## Common Scenarios
 
@@ -65,8 +69,8 @@ a focused set of surrounding drops first.
   highlighted to help users confirm they reached the intended message.
 - With unread context, the divider row marks where new content starts, and the
   jump control points to that serial boundary.
-- On Apple mobile clients, newly arrived messages can be held behind a pending
-  counter; tapping the bottom control reveals them and re-pins to latest.
+- On Apple and Android mobile clients, newly arrived messages can be held behind
+  a pending counter; tapping the bottom control reveals them and re-pins to latest.
 - If pending message count is large, the control label caps at `99+`.
 - While reading older content on Apple mobile, the most recently visible serial
   remains visible while newer serials queue as pending.
@@ -84,6 +88,8 @@ a focused set of surrounding drops first.
 - If a jump target is outside the currently loaded window, the chat requests the
   target range and may fetch multiple historical pages before the target becomes
   visible.
+- If a long compacted tweet preview is loaded during a jump, users can expand it
+  in place.
 - If the target drop is still loading/off-screen when a serial jump begins, the
   temporary highlight can remain visible as the target comes into view.
 - On non-Apple clients, pending messages are not hidden behind a pending counter.
@@ -125,3 +131,4 @@ a focused set of surrounding drops first.
 - [Profile Brain Tab](../../profiles/tabs/feature-brain-tab.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)
 - [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
+- [Wave Drop Twitter/X Link Previews](../link-previews/feature-twitter-link-previews.md)
