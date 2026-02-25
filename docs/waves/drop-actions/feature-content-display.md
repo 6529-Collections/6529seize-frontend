@@ -55,6 +55,12 @@ instead of collapsing into one paragraph.
 - Image attachments show a loading placeholder while the source resolves; on touch
   devices this placeholder is static to keep gesture scrolling smooth, while
   desktop and other non-touch layouts can show the animated pulse style.
+- Reply rows now render standalone media URLs as a compact preview when the reply
+  body is exactly one URL. Image URLs (including `.gif`, `.png`, `.jpg`,
+  `.jpeg`, `.webp`, `.avif`, and Tenor/Giphy GIF links) show as inline
+  thumbnail images. Supported standalone video extensions (`.mp4`, `.webm`,
+  `.ogg`, `.mov`, `.avi`, `.wmv`, `.flv`, `.mkv`) show as a compact video preview
+  placeholder.
 - Same-origin links that include a `drop` query parameter (for example
   `/?drop=...` or `/waves/...?...&drop=...`) are rebased to the current thread
   route before rendering, so drop cards and their copy/open actions stay in the
@@ -78,6 +84,9 @@ instead of collapsing into one paragraph.
 - Reply rows stay in a fixed 24-pixel row while loading and show reply text within a
   single-line constrained space; long replies still open the full target drop when
   activated.
+- Reply preview rows only switch to media thumbnails when the reply consists of one
+  URL and no additional text. Any extra words or punctuation around the URL keep
+  the row in text mode.
 - Selecting text in a drop body suppresses click-through navigation so users
   can copy text without opening drop details. Structured timeline copy behavior
   is covered in [Wave Drop Selection Copy](feature-selection-copy.md).
@@ -97,6 +106,11 @@ instead of collapsing into one paragraph.
 - In storm posts, previous/next controls are disabled at the first/last part.
 - Text and media blocks render as one continuous card body; media appears below
   the active part text when attachments exist.
+- Reply rows only render media thumbnails for URL-only replies when the URL
+  resolves as image or video media; URL text with surrounding content remains a
+  normal text reply.
+- Standalone links to unsupported formats in reply rows remain text-based and do
+  not automatically switch to media preview mode.
 - In memes cards, multiline descriptions can make card headers taller when users
   include multiple line breaks.
 - If the current URL already has a `drop` parameter, opening another shared
@@ -138,6 +152,8 @@ instead of collapsing into one paragraph.
   still apply their own truncation rules.
 - Higher-resolution image scaling is applied in single-drop detail contexts;
   timeline cards keep standard scaled media loading behavior.
+- Reply media conversion is intentionally scoped to reply preview rows and only
+  applies when the reply content is a single standalone URL.
 
 ## Related Pages
 
