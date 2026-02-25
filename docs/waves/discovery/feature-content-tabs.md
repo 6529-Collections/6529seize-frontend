@@ -7,6 +7,8 @@ wave sections such as `Chat`, `Leaderboard`, `Winners`, and other
 wave-dependent views.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
+The app stores the last selected tab for each wave on the current device, then
+restores it whenever that wave is opened again and the tab is still available.
 
 ## Location in the Site
 
@@ -30,8 +32,8 @@ In the `My Votes` tab, non-image drops use a preview image from drop metadata wh
    active tab:
    - Most waves default to `Chat`.
    - Memes waves default to `Leaderboard` when that tab is available.
-   - Returning to a previously viewed wave restores the last valid tab when it
-     is still available.
+   - Returning to a previously viewed wave restores the last saved valid tab when
+     it is still available.
 4. Select a tab to switch sections.
 5. The main content panel updates in place while staying on the same route.
 6. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
@@ -51,11 +53,15 @@ In the `My Votes` tab, non-image drops use a preview image from drop metadata wh
   video, or interactive media is indicated with a small badge at the title row.
 - In `My Votes`, non-image drops show a static preview thumbnail in the row when
   `preview_image` metadata is valid.
+- Move between waves and return later; the previously selected tab is restored for the
+  wave if it remains available.
 
 ## Edge Cases
 
 - Chat-type waves do not render a tab strip.
 - `Leaderboard` can disappear after voting has ended for a wave.
+- If local tab memory for a wave is unavailable or invalid, the wave opens with its
+  default tab.
 - `Winners` is shown only after the first decision has passed.
 - Non-memes waves do not expose `My Votes` and `FAQ` in the tab strip.
 - Tabs expose selected-state semantics and link to the active content panel for
@@ -71,6 +77,8 @@ In the `My Votes` tab, non-image drops use a preview image from drop metadata wh
 
 - If a selected tab becomes unavailable because wave state changes, the
   interface moves to the first available tab.
+- If a previously stored tab is no longer available for that wave, the UI falls
+  back to the wave default.
 - If an unavailable tab is requested, tab state falls back to that wave’s first
   available tab (typically `Leaderboard` for memes waves, otherwise `Chat`).
 - If a wave becomes chat-only, the tab strip is removed and the chat panel
