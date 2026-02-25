@@ -1,6 +1,7 @@
 "use client";
 
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
+import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import {
   areEqualAddresses,
   fromGWEI,
@@ -10,7 +11,6 @@ import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
-import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
@@ -55,6 +55,12 @@ export default function ManifoldMintingWidget(
 
   const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
   const [mintError, setMintError] = useState<string>("");
+  const mintWrite = useWriteContract();
+  const waitMintWrite = useWaitForTransactionReceipt({
+    chainId: props.chain.id,
+    confirmations: 1,
+    hash: mintWrite.data,
+  });
 
   useEffect(() => {
     mintWrite.reset();
@@ -128,13 +134,6 @@ export default function ManifoldMintingWidget(
       props.claim.phase === ManifoldPhase.ALLOWLIST
         ? "MINT_FEE_MERKLE"
         : "MINT_FEE",
-  });
-
-  const mintWrite = useWriteContract();
-  const waitMintWrite = useWaitForTransactionReceipt({
-    chainId: props.chain.id,
-    confirmations: 1,
-    hash: mintWrite.data,
   });
 
   useEffect(() => {
