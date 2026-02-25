@@ -25,6 +25,7 @@ This guide documents current user-facing behavior.
 - [Realtime](realtime/README.md): websocket-backed activity and authenticated live-update behavior.
 - [Shared](shared/README.md): cross-area loading, pagination, hover-cards/tooltips, and redirects.
 - [NextGen](nextgen/README.md): collection slideshow and token media rendering.
+- [Docs Metadata](_meta/README.md): maintainer-only cursor and automation state for docs backfill replay.
 
 ## I am trying to...
 

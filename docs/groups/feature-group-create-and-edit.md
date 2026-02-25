@@ -5,12 +5,11 @@
 The groups area supports creating new group definitions and editing existing
 groups from the same configuration surface.
 
-Within the configuration surface, the TDH requirement field supports three
-selection modes and defaults to `TDH + xTDH`:
+Within the configuration surface, the TDH requirement field exposes two
+selection tabs and defaults to `TDH + xTDH`:
 
-- `TDH`
-- `xTDH`
 - `TDH + xTDH`
+- `TDH`
 
 ## Location in the Site
 
@@ -21,7 +20,8 @@ selection modes and defaults to `TDH + xTDH`:
 ## Entry Points
 
 - Open `Network -> Groups` and choose `Create New`.
-- Open a group card action that routes to edit mode.
+- Open a group card actions menu and choose `Edit` (your own group) or
+  `Clone` (someone else's group).
 - Open a direct URL with `?edit=new` or `?edit={groupId}`.
 
 ## Known Behavior
@@ -34,10 +34,12 @@ selection modes and defaults to `TDH + xTDH`:
     inputs)
   - `Include Identities` and `Exclude Identities` sections
 - The TDH section includes an inclusion mode selector with values:
-  - `TDH`
-  - `xTDH`
   - `TDH + xTDH`
+  - `TDH`
 - For newly created groups, TDH mode defaults to `TDH + xTDH`.
+- Legacy groups that already store `XTDH` inclusion continue to load that value
+  in edit mode, even though the selector does not expose a dedicated `xTDH`
+  tab; choosing another tab switches the stored mode.
 - Include/exclude identity sections support manual identity selection, wallet
   upload/import inputs, and a unique-wallet counter.
 - `Include me` toggle behavior:
@@ -60,8 +62,8 @@ selection modes and defaults to `TDH + xTDH`:
   not update `Include Identities`.
 - Users can still turn `Include me` off to remove their connected-profile
   wallets from `Include Identities`.
-- Groups created before TDH inclusion-mode selection are treated as `TDH` for
-  edit and display.
+- Groups created before TDH inclusion-mode selection fall back to `TDH` in edit
+  mode when no inclusion strategy value is stored.
 
 ## Not Yet Documented
 
@@ -73,8 +75,8 @@ selection modes and defaults to `TDH + xTDH`:
   an active session.
 - TODO: Document wallet import failure and recovery behavior for upload and EMMA
   sources.
-- TODO: Document how each mode changes threshold interpretation
-  (`TDH`, `xTDH`, `TDH + xTDH`) with concrete examples.
+- TODO: Document threshold interpretation examples for current selector modes
+  (`TDH`, `TDH + xTDH`) and legacy `xTDH`-configured groups.
 
 ## Related Pages
 

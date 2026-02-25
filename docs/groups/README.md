@@ -1,16 +1,32 @@
 # Groups
 
-Groups documentation covers filtering and browsing `/network/groups`, opening
-group-scoped network views, using card-level actions, and the group
-creation/edit configuration flow.
+## Overview
 
-## Pages
+Groups docs cover `/network/groups` list filtering, group-card interaction
+behavior, and group create/edit configuration constraints.
+
+## Features
 
 - [Groups List Filters](feature-groups-list-filters.md)
 - [Group Card Keyboard Navigation and Actions](feature-group-card-keyboard-navigation-and-actions.md)
 - [Group Creation and Edit Flow](feature-group-create-and-edit.md)
 
-## Related Pages
+## Flows
+
+- None.
+
+## Troubleshooting
+
+- None.
+
+## Stubs
+
+- TODO: Add an end-to-end flow page for filter -> card -> group-scoped network
+  navigation.
+- TODO: Add a troubleshooting page for create/edit auth-proxy gating and
+  failed group-action recovery.
+
+## Related Areas
 
 - [Docs Home](../README.md)
 - [Network Index](../network/README.md)
