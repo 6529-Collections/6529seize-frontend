@@ -7,6 +7,8 @@ boost activity.
 
 The section displays top boosted drops from the current wave and lets users jump
 directly to a boosted drop from the sidebar.
+The top row is visually emphasized, with rank badges using this visual style:
+`#1` in gold, `#2` in silver, and `#3` in amber.
 
 ## Location in the Site
 
@@ -35,6 +37,7 @@ directly to a boosted drop from the sidebar.
    - `Month`
 5. Review up to five cards ranked by recent boost activity.
 6. Click a card to jump to the referenced drop.
+7. In the list, the #1 card appears with the strongest visual emphasis.
 
 ## Common Scenarios
 
@@ -55,6 +58,8 @@ directly to a boosted drop from the sidebar.
 - The list is intentionally capped at five cards.
 - Time-window filters recalculate ranking by boost activity within the selected
   window.
+- Rank chip colors signal top-three placement as shown in the Overview.
+- The strongest emphasis is reserved for the #1 row.
 - This section is part of sidebar content and does not replace boost cards embedded
   in the wave message list.
 
@@ -72,6 +77,7 @@ directly to a boosted drop from the sidebar.
 - The section updates only from the boosted-drop feed polling behavior used by the
   app, not from a manual refresh control.
 - The maximum visible ranking depth is five items.
+- Only the top-ranked row is highlighted more prominently than the remaining rows.
 
 ## Related Pages
 

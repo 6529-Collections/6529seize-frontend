@@ -7,6 +7,8 @@ Wave drops support a per-user boost action with immediate visual feedback.
 Users can toggle a boost on a drop, and the boost count is shown on the same action control.
 Top boosted drops in the current wave also appear as contextual cards in the message
 list and in the right-sidebar trending section.
+The rank chip uses color for top placement:
+- Gold for #1, silver for #2, amber for #3, and neutral styling for lower ranks.
 Mobile boost/remove actions now include short on-screen confirmation feedback: an icon animation appears on the active drop card, and a success toast confirms the result.
 
 ## Location in the Site
@@ -40,6 +42,8 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
    values and an error toast is shown.
 6. Boosted-drop cards in the message list can be selected to jump directly to the
    corresponding drop in the same thread.
+7. In the right-sidebar trending view, the top-ranked row is visually emphasized
+   compared with lower-ranked rows.
 
 The drop body can still be used for reading and text selection; it does not
 toggle boost. On mobile, boosting is only available from the action control (or
@@ -56,6 +60,7 @@ mobile menu entry).
   - the boost count decreases if it was previously at least one.
 - Boosted drops cards show rank badges for the current boosted ranking (for example,
   `#1`, `#2`, ...).
+  - rank colors match the top-three color treatment above.
 - Boosted cards appear only for the trending set and include:
   - author
   - short content preview
@@ -78,6 +83,8 @@ mobile menu entry).
   available in the list are used.
 - Loading older pages above the anchors does not reposition boosted cards; they stay
   attached to the same in-thread drop.
+- In the right-sidebar trending section, only the top-ranked card keeps the strongest
+  emphasis; lower positions remain visible but more subdued.
 
 ## Failure and Recovery
 
@@ -97,6 +104,8 @@ mobile menu entry).
 - Temporary posts cannot be boosted.
 - Boosted-drop cards are driven by the wave’s boosted ranking feed and only show a
   limited top set.
+- Right-sidebar trending cards use a stronger visual treatment for rank 1 and muted
+  styling for ranks below that threshold.
 
 ## Related Pages
 
