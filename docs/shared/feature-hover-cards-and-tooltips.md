@@ -7,7 +7,8 @@ Parent: [Shared Index](README.md)
 Shared hover cards and tooltips stay anchored to their trigger during desktop
 hover and keyboard-focus interactions. Placement is adjusted to keep content
 readable when viewport bounds, scroll position, or card content changes while a
-card is open.
+card is open. Profile hover cards can additionally surface top rep context when
+that category data is available.
 
 ## Location in the Site
 
@@ -36,6 +37,9 @@ card is open.
 
 - Hovering an author handle opens a compact profile card with identity details,
   follower summary, and quick actions when available.
+- In profile cards that include rep breakdown data, users can see up to three top
+  rep categories, ordered by rating and then contributor count.
+- Each Top Rep entry shows a compact category label and a signed rating value.
 - Hovering a wave mention opens a wave summary card with name, author, and
   drop/joined metrics.
 - Tooltips near viewport edges can flip to another side to remain visible.
@@ -52,6 +56,8 @@ card is open.
   recalculated against the updated trigger location.
 - Small viewports clamp card position to viewport padding when full ideal
   placement is not possible.
+- If a profile has no rep categories yet, the card renders without the Top Rep
+  section.
 
 ## Failure and Recovery
 
@@ -66,6 +72,8 @@ card is open.
 
 - Hover-card behavior depends on hover/focus input and is not a replacement for
   inline labels on touch-first interactions.
+- Top Rep data is optional; absence of this data does not affect other profile
+  card behavior or contents.
 - Placement prioritizes viewport fit; the final side may differ from a preferred
   side when space is constrained.
 - Show/hide timing can vary by feature using the shared tooltip wrapper.

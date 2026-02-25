@@ -64,6 +64,8 @@ scrolling.
 - Flick-scrolling on touch devices and continuing through the feed smoothly
   while older rows load.
 - Opening a notification drop and navigating into the relevant wave thread.
+- Each row with an associated identity now opens with a standardized header that
+  includes the actor profile chip and follow action.
 - Seeing a `sent a priority alert 🚨` notification row that includes a full linked
   drop preview and allows reply/quote actions.
 - Selecting reply/quote controls in a priority alert and opening the related wave with
@@ -91,6 +93,8 @@ scrolling.
   notification content.
 - Priority alerts currently appear in the feed by default and are included in the
   default `All` scope; they are not grouped under a dedicated cause chip yet.
+- Inline follow actions in applicable rows follow the actor’s current follow state
+  and remain in place while scrolling older notifications.
 
 ## Failure and Recovery
 
