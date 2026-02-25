@@ -3,8 +3,8 @@
 ## Overview
 
 The `Brain` tab shows a profile's drop feed on the profile root route. It lets
-users read that profile's recent drops and open each drop in its source wave or
-direct-message thread.
+users read that profile's recent drops and open each drop in a profile-local
+drop surface, then move to the related wave or direct-message thread as needed.
 
 ## Location in the Site
 
@@ -23,7 +23,7 @@ direct-message thread.
 1. Open a profile root URL.
 2. The page resolves the profile and loads the first set of drops.
 3. Scroll to load older drops as needed.
-4. Select a drop to open it in the related wave or direct-message thread.
+4. Select a drop to open a profile-local single-drop surface.
 
 ## Common Scenarios
 

@@ -9,19 +9,23 @@ available, `Winning Artworks` views with tabs for switching between them.
 
 ## Location in the Site
 
+- Profile headers under `/{user}` and `/{user}/<tab>`.
 - Memes leaderboard and meme participation drop rows that render artist info.
 - Single-wave drop headers in wave streams.
 - Single-wave author blocks in wave item details.
 
 ## Entry Points
 
+- Click the artist activity badge in a profile header when submissions and/or win
+  counts are present.
 - Click the artist activity badge next to an artist name when submissions and/or
-  win counts are present.
+  win counts are present in wave/meme contexts.
 - Open a drop row in one of the above contexts and use those badges in that row.
 
 ## User Journey
 
-1. Open a wave or meme feed where an artist appears with badges.
+1. Open a context where an artist row is shown (`/waves`, profile pages, or meme
+   lists).
 2. If the artist has main-stage activity, the activity badge is visible.
 3. If only active submissions exist, the badge uses a palette icon and opens
    `Active Submissions`.
@@ -29,10 +33,10 @@ available, `Winning Artworks` views with tabs for switching between them.
    `Winning Artworks`.
 5. If both exist, the badge uses a trophy icon with a blue marker dot and opens
    `Active Submissions` by default.
-6. In rows with both content types, use `Active Submissions` and `Winning
-   Artworks` tabs to switch.
+6. In rows with both content types, use `Active Submissions` and `Winning Artworks`
+   tabs to switch.
 7. Select an item card:
-   - the modal closes and opens the selected drop in the current wave context.
+   - the modal closes and opens the selected drop in the current context.
 8. Close using the close button; desktop also supports backdrop click, and mobile app
    surfaces support closing with the same control or swipe-to-close behavior.
 
@@ -43,8 +47,10 @@ available, `Winning Artworks` views with tabs for switching between them.
 - Artists with both types open with the clicked badge’s tab preselected.
 - Active and winner views support card-level drop interactions and related metadata
   that is already available in those sections (media, ranks, ratings context).
-- On mobile and touch surfaces, badge hover tooltips are omitted and the badge remains
-  clickable.
+- On mobile and touch surfaces, badge hover tooltips are omitted and the badge
+  remains clickable.
+- Profile headers only show one badge even when both counts are present, and
+  encode both states in that single control.
 
 ## Edge Cases
 
@@ -79,6 +85,7 @@ available, `Winning Artworks` views with tabs for switching between them.
 
 ## Related Pages
 
+- [Profile Header Summary](../../profiles/navigation/feature-header-summary.md)
 - [Waves Index](../README.md)
 - [Wave Drop Vote Summary and Modal](feature-vote-summary-and-modal.md)
 - [Wave Drop Content Display](feature-content-display.md)

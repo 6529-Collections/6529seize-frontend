@@ -3,7 +3,8 @@
 ## Overview
 
 The profile header appears at the top of every profile tab route and provides
-identity context, cover/avatar visuals, quick stats links, and profile actions.
+identity context, cover/avatar visuals, quick stats links, submission/winning
+activity visibility, and profile actions.
 
 ## Location in the Site
 
@@ -13,6 +14,8 @@ identity context, cover/avatar visuals, quick stats links, and profile actions.
 
 - Open any profile tab route directly.
 - Switch to any profile tab from the tab bar.
+- Open profile pages from links outside the profile section.
+- Click the artist activity badge when it appears.
 
 ## User Journey
 
@@ -26,7 +29,13 @@ identity context, cover/avatar visuals, quick stats links, and profile actions.
    - About text when applicable
 4. Use quick stat links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`) to move to
    related profile routes.
-5. Use available actions (follow, direct message, edit controls) based on who is
+5. If the profile has main-stage activity, an artist activity badge appears next
+   to the name line:
+   - palette style for active submissions
+   - trophy style for winning artworks
+   - trophy with accent marker when both are present
+6. Open the Artist Activity modal from the badge.
+7. Use available actions (follow, direct message, edit controls) based on who is
    viewing the profile.
 
 ## Common Scenarios
@@ -45,12 +54,17 @@ identity context, cover/avatar visuals, quick stats links, and profile actions.
 - On desktop, About content is shown in full.
 - The banner editor supports Gradient and Image modes for your own editable
   profile.
-- Viewing someone else's profile while signed in with a handle can show `Follow` and
-  direct-message actions.
+- Viewing someone else's profile while signed in with a handle can show `Follow`
+  and direct-message actions.
 - Viewing your own profile with no active proxy context enables profile editing
   controls in the header.
-- Submission/win artist badges appear when the profile has main-stage
-  submissions or wins.
+- The artist activity badge appears only when at least one of these is true:
+  - `active_main_stage_submission_ids` is non-empty
+  - `winner_main_stage_drop_ids` is non-empty
+- If one count type exists, the modal opens that view first; if both exist, it
+  opens `Active Submissions` by default.
+- On desktop and mouse-based devices, a tooltip shows the current submission and
+  win totals for the badge.
 
 ## Edge Cases
 
@@ -71,6 +85,8 @@ identity context, cover/avatar visuals, quick stats links, and profile actions.
   - Followers count can fall back to `0`.
 - If direct-message creation fails, an error toast is shown and users can retry
   the action.
+- If the artist activity modal fails to surface available items, users can reopen
+  it to retry.
 - If the profile cannot be resolved, users see the `USER OR PAGE` not-found
   screen:
   - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
@@ -79,6 +95,8 @@ identity context, cover/avatar visuals, quick stats links, and profile actions.
 
 - Header follower counts are load-time values and are not guaranteed to update
   live while staying on the same route.
+- Artist activity badges are derived from loaded profile payload fields and are
+  not shown if payload values are missing.
 
 ## Related Pages
 
@@ -88,4 +106,5 @@ identity context, cover/avatar visuals, quick stats links, and profile actions.
 - [Profile Tabs](feature-tabs.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Tab Content](../tabs/feature-tab-content.md)
+- [Wave Drop Artist Preview Modal](../../waves/drop-actions/feature-artist-preview-modal.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
