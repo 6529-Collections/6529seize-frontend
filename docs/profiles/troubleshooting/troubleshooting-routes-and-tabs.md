@@ -28,7 +28,7 @@ profile link lands somewhere unexpected.
   - The user handle/wallet does not resolve.
   - The tab path is unsupported.
 - This is the shared not-found surface:
-  - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
+  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 - Tab missing:
   - `Brain`/`Waves` are hidden when Waves is disabled.
   - `Subscriptions` is hidden on iOS outside the US.

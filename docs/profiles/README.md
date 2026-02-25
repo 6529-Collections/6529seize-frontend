@@ -21,7 +21,7 @@ oversized index.
 
 ## Troubleshooting
 
-- [Profile Troubleshooting](troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Troubleshooting](troubleshooting/README.md)
 
 ## Stubs
 
