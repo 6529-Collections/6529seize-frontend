@@ -62,8 +62,10 @@ targeted drop so it is easier to locate in the list.
 - If pending message count is large, the control label caps at `99+`.
 - While reading older content on Apple mobile, the most recently visible serial
   remains visible while newer serials queue as pending.
-- If a thread opens from a link with `serialNo` plus optional `divider`, the
-  divider context is applied and those query params are cleared after initialization.
+- If a thread opens from a link with `serialNo` plus `divider`, the divider context
+  is applied and those query params are cleared after initialization.
+- If a thread opens with only `serialNo`, the divider still uses the current unread
+  boundary when available.
 
 ## Edge Cases
 
@@ -87,8 +89,9 @@ targeted drop so it is easier to locate in the list.
   clears automatically and normal chat interactions continue.
 - In environments with limited browser observer support, serial-target jumps still
   complete and targeted-drop highlighting remains temporary.
-- If `serialNo` and `divider` jump params fail to target visible data immediately,
-  users can continue reading while the jump control remains available.
+- If `serialNo` jump params fail to target visible data immediately, or `divider`
+  is absent/invalid, users can continue reading while the jump control remains
+  available as data resolves.
 
 ## Limitations / Notes
 

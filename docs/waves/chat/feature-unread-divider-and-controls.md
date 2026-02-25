@@ -3,8 +3,10 @@
 ## Overview
 
 When a wave has unread activity, the message list can insert a divider labeled
-`New Messages` at the first unread serial. A floating control jumps to that point
-and keeps unread navigation available while users read older messages.
+`New Messages` at the unread boundary. The divider is typically driven by a
+`divider` query value created from the wave’s first-unread serial.
+A floating control jumps to that point and keeps unread navigation available
+while users read older messages.
 
 On mobile, the same control combines with the bottom pending-message control so both
 actions stay within reach.
@@ -17,15 +19,20 @@ actions stay within reach.
 
 ## Entry Points
 
-- Open a wave from the Brain list while it has unread drops.
+- Open a wave from the Brain or messages list while it has unread drops
+  (the row link includes `divider=<serial_no>`).
 - Open a wave through a row whose URL includes `divider=<serial_no>`.
-- Open a `serialNo` link after a `divider` query value is added by list navigation.
+- Open a `serialNo` link after list navigation adds `divider` to the URL.
+- Open a `serialNo` link without `divider`; if the thread already has unread
+  metadata, the current unread boundary is used.
 - Use drop actions to mark a message as unread (see `Mark a Drop as Unread`).
 
 ## User Journey
 
-1. Open a wave where the list reports `first_unread_drop_serial_no`.
-2. The chat renders an unread divider at that serial position.
+1. Open a wave where the list reports `first_unread_drop_serial_no` or a
+   direct thread link includes `serialNo`.
+2. The chat renders an unread divider at `divider` (or the current first-unread
+   boundary when `divider` is not available).
 3. If the divider is outside the viewport, a floating control appears:
    - Arrow direction points to where unread content starts relative to your current
      scroll position.
@@ -49,8 +56,9 @@ actions stay within reach.
 
 ## Edge Cases
 
-- If `divider` or `serialNo` query values are invalid, the chat opens using normal
-  behavior.
+- If `divider` or `serialNo` query values are invalid, or `divider` is missing but
+  unread metadata exists, the chat still opens normally and uses the best available
+  known unread boundary where possible.
 - If the divider serial is not part of loaded data yet, the control remains available
   and resolves as data renders.
 - If users manually dismiss the unread control, it stays hidden for that session state
