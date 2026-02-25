@@ -88,7 +88,8 @@ For single-token pages, users usually transfer one card/asset at a time with:
 - If a wallet connector is unavailable, modal submission fails with client-ready
   messaging and users can retry after reconnecting.
 - If a transaction is rejected or fails on-chain, status is shown per item as
-  `error` with the available reason text where available.
+  `error` with the specific failure reason text available from the wallet/API
+  layer (for example revert details for batched ERC-1155 transfers).
 - For in-flight transfers, users can:
   - Keep the modal open while waiting for signatures and confirmations.
   - Note that the page warns transfers are irreversible before signing.
