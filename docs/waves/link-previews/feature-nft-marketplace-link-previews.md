@@ -28,8 +28,10 @@ actions in full-card layouts.
 ## User Journey
 
 1. Open a thread with a supported marketplace URL in drop text.
-2. As the card approaches viewport, a loading placeholder appears.
-3. Marketplace preview data resolves and fills card media/title/price details.
+2. The marketplace card mounts immediately in the drop and shows a loading
+   placeholder.
+3. Marketplace preview data starts loading right away and fills card
+   media/title/price details when it resolves.
 4. Use open/copy actions from the card frame without leaving the thread
    unless you choose to open the marketplace destination.
 5. If newer marketplace enrichment arrives later, card fields can refresh
@@ -58,8 +60,8 @@ actions in full-card layouts.
   previews are shown again.
 - OpenSea overlay-style preview images are filtered so card media can use
   cleaner NFT media sources when available.
-- If card content is still outside viewport, users can continue scrolling and
-  the card will resolve when near view.
+- Cards do not wait for a near-viewport trigger; once the drop card is
+  rendered, preview loading starts immediately.
 
 ## Failure and Recovery
 

@@ -33,6 +33,7 @@ row with direct submit controls and a supported-format reference.
    shows the canonical URL it will submit.
 5. Submit with `Enter` or `Drop`.
 6. The drop is posted and the URL input clears.
+7. In leaderboard composer layouts, a success toast confirms submission.
 
 ## Common Scenarios
 
@@ -41,6 +42,8 @@ row with direct submit controls and a supported-format reference.
 - `www.` host variants for supported marketplaces are accepted.
 - In leaderboard variant, users can open `Supported URLs` to see accepted URL
   formats before posting.
+- In leaderboard variant, successful submissions show
+  `Drop submitted successfully`.
 - Reply and quote context can be preserved while posting a curation URL drop.
 
 ## Edge Cases
@@ -53,6 +56,8 @@ row with direct submit controls and a supported-format reference.
   are rejected.
 - In leaderboard variant, invalid non-empty input can trigger an attention
   prompt that points users to `Supported URLs`.
+- Non-leaderboard curation composer layouts post successfully without the
+  leaderboard success toast.
 
 ## Failure and Recovery
 
