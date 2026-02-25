@@ -6,6 +6,10 @@ Wave chat keeps users anchored to the newest messages when they are already at t
 bottom, while avoiding forced jumps when they scroll away to read older content.
 On Apple mobile clients, newly arrived messages can be queued as pending while
 users continue reading older messages.
+Pinning decisions are re-checked as the list position and container layout change.
+That means temporary layout shifts (such as keyboard open/close states or dynamic
+content changes) can change whether the list is considered pinned without forcing
+unexpected jumps.
 On Android and iOS mobile clients, chat layout height is recalculated while the
 keyboard is open to avoid extra bottom whitespace and keep the composer area in
 the usable viewport.
@@ -64,6 +68,8 @@ less disruptive.
 
 - While pinned at bottom, new incoming/outgoing messages continue in place with
   no manual action.
+- Tapping the bottom jump control from a reading position returns immediately to
+  the latest message and restores pinned scroll behavior.
 - While reading older messages, chat stays at your reading position instead of
   auto-jumping.
 - While older pages are loading, a thin loading bar appears above the oldest
@@ -91,6 +97,8 @@ less disruptive.
 
 - If both unread and pending-message controls are active, controls are combined
   into a stacked button group.
+- If layout changes move the message list briefly while reading older messages, the
+  chat waits to re-pin until bottom position is confirmed again.
 - Older-page loading is only available when the feed already has at least 25
   loaded drops and more pages are available.
 - If a jump target is outside the currently loaded window, the chat requests the
@@ -116,6 +124,9 @@ less disruptive.
   can retry by scrolling again or refreshing.
 - If a targeted jump/scroll operation stalls, the temporary scrolling overlay
   clears automatically and normal chat interactions continue.
+- If container height changes or images load asynchronously while you are reading
+  older messages, the chat keeps your current reading position until you return to
+  the pinned threshold.
 - In environments with limited browser observer support, serial-target jumps still
   complete and targeted-drop highlighting remains temporary.
 - If `serialNo` jump params fail to target visible data immediately, or `divider`
@@ -125,7 +136,7 @@ less disruptive.
 ## Limitations / Notes
 
 - Auto-scroll for temporary drops occurs only when the user is pinned to the
-  bottom.
+  bottom, and the bottom jump control always re-pins to the latest message.
 - Pending-message hiding/reveal behavior is Apple-mobile-specific.
 - Pending-message count is a compact indicator, not a full unread history.
 - Targeted-drop highlighting appears only for explicit serial-target jumps and
