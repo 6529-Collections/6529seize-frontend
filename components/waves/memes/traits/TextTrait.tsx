@@ -69,7 +69,8 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Handle blur (when user finishes typing)
     const handleBlur = useCallback(() => {
-      if (inputRef.current && inputRef.current.value !== traits[field]) {
+      const currentTraitValue = ((traits[field] as string) ?? "").toString();
+      if (inputRef.current && inputRef.current.value !== currentTraitValue) {
         updateText(field, inputRef.current.value);
       }
       // Call parent onBlur if provided

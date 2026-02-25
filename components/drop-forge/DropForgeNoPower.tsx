@@ -10,7 +10,7 @@ export default function DropForgeNoPower() {
 
   useEffect(() => {
     if (seconds === 1) {
-      const t = setTimeout(() => router.push("/"), 1000);
+      const t = setTimeout(() => router.replace("/"), 1000);
       return () => clearTimeout(t);
     }
     if (seconds > 1) {

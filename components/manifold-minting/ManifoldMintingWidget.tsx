@@ -97,7 +97,7 @@ export default function ManifoldMintingWidget(
 
   function getReadContractsParams() {
     const params: any = [];
-    merkleProofs.map((mp) => {
+    merkleProofs.forEach((mp) => {
       params.push({
         address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
         abi: props.abi,

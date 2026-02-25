@@ -9,8 +9,12 @@ jest.mock('@/components/header/share/HeaderQRScanner', () => () => (
 jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
+jest.mock('@/components/header/useChainSwitcher', () => ({
+  useChainSwitcher: jest.fn(),
+}));
 
 const { useSeizeConnectContext } = require('@/components/auth/SeizeConnectContext');
+const { useChainSwitcher } = require('@/components/header/useChainSwitcher');
 
 function setup(address: string | undefined) {
   const seizeConnect = jest.fn();
@@ -19,6 +23,11 @@ function setup(address: string | undefined) {
     address,
     seizeConnect,
     seizeDisconnectAndLogout,
+  });
+  (useChainSwitcher as jest.Mock).mockReturnValue({
+    chains: [],
+    currentChainName: '1',
+    switchToNextChain: jest.fn(),
   });
   const onNavigate = jest.fn();
   render(<AppUserConnect onNavigate={onNavigate} />);

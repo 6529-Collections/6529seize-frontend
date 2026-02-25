@@ -4,8 +4,8 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { useChainId, useChains, useSwitchChain } from "wagmi";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useChainSwitcher } from "./useChainSwitcher";
 import PushNotificationSettings from "./PushNotificationSettings";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 
@@ -17,24 +17,9 @@ export default function AppUserConnect({
   const { address, seizeConnect, seizeDisconnectAndLogout } =
     useSeizeConnectContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const chains = useChains();
-  const chainId = useChainId();
-  const currentChain =
-    chains.find((c) => c.id === chainId)?.name ?? chainId.toString();
-  const { switchChain } = useSwitchChain();
+  const { chains, currentChainName, switchToNextChain } = useChainSwitcher();
 
   const qrScanner = <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />;
-
-  const onSwitchChain = () => {
-    if (chains.length < 2) return;
-    const currentIndex = chains.findIndex((c) => c.id === chainId);
-    const nextIndex =
-      currentIndex === -1 ? 0 : (currentIndex + 1) % chains.length;
-    const nextChain = chains[nextIndex];
-    if (nextChain && nextChain.id !== chainId) {
-      switchChain({ chainId: nextChain.id });
-    }
-  };
 
   const connectButton = (
     <button
@@ -61,12 +46,12 @@ export default function AppUserConnect({
       </button>
       {chains.length > 1 && (
         <button
-          onClick={onSwitchChain}
+          onClick={switchToNextChain}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
           aria-label="Switch Chain"
         >
           <ArrowsRightLeftIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-          <span>Chain: {currentChain} | Change</span>
+          <span>Chain: {currentChainName} | Change</span>
         </button>
       )}
       <button

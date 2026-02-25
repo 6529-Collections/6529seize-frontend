@@ -39,7 +39,7 @@ export default function TheMemesMint({
           ? (nft.metadata as ArweaveMetadata)
           : {},
     }),
-    [nft]
+    [nft.id, nft.metadata]
   );
 
   return (

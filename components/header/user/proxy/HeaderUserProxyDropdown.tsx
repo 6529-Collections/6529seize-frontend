@@ -14,7 +14,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
-import { useChainId, useChains, useSwitchChain } from "wagmi";
+import { useChainSwitcher } from "../../useChainSwitcher";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
 export default function HeaderUserProxyDropdown({
@@ -37,11 +37,7 @@ export default function HeaderUserProxyDropdown({
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
 
-  const chains = useChains();
-  const chainId = useChainId();
-  const currentChain =
-    chains.find((c) => c.id === chainId)?.name ?? chainId.toString();
-  const { switchChain } = useSwitchChain();
+  const { chains, currentChainName, switchToNextChain } = useChainSwitcher();
 
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
@@ -70,13 +66,7 @@ export default function HeaderUserProxyDropdown({
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
   const onSwitchChain = () => {
-    if (chains.length < 2) return;
-    const currentIndex = chains.findIndex((c) => c.id === chainId);
-    const nextIndex =
-      currentIndex === -1 ? 0 : (currentIndex + 1) % chains.length;
-    const nextChain = chains[nextIndex];
-    if (nextChain && nextChain.id !== chainId) {
-      switchChain({ chainId: nextChain.id });
+    if (switchToNextChain()) {
       onClose();
     }
   };
@@ -220,7 +210,7 @@ export default function HeaderUserProxyDropdown({
                           height={16}
                           width={16}
                         />
-                        <span>Chain: {currentChain} | Change</span>
+                        <span>Chain: {currentChainName} | Change</span>
                       </button>
                     )}
                     <button

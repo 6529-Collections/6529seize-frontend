@@ -48,11 +48,16 @@ function getEthForCards(count: number): number {
 function getTopUpModalEmoji(
   status: "confirm_wallet" | "submitted" | "success" | "error"
 ): string {
-  if (status === "success") return "/emojis/sgt_saluting_face.webp";
-  if (status === "error") return "/emojis/sgt_sob.webp";
-  if (status === "confirm_wallet") return "/emojis/sgt_flushed.webp";
-  if (status === "submitted") return "/emojis/sgt_flushed.webp";
-  return "/emojis/sgt_flushed.webp";
+  const emojiByStatus: Record<
+    "confirm_wallet" | "submitted" | "success" | "error",
+    string
+  > = {
+    confirm_wallet: "/emojis/sgt_flushed.webp",
+    submitted: "/emojis/sgt_flushed.webp",
+    success: "/emojis/sgt_saluting_face.webp",
+    error: "/emojis/sgt_sob.webp",
+  };
+  return emojiByStatus[status];
 }
 
 export default function UserPageSubscriptionsTopUp() {

@@ -164,11 +164,6 @@ export default function MediaDisplayGLB({
                 fill={isActive ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.02)"}
                 stroke="currentColor"
               />
-
-              {/* All connecting edges (re‑stroked for extra weight) */}
-              <path d="M6 9v6l6 3 6-3v-6" fill="none" stroke="currentColor" />
-              <path d="M6 9l6-3 6 3" fill="none" stroke="currentColor" />
-              <path d="M12 6v12" fill="none" stroke="currentColor" />
             </svg>
           </button>
 

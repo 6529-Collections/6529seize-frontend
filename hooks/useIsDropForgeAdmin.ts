@@ -25,6 +25,6 @@ export function useIsDropForgeAdmin(): {
 
   return {
     isDropForgeAdmin: areEqualAddresses(readResult.data, address),
-    isFetching: Boolean(address) && (readResult.isLoading || readResult.isFetching),
+    isFetching: Boolean(address) && readResult.isFetching,
   };
 }

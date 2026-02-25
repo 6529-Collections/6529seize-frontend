@@ -69,13 +69,16 @@ export const SeizeSettingsProvider = ({
 
         if (!isMountedRef.current) return;
 
-        setSeizeSettings({
+        setSeizeSettings((previous) => ({
+          ...previous,
           ...settings,
+          distribution_admin_wallets: settings.distribution_admin_wallets ?? [],
+          claims_admin_wallets: settings.claims_admin_wallets ?? [],
           memes_wave_id:
             publicEnv.DEV_MODE_MEMES_WAVE_ID ?? settings.memes_wave_id,
           curation_wave_id:
             publicEnv.DEV_MODE_CURATION_WAVE_ID ?? settings.curation_wave_id,
-        });
+        }));
         setLoadError(null);
         setIsLoaded(true);
       } catch (error) {

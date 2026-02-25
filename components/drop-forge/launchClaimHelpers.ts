@@ -5,7 +5,7 @@ export function isMissingRequiredLaunchInfo(claim: MintingClaim): boolean {
   const noImageLocation = !claim.image_location?.trim();
   const noMetadataLocation = !claim.metadata_location?.trim();
   const noSeason = getClaimSeason(claim).trim() === "";
-  const noEditionSize = claim.edition_size == null;
+  const noEditionSize = claim.edition_size == null || claim.edition_size <= 0;
   const noAttributes =
     !Array.isArray(claim.attributes) || claim.attributes.length === 0;
   const hasEmptyAttributeValue =

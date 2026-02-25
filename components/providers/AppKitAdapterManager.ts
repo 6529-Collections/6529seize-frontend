@@ -21,6 +21,7 @@ type ConnectionState = "connecting" | "connected" | "disconnected";
 export class AppKitAdapterManager {
   private currentAdapter: WagmiAdapter | null = null;
   private currentWallets: AppWallet[] = [];
+  private currentChains: Chain[] = [];
   private readonly requestPassword: (
     address: string,
     addressHashed: string
@@ -105,17 +106,29 @@ export class AppKitAdapterManager {
 
     this.currentAdapter = wagmiAdapter;
     this.currentWallets = [...appWallets];
+    this.currentChains = [...chains];
 
     return wagmiAdapter;
   }
 
-  shouldRecreateAdapter(newWallets: AppWallet[]): boolean {
+  shouldRecreateAdapter(newWallets: AppWallet[], newChains?: Chain[]): boolean {
     if (!Array.isArray(newWallets)) {
       throw new AdapterError("ADAPTER_009: newWallets must be an array");
+    }
+    if (typeof newChains !== "undefined" && !Array.isArray(newChains)) {
+      throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
     }
 
     if (!this.currentAdapter) return true;
     if (newWallets.length !== this.currentWallets.length) return true;
+    if (newChains) {
+      const currentChainIds = this.getSortedChainIdentifiers(this.currentChains);
+      const newChainIds = this.getSortedChainIdentifiers(newChains);
+      if (currentChainIds.length !== newChainIds.length) return true;
+      for (let i = 0; i < newChainIds.length; i++) {
+        if (currentChainIds[i] !== newChainIds[i]) return true;
+      }
+    }
 
     const currentAddresses = new Set(
       this.currentWallets.map((w) => {
@@ -158,7 +171,7 @@ export class AppKitAdapterManager {
       throw new AdapterError("ADAPTER_012: appWallets must be an array");
     }
 
-    const cacheKey = this.getCacheKey(appWallets);
+    const cacheKey = this.getCacheKey(appWallets, chains);
 
     if (this.adapterCache.has(cacheKey)) {
       const cachedAdapter = this.adapterCache.get(cacheKey);
@@ -169,6 +182,7 @@ export class AppKitAdapterManager {
       }
       this.currentAdapter = cachedAdapter;
       this.currentWallets = [...appWallets];
+      this.currentChains = [...chains];
       return cachedAdapter;
     }
 
@@ -224,13 +238,12 @@ export class AppKitAdapterManager {
     }
   }
 
-  private getCacheKey(wallets: AppWallet[]): string {
+  private getCacheKey(wallets: AppWallet[], chains: Chain[] = [mainnet]): string {
     if (!Array.isArray(wallets)) {
       throw new AdapterError(
         "ADAPTER_013: Cannot generate cache key: wallets must be an array"
       );
     }
-
     const addresses = wallets.map((w) => {
       if (!w?.address) {
         throw new AdapterError(
@@ -240,12 +253,27 @@ export class AppKitAdapterManager {
       return w.address;
     });
 
-    if (addresses.length === 0) {
-      return "empty-wallets";
+    const sortedAddresses = addresses.toSorted((a, b) => a.localeCompare(b));
+    const chainIdentifiers = this.getSortedChainIdentifiers(chains);
+
+    const walletsKey =
+      sortedAddresses.length === 0 ? "empty-wallets" : sortedAddresses.join(",");
+    return `${walletsKey}|chains:${chainIdentifiers.join(",")}`;
+  }
+
+  private getSortedChainIdentifiers(chains: Chain[]): string[] {
+    if (!Array.isArray(chains) || chains.length === 0) {
+      throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
     }
 
-    const sortedAddresses = addresses.toSorted((a, b) => a.localeCompare(b));
-    return sortedAddresses.join(",");
+    return chains
+      .map((chain) => {
+        if (!chain || typeof chain.id !== "number") {
+          throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
+        }
+        return `${chain.id}`;
+      })
+      .toSorted((a, b) => a.localeCompare(b));
   }
 
   private buildCoinbaseV3MobileWallet(): CreateConnectorFn {
@@ -298,6 +326,7 @@ export class AppKitAdapterManager {
       // Clear current adapter reference
       this.currentAdapter = null;
       this.currentWallets = [];
+      this.currentChains = [];
 
       // Clear connection states
       this.connectionStates.clear();

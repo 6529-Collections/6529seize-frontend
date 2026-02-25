@@ -5,8 +5,12 @@ import { AuthContext } from '@/components/auth/Auth';
 
 jest.mock('@/components/header/user/proxy/HeaderUserProxyDropdownItem', () => () => <div data-testid="item" />);
 jest.mock('@/components/auth/SeizeConnectContext');
+jest.mock('@/components/header/useChainSwitcher', () => ({
+  useChainSwitcher: jest.fn(),
+}));
 
 const { useSeizeConnectContext: mockConnect } = require('@/components/auth/SeizeConnectContext');
+const { useChainSwitcher } = require('@/components/header/useChainSwitcher');
 
 const profileBase = {
   handle: 'alice',
@@ -26,6 +30,11 @@ function renderDropdown(options: any) {
     setActiveProfileProxy: jest.fn(),
     receivedProfileProxies: [],
   } as any;
+  (useChainSwitcher as jest.Mock).mockReturnValue({
+    chains: [],
+    currentChainName: '1',
+    switchToNextChain: jest.fn(() => false),
+  });
   const onClose = jest.fn();
   render(
     <AuthContext.Provider value={authValue}>

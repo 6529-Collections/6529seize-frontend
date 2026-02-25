@@ -342,6 +342,7 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   body: T;
   headers?: Record<string, string> | undefined;
   params?: Z | undefined;
+  signal?: AbortSignal | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -352,7 +353,8 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
     url,
     "PUT",
     getHeaders(param.headers, true),
-    JSON.stringify(param.body)
+    JSON.stringify(param.body),
+    param.signal
   );
 };
 

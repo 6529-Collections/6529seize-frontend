@@ -7,6 +7,7 @@ import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/Ro
 import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { formatCount } from "@/helpers/format.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
@@ -191,7 +192,6 @@ export default function ReviewDistributionPlanTableRow({
   }, [item.type]);
 
   const isPublic = item.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
-  const formatCount = (count: number) => count.toLocaleString();
 
   return (
     <DistributionPlanTableRowWrapper>

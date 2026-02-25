@@ -1,11 +1,8 @@
 "use client";
 
 import { useTitle } from "@/contexts/TitleContext";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { useWave } from "@/hooks/useWave";
-import { useWaveData } from "@/hooks/useWaveData";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -18,9 +15,10 @@ import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
+  readonly isCurrentWaveDm?: boolean;
 }
 
-const NavItem = ({ item }: Props) => {
+const NavItem = ({ item, isCurrentWaveDm = false }: Props) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { activeView, handleNavClick } = useViewContext();
@@ -29,15 +27,6 @@ const NavItem = ({ item }: Props) => {
   const { icon } = item;
 
   const isLogoItem = name === "Home";
-
-  // Determine if the current wave (if any) is a DM
-  const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const { data: waveData } = useWaveData({
-    waveId: waveIdFromQuery,
-    // Minimal onWaveNotFound, actual handling of not found is likely elsewhere
-    onWaveNotFound: () => {},
-  });
-  const { isDm: isCurrentWaveDmValue } = useWave(waveData);
 
   // Add unread notifications logic
   const { connectedProfile } = useAuth();
@@ -57,15 +46,19 @@ const NavItem = ({ item }: Props) => {
 
   useEffect(() => {
     if (item.name !== "Notifications") return;
-    setTitle(
-      haveUnreadNotifications
-        ? `(${notifications?.unread_count}) Notifications | 6529.io`
-        : "6529.io"
-    );
+    if (haveUnreadNotifications) {
+      setTitle(`(${notifications?.unread_count}) Notifications | 6529.io`);
+    }
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
     }
-  }, [haveUnreadNotifications, notifications?.unread_count]);
+  }, [
+    haveUnreadNotifications,
+    item.name,
+    notifications?.unread_count,
+    removeAllDeliveredNotifications,
+    setTitle,
+  ]);
 
   if (item.disabled) {
     return (
@@ -105,7 +98,7 @@ const NavItem = ({ item }: Props) => {
     pathname ?? "",
     searchParams ?? new URLSearchParams(),
     activeView,
-    isCurrentWaveDmValue
+    isCurrentWaveDm
   );
 
   return (

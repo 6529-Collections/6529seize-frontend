@@ -8,6 +8,8 @@ const DropForgeIcon = ({
     viewBox="0 0 32 32"
     preserveAspectRatio="xMidYMid meet"
     className={className}
+    aria-hidden="true"
+    focusable="false"
   >
     <path
       fill="currentColor"
