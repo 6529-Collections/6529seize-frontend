@@ -60,7 +60,8 @@ identity context, quick stats links, and profile actions.
 - If direct-message creation fails, an error toast is shown and users can retry
   the action.
 - If the profile cannot be resolved, users see the `USER OR PAGE` not-found
-  screen.
+  screen:
+  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
 
 ## Limitations / Notes
 

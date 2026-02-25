@@ -76,7 +76,8 @@ separate route and does not alter the tab's sort/filter/pagination behavior.
 - If transfer submission fails in modal, users can re-open transfer mode and rebuild
   the selection.
 - If profile tabs fail to resolve in normal route mode, profile-level not-found
-  behavior applies.
+  behavior applies:
+  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 
 ## Limitations / Notes
 

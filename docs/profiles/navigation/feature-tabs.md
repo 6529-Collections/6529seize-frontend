@@ -53,10 +53,10 @@ users can deep-link to a specific profile section.
 
 ## Failure and Recovery
 
-- If the profile or route is not found, users see the `USER OR PAGE` not-found
-  screen.
-- If profile loading fails for a non-404 reason, users may see a generic app
-  error state. Reloading the page retries the request.
+- If the profile or route is not found, users see the shared not-found surface:
+  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
+- If profile loading fails for a non-404 reason, users may see a shared app
+  error state. Reloading the route retries the request.
 
 ## Limitations / Notes
 
@@ -78,3 +78,4 @@ users can deep-link to a specific profile section.
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)

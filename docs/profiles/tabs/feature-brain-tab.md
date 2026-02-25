@@ -45,8 +45,8 @@ direct-message thread.
 
 ## Failure and Recovery
 
-- If the profile route cannot be resolved, users see the `USER OR PAGE`
-  not-found screen.
+- If the profile route cannot be resolved, users see the shared not-found screen:
+  [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 - If the drop feed request fails, users can still see `No Drops to show`;
   refreshing retries the request.
 - If loading additional pages fails while scrolling, already loaded drops stay

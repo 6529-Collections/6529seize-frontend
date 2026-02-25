@@ -71,7 +71,9 @@ These redirects apply to the following legacy routes:
 ## Failure and Recovery
 
 - If the destination is temporarily unavailable, users see the destination
-  route's error page (or a browser/network error for external targets).
+  route's shared error surface (or a browser/network error for external
+  targets).
+  - [Route Error and Not-Found Screens](feature-route-error-and-not-found.md)
 - If `/my-stream` is opened from a non-desktop browser and no compatibility
   redirect is applied, users can open canonical routes directly (`/`,
   `/waves`, `/messages`, `/notifications`).

@@ -50,8 +50,10 @@ This behavior appears in multiple areas, including:
 
 ## Failure and Recovery
 
-- If a destination route cannot be resolved, users see the route-level `Not
-  Found` or error page and can return with browser back or sidebar navigation.
+- If a destination route cannot be resolved, users see the shared not-found
+  surface or shared route error screen and can return with browser back or
+  sidebar navigation.
+  - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
 - If redirected destinations are unavailable, users see the destination
   route's failure state and can retry by refreshing or reopening the link.
 - If a hash target is missing, users remain on the same page and can scroll

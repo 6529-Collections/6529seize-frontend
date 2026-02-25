@@ -47,8 +47,8 @@ and what happens when the current route is not canonical.
 
 ## Failure and Recovery
 
-- Missing users or invalid profile routes show the `USER OR PAGE` not-found
-  screen.
+- Missing users or invalid profile routes show the shared not-found screen:
+  [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
 - If a redirect target cannot be resolved due to a transient error, reloading
   retries profile resolution.
 

@@ -43,18 +43,16 @@ This guide documents current user-facing behavior.
   [Profile Tabs](profiles/navigation/feature-tabs.md)
 - Troubleshoot profile load/tab issues:
   [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
-- Move multiple owned cards from a collected profile tab:
-  [Collected Tab and Transfer Controls](profiles/tabs/feature-collected-tab.md)
 - Start with wave creation behavior:
   [Wave Creation Index](waves/create/README.md)
+- Recover from route errors and 404 pages:
+  [Route Error and Not-Found Screens](shared/feature-route-error-and-not-found.md)
 - Start with wave chat behavior:
   [Wave Chat Index](waves/chat/README.md)
 - Start with wave composer behavior:
   [Wave Composer Index](waves/composer/README.md)
 - Start with wave drop actions:
   [Wave Drop Actions Index](waves/drop-actions/README.md)
-- Handle mobile app handoff links:
-  [Mobile App Landing Page](navigation/feature-mobile-app-landing.md)
 - Start with wave link previews:
   [Wave Link Previews Index](waves/link-previews/README.md)
 - Start with wave leaderboards:
