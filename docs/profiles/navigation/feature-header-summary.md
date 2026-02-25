@@ -3,7 +3,7 @@
 ## Overview
 
 The profile header appears at the top of every profile tab route and provides
-identity context, quick stats links, and profile actions.
+identity context, cover/avatar visuals, quick stats links, and profile actions.
 
 ## Location in the Site
 
@@ -19,24 +19,34 @@ identity context, quick stats links, and profile actions.
 1. Open a profile route.
 2. The app resolves the profile and normalizes the route to the canonical
    handle when needed.
-3. The header renders profile identity details (banner, avatar, name/meta,
-   about text when applicable).
+3. The header renders profile identity details:
+   - cover image or gradient
+   - avatar
+   - name and metadata
+   - About text when applicable
 4. Use quick stat links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`) to move to
    related profile routes.
-5. Use available actions (follow, direct message, edit controls) based on who
-   is viewing the profile.
+5. Use available actions (follow, direct message, edit controls) based on who is
+   viewing the profile.
 
 ## Common Scenarios
 
 - Display name priority is handle first, then display name, then wallet-based
   fallback text.
-- The metadata row can show classification and `Profile enabled: <Month Year>`.
+- The metadata row can show:
+  - classification
+  - `Profile enabled: <Month Year>` when available
 - About area is visible when at least one of these is true:
   - a BIO statement is present in loaded profile data
   - the viewer can edit the profile, which keeps an empty About panel visible for
     adding content
-- Viewing someone else's profile while signed in with a handle can show
-  `Follow` and direct-message actions.
+- Long About statements collapse to six lines and show `See more`/`See less`
+  on mobile screens.
+- On desktop, About content is shown in full.
+- The banner editor supports Gradient and Image modes for your own editable
+  profile.
+- Viewing someone else's profile while signed in with a handle can show `Follow` and
+  direct-message actions.
 - Viewing your own profile with no active proxy context enables profile editing
   controls in the header.
 - Submission/win artist badges appear when the profile has main-stage
@@ -49,14 +59,16 @@ identity context, quick stats links, and profile actions.
 - Canonical-handle redirects preserve current tab path and existing query
   parameters.
 - Stats-link rendering requires a route-safe handle or wallet segment.
+- The profile can show only a gradient background when no banner image is stored.
+- Profiles without stored banner colors still use a random fallback gradient pair.
 
 ## Failure and Recovery
 
 - If header-side data requests fail, the profile page still loads:
   - Profile-enabled date can be omitted.
-  - Followers count can fall back to `0`.
   - About text can reflect the latest successful data request; refresh the route
     to retry when expected details are missing.
+  - Followers count can fall back to `0`.
 - If direct-message creation fails, an error toast is shown and users can retry
   the action.
 - If the profile cannot be resolved, users see the `USER OR PAGE` not-found
@@ -67,13 +79,12 @@ identity context, quick stats links, and profile actions.
 
 - Header follower counts are load-time values and are not guaranteed to update
   live while staying on the same route.
-- Profiles without stored banner colors can use fallback colors that vary across
-  full page reloads.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
 - [Profile Picture Editing](feature-profile-picture-editing.md)
+- [Profile Banner Editing](feature-banner-editing.md)
 - [Profile Tabs](feature-tabs.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Tab Content](../tabs/feature-tab-content.md)

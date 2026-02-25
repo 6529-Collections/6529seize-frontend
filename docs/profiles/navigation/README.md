@@ -10,6 +10,7 @@ normalization, and the shared profile header behavior.
 - [Profile Tabs](feature-tabs.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Picture Editing](feature-profile-picture-editing.md)
+- [Profile Banner Editing](feature-banner-editing.md)
 
 ## Flows
 

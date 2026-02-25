@@ -5,6 +5,8 @@
 Signed-in users can update their own profile picture from the profile header by
 choosing either one of their memes or an uploaded image file.
 
+Profile picture editing is separate from banner cover editing.
+
 ## Location in the Site
 
 - Profile header avatar area on profile routes under `/{user}` and
@@ -73,3 +75,4 @@ choosing either one of their memes or an uploaded image file.
 - [Profile Tabs](feature-tabs.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Profile Banner Editing](feature-banner-editing.md)
