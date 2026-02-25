@@ -62,8 +62,8 @@ Wave drop actions provide two different link behaviors:
 - Quote links using either `/waves/{waveId}?serialNo={serialNo}` or
   `/waves?wave={waveId}&serialNo={serialNo}` resolve to the same serial-target
   jump behavior.
-- In-thread links where `drop` points to the currently opened drop render as a
-  normal anchor instead of opening a nested drop card.
+- In-thread links where `drop` or `serialNo` points to the currently opened drop
+  render as a normal anchor instead of opening a nested drop card.
 - Temporary drops disable `Copy link` and show an unavailable state.
 
 ## Edge Cases
@@ -80,9 +80,10 @@ Wave drop actions provide two different link behaviors:
 - If a same-origin shared link carries both `drop` and `serialNo`, the
   `drop` target takes precedence and renders as a drop preview/open flow rather
   than a quote jump card.
-- If a same-origin `drop` link points back to the currently rendered drop, a
-  quote-card render is skipped to avoid recursive nesting, and the link remains a
-  standard URL in the message body.
+- If a same-origin quote link points back to the currently rendered drop
+  (including `serialNo` self-references), quote-card rendering is skipped to
+  avoid recursive nesting, and the link remains a standard URL in the message
+  body.
 - Serial links that include trailing slashes in query values (for example
   `serialNo=10/`) are normalized and still jump to the intended drop.
 - Desktop copy actions can still resolve DM routing when DM context is known
