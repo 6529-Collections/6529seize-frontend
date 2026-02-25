@@ -2,59 +2,78 @@
 
 ## Overview
 
-Wave drop voting supports slider input with a live value tooltip, signed
-positive/negative range behavior, and a numeric-input toggle. The default
-slider appearance uses a higher-contrast blue accent for non-medal ranks.
+Wave voting supports two input modes that share one rating model:
+slider and numeric. The control remains bounded by drop-specific min/max range,
+supports signed values, and shows a live tooltip with formatted value plus the
+current voting-credit label (for example `TDH`, `TDH + XTDH`, `Rep`, or `XTDH`).
 
 ## Location in the Site
 
 - Leaderboard drop voting controls in wave leaderboards
-- Compact/mini vote controls where the same slider component is reused
+- Single-drop voting controls in the modal/sheet
+- Compact/mini vote controls where the same control group is reused
 
 ## Entry Points
 
-- Open a wave leaderboard and interact with drop voting controls.
-- Use `Switch to slider` from numeric mode in vote controls.
-- In mini voting layouts, toggle between slider and numeric input modes.
+- Open a ranked or approved drop with voting enabled.
+- Open the `Vote` modal/sheet from the single-drop summary.
+- In any vote control, use:
+  - `Switch to slider`
+  - `Switch to numeric`
+- In numeric mode, use the small `%` quick buttons and `+` / `-` buttons.
 
 ## User Journey
 
-1. Open vote controls for a drop.
-2. Drag the thumb or click/tap the track to set a value in range.
-3. Read the floating tooltip for live formatted value and vote label.
-4. Optionally switch to numeric mode and back to slider mode.
-5. Submit the selected vote value.
+1. Open a voting control.
+2. Pick slider mode or switch from it to numeric mode.
+3. Set a value:
+   - drag or tap the slider,
+   - click a quick percentage button,
+   - or use `+` / `-` controls.
+4. Watch the tooltip/update text while the value changes.
+5. Submit the selected value from the same control group.
 
 ## Common Scenarios
 
-- Top-ranked drops use medal-themed slider styles; non-top-ranked drops use the
-  default blue-accent style.
-- Users drag within an expanded thumb hit area for easier pointer/touch input.
-- Users switch to numeric mode for exact values, then back to slider.
-- Tooltip updates continuously while the slider value changes.
+- Users in slider mode can drag smoothly in an expanded hit area.
+- Users in numeric mode can enter exact values, then switch back to slider mode.
+- Quick percentage buttons:
+  - compact on mobile (`-75`, `-50`, `-25`, `25`, `50`, `75`)
+  - full set on desktop (`-100`, `-75`, `-50`, `-25`, `25`, `50`, `75`, `100`)
+- Holding `+` or `-` buttons:
+  - starts with small jumps,
+  - speeds up after sustained press,
+  - and supports high-velocity jumps for long-press intent.
+- Values snap cleanly to significant memetic values used in this voting system
+  when those thresholds are crossed (for example `69`, `420`, `6529`).
 
 ## Edge Cases
 
 - When min and max are both zero, the slider rests at center.
-- Negative values fill progress from current position back toward zero marker.
-- Near-left positions apply tooltip offset so text remains readable.
-- Mini mode uses a compact layout with the same underlying value behavior.
+- Negative and positive values share the same range rules, with visual fill
+  direction changing around zero.
+- Very small or large values are clamped to the drop's allowed range.
+- Mini mode uses a compact layout and a reduced quick-percent preset set.
+- A 100ms button repeat loop can continue to fire while the pointer is held down
+  until release.
 
 ## Failure and Recovery
 
-- Changing slider value does not submit automatically; users can adjust again
-  before submitting.
-- If vote submission fails, users can keep or adjust the selected value and
-  retry from the same control.
-- If pointer/touch drag ends unexpectedly, the last selected value remains in
-  the input.
+- Changing slider or numeric input does not submit automatically.
+- If vote submission fails, users can keep the existing value, retry, and submit
+  again from the same control.
+- If a pointer/touch action stops unexpectedly, the last selected value remains
+  in the control for immediate retry.
+- If a numeric entry is outside allowed bounds, the value is constrained back into
+  range.
 
 ## Limitations / Notes
 
-- Slider bounds are constrained to the drop's allowed vote range.
-- Voting controls appear only in contexts that allow voting for the viewer.
-- The slider is one input mode; numeric mode remains available in the same
-  control group.
+- Voting controls appear only in contexts where voting is currently allowed for
+  the viewer.
+- The slider and numeric mode are the same control with shared validation.
+- These controls do not change wave-wide scoring rules by themselves; they only
+  collect the viewer's selected vote.
 
 ## Related Pages
 

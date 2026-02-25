@@ -5,8 +5,8 @@
 The groups area supports creating new group definitions and editing existing
 groups from the same configuration surface.
 
-Within the configuration surface, the TDH requirement field now supports three
-selection modes:
+Within the configuration surface, the TDH requirement field supports three
+selection modes and defaults to `TDH + xTDH`:
 
 - `TDH`
 - `xTDH`
@@ -37,7 +37,7 @@ selection modes:
   - `TDH`
   - `xTDH`
   - `TDH + xTDH`
-- For newly created groups, TDH mode defaults to `TDH`.
+- For newly created groups, TDH mode defaults to `TDH + xTDH`.
 - Include/exclude identity sections support manual identity selection, wallet
   upload/import inputs, and a unique-wallet counter.
 - `Include me` toggle behavior:
