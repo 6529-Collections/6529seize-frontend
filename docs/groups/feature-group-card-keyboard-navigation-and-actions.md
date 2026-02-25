@@ -31,7 +31,9 @@ Card-level activation opens the selected group on the network identity view:
 4. The app opens `/network?page=1&group={groupId}`.
 5. Use nested controls when needed (creator profile link, `Rep all`, `NIC all`,
    config-row scroll controls, and options menu).
-6. Open the options menu from the kebab button, then close it with outside
+6. Inspect the config rows, including the TDH mode label (`TDH`, `xTDH`, or
+   `TDH + xTDH`) when present.
+7. Open the options menu from the kebab button, then close it with outside
    click, `Escape`, or by selecting an action.
 
 ## Common Scenarios
@@ -52,6 +54,9 @@ Card-level activation opens the selected group on the network identity view:
   vote-all buttons disabled while another vote-all action is open.
 - Signed-out sessions do not show vote-all or edit/clone actions in the groups
   list.
+- Card activation and menus remain unaffected by TDH label wording.
+- TDH labels now mirror the group’s configured inclusion mode and can show:
+  `TDH`, `xTDH`, or `TDH + xTDH`.
 - Card action menus render above card content so menu items stay clickable in
   dense list layouts.
 

@@ -5,6 +5,13 @@
 The groups area supports creating new group definitions and editing existing
 groups from the same configuration surface.
 
+Within the configuration surface, the TDH requirement field now supports three
+selection modes:
+
+- `TDH`
+- `xTDH`
+- `TDH + xTDH`
+
 ## Location in the Site
 
 - Base groups route: `/network/groups`
@@ -26,6 +33,11 @@ groups from the same configuration surface.
   - Filter configuration (Level, TDH, CIC, Rep, NFT/collection, and grant
     inputs)
   - `Include Identities` and `Exclude Identities` sections
+- The TDH section includes an inclusion mode selector with values:
+  - `TDH`
+  - `xTDH`
+  - `TDH + xTDH`
+- For newly created groups, TDH mode defaults to `TDH`.
 - Include/exclude identity sections support manual identity selection, wallet
   upload/import inputs, and a unique-wallet counter.
 - `Include me` toggle behavior:
@@ -48,6 +60,8 @@ groups from the same configuration surface.
   not update `Include Identities`.
 - Users can still turn `Include me` off to remove their connected-profile
   wallets from `Include Identities`.
+- Groups created before TDH inclusion-mode selection are treated as `TDH` for
+  edit and display.
 
 ## Not Yet Documented
 
@@ -59,6 +73,8 @@ groups from the same configuration surface.
   an active session.
 - TODO: Document wallet import failure and recovery behavior for upload and EMMA
   sources.
+- TODO: Document how each mode changes threshold interpretation
+  (`TDH`, `xTDH`, `TDH + xTDH`) with concrete examples.
 
 ## Related Pages
 
@@ -66,4 +82,5 @@ groups from the same configuration surface.
 - [Groups List Filters](feature-groups-list-filters.md)
 - [Group Card Keyboard Navigation and Actions](feature-group-card-keyboard-navigation-and-actions.md)
 - [Wave Right Sidebar Group and Curation Management](../waves/sidebars/feature-right-sidebar-group-management.md)
+- [xTDH Network Overview](../network/feature-xtdh-network-overview.md)
 - [Docs Home](../README.md)
