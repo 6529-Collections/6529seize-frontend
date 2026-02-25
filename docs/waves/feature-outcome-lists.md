@@ -40,6 +40,8 @@ ask for them.
    small loading placeholder where the chip will appear.
 9. Once rewards are resolved, an `Outcome:` button appears with relevant NIC, Rep,
    or manual reward icons.
+10. Expanded rows render a winner card preview with the drop title and a media
+   format badge when media metadata is present.
 
 ## Common Scenarios
 
@@ -51,6 +53,8 @@ ask for them.
 - Leaderboard rows with rewards for the current rank show an `Outcome:` button that
   opens a tooltip listing NIC totals, Rep totals, and awarded manual outcomes.
 - If a row has no reward entries for its rank, the outcome chip is omitted.
+- Winner rows surface a small media-type indicator and thumbnail where the winner
+  submission includes a preview image or supported non-image media.
 
 ## Edge Cases
 
@@ -60,6 +64,8 @@ ask for them.
 - If the server returns an explicit error message, that text is shown in the card-level error state.
 - If outcome reward lookup for a leaderboard row is delayed, only the loading
   placeholder is shown and the row remains clickable.
+- If a winner submission has no preview image metadata, the row still renders with
+  textual metadata and opens normally.
 
 ## Failure and Recovery
 

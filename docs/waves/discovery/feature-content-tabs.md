@@ -32,6 +32,8 @@ wave-dependent views.
      is still available.
 4. Select a tab to switch sections.
 5. The main content panel updates in place while staying on the same route.
+6. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
+   an inline media format badge when that drop includes media metadata.
 
 ## Common Scenarios
 
@@ -39,6 +41,8 @@ wave-dependent views.
 - Open `Winners` once the first decision has passed.
 - In memes waves, move between `My Votes`, `FAQ`, and other available tabs.
 - In curation waves, use available tabs without an `Outcome` tab.
+- In the `My Votes` tab, users can quickly scan entries by format: image,
+  video, or interactive media is indicated with a small badge at the title row.
 
 ## Edge Cases
 
@@ -56,6 +60,8 @@ wave-dependent views.
 - If an unavailable tab is requested, tab state falls back to `Chat`.
 - If a wave becomes chat-only, the tab strip is removed and the chat panel
   remains available.
+- If a `My Votes` row has no preview media available, users still get row metadata
+  (title, author, and vote score) and can open the drop.
 
 ## Limitations / Notes
 
