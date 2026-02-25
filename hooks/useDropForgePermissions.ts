@@ -9,6 +9,18 @@ import { useMemo } from "react";
 export function useDropForgePermissions() {
   const { address, connectionState } = useSeizeConnectContext();
   const { seizeSettings, isLoaded } = useSeizeSettings();
+  const distributionAdminWalletsKey = JSON.stringify(
+    seizeSettings.distribution_admin_wallets
+  );
+  const claimsAdminWalletsKey = JSON.stringify(seizeSettings.claims_admin_wallets);
+  const distributionAdminWallets = useMemo(
+    () => JSON.parse(distributionAdminWalletsKey) as string[],
+    [distributionAdminWalletsKey]
+  );
+  const claimsAdminWallets = useMemo(
+    () => JSON.parse(claimsAdminWalletsKey) as string[],
+    [claimsAdminWalletsKey]
+  );
   const {
     isDropForgeAdmin,
     isFetching: isDropForgeAdminFetching,
@@ -23,14 +35,10 @@ export function useDropForgePermissions() {
       (hasWallet && isDropForgeAdminFetching);
     const isDistributionAdmin =
       hasWallet &&
-      seizeSettings.distribution_admin_wallets.some((w) =>
-        areEqualAddresses(w, address)
-      );
+      distributionAdminWallets.some((w) => areEqualAddresses(w, address));
     const isClaimsAdmin =
       hasWallet &&
-      seizeSettings.claims_admin_wallets.some((w) =>
-        areEqualAddresses(w, address)
-      );
+      claimsAdminWallets.some((w) => areEqualAddresses(w, address));
     const canLaunch = hasWallet && (isClaimsAdmin || isDropForgeAdmin);
     const canAccessLanding =
       hasWallet && (isDistributionAdmin || isClaimsAdmin || isDropForgeAdmin);
@@ -54,6 +62,7 @@ export function useDropForgePermissions() {
     isLoaded,
     isDropForgeAdmin,
     isDropForgeAdminFetching,
-    seizeSettings,
+    distributionAdminWallets,
+    claimsAdminWallets,
   ]);
 }

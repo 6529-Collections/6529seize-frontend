@@ -18,6 +18,28 @@ import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePi
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
+import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
+import ClaimTransactionModal from "@/components/drop-forge/ClaimTransactionModal";
+import {
+  buildSubscriptionAirdropSelection,
+  formatDateTimeLocalInput,
+  formatLocalDateTime,
+  formatScheduledLabel,
+  getAnimationMimeType,
+  getErrorMessage,
+  getMediaTypeLabel,
+  getRootAddressesCount,
+  getRootForPhase,
+  getRootTotalSpots,
+  getSafeExternalUrl,
+  getSubscriptionPhaseName,
+  isNotFoundError,
+  mergeAirdropsByWallet,
+  normalizeHexValue,
+  parseLocalDateTimeToUnixSeconds,
+  summarizeAirdrops,
+  toArweaveUrl,
+} from "@/components/drop-forge/dropForgeLaunchClaimPageClient.helpers";
 import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launchClaimHelpers";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
@@ -34,7 +56,6 @@ import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import {
   capitalizeEveryWord,
   fromGWEI,
-  getTransactionLink,
 } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
@@ -47,12 +68,11 @@ import {
   getDistributionAirdropsTeam,
   getFinalSubscriptionsByPhase,
 } from "@/services/api/memes-minting-claims-api";
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { Chain, isAddress, parseEther } from "viem";
+import { isAddress, parseEther } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 interface DropForgeLaunchClaimPageClientProps {
@@ -73,8 +93,6 @@ interface ClaimTxModalState {
   actionLabel?: string | undefined;
 }
 
-const SECTION_CARD_CLASS =
-  "tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-5";
 const BTN_SUBSCRIPTIONS_AIRDROP =
   "tw-h-12 tw-w-full sm:tw-w-64 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 const BTN_METADATA_UPDATE_ACTION =
@@ -82,627 +100,7 @@ const BTN_METADATA_UPDATE_ACTION =
 const DEFAULT_PHASE_PRICE_ETH = "0.06529";
 const RESEARCH_AIRDROP_ADDRESS = "0xc2ce4ccef11a8171f443745cea3bceeaadd750c7";
 
-type SectionTone = "neutral" | "success" | "warning" | "danger";
 type LaunchMediaTab = "image" | "animation";
-type LaunchMediaKind = "image" | "video" | "glb" | "html" | "unknown";
-
-interface LaunchAccordionSectionProps {
-  title: string;
-  subtitle: string;
-  tone: SectionTone;
-  defaultOpen?: boolean;
-  disabled?: boolean;
-  onOpen?: () => void;
-  headerRight?: React.ReactNode;
-  showHeaderRightWhenOpen?: boolean;
-  children: React.ReactNode;
-}
-
-function parseLocalDateTimeToUnixSeconds(value: string): number | null {
-  if (!value) return null;
-  const millis = new Date(value).getTime();
-  if (Number.isNaN(millis)) return null;
-  return Math.floor(millis / 1000);
-}
-
-function toneClass(tone: SectionTone): string {
-  if (tone === "success") {
-    return "tw-bg-emerald-500/15 tw-text-emerald-300 tw-ring-emerald-400/40";
-  }
-  if (tone === "warning") {
-    return "tw-bg-amber-500/15 tw-text-amber-300 tw-ring-amber-400/40";
-  }
-  if (tone === "danger") {
-    return "tw-bg-rose-500/15 tw-text-rose-300 tw-ring-rose-400/40";
-  }
-  return "tw-bg-iron-700/30 tw-text-iron-400 tw-ring-iron-500/40";
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  const normalize = (message: string): string => {
-    const withoutRequestArgs = message.split("Request Arguments")[0] ?? message;
-    const compact = withoutRequestArgs.replaceAll(/\s+/g, " ").trim();
-    return compact.length > 0 ? compact : fallback;
-  };
-
-  if (typeof error === "string") {
-    const trimmed = error.trim();
-    return trimmed.length > 0 ? normalize(trimmed) : fallback;
-  }
-  if (error instanceof Error) {
-    const trimmed = error.message.trim();
-    return trimmed.length > 0 ? normalize(trimmed) : fallback;
-  }
-  return fallback;
-}
-
-function isNotFoundError(message: string): boolean {
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes("not found") ||
-    normalized.includes("status code 404") ||
-    message === "Claim not found"
-  );
-}
-
-function normalizePhaseName(value: string): string {
-  return value.replaceAll(/\s+/g, "").toLowerCase();
-}
-
-function normalizeHexValue(value: string | null | undefined): string {
-  return (value ?? "").trim().toLowerCase();
-}
-
-function getRootForPhase(
-  roots: MintingClaimsRootItem[] | null,
-  phase: "phase0" | "phase1" | "phase2" | "publicphase"
-): MintingClaimsRootItem | null {
-  if (!roots) return null;
-  const targets: Record<typeof phase, string[]> = {
-    phase0: ["phase0"],
-    phase1: ["phase1"],
-    phase2: ["phase2"],
-    publicphase: ["publicphase", "public"],
-  };
-  return (
-    roots.find((root) =>
-      targets[phase].includes(normalizePhaseName(root.phase ?? ""))
-    ) ?? null
-  );
-}
-
-function getRootAddressesCount(
-  root: MintingClaimsRootItem | null | undefined
-): number | null {
-  if (!root) return null;
-  const value =
-    (root as unknown as { addresses_count?: number; addresses?: number })
-      .addresses_count ??
-    (root as unknown as { addresses_count?: number; addresses?: number })
-      .addresses;
-  return typeof value === "number" ? value : null;
-}
-
-function getRootTotalSpots(
-  root: MintingClaimsRootItem | null | undefined
-): number | null {
-  if (!root) return null;
-  const value =
-    (root as unknown as { total_spots?: number; total?: number }).total_spots ??
-    (root as unknown as { total_spots?: number; total?: number }).total;
-  return typeof value === "number" ? value : null;
-}
-
-function summarizeAirdrops(entries: PhaseAirdrop[] | null): {
-  addresses: number;
-  totalAirdrops: number;
-} {
-  if (!entries || entries.length === 0) {
-    return { addresses: 0, totalAirdrops: 0 };
-  }
-
-  const uniqueWallets = new Set(
-    entries
-      .map((item) => item.wallet?.trim())
-      .filter((wallet): wallet is string => Boolean(wallet))
-      .map((wallet) => wallet.toLowerCase())
-  );
-  const totalAirdrops = entries.reduce(
-    (sum, item) => sum + Number(item.amount ?? 0),
-    0
-  );
-
-  return {
-    addresses: uniqueWallets.size,
-    totalAirdrops,
-  };
-}
-
-function getSubscriptionPhaseName(phaseKey: LaunchPhaseKey): string {
-  if (phaseKey === "phase0") return "Phase 0";
-  if (phaseKey === "phase1") return "Phase 1";
-  if (phaseKey === "phase2") return "Phase 2";
-  if (phaseKey === "research") return "Public Phase";
-  return "Public Phase";
-}
-
-function normalizeAirdropAmount(value: number | undefined): number {
-  const normalized = Number(value ?? 0);
-  if (!Number.isFinite(normalized)) return 0;
-  return Math.max(0, Math.trunc(normalized));
-}
-
-function mergeAirdropsByWallet(entries: PhaseAirdrop[] | null): PhaseAirdrop[] {
-  if (!entries || entries.length === 0) return [];
-
-  const merged = new Map<string, PhaseAirdrop>();
-  const orderedKeys: string[] = [];
-
-  for (const entry of entries) {
-    const wallet = (entry.wallet ?? "").trim();
-    if (!wallet) continue;
-    const key = wallet.toLowerCase();
-    const amount = normalizeAirdropAmount(entry.amount);
-    if (amount <= 0) continue;
-
-    const existing = merged.get(key);
-    if (existing) {
-      existing.amount = normalizeAirdropAmount(existing.amount) + amount;
-      merged.set(key, existing);
-      continue;
-    }
-
-    merged.set(key, { wallet, amount });
-    orderedKeys.push(key);
-  }
-
-  return orderedKeys
-    .map((key) => merged.get(key))
-    .filter((item): item is PhaseAirdrop => Boolean(item));
-}
-
-function buildSubscriptionAirdropSelection(
-  mergedEntries: PhaseAirdrop[],
-  remainingEditions: number
-): { selected: PhaseAirdrop[]; selectedTotal: number } {
-  const remaining = Math.max(0, Math.trunc(remainingEditions));
-  if (remaining <= 0 || mergedEntries.length === 0) {
-    return { selected: [], selectedTotal: 0 };
-  }
-
-  let remainingToAllocate = remaining;
-  const selected: PhaseAirdrop[] = [];
-
-  for (const entry of mergedEntries) {
-    if (remainingToAllocate <= 0) break;
-    const amount = normalizeAirdropAmount(entry.amount);
-    if (amount <= 0) continue;
-
-    const allocated = Math.min(amount, remainingToAllocate);
-    selected.push({
-      wallet: entry.wallet,
-      amount: allocated,
-    });
-    remainingToAllocate -= allocated;
-  }
-
-  return { selected, selectedTotal: remaining - remainingToAllocate };
-}
-
-function formatLocalDateTime(date: Date): string {
-  const locale =
-    typeof navigator !== "undefined" && navigator.language
-      ? navigator.language
-      : "en-GB";
-  const isUs = locale.toLowerCase().startsWith("en-us");
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const datePart = isUs ? `${month}/${day}/${year}` : `${day}/${month}/${year}`;
-  return `${datePart} ${hours}:${minutes}`;
-}
-
-function formatScheduledLabel(date: Date): string {
-  const weekday = date.toLocaleDateString(undefined, { weekday: "long" });
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = date.toLocaleDateString(undefined, { month: "short" });
-  const year = date.getFullYear();
-  return `${weekday} ${day} ${month}, ${year}`;
-}
-
-function formatDateTimeLocalInput(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-function getClaimTxModalEmoji(status: ClaimTxModalStatus): string {
-  if (status === "success") return "/emojis/sgt_saluting_face.webp";
-  if (status === "error") return "/emojis/sgt_sob.webp";
-  return "/emojis/sgt_flushed.webp";
-}
-
-function ClaimTransactionModal({
-  state,
-  chain,
-  onClose,
-}: Readonly<{
-  state: ClaimTxModalState | null;
-  chain: Chain;
-  onClose: () => void;
-}>) {
-  if (!state) return null;
-
-  const closable = state.status === "success" || state.status === "error";
-  const txUrl = state.txHash
-    ? getTransactionLink(chain.id, state.txHash)
-    : null;
-  const modalTitle = state.actionLabel ?? "Onchain Action";
-
-  if (typeof document === "undefined") return null;
-
-  return createPortal(
-    <div
-      className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
-    >
-      {closable ? (
-        <button
-          type="button"
-          aria-label="Close modal backdrop"
-          tabIndex={-1}
-          onClick={onClose}
-          className="tw-absolute tw-inset-0 tw-border-0 tw-bg-transparent tw-p-0"
-        />
-      ) : (
-        <div className="tw-absolute tw-inset-0" aria-hidden="true" />
-      )}
-      <div
-        className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
-      >
-        <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
-          <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
-            {modalTitle}
-          </h2>
-          {closable ? (
-            <button
-              type="button"
-              aria-label="Close modal"
-              onClick={onClose}
-              className="tw--mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
-            >
-              <XMarkIcon className="tw-h-5 tw-w-5" />
-            </button>
-          ) : null}
-        </div>
-
-        <div className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3">
-          {state.status === "error" ? (
-            <div className="tw-w-full tw-min-w-0 tw-max-w-full tw-text-center">
-              <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
-                <span>Error</span>
-                <img
-                  src={getClaimTxModalEmoji("error")}
-                  alt="error"
-                  className="tw-h-6 tw-w-6"
-                />
-              </p>
-              <div className="tw-mx-auto tw-max-h-40 tw-w-full tw-max-w-full tw-overflow-auto tw-pr-1">
-                <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-iron-100">
-                  {state.message || "Transaction failed"}
-                </p>
-              </div>
-              {txUrl ? (
-                <a
-                  className="btn btn-white btn-sm tw-mt-3 tw-font-medium"
-                  href={txUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View Tx
-                </a>
-              ) : null}
-            </div>
-          ) : null}
-
-          {state.status === "confirm_wallet" ? (
-            <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-              <img
-                src={getClaimTxModalEmoji("confirm_wallet")}
-                alt="confirm_wallet"
-                className="tw-h-6 tw-w-6"
-              />
-              <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
-                Confirm in your wallet
-              </p>
-              <CircleLoader size={CircleLoaderSize.LARGE} />
-            </div>
-          ) : null}
-
-          {state.status === "submitted" ? (
-            <div className="tw-text-center">
-              <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
-                <img
-                  src={getClaimTxModalEmoji("submitted")}
-                  alt="submitted"
-                  className="tw-h-6 tw-w-6"
-                />
-                Transaction Submitted
-                {txUrl ? (
-                  <a
-                    className="btn btn-white btn-sm tw-font-medium"
-                    href={txUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Tx
-                  </a>
-                ) : null}
-              </p>
-              <p className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-md tw-font-medium tw-text-iron-100">
-                Waiting for confirmation{" "}
-                <CircleLoader size={CircleLoaderSize.MEDIUM} />
-              </p>
-            </div>
-          ) : null}
-
-          {state.status === "success" ? (
-            <div className="tw-text-center">
-              <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
-                <img
-                  src={getClaimTxModalEmoji("success")}
-                  alt="success"
-                  className="tw-h-6 tw-w-6"
-                />
-                Transaction Successful!
-                {txUrl ? (
-                  <a
-                    className="btn btn-white btn-sm tw-font-medium"
-                    href={txUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Tx
-                  </a>
-                ) : null}
-              </p>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const lower = url.toLowerCase();
-  return (
-    lower.includes(".mp4") ||
-    lower.includes(".webm") ||
-    lower.includes(".mov") ||
-    lower.includes(".m4v")
-  );
-}
-
-function normalizeFormat(format: string | null | undefined): string | null {
-  return format ? format.toUpperCase() : null;
-}
-
-function getUrlExtension(url: string | null | undefined): string | null {
-  if (!url) return null;
-  const clean = url.split("?")[0]?.split("#")[0] ?? "";
-  const parts = clean.split(".");
-  if (parts.length < 2) return null;
-  return parts.at(-1)?.toLowerCase() ?? null;
-}
-
-function getImageFormat(claim: MintingClaim): string | null {
-  const fromDetails = normalizeFormat(claim.image_details?.format);
-  if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
-  const ext = getUrlExtension(claim.image_url);
-  if (!ext) return null;
-  if (ext === "jpg" || ext === "jpeg") return "JPEG";
-  if (ext === "png") return "PNG";
-  if (ext === "gif") return "GIF";
-  if (ext === "webp") return "WEBP";
-  return null;
-}
-
-function getAnimationInfo(
-  claim: MintingClaim
-): { kind: LaunchMediaKind; subtype?: string | null } | null {
-  if (!claim.animation_url) return null;
-  const format = normalizeFormat(
-    (claim.animation_details as { format?: string } | undefined)?.format
-  );
-  if (format === "HTML") return { kind: "html" };
-  if (format === "GLB") return { kind: "glb" };
-  if (format) return { kind: "video", subtype: format };
-  const ext = getUrlExtension(claim.animation_url);
-  if (ext === "html" || ext === "htm") return { kind: "html" };
-  if (ext === "glb") return { kind: "glb" };
-  if (ext === "mp4") return { kind: "video", subtype: "MP4" };
-  if (ext === "webm") return { kind: "video", subtype: "WEBM" };
-  if (isVideoUrl(claim.animation_url)) return { kind: "video" };
-  return { kind: "video" };
-}
-
-function getMediaTypeLabel(claim: MintingClaim, tab: LaunchMediaTab): string {
-  if (tab === "animation") {
-    const animationInfo = getAnimationInfo(claim);
-    if (!animationInfo) return "—";
-    if (animationInfo.kind === "html" || animationInfo.kind === "glb") {
-      return animationInfo.kind.toUpperCase();
-    }
-    if (animationInfo.kind === "video") {
-      return animationInfo.subtype ? `VIDEO/${animationInfo.subtype}` : "VIDEO";
-    }
-    return "—";
-  }
-  const imageFormat = getImageFormat(claim);
-  if (imageFormat) return `IMAGE/${imageFormat}`;
-  if (claim.image_url || claim.image_details) return "IMAGE";
-  return "—";
-}
-
-function getAnimationMimeType(claim: MintingClaim): string | null {
-  const animationUrl = claim.animation_url ?? null;
-  if (!animationUrl) return null;
-  const format = (
-    claim.animation_details as { format?: string } | null | undefined
-  )?.format;
-  if (format === "HTML") return "text/html";
-  if (format === "GLB") return "model/gltf-binary";
-  if (format) {
-    const normalizedFormat = format.toUpperCase();
-    const formatMimeMap: Record<string, string> = {
-      WEBM: "video/webm",
-      MP4: "video/mp4",
-      MOV: "video/quicktime",
-      M4V: "video/x-m4v",
-    };
-    return formatMimeMap[normalizedFormat] ?? "video/mp4";
-  }
-  if (isVideoUrl(animationUrl)) return "video/mp4";
-  if (animationUrl.toLowerCase().endsWith(".glb")) return "model/gltf-binary";
-  if (animationUrl.toLowerCase().endsWith(".gltf")) return "model/gltf+json";
-  if (animationUrl.toLowerCase().endsWith(".html")) return "text/html";
-  return "video/mp4";
-}
-
-function getSafeExternalUrl(value: string | null | undefined): string | null {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      return null;
-    }
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-function toArweaveUrl(location: string | null | undefined): string | null {
-  if (!location) return null;
-  const trimmed = location.trim();
-  if (!trimmed) return null;
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
-  }
-  return `https://arweave.net/${trimmed}`;
-}
-
-function LaunchAccordionSection({
-  title,
-  subtitle,
-  tone,
-  defaultOpen = false,
-  disabled = false,
-  onOpen,
-  headerRight,
-  showHeaderRightWhenOpen = false,
-  children,
-}: Readonly<LaunchAccordionSectionProps>) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const showHeaderRight = !!headerRight && (!showHeaderRightWhenOpen || isOpen);
-  const toggleOpen = () => {
-    if (disabled) return;
-    setIsOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        onOpen?.();
-      }
-      return next;
-    });
-  };
-
-  useEffect(() => {
-    setIsOpen(defaultOpen);
-  }, [defaultOpen]);
-
-  useEffect(() => {
-    if (disabled) {
-      setIsOpen(false);
-    }
-  }, [disabled]);
-
-  return (
-    <div className={SECTION_CARD_CLASS}>
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
-        <button
-          type="button"
-          disabled={disabled}
-          aria-expanded={isOpen}
-          aria-disabled={disabled}
-          onClick={toggleOpen}
-          className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
-            disabled ? "tw-!cursor-default" : "tw-cursor-pointer"
-          }`}
-        >
-          <span className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2">
-          <span className="tw-relative tw-h-5 tw-w-5 tw-flex-shrink-0">
-            <ChevronRightIcon
-              className={`tw-absolute tw-inset-0 tw-h-5 tw-w-5 tw-transition-all tw-duration-200 ${
-                isOpen
-                  ? "tw-rotate-90 tw-opacity-0"
-                  : "tw-rotate-0 tw-opacity-100"
-              } ${disabled ? "tw-text-iron-400" : "tw-text-white"}`}
-            />
-            <ChevronDownIcon
-              className={`tw-absolute tw-inset-0 tw-h-5 tw-w-5 tw-transition-all tw-duration-200 ${
-                isOpen
-                  ? "tw-rotate-0 tw-opacity-100"
-                  : "-tw-rotate-90 tw-opacity-0"
-              } ${disabled ? "tw-text-iron-400" : "tw-text-white"}`}
-            />
-          </span>
-          <span
-            className={`tw-text-base tw-font-semibold ${
-              disabled ? "tw-text-iron-400" : "tw-text-iron-50"
-            }`}
-          >
-            {title}
-          </span>
-          </span>
-          {subtitle ? (
-            <span
-              className={`tw-inline-flex tw-items-center tw-rounded-full tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-ring-1 tw-ring-inset ${toneClass(tone)}`}
-            >
-              {subtitle}
-            </span>
-          ) : null}
-        </button>
-        {showHeaderRight ? (
-          <span className="tw-inline-flex tw-items-center tw-gap-2">
-            {headerRight}
-          </span>
-        ) : null}
-      </div>
-      <div
-        className={`tw-grid tw-transition-all tw-duration-200 tw-ease-out ${
-          isOpen
-            ? "tw-mt-5 tw-grid-rows-[1fr] tw-opacity-100"
-            : "tw-mt-0 tw-grid-rows-[0fr] tw-opacity-0"
-        }`}
-      >
-        <div
-          className={`tw-space-y-5 ${
-            isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"
-          }`}
-        >
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function DropForgeLaunchClaimPageClient({
   claimId,
@@ -1013,31 +411,55 @@ export default function DropForgeLaunchClaimPageClient({
     [claimId]
   );
 
+  const selectedPhaseHasSubscriptionAirdrops = selectedPhase
+    ? subscriptionAirdropsByPhase[selectedPhase] !== undefined
+    : false;
+  const selectedPhaseSubscriptionAirdropsLoading = selectedPhase
+    ? Boolean(subscriptionAirdropsLoadingByPhase[selectedPhase])
+    : false;
+  const publicPhaseHasSubscriptionAirdrops =
+    subscriptionAirdropsByPhase.publicphase !== undefined;
+  const publicPhaseSubscriptionAirdropsLoading = Boolean(
+    subscriptionAirdropsLoadingByPhase.publicphase
+  );
+
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage || !selectedPhase) return;
-
-    let phasesToLoad: LaunchPhaseKey[] = [];
-    if (selectedPhase === "phase0") {
-      phasesToLoad = ["phase0"];
-    } else if (selectedPhase === "phase1") {
-      phasesToLoad = ["phase1"];
-    } else if (selectedPhase === "phase2") {
-      phasesToLoad = ["phase2", "publicphase"];
-    }
-
-    for (const phaseKey of phasesToLoad) {
-      const hasValue = subscriptionAirdropsByPhase[phaseKey] !== undefined;
-      const isLoading = Boolean(subscriptionAirdropsLoadingByPhase[phaseKey]);
+    const maybeFetch = (phaseKey: LaunchPhaseKey, hasValue: boolean, isLoading: boolean) => {
       if (!hasValue && !isLoading) {
         fetchSubscriptionAirdropsForPhase(phaseKey).catch(() => undefined);
       }
+    };
+
+    if (selectedPhase === "phase0" || selectedPhase === "phase1") {
+      maybeFetch(
+        selectedPhase,
+        selectedPhaseHasSubscriptionAirdrops,
+        selectedPhaseSubscriptionAirdropsLoading
+      );
+      return;
+    }
+
+    if (selectedPhase === "phase2") {
+      maybeFetch(
+        "phase2",
+        selectedPhaseHasSubscriptionAirdrops,
+        selectedPhaseSubscriptionAirdropsLoading
+      );
+      maybeFetch(
+        "publicphase",
+        publicPhaseHasSubscriptionAirdrops,
+        publicPhaseSubscriptionAirdropsLoading
+      );
     }
   }, [
     hasWallet,
     canAccessLaunchPage,
     selectedPhase,
-    subscriptionAirdropsByPhase,
-    subscriptionAirdropsLoadingByPhase,
+    selectedPhaseHasSubscriptionAirdrops,
+    selectedPhaseSubscriptionAirdropsLoading,
+    publicPhaseHasSubscriptionAirdrops,
+    publicPhaseSubscriptionAirdropsLoading,
     fetchSubscriptionAirdropsForPhase,
   ]);
 
@@ -1870,7 +1292,7 @@ export default function DropForgeLaunchClaimPageClient({
             </div>
           )}
           {(hasImage || hasAnimation) && (
-            <LaunchAccordionSection
+            <DropForgeAccordionSection
               title="Media Preview"
               subtitle=""
               tone="neutral"
@@ -1904,6 +1326,7 @@ export default function DropForgeLaunchClaimPageClient({
                 ) : null
               }
               showHeaderRightWhenOpen
+              childrenClassName="tw-space-y-5"
             >
               <div className="tw-relative tw-h-64 tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 sm:tw-h-80 lg:tw-h-[23.5rem]">
                 {(() => {
@@ -1940,9 +1363,9 @@ export default function DropForgeLaunchClaimPageClient({
               <div className="tw-flex tw-justify-center">
                 <DropForgeMediaTypePill label={activeMediaTypeLabel} />
               </div>
-            </LaunchAccordionSection>
+            </DropForgeAccordionSection>
           )}
-          <LaunchAccordionSection
+          <DropForgeAccordionSection
             title="Details"
             subtitle=""
             tone="neutral"
@@ -1957,6 +1380,7 @@ export default function DropForgeLaunchClaimPageClient({
                 </span>
               </div>
             }
+            childrenClassName="tw-space-y-5"
           >
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-2">
               <DropForgeFieldBox
@@ -1999,12 +1423,13 @@ export default function DropForgeLaunchClaimPageClient({
                 })()}
               </DropForgeFieldBox>
             </div>
-          </LaunchAccordionSection>
-          <LaunchAccordionSection
+          </DropForgeAccordionSection>
+          <DropForgeAccordionSection
             title="Traits"
             subtitle=""
             tone="neutral"
             defaultOpen={false}
+            childrenClassName="tw-space-y-5"
           >
             {claim.attributes?.length ? (
               <div className="tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-4">
@@ -2026,8 +1451,8 @@ export default function DropForgeLaunchClaimPageClient({
                 No traits found.
               </p>
             )}
-          </LaunchAccordionSection>
-          <LaunchAccordionSection
+          </DropForgeAccordionSection>
+          <DropForgeAccordionSection
             title={
               isInitialized
                 ? "On-Chain Claim"
@@ -2044,6 +1469,7 @@ export default function DropForgeLaunchClaimPageClient({
                 </span>
               ) : null
             }
+            childrenClassName="tw-space-y-5"
           >
             {manifoldClaim ? (
               <div className="tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-2">
@@ -2103,7 +1529,7 @@ export default function DropForgeLaunchClaimPageClient({
                 On-chain claim data is not available.
               </p>
             )}
-          </LaunchAccordionSection>
+          </DropForgeAccordionSection>
           <div className="tw-flex tw-flex-col tw-gap-3">
             {hasPublishedMetadata && isMetadataOnlyUpdateMode && (
                 <div className="tw-space-y-4">

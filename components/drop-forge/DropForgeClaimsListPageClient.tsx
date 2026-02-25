@@ -18,6 +18,7 @@ import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import Pagination from "@/components/pagination/Pagination";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
+import { isVideoUrl } from "@/helpers/video.helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
@@ -39,12 +40,6 @@ function getUrlExtension(url: string | null | undefined): string | null {
   const parts = clean.split(".");
   if (parts.length < 2) return null;
   return parts.at(-1)?.toLowerCase() ?? null;
-}
-
-function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const u = url.toLowerCase();
-  return u.includes(".mp4") || u.includes(".webm") || u.includes("video/");
 }
 
 function getImageFormat(claim: MintingClaim): string | null {

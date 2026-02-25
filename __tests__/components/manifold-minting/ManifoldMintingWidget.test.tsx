@@ -57,6 +57,8 @@ const baseProps = {
 };
 
 describe("ManifoldMintingWidget", () => {
+  beforeEach(() => jest.clearAllMocks());
+
   it("shows mint button after address provided", async () => {
     const user = userEvent.setup();
     render(<ManifoldMintingWidget {...baseProps} />);

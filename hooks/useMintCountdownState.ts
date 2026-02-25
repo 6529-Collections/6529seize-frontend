@@ -27,7 +27,7 @@ export type MintCountdownState =
   | { type: "countdown"; countdown: CountdownData };
 
 interface UseMintCountdownStateOptions {
-  hideMintBtn?: boolean;
+  hideMintBtn?: boolean | undefined;
   contract: string;
   chainId: number;
 }

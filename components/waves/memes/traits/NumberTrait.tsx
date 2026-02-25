@@ -166,8 +166,11 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
 
     const isFieldFilled = useMemo(() => {
       const n = Number.parseFloat(currentInputValue);
-      return Number.isFinite(n) && n > 0;
-    }, [currentInputValue]);
+      if (!Number.isFinite(n)) return false;
+      if (min !== undefined && n < min) return false;
+      if (max !== undefined && n > max) return false;
+      return true;
+    }, [currentInputValue, min, max]);
 
     // Determine input state styling
     let stateClassName: string;

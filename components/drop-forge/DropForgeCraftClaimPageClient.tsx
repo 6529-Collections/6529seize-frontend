@@ -1616,6 +1616,9 @@ function DistributionSection({
   const [expandedPhoto, setExpandedPhoto] = useState<DistributionPhoto | null>(
     null
   );
+  const closeExpandedPhoto = useCallback(() => {
+    setExpandedPhoto(null);
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -1745,27 +1748,20 @@ function DistributionSection({
   function getAllowlistAddresses(
     summary: ClaimPhaseSummaryItem | null | undefined
   ): number | null {
-    if (!summary) return null;
-    const value = summary.addresses ?? summary.addresses_count;
-    return typeof value === "number" ? value : null;
+    return normalizeClaimPhaseSummary(summary)?.addresses ?? null;
   }
 
   function getAllowlistTotal(
     summary: ClaimPhaseSummaryItem | null | undefined
   ): number | null {
-    if (!summary) return null;
-    const value = summary.total ?? summary.total_spots;
-    return typeof value === "number" ? value : null;
+    return normalizeClaimPhaseSummary(summary)?.total ?? null;
   }
 
   function renderPhaseSummaryBox(section: DistributionSectionKey) {
     const summary = getPhaseSummary(section);
-    const addresses = summary
-      ? Number(summary.addresses ?? summary.addresses_count ?? 0)
-      : 0;
-    const total = summary
-      ? Number(summary.total ?? summary.total_airdrops ?? 0)
-      : 0;
+    const normalized = normalizeClaimPhaseSummary(summary);
+    const addresses = Number(normalized?.addresses ?? 0);
+    const total = Number(normalized?.total_airdrops ?? 0);
     return (
       <DropForgeFieldBox
         label="Address Count / Total Airdrops"
@@ -1778,6 +1774,27 @@ function DistributionSection({
           : `${addresses.toLocaleString()} / ${total.toLocaleString()}`}
       </DropForgeFieldBox>
     );
+  }
+
+  function normalizeClaimPhaseSummary(
+    summary: ClaimPhaseSummaryItem | null | undefined
+  ): {
+    addresses: number | null;
+    total: number | null;
+    total_airdrops: number | null;
+  } | null {
+    if (!summary) return null;
+    const addressesValue = summary.addresses ?? summary.addresses_count;
+    const totalValue = summary.total ?? summary.total_spots;
+    const totalAirdropsValue =
+      summary.total_airdrops ?? summary.total ?? summary.total_spots;
+
+    return {
+      addresses: typeof addressesValue === "number" ? addressesValue : null,
+      total: typeof totalValue === "number" ? totalValue : null,
+      total_airdrops:
+        typeof totalAirdropsValue === "number" ? totalAirdropsValue : null,
+    };
   }
 
   function getAggregatedAirdropSummary(
@@ -1956,7 +1973,7 @@ function DistributionSection({
         photoFileName={
           expandedPhoto ? getPhotoFileName(expandedPhoto.link) : ""
         }
-        onClose={() => setExpandedPhoto(null)}
+        onClose={closeExpandedPhoto}
       />
 
       <div className="tw-mt-8 tw-space-y-7">

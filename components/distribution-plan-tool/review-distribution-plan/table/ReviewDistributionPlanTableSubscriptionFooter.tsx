@@ -11,7 +11,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import Image from "next/image";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
@@ -312,6 +312,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
+  const distributionAdminWalletsKey = JSON.stringify(
+    seizeSettings.distribution_admin_wallets
+  );
+  const distributionAdminWallets = useMemo(
+    () => JSON.parse(distributionAdminWalletsKey) as string[],
+    [distributionAdminWalletsKey]
+  );
 
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
   const [showAutomaticAirdrops, setShowAutomaticAirdrops] = useState(false);
@@ -358,7 +365,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       !distributionPlan ||
       !isSubscriptionsAdmin(
         connectedProfile,
-        seizeSettings.distribution_admin_wallets
+        distributionAdminWallets
       )
     ) {
       return;
@@ -376,7 +383,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     connectedProfile,
     confirmedTokenId,
     refreshOverview,
-    seizeSettings.distribution_admin_wallets,
+    distributionAdminWallets,
   ]);
 
   const handleConfirmTokenId = (tokenId: string) => {

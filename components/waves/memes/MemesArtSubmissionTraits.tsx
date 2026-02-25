@@ -79,18 +79,12 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
               {section.fields.map((field, fieldIndex) => {
                 const hasReadOnlyOverride =
                   readOnlyOverrides?.[field.field] !== undefined;
-                const effectiveReadOnly =
-                  readOnlyOverrides?.[field.field] ?? field.readOnly;
-                const definitionWithReadOnly =
-                  effectiveReadOnly === undefined
-                    ? field
-                    : { ...field, readOnly: effectiveReadOnly };
                 return (
                   <TraitField
                     key={`field-${field.field}-${fieldIndex}`}
-                    definition={definitionWithReadOnly}
+                    definition={field}
                     {...(hasReadOnlyOverride
-                      ? { readOnlyOverride: Boolean(effectiveReadOnly) }
+                      ? { readOnlyOverride: Boolean(field.readOnly) }
                       : {})}
                     traits={traits}
                     updateText={updateText}

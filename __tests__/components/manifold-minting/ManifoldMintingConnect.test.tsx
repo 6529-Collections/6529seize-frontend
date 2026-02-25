@@ -72,7 +72,16 @@ function renderConnected(onMintFor = jest.fn()) {
   };
   (mockedConnect as jest.Mock).mockReturnValue(seizeCtx);
   const auth = {
-    connectedProfile: { handle: "bob", display: "bob", level: 1, cic: 1 },
+    connectedProfile: {
+      handle: "bob",
+      display: "bob",
+      level: 1,
+      cic: 1,
+      wallets: [
+        { wallet: seizeCtx.address, display: "Primary" },
+        { wallet: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", display: "Alt" },
+      ],
+    },
   } as any;
   render(
     <CookieConsentProvider>
@@ -110,9 +119,8 @@ describe("ManifoldMintingConnect", () => {
     const { onMintFor } = renderConnected();
     const alternateWallet = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
-    if (mockOnWalletSelect) {
-      mockOnWalletSelect(alternateWallet);
-    }
+    expect(mockOnWalletSelect).toBeTruthy();
+    mockOnWalletSelect!(alternateWallet);
 
     await waitFor(() =>
       expect(onMintFor).toHaveBeenLastCalledWith(alternateWallet)
@@ -124,9 +132,8 @@ describe("ManifoldMintingConnect", () => {
     const alternateWallet = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
     const frenWallet = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-    if (mockOnWalletSelect) {
-      mockOnWalletSelect(alternateWallet);
-    }
+    expect(mockOnWalletSelect).toBeTruthy();
+    mockOnWalletSelect!(alternateWallet);
     await waitFor(() =>
       expect(onMintFor).toHaveBeenLastCalledWith(alternateWallet)
     );
@@ -134,10 +141,10 @@ describe("ManifoldMintingConnect", () => {
     await userEvent.click(
       screen.getByRole("button", { name: /Mint for fren/i })
     );
-    if (mockOnProfileSelect && mockOnWalletSelect) {
-      mockOnProfileSelect({ handle: "fren", wallet: frenWallet });
-      mockOnWalletSelect(frenWallet);
-    }
+    expect(mockOnProfileSelect).toBeTruthy();
+    expect(mockOnWalletSelect).toBeTruthy();
+    mockOnProfileSelect!({ handle: "fren", wallet: frenWallet });
+    mockOnWalletSelect!(frenWallet);
     await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenWallet));
 
     await userEvent.click(screen.getByRole("button", { name: /Mint for me/i }));
@@ -163,10 +170,10 @@ describe("ManifoldMintingConnect", () => {
 
     const frenWallet = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-    if (mockOnProfileSelect && mockOnWalletSelect) {
-      mockOnProfileSelect({ handle: "fren", wallet: frenWallet });
-      mockOnWalletSelect(frenWallet);
-    }
+    expect(mockOnProfileSelect).toBeTruthy();
+    expect(mockOnWalletSelect).toBeTruthy();
+    mockOnProfileSelect!({ handle: "fren", wallet: frenWallet });
+    mockOnWalletSelect!(frenWallet);
 
     await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenWallet));
   });
@@ -178,10 +185,10 @@ describe("ManifoldMintingConnect", () => {
     );
 
     const frenWallet = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    if (mockOnProfileSelect && mockOnWalletSelect) {
-      mockOnProfileSelect({ handle: "fren", wallet: frenWallet });
-      mockOnWalletSelect(frenWallet);
-    }
+    expect(mockOnProfileSelect).toBeTruthy();
+    expect(mockOnWalletSelect).toBeTruthy();
+    mockOnProfileSelect!({ handle: "fren", wallet: frenWallet });
+    mockOnWalletSelect!(frenWallet);
 
     await waitFor(() => expect(onMintFor).toHaveBeenLastCalledWith(frenWallet));
 

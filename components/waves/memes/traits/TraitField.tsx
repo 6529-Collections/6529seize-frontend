@@ -39,7 +39,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         traits={traits}
         updateText={updateText}
         readOnly={effectiveReadOnly}
-        placeholder={definition.type === FieldType.TEXT ? definition.placeholder : undefined}
+        placeholder={definition.placeholder}
         error={error}
         onBlur={onBlur}
       />
