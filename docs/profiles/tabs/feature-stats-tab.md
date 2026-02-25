@@ -76,8 +76,8 @@ Gradient.
 - `Boost Breakdown` is shown only when boost breakdown data is available.
 - If a full collection-set boost is already acquired, `Boost Breakdown` can
   show only the top-level collection row instead of per-season rows.
-- When per-season rows are shown, available season entries can expand over time
-  (for example, through `SZN12`) as TDH breakdown data evolves.
+- When per-season rows are shown, available season entries expand as TDH returns new
+  season buckets in the boost breakdown data.
 - `TDH History` can show `No TDH history found` when history is unavailable.
 - If Memes/MemeLab metadata is delayed, wallet rows may still show the row without
   full token naming and icon details until metadata resolves.

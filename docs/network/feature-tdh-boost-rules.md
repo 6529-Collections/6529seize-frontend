@@ -40,7 +40,8 @@ rules are currently active.
   comparing with archived versions.
 - Compare category behavior:
   - Category A: full-set and additional-set logic
-  - Category B: SZN set boosters from SZN1 through SZN12
+- Category B: season boosters from `SZN1` upward, based on the set of season buckets
+  returned by current TDH data
   - Category C: gradient booster cap
 - Use the route as the canonical reference for current TDH rules.
 
