@@ -105,6 +105,22 @@ available yet.
   numeric card id or open `/meme-calendar` directly.
 - If timezone output is unclear, switch between `Local` and `UTC` to compare
   rendered times.
+- `/api/meme-calendar/{id}` returns:
+  - `200` with resolved details when the mint id is a valid positive integer
+    and timeline lookup succeeds:
+    - `mint_date` (`ISO UTC` timestamp, e.g.
+      `2025-03-18T13:00:00.000Z`)
+    - `season`
+    - `year`
+    - `epoch`
+    - `period`
+    - `era`
+    - `eon`
+  - `400` for invalid ids (`"abc"`, `"0"`, `"1.5"`, negative ids, and ids above
+    JavaScript `MAX_SAFE_INTEGER`), with
+    `{"error":"Invalid id. Use a positive integer in /api/meme-calendar/<id>."}`.
+  - `422` when the id is valid but timeline data cannot be resolved, with
+    `{"error":"Unable to resolve calendar details for this mint id. The id may be out of range."}`.
 
 ## Limitations / Notes
 
