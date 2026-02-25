@@ -72,6 +72,8 @@ This guide documents current user-facing behavior.
   [The Memes Mint Flow](media/memes/feature-mint-flow.md)
 - Review realtime auth/live-update behavior:
   [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
+- Review NFT activity browsing:
+  [NFT Activity Browsing Flow](realtime/flow-nft-activity-browsing.md)
 
 ## Troubleshooting
 
@@ -81,3 +83,5 @@ This guide documents current user-facing behavior.
   [Legacy Route Redirects](shared/feature-legacy-route-redirects.md)
 - Delegation routes and action-state troubleshooting:
   [Delegation Routes and Action States](delegation/troubleshooting-delegation-routes-and-actions.md)
+- Realtime websocket connectivity stalls:
+  [Realtime Connectivity Troubleshooting](realtime/troubleshooting-realtime-connectivity.md)
