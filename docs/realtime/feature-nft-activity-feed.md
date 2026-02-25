@@ -20,15 +20,17 @@ collections in one stream.
 
 1. Open `/nft-activity`.
 2. Review the newest rows in the activity table.
-3. Narrow results with the `Collection` and `Transaction Type` dropdowns.
+3. Narrow results with the `Collection` and `Transaction Type` dropdowns
+   (for example `The Memes`, `All Collections`, `All Transactions`).
 4. Move between result pages with pagination controls at the bottom.
 5. Open NFT/token links or the transaction link for deeper details.
 
 ## Common Scenarios
 
-- Filter to `The Memes`, `NextGen`, or `Gradients` in `Collection`.
-- Filter to `Sales`, `Mints`, `Transfers`, `Airdrops`, or `Burns` in
-  `Transaction Type`.
+- Filter to `The Memes`, `NextGen`, or `Gradients` in `Collection`
+  (with `All Collections` to clear the collection scope).
+- Filter to `All Transactions`, `Sales`, `Mints`, `Transfers`, `Airdrops`, or
+  `Burns` in `Transaction Type`.
 - Open a NextGen row to its provenance route:
   `/nextgen/token/{tokenId}/provenance`.
 - Open the transaction icon to view the tx on Etherscan.

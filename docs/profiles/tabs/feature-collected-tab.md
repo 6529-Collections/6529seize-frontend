@@ -16,7 +16,7 @@ separate route and does not alter the tab's sort/filter/pagination behavior.
   - `search=<keyword>` for collection search
   - `sort_by=<field>` and `sort_direction=<asc|desc>` for list ordering
   - `seized=<all|yes|no>` where available for the selected collection type
-  - `szn=<szn1|szn2|...>` for seasonal card views where supported
+  - `szn=<season-id>` for seasonal card views where supported
   - `address=<wallet>` to scope tab-level identity row context
   - `page=<n>` for pagination
 
@@ -31,6 +31,8 @@ separate route and does not alter the tab's sort/filter/pagination behavior.
 1. Open the collected tab.
 2. Apply filters and sorting:
   - collection, sort, seized filter, and season filter by collection rules.
+  - The season filter shows `All Seasons` plus season IDs fetched from the latest
+    seasonal catalog, so new season entries can appear without deployment.
 3. Browse paginated card grid and open card links in normal viewing mode.
 4. Enter transfer mode:
   - Desktop-only `Transfer` button appears when ownership transfer is applicable.
@@ -62,6 +64,8 @@ separate route and does not alter the tab's sort/filter/pagination behavior.
   - the connected wallet does not match a profile wallet for the viewed profile.
 - For profiles that have connected-wallet ownership but mixed balances, some cards
   can be selectable while others are informational-only.
+- If a `szn` value in the URL does not match a known season id, the filter
+  defaults to `All Seasons`.
 - The transfer panel requires at least one selected item before `Continue` is
   enabled.
 - Data for wallet-scoped transfer quantities loads separately from base collected

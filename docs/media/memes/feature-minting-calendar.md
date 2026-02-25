@@ -69,10 +69,11 @@ available yet.
 
 - The upcoming-mints table omits the canonical next mint when it is already
   shown in the left `Next Mint` card.
-- If no additional mints remain in the current season, the table rolls forward
-  to the next season and shows `Upcoming SZN`.
-- If the season only has the canonical next mint (already shown in the left
-  card), the table shows `No additional mints scheduled in this season.`
+- If the upcoming list only contains the canonical next mint already shown in the
+  left card, the season table rolls forward to the next season and shows
+  `Upcoming SZN`.
+- If there are no remaining upcoming mints in the selected season, the section
+  shows `No upcoming mints in this season.`.
 - Historical launch period (SZN1 / Year 0) is grouped as `Memes #1 - #47`
   across calendar views.
 - The month jump field is hidden on small screens.
