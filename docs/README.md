@@ -48,8 +48,7 @@ This guide documents current user-facing behavior.
   [Profile Tabs](profiles/navigation/feature-tabs.md)
 - Understand homepage layout and discoverability:
   [Home Page Surface](home/feature-home-surface.md)
-- Troubleshoot profile load/tab issues:
-  [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
+- Troubleshoot profile load/tab issues in the dedicated troubleshooting index.
 - Start with wave creation behavior:
   [Wave Creation Index](waves/create/README.md)
 - Recover from route errors and 404 pages:
@@ -64,14 +63,10 @@ This guide documents current user-facing behavior.
   [Wave Link Previews Index](waves/link-previews/README.md)
 - Start with wave leaderboards:
   [Wave Leaderboard Index](waves/leaderboard/README.md)
-- Start with wave sidebar behavior:
-  [Wave Sidebar Index](waves/sidebars/README.md)
 - Start with Memes submission flow:
   [Memes Submission Workflow](waves/memes/feature-memes-submission.md)
 - Follow The Memes mint behavior:
   [The Memes Mint Flow](media/memes/feature-mint-flow.md)
-- Understand The Memes countdown states:
-  [Now Minting Countdown](media/memes/feature-now-minting-countdown.md)
 - Review realtime auth/live-update behavior:
   [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
 
