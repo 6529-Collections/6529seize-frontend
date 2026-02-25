@@ -41,6 +41,8 @@ paragraph.
 - Long markdown posts display directly in the drop card.
 - Fenced markdown code blocks render inline in the post body and keep a
   code-style presentation instead of collapsing into plain paragraph text.
+- Wave mention tokens like `#[wave_name]` render as inline links to
+  `/waves?wave=<wave_id>` when wave mention metadata is present.
 - Consecutive blank lines in markdown remain visually separated instead of
   collapsing into a single paragraph break.
 - In memes wave leaderboard, participation, and winner cards, newline breaks in
@@ -57,6 +59,8 @@ paragraph.
   instead of a serial quote-jump card.
 - Raw URLs in drop text are linkified inline when rendering text segments, so
   `https://` links become directly tappable in the post body.
+- `#[name]` tokens without matching wave metadata remain plain text, while matching
+  wave mention tokens become tappable links.
 - Clicking a linkified URL opens the destination in a new browser tab and uses
   safe `rel` attributes for external navigation.
 - Linkified URLs stop event propagation, so clicking a URL does not trigger

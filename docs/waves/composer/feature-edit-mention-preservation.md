@@ -16,8 +16,8 @@ including drops that contain intentional extra blank lines.
 ## Entry Points
 
 - Open a drop action menu and choose `Edit Message`.
-- Edit a previously posted drop that already contains user mentions or wave
-  mentions.
+- Edit a previously posted drop that already contains user mentions, `#[wave_name]`
+  wave mentions, or other supported mention patterns.
 
 ## User Journey
 
@@ -32,7 +32,8 @@ including drops that contain intentional extra blank lines.
 
 - Correct a typo in a sentence that includes one or more mentions.
 - Append text after a mention without needing to recreate the mention.
-- Edit drops containing both user mentions and wave mentions in the same body.
+- Edit drops containing both user mentions and wave mentions (`#[wave_name]`) in the
+  same body.
 - Edit mention-heavy drops that also use extra blank spacing between sections.
 
 ## Edge Cases
@@ -56,8 +57,8 @@ including drops that contain intentional extra blank lines.
 ## Limitations / Notes
 
 - This behavior applies to editing existing drops, not the new-drop composer.
-- Auto-preservation only applies to recognized mention patterns for users and
-  waves.
+- Auto-preservation only applies to recognized mention patterns for users, wave
+  mentions (`#[wave_name]`), and tracked NFT hashtag tokens (`$[name]`).
 - Very malformed mention text may require manual correction before it behaves as
   a mention again.
 

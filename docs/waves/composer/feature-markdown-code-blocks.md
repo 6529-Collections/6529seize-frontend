@@ -35,8 +35,8 @@ code content instead of converting them into mention/hashtag entities.
 
 - Code pasted from rich-text sources is inserted as plain text, which keeps
   raw characters and spacing without bringing formatting from the source app.
-- Inside code context, `@` mentions, `#` wave mentions, and `$` NFT hashtag
-  suggestions stay inactive so code text remains literal.
+- Inside code context, `@` mentions, `#[wave_name]` wave mentions, and `$[name]`
+  NFT hashtags stay inactive so code text remains literal.
 - Fenced blocks with recognized language hints render with syntax coloring.
 - Inline backtick code remains inline and is not converted to a multi-line
   code block.
@@ -55,8 +55,8 @@ code content instead of converting them into mention/hashtag entities.
 
 - If syntax highlighting cannot be applied (for example, detection/import
   issues), the code text still renders and remains readable.
-- If users expected mentions/hashtags inside code to become interactive, they
-  can move outside the code block and re-enter those tokens in normal text.
+- If users expected mention and hashtag tokens inside code to become interactive,
+  move outside the code block and re-enter `#` or `$[ ]` tokens in normal text.
 - If pasted content contains formatting users wanted to keep, they can reapply
   markdown formatting manually after paste.
 
