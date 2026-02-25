@@ -7,6 +7,8 @@ import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimAttribute } from "@/generated/models/MintingClaimAttribute";
 import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimUpdateRequest";
 
+type TraitPrimitive = string | number | boolean;
+
 const ATTRIBUTE_TRAIT_KEYS = (
   Object.keys(getInitialTraitsValues()) as (keyof TraitsData)[]
 ).filter((k) => k !== "title" && k !== "description");
@@ -19,12 +21,50 @@ export function getClaimSeason(claim: MintingClaim): string {
   return "";
 }
 
+function normalizeTraitPrimitive(
+  initialValue: TraitPrimitive,
+  value: unknown,
+  numberFallback: number
+): TraitPrimitive {
+  if (typeof initialValue === "boolean") {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === "yes" || normalized === "true") return true;
+      if (normalized === "no" || normalized === "false") return false;
+    }
+    return Boolean(value);
+  }
+
+  if (typeof initialValue === "number") {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : numberFallback;
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return value;
+  }
+  return "";
+}
+
+function toAttributeValue(value: TraitPrimitive): string | number {
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  return value;
+}
+
 export function claimToTraitsData(claim: MintingClaim): TraitsData {
   const initial = getInitialTraitsValues();
   const traits: TraitsData = { ...initial };
   traits.title = claim.name ?? "";
   traits.description = claim.description ?? "";
-  const attrMap = new Map<string, string | number | boolean>();
+  const attrMap = new Map<string, TraitPrimitive>();
   const labelToField = new Map<string, keyof TraitsData>(
     Object.entries(FIELD_TO_LABEL_MAP).map(([field, label]) => [
       label.toLowerCase(),
@@ -42,31 +82,8 @@ export function claimToTraitsData(claim: MintingClaim): TraitsData {
     if (!rawKey) return;
     const resolvedKey = labelToField.get(rawKey) ?? keyToField.get(rawKey);
     if (!resolvedKey) return;
-    attrMap.set(resolvedKey, a.value as string | number | boolean);
+    attrMap.set(resolvedKey, a.value as TraitPrimitive);
   });
-  const coerceValue = (
-    key: keyof TraitsData,
-    value: string | number | boolean
-  ): string | number | boolean => {
-    const initialValue = initial[key];
-    if (typeof initialValue === "boolean") {
-      if (typeof value === "boolean") return value;
-      if (typeof value === "string") {
-        const normalized = value.trim().toLowerCase();
-        if (normalized === "yes" || normalized === "true") return true;
-        if (normalized === "no" || normalized === "false") return false;
-      }
-      return Boolean(value);
-    }
-    if (typeof initialValue === "number") {
-      if (typeof value === "number") return value;
-      if (typeof value === "string") {
-        const parsed = Number(value);
-        return Number.isFinite(parsed) ? parsed : initialValue;
-      }
-    }
-    return value;
-  };
   const traitsRecord: Record<string, unknown> = traits as unknown as Record<
     string,
     unknown
@@ -74,7 +91,9 @@ export function claimToTraitsData(claim: MintingClaim): TraitsData {
   ATTRIBUTE_TRAIT_KEYS.forEach((key) => {
     const v = attrMap.get(key);
     if (v !== undefined && v !== null) {
-      traitsRecord[key] = coerceValue(key, v);
+      const initialValue = initial[key] as TraitPrimitive;
+      const numberFallback = typeof initialValue === "number" ? initialValue : 0;
+      traitsRecord[key] = normalizeTraitPrimitive(initialValue, v, numberFallback);
     }
   });
   return traits;
@@ -89,30 +108,8 @@ export function traitsDataToUpdateRequest(
   const normalizeValue = (
     key: keyof TraitsData,
     value: unknown
-  ): string | number | boolean => {
-    const initialValue = initial[key];
-    if (typeof initialValue === "boolean") {
-      if (typeof value === "boolean") return value;
-      if (typeof value === "string") {
-        const normalized = value.trim().toLowerCase();
-        if (normalized === "yes" || normalized === "true") return true;
-        if (normalized === "no" || normalized === "false") return false;
-      }
-      return Boolean(value);
-    }
-    if (typeof initialValue === "number") {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : 0;
-    }
-    if (
-      typeof value === "string" ||
-      typeof value === "number" ||
-      typeof value === "boolean"
-    ) {
-      return value;
-    }
-    return "";
+  ): TraitPrimitive => {
+    return normalizeTraitPrimitive(initial[key] as TraitPrimitive, value, 0);
   };
 
   const hasChangedAttributeValues =
@@ -130,15 +127,13 @@ export function traitsDataToUpdateRequest(
 
   if (hasChangedAttributeValues) {
     body.attributes = ATTRIBUTE_TRAIT_KEYS.map(
-      (key): MintingClaimAttribute => ({
-        trait_type: FIELD_TO_LABEL_MAP[key] ?? key,
-        value:
-          typeof normalizeValue(key, traits[key]) === "boolean"
-            ? (normalizeValue(key, traits[key]) as boolean)
-              ? "Yes"
-              : "No"
-            : (normalizeValue(key, traits[key]) as string | number),
-      })
+      (key): MintingClaimAttribute => {
+        const normalizedValue = normalizeValue(key, traits[key]);
+        return {
+          trait_type: FIELD_TO_LABEL_MAP[key] ?? key,
+          value: toAttributeValue(normalizedValue),
+        };
+      }
     );
   }
 

@@ -15,6 +15,9 @@ import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
 import { HttpFile } from '../http/http';
 
 export class MintingClaimUpdateRequest {
+    /**
+    * Maximum signed 32-bit integer.
+    */
     'edition_size'?: number | null;
     'description'?: string;
     'name'?: string;

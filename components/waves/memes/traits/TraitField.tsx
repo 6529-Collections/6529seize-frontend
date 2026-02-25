@@ -30,7 +30,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
   readOnlyOverride,
 }) => {
   const effectiveReadOnly =
-    readOnlyOverride !== undefined ? readOnlyOverride : definition.readOnly;
+    readOnlyOverride === undefined ? definition.readOnly : readOnlyOverride;
   if (definition.type === FieldType.TEXT) {
     return (
       <TextTrait

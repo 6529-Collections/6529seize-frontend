@@ -10,14 +10,14 @@ export function DropForgePermissionFallback({
   hasAccess,
   titleIcon: TitleIcon,
   titleRight,
-}: {
+}: Readonly<{
   title: string;
   permissionsLoading: boolean;
   hasWallet: boolean;
   hasAccess: boolean;
   titleIcon?: ComponentType<{ className?: string | undefined }> | undefined;
   titleRight?: ReactNode;
-}) {
+}>) {
   if (!permissionsLoading && hasWallet && hasAccess) return null;
 
   return (

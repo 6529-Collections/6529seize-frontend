@@ -60,11 +60,13 @@ function getTraitValue(
   const value = attributes?.find(
     (attribute) => attribute.trait_type === traitType
   )?.value;
-  return typeof value === "string"
-    ? value
-    : value != null
-      ? String(value)
-      : undefined;
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value != null) {
+    return String(value);
+  }
+  return undefined;
 }
 
 function getDateTimeString(time: Time, local_timezone: boolean) {
@@ -109,7 +111,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     ) {
       return undefined;
     }
-    const metadata = { ...(props.mintMetadata.metadata as ArweaveMetadata) };
+    const metadata = { ...props.mintMetadata.metadata };
     if (
       metadata.animation_details &&
       typeof metadata.animation_details === "string"
@@ -172,7 +174,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
       const frameId = requestAnimationFrame(checkClamping);
       return () => cancelAnimationFrame(frameId);
     }
-    return;
+    return undefined;
   }, [instance, descriptionClamped]);
 
   function printMint() {

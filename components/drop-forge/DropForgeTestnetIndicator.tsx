@@ -7,9 +7,9 @@ import {
 
 export default function DropForgeTestnetIndicator({
   className = "",
-}: {
+}: Readonly<{
   className?: string;
-}) {
+}>) {
   const { mode } = useDropForgeMintingConfig();
 
   if (mode !== DropForgeMintingMode.TESTNET) {

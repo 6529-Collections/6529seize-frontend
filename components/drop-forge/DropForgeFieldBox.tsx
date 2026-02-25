@@ -8,13 +8,13 @@ export default function DropForgeFieldBox({
   labelClassName = "",
   contentClassName = "",
   children,
-}: {
+}: Readonly<{
   label: string;
   className?: string;
   labelClassName?: string;
   contentClassName?: string;
   children: ReactNode;
-}) {
+}>) {
   return (
     <div
       className={`tw-relative tw-min-h-12 tw-rounded-md tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800 ${className}`}

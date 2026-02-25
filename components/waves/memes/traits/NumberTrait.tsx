@@ -165,7 +165,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
     }, [traits, field]);
 
     const isFieldFilled = useMemo(() => {
-      const n = parseFloat(currentInputValue);
+      const n = Number.parseFloat(currentInputValue);
       return Number.isFinite(n) && n > 0;
     }, [currentInputValue]);
 

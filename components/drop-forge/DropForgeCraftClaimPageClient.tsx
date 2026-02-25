@@ -64,6 +64,12 @@ const BTN_DANGER =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-rose-500/50 tw-bg-rose-600/20 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-rose-200 tw-transition-colors tw-duration-150 enabled:hover:tw-bg-rose-500/30 enabled:hover:tw-ring-rose-400 enabled:active:tw-ring-rose-400";
 
 type ClaimMediaType = "image" | "video" | "glb" | "html" | "unknown";
+type DistributionSectionKey =
+  | "automatic"
+  | "phase0"
+  | "phase1"
+  | "phase2"
+  | "public";
 
 function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   if (!claim.image_url && !claim.image_details) return "unknown";
@@ -110,11 +116,32 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function getPhotoFileName(link: string): string {
+  const withoutHash = link.split("#")[0] ?? link;
+  const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
+  const lastSegment = withoutQuery.split("/").pop() ?? "";
+  if (!lastSegment) return link;
+
+  try {
+    return decodeURIComponent(lastSegment);
+  } catch {
+    return lastSegment;
+  }
+}
+
+function normalizeDistributionPhase(value: string): string {
+  return value.replaceAll(/[\s_-]+/g, "").toLowerCase();
+}
+
+function normalizeRootPhase(value: string): string {
+  return value.replaceAll(/\s+/g, "").toLowerCase();
+}
+
 export default function DropForgeCraftClaimPageClient({
   claimId,
-}: {
+}: Readonly<{
   claimId: number;
-}) {
+}>) {
   const { setToast } = useAuth();
   const { hasWallet, permissionsLoading, canAccessCraft } =
     useDropForgePermissions();
@@ -325,12 +352,12 @@ function ImageSection({
   claimId,
   onUpdated,
   onPendingChange,
-}: {
+}: Readonly<{
   claim: MintingClaim;
   claimId: number;
   onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
-}) {
+}>) {
   const { setToast } = useAuth();
   const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
   const [pendingImagePreviewUrl, setPendingImagePreviewUrl] = useState<
@@ -506,12 +533,12 @@ function AnimationSection({
   claimId,
   onUpdated,
   onPendingChange,
-}: {
+}: Readonly<{
   claim: MintingClaim;
   claimId: number;
   onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
-}) {
+}>) {
   const { setToast } = useAuth();
   const [pendingAnimation, setPendingAnimation] = useState<
     string | null | undefined
@@ -562,6 +589,14 @@ function AnimationSection({
     }
     return null;
   })();
+  let animationPreviewLabel = "Animation";
+  if (animationPreviewMimeType?.startsWith("video/")) {
+    animationPreviewLabel = "Video";
+  } else if (animationPreviewMimeType?.startsWith("model/gltf")) {
+    animationPreviewLabel = "GLB";
+  } else if (animationPreviewMimeType === "text/html") {
+    animationPreviewLabel = "HTML";
+  }
 
   function clearPendingAnimationFileSelection() {
     setPendingAnimationFile(null);
@@ -745,15 +780,7 @@ function AnimationSection({
           pendingAnimationFile !== null) && (
           <>
             <DropForgeMediaTypePill
-              label={
-                animationPreviewMimeType?.startsWith("video/")
-                  ? "Video"
-                  : animationPreviewMimeType?.startsWith("model/gltf")
-                    ? "GLB"
-                    : animationPreviewMimeType === "text/html"
-                      ? "HTML"
-                      : "Animation"
-              }
+              label={animationPreviewLabel}
             />
             {animationDisplayUrl && animationPreviewMimeType && (
               <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
@@ -783,10 +810,11 @@ function AnimationSection({
 
         {showAddLink && (
           <div className="tw-flex tw-flex-col tw-gap-2">
-            <label className="tw-text-sm tw-text-iron-400">
+            <label htmlFor="drop-forge-animation-link" className="tw-text-sm tw-text-iron-400">
               IPFS or Arweave URL (GLB or HTML)
             </label>
             <input
+              id="drop-forge-animation-link"
               type="text"
               value={linkInput}
               onChange={(e) => {
@@ -962,13 +990,13 @@ function CoreInformationSection({
   onUpdated,
   onPendingChange,
   onEditionSizeSaved,
-}: {
+}: Readonly<{
   claim: MintingClaim;
   claimId: number;
   onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
   onEditionSizeSaved: () => void;
-}) {
+}>) {
   const { setToast } = useAuth();
   const [editionSize, setEditionSize] = useState(
     claim.edition_size != null ? String(claim.edition_size) : ""
@@ -985,12 +1013,11 @@ function CoreInformationSection({
     setCoreError(null);
   }, [claim.claim_id]);
 
+  const currentEditionSize =
+    claim.edition_size == null ? "" : String(claim.edition_size);
   const coreChanged =
-    editionSize !==
-      (claim.edition_size != null ? String(claim.edition_size) : "") ||
-    season !== getClaimSeason(claim);
-  const editionSizeChanged =
-    editionSize !== (claim.edition_size != null ? String(claim.edition_size) : "");
+    editionSize !== currentEditionSize || season !== getClaimSeason(claim);
+  const editionSizeChanged = editionSize !== currentEditionSize;
   const seasonChanged = season !== getClaimSeason(claim);
 
   const editionSizeNum =
@@ -1157,12 +1184,12 @@ function MetadataSection({
   claimId,
   onUpdated,
   onPendingChange,
-}: {
+}: Readonly<{
   claim: MintingClaim;
   claimId: number;
   onUpdated: (c: MintingClaim) => void;
   onPendingChange: (dirty: boolean) => void;
-}) {
+}>) {
   const { setToast } = useAuth();
   const initialTraits = useMemo(() => claimToTraitsData(claim), [claim]);
   const [traits, setTraits] = useState<TraitsData>(initialTraits);
@@ -1201,7 +1228,7 @@ function MetadataSection({
     setTraitsError(null);
     const currentTraits = claimToTraitsData(claim);
     const previouslyFocused =
-      typeof document !== "undefined" ? document.activeElement : null;
+      typeof document === "undefined" ? null : document.activeElement;
     setTraitsSaving(true);
     try {
       const body = traitsDataToUpdateRequest(traits, null, currentTraits);
@@ -1347,7 +1374,10 @@ function MetadataSection({
 const ARWEAVE_ROW_GRID =
   "tw-grid tw-grid-cols-[minmax(5rem,auto)_auto_auto_1fr] tw-gap-x-3 tw-items-center";
 
-function ArweaveLinkRow({ label, url }: { label: string; url: string }) {
+function ArweaveLinkRow({
+  label,
+  url,
+}: Readonly<{ label: string; url: string }>) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -1408,12 +1438,12 @@ function ArweaveSection({
   claim,
   onStatusRefresh,
   hasPendingChanges,
-}: {
+}: Readonly<{
   claimId: number;
   claim: MintingClaim;
   onStatusRefresh: () => Promise<void>;
   hasPendingChanges: boolean;
-}) {
+}>) {
   const { setToast } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1426,7 +1456,7 @@ function ArweaveSection({
   useEffect(() => {
     if (!isPublishing) return;
     const id = setInterval(() => {
-      void onStatusRefresh().catch((e) => {
+      onStatusRefresh().catch((e) => {
         const msg = getErrorMessage(e, "Failed to refresh claim status");
         setError(msg);
       });
@@ -1531,10 +1561,10 @@ function ArweaveSection({
 function DistributionSection({
   claimId,
   summariesRefreshNonce,
-}: {
+}: Readonly<{
   claimId: number;
   summariesRefreshNonce: number;
-}) {
+}>) {
   const [photos, setPhotos] = useState<DistributionPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1582,7 +1612,7 @@ function DistributionSection({
       }
     };
 
-    void loadDistributionPhotos();
+    loadDistributionPhotos().catch(() => undefined);
 
     return () => {
       isActive = false;
@@ -1611,7 +1641,7 @@ function DistributionSection({
       }
     };
 
-    void loadAirdropSummaries();
+    loadAirdropSummaries().catch(() => undefined);
 
     return () => {
       isActive = false;
@@ -1641,40 +1671,12 @@ function DistributionSection({
       }
     };
 
-    void loadAllowlists();
+    loadAllowlists().catch(() => undefined);
 
     return () => {
       isActive = false;
     };
   }, [claimId, summariesRefreshNonce]);
-
-  function getPhotoFileName(link: string): string {
-    const withoutHash = link.split("#")[0] ?? link;
-    const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
-    const lastSegment = withoutQuery.split("/").pop() ?? "";
-    if (!lastSegment) return link;
-
-    try {
-      return decodeURIComponent(lastSegment);
-    } catch {
-      return lastSegment;
-    }
-  }
-
-  type DistributionSectionKey =
-    | "automatic"
-    | "phase0"
-    | "phase1"
-    | "phase2"
-    | "public";
-
-  function normalizeDistributionPhase(value: string): string {
-    return value.replace(/[\s_-]+/g, "").toLowerCase();
-  }
-
-  function normalizeRootPhase(value: string): string {
-    return value.replace(/\s+/g, "").toLowerCase();
-  }
 
   const phaseAliases: Record<DistributionSectionKey, string[]> = {
     automatic: ["automatic", "airdrop", "teamandartistairdrops"],
@@ -2068,11 +2070,11 @@ function DistributionPhotoLightbox({
   photo,
   photoFileName,
   onClose,
-}: {
+}: Readonly<{
   photo: DistributionPhoto | null;
   photoFileName: string;
   onClose: () => void;
-}) {
+}>) {
   useEffect(() => {
     if (!photo) return;
     const previousOverflow = document.body.style.overflow;
@@ -2080,10 +2082,10 @@ function DistributionPhotoLightbox({
       if (event.key === "Escape") onClose();
     };
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, [photo, onClose]);
 
@@ -2093,14 +2095,18 @@ function DistributionPhotoLightbox({
 
   return createPortal(
     <div
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-flex tw-items-center tw-justify-center"
-      onClick={onClose}
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-relative tw-flex tw-items-center tw-justify-center"
     >
-      <div className="tw-absolute tw-inset-0 tw-bg-black/85" />
+      <button
+        type="button"
+        aria-label="Close photo lightbox"
+        tabIndex={-1}
+        onClick={onClose}
+        className="tw-absolute tw-inset-0 tw-border-0 tw-bg-black/85 tw-p-0"
+      />
 
       <div
         className="tw-relative tw-z-[1001] tw-w-[min(90vw,980px)] tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-2.5"
-        onClick={(event) => event.stopPropagation()}
       >
         <img
           src={photo.link}

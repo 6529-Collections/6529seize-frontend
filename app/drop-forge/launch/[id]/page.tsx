@@ -8,9 +8,11 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default async function DropForgeLaunchClaimPage({ params }: Props) {
+export default async function DropForgeLaunchClaimPage({
+  params,
+}: Readonly<Props>) {
   const { id } = await params;
-  const claimId = parseInt(id, 10);
+  const claimId = Number.parseInt(id, 10);
   if (!Number.isFinite(claimId) || claimId < 0) {
     return (
       <main className={`${styles["main"]} tailwind-scope`}>
@@ -28,7 +30,9 @@ export default async function DropForgeLaunchClaimPage({ params }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: Readonly<Props>): Promise<Metadata> {
   const { id } = await params;
   return getAppMetadata({
     title: `Claim #${id} | Launch Claims`,

@@ -309,12 +309,12 @@ export default function ManifoldMintingWidget(
   useEffect(() => {
     if (waitMintWrite.error) {
       setMintStatus(<></>);
-      setMintError(
+      const resolvedError =
         waitMintWrite.error.message
           ?.split("Request Arguments")[0]
           ?.split(".")[0]
-          ?.split("Contract Call")[0]!
-      );
+          ?.split("Contract Call")[0] ?? waitMintWrite.error.message;
+      setMintError(resolvedError);
     }
   }, [waitMintWrite.error]);
 

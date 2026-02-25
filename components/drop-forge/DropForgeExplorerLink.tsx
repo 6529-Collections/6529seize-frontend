@@ -10,9 +10,9 @@ import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 
 export default function DropForgeExplorerLink({
   className = "",
-}: {
+}: Readonly<{
   className?: string;
-}) {
+}>) {
   const { mode } = useDropForgeMintingConfig();
   const { address } = useSeizeConnectContext();
 

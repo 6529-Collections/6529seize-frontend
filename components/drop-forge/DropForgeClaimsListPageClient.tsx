@@ -38,7 +38,7 @@ function getUrlExtension(url: string | null | undefined): string | null {
   const clean = url.split("?")[0]?.split("#")[0] ?? "";
   const parts = clean.split(".");
   if (parts.length < 2) return null;
-  return parts[parts.length - 1]?.toLowerCase() ?? null;
+  return parts.at(-1)?.toLowerCase() ?? null;
 }
 
 function isVideoUrl(url: string | null | undefined): boolean {
@@ -94,7 +94,7 @@ function getMediaTypeLabel(claim: MintingClaim): string {
   return "—";
 }
 
-function ClaimCardThumbnail({ claim }: { claim: MintingClaim }) {
+function ClaimCardThumbnail({ claim }: Readonly<{ claim: MintingClaim }>) {
   const animationInfo = getAnimationInfo(claim);
   const containerClass =
     "tw-relative tw-w-20 sm:tw-w-24 tw-flex-shrink-0 tw-self-stretch tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800";
@@ -115,10 +115,19 @@ function ClaimCardThumbnail({ claim }: { claim: MintingClaim }) {
     const animationBlock =
       animationInfo.kind === "video" ? (
         <video
-          src={claim.animation_url!}
+          src={claim.animation_url ?? ""}
           preload="metadata"
+          muted
+          playsInline
           className="tw-h-full tw-w-full tw-object-cover"
-        />
+        >
+          <track
+            kind="captions"
+            src="data:text/vtt,WEBVTT"
+            srcLang="en"
+            label="English"
+          />
+        </video>
       ) : (
         <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
           <span className="tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
@@ -144,7 +153,7 @@ interface DropForgeClaimsPageClientProps {
 
 export default function DropForgeClaimsListPageClient({
   mode = "craft",
-}: DropForgeClaimsPageClientProps) {
+}: Readonly<DropForgeClaimsPageClientProps>) {
   const { setToast } = useAuth();
   const { hasWallet, permissionsLoading, canAccessCraft, canAccessLaunchPage } =
     useDropForgePermissions();
@@ -166,22 +175,25 @@ export default function DropForgeClaimsListPageClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPage = useCallback(async (p: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getClaimsPage(p, CRAFT_CLAIMS_PAGE_SIZE);
-      setData(res);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to load claims";
-      setError(msg);
-      if (msg.toLowerCase() !== "not authorized") {
-        setToast({ message: msg, type: "error" });
+  const fetchPage = useCallback(
+    async (p: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await getClaimsPage(p, CRAFT_CLAIMS_PAGE_SIZE);
+        setData(res);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to load claims";
+        setError(msg);
+        if (msg.toLowerCase() !== "not authorized") {
+          setToast({ message: msg, type: "error" });
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [setToast]
+  );
 
   useEffect(() => {
     if (!hasWallet || !hasAccess) return;
@@ -194,7 +206,7 @@ export default function DropForgeClaimsListPageClient({
   useEffect(() => {
     if (!hasWallet || !hasAccess || !hasUploadingClaims) return;
     const id = setInterval(() => {
-      void fetchPage(page);
+      fetchPage(page).catch(() => undefined);
     }, 10000);
     return () => clearInterval(id);
   }, [hasWallet, hasAccess, hasUploadingClaims, fetchPage, page]);
@@ -261,10 +273,10 @@ export default function DropForgeClaimsListPageClient({
 function ClaimCard({
   claim,
   mode,
-}: {
+}: Readonly<{
   claim: MintingClaim;
   mode: "craft" | "launch";
-}) {
+}>) {
   if (mode === "launch") {
     return <LaunchClaimCard claim={claim} />;
   }
@@ -278,10 +290,10 @@ function getCardDetailsBasePath(mode: "craft" | "launch"): string {
 function ClaimCardContent({
   claim,
   showLaunchFields,
-}: {
+}: Readonly<{
   claim: MintingClaim;
   showLaunchFields?: boolean;
-}) {
+}>) {
   const mediaTypeLabel = getMediaTypeLabel(claim);
   const imageMissing = !claim.image_url && !!claim.animation_url;
   return (
@@ -307,7 +319,7 @@ function ClaimCardContent({
   );
 }
 
-function CraftClaimCard({ claim }: { claim: MintingClaim }) {
+function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
   const primaryStatus = getClaimPrimaryStatus({ claim });
 
   return (
@@ -328,7 +340,7 @@ function CraftClaimCard({ claim }: { claim: MintingClaim }) {
   );
 }
 
-function LaunchClaimCard({ claim }: { claim: MintingClaim }) {
+function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
   const { claim: manifoldClaim } = useDropForgeManifoldClaim(claim.claim_id);
   const primaryStatus = getClaimPrimaryStatus({
     claim,

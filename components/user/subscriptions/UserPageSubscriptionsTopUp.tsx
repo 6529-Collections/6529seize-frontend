@@ -198,7 +198,7 @@ export default function UserPageSubscriptionsTopUp() {
       return (
         <div className="tw-text-center">
           <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
-            Error
+            <span>Error</span>
             <img
               src={getTopUpModalEmoji("error")}
               alt="error"

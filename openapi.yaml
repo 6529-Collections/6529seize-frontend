@@ -11482,6 +11482,8 @@ components:
         edition_size:
           type: integer
           format: int32
+          description: Maximum signed 32-bit integer.
+          maximum: 2147483647
           nullable: true
         description:
           type: string
@@ -11711,6 +11713,8 @@ components:
         edition_size:
           type: integer
           format: int32
+          description: Maximum signed 32-bit integer.
+          maximum: 2147483647
           nullable: true
         description:
           type: string

@@ -30,6 +30,13 @@ const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 const schemaMod = require("./config/env.schema.runtime.cjs");
 const { publicEnvSchema } = schemaMod;
 
+function getAssetPrefix(assetsFromS3: boolean, version: string): string {
+  if (!assetsFromS3) {
+    return "";
+  }
+  return `https://dnclu2fna0b2b.cloudfront.net/web_build/${version}`;
+}
+
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);
@@ -58,9 +65,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
     persistBakedArtifacts(publicEnv, ASSETS_FROM_S3);
 
     // Compose config
-    const assetPrefix = ASSETS_FROM_S3
-      ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
-      : "";
+    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
@@ -118,9 +123,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
     const ASSETS_FROM_S3 = loadAssetsFlagAtRuntime();
     logOnceConfig("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
-    const assetPrefix = ASSETS_FROM_S3
-      ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
-      : "";
+    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
 
     return sharedConfig(publicEnv, assetPrefix);
   }

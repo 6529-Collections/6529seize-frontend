@@ -24,6 +24,9 @@ export class MintingClaim {
     'animation_location'?: string | null;
     'metadata_location'?: string | null;
     'media_uploading'?: boolean;
+    /**
+    * Maximum signed 32-bit integer.
+    */
     'edition_size'?: number | null;
     'description': string;
     'name': string;

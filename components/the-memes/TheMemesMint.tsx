@@ -19,11 +19,12 @@ const ManifoldMinting = dynamic(
   }
 );
 
-export default function TheMemesMint(props: {
+export default function TheMemesMint({
+  nft,
+}: {
   readonly nft: NFTWithMemesExtendedData;
 }) {
   const { setTitle } = useTitle();
-  const nft = props.nft;
 
   useEffect(() => {
     setTitle(`Mint #${nft.id} | ${nft.name} | The Memes`);

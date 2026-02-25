@@ -23,7 +23,7 @@ jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
   default: () => <div data-testid="nft-attributes" />,
 }));
-jest.mock("@/components/manifoldMinting/ManifoldMintingWidget", () => ({
+jest.mock("@/components/manifold-minting/ManifoldMintingWidget", () => ({
   __esModule: true,
   default: () => <div data-testid="widget" />,
 }));
@@ -129,7 +129,7 @@ const { useManifoldClaim } = require("@/hooks/useManifoldClaim") as {
 };
 
 const mockFetch = jest.fn();
-global.fetch = mockFetch;
+globalThis.fetch = mockFetch;
 
 const createMockManifoldInstance = (overrides = {}) => ({
   id: 1,

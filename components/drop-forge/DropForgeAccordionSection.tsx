@@ -16,7 +16,7 @@ export default function DropForgeAccordionSection({
   showHeaderRightWhenClosed = false,
   children,
   className = "",
-}: {
+}: Readonly<{
   title: string;
   defaultOpen?: boolean;
   disabled?: boolean;
@@ -25,8 +25,18 @@ export default function DropForgeAccordionSection({
   showHeaderRightWhenClosed?: boolean;
   children: ReactNode;
   className?: string;
-}) {
+}>) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  let showHeaderRight = false;
+  if (headerRight) {
+    if (showHeaderRightWhenOpen) {
+      showHeaderRight = isOpen;
+    } else if (showHeaderRightWhenClosed) {
+      showHeaderRight = !isOpen;
+    } else {
+      showHeaderRight = true;
+    }
+  }
 
   const toggleOpen = () => {
     if (disabled) return;
@@ -35,23 +45,16 @@ export default function DropForgeAccordionSection({
 
   return (
     <div className={`${SECTION_CARD_CLASS} ${className}`}>
-      <div
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-expanded={isOpen}
-        onClick={toggleOpen}
-        onKeyDown={(event) => {
-          if (disabled) return;
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            toggleOpen();
-          }
-        }}
-        className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-bg-transparent tw-p-0 tw-text-left ${
-          disabled ? "" : "tw-cursor-pointer"
-        }`}
-      >
-        <span className="tw-inline-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2">
+        <button
+          type="button"
+          disabled={disabled}
+          aria-expanded={isOpen}
+          onClick={toggleOpen}
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+            disabled ? "" : "tw-cursor-pointer"
+          }`}
+        >
           <span className="tw-relative tw-h-5 tw-w-5 tw-flex-shrink-0">
             <ChevronRightIcon
               className={`tw-absolute tw-inset-0 tw-h-5 tw-w-5 tw-transition-all tw-duration-200 ${
@@ -75,20 +78,10 @@ export default function DropForgeAccordionSection({
           >
             {title}
           </span>
-        </span>
+        </button>
 
-        {headerRight &&
-        (showHeaderRightWhenOpen
-          ? isOpen
-          : showHeaderRightWhenClosed
-            ? !isOpen
-            : true) ? (
-          <span
-            onClick={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            {headerRight}
-          </span>
+        {showHeaderRight ? (
+          <span className="tw-inline-flex tw-items-center">{headerRight}</span>
         ) : null}
       </div>
 

@@ -23,10 +23,13 @@ export default function NowMintingCountdown({
   hideNextDrop,
   fullWidth,
 }: NowMintingCountdownProps) {
-  const state = useMintCountdownState(nftId, {
+  const countdownOptions = {
     contract,
     chainId,
-    ...(hideMintBtn !== undefined ? { hideMintBtn } : {}),
+    ...(hideMintBtn === undefined ? {} : { hideMintBtn }),
+  };
+  const state = useMintCountdownState(nftId, {
+    ...countdownOptions,
   });
 
   return (

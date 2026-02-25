@@ -9,12 +9,12 @@ export default function DropForgeStatusPill({
   label,
   showLoader = false,
   tooltipText,
-}: {
+}: Readonly<{
   className: string;
   label: string;
   showLoader?: boolean;
   tooltipText?: string;
-}) {
+}>) {
   const tooltipId = useId();
 
   return (

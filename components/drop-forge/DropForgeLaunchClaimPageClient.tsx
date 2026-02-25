@@ -121,7 +121,7 @@ function toneClass(tone: SectionTone): string {
 function getErrorMessage(error: unknown, fallback: string): string {
   const normalize = (message: string): string => {
     const withoutRequestArgs = message.split("Request Arguments")[0] ?? message;
-    const compact = withoutRequestArgs.replace(/\s+/g, " ").trim();
+    const compact = withoutRequestArgs.replaceAll(/\s+/g, " ").trim();
     return compact.length > 0 ? compact : fallback;
   };
 
@@ -146,7 +146,7 @@ function isNotFoundError(message: string): boolean {
 }
 
 function normalizePhaseName(value: string): string {
-  return value.replace(/\s+/g, "").toLowerCase();
+  return value.replaceAll(/\s+/g, "").toLowerCase();
 }
 
 function normalizeHexValue(value: string | null | undefined): string {
@@ -327,11 +327,11 @@ function ClaimTransactionModal({
   state,
   chain,
   onClose,
-}: {
+}: Readonly<{
   state: ClaimTxModalState | null;
   chain: Chain;
   onClose: () => void;
-}) {
+}>) {
   if (!state) return null;
 
   const closable = state.status === "success" || state.status === "error";
@@ -344,15 +344,21 @@ function ClaimTransactionModal({
 
   return createPortal(
     <div
-      className="tw-fixed tw-inset-0 tw-z-[1100] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
-      onClick={() => {
-        if (closable) onClose();
-      }}
-      role="presentation"
+      className="tw-fixed tw-inset-0 tw-z-[1100] tw-relative tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
     >
+      {closable ? (
+        <button
+          type="button"
+          aria-label="Close modal backdrop"
+          tabIndex={-1}
+          onClick={onClose}
+          className="tw-absolute tw-inset-0 tw-border-0 tw-bg-transparent tw-p-0"
+        />
+      ) : (
+        <div className="tw-absolute tw-inset-0" aria-hidden="true" />
+      )}
       <div
-        className="tw-relative tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
       >
         <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
           <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
@@ -374,7 +380,7 @@ function ClaimTransactionModal({
           {state.status === "error" ? (
             <div className="tw-w-full tw-min-w-0 tw-max-w-full tw-text-center">
               <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
-                Error
+                <span>Error</span>
                 <img
                   src={getClaimTxModalEmoji("error")}
                   alt="error"
@@ -489,7 +495,7 @@ function getUrlExtension(url: string | null | undefined): string | null {
   const clean = url.split("?")[0]?.split("#")[0] ?? "";
   const parts = clean.split(".");
   if (parts.length < 2) return null;
-  return parts[parts.length - 1]?.toLowerCase() ?? null;
+  return parts.at(-1)?.toLowerCase() ?? null;
 }
 
 function getImageFormat(claim: MintingClaim): string | null {
@@ -577,8 +583,9 @@ function LaunchAccordionSection({
   headerRight,
   showHeaderRightWhenOpen = false,
   children,
-}: LaunchAccordionSectionProps) {
+}: Readonly<LaunchAccordionSectionProps>) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const showHeaderRight = !!headerRight && (!showHeaderRightWhenOpen || isOpen);
   const toggleOpen = () => {
     if (disabled) return;
     setIsOpen((prev) => {
@@ -602,25 +609,18 @@ function LaunchAccordionSection({
 
   return (
     <div className={SECTION_CARD_CLASS}>
-      <div
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-expanded={isOpen}
-        aria-disabled={disabled}
-        onClick={toggleOpen}
-        onKeyDown={(event) => {
-          if (disabled) return;
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            toggleOpen();
-          }
-        }}
-        style={disabled ? { cursor: "default" } : undefined}
-        className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-bg-transparent tw-p-0 tw-text-left ${
-          disabled ? "tw-!cursor-default" : "tw-cursor-pointer"
-        }`}
-      >
-        <span className="tw-inline-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
+        <button
+          type="button"
+          disabled={disabled}
+          aria-expanded={isOpen}
+          aria-disabled={disabled}
+          onClick={toggleOpen}
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+            disabled ? "tw-!cursor-default" : "tw-cursor-pointer"
+          }`}
+        >
+          <span className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2">
           <span className="tw-relative tw-h-5 tw-w-5 tw-flex-shrink-0">
             <ChevronRightIcon
               className={`tw-absolute tw-inset-0 tw-h-5 tw-w-5 tw-transition-all tw-duration-200 ${
@@ -644,16 +644,7 @@ function LaunchAccordionSection({
           >
             {title}
           </span>
-        </span>
-        <span className="tw-inline-flex tw-items-center tw-gap-2">
-          {headerRight && (!showHeaderRightWhenOpen || isOpen) ? (
-            <span
-              onClick={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-            >
-              {headerRight}
-            </span>
-          ) : null}
+          </span>
           {subtitle ? (
             <span
               className={`tw-inline-flex tw-items-center tw-rounded-full tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-ring-1 tw-ring-inset ${toneClass(tone)}`}
@@ -661,7 +652,12 @@ function LaunchAccordionSection({
               {subtitle}
             </span>
           ) : null}
-        </span>
+        </button>
+        {showHeaderRight ? (
+          <span className="tw-inline-flex tw-items-center tw-gap-2">
+            {headerRight}
+          </span>
+        ) : null}
       </div>
       <div
         className={`tw-grid tw-transition-all tw-duration-200 tw-ease-out ${
@@ -684,7 +680,7 @@ function LaunchAccordionSection({
 
 export default function DropForgeLaunchClaimPageClient({
   claimId,
-}: DropForgeLaunchClaimPageClientProps) {
+}: Readonly<DropForgeLaunchClaimPageClientProps>) {
   const pageTitle = `Launch Claim #${claimId}`;
   const { setToast } = useAuth();
   const { contract: forgeMintingContract, chain: forgeMintingChain } =
@@ -755,7 +751,8 @@ export default function DropForgeLaunchClaimPageClient({
     (message: string) => {
       const now = Date.now();
       const last = lastErrorToastRef.current;
-      if (last && last.message === message && now - last.ts < 2000) {
+      const lastTs = last?.ts;
+      if (last?.message === message && lastTs !== undefined && now - lastTs < 2000) {
         return;
       }
       lastErrorToastRef.current = { message, ts: now };
@@ -1004,20 +1001,20 @@ export default function DropForgeLaunchClaimPageClient({
   useEffect(() => {
     if (!hasWallet || !canAccessLaunchPage || !selectedPhase) return;
 
-    const phasesToLoad: LaunchPhaseKey[] =
-      selectedPhase === "phase0"
-        ? ["phase0"]
-        : selectedPhase === "phase1"
-          ? ["phase1"]
-          : selectedPhase === "phase2"
-            ? ["phase2", "publicphase"]
-            : [];
+    let phasesToLoad: LaunchPhaseKey[] = [];
+    if (selectedPhase === "phase0") {
+      phasesToLoad = ["phase0"];
+    } else if (selectedPhase === "phase1") {
+      phasesToLoad = ["phase1"];
+    } else if (selectedPhase === "phase2") {
+      phasesToLoad = ["phase2", "publicphase"];
+    }
 
     for (const phaseKey of phasesToLoad) {
       const hasValue = subscriptionAirdropsByPhase[phaseKey] !== undefined;
       const isLoading = Boolean(subscriptionAirdropsLoadingByPhase[phaseKey]);
       if (!hasValue && !isLoading) {
-        void fetchSubscriptionAirdropsForPhase(phaseKey);
+        fetchSubscriptionAirdropsForPhase(phaseKey).catch(() => undefined);
       }
     }
   }, [
@@ -1312,16 +1309,23 @@ export default function DropForgeLaunchClaimPageClient({
   const changedFieldBoxLabelClassName =
     "tw-text-rose-300 tw-ring-rose-500/70";
   const selectedPhaseActionDisabled =
-    (claimWritePending || !selectedPhaseConfig
-      ? true
-      : selectedPhaseConfig.key === "phase0"
-        ? !isInitialized
-          ? !selectedPhaseConfig.root || missingRequiredInfo
-          : !selectedPhaseConfig.root
-        : selectedPhaseConfig.key === "publicphase"
-          ? !isInitialized
-          : !isInitialized || !selectedPhaseConfig.root) ||
+    (() => {
+      if (claimWritePending || !selectedPhaseConfig) {
+        return true;
+      }
+      if (selectedPhaseConfig.key === "phase0") {
+        if (!isInitialized) {
+          return !selectedPhaseConfig.root || missingRequiredInfo;
+        }
+        return !selectedPhaseConfig.root;
+      }
+      if (selectedPhaseConfig.key === "publicphase") {
+        return !isInitialized;
+      }
+      return !isInitialized || !selectedPhaseConfig.root;
+    })() ||
     (selectedPhaseIsUpdateAction && selectedPhaseMatchesOnChainConfig);
+  const isPublicPhaseSelected = selectedPhaseConfig?.key === "publicphase";
   const showPhase0AirdropSections = selectedPhaseConfig?.key === "phase0";
   const claimTxModalClosable =
     claimTxModal?.status === "success" || claimTxModal?.status === "error";
@@ -1428,7 +1432,7 @@ export default function DropForgeLaunchClaimPageClient({
   const closeClaimTxModal = useCallback(() => {
     if (!claimTxModalClosable) return;
     setClaimTxModal(null);
-    void refreshLaunchClaimData();
+    refreshLaunchClaimData().catch(() => undefined);
   }, [claimTxModalClosable, refreshLaunchClaimData]);
 
   useEffect(() => {
@@ -1448,8 +1452,8 @@ export default function DropForgeLaunchClaimPageClient({
         closeClaimTxModal();
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    globalThis.addEventListener("keydown", onKeyDown);
+    return () => globalThis.removeEventListener("keydown", onKeyDown);
   }, [claimTxModalClosable, closeClaimTxModal]);
 
   useEffect(() => {
@@ -1754,7 +1758,7 @@ export default function DropForgeLaunchClaimPageClient({
     if (!txHash || !waitClaimWrite.isSuccess) return;
     if (handledClaimWriteSuccessTxHashRef.current === txHash) return;
     handledClaimWriteSuccessTxHashRef.current = txHash;
-    void refetchOnChainClaim();
+    refetchOnChainClaim().catch(() => undefined);
     setClaimTxModal((prev) => ({
       status: "success",
       txHash,
@@ -1869,31 +1873,36 @@ export default function DropForgeLaunchClaimPageClient({
               showHeaderRightWhenOpen
             >
               <div className="tw-relative tw-h-64 tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 sm:tw-h-80 lg:tw-h-[23.5rem]">
-                {activeMediaTab === "animation" &&
-                hasAnimation &&
-                animationMimeType ? (
-                  <MediaDisplay
-                    media_mime_type={animationMimeType}
-                    media_url={claim.animation_url!}
-                  />
-                ) : activeMediaTab === "image" && hasImage ? (
-                  <MediaDisplay
-                    media_mime_type={
-                      claim.image_details?.format
-                        ? `image/${String(claim.image_details.format).toLowerCase()}`
-                        : "image/jpeg"
-                    }
-                    media_url={claim.image_url!}
-                  />
-                ) : activeMediaTab === "image" ? (
-                  <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-sm tw-text-iron-400">
-                    Image missing
-                  </div>
-                ) : (
-                  <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-sm tw-text-iron-400">
-                    Animation missing
-                  </div>
-                )}
+                {(() => {
+                  if (activeMediaTab === "animation" && hasAnimation && animationMimeType) {
+                    return (
+                      <MediaDisplay
+                        media_mime_type={animationMimeType}
+                        media_url={claim.animation_url ?? ""}
+                      />
+                    );
+                  }
+                  if (activeMediaTab === "image" && hasImage) {
+                    const imageMimeType = claim.image_details?.format
+                      ? `image/${String(claim.image_details.format).toLowerCase()}`
+                      : "image/jpeg";
+                    return (
+                      <MediaDisplay
+                        media_mime_type={imageMimeType}
+                        media_url={claim.image_url ?? ""}
+                      />
+                    );
+                  }
+                  return activeMediaTab === "image" ? (
+                    <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-sm tw-text-iron-400">
+                      Image missing
+                    </div>
+                  ) : (
+                    <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-text-sm tw-text-iron-400">
+                      Animation missing
+                    </div>
+                  );
+                })()}
               </div>
               <div className="tw-flex tw-justify-center">
                 <DropForgeMediaTypePill label={activeMediaTypeLabel} />
@@ -2239,7 +2248,7 @@ export default function DropForgeLaunchClaimPageClient({
                           />
                         </DropForgeFieldBox>
                       </div>
-                      {selectedPhaseConfig?.key !== "publicphase" ? (
+                      {isPublicPhaseSelected ? null : (
                         <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 lg:tw-grid-cols-2 lg:tw-gap-x-5">
                           <DropForgeFieldBox
                             label="Merkle Root"
@@ -2297,7 +2306,7 @@ export default function DropForgeLaunchClaimPageClient({
                             )}
                           </DropForgeFieldBox>
                         </div>
-                      ) : null}
+                      )}
                       <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pt-3 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:tw-items-start lg:tw-gap-x-5">
                         <DropForgeFieldBox
                           label="Phase Start"
