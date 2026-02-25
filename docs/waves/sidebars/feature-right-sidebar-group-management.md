@@ -2,8 +2,12 @@
 
 ## Overview
 
-The wave right sidebar `About` content shows who can view, drop, vote, chat,
-and administer a wave.
+The wave right sidebar `About` content shows wave metadata (`Type`, `Creator`)
+and editable scope rows for who can view, drop, vote, chat, and administer a
+wave.
+
+For chat waves, the `Voting` metadata row is hidden, so the `About` block shows
+`Type` and `Creator` without a vote summary.
 
 Eligible editors can use `Group options` to add, change, or remove scope groups
 and to include or exclude individual identities without leaving the current
@@ -59,6 +63,7 @@ For non-chat waves, the same panel also includes `Curation Groups` management.
   group's author.
 - Hidden groups display `Hidden` instead of a linked group name.
 - `Curation Groups` is not shown on chat waves.
+- The `Voting` metadata row in the `About` block is omitted for chat waves.
 - Identity suggestions open after at least 3 typed characters.
 - Keyboard navigation is supported in identity suggestions (`ArrowUp`,
   `ArrowDown`, `Enter`).
