@@ -10,8 +10,8 @@ oversized index.
 
 - [Navigation](navigation/README.md): profile route model, tab availability,
   canonical redirects, and header behavior.
-- [Tabs](tabs/README.md): per-tab behavior for Brain, Identity, Collected,
-  Stats, Subscriptions, plus tab-content coverage tracking.
+- [Tabs](tabs/README.md): per-tab behavior for Brain, Identity (Rep + NIC),
+  Collected, Stats, Subscriptions, plus tab-content coverage tracking.
 - [About](about/README.md): `/about/primary-address` behavior and reference-table
   expectations.
 

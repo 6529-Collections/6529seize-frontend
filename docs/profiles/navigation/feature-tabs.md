@@ -3,7 +3,8 @@
 ## Overview
 
 User profiles are tabbed pages under `/{user}`. Each tab has a stable URL, so
-users can deep-link to a specific profile section.
+users can deep-link to a specific profile section. The `Identity` tab is the
+single route for both `Rep` and `NIC` profile behavior.
 
 ## Location in the Site
 
@@ -36,7 +37,8 @@ users can deep-link to a specific profile section.
 ## Common Scenarios
 
 - Visiting `/{user}` opens the Brain feed for that profile.
-- Visiting `/{user}/identity` opens the Identity view directly.
+- Visiting `/{user}/identity` opens the combined Identity tab (`Rep` + `NIC`)
+  directly.
 - Visiting `/{user}/stats` opens Stats directly.
 - Visiting with `?address=<wallet>` keeps that wallet filter when switching tabs.
 - Visiting by wallet or old handle can redirect to the canonical handle URL.
@@ -50,6 +52,8 @@ users can deep-link to a specific profile section.
 - If a user lands on a tab that is currently hidden, the app redirects to the
   first visible tab for that profile.
 - Canonical-handle redirects keep existing query parameters.
+- Legacy `/{user}/rep` links are unsupported and should be updated to
+  `/{user}/identity`.
 
 ## Failure and Recovery
 
@@ -65,6 +69,7 @@ users can deep-link to a specific profile section.
   tab set.
 - Tab links preserve the `address` query parameter but may drop unrelated query
   parameters.
+- Profile quick stats for both `NIC` and `Rep` land on `/{user}/identity`.
 - The `xTDH` tab is labeled Beta.
 
 ## Related Pages
@@ -72,6 +77,7 @@ users can deep-link to a specific profile section.
 - [Profiles Index](../README.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Identity Statements](../tabs/feature-identity-statements.md)
 - [Profile Tab Content](../tabs/feature-tab-content.md)
 - [Profile Stats Tab](../tabs/feature-stats-tab.md)

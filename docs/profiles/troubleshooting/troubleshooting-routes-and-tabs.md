@@ -29,9 +29,15 @@ profile link lands somewhere unexpected.
   - The tab path is unsupported.
 - This is the shared not-found surface:
   - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
+- Legacy `/{user}/rep` links return not-found:
+  - the separate rep route is not supported
+  - use `/{user}/identity` for both rep and NIC profile behavior
 - Tab missing:
   - `Brain`/`Waves` are hidden when Waves is disabled.
   - `Subscriptions` is hidden on iOS outside the US.
+- Identity tab content differs by screen size:
+  - mobile starts with the rep subview
+  - switch to the `NIC` score card to reach statements and NIC actions
 - Stats view shows mostly `-` values or empty activity panels:
   - The selected wallet has no activity/holdings for those rows.
   - Stats API requests failed and the UI fell back to empty placeholders.
@@ -63,6 +69,7 @@ profile link lands somewhere unexpected.
 - Entering a hidden-tab URL can redirect to the first visible tab.
 - Entering `/{user}/subscriptions` on iOS outside the US redirects to the
   first visible profile tab.
+- Entering `/{user}/rep` is treated as an unsupported profile route.
 - Query parameters other than `address` can be dropped when switching tabs from
   tab links.
 - In `Subscriptions`, first upcoming-drop controls can be disabled on minting
@@ -85,6 +92,10 @@ profile link lands somewhere unexpected.
   - If About text is missing on a profile you cannot edit, verify the profile has
     a BIO statement and refresh the route if a recent profile update should be
     visible.
+- Identity tab:
+  - If `/{user}/rep` bookmarks fail, replace them with `/{user}/identity`.
+  - If statements or NIC actions are not visible on mobile, switch from the rep
+    card to the `NIC` card inside the tab.
 - Subscriptions tab:
   - If a save action fails, settings remain unchanged and an error toast is
     shown; re-authenticate and retry.
@@ -104,4 +115,5 @@ profile link lands somewhere unexpected.
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)

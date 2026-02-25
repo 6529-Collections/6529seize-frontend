@@ -7,6 +7,7 @@ This subarea documents user-visible behavior inside profile tabs.
 ## Features
 
 - [Profile Brain Tab](feature-brain-tab.md)
+- [Profile Identity Tab](feature-identity-tab.md)
 - [Profile Identity Statements](feature-identity-statements.md)
 - [Collected Tab and Transfer Controls](feature-collected-tab.md)
 - [Profile Stats Tab](feature-stats-tab.md)

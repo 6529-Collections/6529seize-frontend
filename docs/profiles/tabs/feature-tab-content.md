@@ -20,10 +20,12 @@ and navigation.
   [Profile Header Summary](../navigation/feature-header-summary.md).
 - Brain tab behavior is documented in
   [Profile Brain Tab](feature-brain-tab.md).
+- Identity-tab behavior that combines Rep and NIC is documented in
+  [Profile Identity Tab](feature-identity-tab.md).
 - Identity statement behavior is documented in
   [Profile Identity Statements](feature-identity-statements.md).
-- Identity, Stats, xTDH, Subscriptions, Proxy, Groups, Waves, and Followers each
-  have their own dedicated tab view.
+- Stats, xTDH, Subscriptions, Proxy, Groups, Waves, and Followers each have
+  their own dedicated tab view.
 - Stats tab behavior is documented in
   [Profile Stats Tab](feature-stats-tab.md).
 - Subscriptions tab behavior is documented in
@@ -47,6 +49,7 @@ and navigation.
 - [Profiles Index](../README.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Brain Tab](feature-brain-tab.md)
+- [Profile Identity Tab](feature-identity-tab.md)
 - [Profile Identity Statements](feature-identity-statements.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
 - [Profile Stats Tab](feature-stats-tab.md)

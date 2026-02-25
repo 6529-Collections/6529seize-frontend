@@ -2,12 +2,14 @@
 
 ## Overview
 
-The `Identity` tab lets a profile publish identity statements and manage how
-those statements are shown on the profile.
+Identity statements are managed inside the `Identity` tab. This page focuses on
+how statement sections are displayed, added, and edited.
 
 ## Location in the Site
 
 - Route: `/{user}/identity`
+- Desktop location: `NIC` side card in the combined Identity tab layout.
+- Mobile location: `Identity` subview inside the same route.
 - Primary sections:
   - `Consolidated Addresses`
   - `Social Media Accounts`
@@ -19,6 +21,7 @@ those statements are shown on the profile.
 
 - Open `/{user}/identity` directly.
 - Switch to `Identity` from another profile tab.
+- On mobile, switch to the `Identity` subview from the `NIC` score card.
 - Follow a shared profile link that lands on the identity route.
 
 ## User Journey
@@ -39,6 +42,9 @@ those statements are shown on the profile.
 - Read-only profile viewing:
   - Statement lists are visible.
   - Add/delete actions are hidden.
+- In the combined identity tab:
+  - desktop keeps statements in the NIC side card
+  - mobile shows statements after switching to the `Identity` subview
 - Profile owner management:
   - Add one statement at a time from the add modal.
   - Social and social proof values show platform-specific placeholders and URL
@@ -89,6 +95,7 @@ those statements are shown on the profile.
 
 - [Profiles Index](../README.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Identity Tab](feature-identity-tab.md)
 - [Profile Tab Content](feature-tab-content.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
