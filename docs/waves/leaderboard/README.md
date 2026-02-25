@@ -9,6 +9,7 @@ Leaderboard docs cover ranking and timeline behavior in voting surfaces.
 - [Wave Top Voters Lists](feature-top-voters-lists.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
+- [Wave Leaderboard Gallery Cards](feature-gallery-cards.md)
 
 ## Flows
 
