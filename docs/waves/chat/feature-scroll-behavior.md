@@ -13,6 +13,8 @@ If a wave opens with unread metadata, the chat can also show a `New Messages`
 divider and jump control anchored to the first unread serial.
 When users jump to a specific drop serial, chat also briefly highlights the
 targeted drop so it is easier to locate in the list.
+Jumps can resolve targets outside the currently loaded message window by loading
+a focused set of surrounding drops first.
 
 ## Location in the Site
 
@@ -43,6 +45,7 @@ targeted drop so it is easier to locate in the list.
    of auto-jumping.
 6. If the thread opens (or jumps) to a targeted serial number, chat scrolls to
    that drop and applies a temporary highlight that fades out.
+   If needed, surrounding drops are loaded so the target can become visible.
 7. If the wave opens with unread context, a divider and floating jump control
    mark the first unread boundary.
 8. On Apple and Android mobile clients, when you are not at the bottom and new
@@ -78,6 +81,9 @@ targeted drop so it is easier to locate in the list.
   into a stacked button group.
 - Older-page loading is only available when the feed already has at least 25
   loaded drops and more pages are available.
+- If a jump target is outside the currently loaded window, the chat requests the
+  target range and may fetch multiple historical pages before the target becomes
+  visible.
 - If the target drop is still loading/off-screen when a serial jump begins, the
   temporary highlight can remain visible as the target comes into view.
 - On non-Apple clients, pending messages are not hidden behind a pending counter.
