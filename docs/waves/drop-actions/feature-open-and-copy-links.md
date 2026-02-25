@@ -105,6 +105,9 @@ Wave drop actions provide two different link behaviors:
   quote-preview chain (including `serialNo` self-references), quote-card
   rendering is skipped to avoid recursive nesting, and the link remains a
   standard URL in the message body.
+- To protect against very long nested quote chains, quote-card rendering is capped
+  at 4 levels. When the limit is reached, links continue to render as standard
+  URLs so users can still open the target directly.
 - Serial links that include trailing slashes in query values (for example
   `serialNo=10/`) are normalized and still jump to the intended drop.
 - Desktop copy actions can still resolve DM routing when DM context is known
@@ -124,6 +127,8 @@ Wave drop actions provide two different link behaviors:
 - If a linked drop becomes self-referential, cyclic, or otherwise not supported
   as a rendered card, the link remains a normal link and users can still open it
   directly.
+- If nested quote-card rendering reaches the depth guard, the link remains a normal
+  link instead of expanding further, preventing interface recursion.
 
 ## Limitations / Notes
 
@@ -135,6 +140,8 @@ Wave drop actions provide two different link behaviors:
   single-drop panel state.
 - Quote-jump cards only apply to same-origin links with valid wave and serial
   values.
+- Quote-card rendering is intentionally bounded by a maximum embed depth and will
+  stop expanding after that depth.
 
 ## Related Pages
 
