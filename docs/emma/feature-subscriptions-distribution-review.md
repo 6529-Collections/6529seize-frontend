@@ -10,7 +10,7 @@ publish finalized allowlists to GitHub from the plan review area.
 ## Location in the Site
 
 - Route: `/emma/plans/{planId}`
-- Context: `Review` tab/table in the plan page
+- Context: `Review` step/table in the plan page
 - Area: EMMA distribution plan review tools
 
 ## Entry Points
@@ -27,7 +27,7 @@ publish finalized allowlists to GitHub from the plan review area.
 3. Confirmed-token mode exposes:
    - phase-level subscription-download buttons
    - an admin footer with reset, upload, and finalize actions.
-4. Download phase CSVs directly from the matching phase row.
+4. Download phase subscription CSV bundles directly from the matching phase row.
 5. Use footer actions to manage distribution assets and finalization.
 6. Once the distribution is normalized and required assets are uploaded, use
    `Publish to GitHub` to export allowlist payload files.
@@ -37,7 +37,8 @@ publish finalized allowlists to GitHub from the plan review area.
 ## Common Scenarios
 
 - Manage phase subscription lists:
-  - phase-level download buttons are only visible after a token ID is confirmed.
+  - phase-level subscription-list download buttons are only visible after a
+    token ID is confirmed.
   - admin users can download phase subscription CSV bundles directly from rows.
   - public subscription list is shown as a synthetic `Public` row.
 - Admin setup flow:
@@ -49,7 +50,8 @@ publish finalized allowlists to GitHub from the plan review area.
     any already exist.
   - `Upload Distribution Photos` supports multiple images up to 500MB each and
     accepts JPEG, PNG, GIF, and WEBP file types.
-  - `Upload Automatic Airdrops` accepts a CSV with `address,value` rows.
+  - `Upload Automatic Airdrops` accepts CSV rows in `address,value` format
+    (optional header supports `address`/`wallet` + `count`/`value`).
   - `Finalize Distribution` runs the normalize step and updates the normalized
     indicator (`✅` or `❌`).
   - `Publish to GitHub` runs only when all conditions are met:
@@ -71,8 +73,9 @@ publish finalized allowlists to GitHub from the plan review area.
 
 - Token ID is required for all subscription-review actions in admin mode.
 - Non-admin viewers only see standard review table rows; admin controls are hidden.
-- `Public` subscription rows show only the subscription-list action and
-  hide regular JSON/CSV/Manifold download actions used for phase rows.
+- In confirmed-token mode, `Public` subscription rows keep JSON/CSV/Manifold
+  actions visible but disabled, while the subscription-list action stays
+  available.
 - Upload paths validate content and reject invalid formats before server calls:
   - automatic airdrops CSV parser errors report parse/format/validation issues.
   - photo uploads require valid image files and enforce size/type limits before
@@ -93,7 +96,7 @@ publish finalized allowlists to GitHub from the plan review area.
 
 ## Limitations / Notes
 
-- Phase download actions are gated by admin status.
+- Subscription-list row actions and the admin footer are gated by admin status.
 - `Finalize Distribution` requires confirmed token context.
 - Subscription review assets are token-specific under the selected contract-token
   context.
