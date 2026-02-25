@@ -29,7 +29,7 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
 
 1. Open a wave thread and locate a full drop.
 2. If your wallet is connected and the drop is already posted, tap/click the boost
-   action.
+   action control.
 3. The button toggles between outline and filled flame states:
    - Outline = not boosted by this account
    - Filled = already boosted by this account
@@ -40,6 +40,10 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
    values and an error toast is shown.
 6. Boosted-drop cards in the message list can be selected to jump directly to the
    corresponding drop in the same thread.
+
+The drop body can still be used for reading and text selection; it does not
+toggle boost. On mobile, boosting is only available from the action control (or
+mobile menu entry).
 
 ## Common Scenarios
 
@@ -62,6 +66,8 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
 
 - Unauthenticated users cannot toggle boosts.
 - Temporary/unsent drops do not show boost controls.
+- Repeated taps in the body/tap-and-select gestures do not toggle boost. Use the
+  boost control to avoid accidental toggles while selecting text.
 - Mobile actions run a brief boost/unboost animation centered on the drop card.
   When reduced-motion mode is enabled, the animation is skipped.
 - If a boosted drop card is not in the loaded message range, the thread loads the
