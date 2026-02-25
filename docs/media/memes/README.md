@@ -15,11 +15,11 @@ states, and schedule views.
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Media Discovery and Actions Flow](../flow-media-discovery-and-actions.md)
 
 ## Troubleshooting
 
-- No dedicated troubleshooting page documented yet.
+- [Media Routes and Minting Troubleshooting](../troubleshooting-media-routes-and-minting.md)
 
 ## Stubs
 

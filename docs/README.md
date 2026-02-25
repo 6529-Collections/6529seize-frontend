@@ -37,7 +37,7 @@ This guide documents current user-facing behavior.
 - Manage wallet connection and account actions:
   [Wallet and Account Controls](navigation/feature-wallet-account-controls.md)
 - Use notifications filtering and scrolling behavior:
-  [Notifications Feed](notifications/feature-notifications-feed.md)
+  [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
 - Create or edit a network group:
   [Group Creation and Edit Flow](groups/feature-group-create-and-edit.md)
 - Understand current TDH and xTDH calculation/overview:
