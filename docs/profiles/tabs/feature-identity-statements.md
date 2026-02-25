@@ -29,6 +29,8 @@ those statements are shown on the profile.
 4. Choose a statement group, then choose the specific statement type.
    - For `NFT Accounts`, choose from marketplace profiles like `SuperRare`, `Foundation`,
      `OpenSea`, `Art Blocks`, `OnCyber`, `The Line`, `Manifold`, and `Transient`.
+   - For `Social Media Accounts`, choose from platform types including `X`, `Instagram`,
+     and `Linktree`.
 5. Enter a value and select `Save`.
 6. Use row actions to open (for URL-capable types), copy, or delete statements.
 
@@ -39,9 +41,10 @@ those statements are shown on the profile.
   - Add/delete actions are hidden.
 - Profile owner management:
   - Add one statement at a time from the add modal.
-  - New NFT account options now include `Manifold` and `Transient` entries, with URL placeholders
-    prefilled as `https://manifold.xyz/` and `https://transient.xyz/`.
-  - Save to append the statement to its category list.
+  - Social and social proof values show platform-specific placeholders and URL
+    prefixes; for `Linktree`, the input starts with `https://linktr.ee/` and suggests
+    `https://linktr.ee/username`.
+  - New statement types support the same save flow and appear in their category list.
 - URL statement input normalization:
   - If a pasted or typed value starts with repeated `http://` or `https://`
     prefixes, the field keeps a single prefix.
@@ -49,7 +52,7 @@ those statements are shown on the profile.
     input.
 - Statement row actions:
   - `Open` appears for URL-capable statement types, including marketplace types like
-    `Manifold` and `Transient`.
+    `Manifold`, `Transient`, and `Linktree`.
   - `Copy` temporarily swaps value text to `Copied!` before restoring.
 
 ## Edge Cases
