@@ -5,7 +5,8 @@
 Wave drops support a per-user boost action with immediate visual feedback.
 
 Users can toggle a boost on a drop, and the boost count is shown on the same action control.
-Top boosted drops in the current wave also appear as contextual cards in the same message list.
+Top boosted drops in the current wave also appear as contextual cards in the message
+list and in the right-sidebar trending section.
 Mobile boost/remove actions now include short on-screen confirmation feedback: an icon animation appears on the active drop card, and a success toast confirms the result.
 
 ## Location in the Site
@@ -19,7 +20,10 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
 
 - Desktop: open a full drop and click the flame button in the action bar.
 - Mobile: open the drop menu and choose **Boost** / **Remove Boost**.
-- Wave message list: scroll through the feed to see boosted-drops cards and select one.
+- Wave message list: scroll through the feed to see boosted-drops cards and select
+  one.
+- Right-sidebar `Trending` section: from any open wave sidebar, switch the time
+  window and select a card to jump to the referenced drop.
 
 ## User Journey
 
@@ -90,4 +94,5 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
 - [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
 - [Wave Drop Vote Slider](feature-vote-slider.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
+- [Wave Right Sidebar Trending Drops](../sidebars/feature-right-sidebar-trending-drops.md)
 - [Wave Drops Index](../README.md)

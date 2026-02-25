@@ -3,8 +3,9 @@
 ## Overview
 
 Rank waves can show a tab row in the right sidebar so users can switch between
-`About`, `Leaderboard`, `Winners`, `Voters`, and `Activity` without leaving
-the current wave route.
+`About`, `Leaderboard`, `Winners`, `Voters`, and `Activity` without leaving the
+current wave route.
+The `About` tab can also surface a `Trending` list for boosted drops.
 
 ## Location in the Site
 
@@ -72,4 +73,5 @@ the current wave route.
 - [Wave Content Tabs](../discovery/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
+- [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Docs Home](../../README.md)

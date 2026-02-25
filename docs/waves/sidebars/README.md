@@ -8,6 +8,7 @@ Sidebar docs cover right-sidebar controls and Brain/DM list metadata behavior.
 
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md)
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
+- [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Brain Wave List Last Drop Indicator](feature-brain-list-last-drop-indicator.md)
 - [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md)
 - [Brain Wave List Navigation](feature-wave-list-navigation.md)
