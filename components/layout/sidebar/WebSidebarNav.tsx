@@ -9,6 +9,7 @@ import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { DROP_FORGE_TITLE } from "@/components/drop-forge/drop-forge.constants";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
@@ -356,7 +357,7 @@ const WebSidebarNav = React.forwardRef<
                         pathname?.startsWith("/drop-forge/")
                       }
                       collapsed={isCollapsed}
-                      label="Drop Forge"
+                      label={DROP_FORGE_TITLE}
                     />
                   </li>
                 )}

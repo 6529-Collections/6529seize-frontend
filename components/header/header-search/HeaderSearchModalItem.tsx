@@ -43,6 +43,7 @@ export interface PageSearchResult {
   title: string;
   href: string;
   breadcrumbs: string[];
+  searchTerms?: string[];
   icon?: ComponentType<{ className?: string | undefined }> | undefined;
 }
 

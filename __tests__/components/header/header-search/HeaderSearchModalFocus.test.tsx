@@ -27,6 +27,7 @@ const useAppWalletsMock = jest.fn();
 const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
+const useDropForgePermissionsMock = jest.fn();
 
 let escapeHandler: (() => void) | null = null;
 
@@ -90,6 +91,9 @@ jest.mock("@/hooks/useSidebarSections", () => {
     mapSidebarSectionsToPages: actual.mapSidebarSectionsToPages,
   };
 });
+jest.mock("@/hooks/useDropForgePermissions", () => ({
+  useDropForgePermissions: () => useDropForgePermissionsMock(),
+}));
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
@@ -155,6 +159,17 @@ beforeEach(() => {
   useCookieConsentMock.mockReturnValue({ country: "US" });
   capacitorMock.mockReturnValue({ isIos: false });
   useSidebarSectionsMock.mockReturnValue(defaultSidebarSections);
+  useDropForgePermissionsMock.mockReturnValue({
+    hasWallet: false,
+    permissionsLoading: false,
+    canAccessLanding: false,
+    canAccessCraft: false,
+    canAccessLaunch: false,
+    canAccessLaunchPage: false,
+    isDistributionAdmin: false,
+    isClaimsAdmin: false,
+    isDropForgeAdmin: false,
+  });
 });
 
 const PLACEHOLDER_TEXT = "Search 6529.io";

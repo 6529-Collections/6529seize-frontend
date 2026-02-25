@@ -4,9 +4,16 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
+import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
+import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import {
+  DROP_FORGE_SECTIONS,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -19,6 +26,7 @@ import {
 } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
@@ -129,6 +137,12 @@ interface RankedPageMatch {
   readonly priority: number;
 }
 
+const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  "/drop-forge": ["Drop Control"],
+  "/drop-forge/craft": ["Drop Control Craft"],
+  "/drop-forge/launch": ["Drop Control Launch"],
+};
+
 const getPageMatchPriority = (
   normalizedTitle: string,
   hrefSegments: string[],
@@ -150,10 +164,14 @@ const pageMatchesQuery = (
   normalizedTitle: string,
   normalizedHref: string,
   normalizedBreadcrumbs: string[],
+  normalizedSearchTerms: string[],
   normalizedQuery: string
 ) => {
   if (normalizedTitle.includes(normalizedQuery)) return true;
   if (normalizedHref.includes(normalizedQuery)) return true;
+  if (normalizedSearchTerms.some((term) => term.includes(normalizedQuery))) {
+    return true;
+  }
   return normalizedBreadcrumbs.some((breadcrumb) =>
     breadcrumb.includes(normalizedQuery)
   );
@@ -250,14 +268,54 @@ export default function HeaderSearchModal({
     () => mapSidebarSectionsToPages(sections),
     [sections]
   );
+  const { canAccessLanding, canAccessCraft, canAccessLaunch } =
+    useDropForgePermissions();
+  const dropForgePages = useMemo<SidebarPageEntry[]>(() => {
+    if (!canAccessLanding) {
+      return [];
+    }
+
+    const pages: SidebarPageEntry[] = [
+      {
+        name: DROP_FORGE_TITLE,
+        href: "/drop-forge",
+        section: "About",
+        icon: DropForgeIcon,
+      },
+    ];
+
+    if (canAccessCraft) {
+      pages.push({
+        name: DROP_FORGE_SECTIONS.CRAFT.title,
+        href: DROP_FORGE_SECTIONS.CRAFT.path,
+        section: DROP_FORGE_TITLE,
+        icon: DropForgeCraftIcon,
+      });
+    }
+
+    if (canAccessLaunch) {
+      pages.push({
+        name: DROP_FORGE_SECTIONS.LAUNCH.title,
+        href: DROP_FORGE_SECTIONS.LAUNCH.path,
+        section: DROP_FORGE_TITLE,
+        icon: DropForgeLaunchIcon,
+      });
+    }
+
+    return pages;
+  }, [canAccessLanding, canAccessCraft, canAccessLaunch]);
   const allPageEntries = useMemo(() => {
     const seen = new Set<string>();
-    return [...PRIMARY_NAVIGATION_PAGES, ...sidebarPages].filter((entry) => {
+    return [
+      ...PRIMARY_NAVIGATION_PAGES,
+      ...sidebarPages,
+      ...dropForgePages,
+    ].filter((entry) => {
       if (seen.has(entry.href)) return false;
       seen.add(entry.href);
       return true;
     });
-  }, [sidebarPages]);
+  }, [sidebarPages, dropForgePages]);
 
   const pageCatalog = useMemo<PageSearchResult[]>(
     () =>
@@ -266,6 +324,7 @@ export default function HeaderSearchModal({
         title: entry.name,
         href: entry.href,
         icon: entry.icon,
+        searchTerms: PAGE_SEARCH_ALIASES_BY_HREF[entry.href] ?? [],
         breadcrumbs: [entry.section, entry.subsection]
           .filter((value): value is string => !!value)
           .map((value) => value),
@@ -391,12 +450,16 @@ export default function HeaderSearchModal({
         const normalizedBreadcrumbs = page.breadcrumbs.map((value) =>
           value.toLowerCase()
         );
+        const normalizedSearchTerms = (page.searchTerms ?? []).map((value) =>
+          value.toLowerCase()
+        );
 
         if (
           !pageMatchesQuery(
             normalizedTitle,
             normalizedHref,
             normalizedBreadcrumbs,
+            normalizedSearchTerms,
             normalizedQuery
           )
         ) {
