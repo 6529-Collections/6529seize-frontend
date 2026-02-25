@@ -6,7 +6,12 @@ Memes docs focus on artwork submission behavior for meme-type waves.
 
 ## Features
 
-- [Memes Submission Workflows](feature-memes-submission.md): submit artwork via file upload or interactive HTML, including distribution, payment, and allowlist fields in the additional information step.
+- [Memes Submission Workflow](feature-memes-submission.md): agreement/artwork
+  steps, file or interactive source selection, and modal-level constraints.
+- [Memes Additional Information Fields](feature-memes-additional-info-fields.md):
+  payment, airdrop, allowlist, artist, and supplemental media requirements.
+- [Memes Preview and Submit States](feature-memes-preview-and-submit-states.md):
+  preview-mode behavior plus upload/sign/process success and retry states.
 
 ## Flows
 

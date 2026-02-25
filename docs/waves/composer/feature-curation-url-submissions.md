@@ -79,6 +79,6 @@ row with direct submit controls and a supported-format reference.
 
 - [Wave Composer Index](README.md)
 - [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
-- [Wave Drop NFT Marketplace Link Previews](../link-previews/feature-nft-marketplace-link-previews.md)
+- [Wave Drop Web3 Preview Cards](../link-previews/feature-web3-preview-cards.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
 - [Docs Home](../../README.md)

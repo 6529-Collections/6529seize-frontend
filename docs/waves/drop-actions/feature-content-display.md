@@ -2,175 +2,100 @@
 
 ## Overview
 
-Standard wave drop cards render the full post body inline. Long posts are not
-collapsed behind a `Show full post` control, so reading a long drop does not
-require an in-card expand action. Image attachments follow the same inline card
-flow, with higher-resolution image loading in single-drop detail contexts and
-fullscreen controls in the image viewer modal. Compact reply rows are rendered in a
-fixed-height container so grouped replies stay visually stable while they load.
-In memes-specific drop cards, description text keeps authored newline breaks
-instead of collapsing into one paragraph.
+Standard wave drop cards render the full post body inline.
+Long posts are not collapsed behind a `Show full post` control, so reading a long
+post does not require an in-card expand step.
+Markdown formatting, mention rendering, and inline linkification are handled in the
+shared drop-content renderer across wave and DM timelines.
+
+In memes-specific drop cards, description text keeps authored newline breaks instead
+of collapsing into one paragraph.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Any standard wave drop card view that reuses the shared wave-drop content
-  renderer (including single-drop and winner/leaderboard card contexts)
+- Standard wave drop card views that reuse shared drop-content rendering.
 
 ## Entry Points
 
 - Open a wave or direct-message thread and scroll to a long post.
-- Follow a shared drop link (including links that only carry `?drop=...`) that
-  opens a specific post in context.
-- Navigate storm parts using previous/next part controls on multi-part drops.
-- Open an image attachment from a single-drop detail view or competition
-  artwork panel.
+- Follow a shared drop link (`?drop=...`) that opens specific post content in
+  context.
+- Navigate storm parts with previous/next controls on multipart drops.
 
 ## User Journey
 
-1. Open a wave thread or direct-message thread.
-2. Find a post with a long body.
-3. Read the full post inline in the card without an expansion button.
-4. Drag-select text in the post body to copy content without opening drop
-   details.
-5. Continue scrolling naturally through older/newer drops.
-6. For storm drops, move between parts with the previous/next controls.
+1. Open a thread and locate a drop.
+2. Read full post body inline with no in-card expand action.
+3. Interact with markdown text, mentions, and linkified URLs directly from the
+   card body.
+4. For storm drops, navigate parts with previous/next controls.
+5. When click-through is enabled in that context, open drop detail by clicking body
+   content after text selection is cleared.
 
 ## Common Scenarios
 
-- Long markdown posts display directly in the drop card.
-- Fenced markdown code blocks render inline in the post body and keep a
-  code-style presentation instead of collapsing into plain paragraph text.
-- Wave mention tokens like `#[wave_name]` render as inline links to
-  `/waves/{waveId}` when wave mention metadata is present.
-- Mention links can include a small wave avatar icon inline when wave profile picture
-  metadata is available.
-- On hover-capable devices, these links can open a wave summary card that
-  includes the wave name, author, and drop/joined metrics.
-- Consecutive blank lines in markdown remain visually separated instead of
-  collapsing into a single paragraph break.
-- In memes wave leaderboard, participation, and winner cards, newline breaks in
-  drop descriptions are rendered as separate lines.
-- Image attachments show a loading placeholder while the source resolves; on touch
-  devices this placeholder is static to keep gesture scrolling smooth, while
-  desktop and other non-touch layouts can show the animated pulse style.
-- Reply rows now render standalone media URLs as a compact preview when the reply
-  body is exactly one URL. Image URLs (including `.gif`, `.png`, `.jpg`,
-  `.jpeg`, `.webp`, `.avif`, and Tenor/Giphy GIF links) show as inline
-  thumbnail images. Supported standalone video extensions (`.mp4`, `.webm`,
-  `.ogg`, `.mov`, `.avi`, `.wmv`, `.flv`, `.mkv`) show as a compact video preview
-  placeholder.
-- Same-origin links that include a `drop` query parameter (for example
-  `/?drop=...` or `/waves/...?...&drop=...`) are rebased to the current thread
-  route before rendering, so drop cards and their copy/open actions stay in the
-  active wave or DM context.
-- When a rebased same-origin link includes both `drop` and `serialNo`, the
-  drop target is treated as the primary action and renders a drop preview card
-  instead of a serial quote-jump card.
-- Raw URLs in drop text are linkified inline when rendering text segments, so
-  `https://` links become directly tappable in the post body.
-- `#[name]` tokens without matching wave metadata remain plain text, while matching
-  wave mention tokens become tappable links.
-- When plain-text normalization applies, `#[name]` is rendered as `#name` so
-  users can still read the intended keyword even without link metadata.
-- Clicking a linkified URL opens the destination in a new browser tab and uses
-  safe `rel` attributes for external navigation.
-- Linkified URLs stop event propagation, so clicking a URL does not trigger
-  drop-card click-through navigation.
-- Consecutive reply cards that are grouped together can suppress repeated
-  parent-drop preview headers, so a short sequence from the same author to the
-  same parent stays visually compact.
-- Reply rows stay in a fixed 24-pixel row while loading and show reply text within a
-  single-line constrained space; long replies still open the full target drop when
-  activated.
-- Reply preview rows keep inline URLs as plain text (not tappable links), so a
-  click or tap on the preview consistently opens the replied-to drop target.
-- Reply preview rows only switch to media thumbnails when the reply consists of one
-  URL and no additional text. Any extra words or punctuation around the URL keep
-  the row in text mode.
-- Selecting text in a drop body suppresses click-through navigation so users
-  can copy text without opening drop details. Structured timeline copy behavior
-  is covered in [Wave Drop Selection Copy](feature-selection-copy.md).
-- Clicking a drop body (when click-through is enabled in that context) opens
-  the drop detail view without a separate "expand post" step.
-- Timeline drop cards load attachment images with standard scaled sources for
-  feed performance.
-- Single-drop detail surfaces (including competition artwork detail panels)
-  request larger scaled image variants for clearer full-image viewing.
-- Opening an image attachment launches a modal viewer where users can zoom,
-  open the source in a browser tab, and enter fullscreen mode.
+- Long markdown posts render directly in timeline cards.
+- Fenced markdown code blocks keep code-style presentation inline.
+- Consecutive blank markdown lines remain visually separated.
+- Wave mention tokens like `#[wave_name]` become inline links when matching mention
+  metadata exists.
+- Mention links can include wave avatar icons when profile metadata is present.
+- On hover-capable devices, mention links can open a wave summary card.
+- Raw `http(s)` URLs are linkified inline when rendering text segments.
+- `#[name]` tokens without matching metadata remain plain text.
+- Plain-text normalization can render unmatched `#[name]` as `#name`.
+- Linkified URLs open in a new tab with safe `rel` attributes.
+- URL clicks stop event propagation so they do not trigger parent drop-card
+  click-through navigation.
+- Selecting text in a drop body suppresses click-through so users can copy text
+  without opening drop details.
+- Same-origin links carrying `drop` query params are rebased to current thread
+  context before rendering.
+- When a same-origin link carries both `drop` and `serialNo`, the `drop` target
+  remains primary and renders drop-preview/open behavior instead of a serial quote
+  jump card.
 
 ## Edge Cases
 
-- Very long posts increase card height and push neighboring drops further in
-  the scroll flow.
-- In storm posts, previous/next controls are disabled at the first/last part.
-- Text and media blocks render as one continuous card body; media appears below
-  the active part text when attachments exist.
-- Reply rows only render media thumbnails for URL-only replies when the URL
-  resolves as image or video media; URL text with surrounding content remains a
-  normal text reply.
-- URL text shown inside reply previews does not open the URL directly; users open
-  the reply target from that row and can access the destination from the full drop
-  view if needed.
-- Standalone links to unsupported formats in reply rows remain text-based and do
-  not automatically switch to media preview mode.
-- In memes cards, multiline descriptions can make card headers taller when users
-  include multiple line breaks.
-- If the current URL already has a `drop` parameter, opening another shared
-  drop link replaces only the `drop` value while keeping other active query
-  parameters (for example `wave` or `serialNo`).
-- Links from other domains, and same-origin links without a `drop` parameter,
-  keep their original URL and rendering path.
+- Very long posts increase card height and push neighboring rows in normal scroll
+  flow.
+- In storm posts, previous/next controls are disabled on first/last parts.
+- Text and media blocks render as one continuous card body when attachments exist.
+- Links from other domains, and same-origin links without `drop`, keep original URL
+  and rendering path.
 - Only `http://` and `https://` URLs are transformed into inline links.
-- Homepage Explore Waves previews keep URL text non-clickable to preserve compact preview behavior.
-- URLs next to sentence punctuation can still render as clickable links while
-  the trailing punctuation remains plain text, preserving the tap target.
-- On touch-only devices, mentions remain inline links without the desktop hover card.
-- After text selection is cleared, click-through behavior returns to normal in
-  contexts that support opening drop details from card body clicks.
-- If fullscreen is opened from the image viewer modal, fullscreen targets the
-  opened modal image rather than the background timeline card image.
+- Homepage Explore Waves previews keep URL text non-clickable to preserve compact
+  preview behavior.
+- URLs adjacent to punctuation can still render as clickable links while trailing
+  punctuation remains plain text.
+- On touch-only devices, mentions stay as inline links without desktop hover cards.
 
 ## Failure and Recovery
 
-- There is no dedicated expansion-state recovery because long posts are not
-  hidden behind a toggle.
-- If a drop-detail navigation does not open (for example due to network or
-  route issues), users remain in the thread and can retry by clicking again.
-- If current-location context cannot be resolved for a same-origin shared drop
-  link, the UI falls back to the original link target; users can still open or
-  copy the link and retry from the intended thread.
-- If loading stalls for the thread itself, refresh/reopen the wave to reload
-  the drop list and continue reading.
-- If a higher-resolution scaled image URL is unavailable or fails, the viewer
-  falls back to the attachment's original media URL.
+- There is no expansion-state recovery path because long posts are never collapsed.
+- If drop-detail navigation fails, users remain in-thread and can retry.
+- If current-location context cannot be resolved for a same-origin shared drop link,
+  the UI falls back to original link target.
+- If thread loading stalls, refreshing/reopening the wave reloads the drop list.
 
 ## Limitations / Notes
 
-- Users cannot collapse long posts back to a shortened preview in standard wave
-  drop cards.
-- Current-thread URL rebasing applies only to same-origin links that include a
-  `drop` query parameter.
-- This page covers full wave-drop cards; compact summary UIs in other areas can
-  still apply their own truncation rules.
-- Higher-resolution image scaling is applied in single-drop detail contexts;
-  timeline cards keep standard scaled media loading behavior.
-- Reply media conversion is intentionally scoped to reply preview rows and only
-  applies when the reply content is a single standalone URL.
-- Reply preview rows intentionally disable inline URL linkification to preserve
-  consistent row-level navigation into the replied-to drop.
+- Users cannot collapse long posts back to shortened previews in standard drop cards.
+- Current-thread URL rebasing applies only to same-origin links with `drop`
+  query parameters.
+- This page covers shared drop text rendering; compact summary UIs in other areas may
+  apply different truncation rules.
 
 ## Related Pages
 
 - [Waves Index](../README.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
+- [Wave Drop Quote Link Cards](feature-quote-link-cards.md)
+- [Wave Drop Reply Preview Rows](feature-reply-preview-rows.md)
+- [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
 - [Wave Drop Markdown Blank-Line Preservation](../composer/feature-markdown-blank-line-preservation.md)
 - [Wave Drop Markdown Code Blocks](../composer/feature-markdown-code-blocks.md)
 - [Wave Drop External Link Previews](../link-previews/feature-external-link-previews.md)
-- [Wave Drop YouTube Link Previews](../link-previews/feature-youtube-link-previews.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
-- [Wave Drop Media Download](feature-media-download.md)
-- [Docs Home](../../README.md)

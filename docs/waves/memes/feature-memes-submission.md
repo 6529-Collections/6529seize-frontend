@@ -1,185 +1,72 @@
-# Memes Submission Workflows
+# Memes Submission Workflow
 
 ## Overview
 
-The Memes submission flow is a three-step modal flow:
+Memes submission uses a three-step modal workflow:
 
-- Agreement.
-- Artwork.
-- Additional Information.
+- Agreement
+- Artwork
+- Additional Information
 
-Before final submit, users can open a read-only preview to see how the submission would
-appear in leaderboard list and gallery cards.
-
-Artists can submit artwork by file upload or by referencing interactive media through
-IPFS or Arweave. The submission flow validates required fields, shows upload,
-signing, and progress states, and only allows completion when all required fields
-pass.
-
-After submission, operational fields from Additional Information are rendered in the
-single-drop view as process sections (preview image, promo video, additional media,
-about-artist text, and artwork commentary) plus an optional technical details block.
-When signed in, payment address and the initial airdrop distribution row are seeded
-from the connected profile’s primary wallet.
+Artists can submit by file upload or by referencing interactive media via IPFS or
+Arweave.
+The modal enforces required fields and only enables completion when inputs are valid.
 
 ## Location in the Site
 
-- Memes wave routes at `/waves/{waveId}` (leaderboard view).
-- The submission modal is opened from the wave leaderboard `Drop` control.
-- Additional Information results are visible from the Memes single-drop detail view.
+- Memes wave route: `/waves/{waveId}` (leaderboard view)
+- Submission modal opened from leaderboard `Drop` control
 
 ## Entry Points
 
-- Open a Memes wave leaderboard and start the modal from `Drop`.
-- Follow the modal sequence:
-  1. Agreement → Artwork → Additional Information.
-- Open an existing Memes drop to inspect process and technical sections.
+- Open a Memes wave leaderboard and click `Drop`.
+- Progress through Agreement -> Artwork -> Additional Information.
 
 ## User Journey
 
-1. Open a Memes wave leaderboard and start the modal from `Drop`.
-2. Accept terms on the Agreement step.
-3. In Artwork, choose one of two sources:
-   1. **Upload File**: drag/drop or choose a supported local file.
-   2. **Interactive HTML/GLB URL**: switch source tab, choose `IPFS` or `Arweave`,
-      and enter a root hash/transaction ID.
-4. If interactive media validates, the preview is shown.
-5. Move to Additional Information and complete required operational inputs.
-6. Open `Preview` to review the draft in full.
-   - Use `Preview` after required fields are valid to open the read-only card preview.
-   - Use `Back to Edit` to return to Additional Information with all current inputs preserved.
-   - Use `Submit Artwork` from preview to complete final submission.
-7. Submit and complete state progression:
-   `uploading` → `processing` → `success`.
-8. Open the single-drop view to inspect:
-   - Process sections for preview image, promo video (when provided), supporting
-     media (shown as Additional Media), about-artist text, and artwork commentary.
-   - Optional collapsible technical details (payment address with designated payee
-     name when provided, distribution, allowlist).
+1. Start the modal from Memes leaderboard `Drop`.
+2. Accept terms in Agreement step.
+3. In Artwork, choose source type:
+   - **Upload File**: drag/drop or select supported local file.
+   - **Interactive URL**: choose `IPFS` or `Arweave` and enter root hash or tx ID.
+4. If interactive input validates, artwork preview appears.
+5. Continue to Additional Information and complete required fields.
+6. Move to preview/submission states once validation passes.
 
 ## Common Scenarios
 
-- File upload mode:
-  - Supported file flow shows local previews immediately after selection.
-- Supported formats are displayed in the upload area as: `PNG`, `JPG`, `GIF`,
-    `VIDEO`, and `GLB`.
-  - Files above `200MB` are rejected before upload and remain on the artwork
-    step with an error state.
-  - Upload progress remains within `0%` to `100%` during multipart retries so the
-    progress overlay does not overflow.
-  - Upload and submit flow continues once artwork and trait fields are valid.
-- Interactive source mode:
-  - Gateway defaults and sanitization are user-friendly.
-  - Validation blocks invalid hashes/unsafe URLs before submission.
-- Layout responsiveness:
-  - On mobile and small screens, the submission modal stays inside the device viewport and does not expand past visible height.
-  - The Artwork step content scrolls internally, so the long form remains usable without leaving the modal or clipping controls.
-  - Upload and interactive media areas keep a minimum height on small screens to avoid collapsing controls while a user is selecting files.
-- Previewing:
-  - The `Preview` action is available once additional information fields pass validation.
-  - The preview screen renders leaderboard list and gallery card previews so artists can validate typography, framing, and card structure before submitting.
-  - `Back to Edit` returns to the existing draft so artists can refine copy, media, and metadata quickly.
-- Additional Info: Airdrop Distribution:
-  - One distribution row is auto-prefilled from the connected wallet with a total of
-    `20` tokens.
-  - Users can add/remove distribution rows.
-  - Total is validated to equal `20` across all rows before submit.
-- Additional Info: Payment config:
-  - Payment address is required and can be entered as `0x...` or ENS.
-  - The connected profile primary wallet preloads the payment address.
-  - When the payment address is preloaded from the connected profile, the
-    designated payee toggle resets to off and the payee name field is cleared
-    until you enable it.
-  - Airdrop rows are also prefilled from the same wallet and are editable.
-  - A designated payee toggle reveals a required payee name field and relabels the
-    address as the designated payee address.
-- Additional Info: Allowlist config:
-  - Users can add multiple batches.
-  - Contract addresses are required per added batch.
-  - Token ranges support formats like `1,2,3` and `10-20`.
-- Additional Info: Artist and story details:
-  - `About the Artist` is required.
-  - `Artwork Commentary` is required.
-  - `About the Artist` is auto-loaded from the connected profile BIO when available.
-- Additional Info: Supplemental media:
-  - Supporting media accepts up to 4 items (images/videos).
-  - `Preview` accepts one image or GIF and is required for video, HTML, and GLB
-    submissions. It is used as the artwork thumbnail in leaderboard cards and
-    sidebar leaderboard summaries.
-  - `Promo Video` accepts one video for HTML/GLB submissions. It is optional; if it is
-    omitted, the preview image is used for social sharing.
-  - Process sections display the preview image, promo video (when provided),
-    supporting media, about-artist text, and artwork commentary.
+- Upload mode shows local previews after file selection.
+- Supported upload labels are `PNG`, `JPG`, `GIF`, `VIDEO`, and `GLB`.
+- Files larger than `200MB` are rejected before upload.
+- Upload progress stays within `0%` to `100%` during multipart retries.
+- Interactive mode sanitizes gateway input and blocks invalid hashes/unsafe URLs.
+- On small screens, modal stays within viewport and artwork step scrolls internally.
+- Upload and interactive panels keep minimum heights on small screens to avoid
+  collapsing controls.
 
 ## Edge Cases
 
-- Switching input mode from upload to interactive does not discard local artwork until
-  user explicitly clears URL mode.
-- If interactive hash validation fails, the user stays on the Artwork step until fixed.
-- Switching back to upload restores previously prepared local state.
-- Preview mode behavior:
-  - Card clicks are intentionally non-actionable in preview; it is for layout verification only.
-  - Preview screens use temporary score and rating values to mimic live leaderboard appearance.
-- Very small/mobile viewports:
-  - If the content does not fit vertically, the modal content area scrolls while keeping action controls available.
-  - Artwork and interactive panels preserve usable height by enforcing minimum panel heights, reducing UI jitter as users tap fields, tabs, and upload controls.
-- Airdrop rules:
-  - Count values must be integers and cannot exceed the `20` total target.
-  - A row with positive count must have a valid `0x...` address.
-  - Rows with addresses must not be invalid ENS names or malformed addresses.
-- Allowlist rows:
-  - Contract address is required when a batch exists.
-  - Token IDs can be empty or in supported range/list format; invalid formats block
-    submit.
-- Preview requirements:
-  - Preview (image or GIF) is required for `video`, `text/html`, and
-    `model/gltf-binary` submissions.
-- Promo video:
-  - The promo video option only appears for `text/html` and `model/gltf-binary`
-    submissions.
-- If the profile has no auto-populated BIO, `About the Artist` starts empty and must be
-  filled manually.
+- Switching from upload to interactive mode does not discard prepared local artwork
+  until URL mode is explicitly cleared.
+- Switching back to upload restores previously prepared local upload state.
+- If interactive hash validation fails, users remain on Artwork step until corrected.
 
 ## Failure and Recovery
 
 - If no valid artwork exists (missing file and missing valid media URL), submission
   stops before API call.
-- If media validation fails, inline errors explain which step must be fixed.
-- If the selected artwork file is empty, upload fails with a validation error and
-  users must re-select a valid file before submit.
-- If the selected artwork format is not supported (for example unsupported MIME type),
-  validation errors remain visible on the upload step and you must choose a supported
-  file type.
-- If required fields in Additional Information fail validation, `Preview` and `Submit
-  Artwork` stay disabled until corrected.
-- If you open Preview and then return to edit, your draft remains in the form state.
-- If the previewed card looks incorrect, return to edit and update fields before submitting.
-- If signing or API submission fails, users can retry from the same submission state.
-- If a required field remains missing (payment, artist text, commentary, or preview
-  image), users must correct it before submission can continue.
-- If a supplemental upload fails, remove and re-upload the failed file and continue
-  after all required fields are valid.
+- Empty selected files fail validation and require reselection.
+- Unsupported file formats keep validation errors visible on Artwork step.
+- If signing or submission fails, users can retry from the same modal state.
 
 ## Limitations / Notes
 
 - Interactive URL mode requires supported gateway hosts and root-style hashes.
 - Interactive URLs block query strings, unsafe schemes, and path suffixes.
-- Payment and distribution are prefilled from profile wallet data when present, but are
-  user-editable.
-- Technical details are displayed only when metadata contains:
-  - Payment address
-  - Airdrop allocation data
-  - Allowlist configuration
-- Process sections are only shown when the corresponding metadata exists.
-- Supporting media upload is capped by UI limits:
-  - `Supporting Media`: 4 files max
-  - `Preview`: 1 file max
-  - `Promo Video`: 1 file max
-- Preview reflects a local draft render and does not indicate final on-chain or ranking results.
 
 ## Related Pages
 
-- [Waves Index](../README.md)
-- [Memes Index](../README.md)
+- [Memes Additional Information Fields](feature-memes-additional-info-fields.md)
+- [Memes Preview and Submit States](feature-memes-preview-and-submit-states.md)
+- [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Interactive HTML Media Rendering](../../media/rendering/feature-interactive-html-rendering.md)
-- [Docs Home](../../README.md)

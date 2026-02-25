@@ -96,7 +96,7 @@ external-link state.
 - [Waves Index](../README.md)
 - [Wave Drop External Link Previews](feature-external-link-previews.md)
 - [Wave Drop YouTube Link Previews](feature-youtube-link-previews.md)
-- [Wave Drop Tenor GIF Previews](feature-tenor-gif-previews.md)
+- [Wave Drop Social Platform Previews](feature-social-platform-previews.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Docs Home](../../README.md)
