@@ -43,9 +43,11 @@ single follow action for the grouped actors.
    useful, tap `Follow All` to follow the non-followed actors.
 8. If a priority alert has a related drop, open that row to view the drop and jump
    to the drop context.
-9. Scroll upward to load older notifications; older rows are appended without
+9. For notifications that include large drop previews, start with a compacted
+   preview and use `Show full drop` if you need the entire drop inline.
+10. Scroll upward to load older notifications; older rows are appended without
    replacing already visible content.
-10. If a priority alert has no related drops, review the header text-only entry for
+11. If a priority alert has no related drops, review the header text-only entry for
    who sent the alert and when.
 
 ## Common Scenarios
@@ -81,11 +83,15 @@ single follow action for the grouped actors.
   without manual re-scrolling.
 - Seeing `No notifications found` with `Explore Waves` / `Create a Wave` calls
   to action when the account has no notification rows.
+- Expanding notification drops in-place with `Show full drop` to inspect long media
+  posts or long text within a notification context.
 
 ## Edge Cases
 
 - Filter chips can overflow horizontally; left/right controls appear so users
   can scroll the filter row.
+- Large or media-heavy notification drops are initially shown in a compact
+  preview with a short inline action (`Show full drop`) so list density remains high.
 - If the route is opened with `?reload=true`, the feed performs a one-time
   refresh/read pass and then removes that query parameter.
 - Changing the active cause filter resets list positioning to the newest edge
@@ -140,6 +146,8 @@ single follow action for the grouped actors.
   threads or review them in `/notifications`.
 - Opening a grouped reaction row drop marks all grouped reaction entries in that
   row as read.
+- Long notification drops may start in a compact state; users can expand them
+  inline to read full content and media.
 - Batch follow actions can still partially fail when some profile follow endpoints
   return errors.
 - Priority alerts render as `sent a priority alert 🚨` and show the first related
