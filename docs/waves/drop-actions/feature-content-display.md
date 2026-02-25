@@ -84,6 +84,8 @@ instead of collapsing into one paragraph.
 - Reply rows stay in a fixed 24-pixel row while loading and show reply text within a
   single-line constrained space; long replies still open the full target drop when
   activated.
+- Reply preview rows keep inline URLs as plain text (not tappable links), so a
+  click or tap on the preview consistently opens the replied-to drop target.
 - Reply preview rows only switch to media thumbnails when the reply consists of one
   URL and no additional text. Any extra words or punctuation around the URL keep
   the row in text mode.
@@ -109,6 +111,9 @@ instead of collapsing into one paragraph.
 - Reply rows only render media thumbnails for URL-only replies when the URL
   resolves as image or video media; URL text with surrounding content remains a
   normal text reply.
+- URL text shown inside reply previews does not open the URL directly; users open
+  the reply target from that row and can access the destination from the full drop
+  view if needed.
 - Standalone links to unsupported formats in reply rows remain text-based and do
   not automatically switch to media preview mode.
 - In memes cards, multiline descriptions can make card headers taller when users
@@ -154,6 +159,8 @@ instead of collapsing into one paragraph.
   timeline cards keep standard scaled media loading behavior.
 - Reply media conversion is intentionally scoped to reply preview rows and only
   applies when the reply content is a single standalone URL.
+- Reply preview rows intentionally disable inline URL linkification to preserve
+  consistent row-level navigation into the replied-to drop.
 
 ## Related Pages
 
