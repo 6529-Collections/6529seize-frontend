@@ -75,12 +75,9 @@ separate from the main content column.
 
 - `Subscriptions`-related links are hidden on iOS when country is not `US`:
   - `Tools -> The Memes Tools -> Subscriptions Report`
-  - `Tools -> Open Data -> Network Metrics`
   - `Tools -> Open Data -> Meme Subscriptions`
-  - `Tools -> Open Data -> Rememes`
-  - `Tools -> Open Data -> Team`
-  - `Tools -> Open Data -> Royalties`
-  - `About -> NFTs -> Subscriptions`
+- Other `Open Data` links remain visible on iOS.
+- `About -> NFTs -> Subscriptions` is hidden on iOS outside the `US`.
 - `App Wallets` appears only when app-wallet support is enabled.
 - `Profile` link in sidebar footer appears only when a wallet is connected.
 - `Memes Calendar` appears under `Network` (not under `About -> NFTs`).
