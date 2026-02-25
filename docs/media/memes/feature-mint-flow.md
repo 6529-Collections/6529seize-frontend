@@ -29,11 +29,21 @@ and on-chain transaction status updates for the current drop.
    `Public Phase` with expected start/end windows and status badges.
 5. User connects a wallet (if not already connected), then chooses either
    `Mint for me` or `Mint for fren`.
-6. User selects a recipient wallet and mint count.
-7. User selects `SEIZE xN` and confirms in wallet.
-8. While the transaction is in-flight, the page shows
-   `Transaction Submitted - SEIZING ...` with a `view trx` link.
-9. After confirmation, the status updates to `SEIZED!` with the same
+6. For `Mint for me`:
+   - The connected profile is shown as the recipient.
+   - The currently connected wallet is preselected by default.
+   - If multiple wallets are attached to the profile, users can switch the
+     destination wallet before minting.
+   - If only one wallet exists for the profile, that wallet is shown in a locked
+     (non-switchable) state.
+7. For `Mint for fren`:
+   - User search by handle, ENS, or wallet appears.
+   - After selecting a profile, users choose the destination wallet.
+8. User selects mint count.
+9. User selects `SEIZE xN` and confirms in wallet.
+10. While the transaction is in-flight, the page shows
+    `Transaction Submitted - SEIZING ...` with a `view trx` link.
+11. After confirmation, the status updates to `SEIZED!` with the same
    transaction link.
 
 ## Common Scenarios
@@ -55,6 +65,14 @@ and on-chain transaction status updates for the current drop.
 - Minting for another wallet:
   - `Mint for fren` enables recipient search by handle, ENS, or wallet.
   - Mint executes for the selected destination wallet.
+- Minting to your own profile wallet:
+  - `Mint for me` uses the connected profile as the recipient profile.
+  - If the profile has multiple wallets, users can switch to a different
+    destination wallet.
+  - If the profile has one wallet, wallet switching is not available and mint
+    uses that wallet directly.
+  - Returning from `Mint for fren` to `Mint for me` resets the destination to
+    the currently connected wallet.
 - Not-yet-active phase:
   - Action button is disabled and shows `DROPS ... UTC`.
 
@@ -67,6 +85,13 @@ and on-chain transaction status updates for the current drop.
   hidden until a wallet is selected.
 - If no allowlist spots exist for the selected address, the panel shows
   `No spots in current phase for this address`.
+- If you leave `Mint for fren` with an active recipient search selection and switch
+  to `Mint for me`, the recipient selection resets to your connected profile and
+  the currently connected wallet.
+- Add `?mintdebug=1` to the mint URL to display a read-only diagnostics panel that
+  shows mint payload, proof counts, and chain/request context for support/debugging.
+- If allowlist proofs are not available for enough entries, minting stops with
+  `No allowlist spots in current phase for this address`.
 - If the minted asset description is short enough to fit in the preview, the expand/collapse
   button is not shown.
 - Once claim status is ended/finalized, mint-connect and mint-action controls
@@ -102,6 +127,8 @@ and on-chain transaction status updates for the current drop.
   as local time or UTC based on the toggle.
 - Transaction success is shown after receipt confirmation, not immediately after
   wallet submission.
+- Debug diagnostics are only exposed when the `mintdebug=1` query parameter is
+  set, and are intended for debugging support.
 
 ## Related Pages
 
