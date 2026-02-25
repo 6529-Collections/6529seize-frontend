@@ -3,7 +3,12 @@
 Shared docs describe user-facing behavior that appears in multiple product
 areas.
 
-## Pages
+## Overview
+
+Shared docs describe cross-area behavior patterns that are reused across flows,
+routes, and media surfaces.
+
+## Features
 
 - [Browser Zoom and Pinch Scaling](feature-browser-zoom-and-pinch-scaling.md)
 - [Hover Cards and Tooltip Positioning](feature-hover-cards-and-tooltips.md)
@@ -13,7 +18,19 @@ areas.
 - [Pagination Controls](feature-pagination-controls.md)
 - [Static Asset Delivery Mode](feature-static-asset-delivery-mode.md)
 
-## Related Pages
+## Flows
+
+- None.
+
+## Troubleshooting
+
+- None.
+
+## Stubs
+
+- None.
+
+## Related Areas
 
 - [Docs Home](../README.md)
 - [Navigation Index](../navigation/README.md)
