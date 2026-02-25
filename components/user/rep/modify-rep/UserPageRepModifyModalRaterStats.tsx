@@ -47,7 +47,7 @@ export default function UserPageRepModifyModalRaterStats({
     }
     return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
       ? heroAvailableCredit
-      : proxyAvailableCredit ?? 0;
+      : (proxyAvailableCredit ?? 0);
   };
 
   const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
@@ -59,9 +59,9 @@ export default function UserPageRepModifyModalRaterStats({
     <div className="tw-mt-6 sm:tw-mt-8">
       <div className="tw-flex tw-flex-col tw-space-y-1">
         {!!activeProfileProxy && (
-          <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
+          <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-500">
             <span>You are acting as proxy for:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
               <Link href={`/${activeProfileProxy.created_by.handle}`}>
                 {activeProfileProxy.created_by.handle}
               </Link>
@@ -69,17 +69,17 @@ export default function UserPageRepModifyModalRaterStats({
           </span>
         )}
         {!activeProfileProxy && (
-          <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
+          <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-500">
             <span>Your available Rep:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(availableCredit)}
             </span>
           </span>
         )}
         {!activeProfileProxy && (
-          <span className="tw-text-sm tw-block tw-text-iron-300 tw-font-normal">
+          <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-500">
             <span>Your max/min Rep Rating to {repState.category}:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
+            <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
               +/- {formatNumberWithCommas(minMaxValues.max)}
             </span>
           </span>

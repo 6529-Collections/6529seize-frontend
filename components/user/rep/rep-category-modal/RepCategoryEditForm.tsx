@@ -179,8 +179,8 @@ export default function RepCategoryEditForm({
       )}
       <form onSubmit={onSubmit} className="tw-mt-4">
         <div>
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
-            Your total Rep for {category}:
+          <label className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
+            Your total Rep for <span className="tw-font-semibold tw-text-iron-300">{category}</span>:
           </label>
           <div className="tw-relative tw-flex tw-mt-1.5">
             <UserPageRateInput
