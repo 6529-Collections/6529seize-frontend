@@ -24,6 +24,7 @@ screens, with app-shell header controls handling in-context title and back actio
 - [Internal Link Navigation](feature-internal-link-navigation.md)
 - [Sidebar Navigation](feature-sidebar-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
+- [Android Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md)
 - [App Header Context](feature-app-header-context.md)
 - [Back Button](feature-back-button.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)

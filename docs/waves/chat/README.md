@@ -9,7 +9,6 @@ Chat docs cover realtime conversation behavior inside wave and DM timelines.
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
 - [Wave Chat Typing Indicator](feature-typing-indicator.md)
 - [Wave Chat Composer Availability](feature-chat-composer-availability.md)
-- [Wave Chat Android Keyboard Layout](feature-android-keyboard-layout.md)
 
 ## Flows
 
@@ -27,3 +26,4 @@ Chat docs cover realtime conversation behavior inside wave and DM timelines.
 
 - [Waves Index](../README.md)
 - [Realtime Index](../../realtime/README.md)
+- [Navigation Index](../../navigation/README.md)

@@ -97,4 +97,4 @@ targeted drop so it is easier to locate in the list.
 - [Profiles Index](../../profiles/README.md)
 - [Profile Brain Tab](../../profiles/tabs/feature-brain-tab.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)
-- [Wave Chat Android Keyboard Layout](feature-android-keyboard-layout.md)
+- [Android Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
