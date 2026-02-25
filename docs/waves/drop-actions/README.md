@@ -10,6 +10,7 @@ Drop action docs cover interaction behavior on posted drops.
 - [Wave Drop Vote Summary and Modal](feature-vote-summary-and-modal.md)
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
+- [Wave Drop Link Preview Toggle](../link-previews/feature-link-preview-toggle.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)

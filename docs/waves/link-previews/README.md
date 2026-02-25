@@ -7,6 +7,7 @@ Link preview docs cover how URLs render as cards in wave and DM drops.
 ## Features
 
 - [Wave Drop External Link Previews](feature-external-link-previews.md)
+- [Wave Drop Link Preview Toggle](feature-link-preview-toggle.md)
 - [Wave Drop NFT Marketplace Link Previews](feature-nft-marketplace-link-previews.md)
 - [Wave Drop Google Workspace Link Previews](feature-google-workspace-link-previews.md)
 - [Wave Drop Farcaster Link Previews](feature-farcaster-link-previews.md)
