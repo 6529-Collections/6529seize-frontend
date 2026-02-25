@@ -74,6 +74,35 @@ const RESEARCH_AIRDROP_ADDRESS = "0xc2ce4ccef11a8171f443745cea3bceeaadd750c7";
 
 type LaunchMediaTab = "image" | "animation";
 
+function getSelectedPhaseFormValues({
+  selectedPhase,
+  phasePricesEth,
+  phaseAllowlistWindows,
+}: Readonly<{
+  selectedPhase: "" | LaunchPhaseKey;
+  phasePricesEth: Record<string, string>;
+  phaseAllowlistWindows: Record<string, { start: string; end: string }>;
+}>): {
+  selectedPhasePriceValue: string;
+  selectedPhaseWindowStartValue: string;
+  selectedPhaseWindowEndValue: string;
+} {
+  if (!selectedPhase) {
+    return {
+      selectedPhasePriceValue: "",
+      selectedPhaseWindowStartValue: "",
+      selectedPhaseWindowEndValue: "",
+    };
+  }
+
+  return {
+    selectedPhasePriceValue: phasePricesEth[selectedPhase] ?? "",
+    selectedPhaseWindowStartValue:
+      phaseAllowlistWindows[selectedPhase]?.start ?? "",
+    selectedPhaseWindowEndValue: phaseAllowlistWindows[selectedPhase]?.end ?? "",
+  };
+}
+
 function runSelectedPhaseClaimAction({
   selectedPhaseConfig,
   isInitialized,
@@ -1229,12 +1258,15 @@ export default function DropForgeLaunchClaimPageClient({
       runClaimWriteForPhase,
     });
   }, [selectedPhaseConfig, runClaimWriteForPhase, isInitialized]);
-  const selectedPhasePriceValue =
-    selectedPhase ? (phasePricesEth[selectedPhase] ?? "") : "";
-  const selectedPhaseWindowStartValue =
-    selectedPhase ? (phaseAllowlistWindows[selectedPhase]?.start ?? "") : "";
-  const selectedPhaseWindowEndValue =
-    selectedPhase ? (phaseAllowlistWindows[selectedPhase]?.end ?? "") : "";
+  const {
+    selectedPhasePriceValue,
+    selectedPhaseWindowStartValue,
+    selectedPhaseWindowEndValue,
+  } = getSelectedPhaseFormValues({
+    selectedPhase,
+    phasePricesEth,
+    phaseAllowlistWindows,
+  });
 
   useEffect(() => {
     if (claimWrite.error) {
