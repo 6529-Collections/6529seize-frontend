@@ -12,6 +12,7 @@ Sidebar docs cover right-sidebar controls and Brain/DM list metadata behavior.
 - [Brain Wave List Name Tooltips](feature-brain-list-name-tooltips.md)
 - [Brain Wave List Navigation](feature-wave-list-navigation.md)
 - [Wave Notification Controls](feature-wave-notification-controls.md)
+- [Wave Left Sidebar Expand Control](feature-left-sidebar-expand-control.md)
 
 ## Flows
 

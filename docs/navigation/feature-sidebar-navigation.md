@@ -70,6 +70,9 @@ separate from the main content column.
 - Using `Profile` from the sidebar footer; it resolves to a handle route when
   available, otherwise wallet-address route.
 - Opening `Network -> Memes Calendar` to reach `/meme-calendar`.
+- On `/waves` and `/messages`, when an inline right sidebar is open, the left
+  wave list stays compact and shows a temporary expand control to restore full
+  width quickly.
 
 ## Edge Cases
 
@@ -119,6 +122,8 @@ separate from the main content column.
 - Profile and user controls depend on active wallet connection state.
 - Full expanded desktop sidebar behavior is replaced by collapsed/off-canvas
   patterns on narrower viewports.
+- In wave/message screens, left-sidebar width can also be driven by right-sidebar
+  state; closing the inline right sidebar expands the compact left sidebar.
 
 ## Related Pages
 
@@ -132,6 +137,7 @@ separate from the main content column.
 - [Block Finder](../api-tool/feature-block-finder.md)
 - [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
+- [Wave Left Sidebar Expand Control](../waves/sidebars/feature-left-sidebar-expand-control.md)
 - [Docs Home](../README.md)
 - [Profile Tabs](../profiles/navigation/feature-tabs.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
