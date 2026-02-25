@@ -34,6 +34,8 @@ wave-dependent views.
 5. The main content panel updates in place while staying on the same route.
 6. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
    an inline media format badge when that drop includes media metadata.
+7. If the active tab is no longer valid when entering a new wave, the active tab
+   resets to that wave’s first available tab.
 
 ## Common Scenarios
 
@@ -52,12 +54,15 @@ wave-dependent views.
 - Non-memes waves do not expose `My Votes` and `FAQ` in the tab strip.
 - Tabs expose selected-state semantics and link to the active content panel for
   assistive technologies.
+- For memes waves, available tabs are evaluated to prefer `Leaderboard` first; if it
+  is unavailable, `Chat` becomes the fallback tab.
 
 ## Failure and Recovery
 
 - If a selected tab becomes unavailable because wave state changes, the
   interface moves to the first available tab.
-- If an unavailable tab is requested, tab state falls back to `Chat`.
+- If an unavailable tab is requested, tab state falls back to that wave’s first
+  available tab (typically `Leaderboard` for memes waves, otherwise `Chat`).
 - If a wave becomes chat-only, the tab strip is removed and the chat panel
   remains available.
 - If a `My Votes` row has no preview media available, users still get row metadata
