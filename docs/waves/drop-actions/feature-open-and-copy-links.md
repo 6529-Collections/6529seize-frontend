@@ -9,6 +9,8 @@ Wave drop actions provide two different link behaviors:
 - `Open drop` opens the selected drop inside the current thread context.
 - `Copy link` copies a shareable URL that targets a specific drop serial in its
   wave or DM thread.
+- The single-drop view uses a shared overlay where drop details stay visible while
+  discussion mode can be shown or hidden inline.
 
 ## Location in the Site
 
@@ -40,8 +42,12 @@ Wave drop actions provide two different link behaviors:
 5. After the jump is initialized, serial-target query parameters are cleared
    from the URL so normal thread browsing can continue.
 6. In app-shell contexts, opening a drop presents a full-viewport single-drop
-   panel with top `Close` and `Show Chat` / `Hide Chat` controls that stay
-   visible above drop content.
+  panel:
+   - On desktop: the drop remains on the left and discussion can be toggled into
+     a right-side pane.
+   - On mobile: the drop remains full-screen and discussion opens in a slide-over
+     panel from the right.
+   - In both forms, the top controls include `Close` and `Show Chat` / `Hide Chat`.
 
 ## Common Scenarios
 
@@ -74,8 +80,11 @@ Wave drop actions provide two different link behaviors:
 - `Open drop` is not shown for chat-type drops.
 - `Open drop` preserves other active query parameters while replacing the
   current `drop` value.
-- When single-drop chat is opened on small screens, chat appears in its own
-  slide-in panel above the drop panel.
+- On desktop, discussion starts hidden by default and can be opened from
+  `Show Chat`; once open, it appears in a dedicated right pane without changing
+  the underlying route.
+- On mobile, single-drop chat opens in its own slide-over panel above the drop
+  panel, and background scrolling is blocked until it is closed.
 - While the small-screen single-drop chat panel is open, background page
   scrolling is blocked until that panel is closed.
 - Serial-target jumps can load additional pages before the target becomes
