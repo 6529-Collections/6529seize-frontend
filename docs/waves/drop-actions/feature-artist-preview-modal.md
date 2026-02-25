@@ -2,9 +2,10 @@
 
 ## Overview
 
-Artists in wave and meme drop lists can open a full-screen artist preview from their
-badge actions. The modal shows active submissions and, when available, winner artworks.
-If both content types exist, the modal shows tabs so users can switch between them.
+Artists in wave and meme drop lists can open a full-screen artist preview from a
+single unified activity badge. The badge appears when an artist has active
+submissions and/or winner artworks. The modal shows `Active Submissions` and, when
+available, `Winning Artworks` views with tabs for switching between them.
 
 ## Location in the Site
 
@@ -14,23 +15,25 @@ If both content types exist, the modal shows tabs so users can switch between th
 
 ## Entry Points
 
-- Click `winner` badge next to an artist name when the badge shows a win count.
-- Click `submissions` badge next to an artist name when the badge shows submission count.
+- Click the artist activity badge next to an artist name when submissions and/or
+  win counts are present.
 - Open a drop row in one of the above contexts and use those badges in that row.
 
 ## User Journey
 
 1. Open a wave or meme feed where an artist appears with badges.
-2. If the artist has active main-stage submissions, the submission badge is visible.
-3. If the artist has winner IDs, the winner badge is visible and shows the win count.
-4. Tap or click:
-   - a submission badge to open the modal on the `Active Submissions` view.
-   - a winner badge to open the modal on the `Winning Artworks` view.
-5. If both active and winner content exists, use `Active Submissions` and
-   `Winning Artworks` tabs to switch.
-6. Select an item card:
+2. If the artist has main-stage activity, the activity badge is visible.
+3. If only active submissions exist, the badge uses a palette icon and opens
+   `Active Submissions`.
+4. If only winner artwork exists, the badge uses a trophy icon and opens
+   `Winning Artworks`.
+5. If both exist, the badge uses a trophy icon with a blue marker dot and opens
+   `Active Submissions` by default.
+6. In rows with both content types, use `Active Submissions` and `Winning
+   Artworks` tabs to switch.
+7. Select an item card:
    - the modal closes and opens the selected drop in the current wave context.
-7. Close using the close button; desktop also supports backdrop click, and mobile app
+8. Close using the close button; desktop also supports backdrop click, and mobile app
    surfaces support closing with the same control or swipe-to-close behavior.
 
 ## Common Scenarios
@@ -40,16 +43,23 @@ If both content types exist, the modal shows tabs so users can switch between th
 - Artists with both types open with the clicked badge’s tab preselected.
 - Active and winner views support card-level drop interactions and related metadata
   that is already available in those sections (media, ranks, ratings context).
+- On mobile and touch surfaces, badge hover tooltips are omitted and the badge remains
+  clickable.
 
 ## Edge Cases
 
-- Badge counts are derived from main-stage data and each badge is hidden when the
+- Badge counts are derived from main-stage data and each behavior is hidden when the
   corresponding count is zero.
-- When both badge types exist, tab controls render; otherwise the modal uses a single
-  available view.
+- Only one badge is shown at a time; when both counts exist it represents both
+  states instead of rendering two separate badges.
+- Desktop users see content-aware tooltip text on badge hover (`View X art
+  submissions`, `View X winning artworks`, or combined text for both states); mobile
+  and touch users do not show this tooltip.
+- When both badge states exist, tab controls render; otherwise the modal uses a
+  single available view.
 - Tap/click inside modal content does not dismiss the modal. Dismiss requires the
   close affordance or backdrop interaction.
-- Winner count in the badge is the actual winner total, not a hardcoded value.
+- Badge totals are real-time values from the current artist activity data.
 
 ## Failure and Recovery
 
