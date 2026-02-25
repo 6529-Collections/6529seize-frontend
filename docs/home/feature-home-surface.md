@@ -74,7 +74,7 @@ The homepage now-minting section uses multi-card placeholders while its data is 
 - If the network request errors for Explore Waves, that section is omitted rather than rendering a persistent error card.
 - The redesigned homepage no longer renders the previous submission carousel segment in this slot.
 - In the latest-drop area, the "next-drop" fallback card appears only when the current mint is finished and replacement drop data is available; if no next-drop is ready, the site keeps the mint countdown card in its completion state instead.
-- In Coming up, the next-winner card appears ahead of current leaderboard entries when the mint is finished; the leaderboard list adjusts so it still shows a total of two or three cards (including the replacement card).
+- In Coming up, the next-winner card appears ahead of current leaderboard entries while the current mint has not ended; the leaderboard list adjusts so it still shows a total of two or three cards (including the replacement card).
 - Message links in Explore Waves previews are non-actionable in the compact list; users open links by navigating into the wave detail context.
 
 ## Failure and Recovery
