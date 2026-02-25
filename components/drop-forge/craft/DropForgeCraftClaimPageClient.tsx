@@ -72,12 +72,16 @@ type DistributionSectionKey =
   | "public";
 
 function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
-  if (!claim.image_url && !claim.image_details) return "unknown";
-  if (!claim.animation_url || !claim.animation_details) return "image";
-  const format = (claim.animation_details as { format?: string }).format;
-  if (format === "HTML") return "html";
-  if (format === "GLB") return "glb";
-  if (format) return "video";
+  const hasImageData = Boolean(claim.image_url || claim.image_details);
+  const hasAnimationData = Boolean(claim.animation_url || claim.animation_details);
+  if (!hasImageData && !hasAnimationData) return "unknown";
+  if (hasAnimationData) {
+    const format = (claim.animation_details as { format?: string } | null | undefined)
+      ?.format;
+    if (format === "HTML") return "html";
+    if (format === "GLB") return "glb";
+    return "video";
+  }
   return "image";
 }
 

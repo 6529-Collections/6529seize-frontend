@@ -49,7 +49,7 @@ export default function ManifoldMintingWidget(
   const [merkleProofsMints, setMerkleProofsMints] = useState<boolean[]>([]);
 
   const [mintCount, setMintCount] = useState<number>(0);
-  const [fee, setFee] = useState<number>(0);
+  const [feeWei, setFeeWei] = useState<bigint>(0n);
 
   const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
   const [mintError, setMintError] = useState<string>("");
@@ -134,8 +134,9 @@ export default function ManifoldMintingWidget(
   });
 
   useEffect(() => {
-    const f = Number(getFee.data ?? 0);
-    setFee(f);
+    const nextFeeWei = (getFee.data as bigint | undefined) ?? 0n;
+    const f = Number(nextFeeWei);
+    setFeeWei(nextFeeWei);
     props.setFee(f);
   }, [getFee.data]);
 
@@ -251,8 +252,8 @@ export default function ManifoldMintingWidget(
       mintFunction: argsPreview.functionName,
       mintCount,
       valueWei: getValue().toString(),
-      feeWei: fee.toString(),
-      claimCostWei: props.claim.cost.toString(),
+      feeWei: feeWei.toString(),
+      claimCostWei: (props.claim.costWei ?? 0n).toString(),
       availableMerkleProofs: merkleProofs.length,
       selectedMerkleProofs: selectedProofs.length,
       mintedProofs: merkleProofsMints.filter(Boolean).length,
@@ -293,7 +294,7 @@ export default function ManifoldMintingWidget(
       address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
       abi: props.abi,
       chainId: props.chain.id,
-      value: BigInt(value),
+      value,
       functionName: args.functionName,
       args: args.args,
     });
@@ -424,7 +425,7 @@ export default function ManifoldMintingWidget(
   }
 
   const getValue = () => {
-    return (props.claim.cost + fee) * mintCount;
+    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(mintCount);
   };
 
   function printMint(available?: number) {
@@ -436,7 +437,7 @@ export default function ManifoldMintingWidget(
             {available === undefined
               ? printMintCountInput()
               : printMintCountDropdown(available)}
-            {mintCount > 0 && <b>{fromGWEI(getValue())} ETH</b>}
+            {mintCount > 0 && <b>{fromGWEI(Number(getValue()))} ETH</b>}
           </Col>
         </Row>
         <Row className="pt-3">

@@ -481,7 +481,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td className="pt-2">Mint Price</td>
                 <td className="pt-2">
                   <b>
-                    {fromGWEI(manifoldClaim.cost).toFixed(5)}{" "}
+                    {fromGWEI(Number(manifoldClaim.costWei ?? 0n)).toFixed(5)}{" "}
                     {ETHEREUM_ICON_TEXT}
                   </b>
                 </td>
@@ -544,7 +544,9 @@ export default function ManifoldMinting(props: Readonly<Props>) {
                 <td className="pt-2">Total Price Per Token</td>
                 <td className="pt-2">
                   <b>
-                    {fromGWEI(manifoldClaim.cost + fee).toFixed(5)}{" "}
+                    {fromGWEI(
+                      Number(manifoldClaim.costWei ?? 0n) + fee
+                    ).toFixed(5)}{" "}
                     {ETHEREUM_ICON_TEXT}
                   </b>
                 </td>

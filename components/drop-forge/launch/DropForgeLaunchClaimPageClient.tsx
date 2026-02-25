@@ -74,6 +74,28 @@ const RESEARCH_AIRDROP_ADDRESS = "0xc2ce4ccef11a8171f443745cea3bceeaadd750c7";
 
 type LaunchMediaTab = "image" | "animation";
 
+function runSelectedPhaseClaimAction({
+  selectedPhaseConfig,
+  isInitialized,
+  runClaimWriteForPhase,
+}: Readonly<{
+  selectedPhaseConfig: { key: Exclude<LaunchPhaseKey, "research"> } | null;
+  isInitialized: boolean;
+  runClaimWriteForPhase: (args: {
+    phaseKey: LaunchPhaseKey;
+    forceAction?: "initialize" | "update";
+  }) => void;
+}>) {
+  if (!selectedPhaseConfig) return;
+  runClaimWriteForPhase({
+    phaseKey: selectedPhaseConfig.key,
+    forceAction:
+      selectedPhaseConfig.key === "phase0" && !isInitialized
+        ? "initialize"
+        : "update",
+  });
+}
+
 export default function DropForgeLaunchClaimPageClient({
   claimId,
 }: Readonly<DropForgeLaunchClaimPageClientProps>) {
@@ -1079,6 +1101,7 @@ export default function DropForgeLaunchClaimPageClient({
           (entry) =>
             isAddress(entry.wallet as `0x${string}`) &&
             Number.isFinite(entry.amount) &&
+            Number.isInteger(entry.amount) &&
             entry.amount > 0
         );
 
@@ -1093,9 +1116,7 @@ export default function DropForgeLaunchClaimPageClient({
       const recipients = parsedEntries.map(
         (entry) => entry.wallet as `0x${string}`
       );
-      const amounts = parsedEntries.map((entry) =>
-        BigInt(Math.trunc(entry.amount))
-      );
+      const amounts = parsedEntries.map((entry) => BigInt(entry.amount));
 
       setClaimTxModal({
         status: "confirm_wallet",
@@ -1202,13 +1223,10 @@ export default function DropForgeLaunchClaimPageClient({
   );
 
   const handleSelectedPhaseAction = useCallback(() => {
-    if (!selectedPhaseConfig) return;
-    runClaimWriteForPhase({
-      phaseKey: selectedPhaseConfig.key,
-      forceAction:
-        selectedPhaseConfig.key === "phase0" && !isInitialized
-          ? "initialize"
-          : "update",
+    runSelectedPhaseClaimAction({
+      selectedPhaseConfig,
+      isInitialized,
+      runClaimWriteForPhase,
     });
   }, [selectedPhaseConfig, runClaimWriteForPhase, isInitialized]);
 

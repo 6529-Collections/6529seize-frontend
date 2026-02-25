@@ -22,6 +22,32 @@ function toneClass(tone: SectionTone): string {
   return "tw-bg-iron-700/30 tw-text-iron-400 tw-ring-iron-500/40";
 }
 
+function shouldShowAccordionHeaderRight({
+  headerRight,
+  showHeaderRightWhenOpen,
+  showHeaderRightWhenClosed,
+  isOpen,
+}: Readonly<{
+  headerRight?: ReactNode;
+  showHeaderRightWhenOpen: boolean;
+  showHeaderRightWhenClosed: boolean;
+  isOpen: boolean;
+}>): boolean {
+  if (!headerRight) {
+    return false;
+  }
+  if (showHeaderRightWhenOpen && showHeaderRightWhenClosed) {
+    return true;
+  }
+  if (showHeaderRightWhenOpen) {
+    return isOpen;
+  }
+  if (showHeaderRightWhenClosed) {
+    return !isOpen;
+  }
+  return true;
+}
+
 export default function DropForgeAccordionSection({
   title,
   subtitle,
@@ -50,18 +76,12 @@ export default function DropForgeAccordionSection({
   className?: string;
 }>) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  let showHeaderRight = false;
-  if (headerRight) {
-    if (showHeaderRightWhenOpen && showHeaderRightWhenClosed) {
-      showHeaderRight = true;
-    } else if (showHeaderRightWhenOpen) {
-      showHeaderRight = isOpen;
-    } else if (showHeaderRightWhenClosed) {
-      showHeaderRight = !isOpen;
-    } else {
-      showHeaderRight = true;
-    }
-  }
+  const showHeaderRight = shouldShowAccordionHeaderRight({
+    headerRight,
+    showHeaderRightWhenOpen,
+    showHeaderRightWhenClosed,
+    isOpen,
+  });
 
   const toggleOpen = () => {
     if (disabled) return;
@@ -144,6 +164,9 @@ export default function DropForgeAccordionSection({
         }`}
       >
         <div
+          aria-hidden={!isOpen}
+          inert={!isOpen}
+          tabIndex={isOpen ? undefined : -1}
           className={`${childrenClassName} ${
             isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"
           }`}

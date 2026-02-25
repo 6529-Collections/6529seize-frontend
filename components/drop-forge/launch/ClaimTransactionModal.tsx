@@ -7,6 +7,7 @@ import { getClaimTxModalEmoji } from "@/components/drop-forge/launch/dropForgeLa
 import { getTransactionLink } from "@/helpers/Helpers";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { createPortal } from "react-dom";
+import { useId } from "react";
 import type { Chain } from "viem";
 
 type ClaimTransactionModalState = {
@@ -30,6 +31,7 @@ export default function ClaimTransactionModal({
   const closable = state.status === "success" || state.status === "error";
   const txUrl = state.txHash ? getTransactionLink(chain.id, state.txHash) : null;
   const modalTitle = state.actionLabel ?? "Onchain Action";
+  const titleId = useId();
 
   if (typeof document === "undefined") return null;
 
@@ -46,9 +48,17 @@ export default function ClaimTransactionModal({
       ) : (
         <div className="tw-absolute tw-inset-0" aria-hidden="true" />
       )}
-      <div className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
+      >
         <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
-          <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
+          <h2
+            id={titleId}
+            className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white"
+          >
             {modalTitle}
           </h2>
           {closable ? (

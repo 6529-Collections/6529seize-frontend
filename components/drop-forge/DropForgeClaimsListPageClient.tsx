@@ -188,8 +188,9 @@ export default function DropForgeClaimsListPageClient({
           setToast({ message: msg, type: "error" });
         }
       } finally {
-        if (requestId !== latestRequestId.current) return;
-        setLoading(false);
+        if (requestId === latestRequestId.current) {
+          setLoading(false);
+        }
       }
     },
     [setToast]

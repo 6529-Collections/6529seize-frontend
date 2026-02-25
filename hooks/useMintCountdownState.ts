@@ -10,6 +10,7 @@ import {
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
 import { useMemo, useState } from "react";
+import type { Abi } from "viem";
 
 export interface CountdownData {
   readonly title: string;
@@ -30,6 +31,7 @@ interface UseMintCountdownStateOptions {
   hideMintBtn?: boolean | undefined;
   contract: string;
   chainId: number;
+  abi?: Abi | undefined;
 }
 
 export function useMintCountdownState(
@@ -49,7 +51,7 @@ export function useMintCountdownState(
     chainId: opts.chainId,
     contract: opts.contract,
     proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
-    abi: MEMES_MANIFOLD_PROXY_ABI,
+    abi: opts.abi ?? MEMES_MANIFOLD_PROXY_ABI,
     identifier: nftId,
     onError: () => {
       setErrorFromCallback(true);

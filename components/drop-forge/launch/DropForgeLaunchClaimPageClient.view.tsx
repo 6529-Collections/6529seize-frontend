@@ -516,7 +516,7 @@ function DropForgeOnChainClaimSection({
             {manifoldClaim.instanceId.toLocaleString()}
           </DropForgeFieldBox>
           <DropForgeFieldBox label="Cost (ETH)">
-            {fromGWEI(manifoldClaim.cost).toFixed(5)}
+            {fromGWEI(Number(manifoldClaim.costWei ?? 0n)).toFixed(5)}
           </DropForgeFieldBox>
           <DropForgeFieldBox label="Claim Phase">
             {manifoldClaim.memePhase?.name ?? "—"}

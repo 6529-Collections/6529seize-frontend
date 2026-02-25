@@ -125,7 +125,7 @@ export function getSubscriptionPhaseName(phaseKey: LaunchPhaseKey): string {
   if (phaseKey === "phase0") return "Phase 0";
   if (phaseKey === "phase1") return "Phase 1";
   if (phaseKey === "phase2") return "Phase 2";
-  if (phaseKey === "research") return "Public Phase";
+  if (phaseKey === "research") return "Airdrop to Research";
   return "Public Phase";
 }
 

@@ -11,7 +11,8 @@ import {
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { Chain, mainnet } from "viem/chains";
+import type { Chain } from "viem";
+import { mainnet } from "viem/chains";
 import type { CreateConnectorFn } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
 import type { AppWallet } from "../app-wallets/AppWalletsContext";
@@ -112,45 +113,65 @@ export class AppKitAdapterManager {
   }
 
   shouldRecreateAdapter(newWallets: AppWallet[], newChains?: Chain[]): boolean {
-    if (!Array.isArray(newWallets)) {
-      throw new AdapterError("ADAPTER_009: newWallets must be an array");
-    }
-    if (typeof newChains !== "undefined" && !Array.isArray(newChains)) {
-      throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
-    }
+    this.validateShouldRecreateAdapterInputs(newWallets, newChains);
 
     if (!this.currentAdapter) return true;
     if (newWallets.length !== this.currentWallets.length) return true;
-    if (newChains) {
-      const currentChainIds = this.getSortedChainIdentifiers(this.currentChains);
-      const newChainIds = this.getSortedChainIdentifiers(newChains);
-      if (currentChainIds.length !== newChainIds.length) return true;
-      for (let i = 0; i < newChainIds.length; i++) {
-        if (currentChainIds[i] !== newChainIds[i]) return true;
-      }
+    if (this.haveChainsChanged(newChains)) return true;
+
+    const currentAddresses = this.toWalletAddressSet(
+      this.currentWallets,
+      "ADAPTER_010: Invalid wallet in currentWallets array"
+    );
+    const newAddresses = this.toWalletAddressSet(
+      newWallets,
+      "ADAPTER_011: Invalid wallet in newWallets array"
+    );
+
+    return this.doAddressSetsDiffer(currentAddresses, newAddresses);
+  }
+
+  private validateShouldRecreateAdapterInputs(
+    newWallets: AppWallet[],
+    newChains?: Chain[]
+  ): void {
+    if (!Array.isArray(newWallets)) {
+      throw new AdapterError("ADAPTER_009: newWallets must be an array");
+    }
+    if (newChains !== undefined && !Array.isArray(newChains)) {
+      throw new AdapterError("ADAPTER_021: chains must be a non-empty array");
+    }
+  }
+
+  private haveChainsChanged(newChains?: Chain[]): boolean {
+    if (!newChains) return false;
+
+    const currentChainIds = this.getSortedChainIdentifiers(this.currentChains);
+    const newChainIds = this.getSortedChainIdentifiers(newChains);
+    if (currentChainIds.length !== newChainIds.length) return true;
+
+    for (let i = 0; i < newChainIds.length; i++) {
+      if (currentChainIds[i] !== newChainIds[i]) return true;
     }
 
-    const currentAddresses = new Set(
-      this.currentWallets.map((w) => {
-        if (!w?.address) {
-          throw new AdapterError(
-            "ADAPTER_010: Invalid wallet in currentWallets array"
-          );
-        }
-        return w.address;
-      })
-    );
-    const newAddresses = new Set(
-      newWallets.map((w) => {
-        if (!w?.address) {
-          throw new AdapterError(
-            "ADAPTER_011: Invalid wallet in newWallets array"
-          );
-        }
-        return w.address;
-      })
-    );
+    return false;
+  }
 
+  private toWalletAddressSet(wallets: AppWallet[], errorMessage: string): Set<string> {
+    return new Set(
+      wallets.map((w) => {
+        if (!w?.address) {
+          throw new AdapterError(errorMessage);
+        }
+        return w.address;
+      })
+    );
+  }
+
+  private doAddressSetsDiffer(
+    currentAddresses: Set<string>,
+    newAddresses: Set<string>
+  ): boolean {
     for (const addr of Array.from(newAddresses)) {
       if (!currentAddresses.has(addr)) return true;
     }

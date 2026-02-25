@@ -10,9 +10,11 @@ export function useDropForgePermissions() {
   const { address, connectionState } = useSeizeConnectContext();
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const distributionAdminWalletsKey = JSON.stringify(
-    seizeSettings.distribution_admin_wallets
+    seizeSettings.distribution_admin_wallets ?? []
   );
-  const claimsAdminWalletsKey = JSON.stringify(seizeSettings.claims_admin_wallets);
+  const claimsAdminWalletsKey = JSON.stringify(
+    seizeSettings.claims_admin_wallets ?? []
+  );
   const distributionAdminWallets = useMemo(
     () => JSON.parse(distributionAdminWalletsKey) as string[],
     [distributionAdminWalletsKey]

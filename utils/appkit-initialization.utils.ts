@@ -8,7 +8,7 @@ import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";
 import type { ChainAdapter } from "@reown/appkit/react";
 import { createAppKit } from "@reown/appkit/react";
-import { Chain } from "viem/chains";
+import type { Chain } from "viem";
 
 // Configuration interface for AppKit initialization
 export interface AppKitInitializationConfig {

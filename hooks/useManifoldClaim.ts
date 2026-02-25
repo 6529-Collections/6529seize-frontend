@@ -105,7 +105,6 @@ export interface ManifoldClaim {
   total: number;
   totalMax: number;
   remaining: number;
-  cost: number;
   costWei?: bigint | undefined;
   walletMax?: number | undefined;
   storageProtocol?: number | undefined;
@@ -226,7 +225,6 @@ export function useManifoldClaim({
         total: Number(claimData.total),
         totalMax: Number(claimData.totalMax),
         remaining: remaining,
-        cost: Number(costWei),
         costWei,
         walletMax: Number(claimData.walletMax ?? 0),
         storageProtocol: Number(claimData.storageProtocol ?? 0),
