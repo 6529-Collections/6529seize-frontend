@@ -15,9 +15,8 @@ type LaunchMediaKind = "image" | "video" | "glb" | "html" | "unknown";
 
 export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
   if (!value) return null;
-  const match = value.match(
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/
-  );
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
   if (!match) return null;
 
   const [, year, month, day, hour, minute, second] = match;

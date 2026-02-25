@@ -183,9 +183,7 @@ export function useManifoldClaim({
   );
 
   const shouldFetchForIdentifier =
-    claim == null ||
-    claim.identifier !== identifier ||
-    !claim.isFinalized;
+    claim?.identifier !== identifier || !claim?.isFinalized;
 
   const readContract = useReadContract({
     address: proxy as `0x${string}`,
