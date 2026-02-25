@@ -3,7 +3,7 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { getClaimTxModalEmoji } from "@/components/drop-forge/dropForgeLaunchClaimPageClient.helpers";
+import { getClaimTxModalEmoji } from "@/components/drop-forge/launch/dropForgeLaunchClaimPageClient.helpers";
 import { getTransactionLink } from "@/helpers/Helpers";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { createPortal } from "react-dom";

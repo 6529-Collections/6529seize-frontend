@@ -2,7 +2,7 @@ import {
   DROP_FORGE_SECTIONS,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
-import DropForgeLaunchPageClient from "@/components/drop-forge/DropForgeLaunchPageClient";
+import DropForgeLaunchPageClient from "@/components/drop-forge/launch/DropForgeLaunchPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";

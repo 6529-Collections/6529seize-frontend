@@ -1,4 +1,4 @@
-import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launchClaimHelpers";
+import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launch/launchClaimHelpers";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 

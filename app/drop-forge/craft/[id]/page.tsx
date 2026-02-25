@@ -1,5 +1,5 @@
 import { DROP_FORGE_TITLE } from "@/components/drop-forge/drop-forge.constants";
-import DropForgeCraftClaimPageClient from "@/components/drop-forge/DropForgeCraftClaimPageClient";
+import DropForgeCraftClaimPageClient from "@/components/drop-forge/craft/DropForgeCraftClaimPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
