@@ -243,13 +243,14 @@ function mergeAirdropsByWallet(entries: PhaseAirdrop[] | null): PhaseAirdrop[] {
     if (amount <= 0) continue;
 
     const existing = merged.get(key);
-    if (!existing) {
-      merged.set(key, { wallet, amount });
-      orderedKeys.push(key);
-    } else {
+    if (existing) {
       existing.amount = normalizeAirdropAmount(existing.amount) + amount;
       merged.set(key, existing);
+      continue;
     }
+
+    merged.set(key, { wallet, amount });
+    orderedKeys.push(key);
   }
 
   return orderedKeys
