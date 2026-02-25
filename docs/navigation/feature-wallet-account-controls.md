@@ -49,14 +49,19 @@ disconnect, and manage proxy profile context from sidebar user menus.
   - Selecting a proxy switches active identity context for user actions.
 - Label fallback behavior:
   - Preferred label is profile handle when available.
-  - If no handle is available, UI falls back to wallet-based identifiers.
+  - For proxy identities without a handle, the label falls back to the proxy
+    owner's primary address.
+  - For non-proxy identities without a handle, the label falls back to the
+    connected wallet address.
   - Long or address-like labels can be visually truncated in compact sidebar
     space.
 
 ## Edge Cases
 
 - While identity data is loading, user sections show placeholder/skeleton UI.
-- If profile image is missing, a default avatar placeholder is shown.
+- If a profile image uses an IPFS URL, the sidebar resolves it to a
+  gateway-backed URL; if resolution fails or the image is missing, a default
+  avatar placeholder is shown.
 - In collapsed desktop sidebar mode, account controls become icon-first and use
   tooltips for labels.
 - Wallet provider availability can differ between web and native app sessions.

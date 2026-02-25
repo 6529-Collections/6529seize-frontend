@@ -6,7 +6,9 @@ Standard wave drop cards render the full post body inline. Long posts are not
 collapsed behind a `Show full post` control, so reading a long drop does not
 require an in-card expand action. Image attachments follow the same inline card
 flow, with higher-resolution image loading in single-drop detail contexts and
-fullscreen controls in the image viewer modal.
+fullscreen controls in the image viewer modal. In memes-specific drop cards,
+description text keeps authored newline breaks instead of collapsing into one
+paragraph.
 
 ## Location in the Site
 
@@ -41,6 +43,8 @@ fullscreen controls in the image viewer modal.
   code-style presentation instead of collapsing into plain paragraph text.
 - Consecutive blank lines in markdown remain visually separated instead of
   collapsing into a single paragraph break.
+- In memes wave leaderboard, participation, and winner cards, newline breaks in
+  drop descriptions are rendered as separate lines.
 - Same-origin links that include a `drop` query parameter (for example
   `/?drop=...` or `/waves/...?...&drop=...`) are rebased to the current thread
   route before rendering, so drop cards and their copy/open actions stay in the
@@ -48,6 +52,12 @@ fullscreen controls in the image viewer modal.
 - When a rebased same-origin link includes both `drop` and `serialNo`, the
   drop target is treated as the primary action and renders a drop preview card
   instead of a serial quote-jump card.
+- Raw URLs in drop text are linkified inline when rendering text segments, so
+  `https://` links become directly tappable in the post body.
+- Clicking a linkified URL opens the destination in a new browser tab and uses
+  safe `rel` attributes for external navigation.
+- Linkified URLs stop event propagation, so clicking a URL does not trigger
+  drop-card click-through navigation.
 - Selecting text in a drop body suppresses click-through navigation so users
   can copy text without opening drop details. Structured timeline copy behavior
   is covered in [Wave Drop Selection Copy](feature-selection-copy.md).
@@ -67,11 +77,17 @@ fullscreen controls in the image viewer modal.
 - In storm posts, previous/next controls are disabled at the first/last part.
 - Text and media blocks render as one continuous card body; media appears below
   the active part text when attachments exist.
+- In memes cards, multiline descriptions can make card headers taller when users
+  include multiple line breaks.
 - If the current URL already has a `drop` parameter, opening another shared
   drop link replaces only the `drop` value while keeping other active query
   parameters (for example `wave` or `serialNo`).
 - Links from other domains, and same-origin links without a `drop` parameter,
   keep their original URL and rendering path.
+- Only `http://` and `https://` URLs are transformed into inline links.
+- Homepage Explore Waves previews keep URL text non-clickable to preserve compact preview behavior.
+- URLs next to sentence punctuation can still render as clickable links while
+  the trailing punctuation remains plain text, preserving the tap target.
 - After text selection is cleared, click-through behavior returns to normal in
   contexts that support opening drop details from card body clicks.
 - If fullscreen is opened from the image viewer modal, fullscreen targets the

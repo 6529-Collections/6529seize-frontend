@@ -9,7 +9,7 @@ The action is available in:
 
 - Desktop drop action row (`mark unread` icon).
 - Desktop more-actions menu item.
-- Mobile long-press action menu item.
+- Non-hover long-press action menu item.
 
 ## Location in the Site
 
@@ -25,7 +25,8 @@ The action is available in:
 
 ## User Journey
 
-1. Open the thread and hover a non-own drop (or long-press on mobile).
+1. Open the thread and hover a non-own drop (or long-press on a non-hover
+   device).
 2. Select `Mark as unread`.
 3. The action shows a loading spinner while the request is in flight.
 4. On success:
@@ -48,7 +49,7 @@ The action is available in:
 
 - The action is hidden for drop authors to prevent self-mark operations.
 - Temporary draft drops do not support mark-unread.
-- Mobile controls show a full-width menu item, while desktop uses icon + tooltip
+- Non-hover controls show a full-width menu item, while desktop uses icon + tooltip
   entry points.
 
 ## Failure and Recovery

@@ -42,6 +42,8 @@ keep voter order continuous as more pages arrive.
   mixed vote history can show both positive and negative indicators.
 - Long or auto-generated handles may be visually truncated in the single-drop
   list while still linking to the same profile.
+- If a voter has no handle, the list links using the voter's primary address and
+  can appear as an address-style label.
 - Additional pages continue from the server-reported current page so ranking
   rows are appended in order.
 

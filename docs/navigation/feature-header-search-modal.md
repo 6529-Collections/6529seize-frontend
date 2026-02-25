@@ -6,6 +6,8 @@ Header search opens as a modal overlay so users can find pages, profiles, NFTs,
 waves, and (when available) messages in the current wave without leaving the
 current context first. In site-wide mode, results are grouped by category in
 one shared results panel, with `All` previews and per-category filtering tabs.
+Supported site-wide searches are started together when query thresholds are met,
+and category tabs filter the already-running results for that query.
 
 ## Location in the Site
 
@@ -55,6 +57,9 @@ one shared results panel, with `All` previews and per-category filtering tabs.
 - All-mode scanning:
   - Review a mixed preview of matching categories, then open `View all` for one
     category when the preview is not enough.
+- Search behavior while typing:
+  - Existing visible results are kept while the next query is debounced to
+    prevent flicker between keystrokes.
 
 ## Edge Cases
 
@@ -64,6 +69,8 @@ one shared results panel, with `All` previews and per-category filtering tabs.
   - Wave message search uses a 2-character minimum.
 - Category filters can collapse back to `All` if the chosen category no longer
   has matches for the current query.
+- While search results are loading for a new query, category tabs still apply to the
+  current in-memory result set until the new payload arrives.
 - In site-wide `All`, each category preview is capped; larger result sets expose
   a `View all <Category>` action.
 - Category selection is remembered between modal openings.

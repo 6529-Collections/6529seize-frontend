@@ -91,6 +91,9 @@ scrolling.
   back to the primary profile.
 - If users are not authenticated, the route shows wallet-connect guidance before
   notification content.
+- If a notification arrives with an unrecognized cause, the row renders in the
+  generic format (cause label, timestamp, and any available context) so the feed
+  stays usable.
 - Priority alerts currently appear in the feed by default and are included in the
   default `All` scope; they are not grouped under a dedicated cause chip yet.
 - Inline follow actions in applicable rows follow the actor’s current follow state

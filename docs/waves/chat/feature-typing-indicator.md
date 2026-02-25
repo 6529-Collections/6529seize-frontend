@@ -80,4 +80,4 @@ the chat surface near the composer.
 - [Wave Drop Composer Enter-Key Behavior](../composer/feature-enter-key-behavior.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)
-- [Android Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
+- [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)

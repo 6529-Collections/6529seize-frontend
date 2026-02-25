@@ -57,6 +57,8 @@ collection routes.
   is used.
 - Rememe and collection identifiers are shortened for readability; full values are
   not fully expanded in the header label.
+- If the connected profile avatar uses an IPFS URL, the header resolves it to a
+  gateway-backed URL before rendering.
 - If no avatar image exists, the app keeps a shaped placeholder in that space.
 
 ## Failure and Recovery

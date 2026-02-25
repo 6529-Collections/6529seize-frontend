@@ -8,6 +8,7 @@ browsable without one oversized index page.
 ## Features
 
 - [Discovery](discovery/README.md): discover cards and wave content-tab switching.
+- [Header](header/README.md): edit wave images from header controls.
 - [Create](create/README.md): create modal entry points and `Groups`/`Dates`/`Drops` steps.
 - [Chat](chat/README.md): chat timeline scroll and typing-indicator behavior.
 - [Composer](composer/README.md): compose/edit markdown, emoji shortcodes, metadata-only submits.

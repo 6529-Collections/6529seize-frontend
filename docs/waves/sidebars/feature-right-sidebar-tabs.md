@@ -70,6 +70,7 @@ The `About` tab can also surface a `Trending` list for boosted drops.
 - [Waves Index](../README.md)
 - [Wave Top Voters Lists](../leaderboard/feature-top-voters-lists.md)
 - [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md)
+- [Wave Right Sidebar Leaderboard](feature-right-sidebar-leaderboard.md)
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
 - [Wave Content Tabs](../discovery/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)

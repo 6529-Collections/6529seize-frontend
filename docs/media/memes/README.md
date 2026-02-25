@@ -9,6 +9,7 @@ states, and schedule views.
 
 - [The Memes Card Tabs and Focus Links](feature-card-tabs-and-focus-links.md)
 - [Now Minting Countdown](feature-now-minting-countdown.md)
+- [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md)
 - [The Memes Mint Flow](feature-mint-flow.md)
 - [Memes Minting Calendar](feature-minting-calendar.md)
 

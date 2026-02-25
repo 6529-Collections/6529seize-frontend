@@ -28,14 +28,18 @@ to the host page.
    - `referrerPolicy="no-referrer"`
    - `credentialless`
 4. A host banner is shown above the frame with the safe resolved origin.
-5. In list/card contexts where autoplay is disabled, interactive cards show
-   `Tap to load` first; loading starts only after interaction.
+5. In list/card contexts where autoplay is disabled (including several touch-first
+   home surfaces), interactive cards show `Tap to load` first; loading starts
+   only after interaction.
 
 ## Common Scenarios
 
 - Standard HTML card:
   - `media_mime_type === "text/html"` switches from normal image/video behavior to
     iframe rendering.
+- Home and latest-drop surfaces:
+  - On touch devices, leading cards and latest-drop hero cards keep interactive
+    HTML paused until users tap the overlay control.
 - Lazy loading:
   - The frame waits for viewport visibility before loading.
 - Safe interaction:

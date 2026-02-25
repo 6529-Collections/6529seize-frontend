@@ -73,6 +73,7 @@ identity context, quick stats links, and profile actions.
 ## Related Pages
 
 - [Profiles Index](../README.md)
+- [Profile Picture Editing](feature-profile-picture-editing.md)
 - [Profile Tabs](feature-tabs.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Tab Content](../tabs/feature-tab-content.md)

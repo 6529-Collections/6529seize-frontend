@@ -54,9 +54,9 @@ underlying page context.
   opening and closing create-wave mode.
 - If the URL mode is `create=dm`, the direct-message modal opens instead and
   the create-wave modal stays closed.
-- In collapsed sidebar mode, the create control remains icon-first; hover
-  tooltip labels appear only on non-touch devices.
-- On touch-capable devices, tooltip labels are not shown for the create icon.
+- In collapsed sidebar mode, the create control remains icon-first; tooltip
+  labels appear only on hover-capable devices.
+- On non-hover devices, tooltip labels are not shown for the create icon.
 - If no connected profile is available, create-wave controls are not shown and
   modal content is not mounted.
 

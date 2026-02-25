@@ -41,6 +41,10 @@ separate from the main content column.
 
 - Opening `Discover` from sidebar to reach `/discover`.
 - Opening `Messages` and seeing an unread indicator when new messages exist.
+- Selecting `Waves` or `Messages` while already inside a wave/DM returns to the
+  section list instead of re-opening the active thread.
+- Selecting `Waves` or `Messages` from other routes opens the last visited
+  wave/DM when available; otherwise it opens the section home.
 - Opening `Notifications` and seeing an unread indicator when notifications are
   pending.
 - Opening `Notifications` from sidebar to reach `/notifications`.

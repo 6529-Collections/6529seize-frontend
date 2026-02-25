@@ -14,18 +14,18 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
-- Desktop drop action bar (hover actions) and mobile drop action menu
+- Desktop drop action bar (hover actions) and non-hover long-press drop action menu
 - Reaction chips shown below drop content
 
 ## Entry Points
 
 - Hover a drop on desktop and use quick-react buttons, the emoji picker button,
   or clap rating controls.
-- Open the mobile drop menu and use quick reactions, emoji picker, or rating
-  controls.
+- Open the non-hover long-press drop menu and use quick reactions, emoji picker,
+  or rating controls.
 - Tap an existing reaction chip on a drop to toggle that reaction.
 - Open reaction details from chip tooltip overflow (`and N others`) or long
-  press on touch devices.
+  press on non-hover devices.
 
 ## User Journey
 
@@ -36,7 +36,8 @@ compact drop cards and temporary unsent drops keep those controls disabled.
    - tap an existing reaction chip.
 3. For existing reaction chips, up to three responders are previewed directly in the tooltip.
 4. If a reaction has additional responders, `and N others` appears; clicking it opens the **Reactions** detail panel.
-5. On touch devices, pressing and holding a reaction chip opens the same detail panel.
+5. On non-hover devices, pressing and holding a reaction chip opens the same
+   detail panel.
 6. In the detail panel:
    - the left side lists all reaction types with totals,
    - selecting a reaction updates the user list on the right,
@@ -67,7 +68,7 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 - Temporary (unsent) drops disable reaction and rating actions.
 - Light compact drops disable reaction and rating actions; only full drops can
   be reacted to.
-- On touch devices, long press opens reaction details instead of toggling.
+- On non-hover devices, long press opens reaction details instead of toggling.
 - If a reaction count reaches zero after removal, that reaction chip disappears.
 - If the reaction list is long, the detail panel still uses one selected reaction
   and lets you switch between all options.

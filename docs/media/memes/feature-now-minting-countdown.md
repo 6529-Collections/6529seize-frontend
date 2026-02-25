@@ -4,7 +4,9 @@
 
 The Now Minting countdown card shows the current mint phase timing and status
 for The Memes drops. Depending on state, it shows one of four states: loading,
-live/upcoming countdown, completion, or error.
+live/upcoming countdown, completion, or error. In the home latest-drop card,
+the `Edition Details` section includes a `Distribution Plan` action that links to
+the card’s distribution view.
 
 ## Location in the Site
 
@@ -32,6 +34,8 @@ live/upcoming countdown, completion, or error.
    live-updating timer.
 5. In countdown mode, the card can show a `Mint` button (depending on surface
    settings and platform/country rules) that links to `/the-memes/mint`.
+6. In the `Edition Details` accordion, users can open the card’s distribution
+   page directly via `Distribution Plan` → `View`.
 
 ## Common Scenarios
 
@@ -42,6 +46,14 @@ live/upcoming countdown, completion, or error.
   - Header shows `... Ends In`
   - Status pill shows `Live`
   - Timer updates continuously
+- Home latest-drop details:
+  - The countdown appears below drop metadata and the stats grid in the same
+    panel.
+  - `Edition`, `Status`, `Mint price`, and `Floor` row behavior is documented
+    in [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md).
+  - The `Edition Details` accordion includes `Mint date`, `File type`,
+    `Dimensions`, `Collection`, `Season`, and a `Distribution Plan` row with a
+    direct link to `/the-memes/{id}/distribution`.
 - Allowlist phase:
   - Info icon appears beside status
   - Header uses phase-specific labels such as `Phase 0 (Allowlist) Starts In`
@@ -52,7 +64,7 @@ live/upcoming countdown, completion, or error.
   - Header uses `Public Phase Starts In` before activation and
     `Public Phase Ends In` after activation
 - Sold out:
-  - Card shows `Mint Complete` with `All editions have been minted!`
+  - Card shows `Mint Complete` with `All NFTs have been successfully minted.`
 - Finalized (ended without full sell-out):
   - Card shows `Mint Complete` with `Minting for this drop has ended.`
   - This state appears when the mint window closes with editions still
@@ -106,6 +118,7 @@ live/upcoming countdown, completion, or error.
 ## Related Pages
 
 - [Media Index](../README.md)
+- [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md)
 - [The Memes Mint Flow](feature-mint-flow.md)
 - [Memes Minting Calendar](feature-minting-calendar.md)
 - [NFT Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)

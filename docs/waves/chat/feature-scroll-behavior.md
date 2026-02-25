@@ -6,6 +6,9 @@ Wave chat keeps users anchored to the newest messages when they are already at t
 bottom, while avoiding forced jumps when they scroll away to read older content.
 On Apple mobile clients, newly arrived messages can be queued as pending while
 users continue reading older messages.
+On Android and iOS mobile clients, chat layout height is recalculated while the
+keyboard is open to avoid extra bottom whitespace and keep the composer area in
+the usable viewport.
 If a wave opens with unread metadata, the chat can also show a `New Messages`
 divider and jump control anchored to the first unread serial.
 When users jump to a specific drop serial, chat also briefly highlights the
@@ -42,7 +45,8 @@ targeted drop so it is easier to locate in the list.
    that drop and applies a temporary highlight that fades out.
 7. If the wave opens with unread context, a divider and floating jump control
    mark the first unread boundary.
-8. On Apple mobile clients, when you are not at the bottom and new messages
+8. On Apple and Android mobile clients, when you are not at the bottom and new
+   messages
    arrive, a counter appears on the bottom control and tapping it reveals pending
    messages, then re-pins to latest.
 
@@ -77,6 +81,8 @@ targeted drop so it is easier to locate in the list.
 - If the target drop is still loading/off-screen when a serial jump begins, the
   temporary highlight can remain visible as the target comes into view.
 - On non-Apple clients, pending messages are not hidden behind a pending counter.
+- On mobile app clients with keyboard focus, the scroll container contracts so
+  composing does not force an extra trailing blank area.
 
 ## Failure and Recovery
 
@@ -112,4 +118,4 @@ targeted drop so it is easier to locate in the list.
 - [Profiles Index](../../profiles/README.md)
 - [Profile Brain Tab](../../profiles/tabs/feature-brain-tab.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)
-- [Android Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
+- [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)

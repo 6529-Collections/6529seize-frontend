@@ -10,6 +10,7 @@ This guide documents current user-facing behavior.
 
 ## Area Map
 
+- [Home](home/README.md): redesigned route-landing surface for `/`.
 - [Navigation](navigation/README.md): global routing, sidebar behavior, search, and wallet/account controls.
 - [Notifications](notifications/README.md): `/notifications` feed behavior and state handling.
 - [API Tool](api-tool/README.md): `/tools/*` user flows, including API guide and Block Finder.
@@ -45,6 +46,8 @@ This guide documents current user-facing behavior.
   [Network Identities Leaderboard](network/feature-network-identities-leaderboard.md)
 - Understand profile tabs and deep-link behavior:
   [Profile Tabs](profiles/navigation/feature-tabs.md)
+- Understand homepage layout and discoverability:
+  [Home Page Surface](home/feature-home-surface.md)
 - Troubleshoot profile load/tab issues:
   [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
 - Start with wave creation behavior:

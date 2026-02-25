@@ -36,11 +36,11 @@ actions stay within reach.
 3. If the divider is outside the viewport, a floating control appears:
    - Arrow direction points to where unread content starts relative to your current
      scroll position.
-   - Optional unread count badge uses `99+` when the unread total exceeds 99.
 4. Click/tap the control to scroll directly to the first unread serial.
-5. If the divider remains off-screen after navigation, you can keep the control
-   or dismiss it.
-6. Sending a new message clears the divider state for the active chat.
+5. If the divider remains off-screen after navigation, the control remains available
+   until context changes.
+6. Once you return to the unread divider position, the control auto-hides.
+7. Sending a new message clears the divider state for the active chat.
 
 ## Common Scenarios
 
@@ -61,9 +61,8 @@ actions stay within reach.
   known unread boundary where possible.
 - If the divider serial is not part of loaded data yet, the control remains available
   and resolves as data renders.
-- If users manually dismiss the unread control, it stays hidden for that session state
-  until list context changes.
-- Escape dismisses the control on desktop unless focus is inside a dialog.
+- If users navigate in and out of the unread boundary, the control can reappear or hide
+  based on current scroll position and divider context.
 
 ## Failure and Recovery
 

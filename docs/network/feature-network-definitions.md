@@ -58,5 +58,5 @@ stats and network pages.
 - [Network Index](README.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
-- [Health and Network Stats](feature-health-and-network-stats.md)
+- [Health Dashboard](feature-health-dashboard.md)
 - [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)

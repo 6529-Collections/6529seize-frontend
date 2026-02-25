@@ -37,7 +37,7 @@ a tooltip when the text is truncated.
 
 ## Edge Cases
 
-- Touchscreen-capable devices do not show these hover tooltips.
+- Non-hover-capable devices do not show these hover tooltips.
 - Expanded-mode rows with short names that fit do not render a tooltip.
 - Active-row highlighting and unread badges do not block tooltip display on
   hover-capable devices.

@@ -4,20 +4,22 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-The site allows users to zoom content instead of locking the viewport at a
-fixed scale. This supports mobile pinch-to-zoom and desktop browser zoom for
-readability and accessibility.
+The site supports browser zoom for readability and accessibility in standard web
+contexts. In native mobile wrappers, editor and form fields are sized to avoid
+unwanted zoom triggers while editing text.
 
 ## Location in the Site
 
 - All standard app routes that use the shared app shell
 - Mobile browser sessions and desktop browser sessions
+- Native app wrapper edit surfaces such as drop and profile content editors
 
 ## Entry Points
 
 - Open any page in a browser.
 - Use pinch gestures on touch devices.
 - Use browser zoom controls (`Cmd/Ctrl` + `+`, `-`, or reset to default).
+- Open a native app wrapper route and edit content in a text field.
 
 ## User Journey
 
@@ -25,6 +27,8 @@ readability and accessibility.
 2. Zoom in or out using browser/device controls.
 3. Continue navigating; page content remains zoomable on subsequent routes.
 4. Reset zoom from browser/device controls when finished.
+5. In native app edit flows, inputs stay stable while editing so zoom is not
+   forced by form focus sizing.
 
 ## Common Scenarios
 
@@ -40,6 +44,8 @@ readability and accessibility.
   scaling behavior.
 - Native app wrappers or embedded web views can apply additional zoom
   constraints outside browser defaults.
+- In native wrappers, form behavior is tuned for stable editing rather than always
+  preserving page zoom state while typing.
 
 ## Failure and Recovery
 
@@ -52,6 +58,8 @@ readability and accessibility.
 ## Limitations / Notes
 
 - Mobile viewport scaling is capped at a high maximum zoom level, not unlimited.
+- Native editing surfaces prioritize predictable text-entry behavior over
+  browser-style zoom-in on focus.
 - Zoom changes visual scale only; it does not alter ranking, filtering, or data
   returned by APIs.
 

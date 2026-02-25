@@ -76,5 +76,6 @@ recipient allocation views.
 
 - [Network Index](README.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
-- [Network Stats and Health](feature-health-and-network-stats.md)
+- [Health Dashboard](feature-health-dashboard.md)
+- [Network Stats](feature-network-stats.md)
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)

@@ -48,7 +48,7 @@ that category data is available.
 
 ## Edge Cases
 
-- Touch-capable layouts that disable hover wrappers show the trigger without a
+- Non-hover-capable layouts that disable hover wrappers show the trigger without a
   hover card.
 - Cards whose content expands after opening (for example, delayed profile/wave
   data) are repositioned after the size change.
@@ -84,5 +84,5 @@ that category data is available.
 - [Shared Index](README.md)
 - [Wave Discover Cards](../waves/discovery/feature-discover-cards.md)
 - [Brain Wave List Name Tooltips](../waves/sidebars/feature-brain-list-name-tooltips.md)
-- [Health and Network Stats](../network/feature-health-and-network-stats.md)
+- [Health Dashboard](../network/feature-health-dashboard.md)
 - [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)

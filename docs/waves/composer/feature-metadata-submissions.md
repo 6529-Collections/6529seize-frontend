@@ -50,6 +50,10 @@ empty.
   draft remains available.
 - If upload/signing/submission errors occur, the composer shows error feedback
   and users can retry.
+- If an attached file is empty, the upload is blocked with an upload error and
+  users must attach a valid file to continue.
+- Multipart upload progress is capped at `0%`–`100%`, so retries do not show
+  progress overflow in upload indicators.
 
 ## Limitations / Notes
 

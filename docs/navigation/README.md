@@ -14,6 +14,8 @@ screens, with app-shell header controls handling in-context title and back actio
   based on current route.
 - [Back Button](feature-back-button.md): context-aware backward actions for waves,
   create flows, and profile stacks.
+- [Mobile Pull-to-Refresh](feature-mobile-pull-to-refresh.md): why pull-to-refresh
+  is enabled in the app shell and how it refreshes cached content.
 - [Wallet and Account Controls](feature-wallet-account-controls.md): account menu and
   connect/disconnect actions.
 - [Mobile App Landing Page](feature-mobile-app-landing.md): native launch fallback
@@ -24,9 +26,10 @@ screens, with app-shell header controls handling in-context title and back actio
 - [Internal Link Navigation](feature-internal-link-navigation.md)
 - [Sidebar Navigation](feature-sidebar-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Android Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md)
+- [Mobile Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md)
 - [App Header Context](feature-app-header-context.md)
 - [Back Button](feature-back-button.md)
+- [Mobile Pull-to-Refresh](feature-mobile-pull-to-refresh.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)
 

@@ -67,8 +67,13 @@ errors.
     (for example, route and layout errors).
   - Without a reset action, users can refresh, reopen the route, or contact support.
 - Error capture behavior:
-  - Runtime errors displayed in these pages are sent to Sentry when
-    `SENTRY_DSN` is configured.
+- Runtime errors displayed in these pages are sent to Sentry when
+  `SENTRY_DSN` is configured.
+- Diagnostic payloads are sanitized before sending: request bodies, query data,
+  and common secret-bearing fields are redacted by default.
+- Session Replay is disabled by default for production incidents.
+  It is only sent when the environment is production and `SENTRY_REPLAY_ENABLED=true`
+  is set.
   - If browser/network restrictions prevent outbound Sentry requests, the error
     UI still appears and users can recover normally, but external reporting may be
     delayed or unavailable.
@@ -87,6 +92,8 @@ errors.
 - The page does not render home or back links.
 - Support contact shown on error screens is:
   - `support@6529.io`.
+- Sentry receives only sanitized request/event data unless replay is intentionally
+  enabled with `SENTRY_REPLAY_ENABLED`.
 - No user-facing change is made when Sentry is disabled (missing `SENTRY_DSN`).
 - Copy behavior is disabled for a short duration after each copy action.
 

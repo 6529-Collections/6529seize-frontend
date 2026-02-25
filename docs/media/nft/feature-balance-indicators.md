@@ -49,7 +49,8 @@ balance text can still show a badge-based ownership marker.
 - Opening `/the-memes/{id}` or `/meme-lab/{id}` in main trading/collector tabs
   shows balance state on the primary large artwork panel.
 - On home latest drop, the balance appears as a small numeric chip in the
-  `Edition` stat row, with tooltip text (`SEIZED xN` or `UNSEIZED`).
+  `Edition` stat row beside the edition count, with tooltip text
+  (`SEIZED xN` or `UNSEIZED`).
 - On Gradient list/detail pages, owned NFTs show a certificate badge next to
   owner identity instead of a `SEIZED` / `UNSEIZED` text chip.
 
@@ -90,6 +91,7 @@ balance text can still show a badge-based ownership marker.
 ## Related Pages
 
 - [Media Index](../README.md)
+- [Latest Drop Stats Grid](../memes/feature-latest-drop-stats-grid.md)
 - [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
 - [NFT Media Source Fallbacks](feature-media-source-fallbacks.md)
 - [Docs Home](../../README.md)

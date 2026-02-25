@@ -61,6 +61,8 @@ mobile menu entry).
   - short content preview
   - current boost total
 - Selecting a boosted card scrolls to the referenced drop and centers it in view.
+- When new drops arrive, boosted-drop cards keep their original placement and move
+  upward with the feed instead of staying fixed near the newest messages.
 
 ## Edge Cases
 
@@ -74,6 +76,8 @@ mobile menu entry).
   required pages during jump flow.
 - If there are fewer positioned slots than available boosted drops, only the slots
   available in the list are used.
+- Loading older pages above the anchors does not reposition boosted cards; they stay
+  attached to the same in-thread drop.
 
 ## Failure and Recovery
 

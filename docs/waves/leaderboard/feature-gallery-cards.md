@@ -12,6 +12,7 @@ Users can quickly scan:
 - rank badge
 - current votes and projected votes
 - optional vote actions
+- media-type badge next to the title for quick format recognition
 
 ## Location in the Site
 
@@ -32,6 +33,7 @@ Users can quickly scan:
    - title text appears above the author handle when a title is present
    - author handle is a profile link
    - rank badge appears when ranking metadata is available
+   - media-type badge appears next to title and identifies image, video, or interactive drops
 3. Check vote indicators in the footer area:
    - current score and projected score at decision time
    - raters count icon
@@ -39,9 +41,13 @@ Users can quickly scan:
 4. Use the `Vote` button when available to open the voting modal.
 5. Tap/click a card image or call `open` action to view the drop detail.
 
+If a card includes non-image media, hover/focus the format badge for a short tooltip label such as `Image - PNG`, `Video - MP4`, or `Interactive - GLB`.
+
 ## Common Scenarios
 
 - Browsing many drops: cards prioritize media and title/author information, with vote metrics below.
+- When a drop includes a preview image, gallery/grid cards use it for non-image
+  media so the card shows a static thumbnail instead of embedding the media.
 - Returning to a wave after voting activity: cards keep the same layout and show updated vote numbers when ranking data refreshes.
 - Empty / unrated drops: cards still render with available fields and omit missing optional metadata.
 - Users with active voting ability:
@@ -54,6 +60,9 @@ Users can quickly scan:
 - If a rank is not present, the rank badge is omitted.
 - If a user has not voted on a card, no personal vote line is shown.
 - If voting is unavailable for a card, the `Vote` button is not shown.
+- If media metadata includes a recognized MIME type, a format badge is shown; if the type is unrecognized, the badge is omitted.
+- If no preview image is available for non-image media, the card renders the
+  original media element in place of the thumbnail.
 - Desktop hover and animation behavior does not appear for touch-only devices; card transitions stay static on mobile-focused layouts.
 
 ## Failure and Recovery

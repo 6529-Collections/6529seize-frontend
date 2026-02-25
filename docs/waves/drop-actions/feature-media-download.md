@@ -53,7 +53,8 @@ when a drop has a downloadable media attachment.
 ## Limitations / Notes
 
 - This action is currently documented for the desktop drop `More` menu.
-- The mobile long-press menu does not expose a matching `Download media` action.
+- The non-hover long-press menu does not expose a matching `Download media`
+  action.
 - Download naming depends on the media URL path format.
 
 ## Related Pages

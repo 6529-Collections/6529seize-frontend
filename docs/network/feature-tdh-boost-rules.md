@@ -73,6 +73,6 @@ rules are currently active.
 - [Network Index](README.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
 - [Network Definitions](feature-network-definitions.md)
-- [Health and Network Stats](feature-health-and-network-stats.md)
+- [Network Stats](feature-network-stats.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)

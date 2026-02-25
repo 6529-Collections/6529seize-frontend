@@ -17,15 +17,17 @@ Wave drop actions provide two different link behaviors:
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages?wave={waveId}`
 - Desktop wave-drop action controls
-- Mobile long-press drop action menu
+- Non-hover long-press drop action menu
 - Quoted-drop cards inside wave drop content
 - App-shell single-drop overlay (full-viewport panel with top action header)
 
 ## Entry Points
 
 - Open a wave or direct-message thread and use drop action controls.
-- Use `Open drop` from desktop actions or the mobile drop menu.
-- Use `Copy link` from desktop actions or the mobile drop menu.
+- Use `Open drop` from desktop actions or the long-press menu on
+  non-hover devices.
+- Use `Copy link` from desktop actions or the long-press menu on
+  non-hover devices.
 - Click a quoted drop in a message body.
 
 ## User Journey
