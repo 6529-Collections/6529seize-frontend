@@ -65,6 +65,10 @@ from the connected profile’s primary wallet.
 - Interactive source mode:
   - Gateway defaults and sanitization are user-friendly.
   - Validation blocks invalid hashes/unsafe URLs before submission.
+- Layout responsiveness:
+  - On mobile and small screens, the submission modal stays inside the device viewport and does not expand past visible height.
+  - The Artwork step content scrolls internally, so the long form remains usable without leaving the modal or clipping controls.
+  - Upload and interactive media areas keep a minimum height on small screens to avoid collapsing controls while a user is selecting files.
 - Additional Info: Airdrop Distribution:
   - One distribution row is auto-prefilled from the connected wallet with a total of
     `20` tokens.
@@ -103,6 +107,9 @@ from the connected profile’s primary wallet.
   user explicitly clears URL mode.
 - If interactive hash validation fails, the user stays on the Artwork step until fixed.
 - Switching back to upload restores previously prepared local state.
+- Very small/mobile viewports:
+  - If the content does not fit vertically, the modal content area scrolls while keeping action controls available.
+  - Artwork and interactive panels preserve usable height by enforcing minimum panel heights, reducing UI jitter as users tap fields, tabs, and upload controls.
 - Airdrop rules:
   - Count values must be integers and cannot exceed the `20` total target.
   - A row with positive count must have a valid `0x...` address.
