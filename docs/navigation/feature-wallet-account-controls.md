@@ -4,6 +4,8 @@
 
 Wallet and account controls let users connect a wallet, switch accounts,
 disconnect, and manage proxy profile context from sidebar user menus.
+The app also handles Safe (Gnosis Safe) wallets with contract-wallet signing
+behavior where required for auth and mutation flows.
 
 ## Location in the Site
 
@@ -39,6 +41,12 @@ disconnect, and manage proxy profile context from sidebar user menus.
     a supported connection option.
 - Switch account:
   - `Switch Account` disconnects and reopens the connect flow.
+- Safe wallet behavior:
+  - If your connected wallet is a Safe (or Gnosis Safe), the app treats signature
+    prompts as contract-wallet signatures and tracks that context for backend
+    validation.
+  - Safe-wallet users can complete the same connect/disconnect actions as other
+    wallets; no separate manual auth mode is required.
 - Disconnect/logout:
   - `Disconnect Wallet` ends wallet connection.
   - `Disconnect & Logout` clears authenticated session state.
@@ -70,6 +78,8 @@ disconnect, and manage proxy profile context from sidebar user menus.
   modal rendering.
 - Restored wallet-connected state depends on wallet/session data in browser
   local storage.
+- Contract-wallet signatures can be longer than standard EOA signatures; users
+  should use the wallet app confirmation flow as usual for Safe prompts.
 - App-wallet connector setup can fail if stored wallet records are malformed
   (for example missing key material or invalid mnemonic format), even when the
   wallet still appears in local app-wallet lists.

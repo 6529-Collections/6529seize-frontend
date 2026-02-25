@@ -21,7 +21,8 @@ to create wave drops with embedded media using multipart upload.
 
 1. Open `/tools/api` and review terminology used across API endpoints.
 2. Follow the authentication flow: request nonce, sign it with wallet, submit
-   signature, and receive a bearer token.
+   signature, and receive a bearer token. Both EOA and Safe (contract) wallets
+   are supported for this signature step.
 3. Use that token for protected API requests.
 4. For media drops, start multipart upload with file name and MIME type.
 5. Request signed upload URLs for each part and upload file bytes.
@@ -42,6 +43,8 @@ to create wave drops with embedded media using multipart upload.
 
 - Non-standard file extensions can resolve to a generic content type, which may
   affect downstream media behavior.
+- Safe and contract-wallet signatures are accepted during auth where signatures do
+  not follow the short EOA format.
 - Multipart completion requires matching ETags for every uploaded part; missing
   values block completion.
 - Drop creation requires a valid target `wave_id`; placeholder values must be
@@ -55,6 +58,8 @@ to create wave drops with embedded media using multipart upload.
   confirming wallet address and signature flow.
 - If part upload fails, retry that part and keep the ETag returned by the
   successful upload response.
+- If authentication is retried from the same session, request a fresh nonce and
+  complete a new signing attempt before resubmitting.
 - If multipart completion fails, do not create the drop until a valid `media_url`
   is returned.
 - If drop creation fails after media upload succeeds, reuse the same `media_url`
