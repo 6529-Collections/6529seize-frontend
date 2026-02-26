@@ -59,6 +59,25 @@ const getRememesTitle = (pathSegments: string[]): string | null => {
   return null;
 };
 
+const getDropForgeTitle = (pathSegments: string[]): string | null => {
+  if (pathSegments[0] !== "drop-forge") {
+    return null;
+  }
+
+  const section = pathSegments[1];
+  const claimId = pathSegments[2];
+
+  if (section === "craft") {
+    return claimId ? `Drop Forge - Craft #${claimId}` : "Drop Forge - Craft";
+  }
+
+  if (section === "launch") {
+    return claimId ? `Drop Forge - Launch #${claimId}` : "Drop Forge - Launch";
+  }
+
+  return null;
+};
+
 export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
@@ -140,6 +159,9 @@ export default function AppHeader() {
 
     const rememesTitle = getRememesTitle(pathSegments);
     if (rememesTitle) return rememesTitle;
+
+    const dropForgeTitle = getDropForgeTitle(pathSegments);
+    if (dropForgeTitle) return dropForgeTitle;
 
     return sliceString(capitalizeEveryWord(pageTitle!), 20);
   })();

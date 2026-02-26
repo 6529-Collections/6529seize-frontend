@@ -155,7 +155,7 @@ interface DropForgeLaunchClaimPageViewProps {
 
 function DropForgeLaunchPageTitleRight() {
   return (
-    <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+    <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 sm:tw-w-auto sm:tw-justify-end">
       <DropForgeExplorerLink />
       <DropForgeTestnetIndicator />
     </div>
@@ -187,15 +187,15 @@ function DropForgeLaunchClaimHeader({
     <div className="tw-mb-6">
       <Link
         href="/drop-forge/launch"
-        className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
+        className="tw-inline-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-start tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
       >
         <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-        Back to Claims list
+        Back to Launch list
       </Link>
-      <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
-          <DropForgeLaunchIcon className="tw-h-8 tw-w-8 tw-flex-shrink-0" />
-          {pageTitle}
+      <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+        <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left tw-text-2xl sm:tw-text-3xl tw-font-semibold tw-text-iron-50">
+          <DropForgeLaunchIcon className="tw-h-7 tw-w-7 sm:tw-h-8 sm:tw-w-8 tw-flex-shrink-0" />
+          <span className="tw-break-words">{pageTitle}</span>
         </h1>
         <DropForgeLaunchPageTitleRight />
       </div>
@@ -271,7 +271,7 @@ function DropForgeLaunchClaimTimelineRow({
 
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-      <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-100">
+      <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-100">
         Scheduled for {formatScheduledLabel(mintTimeline.instantUtc)}
       </p>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
@@ -420,10 +420,10 @@ function DropForgeLaunchClaimDetailsSection({
       defaultOpen={false}
       headerRight={
         <div className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-2">
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
+          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-xs sm:tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
             SZN {getClaimSeason(claim) || "—"}
           </span>
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
+          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-xs sm:tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
             Edition Size {claim.edition_size ?? "—"}
           </span>
         </div>
@@ -1220,15 +1220,15 @@ function DropForgeCraftClaimPrompt({
   primaryStatus,
 }: Readonly<{ claimId: number; primaryStatus: LaunchClaimPrimaryStatus }>) {
   return (
-    <p className="tw-mb-0 tw-text-white">
+    <p className="tw-mb-0 tw-text-base tw-leading-snug tw-text-white">
       {primaryStatus?.key === "publishing"
         ? "Publishing to Arweave: "
-        : "Finish claim crafting before launching: "}
+        : "Finish crafting this claim before launching: "}
       <Link
         href={`/drop-forge/craft/${claimId}`}
         className="hover:tw-text-primary-200 tw-text-primary-300 tw-no-underline"
       >
-        Craft Claim #{claimId}
+        Craft #{claimId}
       </Link>
     </p>
   );
