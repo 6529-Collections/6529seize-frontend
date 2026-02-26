@@ -98,5 +98,5 @@ and submit/recovery behavior.
 - [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
 - [Delegation Collection Management](feature-delegation-collection-management.md)
 - [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
-- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
+- [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
 - [Wallet Checker](feature-wallet-checker.md)

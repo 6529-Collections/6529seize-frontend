@@ -27,7 +27,7 @@ prerequisites, transaction feedback states, or checker recovery paths.
 
 ## Troubleshooting
 
-- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md): route fallback issues, validation failures, network mismatch, and checker confusion.
+- [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md): not-found and fallback route issues, validation failures, manager-action gating, network mismatch, and Wallet Checker recovery.
 
 ## Stubs
 

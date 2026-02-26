@@ -1,46 +1,56 @@
-# Delegation Routes and Action States
+# Delegation Routes and Actions Troubleshooting
 
 ## Overview
 
-Use this page to diagnose delegation routing issues, validation failures,
-wallet/network blockers, and checker result confusion.
+Use this page when `/delegation/*` routes fail to open, writes do not submit,
+collection actions stay blocked, or Wallet Checker output looks wrong.
 
 ## Location in the Site
 
-- `/delegation/*` section routes
-- Action forms (`register-*`, `assign-primary-address`)
-- Collection management routes
-- `/delegation/wallet-checker`
+- Route handler: `/delegation/[...section]`
+- Section routes: `/delegation/delegation-center`, `/delegation/wallet-architecture`,
+  `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
+- Write routes: `/delegation/register-delegation`,
+  `/delegation/register-consolidation`, `/delegation/register-sub-delegation`,
+  `/delegation/assign-primary-address`
+- Collection routes: `/delegation/any-collection`, `/delegation/the-memes`,
+  `/delegation/meme-lab`, `/delegation/6529-gradient`
+- Bare `/delegation` has no page route (not-found)
 
-## Entry Points
+## Quick Triage
 
-- A section route shows unexpected content or `404 | PAGE NOT FOUND`.
-- An action form does not submit.
-- Transaction toasts show errors or request network switch.
-- Wallet Checker results look empty or inconsistent.
+1. Start from `/delegation/delegation-center`, then reopen the route you need.
+2. Confirm wallet prerequisites: connected wallet, expected account, expected chain.
+3. For manager-driven actions, open incoming `Delegation Managers` and select one row.
+4. Retry once and read the latest inline `Errors` or toast text.
+5. Verify outcome in `/delegation/wallet-checker` when needed.
 
-## User Journey
+## Symptom -> Fix
 
-1. Confirm route first (`/delegation/<section>`).
-2. Confirm wallet prerequisites (connected wallet, expected account, expected
-   network).
-3. Confirm form requirements for the specific action.
-4. Retry action and verify outcome in Wallet Checker where applicable.
-
-## Common Scenarios
-
-- HTML-backed section (`Delegation FAQs`, `Wallet Architecture`,
-  `Consolidation Use Cases`) shows `404 | PAGE NOT FOUND`: backing content path
-  did not resolve.
-- Collection route tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
-  wallet is not connected for collection reads.
-- `Assign Primary Address` does not show actionable form: wallet does not
-  currently have a qualifying consolidation key.
-- Submit keeps failing with inline `Errors`: required fields are missing or
-  invalid.
-- Batch revoke stays disabled: fewer than two outgoing rows selected.
-- Lock controls show blocking `*` note on a scoped collection route: global
-  `Any Collection` lock state is overriding local actionability.
+- `/delegation` opens not-found:
+  use `/delegation/delegation-center`. Bare `/delegation` is not a valid page.
+- HTML-backed sections (`Delegation FAQs`, `Wallet Architecture`,
+  `Consolidation Use Cases`) show `404 | PAGE NOT FOUND`: fallback HTML could
+  not load. Reopen from menu and retry later.
+- Clicking a Delegation Center card while disconnected does not navigate:
+  wallet connect was canceled or closed before a successful connect.
+- Collection tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
+  wallet is disconnected, so collection reads do not run.
+- Manager actions do not open a form:
+  no incoming `Delegation Managers` row is selected.
+- `Assign Primary Address` stays blocked:
+  `Connect Wallet to continue` or
+  `You must have a consolidation to assign a Primary Address`.
+- Submit stays blocked with inline `Errors`: required fields are missing or
+  invalid (collection, use case, address, expiry, or token).
+- Batch revoke stays disabled: fewer than two rows selected; maximum selectable
+  rows is five.
+- Lock/unlock controls show `*` notes on a scoped route: global `Any Collection`
+  lock state blocks local lock actions.
+- Toast shows `Switch to Ethereum Mainnet` or `Switch to Sepolia Network`:
+  wallet chain does not match the delegation contract chain.
+- Wallet Checker shows `Invalid address`, empty results, or blocked next run:
+  enter a valid `0x...` or `.eth`, then use `Clear` before the next check.
 
 ## Edge Cases
 
@@ -48,27 +58,22 @@ wallet/network blockers, and checker result confusion.
   routes.
 - `collection` and `use_case` query state is intentionally cleared when leaving
   register-delegation route.
-- Collection write actions can appear available but still fail until wallet
-  chain matches delegation contract chain.
-
-## Failure and Recovery
-
-- For route fallback errors, return to `/delegation/delegation-center` and
-  re-enter the target section.
-- For stuck collection fetch states, connect wallet and reload the same
-  collection route.
-- For network mismatch errors, switch wallet chain and resubmit.
-- For rejected/failed transactions, review toast error text and retry after
-  correcting wallet/input state.
-- For empty checker output, validate address/ENS input and rerun `Check`.
-- For incomplete consolidations, register missing reverse consolidations then
-  rerun checker.
+- `assign-primary-address?address=<wallet>` preselects only when that wallet is
+  inside the resolved consolidation key.
+- Wallet Checker accepts `.eth` input, resolves to `0x...`, and then stores the
+  resolved address in query state.
+- Unknown or nested delegation paths use HTML fallback by final URL segment.
+  Missing HTML content renders `404 | PAGE NOT FOUND`.
+- Some checker/API failures surface as `No delegations found`,
+  `No delegation managers found`, or `No consolidations found`.
 
 ## Limitations / Notes
 
 - HTML-backed delegation sections depend on external content availability.
-- Some checker/API failures surface as empty result states rather than dedicated
-  error panels.
+- Collection reads refresh on a polling cycle (about every 10 seconds), so
+  recent writes may appear stale between polls.
+- Wallet Checker may show empty-result fallback text instead of a dedicated
+  API-error panel.
 
 ## Related Pages
 

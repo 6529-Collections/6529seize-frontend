@@ -73,7 +73,7 @@ state.
 - If a fallback HTML route fails, open a known section from the menu and retry.
 - For write-route failures after navigation, use:
   - [Delegation Write Action Routes](feature-delegation-action-flows.md)
-  - [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
+  - [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
 
 ## Related Pages
 
@@ -82,5 +82,5 @@ state.
 - [Delegation Collection Management](feature-delegation-collection-management.md)
 - [Wallet Checker](feature-wallet-checker.md)
 - [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
-- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
+- [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)

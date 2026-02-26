@@ -79,4 +79,4 @@ It checks delegations, delegation managers, and consolidation relationships.
 - [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
 - [Delegation Write Action Routes](feature-delegation-action-flows.md)
 - [Delegation Collection Management](feature-delegation-collection-management.md)
-- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
+- [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)

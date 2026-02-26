@@ -106,4 +106,4 @@ delegations for one collection scope.
 - [Delegation Write Action Routes](feature-delegation-action-flows.md)
 - [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
 - [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
-- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
+- [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
