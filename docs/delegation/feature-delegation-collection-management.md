@@ -2,9 +2,8 @@
 
 ## Overview
 
-Collection routes under `/delegation/*` let you review existing relationships
-and run management actions (edit, revoke, batch revoke, manager actions, and
-lock controls).
+`/delegation/<collection>` routes let a connected wallet review and manage
+delegations for one collection scope.
 
 ## Location in the Site
 
@@ -12,87 +11,94 @@ lock controls).
 - `/delegation/the-memes`
 - `/delegation/meme-lab`
 - `/delegation/6529-gradient`
+- Delegation Center entry: `Manage by Collection` cards on
+  `/delegation/delegation-center`
 
 ## Entry Points
 
-- Open `Manage by Collection` cards from `/delegation/delegation-center`.
-- Open collection routes directly.
+- Open a `Manage by Collection` card from Delegation Center.
+- Open a collection route directly.
+- In `Delegation Managers -> Incoming`, select one delegator checkbox to enable
+  manager actions.
 
-## Collection View Behavior
+## User Journey
 
-- Each collection route shows:
-  - `Delegations`
-  - `Consolidations`
-  - `Use A Delegation Manager (For Delegations or Consolidations)`
-  - `Locks`
-- Each section uses `Outgoing` and `Incoming` accordions.
-- Rows group by use case (`#<id> - <display>`), then list wallet rows with:
-  - wallet identity
+1. Open a collection route.
+2. Review sections:
+   - `Delegations`
+   - `Consolidations`
+   - `Use A Delegation Manager (For Delegations or Consolidations)`
+   - `Locks`
+3. Use outgoing row actions (`Edit`, `Revoke`) or `Batch Revoke` where offered.
+4. Use manager actions for the selected incoming manager row.
+5. Use `Lock Wallet` / `Unlock Wallet` or a use-case lock action.
+6. Confirm wallet transaction and wait for success toast.
+
+## Common Scenarios
+
+- Check outgoing and incoming rows by use-case header (`#<id> - <display>`).
+- Review row details:
+  - wallet label (ENS + address when ENS resolves)
   - token scope (`all tokens` or `token ID`)
-  - expiry state (`active - non-expiring`, `active - expires <date>`, `expired`)
-- Consolidation rows also show status:
+  - expiry (`active - non-expiring`, `active - expires YYYY-MM-DD`, `expired`)
+- For consolidations, check status:
   - `consolidation active`
-  - `consolidation incomplete` (with tooltip that the reverse direction is
-    missing)
-
-## Row Actions
-
-- Outgoing rows provide:
-  - `Edit` (opens update form)
-  - `Revoke` (single revoke)
-- Batch revoke behavior:
-  - appears when there are at least two outgoing rows
-  - requires at least two selected rows to enable submit
-  - max selected rows: `5`
-
-## Delegation Manager Actions (From Incoming Delegation Managers)
-
-- Select one incoming delegator row first.
-- Then launch:
+  - `consolidation incomplete` with tooltip (`Incoming consolidation missing` or
+    `Outgoing consolidation missing`)
+- Revoke multiple stale outgoing rows at once with `Batch Revoke`.
+- Use manager actions for a selected original delegator:
   - `Register Delegation`
   - `Register Delegation Manager`
   - `Register Consolidation`
   - `Assign Primary Address` (only on `Any Collection` and `The Memes`)
   - `Revoke`
-
-## Lock Controls
-
-- `Lock Wallet` / `Unlock Wallet` toggles collection-level incoming acceptance.
-- Use-case dropdown supports lock/unlock per use case (except use case `#1`).
-- Global `Any Collection` locks can block scoped collection lock controls.
-- Scoped routes show `*` notes when unlock must be done first from
-  `/delegation/any-collection`.
-
-## Feedback and Transaction States
-
-- Collection actions start with `Confirm in your wallet...`.
-- On submission, toast shows `Transaction submitted...` with explorer `view`
-  link while waiting.
-- On confirmation, toast shows `Transaction Successful!`.
-- If wallet chain does not match delegation chain, actions show a switch-network
-  message (`Switch to Ethereum Mainnet` or `Switch to Sepolia Network`).
+- Manager actions open inline forms on the same route.
 
 ## Edge Cases
 
-- Collection reads require a connected wallet; disconnected state can leave
-  tables in `Fetching ...`.
-- Manager action buttons are disabled until one incoming manager row is
-  selected.
-- Batch-selection checkboxes disable extra picks after 5 selected rows.
+- Accordions auto-open sides with loaded rows; empty sections stay collapsed.
+- While reads are unresolved, tables show `Fetching incoming ...` /
+  `Fetching outgoing ...`.
+- Empty tables show `No incoming ... found` / `No outgoing ... found`.
+- Outgoing-row checkboxes and `Batch Revoke` show only when that outgoing table
+  has at least 2 rows.
+- `Batch Revoke` stays disabled until at least 2 rows are selected.
+- `Batch Revoke` selection cap is 5 rows; extra checkboxes disable at max.
+- Manager action buttons render only when incoming manager rows exist and stay
+  disabled until one delegator is selected.
+- `Lock/Unlock Use Case` excludes use case `#1`.
+- If current collection wallet is locked, use-case controls are disabled until
+  wallet unlock.
+- On scoped routes, global `Any Collection` wallet lock blocks local lock
+  controls and shows `*` notes linked to `/delegation/any-collection`.
+- On scoped routes, if a use case is globally locked in `Any Collection`, local
+  lock/unlock is replaced by an `Unlock use case in All Collections` note.
+
+## Feedback and Transaction States
+
+- Actions start with `Confirm in your wallet...`.
+- After submit, toast shows `Transaction submitted...` with a `view` explorer
+  link.
+- After confirmation, toast shows `Transaction Successful!`.
+- Chain mismatch shows `Switch to Ethereum Mainnet` or
+  `Switch to Sepolia Network`.
 
 ## Failure and Recovery
 
-- If rows do not load, connect wallet and reload the same collection route.
-- If action submission fails, read toast/error details and retry with corrected
-  inputs.
-- If chain switch is requested, switch wallet network and retry.
-- If lock controls show `*` note, unlock from `Any Collection` first, then
-  retry scoped lock changes.
+- If tables remain on `Fetching ...`, connect wallet and reload the same route.
+- If manager actions stay disabled, select one incoming manager row first.
+- If `Batch Revoke` is disabled, select at least 2 outgoing rows.
+- If lock controls show `*` notes, unlock from `/delegation/any-collection`
+  first.
+- If a write fails, use toast error text, fix wallet/network/input state, and
+  retry.
 
 ## Limitations / Notes
 
-- Collection data and lock states are account-specific.
-- Reads and statuses refresh on polling, not instant push.
+- Data is wallet/account specific.
+- Reads poll every 10 seconds; updates are not pushed in real time.
+- Field-level write form requirements are documented in
+  [Delegation Write Action Routes](feature-delegation-action-flows.md).
 
 ## Related Pages
 
