@@ -4,69 +4,72 @@ Parent: [Groups Index](README.md)
 
 ## Overview
 
-Group cards on `/network/groups` are keyboard-accessible navigation surfaces
-with nested actions for creator navigation, bulk rating, and group management.
+Group cards on `/network/groups` open one group-scoped network view.
 
-Card activation opens the network view scoped to that group:
-`/network?page=1&group={groupId}`.
+Signed-in users can run bulk credit actions (`Rep all`, `NIC all`).
+Signed-in non-proxy users also get a card options menu with `Edit`/`Clone`,
+and creator-only `Delete`.
 
 ## Location in the Site
 
 - Groups list route: `/network/groups`
-- Group-scope target route: `/network?page=1&group={groupId}`
-- Group card previews in seize-link chat messages
+- Card open target: `/network?page=1&group={groupId}`
+- Card menu edit/clone target: `/network/groups?edit={groupId}`
+- Seize group links rendered in wave/drop chat: `/network?group={groupId}`
 
 ## Entry Points
 
 - Open `Network -> Groups`.
 - Open `/network/groups` directly.
-- Open a message containing a seize link that renders a group card preview.
+- Open a seize group link in wave/drop chat content.
 
-## User Journey
+## Card Navigation
 
-1. Move focus to a card in `/network/groups`.
-2. Open the card with `Enter`, `Space`, or click on card surface.
-3. The app navigates to `/network?page=1&group={groupId}`.
-4. Use nested controls when needed:
-   - Creator handle link
-   - `Rep all` / `NIC all`
-   - Config-row scroll arrows
-   - Kebab options menu (`Edit`/`Clone`, and `Delete` when allowed)
+1. Focus a card in `/network/groups`.
+2. Press `Enter` or `Space`, or click the card surface.
+3. The app opens `/network?page=1&group={groupId}`.
+4. Creator handle links open the creator profile.
 
-## Common Scenarios
+In chat link previews, card-surface navigation is unavailable until group data
+loads.
 
-- Keyboard users open group-scoped network view without a mouse.
-- Signed-in users distribute bulk Rep or NIC from one card.
-- Owners open `Edit` or `Delete`; non-owners open `Clone`.
-- Users inspect TDH/xTDH/grant/manual-list summary values in config rows.
+## Card Actions
 
-## Edge Cases
-
-- Only one card can be in `Rep all` or `NIC all` mode at a time.
-- While vote-all mode is active on a card, card-level navigation is paused.
-- Signed-out users do not see vote-all or edit/clone/delete actions.
-- Proxy sessions hide edit/clone/delete actions, but vote-all remains
-  available.
-- In chat previews, card activation is unavailable until group data resolves.
-- Config rows can overflow horizontally; left/right controls appear when
+- Signed-in users see `Rep all` and `NIC all`.
+- Signed-in non-proxy users see an options menu with `Edit` or `Clone`.
+- `Delete` appears only when the signed-in handle matches the group creator.
+- Config rows can overflow horizontally; left/right scroll controls appear when
   needed.
+
+## Vote-All State Rules
+
+- Only one card can run `Rep all` or `NIC all` at a time.
+- While one card is in vote-all mode:
+  - That card leaves idle view, so card-surface navigation is not shown.
+  - Other cards keep card-surface navigation.
+  - Other cards disable `Rep all`/`NIC all`.
+- `Rep all` needs both amount and category.
+- `NIC all` needs an amount.
+- If the session becomes signed out, vote-all exits and the card returns to
+  idle.
 
 ## Failure and Recovery
 
-- If route navigation fails, users stay on the current page and can retry card
-  activation.
-- If delete fails, an error toast is shown and the card remains.
-- If delete succeeds, the card is removed from the list and active-group state
-  is cleared when needed.
-- If bulk rating fails mid-run, the action closes and users can retry from idle
-  state.
-- Users can cancel vote-all actions to return to normal card behavior.
+- Delete auth cancelled: no delete is applied.
+- Delete API failure: error toast is shown; the card stays in the list.
+- Delete success: `Group deleted.` toast is shown and group queries refresh.
+- Bulk rate auth cancelled: no credits are sent; retry from the same panel.
+- Bulk rate failure while running: error toast is shown; panel closes and card
+  returns to idle.
+- Bulk rate success: `Rep distributed.` or `NIC distributed.` toast is shown;
+  panel closes.
+- `Cancel` in vote-all returns the card to idle.
 
 ## Limitations / Notes
 
-- Card activation always targets `/network?page=1&group={groupId}`.
-- Cards are single-target navigation elements, not multi-select controls.
-- This page covers card behavior, not the full create/edit form.
+- Card-surface navigation always opens `/network?page=1&group={groupId}`.
+- Group scope is single-target from each card open action.
+- This page covers card behavior only, not full create/edit configuration.
 
 ## Related Pages
 
@@ -74,6 +77,8 @@ Card activation opens the network view scoped to that group:
 - [Groups Index](README.md)
 - [Groups List Filters](feature-groups-list-filters.md)
 - [Group Creation and Edit Flow](feature-group-create-and-edit.md)
+- [Groups List, Create, and Network Scope Flow](flow-groups-list-create-and-network-scope.md)
 - [Groups List and Create Actions Troubleshooting](troubleshooting-groups-list-and-create-actions.md)
+- [Network Group Scope Flow](../network/flow-network-group-scope.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Internal Link Navigation](../navigation/feature-internal-link-navigation.md)
