@@ -2,81 +2,78 @@
 
 ## Overview
 
-The delegation route family is served by `/delegation/[...section]`. Known
-section values render dedicated delegation UI panels; unknown or nested section
-paths fall back to the delegation HTML renderer.
+Use this page for how users move inside `/delegation/*`.
+Section switching is route-based (`/delegation/<section>`), not local tab
+state.
 
-## Location in the Site
+## Route Scope
 
-- Route family: `/delegation/<section>`
-- Sidebar entry group: `Tools -> NFT Delegation`
-- Sidebar section routes:
+- Route handler: `/delegation/[...section]`
+- No bare `/delegation` route.
+- Known section routes render delegation UI panels.
+- Unknown or multi-segment paths render HTML fallback content.
+
+## Entry Points
+
+- Sidebar: `Tools -> NFT Delegation`
   - `/delegation/delegation-center`
   - `/delegation/wallet-architecture`
   - `/delegation/delegation-faq`
   - `/delegation/consolidation-use-cases`
   - `/delegation/wallet-checker`
-- Additional section routes in the same route family:
-  - `/delegation/register-delegation`
-  - `/delegation/register-sub-delegation`
-  - `/delegation/register-consolidation`
+- Direct URL to any `/delegation/<section>` route.
+- From `/delegation/delegation-center` cards:
+  - action routes: `/delegation/register-delegation`,
+    `/delegation/register-consolidation`,
+    `/delegation/register-sub-delegation`
+  - collection routes: `/delegation/any-collection`, `/delegation/the-memes`,
+    `/delegation/meme-lab`, `/delegation/6529-gradient`
+  - `assign-primary-address` has no center card; open it by URL or collection
+    manager actions
+
+## Section Menu Behavior
+
+- Desktop (`> 1000px`): left menu stays beside content.
+- Mobile/tablet (`<= 1000px`): full-width menu renders below content.
+- Both menus include `Etherscan` and `Github` links that open in a new tab.
+- Choosing a section updates URL to `/delegation/<section>` and scrolls to top.
+
+## Query Parameter Rules
+
+- `address` is kept only on:
+  - `/delegation/wallet-checker`
   - `/delegation/assign-primary-address`
-  - `/delegation/any-collection`
-  - `/delegation/the-memes`
-  - `/delegation/meme-lab`
-  - `/delegation/6529-gradient`
+- `collection` and `use_case` are kept only on:
+  - `/delegation/register-delegation`
+- Switching sections clears unrelated query params.
+- Known sections also strip unsupported query params on direct load.
 
-## Entry Points
+## HTML Fallback Behavior
 
-- Open delegation routes from `Tools -> NFT Delegation` in the sidebar.
-- Open a `/delegation/<section>` URL directly.
-- Use delegation-center cards (`Delegation`, `Consolidation`, `Delegation
-  Management`) to route into action sections.
-- Use `Manage by Collection` cards to route into collection sections.
+- Unknown sections and multi-segment paths use HTML fallback.
+- Fallback key is the last URL segment.
+  - Example: `/delegation/delegation-faq/security` loads `security.html`.
+- Desktop keeps `Delegation FAQs` highlighted for nested FAQ paths.
+- The mobile full-width menu does not keep that nested-path FAQ highlight.
+- If HTML fetch is not `200`, the panel shows `404 | PAGE NOT FOUND`.
+- HTML panels do not show a dedicated loading indicator.
 
-## User Journey
+## Connection Gate on Center Cards
 
-1. Open `/delegation/delegation-center`.
-2. Choose a section from the left menu (desktop) or full-width menu (small
-   screens).
-3. The route updates to `/delegation/<section>` and the right panel renders
-   that section.
-4. Continue switching sections without leaving `/delegation/*`.
-
-## Common Scenarios
-
-- Move between `Delegation Center`, `Wallet Architecture`, `Delegation FAQs`,
-  `Consolidation Use Cases`, and `Wallet Checker` from the local section menu.
-- Open nested FAQ routes such as `/delegation/delegation-faq/<topic>`.
-- Use persistent external links (`Etherscan`, `Github`) from the section menu.
-
-## Edge Cases
-
-- Query params are preserved only on matching sections:
-  - `address` on `wallet-checker` and `assign-primary-address`
-  - `collection` and `use_case` on `register-delegation`
-  - unrelated params are cleared when switching away
-- Unknown sections and multi-segment section paths render the HTML fallback
-  handler using the last segment as content key.
-- At viewport widths `<= 1000px`, the desktop left menu is hidden and a
-  full-width menu block is shown above content.
+- If a center-card action starts while disconnected, wallet connect opens first.
+- If connect succeeds and the modal closes, the pending route transition
+  continues.
+- If the modal closes without a successful connect, the pending transition is
+  canceled.
 
 ## Failure and Recovery
 
-- If delegated HTML content does not return `200`, the panel shows
-  `404 | PAGE NOT FOUND`.
-- If an action card was started while disconnected, wallet connect opens first.
-  After successful connect and modal close, the pending route transition should
-  complete automatically.
 - If section state looks stale, navigate to `/delegation/delegation-center` and
   re-enter the section from menu links.
-
-## Limitations / Notes
-
-- Section navigation is route-based (`/delegation/<section>`), not tab-state in
-  a single URL.
-- `Wallet Architecture`, `Delegation FAQs`, and `Consolidation Use Cases` are
-  remote HTML pages loaded at runtime.
+- If a fallback HTML route fails, open a known section from the menu and retry.
+- For write-route failures after navigation, use:
+  - [Delegation Write Action Routes](feature-delegation-action-flows.md)
+  - [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
 
 ## Related Pages
 

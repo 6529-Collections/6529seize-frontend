@@ -16,7 +16,7 @@ prerequisites, transaction feedback states, or checker recovery paths.
 
 ## Features
 
-- [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md): section routes, menu behavior, HTML fallback, and query-param persistence rules.
+- [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md): section routes, desktop/mobile menu behavior, HTML fallback mapping, and query-param cleanup rules.
 - [Delegation Write Action Routes](feature-delegation-action-flows.md): write forms, query-prefill behavior, manager write variants, and onchain feedback states.
 - [Delegation Collection Management](feature-delegation-collection-management.md): collection route accordions, row actions, batch revoke limits, manager actions, and locks.
 - [Wallet Checker](feature-wallet-checker.md): read-only diagnostics, deep-link checks, and consolidation recommendations.
