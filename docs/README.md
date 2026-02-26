@@ -1,87 +1,68 @@
 # Documentation
 
-This guide documents current user-facing behavior.
+This section documents user-facing interactive behavior.
 
-## Start Here
+Editorial and content-only routes are out of scope here, for example `/about/*`, `/museum/*`, `/blog/*`, `/news/*`, and `/city/*`.
 
-- Browse by product area from the map below.
-- Use area indexes for complete page lists.
-- Use task links for common entry points.
+## Start here
 
-## Area Map
+1. Pick the area that matches your goal.
+2. Open the area `README.md` for ownership and scope.
+3. Open a feature or flow page for exact behavior and recovery cases.
+4. Open troubleshooting if a route, action, or state is blocked.
 
-- [Home](home/README.md): redesigned route-landing surface for `/`.
-- [Navigation](navigation/README.md): global routing, sidebar behavior, search, and wallet/account controls.
-- [Notifications](notifications/README.md): `/notifications` feed behavior and state handling.
-- [API Tool](api-tool/README.md): `/tools/*` user flows, including API guide and Block Finder.
-- [EMMA](emma/README.md): `/emma/*` distribution-plan and custom snapshot behavior.
-- [Open Data](open-data/README.md): `/open-data` data export hub and consolidated network metrics route.
-- [Delegation](delegation/README.md): `/delegation/*` layout and action-route behavior.
-- [Groups](groups/README.md): `/network/groups` browse, filter, and create/edit flows.
-- [Network](network/README.md): TDH rules, metric definitions, and health/network-stats routes.
-- [Profiles](profiles/README.md): profile routes, tabs, identity controls, and troubleshooting.
-- [Waves](waves/README.md): wave creation, chat, drop actions, link previews, leaderboards, and sidebars.
-- [Media](media/README.md): NFT media rendering, marketplace links, and Memes mint surfaces.
-- [Realtime](realtime/README.md): websocket-backed activity and authenticated live-update behavior.
-- [Shared](shared/README.md): cross-area loading, pagination, hover-cards/tooltips, and redirects.
-- [NextGen](nextgen/README.md): collection slideshow and token media rendering.
-- [Docs Metadata](meta.json): maintainer-only cursor and automation state for docs backfill replay.
+## Documentation scope map
 
-## I am trying to...
+### Core journey
 
-- Use search from anywhere in the app:
-  [Header Search Modal](navigation/feature-header-search-modal.md)
-- Understand navigation entry/switching and sidebar behavior:
-  [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md),
-  [Sidebar Navigation](navigation/feature-sidebar-navigation.md),
-  [Navigation and Shell Controls Troubleshooting](navigation/troubleshooting-navigation-and-shell-controls.md)
-- Manage wallet connection and account actions:
-  [Wallet and Account Controls](navigation/feature-wallet-account-controls.md)
-- Use notifications filtering and scrolling behavior:
-  [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
-- Create or edit a network group:
-  [Group Creation and Edit Flow](groups/feature-group-create-and-edit.md)
-- Understand current TDH and xTDH calculation/overview:
-  [TDH Boost Rules](network/feature-tdh-boost-rules.md),
-  [xTDH Network Overview](network/feature-xtdh-network-overview.md),
-  [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md)
-- Explore live identity rankings and sorting/filtering:
-  [Network Identities Leaderboard](network/feature-network-identities-leaderboard.md)
-- Understand profile tabs and deep-link behavior:
-  [Profile Tabs](profiles/navigation/feature-tabs.md)
-- Understand homepage layout and discoverability:
-  [Home Page Surface](home/feature-home-surface.md)
-- Troubleshoot profile load/tab issues in the dedicated troubleshooting index.
-- Start with wave creation behavior:
-  [Wave Creation Index](waves/create/README.md)
-- Recover from route errors and 404 pages:
-  [Route Error and Not-Found Screens](shared/feature-route-error-and-not-found.md)
-- Start with wave chat behavior:
-  [Wave Chat Index](waves/chat/README.md)
-- Start with wave composer behavior:
-  [Wave Composer Index](waves/composer/README.md)
-- Start with wave drop actions:
-  [Wave Drop Actions Index](waves/drop-actions/README.md)
-- Start with wave link previews:
-  [Wave Link Previews Index](waves/link-previews/README.md)
-- Start with wave leaderboards:
-  [Wave Leaderboard Index](waves/leaderboard/README.md)
-- Start with Memes submission flow:
-  [Memes Submission Workflow](waves/memes/feature-memes-submission.md)
-- Follow The Memes mint behavior:
-  [The Memes Mint Flow](media/memes/feature-mint-flow.md)
-- Review realtime auth/live-update behavior:
-  [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
-- Review NFT activity browsing:
-  [NFT Activity Browsing Flow](realtime/flow-nft-activity-browsing.md)
+- [Home](home/README.md): `/` landing surface and first-run entry.
+- [Navigation](navigation/README.md): route switching, shell controls, and search entry.
+- [Waves](waves/README.md): discovery, posting, chat, and outcome interactions.
+- [Profiles](profiles/README.md): profile routes, tabs, and about-route behavior.
+- [Media](media/README.md): NFT and meme surfaces, minting, and media rendering.
+- [Notifications](notifications/README.md): `/notifications` feed behavior, filtering, and push settings.
+- [Network](network/README.md): scoring, leaderboards, health, and TDH/xTDH rules.
 
-## Troubleshooting
+### Product operations
 
-- Profile pages:
-  [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
-- Legacy URL behavior:
-  [Legacy Route Redirects](shared/feature-legacy-route-redirects.md)
-- Delegation routes and action-state troubleshooting:
-  [Delegation Routes and Action States](delegation/troubleshooting-delegation-routes-and-actions.md)
-- Realtime websocket connectivity stalls:
-  [Realtime Connectivity Troubleshooting](realtime/troubleshooting-realtime-connectivity.md)
+- [Groups](groups/README.md): `/network/groups` listing, creation, and edits.
+- [Delegation](delegation/README.md): `/delegation/*` routing and onchain action flows.
+- [NextGen](nextgen/README.md): `/nextgen` collection and token-media workflows.
+- [Realtime](realtime/README.md): `/nft-activity` websocket updates and event-driven feed behavior.
+- [API Tool](api-tool/README.md): `/tools/*` API access, block finder, and subscription reports.
+- [EMMA](emma/README.md): `/emma/*` distribution-plan operations.
+- [Open Data](open-data/README.md): `/open-data/*` dataset download surfaces.
+- [Shared](shared/README.md): reusable patterns shared across multiple areas.
+
+## Fast path tasks
+
+Use this when you need the shortest route to the right page.
+
+- Find active waves and open a thread: [Wave Discovery Index](waves/discovery/README.md)
+- Read or post in a wave thread: [Wave Chat Index](waves/chat/README.md)
+- Post a new wave: [Wave Creation Index](waves/create/README.md)
+- Submit a meme: [Memes Submission Flow](waves/memes/feature-memes-submission.md)
+- Search from any route: [Header Search Modal](navigation/feature-header-search-modal.md)
+- Move between app areas quickly: [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md)
+- Review notifications: [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
+- Debug profile route and tab issues: [Profile Troubleshooting](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
+- Review TDH and xTDH behavior: [TDH Boost Rules](network/feature-tdh-boost-rules.md), [xTDH Network Overview](network/feature-xtdh-network-overview.md), [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md)
+- Follow network group routing logic: [Group to Network Scope Flow](network/flow-network-group-scope.md)
+- Mint or schedule The Memes flow: [The Memes Mint Flow](media/memes/feature-mint-flow.md)
+- Debug live updates: [Authenticated Live Updates](realtime/feature-authenticated-live-updates.md)
+
+## Troubleshooting entry point
+
+Use this section when a route is blocked, data is missing, or an action fails.
+
+- [Navigation and Shell Controls](navigation/troubleshooting-navigation-and-shell-controls.md)
+- [Wave Navigation and Posting](waves/troubleshooting-wave-navigation-and-posting.md)
+- [Profile Routes and Tabs](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Notifications Feed](notifications/troubleshooting-notifications-feed.md)
+- [Network Routes and Health](network/troubleshooting-network-routes-and-health.md)
+- [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)
+- [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)
+- [NextGen Slideshow and Token Media](nextgen/troubleshooting-nextgen-slideshow-and-token-media.md)
+- [Realtime Connectivity](realtime/troubleshooting-realtime-connectivity.md)
+- [Route Error and Not Found](shared/feature-route-error-and-not-found.md)
+- [Legacy Route Redirects](shared/feature-legacy-route-redirects.md)

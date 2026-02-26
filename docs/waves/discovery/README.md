@@ -3,6 +3,8 @@
 ## Overview
 
 Discovery docs cover how users find and browse waves before entering a thread.
+This subarea owns discovery behavior for `/discover`, `/waves`, and related
+discovery states reached from `/messages?wave={waveId}`.
 
 ## Features
 

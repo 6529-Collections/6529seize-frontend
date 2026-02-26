@@ -10,12 +10,20 @@ if ! [[ "${max_iterations}" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
+if ! git diff --cached --quiet; then
+  echo "ERROR: staged changes detected. Commit, stash, or unstage before running this loop." >&2
+  exit 1
+fi
+
 pick_next_target() {
   local after="$1"
   local -a docs_files=()
   local candidate=""
 
-  mapfile -t docs_files < <(find docs -type f -name '*.md' | sort)
+  # macOS ships Bash 3.2 by default, which does not include `mapfile`.
+  while IFS= read -r candidate; do
+    docs_files+=("${candidate}")
+  done < <(find docs -type f -name '*.md' | sort)
 
   if [[ "${#docs_files[@]}" -eq 0 ]]; then
     return 1
@@ -53,6 +61,15 @@ while true; do
   last_target="${target_path}"
   iteration=$((iteration + 1))
 
+  is_root_target=false
+  target_area=""
+  if [[ "${target_path}" == "docs/README.md" ]]; then
+    is_root_target=true
+  else
+    target_area="${target_path#docs/}"
+    target_area="${target_area%%/*}"
+  fi
+
   if [[ "${max_iterations}" -gt 0 ]]; then
     echo "=== Docs remediator pass ${iteration}/${max_iterations} :: ${target_path} ==="
   else
@@ -84,14 +101,22 @@ EOF
   )
   codex exec -- "${second_view_instruction}"
 
-  git add docs
+  if [[ "${is_root_target}" == "true" ]]; then
+    git add docs
+  else
+    git add -A "docs/${target_area}" docs/README.md
+  fi
 
   if git diff --cached --quiet; then
     echo "No docs changes for ${target_path}; continuing."
     continue
   fi
 
-  python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --staged --strict --enforce-monotonic
+  if [[ "${is_root_target}" == "true" ]]; then
+    python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict --enforce-monotonic
+  else
+    python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic
+  fi
   python3 .codex/skills/commit-docs-updater/scripts/validate_docs_links.py
   git commit -m "docs: remediator pass ${iteration} (${target_path})"
 done

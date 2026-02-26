@@ -3,6 +3,8 @@
 ## Overview
 
 Chat docs cover realtime conversation behavior inside wave and DM timelines.
+This subarea owns chat behavior for `/waves/{waveId}` and direct-message
+threads at `/messages?wave={waveId}`.
 
 ## Features
 
