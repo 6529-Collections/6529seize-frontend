@@ -15,5 +15,3 @@ export const DROP_FORGE_SECTIONS = {
     path: `${DROP_FORGE_PATH}/launch`,
   },
 } as const;
-
-export type DropForgeSectionKey = keyof typeof DROP_FORGE_SECTIONS;

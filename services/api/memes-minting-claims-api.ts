@@ -91,8 +91,7 @@ export interface MemesMintingAirdropSummaryItem {
   total_spots?: number;
 }
 
-export interface NormalizedMemesMintingAirdropSummaryItem
-  extends MemesMintingAirdropSummaryItem {
+interface NormalizedMemesMintingAirdropSummaryItem extends MemesMintingAirdropSummaryItem {
   addresses: number;
   total: number;
 }
@@ -193,7 +192,7 @@ export async function postArweaveUpload(claimId: number): Promise<void> {
   });
 }
 
-export type ClaimMediaField = "image_url" | "animation_url";
+type ClaimMediaField = "image_url" | "animation_url";
 
 export async function uploadClaimMedia(
   _claimId: number,

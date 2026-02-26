@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { useChainId } from "wagmi";
 import { Chain, mainnet, sepolia } from "wagmi/chains";
 
-export const DROP_FORGE_TESTNET_CONTRACT =
+const DROP_FORGE_TESTNET_CONTRACT =
   "0xb491971ba9d757d1b16feba1a019b60d6b74dc20";
 
 export enum DropForgeMintingMode {

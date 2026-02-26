@@ -2,7 +2,7 @@ import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launch/laun
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
-export type ClaimPrimaryStatusKey =
+type ClaimPrimaryStatusKey =
   | "draft"
   | "publishing"
   | "published"
@@ -12,7 +12,7 @@ export type ClaimPrimaryStatusKey =
   | "live_needs_update"
   | "diverged";
 
-export type ClaimPrimaryStatusTone =
+type ClaimPrimaryStatusTone =
   | "neutral"
   | "pending"
   | "success"

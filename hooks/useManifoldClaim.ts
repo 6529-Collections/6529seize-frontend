@@ -128,14 +128,14 @@ export interface ManifoldClaim {
   isError: boolean;
 }
 
-export type ManifoldClaimReadMethod = "getClaimForToken" | "getClaim";
-export interface UseManifoldClaimResult {
+type ManifoldClaimReadMethod = "getClaimForToken" | "getClaim";
+interface UseManifoldClaimResult {
   claim: ManifoldClaim | undefined;
   isFetching: boolean;
   refetch: () => Promise<unknown>;
 }
 
-export interface UseManifoldClaimParams {
+interface UseManifoldClaimParams {
   chainId: number;
   contract: string;
   proxy: string;
