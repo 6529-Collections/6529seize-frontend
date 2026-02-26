@@ -1,7 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import { useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
