@@ -52,9 +52,38 @@ selection tabs and defaults to `TDH + xTDH`:
   - Exclude list max: `1,000`
 - Edit mode preloads both included and excluded identity-wallet sets from the
   existing group configuration.
-- `Create` is disabled while configuration validation fails or a submit request
-  is already in progress.
+- `Create` and `Test` are disabled while configuration validation fails or the
+  corresponding action is already running.
 - `Cancel` or `Back` returns to the groups list view.
+
+## Validation and Action Preconditions
+
+- Client-side validation checks all group filters before `Create` or `Test`:
+  - At least one filter source exists: include wallets, exclude wallets, level,
+    TDH, rep, CIC, NFT collection ownership, or beneficiary grant.
+  - Include wallets must be `<= 10,000`.
+  - Exclude wallets must be `<= 1,000`.
+  - When both values are set, each numeric range must have `min <= max` for:
+    level, TDH, rep, and CIC.
+- If any rule fails, buttons stay disabled and the action returns `Group
+  configuration is invalid.` from the mutation layer.
+- Wallet list input is normalized:
+  - Wallets are case-normalized and deduplicated when combining manual search,
+    EMMA, and file-import sources.
+  - Include-list overflow shows a red "Maximum allowed wallets count is ..."
+    message once the configured limit is exceeded.
+- `Test` and `Create` share the same validation gate, so a failing validation
+  blocks both actions.
+
+## Test Action and Members Preview
+
+- `Test` submits a test group using the current form payload.
+- If the Name field is empty, test submission uses `{connected handle} Test Run`
+  as the fallback name.
+- On successful test, the page queries `community-members/top` with the created
+  test group and displays `Members count`.
+- On test failure (non-auth), the error returned by the submit path is shown in a
+  toast message.
 
 ## Failure and Recovery
 
@@ -67,10 +96,6 @@ selection tabs and defaults to `TDH + xTDH`:
 
 ## Not Yet Documented
 
-- TODO: Document field-level validation behavior and user-facing validation
-  messaging across each filter type.
-- TODO: Document the `Test` action flow and how member-count previews update
-  after test runs.
 - TODO: Document create/edit behavior differences for permission changes during
   an active session.
 - TODO: Document wallet import failure and recovery behavior for upload and EMMA
