@@ -70,5 +70,6 @@ wallet.
 ## Related Pages
 
 - [Delegation Index](README.md)
-- [Delegation Action Routes and Collection Management](feature-delegation-action-flows.md)
+- [Delegation Write Action Routes](feature-delegation-action-flows.md)
+- [Delegation Collection Management](feature-delegation-collection-management.md)
 - [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)

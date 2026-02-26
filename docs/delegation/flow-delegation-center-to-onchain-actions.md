@@ -64,6 +64,7 @@ to executing writes and validating outcomes.
 
 - [Delegation Index](README.md)
 - [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
-- [Delegation Action Routes and Collection Management](feature-delegation-action-flows.md)
+- [Delegation Write Action Routes](feature-delegation-action-flows.md)
+- [Delegation Collection Management](feature-delegation-collection-management.md)
 - [Wallet Checker](feature-wallet-checker.md)
 - [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)

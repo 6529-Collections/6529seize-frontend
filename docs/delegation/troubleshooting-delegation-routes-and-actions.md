@@ -74,6 +74,7 @@ wallet/network blockers, and checker result confusion.
 
 - [Delegation Index](README.md)
 - [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
-- [Delegation Action Routes and Collection Management](feature-delegation-action-flows.md)
+- [Delegation Write Action Routes](feature-delegation-action-flows.md)
+- [Delegation Collection Management](feature-delegation-collection-management.md)
 - [Wallet Checker](feature-wallet-checker.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
