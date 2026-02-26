@@ -4,20 +4,16 @@ Parent: [Groups Index](README.md)
 
 ## Overview
 
-Group creation and editing use the same configuration surface. Users can start
-from `Create New`, `Edit`, or `Clone`, then run `Test` or `Create`.
+Group creation, editing, and cloning use one configuration screen on
+`/network/groups`.
 
-The TDH mode picker exposes two tabs:
-
-- `TDH + xTDH`
-- `TDH`
-
-Legacy groups that store `XTDH` still load and can be saved.
+Users can open that screen from `Create New`, `Edit`, `Clone`, or a deep link,
+then run `Test` or `Create`.
 
 ## Location in the Site
 
 - Base route: `/network/groups`
-- Create surface from list action: `/network/groups` (same route, create view mode)
+- Create surface from list action: `/network/groups` (same route, create view)
 - Deep-link create mode: `/network/groups?edit=new`
 - Deep-link edit/clone mode: `/network/groups?edit={groupId}`
 
@@ -30,7 +26,7 @@ Legacy groups that store `XTDH` still load and can be saved.
 ## Access and Mode Gating
 
 - Create/edit requires an authenticated, non-proxy session.
-- If auth is cancelled while entering create/edit, users remain in list view.
+- If auth is cancelled while entering create/edit, the app stays in list view.
 - If session state changes to signed-out or proxy while create/edit is open,
   the app returns to list view.
 - Exiting create/edit (`Back`, `Cancel`, or successful save) returns to the
@@ -38,18 +34,20 @@ Legacy groups that store `XTDH` still load and can be saved.
 
 ## Configuration Surface
 
-- Top-level fields:
-  - `Name`
-  - `Include me` toggle
-  - `Private group` toggle
-- Filter cards:
-  - `Level` minimum
-  - `TDH` minimum + mode (`TDH + xTDH` or `TDH`)
-  - `NIC` minimum with optional identity and direction
-  - `Rep` minimum with optional identity, direction, and category
-  - `Required NFTs` (specific tokens)
-  - `Collection Access` (any token from selected collections)
-  - `xTDH Grant Beneficiary` (manual grant ID or picker)
+- Top-level fields: `Name`, `Include me`, `Private group`.
+- Threshold cards:
+  - `Level at least`
+  - `TDH` mode with tabs `TDH + xTDH` and `TDH`
+  - Legacy `XTDH` values still load and can be saved.
+  - `NIC at least`, with optional identity and direction
+  - `Rep at least`, with optional identity, direction, and category
+- NFT cards:
+  - `Required NFTs`: user must own all selected tokens.
+  - `Collection Access`: user must own any token from selected collections.
+  - Supported collections are `Gradients`, `Memes`, `Memelab`, and `Nextgen`.
+- Grant card:
+  - `xTDH Grant Beneficiary` accepts a typed grant ID or `Find grant` picker.
+  - Picker filters by grantor, collection name, and status.
 - Identity lists:
   - `Include Identities`
   - `Exclude Identities`
@@ -87,8 +85,9 @@ Legacy groups that store `XTDH` still load and can be saved.
   version id passed as `old_version_id`.
 - Cloning another user’s group publishes a new copy and keeps the original
   group unchanged.
-- In edit mode, include/exclude identity-wallet lists preload from the selected
-  group.
+- In edit mode, the selected group values are prefilled (name, privacy,
+  thresholds, NFTs, grant ID, include/exclude wallets).
+- Save success toast is always `Group created.` (create, edit, and clone).
 
 ## Grant Lookup and Import Behavior
 
@@ -96,11 +95,13 @@ Legacy groups that store `XTDH` still load and can be saved.
 - A typed grant ID is still submitted even when lookup fails.
 - Non-`GRANTED` grant statuses are selectable, with an inline warning.
 - EMMA import requires auth; cancelled auth leaves EMMA wallets unset.
-- CSV import keeps valid `0x` wallet addresses, ignores invalid tokens, and
+- CSV import accepts valid `0x` wallet addresses, ignores invalid tokens, and
   deduplicates matches.
 
 ## Failure and Recovery
 
+- Edit/clone prefill shows `Loading...` while group data and wallet lists are
+  fetched.
 - If create/edit opens without expected prefilled data from an edit link, go
   back to list and re-open from the card menu.
 - If wallet totals exceed limits, remove entries until totals are within
