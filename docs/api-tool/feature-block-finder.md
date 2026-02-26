@@ -52,6 +52,10 @@ time. It supports two modes:
 ## Edge Cases
 
 - `Block number includes` is disabled while window length is `None`.
+- `Block number includes` is disabled while window length is `None`, but existing typed
+  values are not automatically cleared. If values remain when window is `None`, submit
+  still sends inclusion-mode request payload (with a zero-length window) instead of a
+  pure single-block prediction.
 - Choosing a non-`None` window without inclusion values shows an error toast.
 - Inclusion values must be numeric and comma-separated; invalid tokens trigger
   an error toast.
