@@ -29,4 +29,4 @@ fi
 git add docs
 
 codex exec "${CODEX_ARGS[@]}" -- 'Use $docs-precommit-guard. Context: docs may be a symlink in this workflow, and that is expected.'
-git commit -m "docs updated ${LAST_COMMIT_HASH}"
+
