@@ -64,6 +64,7 @@ Use this when a route is blocked, data is missing, or an action fails.
 - [Notifications Feed](notifications/troubleshooting-notifications-feed.md)
 - [Network Routes and Health](network/troubleshooting-network-routes-and-health.md)
 - [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)
+- [EMMA Access and Plan Operations](emma/troubleshooting-emma-access-and-plan-operations.md)
 - [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)
 - [NextGen Slideshow and Token Media](nextgen/troubleshooting-nextgen-slideshow-and-token-media.md)
 - [Realtime Connectivity](realtime/troubleshooting-realtime-connectivity.md)

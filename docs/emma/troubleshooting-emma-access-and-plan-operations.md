@@ -1,66 +1,73 @@
 # EMMA Access and Plan Operations Troubleshooting
 
-## Overview
+## Scope
 
-Use this page when `/emma` access, `/emma/plans` plan management, or plan
-operation runs are blocked.
-
-## Location in the Site
+Use this page when EMMA sign-in, plan loading, step progression, or review
+actions are blocked.
 
 - Routes: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
-- Plan execution warning surface: top warning bar in `/emma/plans/{planId}`
-- Plan execution loading surface: fullscreen blocking loader during active runs
+- Warning surface: top bar in `/emma/plans/{planId}` when run status is `FAILED`
+- Loading surface: fullscreen blocking loader during active run or refresh states
 
-## Quick Triage
+## Quick Reset
 
-1. Reopen `/emma` and verify wallet connection.
-2. Sign in again with `Sign In with Web3`.
-3. Reopen `/emma/plans` and confirm the plan list is loading.
-4. Reopen the target `/emma/plans/{planId}` route.
-5. If a run failed, use `Run Analysis` from the warning bar and wait for the
-   active run overlay to clear.
+1. Reopen `/emma` and verify the connected wallet address is valid.
+2. Retry `Sign In with Web3`.
+3. Reopen `/emma/plans` and check for error toasts (`Unauthorized`, `Something went wrong, try again`).
+4. Open the target plan from the table row in `/emma/plans`.
+5. If the warning bar shows `Distribution plan building failed`, click `Run Analysis` and wait for the blocking loader to clear.
 
-## Symptom -> Fix
+## Route and Access Issues
 
 - `/emma` stays on `Connect Your Wallet`:
-  connect a valid wallet address first, then retry sign-in.
+  connect a valid wallet address, then retry sign-in.
 - `Sign In with Web3` does not move to plans:
-  the auth request failed or was canceled; retry the sign-in action.
-- `Unauthorized` toast appears on `/emma/plans` or plan actions:
-  return to `/emma`, sign in again, then retry.
+  the auth request failed or was canceled; retry sign-in.
+- `/emma/plans` shows `No plan` right after `Unauthorized` toast:
+  the auth session was cleared; return to `/emma`, sign in again, then reopen plans.
+- `/emma/plans` shows `Something went wrong, try again`:
+  retry the action; if it persists, go back to `/emma`, sign in again, then reopen plans.
 - Create-plan modal does not submit:
-  both `Name` and `Description` are required before `Create`.
+  `Name` and `Description` are both required before `Create`.
 - `/emma/plans/{planId}` redirects back to `/emma`:
-  the plan ID is invalid/inaccessible or loading failed; reopen from plans list.
+  the plan ID is invalid/inaccessible or plan load failed; reopen from the plans list.
 - Top warning says `Distribution plan building failed`:
   read the backend reason shown in the warning and retry with `Run Analysis`.
-- Step progression shows `Run analysis` instead of `Next`:
-  run analysis first, wait for run completion, then continue.
-- In `Map Delegations`, `Run analysis` shows and `Skip` is hidden:
-  at least one plan operation is still unrun; click `Run analysis`, wait for
-  completion, then retry.
+
+## Step Progression Blockers
+
+- `Run analysis` shows instead of `Next`:
+  one or more plan operations have not run; click `Run analysis`, wait for completion, then continue.
+- `Next` is missing in `Create Snapshots`:
+  add at least one snapshot and wait for active download states to leave `PENDING`/`CLAIMED`.
+- `Next` is missing in `Create Custom Snapshot`:
+  add at least one custom snapshot, or use `Skip` if you do not need this step.
+- `Next` is missing in `Create Phases`:
+  add at least one phase first.
+- `Next` is missing in `Build Phases`:
+  add at least one component to the selected phase, then run required analysis.
+- In `Map Delegations`, `Run analysis` shows and `Skip`/`Next` are hidden:
+  at least one operation is unrun; run analysis first.
 - `Map Delegations` shows `Delegations are done using contract ...` and no input:
-  a delegation contract is already mapped for this plan; this step is read-only
-  for that value.
+  a delegation contract is already mapped for this plan; this step is read-only for that value.
+
+## Review and Publish Blockers (Subscriptions Admins)
+
+- Review footer actions are missing:
+  your wallet is not in the subscriptions-admin list.
+- `Confirm Token ID` keeps reopening in `Review`:
+  subscriptions-admin actions stay blocked until you confirm a valid positive token ID.
 - `Publish to GitHub` is disabled in review:
-  finalize distribution and ensure at least one photo and one automatic airdrop
-  upload are present.
+  `Finalize Distribution` first, then upload at least one photo and at least one automatic airdrop entry.
+- `JSON`/`CSV`/`Manifold` buttons are disabled on `Public`:
+  this is expected; the synthetic `Public` row keeps those exports visible but disabled.
 
-## Edge Cases
+## Runtime and Permission Notes
 
-- During active run states (`CLAIMED`/`PENDING`), plan UI stays blocked by a
-  fullscreen loader.
-- Subscriptions admin users must confirm token ID before review footer actions
-  are available.
-- The synthetic `Public` row in review keeps JSON/CSV/Manifold export buttons
-  visible but disabled by design.
-
-## Limitations / Notes
-
-- EMMA does not show a dedicated success banner after run completion; the page
-  returns to normal step controls.
-- API and auth issues are surfaced through toast errors instead of inline form
-  errors in many EMMA screens.
+- During active run states (`CLAIMED`/`PENDING`), plan UI stays blocked by a fullscreen loader.
+- Plan refresh/fetch states can show the same blocking loader briefly.
+- Subscriptions footer actions in `Review` are visible only to subscriptions-admin wallets.
+- EMMA does not show a dedicated success banner after run completion; controls return to normal state in-place.
 
 ## Related Pages
 
