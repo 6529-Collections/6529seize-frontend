@@ -43,6 +43,7 @@ title is limited to `250` characters.
 ## Related Pages
 
 - [Waves Composer](README.md)
+- [Wave Drop Body Input Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
 - [Wave Participation Flow](../flow-wave-participation.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)

@@ -10,6 +10,7 @@ Composer docs cover editing and submission behavior before drops are posted.
 - [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 - [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
+- [Wave Drop Body Input Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
 - [Wave Drop Composer Title Max Length](feature-wave-drop-title-max-length.md)
