@@ -296,7 +296,7 @@ export default function UserPageRepMobile({
                     <button
                       type="button"
                       onClick={() => setVisibleCount((prev) => prev + 10)}
-                      className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-3 tw-py-2 tw-cursor-pointer tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 tw-text-sm tw-font-semibold tw-text-iron-400 hover:tw-text-iron-300"
+                      className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
                     >
                       +{reps.length - visibleCount} more
                     </button>

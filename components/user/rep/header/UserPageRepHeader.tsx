@@ -96,14 +96,14 @@ export default function UserPageRepHeader({
                   <button
                     type="button"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-400/40 tw-bg-white/5 tw-px-4 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition-colors hover:tw-border-iron-300/60 hover:tw-bg-white/10 hover:tw-text-iron-200"
+                    className="tw-group tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-white/10 tw-bg-transparent tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/30 hover:tw-bg-white/5 hover:tw-text-white"
                   >
                     <svg
-                      className="-tw-ml-0.5 tw-h-4 tw-w-4 tw-shrink-0"
+                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-text-iron-500 tw-transition-colors group-hover:tw-text-white"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2.5"
+                      strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
@@ -125,7 +125,7 @@ export default function UserPageRepHeader({
                   <button
                     type="button"
                     onClick={() => setVisibleCount((prev) => prev + 10)}
-                    className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
+                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white"
                   >
                     +{allReps.length - visibleCount} more
                   </button>

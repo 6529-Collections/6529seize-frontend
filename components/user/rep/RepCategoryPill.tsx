@@ -23,14 +23,14 @@ export default function RepCategoryPill({
   const content = (
     <>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="tw-text-sm tw-font-medium tw-text-white tw-text-left">
           {rep.category}
         </span>
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-300">
           {formatNumberWithCommas(rep.rating)}
         </span>
       </span>
-      <span className="tw-text-xs tw-text-iron-600">&middot;</span>
+      <span className="tw-text-xs tw-text-white/20">&middot;</span>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
         <span className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
           <TopRaterAvatars
@@ -40,17 +40,17 @@ export default function RepCategoryPill({
             onAvatarClick={stopPropagation}
           />
         </span>
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
+        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
           {formatNumberWithCommas(rep.contributor_count)}{" "}
           {rep.contributor_count === 1 ? "rater" : "raters"}
         </span>
       </span>
       {!!rep.rater_contribution && (
         <>
-          <span className="tw-text-xs tw-text-iron-600">&middot;</span>
-          <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
+          <span className="tw-text-xs tw-text-white/20">&middot;</span>
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
             My Rate:{" "}
-            <span className="tw-font-semibold tw-text-primary-400">
+            <span className="tw-font-medium tw-text-primary-400">
               {formatNumberWithCommas(rep.rater_contribution)}
             </span>
           </span>
@@ -59,14 +59,14 @@ export default function RepCategoryPill({
     </>
   );
 
-  const baseClasses = `group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 ${paddingClass}`;
+  const baseClasses = `group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out ${paddingClass}`;
 
   if (canEdit) {
     return (
       <button
         type="button"
         onClick={() => onEdit(rep.category)}
-        className={`${baseClasses} tw-cursor-pointer tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60`}
+        className={`${baseClasses} tw-cursor-pointer hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-shadow-md`}
       >
         {content}
       </button>
@@ -74,7 +74,7 @@ export default function RepCategoryPill({
   }
 
   return (
-    <div className={`${baseClasses} tw-cursor-default tw-transition-colors`}>
+    <div className={`${baseClasses} tw-cursor-default`}>
       {content}
     </div>
   );
