@@ -1,62 +1,61 @@
 # EMMA Access and Plan Management
 
-## Overview
+## Scope
 
-EMMA access starts at `/emma`, where users connect a wallet and sign in before
-managing plans at `/emma/plans`.
+- Connect wallet and sign in at `/emma`.
+- Create, open, and delete plans at `/emma/plans`.
+- Open plan routes at `/emma/plans/{planId}`.
 
-## Location in the Site
+## Routes and Entry Points
 
 - Routes: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
 - Navigation path: `Tools -> EMMA`
+- Open directly: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
 
-## Entry Points
+## Access States at `/emma`
 
-- Open `Tools -> EMMA` from the app sidebar.
-- Open `/emma` directly.
-- Open `/emma/plans` or `/emma/plans/{planId}` directly when already signed in.
+- If no valid wallet is connected, EMMA shows `Connect Your Wallet`.
+- With a valid wallet, EMMA shows sign-in guidance and `Sign In with Web3`.
+- Sign-in guidance says to use a consolidated-account address, avoid vault
+  addresses, and that no gas/fee is required to sign in.
+- Successful sign-in routes to `/emma/plans`.
+- Failed or canceled sign-in keeps users on `/emma`.
 
-## User Journey
+## Plan List at `/emma/plans`
 
-1. Open `/emma`.
-2. If wallet is not connected, the page shows `Connect Your Wallet` guidance.
-3. After connecting, click `Sign In with Web3`.
-4. On successful sign-in, EMMA routes to `/emma/plans`.
-5. In plans view, use `Create new` to open the create-plan modal.
-6. Enter `Name` and `Description`, then submit `Create`.
-7. EMMA routes to `/emma/plans/{planId}` for the newly created plan.
-8. Reopen an existing plan by clicking its table row.
-9. Delete a plan from the row-level trash action.
+- `Create new` opens `Create new Distribution plan`.
+- Creating a plan requires `Name` and `Description`.
+- On success, EMMA routes to `/emma/plans/{planId}`.
+- Existing plans render in a table with `Name`, `Description`, and `Date`.
+- Dates render as `DD/MM/YY`.
+- Loading state shows a centered spinner.
+- Empty state shows `No plan`.
+- Clicking a row opens that plan.
+- Deleting uses a row-level trash action with row-level loading.
+- The trash action does not trigger row navigation.
 
-## Common Scenarios
+## Plan Route at `/emma/plans/{planId}`
 
-- First-time open with no plans shows `No plan` and prompts creating one.
-- Existing plans are listed with `Name`, `Description`, and `Date`.
-- Deep-linking to `/emma/plans/{planId}` opens a saved plan directly.
+- Route starts with a loading view while plan data is fetched.
+- If the plan is accessible, EMMA initializes plan state and moves into plan
+  steps.
+- Deep links to `/emma/plans/{planId}` work when the plan is accessible.
+- If plan load fails, EMMA routes back to `/emma`.
 
-## Edge Cases
+## Failures and Recovery
 
-- `/emma` shows rate-limit policy copy for plan creation:
-  TDH `< 25,000` users are limited to 3 allowlists/day; TDH `> 25,000` users
-  are listed as unlimited.
-- Plan dates are displayed as `DD/MM/YY`.
-- Delete action uses row-level loading state and does not navigate to the plan.
-- If plan loading fails for `/emma/plans/{planId}`, EMMA redirects back to
-  `/emma`.
+- API auth failures show `Unauthorized`.
+- Network/API failures show `Something went wrong, try again`.
+- If auth fails on `/emma/plans` or plan actions, return to `/emma`, sign in
+  again, then retry.
+- `/emma/plans` can open without an active auth session, but plan API calls can
+  still fail.
 
-## Failure and Recovery
+## Rate-Limit Policy Text on `/emma`
 
-- API auth failures show `Unauthorized`; sign in again from `/emma`.
-- Network/API failures show error toasts (for example,
-  `Something went wrong, try again`) and users can retry in place.
-- If a plan route fails to load, EMMA returns to `/emma`; reconnect/sign in and
-  reopen the plan.
-
-## Limitations / Notes
-
-- Creating a plan requires both `Name` and `Description`.
-- Plan list and plan-detail actions depend on an active authenticated session.
-- Access/rate-limit policy text is user-facing guidance and may change over time.
+- Users with TDH `< 25,000` and at least `1`: up to `3` allowlists per day.
+- Users with TDH `> 25,000`: unlimited allowlists per day.
+- This is user-facing policy text and can change.
 
 ## Related Pages
 
