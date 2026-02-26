@@ -2,71 +2,91 @@
 
 ## Overview
 
-This flow covers EMMA access, opening a plan, and advancing plan steps that
-execute `allowlist` operations.
+Use this flow to move a plan from EMMA sign-in to `Review` in
+`/emma/plans/{planId}`.
+
+This page owns cross-step behavior: step progression, `Run analysis` gating,
+active-run blocking, and failed-run recovery.
 
 ## Location in the Site
 
 - Routes: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
-- Plan progress context: right-side sidebar steps
-- Steps: `Create Plan` -> `Create Snapshots` -> `Create Custom Snapshot` ->
-  `Create Phases` -> `Build Phases` -> `Map Delegations` -> `Review`
+- In-plan progress: right sidebar timeline
+- Step order: `Create Plan` -> `Create Snapshots` -> `Create Custom Snapshot`
+  -> `Create Phases` -> `Build Phases` -> `Map Delegations` -> `Review`
 
 ## Entry Points
 
-- Open `Tools -> EMMA`, connect wallet, and sign in.
-- Open `/emma/plans`, then select a row or create a plan.
-- Open `/emma/plans/{planId}` directly when already signed in.
+1. Open `Tools -> EMMA`, connect a valid wallet, then use `Sign In with Web3`.
+2. Open or create a plan in `/emma/plans`.
+3. Open `/emma/plans/{planId}` directly if you already have access.
 
-## User Journey
+## End-to-End Flow
 
 1. Open `/emma`, connect wallet, then use `Sign In with Web3`.
 2. EMMA routes to `/emma/plans`.
 3. Create or open a plan to enter `/emma/plans/{planId}`.
-4. Plan context loads operations, token pools, transfer pools, and phases.
-5. Configure steps in order (snapshots, custom snapshots, phases, components,
-   delegation mapping, review).
-6. Non-create steps include `Download operations` for `operations.json` export.
-7. In steps that require executed operations, progression is gated behind
-   `Run analysis`.
-8. `Run analysis` starts a run request for the current plan.
-9. While run status is active (`CLAIMED` or `PENDING`), EMMA blocks the page
-   with a fullscreen loader and polls `/allowlists/{planId}` every 2 seconds.
-10. Once status leaves active states, EMMA refreshes plan state and resumes
-    normal step controls.
-11. If status is `FAILED`, EMMA shows `Distribution plan building failed` with
-    backend reason and `Run Analysis` retry.
+4. The plan route starts in `Create Plan` loading state while EMMA fetches the
+   plan. If loading fails, EMMA routes back to `/emma`.
+5. `Create Snapshots`:
+   - Add one or more snapshots.
+   - Each snapshot starts a download job.
+   - While any snapshot download is active (`PENDING` / `CLAIMED`), progression
+     controls are hidden.
+   - After downloads settle, `Run analysis` appears when snapshot operations are
+     not run. `Next` appears when at least one snapshot exists and no run is
+     required.
+6. `Create Custom Snapshot`:
+   - `Skip` appears when no custom snapshots exist.
+   - `Next` appears after at least one custom snapshot exists.
+7. `Create Phases`:
+   - Add at least one phase.
+   - `Next` moves to `Build Phases`.
+8. `Build Phases`:
+   - Configure groups phase-by-phase (`<phase name> - X/Y`).
+   - `Run analysis` appears when selected-phase spot operations are not run.
+   - `Next` appears only after the phase has groups and no run is required.
+   - On the last phase, `Next` auto-runs pending operations (if any), then
+     moves to `Map Delegations`.
+9. `Map Delegations`:
+   - If no delegation contract exists, use `Add contract`.
+   - If a contract exists, the step is read-only for that value.
+   - `Run analysis` appears while any operation is not run.
+   - After all operations are run: `Skip` goes to `Review` when no contract is
+     mapped, and `Next` goes to `Review` when a contract is mapped.
+10. In every non-`Create Plan` step, `Download operations` exports
+    `operations.json`.
 
-## Common Scenarios
+## Step Navigation Rules
 
-- Create snapshots/custom snapshots, then run analysis before moving forward.
-- Build phase components and run analysis until each phase step is run-complete.
-- In `Map Delegations`, add contract and run analysis, or use `Skip` when no
-  delegation mapping is needed and all operations are already run.
-- Recover failed runs directly from the warning bar without leaving the plan.
+- Steps do not have separate URLs; they are in-page state under
+  `/emma/plans/{planId}`.
+- Completed sidebar steps are clickable, except `Create Plan`.
+- Current and upcoming sidebar steps are not clickable.
 
-## Edge Cases
+## Run Lifecycle and Blocking
 
-- Build-phase completion can trigger run execution before moving into
-  `Map Delegations` when pending operations still exist.
-- Loader overlay appears for both active run status and plan fetch state, so
-  interaction stays paused until state refresh completes.
-- In `Map Delegations`, skipping without a contract moves directly to `Review`.
+- `Run analysis` and last-phase auto-run both send a run request for the plan.
+- While active run status is `CLAIMED` or `PENDING`, EMMA blocks the plan UI
+  with a fullscreen loader.
+- The same loader can appear during plan-fetch refresh states.
+- During active run states, EMMA polls `/allowlists/{planId}` every 2 seconds.
+- When run state leaves active statuses, EMMA refreshes plan state and restores
+  normal step controls.
 
 ## Failure and Recovery
 
-- On `FAILED` status, users see a top-level warning with the specific backend error
-  reason and a `Run Analysis` retry action.
-- If a plan run fails and needs another pass, re-run analysis from the same control;
-  once operations clear, progression resumes.
-- The run endpoint can fail due to invalid operation state; users should inspect the
-  visible warning reason and retry after addressing the underlying issue.
+- On `FAILED` run status, EMMA shows `Distribution plan building failed` with
+  backend reason text and a `Run Analysis` retry action in the warning bar.
+- Retry from the warning bar, then wait for the blocking loader to clear.
+- API auth failures show `Unauthorized`; sign in again and reopen the plan.
+- Other request failures show `Something went wrong, try again`.
 
 ## Limitations / Notes
 
-- EMMA only reports run states for operation execution (`CLAIMED`, `PENDING`, `FAILED`).
-- When a run succeeds, there is no explicit success banner; control returns to normal
-  step behavior and content updates in place.
+- User-visible run states are `CLAIMED`, `PENDING`, and `FAILED`.
+- Successful runs do not show a separate success banner; controls return to
+  normal step behavior in place.
 
 ## Related Pages
 
