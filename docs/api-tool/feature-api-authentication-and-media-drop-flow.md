@@ -2,118 +2,89 @@
 
 ## Overview
 
-The `/tools/api` page explains how to authenticate against the 6529 API and how
-to create wave drops with embedded media using multipart upload.
+`/tools/api` is a code-first guide for working with backend endpoints from Node.js:
 
-## Location in the Site
+- Authenticate with an Ethereum wallet and get a bearer token.
+- Upload media via multipart and create a media drop.
+- Keep a common vocabulary for API payloads.
 
-- Route: tools/api
-- Navigation path: `Tools -> API`
-- External API reference linked from the page: `https://api.6529.io/docs/`
+Route: `/tools/api`
 
-## Entry Points
+Sidebar path: `Tools -> API`
 
-- Open `Tools -> API` from the sidebar.
-- Open the Tools API page directly.
-- Open the external API reference from the link on the page.
+API reference: `https://api.6529.io/docs/`
 
-## Terminology Snapshot
+## What this page is
 
-The page includes a key-terminology glossary used by the examples and endpoint
-descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
-`Groups`, `REP`, and `NIC`.
+- No interactive API console is embedded.
+- The page currently focuses on two runnable examples and the API terms they use.
 
-## User Journey
+## Authentication flow
 
-1. Open `/tools/api` and review terminology used across API endpoints.
-2. Follow the authentication flow: request nonce, sign it with wallet, submit
-   signature, and receive a bearer token.
-3. In the auth example, include `short_nonce=true` on nonce request, read
-  `nonce` and `server_signature` from that nonce response, then submit the
-  signed payload to login with `server_signature`.
-4. `short_nonce` can be used to choose nonce shape:
-   - `short_nonce=true` returns a UUID-like nonce that is easier for automated
-     callers.
-   - `short_nonce=false` (or omitted) returns a longer welcome-message-style nonce;
-     this is friendlier for GUIs but can expose encoding pitfalls with multiline
-     text.
-5. Use the returned JWT bearer token for protected API requests.
-6. Use that token for the feed call and media-upload helpers; changing
-   `short_nonce` only changes the signed nonce value, not downstream request
-   contracts.
-7. For media drops, start multipart upload (`/api/drop-media/multipart-upload`)
-   with file name and MIME type.
-8. Request signed upload URLs for each part
-   (`/api/drop-media/multipart-upload/part`) using `upload_id`, `key`, and
-   `part_no`, then upload file bytes.
-9. Collect ETags from each successful part upload and keep only valid values.
-10. Complete multipart upload (`/api/drop-media/multipart-upload/completion`)
-   with `upload_id`, `key`, and `parts` to receive a `media_url`.
-11. Submit drop payload with the `media_url` and target `wave_id` (replace the
-   example placeholder before sending).
+1. Request a nonce:
+   - `GET https://api.6529.io/api/auth/nonce?signer_address=<address>&short_nonce=true`
+   - `short_nonce` defaults to `false`.
+   - Response includes `nonce` and `server_signature`.
+2. Sign `nonce` with the same wallet.
+3. Exchange the signature:
+   - `POST https://api.6529.io/api/auth/login?signer_address=<address>`
+   - JSON body: `client_address`, `client_signature`, `server_signature`.
+4. Read `token` and send it as `Authorization: Bearer <token>` on protected calls.
+5. Use the token in the `/tools/api` sample feed request:
+   - `GET https://api.6529.io/api/feed`
 
-## Common Scenarios
+Example note from implementation:
 
-- Authenticate once, then call read/write endpoints with a bearer token.
-- Upload a small media file as one part, then create a `CHAT` drop with that
-  media URL.
-- Upload larger media as multiple parts by repeating part URL retrieval and
-  upload steps before completion.
-- Nonce mode (`short_nonce=true` vs `short_nonce=false`) changes only the nonce
-  message you sign; once login returns a token, feed and media-drop calls are
-  unchanged.
-- Use the page examples as a starting point for scripting with Node.js.
-- Use the glossary section first when mapping API terms to UI concepts.
+- The embedded auth/feed sample parses `resp.json()` directly. In production, check `resp.ok` before parsing JSON so non-2xx responses surface clear errors.
+- Invalid signature, signer address, or server signature returns an error at login.
 
-## Edge Cases
+## Multipart media drop flow
 
-- Non-standard file extensions can resolve to a generic content type, which may
-  affect downstream media behavior.
-- Auth examples explicitly warn against hardcoding private keys.
-- The Node auth snippet parses JSON from nonce/login/feed responses without an
-  explicit `resp.ok` check. Non-2xx or non-JSON bodies can fail with a JSON
-  parse error before showing HTTP status context.
-- Multipart completion requires matching ETags for every uploaded part; missing
-  values block completion.
-- Drop creation requires a valid target `wave_id`; placeholder values must be
-  replaced before requests succeed.
-- The page notes that some API routes are still undocumented even though they
-  are in active use.
-- Nonce format is controlled by the `short_nonce` query parameter:
-  - `short_nonce=true` returns a compact UUID-style nonce.
-  - `short_nonce=false` or omitted returns a longer multiline nonce intended for
-    human-facing UX, but this can create encoding complexity in some runtimes.
-- Authentication requires the same nonce response and matching server signature in
-  the login call; reusing a stale `server_signature` with a newly requested nonce
-  will fail.
+1. Start upload:
+   - `POST https://api.6529.io/api/drop-media/multipart-upload`
+   - Header: `Authorization: Bearer <token>`
+   - Body: `file_name`, `content_type`
+   - Response: `upload_id`, `key`
+2. Get a pre-signed part URL for each part:
+   - `POST https://api.6529.io/api/drop-media/multipart-upload/part`
+   - Body: `upload_id`, `key`, `part_no` (1-based)
+   - Response: `upload_url`
+3. Upload bytes directly to `upload_url` using `PUT`.
+   - Do **not** include API auth on this request.
+   - Save returned `ETag` (strip quotes) for each successful part.
+4. Complete multipart upload:
+   - `POST https://api.6529.io/api/drop-media/multipart-upload/completion`
+   - Body: `upload_id`, `key`, `parts: [{ part_no, etag }]`
+   - Response: `media_url`
+5. Create the drop:
+   - `POST https://api.6529.io/api/drops`
+   - `drop_type: "CHAT"`, `wave_id`, and `parts[0].media[0]` with `url` + `mime_type`.
 
-## Failure and Recovery
+## Error recovery
 
-- If nonce/login requests fail, token generation does not complete; retry after
-  confirming wallet address and signature flow.
-- If you script from the auth snippet, add explicit response-status guards
-  before `resp.json()` for nonce/login/feed so failures include status/body
-  details.
-- If nonce response fields are incomplete (for example missing
-  `server_signature`), rerun the nonce/sign/login sequence with fresh values.
-- If part upload fails, retry that part and keep the ETag returned by the
-  successful upload response.
-- If authentication is retried from the same session, request a fresh nonce and
-  complete a new signing attempt before resubmitting.
-- If multipart completion fails, do not create the drop until a valid `media_url`
-  is returned.
-- If drop creation fails after media upload succeeds, reuse the same `media_url`
-  in a retried drop request.
+- Re-run nonce/login if either auth step fails.
+- Retry only the failed media part and keep successful `ETag`s.
+- Retry completion after a part failure before submitting the drop.
+- If `complete` succeeds but `/drops` fails, reuse the same `media_url` on retry.
 
-## Limitations / Notes
+## Key terms used in API payloads
 
-- `/tools/api` is a guide page, not an interactive API console.
-- Examples are Node.js-focused and may require adaptation for other runtimes.
-- Some backend routes are not yet included in the external docs site.
-- Example payloads center on `CHAT` drops with media; other drop types can
-  require different fields.
+- Identity: one or more Ethereum addresses.
+- Profile: data linked to an identity, including handle and metadata.
+- Brain: the social namespace containing waves.
+- Wave: chat/participation space.
+- Drop: a single message inside a wave.
+- Groups: filters for identities (including TDH, REP, NIC).
+- REP: reputation tag.
+- NIC: trust tags.
 
-## Related Pages
+## Limits and notes
+
+- `short_nonce=true` is easier for programmatic callers; `short_nonce=false` returns a longer nonce.
+- Examples are Node.js-focused and use placeholder keys and addresses.
+- Not every public endpoint is demonstrated in this page.
+
+## Related pages
 
 - [API Tool Index](README.md)
 - [Block Finder](feature-block-finder.md)
