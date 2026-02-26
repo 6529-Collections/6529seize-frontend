@@ -1058,7 +1058,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }
 
   function printOutgoingDelegationRow(
-    index: number,
+    delegationIndex: number,
+    walletIndex: number,
     delegations: number,
     del: ContractDelegation,
     w: ContractWalletDelegation,
@@ -1067,7 +1068,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     isConsolidation: boolean
   ) {
     return (
-      <tr key={`outgoing-${del.useCase.use_case}-${index}-${w.wallet}`}>
+      <tr
+        key={`outgoing-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
+      >
         <td>
           <div
             className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}
@@ -1221,7 +1224,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             #{del.useCase.use_case} - {del.useCase.display}
                           </td>
                         </tr>
-                        {del.wallets.map((w) => {
+                        {del.wallets.map((w, walletIndex) => {
                           const consolidationStatus =
                             outgoingActiveConsolidations.find((i) =>
                               areEqualAddresses(w.wallet, i.wallet)
@@ -1230,6 +1233,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             consolidationStatus === "consolidation incomplete";
                           return printOutgoingDelegationRow(
                             index,
+                            walletIndex,
                             delegations,
                             del,
                             w,
@@ -1316,7 +1320,8 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   }
 
   function printIncomingDelegationRow(
-    index: number,
+    delegationIndex: number,
+    walletIndex: number,
     del: ContractDelegation,
     w: ContractWalletDelegation,
     consolidationStatus: string | undefined,
@@ -1324,7 +1329,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     isConsolidation: boolean
   ) {
     return (
-      <tr key={`incoming-${del.useCase.use_case}-${index}-${w.wallet}`}>
+      <tr
+        key={`incoming-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
+      >
         <td>
           <div
             className={`d-flex flex-column gap-2 ${styles["delegationAccordionBlock"]}`}
@@ -1397,7 +1404,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             #{del.useCase.use_case} - {del.useCase.display}
                           </td>
                         </tr>
-                        {del.wallets.map((w) => {
+                        {del.wallets.map((w, walletIndex) => {
                           const consolidationStatus =
                             incomingActiveConsolidations.find((i) =>
                               areEqualAddresses(w.wallet, i.wallet)
@@ -1406,6 +1413,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             consolidationStatus === "consolidation incomplete";
                           return printIncomingDelegationRow(
                             index,
+                            walletIndex,
                             del,
                             w,
                             consolidationStatus,

@@ -104,12 +104,12 @@ export function getDelegationsFromData(data: any) {
         if (useCase.use_case >= PRIMARY_ADDRESS_USE_CASE.use_case) {
           myDateDisplay = `active - non-expiring`;
         } else {
-          myDateDisplay =
-            new Date().getTime() / 1000 > myDate
+          const isNonExpiring = myDate == 0 || myDate >= NEVER_DATE;
+          myDateDisplay = isNonExpiring
+            ? `active - non-expiring`
+            : new Date().getTime() / 1000 > myDate
               ? `expired`
-              : myDate >= NEVER_DATE
-                ? `active - non-expiring`
-                : `active - expires ${formatExpiry(myDate)}`;
+              : `active - expires ${formatExpiry(myDate)}`;
         }
         walletDelegations.push({
           wallet: wallet,
