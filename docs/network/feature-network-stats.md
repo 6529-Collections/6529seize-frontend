@@ -27,13 +27,54 @@ from the Health dashboard.
 - CTA buttons labeled `Network Stats` across Network pages resolve to this
   route.
 
-## Not Yet Documented
+## Sections and Metrics
 
-- TODO: Document the Network Stats sections, metrics, and any filters.
-- TODO: Document empty states and pagination behavior on
-  `/network/health/network-tdh`.
-- TODO: Document cross-page behavior between `Health`, `Network Stats`, and
-  `Levels`.
+- The route renders the `Network Stats` overview from the shared `CommunityStats`
+  component.
+- Network TDH summary table: total, daily change, and daily percentage change from
+  `total_boosted_tdh` history.
+- Estimated TDH checkpoint table from the latest `total_boosted_tdh` based on
+  `250_000_000` increments.
+- `Total TDH` bar chart.
+- `Net TDH Daily Change` bar chart.
+- `Created TDH Daily Change` bar chart.
+- `Destroyed TDH Change` bar chart.
+
+## Metric Sources
+
+- The summary table reads `total_boosted_tdh`, `net_boosted_tdh`, and derived
+  percentage values from the same `tdh_global_history` payload.
+- Each chart always renders three series: the boosted value, the base/total value,
+  and the raw value.
+- The checkpoint table is driven by `total_boosted_tdh` and extrapolated using the
+  current rate (`net_boosted_tdh`).
+
+## Route State and Data Source
+
+- This route has no query params, filters, or sorting controls.
+- The request is fixed to `page=1` and `page_size=10` against
+  `/api/tdh_global_history`.
+- The API payload is reversed client-side so charts and labels render oldest
+  sample first.
+- There is no visible pagination or "load more" behavior on this route.
+
+## Empty/Failure Behavior
+
+- If the API returns no rows, the page shows only the title/header and no
+  summary or chart sections.
+- The UI does not expose a dedicated empty-state or inline retry control for this
+  dataset.
+
+## Cross-Route Behavior
+
+- `/network/health` links directly to this route from the `Network TDH` card.
+- `/network/tdh`, `/network/tdh/historic-boosts`, and
+  `/network/definitions` all link to `/network/health/network-tdh` via
+  `Network Stats` CTAs.
+- Route state is static; sharing the deep link always opens the same fixed view.
+- `Levels` is a separate route and does not receive route-level filter state from this
+  page.
+
 
 ## Related Pages
 

@@ -52,6 +52,8 @@ recent mint volume in a dedicated Mint Stats card.
 - If both current and previous windows are `0`, the change badge shows `N/A`.
 - Invalid or negative metric values are treated as `0` for display and
   comparisons.
+- If trend-series data is unavailable, cards render without sparkline strips and
+  still show numeric 24h/7d values.
 - Large values are compacted (`K`, `M`, `B`) while tooltips show full counts.
 - Sparkline bars follow the same sequence as the data returned for that card:
   if a metric has dates, each tooltip line matches the corresponding bar and
@@ -61,6 +63,14 @@ recent mint volume in a dedicated Mint Stats card.
 - If no mint data is returned, the Mint Stats card shows `No mint data available`.
 - When 10 or fewer mints are returned, card IDs appear under the bars;
   otherwise rely on hover tooltips.
+
+## Route-State Behavior
+
+- `/network/health` has no query params for filters, sort state, or pagination.
+- The dashboard route is static after mount: queryless URL state means a shared link
+  always opens to the same metric surface and card set.
+- The `Network TDH` card always links directly to
+  `/network/health/network-tdh` with no attached route state.
 
 ## Failure and Recovery
 
