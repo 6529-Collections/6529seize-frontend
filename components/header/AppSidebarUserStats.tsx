@@ -1,8 +1,10 @@
+import { useState } from "react";
 import UserStatsRow from "../user/utils/stats/UserStatsRow";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import UserPageFollowersModal from "../user/followers/UserPageFollowersModal";
 
 export default function AppSidebarUserStats({
   handle,
@@ -23,6 +25,8 @@ export default function AppSidebarUserStats({
   readonly cic: number;
   readonly profileId: string | null | undefined;
 }) {
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
+
   const { data } = useQuery<ApiIncomingIdentitySubscriptionsPage>({
     queryKey: [
       QueryKey.IDENTITY_FOLLOWERS,
@@ -39,15 +43,23 @@ export default function AppSidebarUserStats({
   const followers = data?.count ?? 0;
 
   return (
-    <UserStatsRow
-      handle={handle}
-      tdh={tdh}
-      tdh_rate={tdh_rate}
-      xtdh={xtdh}
-      xtdh_rate={xtdh_rate}
-      rep={rep}
-      cic={cic}
-      followersCount={followers}
-    />
+    <>
+      <UserStatsRow
+        handle={handle}
+        tdh={tdh}
+        tdh_rate={tdh_rate}
+        xtdh={xtdh}
+        xtdh_rate={xtdh_rate}
+        rep={rep}
+        cic={cic}
+        followersCount={followers}
+        onFollowersClick={() => setIsFollowersModalOpen(true)}
+      />
+      <UserPageFollowersModal
+        profileId={profileId}
+        isOpen={isFollowersModalOpen}
+        onClose={() => setIsFollowersModalOpen(false)}
+      />
+    </>
   );
 }
