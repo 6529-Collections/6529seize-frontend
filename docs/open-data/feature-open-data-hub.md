@@ -33,6 +33,7 @@ The `/open-data` hub is a card-based entry page for community data exports.
 - [Meme Subscriptions](feature-meme-subscriptions.md) documents `/open-data/meme-subscriptions`
   specifically.
 - [Royalties](feature-royalties-uploads.md) documents `/open-data/royalties` specifically.
+- [Team](feature-team-downloads.md) documents `/open-data/team` specifically.
 
 ## Common Scenarios
 
