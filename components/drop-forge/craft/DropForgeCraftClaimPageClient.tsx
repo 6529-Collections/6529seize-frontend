@@ -62,6 +62,11 @@ const BTN_SUCCESS =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-sky-500/50 tw-bg-sky-500/20 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-sky-200 tw-transition-colors tw-duration-150 enabled:hover:tw-bg-sky-500/30 enabled:hover:tw-ring-sky-400 enabled:active:tw-ring-sky-400";
 const BTN_DANGER =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-rose-500/50 tw-bg-rose-600/20 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-rose-200 tw-transition-colors tw-duration-150 enabled:hover:tw-bg-rose-500/30 enabled:hover:tw-ring-rose-400 enabled:active:tw-ring-rose-400";
+const CRAFT_CLAIMS_LIST_PATH = "/drop-forge/craft";
+const PAGE_CONTAINER_CLASS =
+  "tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8";
+const BACK_LINK_CLASS =
+  "tw-inline-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-start tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50";
 
 type ClaimMediaType = "image" | "video" | "glb" | "html" | "unknown";
 type DistributionSectionKey =
@@ -155,6 +160,30 @@ function normalizeRootPhase(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
 }
 
+function DropForgeCraftClaimHeader({
+  pageTitle,
+}: Readonly<{
+  pageTitle: string;
+}>) {
+  return (
+    <div className="tw-mb-4 sm:tw-mb-6">
+      <Link href={CRAFT_CLAIMS_LIST_PATH} className={BACK_LINK_CLASS}>
+        <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        Back to Craft list
+      </Link>
+      <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+        <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left tw-text-2xl sm:tw-text-3xl tw-font-semibold tw-text-iron-50">
+          <DropForgeCraftIcon className="tw-h-7 tw-w-7 sm:tw-h-8 sm:tw-w-8 tw-flex-shrink-0" />
+          <span className="tw-break-words">{pageTitle}</span>
+        </h1>
+        <div className="tw-flex tw-w-full tw-justify-center sm:tw-w-auto sm:tw-justify-end">
+          <DropForgeTestnetIndicator className="tw-flex-shrink-0" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DropForgeCraftClaimPageClient({
   claimId,
 }: Readonly<{
@@ -217,23 +246,8 @@ export default function DropForgeCraftClaimPageClient({
 
   if (loading && !claim) {
     return (
-      <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-        <div className="tw-mb-4">
-          <Link
-            href="/drop-forge/craft"
-            className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
-          >
-            <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-            Back to Claims list
-          </Link>
-          <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
-            <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
-              <DropForgeCraftIcon className="tw-h-8 tw-w-8 tw-flex-shrink-0" />
-              {pageTitle}
-            </h1>
-            <DropForgeTestnetIndicator className="tw-flex-shrink-0" />
-          </div>
-        </div>
+      <div className={PAGE_CONTAINER_CLASS}>
+        <DropForgeCraftClaimHeader pageTitle={pageTitle} />
         <p className="tw-mb-0 tw-text-iron-400">Loading…</p>
       </div>
     );
@@ -241,23 +255,8 @@ export default function DropForgeCraftClaimPageClient({
 
   if (error && !claim) {
     return (
-      <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-        <div className="tw-mb-4">
-          <Link
-            href="/drop-forge/craft"
-            className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
-          >
-            <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-            Back to Claims list
-          </Link>
-          <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
-            <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
-              <DropForgeCraftIcon className="tw-h-8 tw-w-8 tw-flex-shrink-0" />
-              {pageTitle}
-            </h1>
-            <DropForgeTestnetIndicator className="tw-flex-shrink-0" />
-          </div>
-        </div>
+      <div className={PAGE_CONTAINER_CLASS}>
+        <DropForgeCraftClaimHeader pageTitle={pageTitle} />
         <p className="tw-text-rose-300 tw-mb-0" role="alert">
           {error}
         </p>
@@ -282,23 +281,8 @@ export default function DropForgeCraftClaimPageClient({
   );
 
   return (
-    <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-      <div className="tw-mb-6">
-        <Link
-          href="/drop-forge/craft"
-          className="tw-inline-flex tw-items-center tw-gap-2 tw-text-iron-400 tw-no-underline hover:tw-text-iron-50"
-        >
-          <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-          Back to Claims list
-        </Link>
-        <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-3">
-          <h1 className="tw-mb-0 tw-inline-flex tw-items-center tw-gap-3 tw-text-3xl tw-font-semibold tw-text-iron-50">
-            <DropForgeCraftIcon className="tw-h-8 tw-w-8 tw-flex-shrink-0" />
-            {pageTitle}
-          </h1>
-          <DropForgeTestnetIndicator className="tw-flex-shrink-0" />
-        </div>
-      </div>
+    <div className={PAGE_CONTAINER_CLASS}>
+      <DropForgeCraftClaimHeader pageTitle={pageTitle} />
 
       <div className="tw-flex tw-flex-col tw-gap-5">
         <DropForgeAccordionSection title="Image" defaultOpen>
@@ -488,7 +472,7 @@ function ImageSection({
             type="button"
             disabled={saving}
             onClick={() => imageInputRef.current?.click()}
-            className={`${BTN_PRIMARY} tw-w-fit`}
+            className={`${BTN_PRIMARY} tw-w-fit tw-self-center`}
           >
             Replace
           </button>

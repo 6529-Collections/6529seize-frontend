@@ -12,7 +12,7 @@ enum CapacitorOrientationType {
 }
 
 const useCapacitor = () => {
-  const isCapacitor = Capacitor.isNativePlatform();
+  const isCapacitor = !Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
 
   const isIos = platform === "ios";
