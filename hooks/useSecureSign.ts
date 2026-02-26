@@ -426,9 +426,9 @@ const getMobileErrorMessage = (error: unknown): string => {
         // Use JSON stringification for plain objects
         message = JSON.stringify(error);
       } else {
-        // Use custom toString method (verified above to not be Object.prototype.toString)
-         
-        message = String(error);
+        // Avoid object stringification fallback; serialize instead for lint-safe output.
+        const serialized = JSON.stringify(error);
+        message = serialized ?? "Unknown error";
       }
     } catch {
       message = "Unknown error";

@@ -20,6 +20,7 @@ export default function MobileWrapperDialog({
   tall,
   fixedHeight,
   tabletModal,
+  showScrollbar,
 }: {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
@@ -31,6 +32,7 @@ export default function MobileWrapperDialog({
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
+  readonly showScrollbar?: boolean | undefined;
 }) {
   const { isCapacitor, isIos } = useCapacitor();
 
@@ -147,24 +149,34 @@ export default function MobileWrapperDialog({
                     </div>
                   </TransitionChild>
                   <div
-                    className={`tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 ${
-                      noPadding ? "tw-py-0" : "tw-py-6"
-                    }${tabletModal ? " md:tw-rounded-xl" : ""}`}
+                    className={`tw-flex tw-flex-col tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-950${
+                      tabletModal ? " md:tw-rounded-xl" : ""
+                    }`}
                     style={{
                       ...(fixedHeight
                         ? { height: getHeight() }
                         : { maxHeight: getHeight() }),
-                      paddingBottom: bottomPadding,
                     }}
                   >
-                    <div className="tw-px-4 sm:tw-px-6">
-                      {title && (
-                        <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
-                          {title}
-                        </DialogTitle>
-                      )}
+                    <div
+                      className={`tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-flex-1 tw-min-h-0 ${
+                        noPadding ? "tw-py-0" : "tw-py-6"
+                      }${
+                        showScrollbar
+                          ? " tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+                          : ""
+                      }`}
+                      style={{ paddingBottom: bottomPadding }}
+                    >
+                      <div className="tw-px-4 sm:tw-px-6">
+                        {title && (
+                          <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
+                            {title}
+                          </DialogTitle>
+                        )}
+                      </div>
+                      {children}
                     </div>
-                    {children}
                   </div>
                 </DialogPanel>
               </TransitionChild>

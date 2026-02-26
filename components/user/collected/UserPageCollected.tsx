@@ -433,6 +433,7 @@ export default function UserPageCollected({
     enabled: filters.collection !== CollectedCollectionType.NETWORK,
   });
 
+  const isNetwork = filters.collection === CollectedCollectionType.NETWORK;
   const {
     data: dataNetwork,
     isLoading: isNetworkLoading,
@@ -444,11 +445,10 @@ export default function UserPageCollected({
     sort: filters.sortBy,
     order: filters.sortDirection,
     contract: filters.subcollection,
+    enabled: isNetwork,
   });
-
-  const isNetwork = filters.collection === CollectedCollectionType.NETWORK;
-  const isFetchingData = isFetching || isNetworkFetching;
-  const isLoading = isInitialLoading || isNetworkLoading;
+  const isFetchingData = isNetwork ? isNetworkFetching : isFetching;
+  const isLoading = isNetwork ? isNetworkLoading : isInitialLoading;
 
   const showTransfer =
     !isMobile &&

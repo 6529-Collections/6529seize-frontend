@@ -47,7 +47,9 @@ export function VirtualizedTokenListContent({
   const rowCount = isGrid ? Math.ceil(totalCount / columns) : totalCount;
   const rowHeight = isGrid ? GRID_ROW_HEIGHT : ROW_HEIGHT;
 
-   
+  // TanStack Virtual returns imperative functions that React Compiler marks as incompatible.
+  // Keep this hook usage explicit until the library/compiler integration changes.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => scrollContainerRef.current,

@@ -29,8 +29,9 @@ import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
 
 import TopRaterAvatars from "./header/TopRaterAvatars";
-import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
-import UserPageRepRepsTable from "./reps/table/UserPageRepRepsTable";
+import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
+import GrantRepDialog from "./new-rep/GrantRepDialog";
+import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import {
   getCanEditRep,
@@ -55,6 +56,8 @@ export default function UserPageRepMobile({
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [editCategory, setEditCategory] = useState<string | null>(null);
 
   const { data: nicRatings } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
     queryKey: [
@@ -95,6 +98,10 @@ export default function UserPageRepMobile({
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
+
+  useEffect(() => {
+    setVisibleCount(5);
+  }, [repRates?.rating_stats]);
 
   // --- derived: sorted reps, can-edit flags ---
   const reps = useMemo(
@@ -243,7 +250,7 @@ export default function UserPageRepMobile({
               </span>
             </div>
             <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-              <div className="tw-pointer-events-none">
+              <div className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
                 <TopRaterAvatars
                   handleOrWallet={profile.handle ?? ""}
                   matter={RateMatter.NIC}
@@ -271,6 +278,36 @@ export default function UserPageRepMobile({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: "easeInOut" }}
           >
+            {/* Rep Categories */}
+            {reps.length > 0 && (
+              <div className="tw-mt-4">
+                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
+                  Rep Categories
+                </div>
+                <div className="tw-flex tw-flex-wrap tw-gap-2">
+                  {reps.slice(0, visibleCount).map((rep) => (
+                    <RepCategoryPill
+                      key={rep.category}
+                      rep={rep}
+                      profileHandle={profile.handle ?? ""}
+                      canEdit={canEditRep}
+                      onEdit={setEditCategory}
+                      compact
+                    />
+                  ))}
+                  {reps.length > visibleCount && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((prev) => prev + 10)}
+                      className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
+                    >
+                      +{reps.length - visibleCount} more
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {canEditRep && (
               <div className="tw-mt-4">
                 <UserPageRateWrapper
@@ -280,7 +317,7 @@ export default function UserPageRepMobile({
                 >
                   <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
                     <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
-                      Add skill to this identity
+                      Add rep to this identity
                     </span>
                     <button
                       onClick={() => setIsGrantRepOpen(true)}
@@ -295,7 +332,6 @@ export default function UserPageRepMobile({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <path d="M12 5v14M5 12h14" />
                       </svg>
@@ -303,18 +339,6 @@ export default function UserPageRepMobile({
                     </button>
                   </div>
                 </UserPageRateWrapper>
-              </div>
-            )}
-
-            {/* Rep Table */}
-            {!!reps.length && (
-              <div className="tw-mt-4">
-                <UserPageRepRepsTable
-                  reps={reps}
-                  profile={profile}
-                  canEditRep={canEditRep}
-                  initialCount={5}
-                />
               </div>
             )}
 
@@ -382,31 +406,12 @@ export default function UserPageRepMobile({
       </AnimatePresence>
 
       {/* Grant Rep Bottom Sheet */}
-      <MobileWrapperDialog
-        title="Grant Rep"
+      <GrantRepDialog
+        profile={profile}
+        repRates={repRates}
         isOpen={isGrantRepOpen}
         onClose={() => setIsGrantRepOpen(false)}
-        tabletModal
-      >
-        <div className="tw-px-4 sm:tw-px-6">
-          <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
-            <UserPageRepNewRep
-              profile={profile}
-              repRates={repRates}
-              onSuccess={() => setIsGrantRepOpen(false)}
-            />
-          </UserPageRateWrapper>
-          <div className="tw-mt-3">
-            <button
-              onClick={() => setIsGrantRepOpen(false)}
-              type="button"
-              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </MobileWrapperDialog>
+      />
 
       {/* Rate NIC Bottom Sheet */}
       <MobileWrapperDialog
@@ -434,6 +439,14 @@ export default function UserPageRepMobile({
           </div>
         </div>
       </MobileWrapperDialog>
+
+      {canEditRep && editCategory && (
+        <UserPageRepModifyModal
+          profile={profile}
+          category={editCategory}
+          onClose={() => setEditCategory(null)}
+        />
+      )}
     </div>
   );
 }

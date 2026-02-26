@@ -3,8 +3,10 @@
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
+import NetworkHealthCTA from "@/components/header/NetworkHealthCTA";
 
 interface SmallScreenHeaderProps {
   readonly onMenuToggle: () => void;
@@ -15,6 +17,9 @@ export default function SmallScreenHeader({
   onMenuToggle,
   isMenuOpen,
 }: SmallScreenHeaderProps) {
+  const pathname = usePathname();
+  const isHomeRoute = pathname === "/";
+
   return (
     <header className="tailwind-scope tw-sticky tw-top-0 tw-z-50 tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black">
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-px-5">
@@ -31,6 +36,7 @@ export default function SmallScreenHeader({
           />
         </Link>
         <div className="tw-flex tw-items-center tw-gap-3">
+          {isHomeRoute && <NetworkHealthCTA />}
           <HeaderSearchButton wave={null} />
           <button
             onClick={onMenuToggle}

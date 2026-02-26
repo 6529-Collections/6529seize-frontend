@@ -26,6 +26,7 @@ import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
+import NetworkHealthCTA from "./NetworkHealthCTA";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -98,6 +99,7 @@ export default function AppHeader() {
   const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
   const isMessagesRoute =
     pathname === "/messages" || pathname.startsWith("/messages/");
+  const isHomeRoute = pathname === "/";
 
   const isCreateRoute =
     pathname === "/waves/create" || pathname === "/messages/create";
@@ -186,6 +188,9 @@ export default function AppHeader() {
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <HeaderActionButtons />
+          {isHomeRoute && (
+            <NetworkHealthCTA className="md:tw-hidden" />
+          )}
           <HeaderSearchButton
             wave={
               isInsideWave && (isWavesRoute || isMessagesRoute)

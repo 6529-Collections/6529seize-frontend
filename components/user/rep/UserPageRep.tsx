@@ -18,7 +18,6 @@ import UserPageIdentityStatements from "../identity/statements/UserPageIdentityS
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 import UserPageRepHeader from "./header/UserPageRepHeader";
-import UserPageRepReps from "./reps/UserPageRepReps";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRepMobile from "./UserPageRepMobile";
 export default function UserPageRep({
@@ -67,27 +66,11 @@ export default function UserPageRep({
           {/* Left Column - Rep Content */}
           <div className="tw-min-w-0">
             <UserPageRepHeader repRates={repRates ?? null} profile={profile} />
-            <UserPageRepReps repRates={repRates ?? null} profile={profile} />
             <div className="tw-mt-6 lg:tw-mt-8">
               <UserPageCombinedActivityLog
                 initialActivityLogParams={initialActivityLogParams}
               />
             </div>
-
-            {/* Rep raters tables - commented out for now
-            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 lg:tw-mt-8 lg:tw-gap-x-10 lg:tw-gap-y-10 xl:tw-grid-cols-2">
-              <div>
-                <ProfileRatersTableWrapper
-                  initialParams={initialRepGivenParams}
-                />
-              </div>
-              <div>
-                <ProfileRatersTableWrapper
-                  initialParams={initialRepReceivedParams}
-                />
-              </div>
-            </div>
-            */}
           </div>
 
           {/* Right Sidebar - Identity Card */}
@@ -117,19 +100,6 @@ export default function UserPageRep({
             </div>
           </div>
         </div>
-
-        {/* CIC raters tables - commented out for now
-        <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 lg:tw-mt-8 lg:tw-gap-x-10 lg:tw-gap-y-10 xl:tw-grid-cols-2">
-          <div>
-            <ProfileRatersTableWrapper initialParams={initialCICGivenParams} />
-          </div>
-          <div>
-            <ProfileRatersTableWrapper
-              initialParams={initialCICReceivedParams}
-            />
-          </div>
-        </div>
-        */}
       </div>
     </div>
   );

@@ -65,11 +65,6 @@ const TAB_DEFINITIONS = [
     route: "waves",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
   },
-  {
-    id: "followers",
-    title: "Followers",
-    route: "followers",
-  },
 ] as const satisfies readonly UserPageTabDefinition[];
 
 const USER_PAGE_TAB_DEFINITIONS: readonly UserPageTabDefinition[] =

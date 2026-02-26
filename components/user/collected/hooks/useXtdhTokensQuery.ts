@@ -12,6 +12,7 @@ interface UseXtdhTokensQueryProps {
   readonly sort: string;
   readonly order: string;
   readonly contract?: string | null | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 export const useXtdhTokensQuery = ({
@@ -21,6 +22,7 @@ export const useXtdhTokensQuery = ({
   sort,
   order,
   contract,
+  enabled = true,
 }: UseXtdhTokensQueryProps) => {
   return useQuery<ApiXTdhTokensPage>({
     queryKey: [
@@ -58,5 +60,6 @@ export const useXtdhTokensQuery = ({
       });
     },
     placeholderData: keepPreviousData,
+    enabled,
   });
 };

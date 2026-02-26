@@ -1,21 +1,20 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
+import { useMemo } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
-import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
+import GrantRepDialog from "../new-rep/GrantRepDialog";
+import RepCategoryPill from "../RepCategoryPill";
 import {
   getCanEditRep,
   sortRepsByRatingAndContributors,
 } from "../UserPageRep.helpers";
-
-import TopRaterAvatars from "./TopRaterAvatars";
-
-const TOP_REPS_COUNT = 5;
 
 export default function UserPageRepHeader({
   repRates,
@@ -26,48 +25,32 @@ export default function UserPageRepHeader({
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const [topReps, setTopReps] = useState<RatingStats[]>(
-    sortRepsByRatingAndContributors(repRates?.rating_stats ?? []).slice(
-      0,
-      TOP_REPS_COUNT
-    )
+  const allReps = useMemo(
+    () => sortRepsByRatingAndContributors(repRates?.rating_stats ?? []),
+    [repRates?.rating_stats]
   );
 
+  const [visibleCount, setVisibleCount] = useState(5);
+
   useEffect(() => {
-    setTopReps(
-      sortRepsByRatingAndContributors(repRates?.rating_stats ?? []).slice(
-        0,
-        TOP_REPS_COUNT
-      )
-    );
+    setVisibleCount(5);
   }, [repRates?.rating_stats]);
 
-  const [canEditRep, setCanEditRep] = useState<boolean>(
-    getCanEditRep({
-      myProfile: connectedProfile,
-      targetProfile: profile,
-      activeProfileProxy,
-    })
-  );
+  const visibleReps = allReps.slice(0, visibleCount);
+  const hasMore = allReps.length > visibleCount;
 
-  useEffect(() => {
-    setCanEditRep(
+  const canEditRep = useMemo(
+    () =>
       getCanEditRep({
         myProfile: connectedProfile,
         targetProfile: profile,
         activeProfileProxy,
-      })
-    );
-  }, [connectedProfile, profile, activeProfileProxy]);
+      }),
+    [connectedProfile, profile, activeProfileProxy]
+  );
 
   const [editCategory, setEditCategory] = useState<string | null>(null);
-
-  const openEditCategory = (category: string) => {
-    if (!canEditRep) {
-      return;
-    }
-    setEditCategory(category);
-  };
+  const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
 
   return (
     <>
@@ -106,56 +89,50 @@ export default function UserPageRepHeader({
             </div>
           </div>
 
-          {topReps.length > 0 && (
+          {(visibleReps.length > 0 || canEditRep) && (
             <div className="tw-mt-6 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
               <div className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                Top Rep
+                Rep Categories
               </div>
               <div className="tw-flex tw-flex-wrap tw-gap-3">
-                {topReps.map((rep) => (
-                  <div
-                    key={rep.category}
-                    className={`group tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-transition-colors ${
-                      canEditRep
-                        ? "tw-cursor-pointer hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60"
-                        : "tw-cursor-default"
-                    }`}
+                {canEditRep && (
+                  <button
+                    type="button"
+                    onClick={() => setIsGrantRepOpen(true)}
+                    className="tw-group tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-white/10 tw-bg-transparent tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/30 hover:tw-bg-white/5 hover:tw-text-white"
                   >
-                    {canEditRep ? (
-                      <button
-                        type="button"
-                        onClick={() => openEditCategory(rep.category)}
-                        className="tw-inline-flex tw-items-center tw-gap-2.5 tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit tw-cursor-pointer focus:tw-outline-none"
-                      >
-                        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                          {rep.category}
-                        </span>
-                        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
-                          {formatNumberWithCommas(rep.rating)}
-                        </span>
-                      </button>
-                    ) : (
-                      <div className="tw-inline-flex tw-items-center tw-gap-2.5">
-                        <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                          {rep.category}
-                        </span>
-                        <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
-                          {formatNumberWithCommas(rep.rating)}
-                        </span>
-                      </div>
-                    )}
-                    <span className="tw-text-xs tw-text-iron-600">·</span>
-                    <TopRaterAvatars
-                      handleOrWallet={profile.handle ?? ""}
-                      category={rep.category}
-                      count={5}
-                    />
-                    <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
-                      {formatNumberWithCommas(rep.contributor_count)}{" "}
-                      {rep.contributor_count === 1 ? "rater" : "raters"}
-                    </span>
-                  </div>
+                    <svg
+                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-text-iron-500 tw-transition-colors group-hover:tw-text-white"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    <span>Add new</span>
+                  </button>
+                )}
+                {visibleReps.map((rep) => (
+                  <RepCategoryPill
+                    key={rep.category}
+                    rep={rep}
+                    profileHandle={profile.handle ?? ""}
+                    canEdit={canEditRep}
+                    onEdit={setEditCategory}
+                  />
                 ))}
+                {hasMore && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((prev) => prev + 10)}
+                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-backdrop-blur-md tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white"
+                  >
+                    +{allReps.length - visibleCount} more
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -169,6 +146,13 @@ export default function UserPageRepHeader({
           onClose={() => setEditCategory(null)}
         />
       )}
+
+      <GrantRepDialog
+        profile={profile}
+        repRates={repRates}
+        isOpen={isGrantRepOpen}
+        onClose={() => setIsGrantRepOpen(false)}
+      />
     </>
   );
 }
