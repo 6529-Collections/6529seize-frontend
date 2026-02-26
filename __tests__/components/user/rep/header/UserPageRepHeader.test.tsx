@@ -20,6 +20,6 @@ describe('UserPageRepHeader', () => {
 
   it('renders without repRates', () => {
     const { container } = render(<UserPageRepHeader repRates={null} profile={mockProfile} />);
-    expect(container).toHaveTextContent('Reputation');
+    expect(container).toHaveTextContent('Rep');
   });
 });
