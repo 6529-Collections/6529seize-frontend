@@ -13,7 +13,7 @@ behavior, and group create/edit configuration constraints.
 
 ## Flows
 
-- None.
+- [Group-to-Network Scope Flow](../network/flow-network-group-scope.md)
 
 ## Troubleshooting
 
@@ -21,8 +21,6 @@ behavior, and group create/edit configuration constraints.
 
 ## Stubs
 
-- TODO: Add an end-to-end flow page for filter -> card -> group-scoped network
-  navigation.
 - TODO: Add a troubleshooting page for create/edit auth-proxy gating and
   failed group-action recovery.
 

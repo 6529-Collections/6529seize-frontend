@@ -19,7 +19,7 @@ dashboards.
 
 ## Flows
 
-- No dedicated flow page documented yet.
+- [Network Group Scope Flow](flow-network-group-scope.md)
 
 ## Troubleshooting
 
