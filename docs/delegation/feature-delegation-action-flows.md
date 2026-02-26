@@ -37,6 +37,10 @@ locks) and collection-scoped delegation management inside `/delegation/*`.
   Optional controls:
   - `Expiry Date` (`Never` or selected date)
   - `Tokens` (`All` or selected token ID)
+- `assign-primary-address` can start with `?address=<wallet>`:
+  - If the value matches one consolidation wallet, that option is preselected.
+  - If missing, or not found in the consolidation key, the form still opens and
+    preselects the first consolidation wallet.
 - `register-consolidation` requires `Collection` and `Consolidating With`.
 - `register-sub-delegation` requires `Collection` and `Delegate Manager`.
 - `assign-primary-address` requires a connected profile plus a consolidation key
@@ -71,6 +75,9 @@ locks) and collection-scoped delegation management inside `/delegation/*`.
 
 - `Assign Primary Address` in manager-driven sub-delegation actions appears only
   on `Any Collection` and `The Memes`.
+- In `/delegation/assign-primary-address`, a valid `address` query can be passed to
+  preselect a wallet, and invalid/empty values are normalized to a valid
+  consolidation member before the action form loads.
 - Wrong-network write attempts show a toast requesting switch to configured
   chain (`Ethereum Mainnet` or `Sepolia Network`).
 - Global lock state can block collection-specific lock controls until unlocked
