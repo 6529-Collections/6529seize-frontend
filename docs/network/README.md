@@ -9,6 +9,7 @@ dashboards.
 ## Features
 
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
+- [Network Nerd Leaderboard](feature-network-nerd-leaderboard.md)
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
 - [Network Definitions](feature-network-definitions.md)
