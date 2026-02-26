@@ -2,25 +2,33 @@
 
 ## Overview
 
-Media docs are organized into focused subareas for NFT ownership/actions, The
-Memes mint/calendar surfaces, and shared rendering behavior.
+- Use this area for media routes: `/the-memes`, `/the-memes/mint`,
+  `/meme-lab`, `/rememes`, `/meme-calendar`, and `/6529-gradient`.
+- Start with the subarea for your task: minting, collection browsing, NFT
+  ownership/actions, or rendering behavior.
+- Each linked subarea page is the canonical owner for its route family.
 
 ## Features
 
+- [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,
+  `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
+- [Collections](collections/README.md): `/meme-lab`,
+  `/meme-lab/collection/{collection}`, `/rememes`, `/rememes/{contract}/{id}`,
+  and `/rememes/add`.
 - [NFT](nft/README.md): ownership indicators, source fallbacks, marketplace
-  shortcuts, and transfer flows.
-- [Memes](memes/README.md): card tabs/deep links, mint flow, countdown, and
-  minting calendar behavior.
-- [Rendering](rendering/README.md): interactive HTML sandbox rendering and 6529
-  Gradient list behavior.
+  shortcuts, and transfer actions across media detail routes.
+- [Rendering](rendering/README.md): interactive HTML sandbox behavior and
+  `/6529-gradient` list/detail loading.
 
 ## Flows
 
-- [Media Discovery and Actions Flow](flow-media-discovery-and-actions.md)
+- [Media Discovery and Actions Flow](flow-media-discovery-and-actions.md):
+  end-to-end path from discovery to minting, card actions, and adjacent tools.
 
 ## Troubleshooting
 
-- [Media Routes and Minting Troubleshooting](troubleshooting-media-routes-and-minting.md)
+- [Media Routes and Minting Troubleshooting](troubleshooting-media-routes-and-minting.md):
+  route, minting, calendar, rendering, and marketplace recovery steps.
 
 ## Stubs
 

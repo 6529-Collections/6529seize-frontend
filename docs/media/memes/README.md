@@ -28,6 +28,7 @@ states, and schedule views.
 ## Related Areas
 
 - [Media Index](../README.md)
+- [Media Collections Index](../collections/README.md)
 - [Waves Memes Index](../../waves/memes/README.md)
 - [Navigation Index](../../navigation/README.md)
 - [Media NFT Index](../nft/README.md)

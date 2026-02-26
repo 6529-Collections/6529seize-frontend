@@ -27,6 +27,7 @@ marketplace shortcuts, and transfer behavior.
 ## Related Areas
 
 - [Media Index](../README.md)
+- [Media Collections Index](../collections/README.md)
 - [Media Memes Index](../memes/README.md)
 - [Media Rendering Index](../rendering/README.md)
 - [Profiles Tabs](../../profiles/tabs/README.md)

@@ -25,5 +25,6 @@ interactive HTML sandboxing and Gradient collection list behavior.
 ## Related Areas
 
 - [Media Index](../README.md)
+- [Media Collections Index](../collections/README.md)
 - [NextGen Token View](../../nextgen/feature-token-media-rendering.md)
 - [Media NFT Index](../nft/README.md)
