@@ -32,7 +32,6 @@ enum WavesViewMode {
 
 const WAVES_PATH = "/waves";
 export const CREATE_WAVE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_QUERY_KEY}=${CREATE_WAVE_VALUE}`;
-export const CREATE_DIRECT_MESSAGE_SEARCH_PATH = `${WAVES_PATH}?${CREATE_QUERY_KEY}=${CREATE_DIRECT_MESSAGE_VALUE}`;
 
 export default function Waves({
   heading = "Waves",
