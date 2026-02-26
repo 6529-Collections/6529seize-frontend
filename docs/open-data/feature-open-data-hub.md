@@ -28,6 +28,11 @@ The `/open-data` hub is a card-based entry page for community data exports.
    - Royalties
 3. Select the card to open the matching export list page.
 
+## Related Route Behavior
+
+- [Meme Subscriptions](feature-meme-subscriptions.md) documents `/open-data/meme-subscriptions`
+  specifically.
+
 ## Common Scenarios
 
 - Open a specific dataset page quickly from one place.

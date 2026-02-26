@@ -13,10 +13,12 @@ community/community-report style analysis.
 
 - [Open Data Hub](feature-open-data-hub.md)
 - [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
+- [Meme Subscriptions](feature-meme-subscriptions.md)
 
 ## Flows
 
 - [Open Data navigation flow](feature-open-data-hub.md)
+- [Meme Subscriptions route flow](feature-meme-subscriptions.md)
 
 ## Troubleshooting
 
@@ -24,8 +26,8 @@ community/community-report style analysis.
 
 ## Stubs
 
-- Open data destination pages (Rememes, Team, Royalties, Meme Subscriptions)
-  are user-facing but documented only through route behavior for this update.
+- Rememes, Team, and Royalties destination pages are user-facing but documented
+  only through route behavior for this update.
 
 ## Related Areas
 
