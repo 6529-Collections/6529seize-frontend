@@ -31,6 +31,7 @@ and category tabs filter the already-running results for that query.
    - Site-wide pages/profiles/waves search starts at 3 characters.
    - Site-wide NFT search can still return results for short numeric token IDs.
    - In wave contexts, users can switch between `In this Wave` and `Site-wide`.
+   - Site-wide mode debounces each query for ~500ms, while in-wave mode debounces for ~250ms before issuing search requests.
    - `In this Wave` message search starts at 2 characters.
 4. In site-wide mode, use category tabs (`All`, `Pages`, `Profiles`, `NFTs`,
    `Waves`) to narrow visible results. In `All`, each category shows a preview
@@ -67,8 +68,12 @@ and category tabs filter the already-running results for that query.
   - Pages/profiles/waves require at least 3 characters.
   - NFT search also supports shorter numeric queries for token-ID lookups.
   - Wave message search uses a 2-character minimum.
+- Site-wide mode remembers the selected category filter in local preference; `Clear`
+  returns category selection to `All`.
 - Category filters can collapse back to `All` if the chosen category no longer
   has matches for the current query.
+- Wave mode shows `Load more` when more message results are available, and this
+  button is hidden when no further wave results exist.
 - While search results are loading for a new query, category tabs still apply to the
   current in-memory result set until the new payload arrives.
 - In site-wide `All`, each category preview is capped; larger result sets expose
