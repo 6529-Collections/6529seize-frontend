@@ -10,7 +10,7 @@ destination, or mint/wave handoffs from `/` do not match expectations.
 
 ## Features
 
-- [Home Header and Mission](feature-home-header-and-mission.md)
+- [Home Header and Mission Block](feature-home-header-and-mission.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
 - [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
 
