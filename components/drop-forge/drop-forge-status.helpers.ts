@@ -26,6 +26,13 @@ export interface ClaimPrimaryStatus {
   reason?: string;
 }
 
+export interface ClaimArweaveSectionStatus {
+  key: "not_published" | "publishing" | "published";
+  label: "Not Published" | "Publishing…" | "Published";
+  tone: ClaimPrimaryStatusTone;
+  reason?: string;
+}
+
 export function getPrimaryStatusPillClassName(
   tone: ClaimPrimaryStatusTone
 ): string {
@@ -126,5 +133,34 @@ export function getClaimPrimaryStatus({
     label: "Diverged",
     tone: "destructive",
     reason: "DB, Arweave, and onchain sources conflict",
+  };
+}
+
+export function getClaimArweaveSectionStatus(
+  claim: MintingClaim
+): ClaimArweaveSectionStatus {
+  if (claim.media_uploading === true) {
+    return {
+      key: "publishing",
+      label: "Publishing…",
+      tone: "pending",
+      reason: "Uploading media and metadata to Arweave now",
+    };
+  }
+
+  if ((claim.metadata_location?.trim() ?? "").length > 0) {
+    return {
+      key: "published",
+      label: "Published",
+      tone: "success",
+      reason: "Arweave metadata CID is present",
+    };
+  }
+
+  return {
+    key: "not_published",
+    label: "Not Published",
+    tone: "neutral",
+    reason: "No Arweave metadata CID yet",
   };
 }
