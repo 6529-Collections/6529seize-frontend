@@ -26,7 +26,7 @@ export interface ClaimPrimaryStatus {
   reason?: string;
 }
 
-export interface ClaimArweaveSectionStatus {
+interface ClaimArweaveSectionStatus {
   key: "not_published" | "publishing" | "published";
   label: "Not Published" | "Publishing…" | "Published";
   tone: ClaimPrimaryStatusTone;
