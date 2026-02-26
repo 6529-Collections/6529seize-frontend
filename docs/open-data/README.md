@@ -14,21 +14,26 @@ community/community-report style analysis.
 - [Open Data Hub](feature-open-data-hub.md)
 - [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
+- [Royalties Uploads](feature-royalties-uploads.md)
 - [Rememes](feature-rememes-uploads.md)
 
 ## Flows
 
-- [Open Data navigation flow](feature-open-data-hub.md)
-- [Meme Subscriptions route flow](feature-meme-subscriptions.md)
-- [Rememes route flow](feature-rememes-uploads.md)
+- Open `/open-data` and choose the target card to reach the matching route.
+- Open a specific route directly for quick return (`/open-data/network-metrics`,
+  `/open-data/meme-subscriptions`, `/open-data/rememes`, `/open-data/team`,
+  `/open-data/royalties`).
 
 ## Troubleshooting
 
-- [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
+- Error messages appear inline as `Failed to load community downloads. Please try
+  again.` when fetches fail.
+- Empty or missing content uses the shared `Nothing here yet` state.
+- Pagination is shown only when export count is above one page.
 
 ## Stubs
 
-- Team and Royalties destination pages are user-facing but still undocumented here.
+- Team destination page is user-facing but still undocumented here.
 
 ## Related Areas
 
