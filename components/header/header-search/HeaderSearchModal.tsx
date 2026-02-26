@@ -16,10 +16,12 @@ import {
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
-import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
@@ -34,12 +36,11 @@ import {
   useSidebarSections,
   type SidebarPageEntry,
 } from "@/hooks/useSidebarSections";
-import { useWaves } from "@/hooks/useWaves";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import { useWaves } from "@/hooks/useWaves";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -54,7 +55,6 @@ import HeaderSearchModalItem, {
   getNftCollectionMap,
 } from "./HeaderSearchModalItem";
 import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
-import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -285,7 +285,7 @@ export default function HeaderSearchModal({
       {
         name: DROP_FORGE_TITLE,
         href: DROP_FORGE_PATH,
-        section: "About",
+        section: "Main",
         icon: DropForgeIcon,
       },
     ];

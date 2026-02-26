@@ -77,6 +77,9 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   },
 ];
 
+const ACTIVE_CLAIM_REFETCH_INTERVAL_MS = 5000;
+const INACTIVE_CLAIM_REFETCH_INTERVAL_MS = 10000;
+
 export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
   const resolveTime = ({
     hour,
@@ -152,7 +155,9 @@ export function useManifoldClaim({
   const readMethod: ManifoldClaimReadMethod =
     chainId === mainnet.id ? "getClaimForToken" : "getClaim";
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
-  const [refetchInterval, setRefetchInterval] = useState<number>(5000);
+  const [refetchInterval, setRefetchInterval] = useState<number>(
+    ACTIVE_CLAIM_REFETCH_INTERVAL_MS
+  );
 
   const getStatus = useCallback((start: number, end: number) => {
     const now = Time.now().toSeconds();
@@ -201,6 +206,11 @@ export function useManifoldClaim({
     functionName: readMethod,
     args: [contract, identifier],
   });
+
+  useEffect(() => {
+    setClaim(undefined);
+    setRefetchInterval(ACTIVE_CLAIM_REFETCH_INTERVAL_MS);
+  }, [chainId, contract, proxy, identifier, readMethod]);
 
   useEffect(() => {
     if (readContract.data) {
@@ -255,7 +265,11 @@ export function useManifoldClaim({
         isError: false,
       };
       setClaim(newClaim);
-      setRefetchInterval(status === ManifoldClaimStatus.ACTIVE ? 5000 : 10000);
+      setRefetchInterval(
+        status === ManifoldClaimStatus.ACTIVE
+          ? ACTIVE_CLAIM_REFETCH_INTERVAL_MS
+          : INACTIVE_CLAIM_REFETCH_INTERVAL_MS
+      );
     }
   }, [readContract.data, readMethod, identifier, getMemePhase, getStatus]);
 

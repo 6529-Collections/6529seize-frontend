@@ -1,13 +1,14 @@
 import {
+  ArrowPathRoundedSquareIcon,
   ArrowRightEndOnRectangleIcon,
   ArrowsRightLeftIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { useChainSwitcher } from "./useChainSwitcher";
 import PushNotificationSettings from "./PushNotificationSettings";
 import HeaderQRScanner from "./share/HeaderQRScanner";
+import { useChainSwitcher } from "./useChainSwitcher";
 
 export default function AppUserConnect({
   onNavigate,
@@ -17,9 +18,16 @@ export default function AppUserConnect({
   const { address, seizeConnect, seizeDisconnectAndLogout } =
     useSeizeConnectContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { chains, currentChainName, switchToNextChain } = useChainSwitcher();
+  const { chains, currentChainName, nextChainName, switchToNextChain } =
+    useChainSwitcher();
 
   const qrScanner = <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />;
+
+  const onSwitchChain = () => {
+    if (switchToNextChain()) {
+      onNavigate();
+    }
+  };
 
   const connectButton = (
     <button
@@ -45,14 +53,19 @@ export default function AppUserConnect({
         <span>Push Notifications</span>
       </button>
       {chains.length > 1 && (
-        <button
-          onClick={switchToNextChain}
-          className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-          aria-label="Switch Chain"
-        >
-          <ArrowsRightLeftIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-          <span>Chain: {currentChainName} | Change</span>
-        </button>
+        <div>
+          <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-4 tw-py-0.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
+            Network: {currentChainName}
+          </span>
+          <button
+            onClick={onSwitchChain}
+            className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
+            aria-label="Switch Chain"
+          >
+            <ArrowPathRoundedSquareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+            <span>Switch to {nextChainName}</span>
+          </button>
+        </div>
       )}
       <button
         onClick={() => {

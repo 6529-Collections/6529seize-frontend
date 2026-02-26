@@ -37,7 +37,8 @@ export default function HeaderUserProxyDropdown({
   const { activeProfileProxy, setActiveProfileProxy, receivedProfileProxies } =
     useContext(AuthContext);
 
-  const { chains, currentChainName, switchToNextChain } = useChainSwitcher();
+  const { chains, currentChainName, nextChainName, switchToNextChain } =
+    useChainSwitcher();
 
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
@@ -186,18 +187,11 @@ export default function HeaderUserProxyDropdown({
                       </button>
                     )}
                   </div>
-                  <div className="tw-h-full tw-px-2 tw-pt-2">
-                    <button
-                      onClick={() => seizeDisconnectAndLogout(true)}
-                      type="button"
-                      aria-label="Switch Account"
-                      title="Switch Account"
-                      className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                    >
-                      <FontAwesomeIcon icon={faRepeat} height={16} width={16} />
-                      <span>Switch Account</span>
-                    </button>
-                    {isConnected && chains.length > 1 && (
+                  {isConnected && chains.length > 1 && (
+                    <div className="tw-h-full tw-px-2 tw-pt-2">
+                      <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-3 tw-pt-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
+                        Network: {currentChainName}
+                      </span>
                       <button
                         onClick={onSwitchChain}
                         type="button"
@@ -210,9 +204,21 @@ export default function HeaderUserProxyDropdown({
                           height={16}
                           width={16}
                         />
-                        <span>Chain: {currentChainName} | Change</span>
+                        <span>Switch to {nextChainName}</span>
                       </button>
-                    )}
+                    </div>
+                  )}
+                  <div className="tw-h-full tw-px-2 tw-pt-2">
+                    <button
+                      onClick={() => seizeDisconnectAndLogout(true)}
+                      type="button"
+                      aria-label="Switch Account"
+                      title="Switch Account"
+                      className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                    >
+                      <FontAwesomeIcon icon={faRepeat} height={16} width={16} />
+                      <span>Switch Account</span>
+                    </button>
                     <button
                       onClick={() => seizeDisconnectAndLogout()}
                       type="button"
