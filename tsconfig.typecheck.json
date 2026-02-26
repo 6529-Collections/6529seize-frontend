@@ -1,6 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "exclude": [
+    "node_modules",
+    ".next/**",
+    "generated/**",
     "__tests__/**",
     "__mocks__/**",
     "tests/**",
