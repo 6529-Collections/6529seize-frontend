@@ -68,6 +68,14 @@ set edition preference, and manage per-drop upcoming subscription counts.
   aligned with the current mint date throughout mint day instead of advancing
   early by local timezone/time-of-day.
 - Top-up action requires selecting a valid option before `Send` is enabled.
+- `Top Up` uses `Other` as a free-text card-count input:
+  - entering free-text is accepted as text but validated through integer parsing.
+  - non-numeric input, blank input, `0`, and negative counts are rejected with
+    `Select a top-up option`.
+  - values with decimals or numeric prefixes (for example `1.8`) are parsed to
+    the integer prefix before sending (`1` in this example).
+  - switching back to a preset option clears the `Other` input and removes
+    validation errors for that field.
 - Per-drop subscription count is capped by the profile's eligibility count.
 - `Mode` and `Upcoming Drops` rows show updated UTC last-update/time context:
   - `Mode` includes the last settings update timestamp when available.
