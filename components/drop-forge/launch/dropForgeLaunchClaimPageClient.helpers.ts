@@ -21,15 +21,23 @@ export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
 
   const partsByT = value.split("T");
   if (partsByT.length !== 2) return null;
-  const [datePart, timePart] = partsByT;
+  const datePart = partsByT[0];
+  const timePart = partsByT[1];
+  if (!datePart || !timePart) return null;
 
   const dateParts = datePart.split("-");
   if (dateParts.length !== 3) return null;
-  const [year, month, day] = dateParts;
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  if (!year || !month || !day) return null;
 
   const timeParts = timePart.split(":");
   if (timeParts.length !== 2 && timeParts.length !== 3) return null;
-  const [hour, minute, second = "0"] = timeParts;
+  const hour = timeParts[0];
+  const minute = timeParts[1];
+  const second = timeParts[2] ?? "0";
+  if (!hour || !minute) return null;
 
   if (
     !isAsciiDigits(year, 4) ||
