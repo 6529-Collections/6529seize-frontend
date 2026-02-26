@@ -26,6 +26,7 @@ wallet.
    - `Delegation Managers`
    - `Consolidations`
 4. Use `Clear` to reset input and results.
+5. Open `/delegation/wallet-checker?address=<wallet-or-ens>`, and a check starts automatically once that value is validated.
 
 ## Common Scenarios
 
@@ -38,13 +39,21 @@ wallet.
 ## Edge Cases
 
 - Invalid input shows `Invalid address`.
+- If `?address=<wallet-or-ens>` is present, Wallet Checker starts an initial check immediately after the page initializes.
 - ENS resolution blocks submit while address resolution is still loading.
+- While a check is in progress, `Check` and `Enter` do not start another request.
+- `Clear` resets the address input, clears cached query state, and empties all
+  result sections.
 - Consolidation output can include directional pairs until reciprocal
   consolidation is completed.
+- Opening `Wallet Checker` with an address query parameter from other pages
+  preserves that input without requiring a manual paste or `Check` click.
 
 ## Failure and Recovery
 
 - If results are empty, confirm wallet input and rerun `Check`.
+- If deep-linked address lookup cannot resolve to a valid `0x` address, fix the
+  input value (or replace ENS with its resolved address) and rerun check.
 - If API reads fail, checker falls back to empty result sets; retry after
   network/API recovery.
 - If incomplete-consolidation recommendations appear, complete the missing
