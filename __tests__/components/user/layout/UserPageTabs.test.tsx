@@ -35,7 +35,8 @@ const {
 const renderTabs = (
   showWaves: boolean,
   isIos: boolean,
-  country: string = "US"
+  country: string = "US",
+  connectedProfile: any = null
 ) => {
   (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
   (usePathname as jest.Mock).mockReturnValue("/[user]");
@@ -49,7 +50,7 @@ const renderTabs = (
     reject: jest.fn(),
   });
   return render(
-    <AuthContext.Provider value={{ showWaves } as any}>
+    <AuthContext.Provider value={{ showWaves, connectedProfile } as any}>
       <UserPageTabs />
     </AuthContext.Provider>
   );
@@ -60,14 +61,45 @@ describe("UserPageTabs", () => {
     renderTabs(false, false);
     const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
-    expect(tabs).not.toContain(USER_PAGE_TAB_IDS.WAVES);
     expect(tabs).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
   });
 
-  it("hides subscriptions tab on iOS and shows waves when enabled", () => {
-    renderTabs(true, true, "CA"); // Non-US country to trigger subscription hiding
+  it("hides subscriptions tab on iOS non-US", () => {
+    renderTabs(true, true, "CA");
     const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
-    expect(tabs).toContain(USER_PAGE_TAB_IDS.WAVES);
+  });
+
+  it("shows proxy tab when viewing own profile by handle", () => {
+    renderTabs(false, false, "US", {
+      normalised_handle: "testuser",
+      wallets: [],
+    });
+    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
+  });
+
+  it("shows proxy tab when viewing own profile by wallet", () => {
+    renderTabs(false, false, "US", {
+      normalised_handle: "otherhandle",
+      wallets: [{ wallet: "testuser" }],
+    });
+    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
+  });
+
+  it("hides proxy tab when viewing another user's profile", () => {
+    renderTabs(false, false, "US", {
+      normalised_handle: "anotheruser",
+      wallets: [{ wallet: "0xSomeOtherWallet" }],
+    });
+    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    expect(tabs).not.toContain(USER_PAGE_TAB_IDS.PROXY);
+  });
+
+  it("hides proxy tab when not connected", () => {
+    renderTabs(false, false, "US", null);
+    const tabs = screen.getAllByTestId("tab").map((t) => t.textContent);
+    expect(tabs).not.toContain(USER_PAGE_TAB_IDS.PROXY);
   });
 });
