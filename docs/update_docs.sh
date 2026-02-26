@@ -8,7 +8,7 @@ fi
 
 LAST_COMMIT_HASH="$(git rev-parse --short HEAD)"
 
-codex exec -- '$commit-docs-updater'
+codex exec -- 'Use $commit-docs-updater. Context: docs may be a symlink in this workflow, and that is expected.'
 
 if [[ -L docs ]]; then
   echo "docs is symlinked in this worktree; skipping git add/commit."
@@ -22,5 +22,5 @@ fi
 
 git add docs
 
-codex exec -- '$docs-precommit-guard'
+codex exec -- 'Use $docs-precommit-guard. Context: docs may be a symlink in this workflow, and that is expected.'
 git commit -m "docs updated ${LAST_COMMIT_HASH}"
