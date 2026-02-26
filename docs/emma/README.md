@@ -17,7 +17,7 @@ Primary jobs in this area:
 
 - [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md): connect, sign in, create plans, open saved plans, and delete plans.
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md): add wallets manually or by CSV and auto-split large uploads into multiple custom snapshots.
-- [Map Delegations](feature-map-delegations.md): add a delegation contract and continue plan execution.
+- [Map Delegations](feature-map-delegations.md): optionally add one delegation contract, run analysis when required, then continue to `Review`.
 - [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md): confirm token ID, upload photos and automatic airdrops, finalize, and publish to GitHub.
 
 ## Flows

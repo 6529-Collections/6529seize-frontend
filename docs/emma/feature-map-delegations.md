@@ -1,64 +1,56 @@
-# EMMA Map Delegations Step
+# EMMA Map Delegations
 
 ## Overview
 
-The `Map Delegations` step in an EMMA plan lets you add an optional delegation
-contract so downstream phases can resolve delegated wallets during distribution.
+Use `Map Delegations` in `/emma/plans/{planId}` to optionally map one delegation
+contract before `Review`.
 
-## Location in the Site
+## Location and Entry
 
 - Route: `/emma/plans/{planId}`
-- Context: `Map Delegations` step in the right-side step timeline
+- Step: `Map Delegations` in the right-side plan timeline
+- This step has no dedicated URL segment. Open a plan, then move through steps.
+- To revisit from `Review`, click completed `Map Delegations` in the sidebar.
 
-## Entry Points
+## What the Step Shows
 
-- Open `Tools -> EMMA` and select an existing plan, or open `/emma/plans/{planId}`
-  directly.
-- Continue through plan setup to the `Map Delegations` step.
+- If no delegation contract exists:
+  - input `Contract to return registered Delegations`
+  - `Add contract` submit button
+- If a contract already exists:
+  - `Delegations are done using contract <contract>`
+  - no edit or replace action in this step
+- Header action: `Download operations` (same as other non-`Create Plan` steps)
 
-## User Journey
+## Action Rules
 
-1. Open the `Map Delegations` step.
-2. If no delegation mapping exists yet, enter `Contract to return registered
-   Delegations` and click `Add contract`.
-3. The tool posts `MAP_RESULTS_TO_DELEGATED_WALLETS` with
-   `delegationContract: <lowercased input>`.
-4. On successful post, operations reload and the form resets.
-5. If mapped, the step shows `Delegations are done using contract <contract>`.
-6. Navigation state:
-   - `Run analysis` is shown while any operation is un-run.
-   - `Next` is shown only after operations are run.
-   - `Skip` is shown when no delegation contract exists yet.
+- `Run analysis` shows when any plan operation is still not run.
+- `Skip` shows only when all operations are run and no delegation contract is mapped.
+- `Next` shows only when all operations are run and a delegation contract is mapped.
+- `Skip` and `Next` both move to `Review`.
 
-## Common Scenarios
+## Add Contract Behavior
 
-- Keep delegation mapping optional if your plan does not need delegated-wallet
-  expansion; `Skip` moves directly to `Review`.
-- Map delegation after adding operations in prior steps to avoid the extra
-  `Run analysis` roundtrip.
-- Use `Next` only when the operation is present and run-complete.
-
-## Edge Cases
-
-- The input accepts any non-empty string in this step; backend/API validation can
-  still reject invalid contracts and surfaces error toasts.
-- A delegated contract is displayed as read-only once added in this flow.
-- The control uses `RUN` behavior from plan execution flow, so if any operation
-  remains unrun the step remains in analysis-required mode.
+1. Enter any non-empty value in `Contract to return registered Delegations`.
+2. Click `Add contract`.
+3. During submit, the button is disabled and shows a spinner.
+4. EMMA lowercases the value before sending it.
+5. On success, EMMA refreshes operations, clears the input, and switches to the
+   read-only contract message.
 
 ## Failure and Recovery
 
-- If posting the operation fails, the API returns an error toast and operation list
-  is unchanged.
-- If execution fails in this or earlier steps, users run analysis and rely on the
-  returned warning/error reason before continuing.
+- If `Add contract` fails, EMMA keeps this step open and shows an error toast.
+- If run execution fails, the top warning bar shows
+  `Distribution plan building failed`, backend reason text, and `Run Analysis`.
+- If `Run analysis` keeps showing here, another operation in the plan is still
+  unrun. Run analysis, wait for completion, then retry `Skip` or `Next`.
 
 ## Related Pages
 
-- [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
 - [EMMA Index](README.md)
+- [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
 - [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
-- [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
-- [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
 - [EMMA Access and Plan Operations Troubleshooting](troubleshooting-emma-access-and-plan-operations.md)
+- [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
 - [Docs Home](../README.md)

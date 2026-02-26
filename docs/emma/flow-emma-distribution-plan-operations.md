@@ -42,7 +42,7 @@ execute `allowlist` operations.
 - Create snapshots/custom snapshots, then run analysis before moving forward.
 - Build phase components and run analysis until each phase step is run-complete.
 - In `Map Delegations`, add contract and run analysis, or use `Skip` when no
-  delegation mapping is needed.
+  delegation mapping is needed and all operations are already run.
 - Recover failed runs directly from the warning bar without leaving the plan.
 
 ## Edge Cases

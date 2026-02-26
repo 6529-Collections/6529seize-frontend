@@ -36,6 +36,12 @@ operation runs are blocked.
   read the backend reason shown in the warning and retry with `Run Analysis`.
 - Step progression shows `Run analysis` instead of `Next`:
   run analysis first, wait for run completion, then continue.
+- In `Map Delegations`, `Run analysis` shows and `Skip` is hidden:
+  at least one plan operation is still unrun; click `Run analysis`, wait for
+  completion, then retry.
+- `Map Delegations` shows `Delegations are done using contract ...` and no input:
+  a delegation contract is already mapped for this plan; this step is read-only
+  for that value.
 - `Publish to GitHub` is disabled in review:
   finalize distribution and ensure at least one photo and one automatic airdrop
   upload are present.
