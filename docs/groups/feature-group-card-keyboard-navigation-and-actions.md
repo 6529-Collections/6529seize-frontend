@@ -4,77 +4,69 @@ Parent: [Groups Index](README.md)
 
 ## Overview
 
-Group cards on `/network/groups` use keyboard-accessible card activation while
-keeping nested controls independently interactive.
+Group cards on `/network/groups` are keyboard-accessible navigation surfaces
+with nested actions for creator navigation, bulk rating, and group management.
 
-Card-level activation opens the selected group on the network identity view:
+Card activation opens the network view scoped to that group:
 `/network?page=1&group={groupId}`.
 
 ## Location in the Site
 
-- Primary list route: `/network/groups`.
-- Group-scoped identity target route: `/network?page=1&group={groupId}`.
-- Group cards also appear in wave/chat seize-link previews.
+- Groups list route: `/network/groups`
+- Group-scope target route: `/network?page=1&group={groupId}`
+- Group card previews in seize-link chat messages
 
 ## Entry Points
 
-- Open `Network -> Groups` from the sidebar.
+- Open `Network -> Groups`.
 - Open `/network/groups` directly.
-- Open a seize link that renders an inline group card preview.
+- Open a message containing a seize link that renders a group card preview.
 
 ## User Journey
 
-1. Open `/network/groups`.
-2. Move focus to a group card.
-3. Activate the card with `Enter`, `Space`, or click on non-control card
-   surface.
-4. The app opens `/network?page=1&group={groupId}`.
-5. Use nested controls when needed (creator profile link, `Rep all`, `NIC all`,
-   config-row scroll controls, and options menu).
-6. Inspect the config rows, including the TDH mode label (`TDH`, `xTDH`, or
-   `TDH + xTDH`) when present.
-7. Open the options menu from the kebab button, then close it with outside
-   click, `Escape`, or by selecting an action.
+1. Move focus to a card in `/network/groups`.
+2. Open the card with `Enter`, `Space`, or click on card surface.
+3. The app navigates to `/network?page=1&group={groupId}`.
+4. Use nested controls when needed:
+   - Creator handle link
+   - `Rep all` / `NIC all`
+   - Config-row scroll arrows
+   - Kebab options menu (`Edit`/`Clone`, and `Delete` when allowed)
 
 ## Common Scenarios
 
-- Keyboard-only users open group-scoped network view with `Enter` or `Space`.
-- Users open the creator handle to navigate to the creator profile route.
-- Signed-in users start group-wide vote actions with `Rep all` or `NIC all`.
-- Users open the options menu for `Edit`/`Clone` (and delete when available).
-- Screen-reader users get menu open/closed state from the options trigger.
-- Users scroll long config rows with left/right controls.
+- Keyboard users open group-scoped network view without a mouse.
+- Signed-in users distribute bulk Rep or NIC from one card.
+- Owners open `Edit` or `Delete`; non-owners open `Clone`.
+- Users inspect TDH/xTDH/grant/manual-list summary values in config rows.
 
 ## Edge Cases
 
-- Card-level activation is available only when the card has a resolved group id.
-- While a card is in `Rep all` or `NIC all` mode, card-level navigation is
-  paused until returning to idle.
-- Only one card can be active for vote-all at a time; other cards keep
-  vote-all buttons disabled while another vote-all action is open.
-- Signed-out sessions do not show vote-all or edit/clone actions in the groups
-  list.
-- Card activation and menus remain unaffected by TDH label wording.
-- TDH labels now mirror the group’s configured inclusion mode and can show:
-  `TDH`, `xTDH`, or `TDH + xTDH`.
-- Card action menus render above card content so menu items stay clickable in
-  dense list layouts.
+- Only one card can be in `Rep all` or `NIC all` mode at a time.
+- While vote-all mode is active on a card, card-level navigation is paused.
+- Signed-out users do not see vote-all or edit/clone/delete actions.
+- Proxy sessions hide edit/clone/delete actions, but vote-all remains
+  available.
+- In chat previews, card activation is unavailable until group data resolves.
+- Config rows can overflow horizontally; left/right controls appear when
+  needed.
 
 ## Failure and Recovery
 
-- If embedded preview card data is still loading, card-level activation stays
-  unavailable until the group id resolves.
-- If route navigation fails, users remain on the current page and can retry.
-- If users open a vote-all action by mistake, they can cancel and return to
-  idle card behavior.
+- If route navigation fails, users stay on the current page and can retry card
+  activation.
+- If delete fails, an error toast is shown and the card remains.
+- If delete succeeds, the card is removed from the list and active-group state
+  is cleared when needed.
+- If bulk rating fails mid-run, the action closes and users can retry from idle
+  state.
+- Users can cancel vote-all actions to return to normal card behavior.
 
 ## Limitations / Notes
 
-- Card activation always targets page 1 of `/network` with the `group` filter.
-- Group cards are single-target navigation surfaces; they do not multi-select
-  multiple groups.
-- This page covers card interaction behavior, not full group creation/edit form
-  field documentation.
+- Card activation always targets `/network?page=1&group={groupId}`.
+- Cards are single-target navigation elements, not multi-select controls.
+- This page covers card behavior, not the full create/edit form.
 
 ## Related Pages
 
@@ -82,5 +74,6 @@ Card-level activation opens the selected group on the network identity view:
 - [Groups Index](README.md)
 - [Groups List Filters](feature-groups-list-filters.md)
 - [Group Creation and Edit Flow](feature-group-create-and-edit.md)
+- [Groups List and Create Actions Troubleshooting](troubleshooting-groups-list-and-create-actions.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Internal Link Navigation](../navigation/feature-internal-link-navigation.md)

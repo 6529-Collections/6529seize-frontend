@@ -63,6 +63,7 @@ Use this when a route is blocked, data is missing, or an action fails.
 - [Profile Routes and Tabs](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Notifications Feed](notifications/troubleshooting-notifications-feed.md)
 - [Network Routes and Health](network/troubleshooting-network-routes-and-health.md)
+- [Groups List and Create Actions](groups/troubleshooting-groups-list-and-create-actions.md)
 - [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)
 - [EMMA Access and Plan Operations](emma/troubleshooting-emma-access-and-plan-operations.md)
 - [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)

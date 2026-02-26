@@ -2,8 +2,11 @@
 
 ## Overview
 
-Groups docs cover `/network/groups` list filtering, group-card interaction
-behavior, and group create/edit configuration constraints.
+Groups docs cover `/network/groups`: finding groups, running card actions,
+creating or cloning definitions, and opening group-scoped network views.
+
+Use this area when you need filter behavior, create/edit access rules,
+validation limits, or recovery paths for failed group actions.
 
 ## Features
 
@@ -13,21 +16,21 @@ behavior, and group create/edit configuration constraints.
 
 ## Flows
 
-- [Group-to-Network Scope Flow](../network/flow-network-group-scope.md)
+- [Groups List, Create, and Network Scope Flow](flow-groups-list-create-and-network-scope.md)
 
 ## Troubleshooting
 
-- None.
+- [Groups List and Create Actions Troubleshooting](troubleshooting-groups-list-and-create-actions.md)
 
 ## Stubs
 
-- TODO: Add a troubleshooting page for create/edit auth-proxy gating and
-  failed group-action recovery.
+- None.
 
 ## Related Areas
 
 - [Docs Home](../README.md)
 - [Network Index](../network/README.md)
+- [Network Group Scope Flow](../network/flow-network-group-scope.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Internal Link Navigation](../navigation/feature-internal-link-navigation.md)
-- [Waves Index](../waves/README.md)
+- [Wave Right Sidebar Group and Curation Management](../waves/sidebars/feature-right-sidebar-group-management.md)

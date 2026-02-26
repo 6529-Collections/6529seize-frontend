@@ -1,129 +1,121 @@
 # Group Creation and Edit Flow
 
+Parent: [Groups Index](README.md)
+
 ## Overview
 
-The groups area supports creating new group definitions and editing existing
-groups from the same configuration surface.
+Group creation and editing use the same configuration surface. Users can start
+from `Create New`, `Edit`, or `Clone`, then run `Test` or `Create`.
 
-Within the configuration surface, the TDH requirement field exposes two
-selection tabs and defaults to `TDH + xTDH`:
+The TDH mode picker exposes two tabs:
 
 - `TDH + xTDH`
 - `TDH`
 
+Legacy groups that store `XTDH` still load and can be saved.
+
 ## Location in the Site
 
-- Base groups route: `/network/groups`
-- Create mode: `/network/groups?edit=new`
-- Edit mode: `/network/groups?edit={groupId}`
+- Base route: `/network/groups`
+- Create surface from list action: `/network/groups` (same route, create view mode)
+- Deep-link create mode: `/network/groups?edit=new`
+- Deep-link edit/clone mode: `/network/groups?edit={groupId}`
 
 ## Entry Points
 
-- Open `Network -> Groups` and choose `Create New`.
-- Open a group card actions menu and choose `Edit` (your own group) or
-  `Clone` (someone else's group).
+- Open `Network -> Groups`, then choose `Create New`.
+- Open a group card menu and choose `Edit` (owner) or `Clone` (non-owner).
 - Open a direct URL with `?edit=new` or `?edit={groupId}`.
 
-## Known Behavior
+## Access and Mode Gating
 
-- Group create/edit mode requires an authenticated, non-proxy session.
-- The configuration form includes:
-  - Name
-  - Include-me and private toggles
-  - Filter configuration (Level, TDH, CIC, Rep, NFT/collection, and grant
-    inputs)
-  - `Include Identities` and `Exclude Identities` sections
-- The TDH section includes an inclusion mode selector with values:
-  - `TDH + xTDH`
-  - `TDH`
-- For newly created groups, TDH mode defaults to `TDH + xTDH`.
-- Legacy groups that already store `XTDH` inclusion continue to load that value
-  in edit mode, even though the selector does not expose a dedicated `xTDH`
-  tab; choosing another tab switches the stored mode.
-- Include/exclude identity sections support manual identity selection, wallet
-  upload/import inputs, and a unique-wallet counter.
-- `Include me` toggle behavior:
-  - Turning it on adds the connected profile's primary wallet to
-    `Include Identities`.
-  - Turning it off removes connected-profile wallets from
-    `Include Identities`, even when no primary wallet is currently available.
-- Include/exclude wallet limits are enforced:
-  - Include list max: `10,000`
-  - Exclude list max: `1,000`
-- Edit mode preloads both included and excluded identity-wallet sets from the
-  existing group configuration.
-- `Create` and `Test` are disabled while configuration validation fails or the
-  corresponding action is already running.
-- `Cancel` or `Back` returns to the groups list view.
+- Create/edit requires an authenticated, non-proxy session.
+- If auth is cancelled while entering create/edit, users remain in list view.
+- If session state changes to signed-out or proxy while create/edit is open,
+  the app returns to list view.
+- Exiting create/edit (`Back`, `Cancel`, or successful save) returns to the
+  base `/network/groups` route and clears current query params.
+
+## Configuration Surface
+
+- Top-level fields:
+  - `Name`
+  - `Include me` toggle
+  - `Private group` toggle
+- Filter cards:
+  - `Level` minimum
+  - `TDH` minimum + mode (`TDH + xTDH` or `TDH`)
+  - `NIC` minimum with optional identity and direction
+  - `Rep` minimum with optional identity, direction, and category
+  - `Required NFTs` (specific tokens)
+  - `Collection Access` (any token from selected collections)
+  - `xTDH Grant Beneficiary` (manual grant ID or picker)
+- Identity lists:
+  - `Include Identities`
+  - `Exclude Identities`
+  - Sources: identity search, EMMA list import, CSV upload
+  - Combined wallets are deduplicated and normalized to lowercase.
+- `Include me` behavior:
+  - Turning on adds the connected profile primary wallet (if present) to
+    include identities.
+  - Turning off removes connected-profile wallets from include identities.
 
 ## Validation and Action Preconditions
 
-- Client-side validation checks all group filters before `Create` or `Test`:
-  - At least one filter source exists: include wallets, exclude wallets, level,
-    TDH, rep, CIC, NFT collection ownership, or beneficiary grant.
-  - Include wallets must be `<= 10,000`.
-  - Exclude wallets must be `<= 1,000`.
-  - When both values are set, each numeric range must have `min <= max` for:
-    level, TDH, rep, and CIC.
-- If any rule fails, buttons stay disabled and the action returns `Group
-  configuration is invalid.` from the mutation layer.
-- Wallet list input is normalized:
-  - Wallets are case-normalized and deduplicated when combining manual search,
-    EMMA, and file-import sources.
-  - Include-list overflow shows a red "Maximum allowed wallets count is ..."
-    message once the configured limit is exceeded.
-- `Test` and `Create` share the same validation gate, so a failing validation
-  blocks both actions.
+- `Create` and `Test` share the same configuration validation gate.
+- Validation requires at least one active filter source:
+  - include wallets, exclude wallets, level, TDH, Rep, NIC, NFT ownership, or
+    grant requirement.
+- Wallet limits:
+  - Include identities: `<= 10,000`
+  - Exclude identities: `<= 1,000`
+- Range checks:
+  - When both values exist, `min <= max` is required for level, TDH, Rep, and
+    NIC.
+- If validation fails, actions stay disabled and mutation paths return `Group
+  configuration is invalid.`
+- `Name` is validated on submit:
+  - Empty names are rejected on `Create` with `Please name your group.`
+  - `Test` uses `{handle} Test Run` when name is empty.
 
-## Inclusion Strategy and Threshold Semantics
+## Save and Test Behavior
 
-- The TDH filter stores:
-  - a minimum value (`min`),
-  - an optional maximum value (`max`),
-  - and an inclusion strategy (`TDH` or `TDH + xTDH`, with legacy `XTDH` payloads preserved in edit).
-- The UI edits the minimum threshold only; any loaded maximum remains attached to the
-  group payload and is preserved through save unless you change the group
-  configuration in a way that rewrites the full TDH object.
-- Strategy meaning:
-  - `TDH + xTDH`: threshold uses combined TDH and xTDH.
-  - `TDH`: threshold uses only TDH.
-- Legacy `XTDH` strategy values in edit mode are preserved on open (the label and
-  saved logic continue to use that mode), even though only `TDH` and `TDH + xTDH`
-  are available as selectable tabs.
-- If both `min` and `max` are set and `min > max`, validation blocks the action
-  with the TDH-range issue.
+- `Test` creates a test group from current config, then loads `Members count`.
+- `Create` always uses the same primary action label (`Create`), including edit
+  mode.
+- Editing your own group creates and publishes a new version with the previous
+  version id passed as `old_version_id`.
+- Cloning another user’s group publishes a new copy and keeps the original
+  group unchanged.
+- In edit mode, include/exclude identity-wallet lists preload from the selected
+  group.
 
-## Test Action and Members Preview
+## Grant Lookup and Import Behavior
 
-- `Test` submits a test group using the current form payload.
-- If the Name field is empty, test submission uses `{connected handle} Test Run`
-  as the fallback name.
-- On successful test, the page queries `community-members/top` with the created
-  test group and displays `Members count`.
-- On test failure (non-auth), the error returned by the submit path is shown in a
-  toast message.
+- Grant ID lookup can show inline validation errors.
+- A typed grant ID is still submitted even when lookup fails.
+- Non-`GRANTED` grant statuses are selectable, with an inline warning.
+- EMMA import requires auth; cancelled auth leaves EMMA wallets unset.
+- CSV import keeps valid `0x` wallet addresses, ignores invalid tokens, and
+  deduplicates matches.
 
 ## Failure and Recovery
 
-- If the connected profile has no primary wallet, turning `Include me` on does
-  not update `Include Identities`.
-- Users can still turn `Include me` off to remove their connected-profile
-  wallets from `Include Identities`.
-- Groups created before TDH inclusion-mode selection fall back to `TDH` in edit
-  mode when no inclusion strategy value is stored.
-
-## Not Yet Documented
-
-- TODO: Document create/edit behavior differences for permission changes during
-  an active session.
-- TODO: Document wallet import failure and recovery behavior for upload and EMMA
-  sources.
+- If create/edit opens without expected prefilled data from an edit link, go
+  back to list and re-open from the card menu.
+- If wallet totals exceed limits, remove entries until totals are within
+  limits.
+- If `Test` or `Create` fails with API error, retry after confirming auth and
+  filter validity.
+- If grant lookup fails, either correct the grant ID or continue with the typed
+  value intentionally.
 
 ## Related Pages
 
 - [Groups Index](README.md)
 - [Groups List Filters](feature-groups-list-filters.md)
 - [Group Card Keyboard Navigation and Actions](feature-group-card-keyboard-navigation-and-actions.md)
+- [Groups List and Create Actions Troubleshooting](troubleshooting-groups-list-and-create-actions.md)
 - [Wave Right Sidebar Group and Curation Management](../waves/sidebars/feature-right-sidebar-group-management.md)
 - [xTDH Network Overview](../network/feature-xtdh-network-overview.md)
 - [Docs Home](../README.md)
