@@ -3,10 +3,45 @@ set -euo pipefail
 
 export LC_ALL=C
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+META_FILE="$REPO_ROOT/docs/meta.json"
+
+error() {
+  printf '%s\n' "$1" >&2
+}
+
+read_last_target_from_meta() {
+  jq -r '.docs_area_remediator_loop.last_target // empty' "$META_FILE" 2>/dev/null
+}
+
+write_last_target_to_meta() {
+  local target="$1"
+  local tmp_meta_file="${META_FILE}.tmp"
+
+  jq --indent 4 --arg target "$target" '.docs_area_remediator_loop.last_target = $target' "$META_FILE" > "$tmp_meta_file"
+  mv "$tmp_meta_file" "$META_FILE"
+}
+
 max_iterations="${1:-0}"
 
 if ! [[ "${max_iterations}" =~ ^[0-9]+$ ]]; then
   echo "Usage: $0 [max_iterations>=0]" >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  error "jq is required."
+  exit 1
+fi
+
+if [[ ! -r "$META_FILE" ]]; then
+  error "Missing or unreadable ${META_FILE}."
+  exit 1
+fi
+
+if ! jq empty "$META_FILE" >/dev/null 2>&1; then
+  error "Invalid JSON in ${META_FILE}."
   exit 1
 fi
 
@@ -45,7 +80,10 @@ pick_next_target() {
 }
 
 iteration=0
-last_target=""
+if ! last_target="$(read_last_target_from_meta)"; then
+  error "Invalid JSON in ${META_FILE}."
+  exit 1
+fi
 run_final_validation=false
 
 while true; do
@@ -58,7 +96,6 @@ while true; do
     echo "No docs markdown files found under docs/. Stopping loop."
     break
   fi
-  last_target="${target_path}"
   iteration=$((iteration + 1))
 
   is_root_target=false
@@ -109,6 +146,8 @@ EOF
 
   if git diff --cached --quiet; then
     echo "No docs changes for ${target_path}; continuing."
+    write_last_target_to_meta "${target_path}"
+    last_target="${target_path}"
     continue
   fi
 
@@ -119,6 +158,8 @@ EOF
   fi
   python3 .codex/skills/commit-docs-updater/scripts/validate_docs_links.py
   git commit -m "docs: remediator pass ${iteration} (${target_path})"
+  write_last_target_to_meta "${target_path}"
+  last_target="${target_path}"
 done
 
 if [[ "${run_final_validation}" == "true" ]]; then
