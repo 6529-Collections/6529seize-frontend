@@ -18,6 +18,13 @@ cleanup() {
   fi
 }
 
+update_last_commit() {
+  local commit="$1"
+  local tmp_meta_file="${META_FILE}.tmp"
+  jq --indent 4 --arg commit "$commit" '.last_commit = $commit' "$META_FILE" > "$tmp_meta_file"
+  mv "$tmp_meta_file" "$META_FILE"
+}
+
 trap cleanup EXIT INT TERM
 
 if ! command -v jq >/dev/null 2>&1; then
@@ -75,10 +82,19 @@ while true; do
   fi
 
   short_commit="$(git -C "$REPO_ROOT" rev-parse --short "$next_commit")"
-  worktree_path="$PARENT_DIR/${REPO_NAME}-next-${short_commit}"
   iteration=$((processed_count + 1))
 
   printf '=== Processing queued commit %d: %s (%s) ===\n' "$iteration" "$short_commit" "$next_commit"
+
+  if ! git -C "$REPO_ROOT" diff-tree --no-commit-id --name-only -r --root "$next_commit" -- '*.ts' '*.tsx' | grep -q '.'; then
+    printf 'Skipping queued commit %s: no .ts/.tsx changes.\n' "$next_commit"
+    update_last_commit "$next_commit"
+    processed_count=$((processed_count + 1))
+    printf 'Skipped queued commit %s. Total processed: %d.\n' "$next_commit" "$processed_count"
+    continue
+  fi
+
+  worktree_path="$PARENT_DIR/${REPO_NAME}-next-${short_commit}"
 
   if [ -e "$worktree_path" ]; then
     error "Target worktree path already exists: $worktree_path"
@@ -99,9 +115,7 @@ while true; do
   printf 'Running docs updater in worktree scope...\n'
   (cd "$worktree_path" && ./docs/update_docs.sh)
 
-  tmp_meta_file="${META_FILE}.tmp"
-  jq --indent 4 --arg commit "$next_commit" '.last_commit = $commit' "$META_FILE" > "$tmp_meta_file"
-  mv "$tmp_meta_file" "$META_FILE"
+  update_last_commit "$next_commit"
 
   git -C "$REPO_ROOT" worktree remove -f "$worktree_path"
   ACTIVE_WORKTREE_PATH=""
