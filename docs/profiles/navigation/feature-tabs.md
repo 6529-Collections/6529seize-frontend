@@ -1,0 +1,87 @@
+# Profile Tabs
+
+## Overview
+
+User profiles are tabbed pages under `/{user}`. Each tab has a stable URL, so
+users can deep-link to a specific profile section. The `Identity` tab is the
+single route for both `Rep` and `NIC` profile behavior.
+
+## Location in the Site
+
+- Profile root: `/{user}`
+- Tab routes:
+  - `/{user}` (Brain)
+  - `/{user}/identity`
+  - `/{user}/collected`
+  - `/{user}/xtdh` (Beta)
+  - `/{user}/stats`
+  - `/{user}/subscriptions`
+  - `/{user}/proxy`
+  - `/{user}/groups`
+  - `/{user}/waves`
+  - `/{user}/followers`
+
+## Entry Points
+
+- Open a profile URL directly by handle or wallet.
+- Click tabs in the profile header area.
+- Open a shared deep link that includes a tab route.
+
+## User Journey
+
+1. User opens a profile URL.
+2. The app loads the profile and resolves redirects when needed.
+3. The profile header and tab bar are shown.
+4. User switches tabs or shares the current tab URL.
+
+## Common Scenarios
+
+- Visiting `/{user}` opens the Brain feed for that profile.
+- Visiting `/{user}/identity` opens the combined Identity tab (`Rep` + `NIC`)
+  directly.
+- Visiting `/{user}/stats` opens Stats directly.
+- Visiting with `?address=<wallet>` keeps that wallet filter when switching tabs.
+- Visiting by wallet or old handle can redirect to the canonical handle URL.
+- Browser-tab titles fall back to a shortened wallet identifier when no handle
+  is available or display text is emoji-only.
+
+## Edge Cases
+
+- `Brain` and `Waves` tabs are hidden when the Waves feature is disabled.
+- `Subscriptions` is hidden on iOS when the country is not `US`.
+- If a user lands on a tab that is currently hidden, the app redirects to the
+  first visible tab for that profile.
+- Canonical-handle redirects keep existing query parameters.
+- Legacy `/{user}/rep` links are unsupported and should be updated to
+  `/{user}/identity`.
+
+## Failure and Recovery
+
+- If the profile or route is not found, users see the shared not-found surface:
+  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
+- If profile loading fails for a non-404 reason, users may see a shared app
+  error state. Reloading the route retries the request.
+
+## Limitations / Notes
+
+- Tab availability can change by device and feature context.
+- `/{user}` only resolves the Brain tab when Waves is currently visible in the
+  tab set.
+- Tab links preserve the `address` query parameter but may drop unrelated query
+  parameters.
+- Profile quick stats for both `NIC` and `Rep` land on `/{user}/identity`.
+- The `xTDH` tab is labeled Beta.
+
+## Related Pages
+
+- [Profiles Index](../README.md)
+- [Profile Header Summary](feature-header-summary.md)
+- [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Profile Identity Tab](../tabs/feature-identity-tab.md)
+- [Profile Identity Statements](../tabs/feature-identity-statements.md)
+- [Profile Tab Content](../tabs/feature-tab-content.md)
+- [Profile Stats Tab](../tabs/feature-stats-tab.md)
+- [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
+- [Profile Navigation Flow](flow-navigation.md)
+- [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)

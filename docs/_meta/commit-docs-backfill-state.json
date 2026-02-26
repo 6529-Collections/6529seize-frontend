@@ -1,0 +1,6 @@
+{
+  "last_processed_commit": null,
+  "updated_at": null,
+  "mode": "first-parent",
+  "notes": "Initialize with scripts/docs-backfill-replay.py --init <commit-ref>"
+}
