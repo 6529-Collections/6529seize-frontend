@@ -11,6 +11,7 @@ import {
   traitsDataToUpdateRequest,
 } from "@/components/drop-forge/claimTraitsData";
 import {
+  getClaimArweaveSectionStatus,
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
@@ -279,6 +280,15 @@ export default function DropForgeCraftClaimPageClient({
       </span>
     </span>
   );
+  const arweavePrimaryStatus = getClaimArweaveSectionStatus(claim);
+  const arweaveHeaderPill = (
+    <DropForgeStatusPill
+      className={getPrimaryStatusPillClassName(arweavePrimaryStatus.tone)}
+      label={arweavePrimaryStatus.label}
+      showLoader={arweavePrimaryStatus.key === "publishing"}
+      tooltipText={arweavePrimaryStatus.reason ?? ""}
+    />
+  );
 
   return (
     <div className={PAGE_CONTAINER_CLASS}>
@@ -329,7 +339,13 @@ export default function DropForgeCraftClaimPageClient({
           />
         </DropForgeAccordionSection>
 
-        <DropForgeAccordionSection title="Arweave" defaultOpen>
+        <DropForgeAccordionSection
+          title="Arweave"
+          defaultOpen
+          headerRight={arweaveHeaderPill}
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <ArweaveSection
             claimId={claimId}
             claim={claim}
@@ -1400,18 +1416,24 @@ function MetadataSection({
   );
 }
 
-const ARWEAVE_ROW_GRID =
-  "tw-grid tw-grid-cols-[minmax(5rem,auto)_auto_auto_1fr] tw-gap-x-3 tw-items-center";
+const ARWEAVE_LINK_GRID =
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
+const ARWEAVE_LINK_CARD =
+  "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 
 function ArweaveLinkRow({
   label,
-  url,
-}: Readonly<{ label: string; url: string }>) {
+  cid,
+}: Readonly<{ label: string; cid: string | null | undefined }>) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const trimmedCid = cid?.trim() ?? "";
+  const hasCid = trimmedCid.length > 0;
+  const url = hasCid ? `https://arweave.net/${trimmedCid}` : null;
 
   async function handleCopy(e: React.MouseEvent) {
     e.preventDefault();
+    if (!url) return;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     try {
       await navigator.clipboard.writeText(url);
@@ -1432,31 +1454,45 @@ function ArweaveLinkRow({
   }, []);
 
   return (
-    <div className={ARWEAVE_ROW_GRID}>
-      <span className="tw-text-base tw-text-iron-200">{label}</span>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="tw-inline-flex tw-text-iron-400 tw-transition-colors hover:tw-text-primary-400"
-        aria-label={`Open ${label} on Arweave`}
+    <div className={ARWEAVE_LINK_CARD}>
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
+        <div className="tw-flex tw-items-center tw-gap-2 tw-flex-shrink-0">
+          {url && (
+            <>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
+                aria-label={`Copy ${label} link`}
+              >
+                <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
+              </button>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
+                aria-label={`Open ${label} on Arweave`}
+              >
+                <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
+              </a>
+            </>
+          )}
+          {copied && (
+            <span className="tw-animate-in tw-fade-in tw-text-xs tw-text-iron-300 tw-duration-150">
+              Copied
+            </span>
+          )}
+        </div>
+      </div>
+      <div
+        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
+          hasCid ? "tw-text-white" : "tw-text-iron-500"
+        }`}
+        title={hasCid ? trimmedCid : undefined}
       >
-        <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
-      </a>
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-text-primary-400"
-          aria-label={`Copy ${label} link`}
-        >
-          <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
-        </button>
-        {copied && (
-          <span className="tw-animate-in tw-fade-in tw-text-sm tw-text-primary-400 tw-duration-150">
-            Copied!
-          </span>
-        )}
+        {hasCid ? trimmedCid : "—"}
       </div>
     </div>
   );
@@ -1514,37 +1550,14 @@ function ArweaveSection({
 
   return (
     <div>
-      <div className="tw-mb-4 tw-flex tw-items-center tw-gap-3">
-        <DropForgeStatusPill
-          className={getPrimaryStatusPillClassName(primaryStatus.tone)}
-          label={primaryStatus.label}
-          showLoader={primaryStatus.key === "publishing"}
-          tooltipText={primaryStatus.reason ?? ""}
-        />
-      </div>
       {hasPublishedMetadata &&
         (claim.image_location ||
           claim.animation_location ||
           claim.metadata_location) && (
-          <div className="tw-my-4 tw-flex tw-flex-col tw-gap-y-5">
-            {claim.image_location && (
-              <ArweaveLinkRow
-                label="Image"
-                url={`https://arweave.net/${claim.image_location.trim()}`}
-              />
-            )}
-            {claim.animation_location && (
-              <ArweaveLinkRow
-                label="Animation"
-                url={`https://arweave.net/${claim.animation_location.trim()}`}
-              />
-            )}
-            {claim.metadata_location && (
-              <ArweaveLinkRow
-                label="Metadata"
-                url={`https://arweave.net/${claim.metadata_location.trim()}`}
-              />
-            )}
+          <div className={`tw-my-4 ${ARWEAVE_LINK_GRID}`}>
+            <ArweaveLinkRow label="Image" cid={claim.image_location} />
+            <ArweaveLinkRow label="Animation" cid={claim.animation_location} />
+            <ArweaveLinkRow label="Metadata" cid={claim.metadata_location} />
           </div>
         )}
       {(isDraft || isPublishing) && (

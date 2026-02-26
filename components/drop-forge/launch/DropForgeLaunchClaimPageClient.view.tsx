@@ -6,6 +6,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
+  getClaimArweaveSectionStatus,
   getPrimaryStatusPillClassName,
   type ClaimPrimaryStatus,
 } from "@/components/drop-forge/drop-forge-status.helpers";
@@ -32,7 +33,11 @@ import { capitalizeEveryWord, fromGWEI } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowLeftIcon,
+  ArrowTopRightOnSquareIcon,
+  DocumentDuplicateIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 type LaunchPhaseKey =
@@ -47,6 +52,10 @@ const BTN_SUBSCRIPTIONS_AIRDROP =
   "tw-h-12 tw-w-full sm:tw-w-64 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 const BTN_METADATA_UPDATE_ACTION =
   "tw-h-12 tw-w-full sm:tw-w-64 tw-rounded-lg tw-border-0 tw-bg-orange-600 tw-px-5 tw-text-base tw-font-semibold tw-text-orange-50 tw-ring-1 tw-ring-inset tw-ring-orange-300/60 tw-shadow-[0_8px_18px_rgba(234,88,12,0.25)] tw-transition-colors tw-duration-150 enabled:hover:tw-bg-orange-500 enabled:active:tw-bg-orange-700 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
+const ARWEAVE_LINK_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3";
+const ARWEAVE_LINK_CARD_CLASS =
+  "tw-flex tw-flex-col tw-items-stretch tw-gap-2 tw-rounded-lg tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800";
 
 type LaunchConfiguredPhaseKey = Exclude<LaunchPhaseKey, "research">;
 type LaunchClaimPrimaryStatus = ClaimPrimaryStatus | null;
@@ -255,6 +264,114 @@ function DropForgeArweaveLinkValue({
     >
       {value}
     </a>
+  );
+}
+
+function DropForgeArweaveLinkCard({
+  label,
+  value,
+}: Readonly<{ label: string; value: string | null | undefined }>) {
+  const trimmedValue = value?.trim() ?? "";
+  const url = toArweaveUrl(trimmedValue || undefined);
+  const hasCid = Boolean(trimmedValue && url);
+
+  async function handleCopy() {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // ignore clipboard failures
+    }
+  }
+
+  return (
+    <div className={ARWEAVE_LINK_CARD_CLASS}>
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-min-w-0 tw-text-base tw-text-iron-200">{label}</div>
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+          {hasCid && url && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  void handleCopy();
+                }}
+                className="tw-inline-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
+                aria-label={`Copy ${label} link`}
+              >
+                <DocumentDuplicateIcon className="tw-h-5 tw-w-5" />
+              </button>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-inline-flex tw-text-primary-300 tw-transition-colors hover:tw-text-primary-500"
+                aria-label={`Open ${label} on Arweave`}
+              >
+                <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5" />
+              </a>
+            </>
+          )}
+        </div>
+      </div>
+      <div
+        className={`tw-w-full tw-whitespace-normal tw-break-all tw-text-xs tw-leading-5 ${
+          hasCid ? "tw-text-white" : "tw-text-iron-500"
+        }`}
+        title={hasCid ? trimmedValue : undefined}
+      >
+        {hasCid ? trimmedValue : "—"}
+      </div>
+    </div>
+  );
+}
+
+function DropForgeLaunchClaimArweaveSection({
+  claim,
+}: Readonly<{
+  claim: MintingClaim;
+}>) {
+  const arweaveStatus = getClaimArweaveSectionStatus(claim);
+  const hasArweaveLinks = Boolean(
+    claim.image_location || claim.animation_location || claim.metadata_location
+  );
+
+  return (
+    <DropForgeAccordionSection
+      title="Arweave"
+      subtitle=""
+      tone="neutral"
+      defaultOpen={false}
+      headerRight={
+        <DropForgeStatusPill
+          className={getPrimaryStatusPillClassName(arweaveStatus.tone)}
+          label={arweaveStatus.label}
+          showLoader={arweaveStatus.key === "publishing"}
+          tooltipText={arweaveStatus.reason ?? ""}
+        />
+      }
+      showHeaderRightWhenOpen
+      showHeaderRightWhenClosed
+      childrenClassName="tw-space-y-5"
+    >
+      {hasArweaveLinks ? (
+        <div className={ARWEAVE_LINK_GRID_CLASS}>
+          <DropForgeArweaveLinkCard label="Image" value={claim.image_location} />
+          <DropForgeArweaveLinkCard
+            label="Animation"
+            value={claim.animation_location}
+          />
+          <DropForgeArweaveLinkCard
+            label="Metadata"
+            value={claim.metadata_location}
+          />
+        </div>
+      ) : (
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          No Arweave links published yet.
+        </p>
+      )}
+    </DropForgeAccordionSection>
   );
 }
 
@@ -1460,6 +1577,7 @@ function DropForgeLaunchClaimContent({
         safeClaimExternalUrl={safeClaimExternalUrl}
       />
       <DropForgeLaunchClaimTraitsSection claim={claim} />
+      <DropForgeLaunchClaimArweaveSection claim={claim} />
       <DropForgeOnChainClaimSection
         isInitialized={isInitialized}
         onChainClaimSpinnerVisible={onChainClaimSpinnerVisible}

@@ -15,17 +15,47 @@ type LaunchMediaKind = "image" | "video" | "glb" | "html" | "unknown";
 
 export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
   if (!value) return null;
-  const match =
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
-  if (!match) return null;
+  const isAsciiDigits = (part: string, length: number): boolean =>
+    part.length === length &&
+    Array.from(part).every((char) => char >= "0" && char <= "9");
 
-  const [, year, month, day, hour, minute, second] = match;
+  const partsByT = value.split("T");
+  if (partsByT.length !== 2) return null;
+  const datePart = partsByT[0];
+  const timePart = partsByT[1];
+  if (!datePart || !timePart) return null;
+
+  const dateParts = datePart.split("-");
+  if (dateParts.length !== 3) return null;
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  if (!year || !month || !day) return null;
+
+  const timeParts = timePart.split(":");
+  if (timeParts.length !== 2 && timeParts.length !== 3) return null;
+  const hour = timeParts[0];
+  const minute = timeParts[1];
+  const second = timeParts[2] ?? "0";
+  if (!hour || !minute) return null;
+
+  if (
+    !isAsciiDigits(year, 4) ||
+    !isAsciiDigits(month, 2) ||
+    !isAsciiDigits(day, 2) ||
+    !isAsciiDigits(hour, 2) ||
+    !isAsciiDigits(minute, 2) ||
+    !isAsciiDigits(second, 2)
+  ) {
+    return null;
+  }
+
   const y = Number(year);
   const mo = Number(month);
   const d = Number(day);
   const h = Number(hour);
   const mi = Number(minute);
-  const s = Number(second ?? "0");
+  const s = Number(second);
 
   if ([y, mo, d, h, mi, s].some(Number.isNaN)) return null;
 
@@ -43,7 +73,6 @@ export function parseLocalDateTimeToUnixSeconds(value: string): number | null {
 
   return Math.floor(parsed.getTime() / 1000);
 }
-
 
 export function getErrorMessage(error: unknown, fallback: string): string {
   const normalize = (message: string): string => {
@@ -72,7 +101,7 @@ export function isNotFoundError(message: string): boolean {
   );
 }
 
-export function normalizePhaseName(value: string): string {
+function normalizePhaseName(value: string): string {
   return value.replaceAll(/\s+/g, "").toLowerCase();
 }
 
@@ -147,13 +176,15 @@ export function getSubscriptionPhaseName(phaseKey: LaunchPhaseKey): string {
   return "Public Phase";
 }
 
-export function normalizeAirdropAmount(value: number | undefined): number {
+function normalizeAirdropAmount(value: number | undefined): number {
   const normalized = Number(value ?? 0);
   if (!Number.isFinite(normalized)) return 0;
   return Math.max(0, Math.trunc(normalized));
 }
 
-export function mergeAirdropsByWallet(entries: PhaseAirdrop[] | null): PhaseAirdrop[] {
+export function mergeAirdropsByWallet(
+  entries: PhaseAirdrop[] | null
+): PhaseAirdrop[] {
   if (!entries || entries.length === 0) return [];
 
   const merged = new Map<string, PhaseAirdrop>();
@@ -248,8 +279,7 @@ export function getClaimTxModalEmoji(status: ClaimTxModalStatus): string {
   return "/emojis/sgt_flushed.webp";
 }
 
-
-export function isVideoUrl(url: string | null | undefined): boolean {
+function isVideoUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   const lower = url.toLowerCase();
   return (
@@ -260,11 +290,11 @@ export function isVideoUrl(url: string | null | undefined): boolean {
   );
 }
 
-export function normalizeFormat(format: string | null | undefined): string | null {
+function normalizeFormat(format: string | null | undefined): string | null {
   return format ? format.toUpperCase() : null;
 }
 
-export function getUrlExtension(url: string | null | undefined): string | null {
+function getUrlExtension(url: string | null | undefined): string | null {
   if (!url) return null;
   const clean = url.split("?")[0]?.split("#")[0] ?? "";
   const parts = clean.split(".");
@@ -272,7 +302,7 @@ export function getUrlExtension(url: string | null | undefined): string | null {
   return parts.at(-1)?.toLowerCase() ?? null;
 }
 
-export function getImageFormat(claim: MintingClaim): string | null {
+function getImageFormat(claim: MintingClaim): string | null {
   const fromDetails = normalizeFormat(claim.image_details?.format);
   if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
   const ext = getUrlExtension(claim.image_url);
@@ -284,7 +314,7 @@ export function getImageFormat(claim: MintingClaim): string | null {
   return null;
 }
 
-export function getAnimationInfo(
+function getAnimationInfo(
   claim: MintingClaim
 ): { kind: LaunchMediaKind; subtype?: string | null } | null {
   if (!claim.animation_url) return null;
@@ -302,7 +332,10 @@ export function getAnimationInfo(
   return { kind: "video" };
 }
 
-export function getMediaTypeLabel(claim: MintingClaim, tab: LaunchMediaTab): string {
+export function getMediaTypeLabel(
+  claim: MintingClaim,
+  tab: LaunchMediaTab
+): string {
   if (tab === "animation") {
     const animationInfo = getAnimationInfo(claim);
     if (!animationInfo) return "—";
@@ -344,7 +377,9 @@ export function getAnimationMimeType(claim: MintingClaim): string | null {
   return "video/mp4";
 }
 
-export function getSafeExternalUrl(value: string | null | undefined): string | null {
+export function getSafeExternalUrl(
+  value: string | null | undefined
+): string | null {
   if (!value) return null;
   try {
     const url = new URL(value);
@@ -357,7 +392,9 @@ export function getSafeExternalUrl(value: string | null | undefined): string | n
   }
 }
 
-export function toArweaveUrl(location: string | null | undefined): string | null {
+export function toArweaveUrl(
+  location: string | null | undefined
+): string | null {
   if (!location) return null;
   const trimmed = location.trim();
   if (!trimmed) return null;
