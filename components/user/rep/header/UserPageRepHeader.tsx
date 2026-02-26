@@ -5,9 +5,9 @@ import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useContext, useEffect, useState } from "react";
+import RepCategoryPill from "../RepCategoryPill";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
-import TopRaterAvatars from "./TopRaterAvatars";
 import {
   getCanEditRep,
   sortRepsByRatingAndContributors,
@@ -126,73 +126,15 @@ export default function UserPageRepHeader({
                     <span>Add new</span>
                   </button>
                 )}
-                {visibleReps.map((rep) =>
-                  canEditRep ? (
-                    <button
-                      key={rep.category}
-                      type="button"
-                      onClick={() => openEditCategory(rep.category)}
-                      className="group tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60"
-                    >
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                        {rep.category}
-                      </span>
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
-                        {formatNumberWithCommas(rep.rating)}
-                      </span>
-                      <span className="tw-text-xs tw-text-iron-600">·</span>
-                      <div className="tw-pointer-events-none">
-                        <TopRaterAvatars
-                          handleOrWallet={profile.handle ?? ""}
-                          category={rep.category}
-                          count={5}
-                        />
-                      </div>
-                      <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
-                        {formatNumberWithCommas(rep.contributor_count)}{" "}
-                        {rep.contributor_count === 1 ? "rater" : "raters"}
-                      </span>
-                      {rep.rater_contribution !== 0 && (
-                        <>
-                          <span className="tw-text-xs tw-text-iron-600">·</span>
-                          <span className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-primary-400">
-                            My Rate: {formatNumberWithCommas(rep.rater_contribution)}
-                          </span>
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <div
-                      key={rep.category}
-                      className="group tw-inline-flex tw-cursor-default tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-transition-colors"
-                    >
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-                        {rep.category}
-                      </span>
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-300 group-hover:tw-text-iron-200">
-                        {formatNumberWithCommas(rep.rating)}
-                      </span>
-                      <span className="tw-text-xs tw-text-iron-600">·</span>
-                      <TopRaterAvatars
-                        handleOrWallet={profile.handle ?? ""}
-                        category={rep.category}
-                        count={5}
-                      />
-                      <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
-                        {formatNumberWithCommas(rep.contributor_count)}{" "}
-                        {rep.contributor_count === 1 ? "rater" : "raters"}
-                      </span>
-                      {rep.rater_contribution !== 0 && (
-                        <>
-                          <span className="tw-text-xs tw-text-iron-600">·</span>
-                          <span className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-primary-400">
-                            My Rate: {formatNumberWithCommas(rep.rater_contribution)}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  )
-                )}
+                {visibleReps.map((rep) => (
+                  <RepCategoryPill
+                    key={rep.category}
+                    rep={rep}
+                    profileHandle={profile.handle ?? ""}
+                    canEdit={canEditRep}
+                    onEdit={openEditCategory}
+                  />
+                ))}
                 {hasMore && (
                   <button
                     type="button"
