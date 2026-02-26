@@ -2,106 +2,98 @@
 
 ## Overview
 
-The EMMA plan review table includes a dedicated subscription review workflow for
-The Memes plans. Admin users can confirm a token ID, download subscription
-lists, upload photos and automatic airdrops, finalize distribution state, and
-publish finalized allowlists to GitHub from the plan review area.
+Use `Review` in `/emma/plans/{planId}` to export plan results. If your wallet
+is a subscriptions admin wallet, this step also lets you prepare and publish
+The Memes token distribution outputs.
 
 ## Location in the Site
 
 - Route: `/emma/plans/{planId}`
-- Context: `Review` step/table in the plan page
-- Area: EMMA distribution plan review tools
+- Step: `Review`
+- Surfaces: review table, subscriptions footer (admin only), token confirmation
+  modal
 
 ## Entry Points
 
-- Open `Tools -> EMMA`.
-- Open a Memes distribution plan from `/emma/plans` and navigate to
-  `Review` for that plan.
-- Open an existing plan step-by-step and reach the distribution review table.
+1. Open `Tools -> EMMA`.
+2. Open a plan from `/emma/plans`.
+3. Move to `Review` from the plan sidebar, or reopen a plan already on this
+   step.
 
-## User Journey
+## Access and Visibility
 
-1. Open the plan review table in the `Review` section.
-2. If no token ID has been confirmed yet, complete the `Confirm Token ID` step.
-3. Confirmed-token mode exposes:
-   - phase-level subscription-download buttons
-   - an admin footer with reset, upload, and finalize actions.
-4. Download phase subscription CSV bundles directly from the matching phase row.
-5. Use footer actions to manage distribution assets and finalization.
-6. Once the distribution is normalized and required assets are uploaded, use
-   `Publish to GitHub` to export allowlist payload files.
-7. Keep the publish modal open to check progress, success details, or retry on
-   failure.
+- All plan users:
+  - can export `JSON`, `CSV`, and `Manifold` for normal phase/component rows.
+- Subscriptions admins:
+  - get an extra synthetic `Public` phase row.
+  - get phase-level `Subscription Lists` / `Public Subscriptions` downloads.
+  - get footer actions: `Change Token ID`, `Reset Subscriptions`, `Upload
+    Automatic Airdrops`, `Upload Distribution Photos`, `Finalize Distribution`,
+    `Publish to GitHub`.
+- Admin users must confirm token ID before footer actions and subscription
+  downloads unlock.
+- `Confirm Token ID` is blocking (`backdrop="static"` and `keyboard={false}`).
+- Token ID is prefilled from the first number in the plan name when available.
 
-## Common Scenarios
+## Review Workflow
 
-- Manage phase subscription lists:
-  - phase-level subscription-list download buttons are only visible after a
-    token ID is confirmed.
-  - admin users can download phase subscription CSV bundles directly from rows.
-  - public subscription list is shown as a synthetic `Public` row.
-- Admin setup flow:
-  - Confirm token ID once at load.
-  - Use `Change Token ID` to swap token context if needed.
-- Distribution operations:
-  - `Reset Subscriptions` clears working subscriptions for the plan/token.
-  - `Upload Distribution Photos` replaces existing photos for that token when
-    any already exist.
-  - `Upload Distribution Photos` supports multiple images up to 500MB each and
-    accepts JPEG, PNG, GIF, and WEBP file types.
-  - `Upload Automatic Airdrops` accepts CSV rows in `address,value` format
-    (optional header supports `address`/`wallet` + `count`/`value`).
-  - `Finalize Distribution` runs the normalize step and updates the normalized
-    indicator (`✅` or `❌`).
-  - `Publish to GitHub` runs only when all conditions are met:
-    - distribution is normalized
-    - at least one photo is uploaded
-    - at least one automatic airdrop entry is uploaded
-  - On publish success, users see:
-    - a status message
-    - a `View <folder> on GitHub` link to the repository folder
-    - a list of deleted files (if any)
-    - a list of uploaded files (if any)
-  - On publish failure, users see the error in the modal and can retry.
-- Use the footer status counters as a quick state check:
-  - photos uploaded count
-  - automatic airdrops addresses + total count
-  - normalized state indicator
+1. Inspect phase and component rows.
+2. Export baseline results (`JSON` / `CSV` / `Manifold`) for normal rows.
+3. If you are a subscriptions admin, confirm token ID.
+4. Download subscription CSV bundles from phase rows.
+5. Upload automatic airdrops and distribution photos from the footer.
+6. Run `Finalize Distribution` until the status shows `✅`.
+7. Click `Publish to GitHub` when it becomes enabled.
+8. Use the GitHub modal to watch progress, then close or retry.
 
-## Edge Cases
+## Subscriptions Action Rules
 
-- Token ID is required for all subscription-review actions in admin mode.
-- Non-admin viewers only see standard review table rows; admin controls are hidden.
-- In confirmed-token mode, `Public` subscription rows keep JSON/CSV/Manifold
-  actions visible but disabled, while the subscription-list action stays
-  available.
-- Upload paths validate content and reject invalid formats before server calls:
-  - automatic airdrops CSV parser errors report parse/format/validation issues.
-  - photo uploads require valid image files and enforce size/type limits before
-    upload.
-- `Publish to GitHub` is disabled while the distribution is not ready:
-  - not normalized
-  - no photos uploaded
-  - no automatic airdrops uploaded
-- The publish modal cannot be closed while the publish request is in flight.
+- Subscription CSV downloads:
+  - require admin wallet + confirmed token ID.
+  - non-`Public` phase downloads: `airdrops`, `airdrops_unconsolidated`,
+    `allowlists`.
+  - `Public` phase downloads: `airdrops` only.
+- `Reset Subscriptions` resets current `contract + token + plan` data.
+- `Upload Automatic Airdrops`:
+  - accepts `.csv`, `text/csv`, `text/plain` up to `10MB`.
+  - expects `address,value` rows.
+  - optional header accepted: `address|wallet` + `count|value`.
+  - each row needs valid Ethereum address and non-negative integer value.
+  - parse errors are line-specific.
+- `Upload Distribution Photos`:
+  - accepts `jpeg`, `jpg`, `png`, `gif`, `webp`.
+  - max `500MB` per file.
+  - warns before replacing existing photos.
+- `Finalize Distribution`:
+  - runs normalization for the confirmed token.
+  - button shows `✅` when normalized, `❌` otherwise.
+- `Publish to GitHub`:
+  - enabled only when all are true: normalized, photos count > 0, automatic
+    airdrops count > 0.
+  - disabled state explains the missing requirement via tooltip.
+  - while publishing, modal close is blocked.
+  - success modal can show message, GitHub folder link, deleted files, uploaded
+    files.
+  - failure modal shows error and `Retry`.
 
 ## Failure and Recovery
 
-- Network/request failures show toast errors and keep previous UI state visible.
-- Modal flows surface error copy for CSV or file validation failures, and users can
-  retry after fixing the input or network issue.
-- `Publish to GitHub` failures show the API/backend error message in the modal and
-  keep the workflow available for retry.
-- If a plan operation run fails, the plan context displays a build failure warning with
-  the backend reason and an explicit `Run Analysis` retry control.
+- Baseline export failures show toast errors such as `Unauthorized` or
+  `Something went wrong, try again`.
+- Subscription download failure shows `Download failed: ...`; success shows
+  `Download successful`.
+- Reset, upload, finalize, and publish failures show toast or modal errors.
+- CSV and image validation errors are shown before upload.
+- If plan run fails, the warning bar shows `Distribution plan building failed`
+  with `Run Analysis`. See [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md).
 
 ## Limitations / Notes
 
-- Subscription-list row actions and the admin footer are gated by admin status.
-- `Finalize Distribution` requires confirmed token context.
-- Subscription review assets are token-specific under the selected contract-token
-  context.
+- Subscriptions admin access is wallet-gated.
+- Subscriptions actions always run against `The Memes` contract context.
+- All counters and assets are tied to the confirmed token ID.
+- In synthetic `Public` row, `JSON`/`CSV`/`Manifold` buttons are visible but
+  disabled by design.
 
 ## Related Pages
 
