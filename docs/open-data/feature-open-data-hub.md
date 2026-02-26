@@ -38,6 +38,7 @@ The `/open-data` hub is a card-based entry page for community data exports.
 - Open a specific dataset page quickly from one place.
 - Find all available current open-data routes without searching.
 - Access data from mobile and desktop through the same card list.
+- Open the `Rememes` card to reach upload archives for Rememes data files.
 
 ## Edge Cases
 
@@ -58,6 +59,10 @@ The `/open-data` hub is a card-based entry page for community data exports.
 - The cards are direct links only; this page does not include search, filtering, or
   per-route sorting.
 - The list reflects the routes shipped in the current release.
+
+## Related Route Behavior
+
+- [Rememes Data Uploads](feature-rememes-uploads.md) documents `/open-data/rememes`.
 
 ## Related Pages
 
