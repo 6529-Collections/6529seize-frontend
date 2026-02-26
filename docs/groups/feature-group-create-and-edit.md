@@ -75,6 +75,24 @@ selection tabs and defaults to `TDH + xTDH`:
 - `Test` and `Create` share the same validation gate, so a failing validation
   blocks both actions.
 
+## Inclusion Strategy and Threshold Semantics
+
+- The TDH filter stores:
+  - a minimum value (`min`),
+  - an optional maximum value (`max`),
+  - and an inclusion strategy (`TDH` or `TDH + xTDH`, with legacy `XTDH` payloads preserved in edit).
+- The UI edits the minimum threshold only; any loaded maximum remains attached to the
+  group payload and is preserved through save unless you change the group
+  configuration in a way that rewrites the full TDH object.
+- Strategy meaning:
+  - `TDH + xTDH`: threshold uses combined TDH and xTDH.
+  - `TDH`: threshold uses only TDH.
+- Legacy `XTDH` strategy values in edit mode are preserved on open (the label and
+  saved logic continue to use that mode), even though only `TDH` and `TDH + xTDH`
+  are available as selectable tabs.
+- If both `min` and `max` are set and `min > max`, validation blocks the action
+  with the TDH-range issue.
+
 ## Test Action and Members Preview
 
 - `Test` submits a test group using the current form payload.
@@ -100,8 +118,6 @@ selection tabs and defaults to `TDH + xTDH`:
   an active session.
 - TODO: Document wallet import failure and recovery behavior for upload and EMMA
   sources.
-- TODO: Document threshold interpretation examples for current selector modes
-  (`TDH`, `TDH + xTDH`) and legacy `xTDH`-configured groups.
 
 ## Related Pages
 
