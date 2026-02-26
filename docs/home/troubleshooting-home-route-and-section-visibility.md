@@ -41,7 +41,7 @@ unexpected targets.
 - `Mint` button missing in latest-drop countdown:
   - Hidden on iOS outside the US.
 - Health heart shortcut missing:
-  - Hidden on small-width layouts.
+  - Verify you are on `/`; placement changes by layout (hero area on larger layouts, header action row on small/mobile layouts).
 
 ## Edge Cases
 

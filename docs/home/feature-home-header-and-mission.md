@@ -5,7 +5,7 @@
 The top of `/` shows static context before discovery sections:
 
 - Brand label and headline
-- A network-health shortcut on medium-and-up layouts
+- A network-health shortcut on home layouts
 - A mission block below the latest-drop slot
 
 ## Location in the Site
@@ -13,8 +13,8 @@ The top of `/` shows static context before discovery sections:
 - Route: `/`
 - Health shortcut route: `/network/health`
 - Health shortcut visibility:
-  - Hidden below `md`
-  - Fixed top-right icon at `md` and above
+  - Desktop/tablet: fixed heart icon near the top-right of home content
+  - Mobile/app small-screen layouts: heart icon in the header actions when the current route is `/`
 
 ## Entry Points
 
@@ -27,7 +27,9 @@ The top of `/` shows static context before discovery sections:
 2. The header shows:
    - Label: `6529`
    - Headline: `Building a decentralized network state`
-3. On `md+`, a fixed heart icon appears in the top-right.
+3. A heart shortcut is visible on `/`:
+   - Larger layouts: fixed near the top-right of the hero area
+   - Mobile/app small-screen layouts: in the top header actions
    - Accessible name: `Open network health dashboard`
    - Tooltip/title: `Network health`
 4. The latest-drop slot resolves independently.
@@ -40,8 +42,8 @@ The top of `/` shows static context before discovery sections:
 
 ## Common Scenarios
 
-- Desktop/tablet: health shortcut is visible.
-- Mobile: health shortcut is hidden.
+- Desktop/tablet: health shortcut is visible near the top-right.
+- Mobile/app small-screen: health shortcut is visible in the header action row.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
@@ -51,10 +53,10 @@ The top of `/` shows static context before discovery sections:
 
 ## Failure and Recovery
 
-- If the health shortcut is missing on desktop/tablet, verify:
+- If the health shortcut is missing, verify:
   - You are on `/`
-  - Viewport width is at least `md`
-- On small-width layouts, open `/network/health` directly.
+  - You are checking the correct placement for your layout (hero area on larger layouts, header action row on small/mobile layouts)
+- If the shortcut is still unavailable, open `/network/health` directly.
 - If copy appears stale, refresh `/` and retry.
 
 ## Limitations / Notes
