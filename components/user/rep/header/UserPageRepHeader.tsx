@@ -1,10 +1,10 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import RepCategoryPill from "../RepCategoryPill";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
@@ -22,46 +22,32 @@ export default function UserPageRepHeader({
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const [allReps, setAllReps] = useState<RatingStats[]>(
-    sortRepsByRatingAndContributors(repRates?.rating_stats ?? [])
+  const allReps = useMemo(
+    () => sortRepsByRatingAndContributors(repRates?.rating_stats ?? []),
+    [repRates?.rating_stats]
   );
 
   const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
-    setAllReps(sortRepsByRatingAndContributors(repRates?.rating_stats ?? []));
     setVisibleCount(5);
   }, [repRates?.rating_stats]);
+
   const visibleReps = allReps.slice(0, visibleCount);
   const hasMore = allReps.length > visibleCount;
 
-  const [canEditRep, setCanEditRep] = useState<boolean>(
-    getCanEditRep({
-      myProfile: connectedProfile,
-      targetProfile: profile,
-      activeProfileProxy,
-    })
-  );
-
-  useEffect(() => {
-    setCanEditRep(
+  const canEditRep = useMemo(
+    () =>
       getCanEditRep({
         myProfile: connectedProfile,
         targetProfile: profile,
         activeProfileProxy,
-      })
-    );
-  }, [connectedProfile, profile, activeProfileProxy]);
+      }),
+    [connectedProfile, profile, activeProfileProxy]
+  );
 
   const [editCategory, setEditCategory] = useState<string | null>(null);
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
-
-  const openEditCategory = (category: string) => {
-    if (!canEditRep) {
-      return;
-    }
-    setEditCategory(category);
-  };
 
   return (
     <>
@@ -110,7 +96,7 @@ export default function UserPageRepHeader({
                   <button
                     type="button"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-400/40 tw-bg-white/5 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition-colors hover:tw-border-iron-300/60 hover:tw-bg-white/10 hover:tw-text-iron-200"
+                    className="tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-400/40 tw-bg-white/5 tw-px-4 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition-colors hover:tw-border-iron-300/60 hover:tw-bg-white/10 hover:tw-text-iron-200"
                   >
                     <svg
                       className="-tw-ml-0.5 tw-h-4 tw-w-4 tw-shrink-0"
@@ -132,14 +118,14 @@ export default function UserPageRepHeader({
                     rep={rep}
                     profileHandle={profile.handle ?? ""}
                     canEdit={canEditRep}
-                    onEdit={openEditCategory}
+                    onEdit={setEditCategory}
                   />
                 ))}
                 {hasMore && (
                   <button
                     type="button"
                     onClick={() => setVisibleCount((prev) => prev + 10)}
-                    className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
+                    className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
                   >
                     +{allReps.length - visibleCount} more
                   </button>

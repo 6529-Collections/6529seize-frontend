@@ -247,7 +247,7 @@ export default function UserPageRepMobile({
               </span>
             </div>
             <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-              <div className="tw-pointer-events-none">
+              <div className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
                 <TopRaterAvatars
                   handleOrWallet={profile.handle ?? ""}
                   matter={RateMatter.NIC}
