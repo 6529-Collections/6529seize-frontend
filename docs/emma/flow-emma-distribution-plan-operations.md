@@ -2,61 +2,56 @@
 
 ## Overview
 
-The EMMA plan workspace at `/emma/plans/{planId}` runs every plan change as a set of
-`allowlist` operations. After you configure a step, some actions require running
-analysis so operation state is computed and persisted before continuing.
+This flow covers EMMA access, opening a plan, and advancing plan steps that
+execute `allowlist` operations.
 
 ## Location in the Site
 
-- Route: `/emma/plans/{planId}`
-- Plan progress context: right-side sidebar steps.
-- Steps: `Create Plan` → `Create Snapshots` → `Create Custom Snapshot` → `Create Phases` → `Build Phases` → `Map Delegations` → `Review`.
+- Routes: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
+- Plan progress context: right-side sidebar steps
+- Steps: `Create Plan` -> `Create Snapshots` -> `Create Custom Snapshot` ->
+  `Create Phases` -> `Build Phases` -> `Map Delegations` -> `Review`
 
 ## Entry Points
 
-- Open `Tools -> EMMA`, then choose an existing plan.
-- Open `/emma/plans` and select any plan row.
-- Open `/emma/plans/{planId}` directly.
+- Open `Tools -> EMMA`, connect wallet, and sign in.
+- Open `/emma/plans`, then select a row or create a plan.
+- Open `/emma/plans/{planId}` directly when already signed in.
 
 ## User Journey
 
-1. Opening a plan loads its current operation state into the builder context.
-2. Each step lets you define operations in that step (for example, adding snapshots,
-   custom snapshots, phases, and delegation mapping).
-3. When a step requires execution before you can safely continue, the UI shows
-   `Run analysis` and the step gates progression.
-4. In `Map Delegations`, add `Contract to return registered Delegations` and submit
-   to create the delegation-mapping operation, or skip the step entirely.
-5. Running analysis sends a run request for the plan and updates the active run
-   state.
-6. While the run is active (`CLAIMED` or `PENDING`), the UI shows a fullscreen
-   blocking overlay with a spinner so interaction stays paused during execution.
-7. The page polls `/allowlists/{planId}` every 2 seconds until run status leaves the
-   active states.
-8. If polling detects non-active status, the plan state refreshes and the overlay
-   exits.
-9. If the run fails, the page shows a failure warning with the backend error reason
-   and a retry control.
+1. Open `/emma`, connect wallet, then use `Sign In with Web3`.
+2. EMMA routes to `/emma/plans`.
+3. Create or open a plan to enter `/emma/plans/{planId}`.
+4. Plan context loads operations, token pools, transfer pools, and phases.
+5. Configure steps in order (snapshots, custom snapshots, phases, components,
+   delegation mapping, review).
+6. Non-create steps include `Download operations` for `operations.json` export.
+7. In steps that require executed operations, progression is gated behind
+   `Run analysis`.
+8. `Run analysis` starts a run request for the current plan.
+9. While run status is active (`CLAIMED` or `PENDING`), EMMA blocks the page
+   with a fullscreen loader and polls `/allowlists/{planId}` every 2 seconds.
+10. Once status leaves active states, EMMA refreshes plan state and resumes
+    normal step controls.
+11. If status is `FAILED`, EMMA shows `Distribution plan building failed` with
+    backend reason and `Run Analysis` retry.
 
 ## Common Scenarios
 
-- Run analysis from an incomplete step to execute pending operations.
-- In `Map Delegations`, `Run analysis` appears when operations are unrun, and
-  `Next` appears after all operations in the step are run.
-- Continue from `Build Phases` or `Map Delegations` only after run state is clear and
-  required operations are marked as run.
-- Retry failed analysis directly from the warning bar in the plan context.
+- Create snapshots/custom snapshots, then run analysis before moving forward.
+- Build phase components and run analysis until each phase step is run-complete.
+- In `Map Delegations`, add contract and run analysis, or use `Skip` when no
+  delegation mapping is needed.
+- Recover failed runs directly from the warning bar without leaving the plan.
 
 ## Edge Cases
 
-- Runs remain `PENDING`/`CLAIMED` during execution, so progress can be resumed by
-  polling even if the user navigates away briefly within the same plan page.
-- The loader overlay also covers the page while global fetch state is active, so users
-  can tell execution is still in progress.
-- Operations are reloaded after a successful non-active run state, so step tables and
-  navigation state reflect the latest run results.
-- In `Map Delegations`, if you skip because no contract was added, the step transitions
-  directly to `Review`.
+- Build-phase completion can trigger run execution before moving into
+  `Map Delegations` when pending operations still exist.
+- Loader overlay appears for both active run status and plan fetch state, so
+  interaction stays paused until state refresh completes.
+- In `Map Delegations`, skipping without a contract moves directly to `Review`.
 
 ## Failure and Recovery
 
@@ -76,6 +71,8 @@ analysis so operation state is computed and persisted before continuing.
 ## Related Pages
 
 - [EMMA Index](README.md)
+- [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
 - [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
+- [EMMA Access and Plan Operations Troubleshooting](troubleshooting-emma-access-and-plan-operations.md)
 - [Docs Home](../README.md)

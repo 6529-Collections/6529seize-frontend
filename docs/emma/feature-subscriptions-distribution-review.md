@@ -106,7 +106,10 @@ publish finalized allowlists to GitHub from the plan review area.
 ## Related Pages
 
 - [EMMA Index](README.md)
+- [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
+- [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
+- [EMMA Access and Plan Operations Troubleshooting](troubleshooting-emma-access-and-plan-operations.md)
 - [Profile Subscriptions Tab](../profiles/tabs/feature-subscriptions-tab.md)
 - [Memes Subscriptions Report](../api-tool/feature-memes-subscriptions-report.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)

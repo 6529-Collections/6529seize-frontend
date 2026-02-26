@@ -57,6 +57,8 @@ contract so downstream phases can resolve delegated wallets during distribution.
 
 - [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
 - [EMMA Index](README.md)
+- [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
 - [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
+- [EMMA Access and Plan Operations Troubleshooting](troubleshooting-emma-access-and-plan-operations.md)
 - [Docs Home](../README.md)

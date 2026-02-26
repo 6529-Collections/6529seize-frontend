@@ -8,14 +8,13 @@ automatically into multiple snapshots.
 
 ## Location in the Site
 
-- Routes: `/emma`, `/emma/plans`, `/emma/plans/{planId}`
-- Navigation path: `Tools -> EMMA`
-- In-plan step: `Create Custom Snapshot` (right-side progress navigation)
+- Route: `/emma/plans/{planId}`
+- Plan step: `Create Custom Snapshot` (right-side progress navigation)
 
 ## Entry Points
 
-- Open `Tools -> EMMA`, connect wallet, and sign in.
-- Open an existing plan from `/emma/plans`, or create a new one first.
+- Open `Tools -> EMMA`, complete connect/sign-in, then open a plan.
+- Open an existing plan from `/emma/plans`, or create one first.
 - Inside `/emma/plans/{planId}`, select the `Create Custom Snapshot` step.
 - Optionally download `Download example CSV file` from the step header.
 
@@ -73,6 +72,9 @@ automatically into multiple snapshots.
 ## Related Pages
 
 - [EMMA Index](README.md)
+- [EMMA Access and Plan Management](feature-emma-access-and-plan-management.md)
+- [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
+- [EMMA Access and Plan Operations Troubleshooting](troubleshooting-emma-access-and-plan-operations.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [API Tool Index](../api-tool/README.md)
 - [Docs Home](../README.md)
