@@ -1,6 +1,15 @@
 "use client";
 
-import styles from "./MemeLab.module.scss";
+
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 
 import { AuthContext } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -12,21 +21,14 @@ import { SortDirection } from "@/entities/ISort";
 import { addProtocol } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+
 import {
   getInitialRouterValues,
   printNftContent,
   printSortButtons,
   sortChanged,
 } from "./MemeLab";
+import styles from "./MemeLab.module.scss";
 
 export default function LabCollection({
   collectionName,

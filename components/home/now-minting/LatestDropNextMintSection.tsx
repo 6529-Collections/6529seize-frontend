@@ -1,19 +1,21 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import {
   formatFullDateTime,
   getNextMintStart,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import Image from "next/image";
-import Link from "next/link";
+
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface LatestDropNextMintSectionProps {

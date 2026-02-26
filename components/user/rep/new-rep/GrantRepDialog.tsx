@@ -1,8 +1,10 @@
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { RateMatter } from "@/types/enums";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+
 import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
+
 import UserPageRepNewRep from "./UserPageRepNewRep";
 
 export default function GrantRepDialog({

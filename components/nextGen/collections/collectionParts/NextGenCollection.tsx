@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import {
   getCollectionView,
   getContentViewKeyByValue,
@@ -9,10 +12,10 @@ import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/types/enums";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+
 import styles from "../NextGen.module.scss";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
+
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";

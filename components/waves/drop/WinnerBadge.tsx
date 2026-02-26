@@ -1,6 +1,8 @@
 import React from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface WinnerBadgeProps {

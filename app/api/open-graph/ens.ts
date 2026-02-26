@@ -1,3 +1,20 @@
+import { toUnicode } from "punycode";
+
+import { ens_normalize } from "@adraffy/ens-normalize";
+import * as contentHash from "@ensdomains/content-hash";
+import {
+  type Address,
+  createPublicClient,
+  fallback,
+  getAddress,
+  type Hex,
+  http,
+  isAddress,
+  zeroAddress,
+} from "viem";
+import { mainnet } from "viem/chains";
+import { labelhash, namehash } from "viem/ens";
+
 import type {
   EnsAddressPreview,
   EnsContenthash,
@@ -9,24 +26,11 @@ import type {
 import {
   TEXT_RECORD_KEYS
 } from "@/components/waves/ens/types";
+import LruTtlCache from "@/lib/cache/lruTtl";
 import type { EnsTarget } from "@/lib/ens/detect";
 import { stripHtmlTags } from "@/lib/text/html";
-import LruTtlCache from "@/lib/cache/lruTtl";
-import { ens_normalize } from "@adraffy/ens-normalize";
-import * as contentHash from "@ensdomains/content-hash";
-import { toUnicode } from "punycode";
-import {
-  createPublicClient,
-  fallback,
-  getAddress,
-  http,
-  isAddress,
-  zeroAddress,
-  type Address,
-  type Hex,
-} from "viem";
-import { mainnet } from "viem/chains";
-import { labelhash, namehash } from "viem/ens";
+
+
 
 const CHAIN_ID = 1;
 

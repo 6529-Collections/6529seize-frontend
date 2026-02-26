@@ -1,12 +1,13 @@
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
 import CommonSelect from "@/components/utils/select/CommonSelect";
-import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
 import type { SortDirection } from "@/entities/ISort";
+import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
 
 import {
   COLLECTION_SORT_ITEMS,
 } from "../constants";
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface XtdhCollectionsControlsProps {
   readonly activeSortField: XtdhCollectionsSortField;

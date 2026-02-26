@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import {
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
@@ -9,6 +10,7 @@ import type {
   CreateWaveConfig,
   CreateWaveStep,
 } from "@/types/waves.types";
+
 import CreateWaveBackStep from "./CreateWaveBackStep";
 import CreateWaveNextStep from "./CreateWaveNextStep";
 

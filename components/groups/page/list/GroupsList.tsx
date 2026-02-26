@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { GroupsRequestParams } from "@/entities/IGroup";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useDebounce } from "react-use";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonInfiniteScrollWrapper from "@/components/utils/infinite-scroll/CommonInfiniteScrollWrapper";
+import type { GroupsRequestParams } from "@/entities/IGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
+
 import GroupCard from "./card/GroupCard";
 import GroupsListSearch from "./search/GroupsListSearch";
-import CommonInfiniteScrollWrapper from "@/components/utils/infinite-scroll/CommonInfiniteScrollWrapper";
-import { useDebounce } from "react-use";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
+
+
 
 const REQUEST_SIZE = 20;
 

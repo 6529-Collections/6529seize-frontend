@@ -5,6 +5,7 @@
  */
 
 import { MAX_PROCESSING_ATTEMPTS } from '../utils/constants';
+
 import type { FileUploaderAction, FileUploaderState } from './types';
 
 /**

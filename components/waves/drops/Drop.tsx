@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type {
@@ -8,7 +10,7 @@ import type {
 } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useMemo } from "react";
+
 import DropContext from "./DropContext";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";

@@ -1,6 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+
 import SubscriptionsReportClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export default function SubscriptionsReportPage() {
   return <SubscriptionsReportClient />;

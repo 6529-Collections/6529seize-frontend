@@ -1,7 +1,8 @@
 "use client";
 
-import type { MouseEvent, TouchEvent } from "react";
 import { useCallback, useRef, useState } from "react";
+
+import type { MouseEvent, TouchEvent } from "react";
 
 const DEFAULT_SWIPE_THRESHOLD = 25;
 

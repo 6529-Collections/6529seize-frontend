@@ -1,6 +1,8 @@
-import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+
 import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
+
 import SelectGroupModal from "./SelectGroupModal";
 
 export default function SelectGroupModalWrapper({

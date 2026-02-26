@@ -1,11 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBoostedDrops } from "@/hooks/useBoostedDrops";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+
 import BoostedDropCardHome from "./BoostedDropCardHome";
 
 const BOOSTED_DROPS_LIMIT = 50;

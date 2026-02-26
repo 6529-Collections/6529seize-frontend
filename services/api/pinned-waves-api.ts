@@ -1,7 +1,8 @@
-import { commonApiFetchWithRetry, commonApiPostWithoutBodyAndResponse, commonApiDelete } from './common-api';
 import type { ApiWave } from '@/generated/models/ApiWave';
-import { ApiWavesPinFilter } from '@/generated/models/ApiWavesPinFilter';
 import { ApiWavesOverviewType } from '@/generated/models/ApiWavesOverviewType';
+import { ApiWavesPinFilter } from '@/generated/models/ApiWavesPinFilter';
+
+import { commonApiDelete, commonApiFetchWithRetry, commonApiPostWithoutBodyAndResponse } from './common-api';
 
 interface PinnedWavesService {
   fetchPinnedWaves: () => Promise<ApiWave[]>;

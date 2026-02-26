@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 
 export function useShallowRedirect(name: string) {

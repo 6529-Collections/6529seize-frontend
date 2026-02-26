@@ -1,5 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   GRADIENT_CONTRACT,
@@ -14,9 +18,7 @@ import type {
 } from "@/entities/IReservoir";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { isMemesEcosystemContract } from "@/helpers/nft.helpers";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+
 import DropListItemContentNftDetails from "./DropListItemContentNftDetails";
 
 export default function DropListItemContentNft({

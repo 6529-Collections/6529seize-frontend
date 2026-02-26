@@ -1,4 +1,4 @@
-import { useId, type ChangeEvent } from "react";
+import { type ChangeEvent, useId } from "react";
 
 interface TimePickerProps {
   readonly hours: number;

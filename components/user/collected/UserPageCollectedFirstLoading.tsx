@@ -1,6 +1,6 @@
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function UserPageCollectedFirstLoading() {
   return (

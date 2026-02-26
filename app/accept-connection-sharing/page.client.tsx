@@ -1,5 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -9,10 +14,6 @@ import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeem
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { setAuthJwt } from "@/services/auth/auth.utils";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
 
 interface AcceptConnectionSharingProps {
   token: string;

@@ -1,9 +1,10 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEULAConsent } from "./EULAConsentContext";
-import { useEffect, useRef, useState } from "react";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useRef, useState } from "react";
+
+import { useEULAConsent } from "./EULAConsentContext";
 
 export default function EULAModal() {
   const { consent } = useEULAConsent();

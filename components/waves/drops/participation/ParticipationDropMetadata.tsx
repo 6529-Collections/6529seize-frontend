@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { Tooltip } from "react-tooltip";
+
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { useState } from "react";
-import { Tooltip } from "react-tooltip";
 
 interface ParticipationDropMetadataProps {
   readonly metadata: ApiDropMetadata[];

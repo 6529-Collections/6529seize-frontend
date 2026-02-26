@@ -1,21 +1,23 @@
-import { useCallback, useContext, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AuthContext } from "@/components/auth/Auth";
-import { commonApiPost } from "@/services/api/common-api";
+import { useCallback, useContext, useEffect, useState } from "react";
 
+import { AuthContext } from "@/components/auth/Auth";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiXTdhCreateGrant } from "@/generated/models/ApiXTdhCreateGrant";
+import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
+import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
+import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
+import { commonApiPost } from "@/services/api/common-api";
+
 import { validateGrantForm } from "../utils/validateGrantForm";
+
 import type {
   GrantValidationResult,
   UserPageXtdhGrantForm,
 } from "../types";
-import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
-import type { ApiXTdhCreateGrant } from "@/generated/models/ApiXTdhCreateGrant";
-import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
-import { ApiXTdhGrantTargetChain } from "@/generated/models/ApiXTdhGrantTargetChain";
 
 export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
   const [contract, setContract] = useState<UserPageXtdhGrantForm["contract"]>(

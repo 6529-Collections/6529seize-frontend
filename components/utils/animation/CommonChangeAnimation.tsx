@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+
 import CommonAnimationWrapper from "./CommonAnimationWrapper";
 
 export default function CommonChangeAnimation({

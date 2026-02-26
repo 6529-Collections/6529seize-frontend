@@ -1,12 +1,15 @@
 "use client";
 
-import { NULL_MERKLE } from "@/constants/constants";
-import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
-import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
+
+import { NULL_MERKLE } from "@/constants/constants";
+import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
+
 import DotLoader from "../dotLoader/DotLoader";
+
 import { NEXTGEN_CHAIN_ID } from "./nextgen_contracts";
 
 const TRANSFER_EVENT =

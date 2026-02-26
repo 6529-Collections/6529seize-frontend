@@ -3,6 +3,7 @@ import { GrantedListError } from "./subcomponents/GrantedListError";
 import { GrantedListMessage } from "./subcomponents/GrantedListMessage";
 import { GrantedListSkeleton } from "./subcomponents/GrantedListSkeleton";
 import { UserPageXtdhGrantList } from "./subcomponents/UserPageXtdhGrantList";
+
 import type { UserPageXtdhGrantedListContentProps } from "./types";
 
 export default function UserPageXtdhGrantedListContent({

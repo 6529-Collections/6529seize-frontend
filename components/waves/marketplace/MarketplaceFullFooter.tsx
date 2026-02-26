@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import MarketplaceCopyListingButton from "./MarketplaceCopyListingButton";
+import MarketplaceExternalOpenIcon from "./MarketplaceExternalOpenIcon";
+
 import type {
   MarketplaceBrand,
   ResolvedPreviewHref,
 } from "./MarketplaceItemPreviewCard.types";
-import MarketplaceCopyListingButton from "./MarketplaceCopyListingButton";
-import MarketplaceExternalOpenIcon from "./MarketplaceExternalOpenIcon";
 
 interface MarketplaceFullFooterProps {
   readonly href: string;

@@ -1,5 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import React from 'react';
+
 import type { ErrorMessageProps } from '../reducers/types';
 
 /**

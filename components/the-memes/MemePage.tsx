@@ -1,27 +1,30 @@
 "use client";
 
-import styles from "./TheMemes.module.scss";
 
-import { MEMES_CONTRACT } from "@/constants/constants";
-import type { DBResponse } from "@/entities/IDBResponse";
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+
 
 import { AuthContext } from "@/components/auth/Auth";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { publicEnv } from "@/config/env";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
+import type { DBResponse } from "@/entities/IDBResponse";
 import type { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+
 import NftNavigation from "../nft-navigation/NftNavigation";
+
 import {
   MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
@@ -37,6 +40,7 @@ import {
   MEME_TABS,
   TabButton,
 } from "./MemeShared";
+import styles from "./TheMemes.module.scss";
 import UpcomingMemePage from "./UpcomingMemePage";
 
 const MemePageArt = dynamic(() =>

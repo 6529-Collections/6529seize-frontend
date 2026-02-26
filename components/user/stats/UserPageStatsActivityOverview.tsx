@@ -1,5 +1,8 @@
 "use client";
 
+import { Fragment, useEffect, useState } from "react";
+import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
+
 import type {
     AggregatedActivity,
     AggregatedActivityMemes,
@@ -7,8 +10,7 @@ import type {
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { Fragment, useEffect, useState } from "react";
-import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
+
 import { getStatsPath } from "./userPageStats.helpers";
 import styles from "./UserPageStats.module.scss";
 import {

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { formatAddress } from "@/helpers/Helpers";
-import type { ReactElement } from "react";
 
 import {
   type EnsAddressPreview,
@@ -14,6 +13,9 @@ import {
   type EnsNamePreview,
   type EnsPreview,
 } from "./types";
+
+import type { ReactElement } from "react";
+
 
 type RecordKey = keyof EnsNamePreview["records"];
 const RECORD_LABELS: Readonly<Record<RecordKey, string>> = {

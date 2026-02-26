@@ -1,8 +1,9 @@
 "use client";
 
-import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+
+import { useSetTitle } from "@/contexts/TitleContext";
 
 const BUTTON_LINK_CLASSES =
   "tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline";

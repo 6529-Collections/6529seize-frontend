@@ -1,11 +1,13 @@
 import Link from "next/link";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import WinnerDropBadge from "../winner/WinnerDropBadge";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import WaveDropTime from "../time/WaveDropTime";
+import WinnerDropBadge from "../winner/WinnerDropBadge";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;

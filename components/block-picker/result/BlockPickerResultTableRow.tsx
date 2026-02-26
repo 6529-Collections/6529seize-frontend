@@ -1,12 +1,14 @@
 "use client";
 
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
+
 import type { PredictBlockNumbersResponseApiModel } from "@/app/tools/block-finder/page.client";
 import AllowlistToolCommonModalWrapper, {
     AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+
 import BlockPickerResultTableRowModal from "./BlockPickerResultTableRowModal";
 
 export default function BlockPickerResultTableRow({

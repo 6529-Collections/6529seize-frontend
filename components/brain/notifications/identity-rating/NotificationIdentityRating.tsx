@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { useContext } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -6,8 +9,7 @@ import type {
   INotificationIdentityNic,
   INotificationIdentityRep,
 } from "@/types/feed.types";
-import Link from "next/link";
-import { useContext } from "react";
+
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";

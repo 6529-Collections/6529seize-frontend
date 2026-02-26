@@ -1,20 +1,17 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
   createContext,
-  useContext,
-  useState,
-  useMemo,
   useCallback,
+  useContext,
   useEffect,
+  useMemo,
   useRef,
+  useState,
 } from "react";
-import type { ViewKey, NavItem } from "./navTypes";
-import { commonApiFetch } from "@/services/api/common-api";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
@@ -22,6 +19,11 @@ import {
   getWaveRoute,
   getWavesBaseRoute,
 } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import type { NavItem, ViewKey } from "./navTypes";
+import type { ReactNode } from "react";
 
 interface ViewContextType {
   activeView: ViewKey | null;

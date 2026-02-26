@@ -1,33 +1,34 @@
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
-import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
+  type Address,
   decodeEventLog,
   erc20Abi,
   formatUnits,
   getAddress,
+  type Hash,
   isAddress,
   isHex,
   zeroAddress,
-  type Address,
-  type Hash,
 } from "viem";
 
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
+import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+
 import {
-  cTokenAbi,
   cometAbi,
   comptrollerAbi,
+  cTokenAbi,
   priceFeedAbi,
   priceOracleAbi,
 } from "./abis";
 import { publicClient } from "./client";
 import {
   compoundRegistry,
+  type CompoundV2MarketConfig,
+  type CompoundV3MarketConfig,
   v2MarketsByAddress,
   v2MarketsByPath,
   v3MarketsByAddress,
   v3MarketsByPath,
-  type CompoundV2MarketConfig,
-  type CompoundV3MarketConfig,
 } from "./registry";
 
 const BLOCKS_PER_YEAR = 2_365_200;

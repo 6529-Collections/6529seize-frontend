@@ -1,7 +1,8 @@
-import CreateCustomSnapshotTableHeader from "./CreateCustomSnapshotTableHeader";
-import CreateCustomSnapshotTableBody from "./CreateCustomSnapshotTableBody";
-import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import type { AllowlistCustomTokenPool } from "@/components/allowlist-tool/allowlist-tool.types";
+import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
+
+import CreateCustomSnapshotTableBody from "./CreateCustomSnapshotTableBody";
+import CreateCustomSnapshotTableHeader from "./CreateCustomSnapshotTableHeader";
 
 export default function CreateCustomSnapshotTable({
   customSnapshots,

@@ -1,47 +1,49 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Children,
+  type ComponentPropsWithoutRef,
+  type ElementType,
   memo,
+  type ReactNode,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
-  type ComponentPropsWithoutRef,
-  type ElementType,
-  type ReactNode,
 } from "react";
 import Markdown, { type Components, type ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import { useQueryClient } from "@tanstack/react-query";
-import type { PluggableList } from "unified";
 
-import { useEmoji } from "@/contexts/EmojiContext";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
+
 import { useTweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import {
   LinkPreviewProvider,
-  useLinkPreviewContext,
   type LinkPreviewToggleControl,
+  useLinkPreviewContext,
 } from "@/components/waves/LinkPreviewContext";
 import { primeMarketplacePreviewCacheFromNftLinks } from "@/components/waves/marketplace/common";
+import { useEmoji } from "@/contexts/EmojiContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 
 import {
-  DropContentPartType,
   createMarkdownContentRenderers,
+  DropContentPartType,
 } from "./dropPartMarkdown/content";
 import { highlightCodeElement } from "./dropPartMarkdown/highlight";
 import {
   createLinkRenderer,
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
+
+import type { PluggableList } from "unified";
 
 const BreakComponent = () => <br />;
 

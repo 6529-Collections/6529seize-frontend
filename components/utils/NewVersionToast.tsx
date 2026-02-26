@@ -1,10 +1,11 @@
 "use client";
 
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type JSX } from "react";
+
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();

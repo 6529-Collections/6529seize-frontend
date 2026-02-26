@@ -1,9 +1,12 @@
 import React from "react";
-import DropPartMarkdown from "./DropPartMarkdown";
-import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+
 import type { MentionedWave } from "@/entities/IDrop";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+
+import DropListItemContentMedia from "../item/content/media/DropListItemContentMedia";
+
+import DropPartMarkdown from "./DropPartMarkdown";
 
 interface DropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];

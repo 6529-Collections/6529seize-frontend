@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { getSliderTheme } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { getSliderTheme } from "./types/slider.types";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;

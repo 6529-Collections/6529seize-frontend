@@ -1,8 +1,11 @@
-import { Fragment, useCallback } from "react";
 import { MenuItem } from "@headlessui/react";
 import clsx from "clsx";
-import type { CompactMenuItem, CompactMenuProps } from "../types";
+import { Fragment, useCallback } from "react";
+
 import { CompactMenuItemButton } from "./CompactMenuItemButton";
+
+import type { CompactMenuItem, CompactMenuProps } from "../types";
+
 
 interface CompactMenuItemsPanelProps {
   readonly items: CompactMenuProps["items"];

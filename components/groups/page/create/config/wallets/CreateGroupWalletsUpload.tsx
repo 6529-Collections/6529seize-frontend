@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useCallback, useRef } from "react";
+
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
+
 import type { GroupCreateWalletsType } from "./GroupCreateWallets";
 
 export default function CreateGroupWalletsUpload({

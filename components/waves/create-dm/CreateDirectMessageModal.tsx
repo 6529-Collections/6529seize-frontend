@@ -4,8 +4,10 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
+
 import CreateDirectMessage from "./CreateDirectMessage";
+
+import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 
 interface CreateDirectMessageModalProps {
   readonly isOpen: boolean;

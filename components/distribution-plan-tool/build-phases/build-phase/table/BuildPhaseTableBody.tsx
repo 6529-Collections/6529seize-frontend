@@ -1,5 +1,6 @@
-import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
+import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
+
 import BuildPhaseTableRow from "./BuildPhaseTableRow";
 
 export default function BuildPhaseTableBody({

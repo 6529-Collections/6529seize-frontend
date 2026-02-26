@@ -1,11 +1,13 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
-import { createPossessionStr } from "@/helpers/Helpers";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { createPossessionStr } from "@/helpers/Helpers";
+
+import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,

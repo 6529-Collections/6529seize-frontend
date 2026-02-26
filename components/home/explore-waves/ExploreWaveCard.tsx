@@ -1,14 +1,17 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
-import ContentDisplay from "@/components/waves/drops/ContentDisplay";
-import type { ProcessedContent } from "@/components/waves/drops/media-utils";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { ChatBubbleBottomCenterIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { ChatBubbleBottomCenterIcon } from "@heroicons/react/24/outline";
+
+import ContentDisplay from "@/components/waves/drops/ContentDisplay";
+import type { ProcessedContent } from "@/components/waves/drops/media-utils";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+
+
 import { extractDropPreview, useWaveLatestDrop } from "./useWaveLatestDrop";
 
 interface ExploreWaveCardProps {

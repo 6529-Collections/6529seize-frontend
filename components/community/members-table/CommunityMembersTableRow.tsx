@@ -1,7 +1,10 @@
+import Link from "next/link";
+import { Tooltip } from "react-tooltip";
+
+import UserCICTypeIcon from "@/components/user/utils/user-cic-type/UserCICTypeIcon";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import UserCICTypeIcon from "@/components/user/utils/user-cic-type/UserCICTypeIcon";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
 import {
@@ -9,9 +12,8 @@ import {
   formatNumberWithCommasOrDash,
   getTimeAgoShort,
 } from "@/helpers/Helpers";
-import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import Link from "next/link";
-import { Tooltip } from "react-tooltip";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
 
 export default function CommunityMembersTableRow({
   member,

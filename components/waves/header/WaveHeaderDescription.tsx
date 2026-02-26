@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { AnimatePresence, motion } from "framer-motion";
-import { useClickAway, useKeyPressEvent } from "react-use";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { WaveHeaderPinnedSide } from "./WaveHeader";
-import Drop, { DropLocation } from "../drops/Drop";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+
+import Drop, { DropLocation } from "../drops/Drop";
+
+import { WaveHeaderPinnedSide } from "./WaveHeader";
 
 interface WaveHeaderDescriptionProps {
   readonly wave: ApiWave;

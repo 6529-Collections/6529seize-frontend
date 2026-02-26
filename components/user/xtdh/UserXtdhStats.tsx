@@ -1,6 +1,6 @@
-import { formatStatFloor } from "@/helpers/Helpers";
-import { XtdhStatCard } from "@/components/xtdh/stats/subcomponents/XtdhStatCard";
 import { XtdhLabeledProgressBar } from "@/components/xtdh/stats/subcomponents/XtdhLabeledProgressBar";
+import { XtdhStatCard } from "@/components/xtdh/stats/subcomponents/XtdhStatCard";
+import { formatStatFloor } from "@/helpers/Helpers";
 
 interface UserXtdhStatsProps {
   readonly generationRate: number;

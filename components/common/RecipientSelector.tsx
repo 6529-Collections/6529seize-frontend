@@ -1,5 +1,11 @@
 "use client";
 
+import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { isAddress } from "viem";
+
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -7,11 +13,7 @@ import { getUserProfile } from "@/helpers/server.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { isAddress } from "viem";
+
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
 const MIN_SEARCH_LENGTH = 3;

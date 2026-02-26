@@ -1,20 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import type { WsMessageType } from "@/helpers/Types";
+import { asNonEmptyString } from "@/lib/text/nonEmptyString";
+
+import { getAuthJwt } from "../auth/auth.utils";
+
+import { WebSocketContext } from "./WebSocketContext";
+import { WebSocketStatus } from "./WebSocketTypes";
+
 import type {
   WebSocketContextValue,
   WebSocketProviderProps,
 } from "./WebSocketContext";
-import { WebSocketContext } from "./WebSocketContext";
 import type {
   MessageCallback,
   SubscriberMap,
   WebSocketMessage,
 } from "./WebSocketTypes";
-import { WebSocketStatus } from "./WebSocketTypes";
-import type { WsMessageType } from "@/helpers/Types";
-import { asNonEmptyString } from "@/lib/text/nonEmptyString";
-import { getAuthJwt } from "../auth/auth.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds

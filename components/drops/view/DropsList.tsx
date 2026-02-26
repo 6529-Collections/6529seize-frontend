@@ -1,9 +1,11 @@
 "use client";
 
+import { memo, useCallback, useMemo, useState } from "react";
+
+import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
-import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type {
   Drop as DropType,
@@ -11,11 +13,12 @@ import type {
 } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { RefObject } from "react";
-import { memo, useCallback, useMemo, useState } from "react";
+
 import BoostedDropCard from "./BoostedDropCard";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
+
+import type { RefObject } from "react";
 
 // Logarithmic positions for boost cards (visual positions, 1-indexed)
 const BOOST_CARD_POSITIONS = [5, 10, 20, 40, 80, 160];

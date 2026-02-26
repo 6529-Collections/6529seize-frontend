@@ -1,3 +1,6 @@
+import Image from "next/image";
+import Link from "next/link";
+
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -14,8 +17,6 @@ import {
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import Image from "next/image";
-import Link from "next/link";
 
 interface SingleWaveDropLogProps {
   readonly log: ApiWaveLog;

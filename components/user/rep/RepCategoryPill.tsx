@@ -1,7 +1,9 @@
 import type { RatingStats } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { MouseEvent } from "react";
+
 import TopRaterAvatars from "./header/TopRaterAvatars";
+
+import type { MouseEvent } from "react";
 
 const stopPropagation = (e: MouseEvent) => e.stopPropagation();
 

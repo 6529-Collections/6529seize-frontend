@@ -1,5 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import React from "react";
+import { createPortal } from "react-dom";
+import { Tooltip } from "react-tooltip";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
@@ -8,9 +13,9 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
@@ -23,10 +28,7 @@ import {
 } from "@/helpers/waves/waves.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import Link from "next/link";
-import React from "react";
-import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
+
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 
 interface MemesWaveWinnersDropProps {

@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+
 import type {
   ActiveDropState,
 } from "@/types/dropInteractionTypes";
+
 import BrainContent from "../content/BrainContent";
+
 import Notifications from "./index";
 
 const NotificationsContainer: React.FC = () => {

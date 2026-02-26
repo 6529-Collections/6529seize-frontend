@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
+
 import type {
   UserPageTabConfig,
   UserPageTabKey,

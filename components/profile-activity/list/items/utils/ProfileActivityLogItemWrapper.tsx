@@ -6,6 +6,7 @@ import type { ProfileActivityLog } from "@/entities/IProfile";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { ProfileActivityLogType } from "@/types/enums";
+
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 
 export default function ProfileActivityLogItemWrapper({

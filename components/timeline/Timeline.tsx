@@ -1,10 +1,13 @@
-import { Col, Container, Row } from "react-bootstrap";
-import type { BaseNFT, NFTHistory } from "@/entities/INFT";
-import styles from "./Timeline.module.scss";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { numberWithCommasFromString } from "@/helpers/Helpers";
-import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Col, Container, Row } from "react-bootstrap";
+
+import type { BaseNFT, NFTHistory } from "@/entities/INFT";
+import { numberWithCommasFromString } from "@/helpers/Helpers";
+
+import styles from "./Timeline.module.scss";
+import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
+
 
 interface Props {
   nft: BaseNFT;

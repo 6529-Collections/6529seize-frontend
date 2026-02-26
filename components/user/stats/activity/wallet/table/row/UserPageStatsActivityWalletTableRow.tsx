@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
 import { getNextGenIconUrl } from "@/components/nextGen/collections/nextgenToken/NextGenTokenImage";
 import { normalizeNextgenTokenID } from "@/components/nextGen/nextgen_helpers";
 import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
@@ -23,8 +26,7 @@ import {
   isMemesContract,
   isNextgenContract,
 } from "@/helpers/Helpers";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
 import UserPageStatsActivityWalletTableRowIcon from "./UserPageStatsActivityWalletTableRowIcon";
 import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";

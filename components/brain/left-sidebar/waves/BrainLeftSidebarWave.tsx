@@ -1,22 +1,26 @@
 "use client";
 
-import WavePicture from "@/components/waves/WavePicture";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useCallback, useMemo } from "react";
+
+import WavePicture from "@/components/waves/WavePicture";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
   getWaveRoute,
 } from "../../../../helpers/navigation.helpers";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;

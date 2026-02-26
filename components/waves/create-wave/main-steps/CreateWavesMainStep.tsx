@@ -4,8 +4,9 @@ import type {
 import {
   CreateWaveStepStatus,
 } from "@/types/waves.types";
-import CreateWavesMainStepIcon from "./CreateWavesMainStepIcon";
+
 import CreateWavesMainStepConnectionLine from "./CreateWavesMainStepConnectionLine";
+import CreateWavesMainStepIcon from "./CreateWavesMainStepIcon";
 
 export default function CreateWavesMainStep({
   isLast,

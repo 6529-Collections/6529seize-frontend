@@ -1,16 +1,20 @@
 "use client"
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
+
+import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
 import { ArtistActiveSubmissionContent } from "./ArtistActiveSubmissionContent";
-import { ArtistWinningArtworksContent } from "./ArtistWinningArtworksContent";
 import { ArtistPreviewModalHeader } from "./ArtistPreviewModalHeader";
 import { ArtistPreviewModalTabs } from "./ArtistPreviewModalTabs";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { ArtistWinningArtworksContent } from "./ArtistWinningArtworksContent";
+
 import type { ModalTab } from "./ArtistPreviewModal";
-import { useCompactMode } from "@/contexts/CompactModeContext";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+
 
 interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;

@@ -1,7 +1,9 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import type { GroupCardState } from "./GroupCard";
+
 import GroupCardContent from "./GroupCardContent";
 import GroupCardHeader from "./GroupCardHeader";
+
+import type { GroupCardState } from "./GroupCard";
 
 export default function GroupCardView({
   group,

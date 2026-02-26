@@ -1,4 +1,5 @@
-import { useEffect, useEffectEvent, useState, type RefObject } from "react";
+import { type RefObject, useEffect, useEffectEvent, useState } from "react";
+
 import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 
 export function usePersistentScrollOffset(

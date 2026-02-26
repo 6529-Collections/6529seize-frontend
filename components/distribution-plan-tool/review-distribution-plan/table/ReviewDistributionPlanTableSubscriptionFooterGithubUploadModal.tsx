@@ -1,9 +1,10 @@
 "use client";
 
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Image from "next/image";
 import Link from "next/link";
 import { Button, Container, Modal } from "react-bootstrap";
+
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
 const GITHUB_BASE =
   "https://github.com/6529-Collections/thememecards/tree/main";

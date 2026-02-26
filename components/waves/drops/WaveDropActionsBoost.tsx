@@ -1,9 +1,5 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
-import BoostIcon from "@/components/common/icons/BoostIcon";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import { AnimatePresence, motion } from "framer-motion";
 import React, {
   useCallback,
@@ -13,6 +9,11 @@ import React, {
   useState,
 } from "react";
 import { Tooltip } from "react-tooltip";
+
+import { AuthContext } from "@/components/auth/Auth";
+import BoostIcon from "@/components/common/icons/BoostIcon";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 
 interface WaveDropActionsBoostProps {
   readonly drop: ExtendedDrop;

@@ -1,5 +1,11 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
@@ -7,11 +13,6 @@ import UserSettingsUsername from "@/components/user/settings/UserSettingsUsernam
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageHeaderEditName({
   profile,
   onClose,

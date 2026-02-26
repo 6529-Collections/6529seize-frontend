@@ -1,15 +1,17 @@
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+
 import GroupCreateConfigHeader from "../GroupCreateConfigHeader";
+
 import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
 import GroupCreateRep from "./GroupCreateRep";
 import GroupCreateTDH from "./GroupCreateTDH";
 import GroupCreateCollections from "./nfts/GroupCreateCollections";
 import GroupCreateNfts from "./nfts/GroupCreateNfts";
-import GroupCreateXtdhGrant from "./xtdh-grant/GroupCreateXtdhGrant";
 import GroupCreateWallets, {
   GroupCreateWalletsType,
 } from "./wallets/GroupCreateWallets";
+import GroupCreateXtdhGrant from "./xtdh-grant/GroupCreateXtdhGrant";
 
 export default function GroupCreateConfig({
   level,

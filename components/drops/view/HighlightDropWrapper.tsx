@@ -1,7 +1,5 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
 import {
   forwardRef,
   useCallback,
@@ -10,8 +8,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
+
 import { classNames } from "@/helpers/Helpers";
+import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
+
+import type {
+  ReactNode} from "react";
 
 interface HighlightDropWrapperProps {
   readonly active: boolean;

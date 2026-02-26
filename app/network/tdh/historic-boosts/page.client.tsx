@@ -1,9 +1,12 @@
 "use client";
 
-import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
-import type { PropsWithChildren, ReactNode } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+
+import { useSetTitle } from "@/contexts/TitleContext";
+
+import type { PropsWithChildren, ReactNode } from "react";
+
 
 function DetailsCard(props: Readonly<{ title: string; children: ReactNode }>) {
   return (

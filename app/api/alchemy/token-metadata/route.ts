@@ -1,4 +1,3 @@
-import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
@@ -6,6 +5,8 @@ import { isValidEthAddress } from "@/helpers/Helpers";
 import { fetchPublicJson, UrlGuardError } from "@/lib/security/urlGuard";
 import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+
+import type { NextRequest} from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const MAX_BATCH_SIZE = 100;

@@ -1,6 +1,5 @@
 "use client";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   faChevronDown,
   faChevronUp,
@@ -11,9 +10,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "../distribution-plan-tool/common/CircleLoader";
+
 import TransferModal from "./TransferModal";
 import { useTransfer } from "./TransferState";
 

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NftOwner } from "@/entities/IOwner";
 import { commonApiFetch } from "@/services/api/common-api";

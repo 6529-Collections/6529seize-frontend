@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 
-import type { ContractOverview } from "../types";
 import { shortenAddress } from "@/helpers/address.helpers";
+
+import type { ContractOverview } from "../types";
 
 interface NftContractHeaderProps {
     readonly contract: ContractOverview | null;

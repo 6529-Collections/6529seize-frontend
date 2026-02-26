@@ -1,6 +1,6 @@
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 
 const SORT_OPTIONS: { value: ApiCommunityMembersSortOption; label: string }[] =
   [

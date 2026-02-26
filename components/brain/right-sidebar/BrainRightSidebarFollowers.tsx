@@ -1,6 +1,7 @@
 import React from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
+
 import WaveFollowersList from "@/components/waves/followers/WaveFollowersList";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface BrainRightSidebarFollowersProps {
   readonly wave: ApiWave;

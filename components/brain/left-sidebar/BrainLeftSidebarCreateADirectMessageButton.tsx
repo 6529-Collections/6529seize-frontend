@@ -4,6 +4,7 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useMemo } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
 import useCreateModalState, {
   CREATE_DIRECT_MESSAGE_VALUE,

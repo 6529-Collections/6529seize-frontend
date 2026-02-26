@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useContext } from "react";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+
 import { AuthContext } from "@/components/auth/Auth";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { WaveGroupType } from "../WaveGroup.types";
+
 import {
   useWaveGroupEditButtonsController,
   WaveGroupIdentitiesModal,
@@ -13,9 +14,11 @@ import {
 import WaveGroupEditMenu from "./buttons/subcomponents/WaveGroupEditMenu";
 import WaveGroupManageIdentitiesModals from "./buttons/subcomponents/WaveGroupManageIdentitiesModals";
 import {
-  WaveGroupManageIdentitiesMode,
   type WaveGroupManageIdentitiesConfirmEvent,
+  WaveGroupManageIdentitiesMode,
 } from "./WaveGroupManageIdentitiesModal";
+
+import type { WaveGroupType } from "../WaveGroup.types";
 
 interface WaveGroupEditButtonsProps {
   readonly haveGroup: boolean;

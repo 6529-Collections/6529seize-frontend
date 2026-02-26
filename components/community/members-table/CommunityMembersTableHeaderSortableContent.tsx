@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SortDirection } from "@/entities/ISort";
-import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 
 const TITLE: Record<string, string> = {

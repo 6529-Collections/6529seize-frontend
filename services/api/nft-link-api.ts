@@ -1,5 +1,6 @@
-import { commonApiFetch } from "./common-api";
 import type { ApiNftLinkData } from "@/generated/models/ApiNftLinkData";
+
+import { commonApiFetch } from "./common-api";
 
 export interface ApiNftLinkResponse {
   readonly is_enrichable: boolean;

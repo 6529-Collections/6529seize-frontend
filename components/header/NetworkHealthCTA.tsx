@@ -3,6 +3,7 @@
 import { HeartIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
+
 import type { ComponentProps } from "react";
 
 type NetworkHealthCTAProps = Omit<ComponentProps<typeof Link>, "href" | "children">;

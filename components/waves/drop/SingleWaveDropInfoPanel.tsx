@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
 import VotingModal from "@/components/voting/VotingModal";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { useState } from "react";
+
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";

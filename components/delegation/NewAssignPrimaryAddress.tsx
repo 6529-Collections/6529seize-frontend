@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 
@@ -13,8 +14,8 @@ import {
 } from "@/constants/constants";
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
-import type { DelegationCollection } from "./delegation-constants";
+
+
 import { PRIMARY_ADDRESS_USE_CASE } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
 import {
@@ -25,6 +26,8 @@ import {
   DelegationFormOriginalDelegatorFormGroup,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
+
+import type { DelegationCollection } from "./delegation-constants";
 
 interface Props {
   address: string;

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+
 import GroupCardDeleteModal from "./GroupCardDeleteModal";
 
 export default function GroupCardDelete({

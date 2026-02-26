@@ -1,4 +1,5 @@
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+
 import { WaveGroupType } from "../../WaveGroup.types";
 
 const waveGroupUpdatePaths = {

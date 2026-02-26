@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { CollectedCollectionType, CollectionSeized } from "@/entities/IProfile";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { useEffect, useState } from "react";
+
 import type { ProfileCollectedFilters } from "../UserPageCollected";
 
 export default function UserPageCollectedCardsNoCards({

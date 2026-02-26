@@ -3,17 +3,18 @@
 import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import React, { useState, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
-import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
-import { fullScreenSupported } from "@/helpers/Helpers";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
-import useCapacitor from "@/hooks/useCapacitor";
-import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import React, { useCallback, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
+import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { fullScreenSupported } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 
 const tooltipProps = {
   delayShow: 250,

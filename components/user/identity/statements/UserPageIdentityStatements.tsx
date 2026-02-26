@@ -1,15 +1,17 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
+
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";

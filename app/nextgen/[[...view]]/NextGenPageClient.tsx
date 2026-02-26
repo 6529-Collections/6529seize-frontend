@@ -1,5 +1,9 @@
 "use client";
 
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import NextGenComponent from "@/components/nextGen/collections/NextGen";
 import NextgenAboutComponent from "@/components/nextGen/collections/NextGenAbout";
 import NextgenArtistsComponent from "@/components/nextGen/collections/NextGenArtists";
@@ -9,9 +13,7 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
 import styles from "@/styles/Home.module.scss";
 import { NextgenView } from "@/types/enums";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+
 import { getNextGenView } from "./view-utils";
 
 export default function NextGenPageClient({

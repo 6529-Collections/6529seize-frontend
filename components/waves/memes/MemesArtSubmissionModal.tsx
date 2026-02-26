@@ -1,10 +1,12 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useKeyPressEvent } from "react-use";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
+
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
 
 interface MemesArtSubmissionModalProps {

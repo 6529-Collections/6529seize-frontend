@@ -2,14 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
-import { ImageScale } from "@/helpers/image.helpers";
 
-import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
-import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import InteractiveIcon from "@/components/drops/media/InteractiveIcon";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { ImageScale } from "@/helpers/image.helpers";
+
+import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
+import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
+import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
 
 enum MediaType {
   IMAGE = "IMAGE",

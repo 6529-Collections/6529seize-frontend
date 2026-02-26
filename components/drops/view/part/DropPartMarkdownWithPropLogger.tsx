@@ -1,6 +1,8 @@
 import React from "react";
-import type { DropPartMarkdownProps } from "./DropPartMarkdown";
+
 import DropPartMarkdown from "./DropPartMarkdown";
+
+import type { DropPartMarkdownProps } from "./DropPartMarkdown";
 
 function areArraysEqual(arr1: any[], arr2: any[]): boolean {
   if (arr1.length !== arr2.length) return false;

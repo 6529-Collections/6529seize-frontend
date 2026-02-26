@@ -1,7 +1,8 @@
 import { ProfileConnectedStatus } from "@/entities/IProfile";
-import type { ProfileMinWithoutSubs } from "./ProfileTypes";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+
+import type { ProfileMinWithoutSubs } from "./ProfileTypes";
 export const getProfileConnectedStatus = ({
   profile,
   isProxy,

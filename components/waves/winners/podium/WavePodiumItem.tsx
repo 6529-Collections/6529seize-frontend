@@ -1,16 +1,19 @@
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
-import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { motion } from "framer-motion";
-import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+
+import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
+import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
+
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner | undefined;

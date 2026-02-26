@@ -1,9 +1,11 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+
 import { getThemeColors } from "./ParticipationDropRatingsTheme";
-import type { RatingsData } from "./types";
 import ParticipationDropRatingsTotalSection from "./ParticipationDropRatingsTotalSection";
-import ParticipationDropRatingsVoterSection from "./ParticipationDropRatingsVoterSection";
 import ParticipationDropRatingsUserSection from "./ParticipationDropRatingsUserSection";
+import ParticipationDropRatingsVoterSection from "./ParticipationDropRatingsVoterSection";
+
+import type { RatingsData } from "./types";
 
 interface ParticipationDropRatingsContainerProps {
   readonly drop: ApiDrop;

@@ -1,10 +1,11 @@
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
-import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
-import { getStatsPath } from "./userPageStats.helpers";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+
+import { getStatsPath } from "./userPageStats.helpers";
 import UserPageStatsClient from "./UserPageStatsClient";
 
 async function fetchSeasons(headers: Record<string, string>) {

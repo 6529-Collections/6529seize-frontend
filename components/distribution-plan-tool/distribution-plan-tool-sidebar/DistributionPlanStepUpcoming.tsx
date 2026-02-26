@@ -1,8 +1,9 @@
-import type {
-    DistributionPlanStepDescription} from "./DistributionPlanToolSidebar";
 import {
     DISTRIBUTION_PLAN_STEPS
 } from "./DistributionPlanToolSidebar";
+
+import type {
+    DistributionPlanStepDescription} from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepUpcoming({
   step,

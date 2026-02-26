@@ -1,10 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
 import React from "react";
-import BrainMobile from "../brain/BrainMobile";
+
 import { SidebarProvider } from "../../hooks/useSidebarState";
+import BrainMobile from "../brain/BrainMobile";
 import { ContentTabProvider } from "../brain/ContentTabContext";
+
+import type { ReactNode } from "react";
 
 interface Props {
   readonly children: ReactNode;

@@ -1,14 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
-import type { NFT } from "@/entities/INFT";
-import {
-  areEqualAddresses,
-  formatAddress,
-  isValidEthAddress,
-} from "@/helpers/Helpers";
-import { postData } from "@/services/6529api";
 import {
   faCheckCircle,
   faPlusCircle,
@@ -21,8 +12,21 @@ import { useEffect, useState } from "react";
 import { Button, Col, Container, Dropdown, Form, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
-import type { Nft, NftContract } from "./alchemy-sdk-types";
+
+import { publicEnv } from "@/config/env";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
+import type { NFT } from "@/entities/INFT";
+import {
+  areEqualAddresses,
+  formatAddress,
+  isValidEthAddress,
+} from "@/helpers/Helpers";
+import { postData } from "@/services/6529api";
+
 import styles from "./Rememes.module.scss";
+
+import type { Nft, NftContract } from "./alchemy-sdk-types";
+
 
 export interface ProcessedRememe {
   valid: boolean;

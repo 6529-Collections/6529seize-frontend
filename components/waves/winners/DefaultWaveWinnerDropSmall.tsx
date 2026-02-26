@@ -1,16 +1,20 @@
 "use client";
 
-import { memo, useCallback } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
+import { memo, useCallback } from "react";
+
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { Time } from "@/helpers/time";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+
 import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
-import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
-import { Time } from "@/helpers/time";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+
 
 interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;

@@ -1,7 +1,9 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+
 import WaveWinnersDropHeaderVoter from "./WaveWinnersDropHeaderVoter";
-import { WAVE_VOTING_LABELS, WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+
 
 interface WaveWinnersDropHeaderVotersProps {
   readonly winner: ApiWaveDecisionWinner;

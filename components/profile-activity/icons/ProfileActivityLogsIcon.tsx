@@ -1,8 +1,9 @@
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { ProfileActivityLogType } from "@/types/enums";
+
 import ProfileActivityLogsBannerIcon from "./ProfileActivityLogsBannerIcon";
-import ProfileActivityLogsCICRatingIcon from "./ProfileActivityLogsCICRatingIcon";
 import ProfileActivityLogsCertificateIcon from "./ProfileActivityLogsCertificateIcon";
+import ProfileActivityLogsCICRatingIcon from "./ProfileActivityLogsCICRatingIcon";
 import ProfileActivityLogsContactIcon from "./ProfileActivityLogsContactIcon";
 import ProfileActivityLogsGeneralCICStatementIcon from "./ProfileActivityLogsGeneralCICStatementIcon";
 import ProfileActivityLogsHandleIcon from "./ProfileActivityLogsHandleIcon";

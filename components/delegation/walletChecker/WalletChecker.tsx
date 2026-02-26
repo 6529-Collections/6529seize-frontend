@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  faCheck,
+  faPlusCircle,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQuery } from "@tanstack/react-query";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
+
 import Address from "@/components/address/Address";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { publicEnv } from "@/config/env";
@@ -12,21 +22,14 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { Delegation, WalletConsolidation } from "@/entities/IDelegation";
 import { areEqualAddresses, isValidEthAddress } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import {
-  faCheck,
-  faPlusCircle,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useQuery } from "@tanstack/react-query";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
+
 import {
   ALL_USE_CASES,
   MINTING_USE_CASE,
   SUB_DELEGATION_USE_CASE,
   SUPPORTED_COLLECTIONS,
 } from "../delegation-constants";
+
 import styles from "./WalletChecker.module.scss";
 
 interface ConsolidationDisplay {

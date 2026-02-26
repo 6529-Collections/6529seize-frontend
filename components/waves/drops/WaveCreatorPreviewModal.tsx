@@ -1,7 +1,5 @@
 "use client";
 
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   Dialog,
   DialogPanel,
@@ -10,6 +8,10 @@ import {
 } from "@headlessui/react";
 import { Fragment, useEffect } from "react";
 import { createPortal } from "react-dom";
+
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
 import ArtistPreviewAppWrapper from "./ArtistPreviewAppWrapper";
 import { WaveCreatorPreviewModalContent } from "./WaveCreatorPreviewModalContent";
 

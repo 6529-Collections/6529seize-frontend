@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
-import { useSignMessage } from "wagmi";
+import { useCallback, useState } from "react";
 import { UserRejectedRequestError } from "viem";
+import { useSignMessage } from "wagmi";
 
 /**
  * Enhanced mobile-compatible signing errors
@@ -426,9 +426,9 @@ const getMobileErrorMessage = (error: unknown): string => {
         // Use JSON stringification for plain objects
         message = JSON.stringify(error);
       } else {
-        // Use custom toString method (verified above to not be Object.prototype.toString)
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
-        message = String(error);
+        // Avoid object stringification fallback; serialize instead for lint-safe output.
+        const serialized = JSON.stringify(error);
+        message = serialized ?? "Unknown error";
       }
     } catch {
       message = "Unknown error";

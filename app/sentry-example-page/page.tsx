@@ -1,8 +1,8 @@
 "use client";
 
-import Head from "next/head";
 import * as Sentry from "@sentry/nextjs";
-import { useState, useEffect } from "react";
+import Head from "next/head";
+import { useEffect, useState } from "react";
 
 class SentryExampleFrontendError extends Error {
   constructor(message: string | undefined) {

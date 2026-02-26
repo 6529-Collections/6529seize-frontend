@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import type { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanVerifiedIcon from "@/components/distribution-plan-tool/common/DistributionPlanVerifiedIcon";
 import {
@@ -7,7 +9,6 @@ import {
   truncateTextMiddle,
 } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import Image from "next/image";
 
 interface CollectionMeta {
   readonly imgUrl: string;

@@ -1,7 +1,9 @@
-import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+
 import CreateDropContentRequirementsItem from "./CreateDropContentRequirementsItem";
 
 export enum DropRequirementType {

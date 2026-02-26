@@ -1,5 +1,6 @@
 "use client";
 
+import data from "@emoji-mart/data";
 import {
   createContext,
   useCallback,
@@ -8,7 +9,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import data from "@emoji-mart/data";
 
 const S3_EMOJI_URL = `https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json?t=${Date.now()}`;
 

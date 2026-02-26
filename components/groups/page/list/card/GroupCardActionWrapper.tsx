@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import GroupCardActionFooter from "./utils/GroupCardActionFooter";
+
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+
+import GroupCardActionFooter from "./utils/GroupCardActionFooter";
 
 export default function GroupCardActionWrapper({
   loading,

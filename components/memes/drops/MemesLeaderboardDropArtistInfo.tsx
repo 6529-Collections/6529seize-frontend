@@ -1,16 +1,17 @@
 "use client"
 
 import Link from "next/link";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
+import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 
 interface MemesLeaderboardDropArtistInfoProps {

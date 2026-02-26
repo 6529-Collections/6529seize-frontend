@@ -1,16 +1,19 @@
 "use client";
 
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+
+import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSort,
 } from "@/hooks/useWaveDropsLeaderboard";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
-import { shouldShowNextWinnerInComingUp } from "@/helpers/mint-visibility.helpers";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+
+
 import { LeadingCard } from "./LeadingCard";
 import { NextMintCard } from "./NextMintCard";
 

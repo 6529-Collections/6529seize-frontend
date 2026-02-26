@@ -1,6 +1,7 @@
 import CommunityDownloads from "@/components/community-downloads/CommunityDownloads";
 import { getAppMetadata } from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
 
 export default function Downloads() {

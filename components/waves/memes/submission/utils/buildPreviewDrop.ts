@@ -1,16 +1,18 @@
 "use client";
 
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { DropSize, getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { OperationalData } from "../types/OperationalData";
-import type { TraitsData } from "../types/TraitsData";
+
 import { validateStrictAddress } from "./addressValidation";
 import { objectEntries } from "./objectEntries";
+
+import type { OperationalData } from "../types/OperationalData";
+import type { TraitsData } from "../types/TraitsData";
 
 interface PreviewMediaSelection {
   readonly mediaSource: "upload" | "url";

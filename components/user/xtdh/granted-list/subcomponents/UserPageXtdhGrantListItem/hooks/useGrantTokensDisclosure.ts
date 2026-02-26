@@ -4,11 +4,12 @@ import { useCallback, useId, useMemo, useState } from "react";
 
 import { useTdhGrantTokensQuery } from "@/hooks/useTdhGrantTokensQuery";
 
-import type { GrantTokensDisclosureState } from "../types";
 import {
   getGrantTokensErrorMessage,
   mapTokensToRanges,
 } from "../utils/grantTokens";
+
+import type { GrantTokensDisclosureState } from "../types";
 
 const TOKEN_PAGE_SIZE = 500;
 

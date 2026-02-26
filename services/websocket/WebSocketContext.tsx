@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext } from "react";
+
+import type { WsMessageType } from "@/helpers/Types";
+
 import type {
   MessageCallback,
-  WebSocketStatus,
   WebSocketConfig,
+  WebSocketStatus,
 } from "./WebSocketTypes";
-import type { WsMessageType } from "@/helpers/Types";
 
 /**
  * Interface for the WebSocket context

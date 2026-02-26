@@ -1,6 +1,7 @@
 import Link from "next/link";
-import type { MentionedUser } from "@/entities/IDrop";
+
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { MentionedUser } from "@/entities/IDrop";
 
 export default function DropListItemContentMention({
   user,

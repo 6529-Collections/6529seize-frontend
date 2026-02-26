@@ -1,7 +1,8 @@
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
-import styles from "./NextGenAdmin.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Row, Col, Form } from "react-bootstrap";
+import { Col, Form, Row } from "react-bootstrap";
+
+import styles from "./NextGenAdmin.module.scss";
 
 export function NextGenAdminHeadingRow(
   props: Readonly<{ title: string; close: () => void }>

@@ -1,19 +1,24 @@
 "use client";
 
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import useCreateModalState from "@/hooks/useCreateModalState";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
+
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import useCreateModalState from "@/hooks/useCreateModalState";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
+
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+
+import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 
 function isValidWave(wave: unknown): wave is MinimalWave {
   if (wave === null || wave === undefined || typeof wave !== "object") {

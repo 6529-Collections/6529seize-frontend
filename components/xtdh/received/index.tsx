@@ -2,17 +2,18 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-import type { ReactElement } from "react";
 
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
-import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 
-import { XtdhCollectionsControls } from "./collections-controls";
-import { useXtdhCollectionsFilters } from "./hooks/useXtdhCollectionsFilters";
-import { useXtdhCollectionSelection } from "./hooks/useXtdhCollectionSelection";
-import { XtdhCollectionsList } from "./subcomponents/XtdhCollectionsList";
 import { XtdhCollectionTokensPanel } from "./collection-tokens";
+import { XtdhCollectionsControls } from "./collections-controls";
+import { useXtdhCollectionSelection } from "./hooks/useXtdhCollectionSelection";
+import { useXtdhCollectionsFilters } from "./hooks/useXtdhCollectionsFilters";
+import { XtdhCollectionsList } from "./subcomponents/XtdhCollectionsList";
+
+import type { ReactElement } from "react";
 
 interface XtdhReceivedSectionProps {
   readonly profileId: string | null;

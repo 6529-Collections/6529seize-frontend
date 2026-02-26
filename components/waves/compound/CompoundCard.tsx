@@ -1,7 +1,8 @@
 import Link from "next/link";
-import type { ReactElement } from "react";
+
 
 import { LinkPreviewCardLayout } from "../OpenGraphPreview";
+
 import {
   type CompoundAccountResponse,
   type CompoundMarketV2Response,
@@ -13,6 +14,8 @@ import {
   isCompoundResponse,
   isCompoundTx,
 } from "./types";
+
+import type { ReactElement } from "react";
 
 interface CompoundCardProps {
   readonly href: string;

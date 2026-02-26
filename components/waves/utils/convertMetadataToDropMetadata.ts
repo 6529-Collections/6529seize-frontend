@@ -1,5 +1,6 @@
-import type { CreateDropMetadataType } from "../CreateDropContent";
 import type { DropMetadata } from "@/entities/IDrop";
+
+import type { CreateDropMetadataType } from "../CreateDropContent";
 
 export const convertMetadataToDropMetadata = (
   metadata: CreateDropMetadataType[]

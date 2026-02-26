@@ -1,5 +1,6 @@
-import styles from "./AppWallet.module.scss";
 import Image from "next/image";
+
+import styles from "./AppWallet.module.scss";
 
 export default function AppWalletAvatar(
   props: Readonly<{ address: string; size?: number | undefined }>

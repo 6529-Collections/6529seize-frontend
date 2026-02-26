@@ -10,6 +10,18 @@ import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+
+import DotLoader from "@/components/dotLoader/DotLoader";
+import {
+  formatNameForUrl,
+  normalizeNextgenTokenID,
+} from "@/components/nextGen/nextgen_helpers";
+import Pagination from "@/components/pagination/Pagination";
+import {
+  SearchModalDisplay,
+  SearchWalletsDisplay,
+} from "@/components/searchModal/SearchModal";
+import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type {
   NextGenCollection,
@@ -19,22 +31,13 @@ import type {
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import DotLoader from "@/components/dotLoader/DotLoader";
-import Pagination from "@/components/pagination/Pagination";
-import {
-  SearchModalDisplay,
-  SearchWalletsDisplay,
-} from "@/components/searchModal/SearchModal";
-import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
-import {
-  formatNameForUrl,
-  normalizeNextgenTokenID,
-} from "@/components/nextGen/nextgen_helpers";
+
 import styles from "../NextGen.module.scss";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
+
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 
 const TRAITS: Record<number, string[]> = {

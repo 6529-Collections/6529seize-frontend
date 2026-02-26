@@ -1,8 +1,11 @@
-import type { SortDirection } from "@/entities/ISort";
-import type { RefObject } from "react";
 import { createBreakpoint } from "react-use";
+
+import type { SortDirection } from "@/entities/ISort";
+
 import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";
+
+import type { RefObject } from "react";
 
 interface ChildComponentProps {
   onCopy?: (() => void) | undefined;

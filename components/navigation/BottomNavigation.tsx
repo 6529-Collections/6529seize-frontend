@@ -1,18 +1,22 @@
 "use client";
 
+import React, { useCallback, useMemo, useRef } from "react";
+
 import { getNotificationsRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import React, { useCallback, useMemo, useRef } from "react";
+
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
+import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
 import LogoIcon from "../common/icons/LogoIcon";
-import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
+
 import NavItem from "./NavItem";
+
 import type { NavItem as NavItemData } from "./navTypes";
 
 const items: NavItemData[] = [

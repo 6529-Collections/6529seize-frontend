@@ -1,10 +1,12 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
+
 import { ExploreWaveCard } from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 

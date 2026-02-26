@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { SingleWaveDropContentMetadata } from "./SingleWaveDropContentMetadata";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import WaveDropContent from "../drops/WaveDropContent";
+
 import { ImageScale } from "@/helpers/image.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
+import WaveDropContent from "../drops/WaveDropContent";
+
+import { SingleWaveDropContentMetadata } from "./SingleWaveDropContentMetadata";
+
 
 interface SingleWaveDropContentProps {
   readonly drop: ExtendedDrop;

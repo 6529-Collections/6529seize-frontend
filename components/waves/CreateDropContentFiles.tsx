@@ -1,7 +1,10 @@
-import React from "react";
-import type { CreateDropPart } from "@/entities/IDrop";
 import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
+
+import type { CreateDropPart } from "@/entities/IDrop";
+
 import FilePreview from "./FilePreview";
+
 import type { UploadingFile } from "./CreateDropContent";
 
 enum FileSource {

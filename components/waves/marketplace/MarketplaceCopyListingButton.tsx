@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from "react";
+import { type MouseEvent, useState } from "react";
 
 import { stopPropagation } from "./MarketplaceItemPreviewCard.utils";
 

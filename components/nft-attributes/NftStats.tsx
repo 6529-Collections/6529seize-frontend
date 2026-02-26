@@ -1,6 +1,6 @@
+import type { LabNFT, NFT } from "@/entities/INFT";
 import { numberWithCommas } from "@/helpers/Helpers";
 
-import type { LabNFT, NFT } from "@/entities/INFT";
 
 export function NftPageStats(props: {
   readonly nft: NFT | LabNFT;

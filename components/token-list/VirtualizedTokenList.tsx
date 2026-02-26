@@ -3,10 +3,11 @@
 import { useMemo } from "react";
 import { createBreakpoint } from "react-use";
 
-import type { VirtualizedTokenListProps } from "./types";
 
 import { getTotalCount } from "./utils";
 import { VirtualizedTokenListContent } from "./VirtualizedTokenListContent";
+
+import type { VirtualizedTokenListProps } from "./types";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 

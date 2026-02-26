@@ -1,10 +1,12 @@
 import { useQueries } from "@tanstack/react-query";
-import { useWaveOutcomesQuery } from "./useWaveOutcomesQuery";
+
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import type { ApiWaveOutcomeDistributionItemsPage } from "@/generated/models/ApiWaveOutcomeDistributionItemsPage";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWaveOutcomeDistributionItemsPage } from "@/generated/models/ApiWaveOutcomeDistributionItemsPage";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+
+import { useWaveOutcomesQuery } from "./useWaveOutcomesQuery";
 
 const DISTRIBUTION_PAGE_SIZE = 100;
 

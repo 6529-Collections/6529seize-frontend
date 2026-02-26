@@ -1,13 +1,11 @@
 "use client";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import type { MenuTextMatch } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import {
   LexicalTypeaheadMenuPlugin,
   MenuOption,
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import type { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -19,10 +17,14 @@ import {
 import * as ReactDOM from "react-dom";
 
 import { $createWaveMentionNode } from "@/components/drops/create/lexical/nodes/WaveMentionNode";
-import WaveMentionsTypeaheadMenu from "./WaveMentionsTypeaheadMenu";
+import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 import type { MentionedWave } from "@/entities/IDrop";
 import { useWavesSearch } from "@/hooks/useWavesSearch";
-import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
+
+import WaveMentionsTypeaheadMenu from "./WaveMentionsTypeaheadMenu";
+
+import type { MenuTextMatch } from "@lexical/react/LexicalTypeaheadMenuPlugin";
+import type { TextNode } from "lexical";
 
 const PUNCTUATION = String.raw`\.,\+\*\?\$\@\|#{}\(\)\^\-\[\]\\\/!%'"~=<>_:;`;
 

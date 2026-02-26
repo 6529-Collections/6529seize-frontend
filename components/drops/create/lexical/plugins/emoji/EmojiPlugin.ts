@@ -1,19 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import type {
-  LexicalEditor} from "lexical";
 import {
+  $createRangeSelection,
   $getRoot,
   $getSelection,
   $isRangeSelection,
-  $createRangeSelection,
   $setSelection,
   TextNode
 } from "lexical";
+import { useCallback, useEffect, useMemo } from "react";
+
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { useEmoji } from "@/contexts/EmojiContext";
+
+import type {
+  LexicalEditor} from "lexical";
 
 const EMOJI_TEST_REGEX = /:(\w+)/;
 export const EMOJI_MATCH_REGEX = /:(\w+):/g;

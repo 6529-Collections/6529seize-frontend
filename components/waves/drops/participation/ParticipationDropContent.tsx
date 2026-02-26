@@ -1,7 +1,9 @@
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import WaveDropContent from "../WaveDropContent";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+
+import WaveDropContent from "../WaveDropContent";
+
 
 interface ParticipationDropContentProps {
   readonly drop: ExtendedDrop;

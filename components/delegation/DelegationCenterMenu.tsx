@@ -1,8 +1,5 @@
 "use client";
 
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { DELEGATION_CONTRACT } from "@/constants/constants";
-import { DelegationCenterSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,20 +7,25 @@ import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { DELEGATION_CONTRACT } from "@/constants/constants";
+import { DelegationCenterSection } from "@/types/enums";
+
 import CollectionDelegationComponent from "./CollectionDelegation";
+import {
+  ANY_COLLECTION,
+  GRADIENTS_COLLECTION,
+  MEME_LAB_COLLECTION,
+  MEMES_COLLECTION,
+} from "./delegation-constants";
 import styles from "./Delegation.module.scss";
 import DelegationCenterComponent from "./DelegationCenter";
+import DelegationHTML from "./html/DelegationHTML";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
 import NewDelegationComponent from "./NewDelegation";
 import NewSubDelegationComponent from "./NewSubDelegation";
-import {
-  ANY_COLLECTION,
-  GRADIENTS_COLLECTION,
-  MEMES_COLLECTION,
-  MEME_LAB_COLLECTION,
-} from "./delegation-constants";
-import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 
 interface Props {

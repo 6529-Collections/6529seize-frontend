@@ -1,12 +1,14 @@
-import type { TraitsData } from "../types/TraitsData";
 import type { FieldDefinition } from "@/components/waves/memes/traits/schema";
 import { traitDefinitions } from "@/components/waves/memes/traits/schema";
+
+import { validationRulesByType } from "./validationRules";
+
 import type {
+  FieldValidationContext,
   ValidationOptions,
   ValidationResult,
-  FieldValidationContext,
 } from "./validationTypes";
-import { validationRulesByType } from "./validationRules";
+import type { TraitsData } from "../types/TraitsData";
 
 /**
  * Default validation options

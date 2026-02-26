@@ -1,5 +1,6 @@
-import { Time } from "../time";
 import type { ApiWave } from "@/generated/models/ApiWave";
+
+import { Time } from "../time";
 
 // Constants for fallback values
 export const FALLBACK_START_TIME = 0; // Use 0 (Jan 1, 1970) to indicate "started immediately"

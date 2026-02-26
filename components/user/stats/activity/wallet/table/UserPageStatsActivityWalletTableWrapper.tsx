@@ -5,8 +5,10 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
+
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,

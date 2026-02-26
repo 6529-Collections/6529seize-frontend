@@ -1,15 +1,18 @@
 import {
-  QueryClient,
   dehydrate,
   HydrationBoundary,
+  QueryClient,
 } from "@tanstack/react-query";
-import { getAppMetadata } from "@/components/providers/metadata";
-import NotificationsPageClient from "./page.client";
 import { cookies } from "next/headers";
+
+import { getAppMetadata } from "@/components/providers/metadata";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchAuthenticatedNotifications } from "@/helpers/stream.helpers";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "@/helpers/time";
+
+import NotificationsPageClient from "./page.client";
+
 import type { Metadata } from "next";
 
 export default async function NotificationsPage() {

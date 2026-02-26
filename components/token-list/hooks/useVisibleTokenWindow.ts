@@ -1,7 +1,10 @@
 import { useMemo } from "react";
-import { expandRangesWindow } from "@/components/nft-picker/NftPicker.utils";
+
 import type { TokenRange } from "@/components/nft-picker/NftPicker.types";
+import { expandRangesWindow } from "@/components/nft-picker/NftPicker.utils";
+
 import { toDecimalString } from "../utils";
+
 import type { TokenWindowEntry } from "../types";
 
 export function useVisibleTokenWindow(

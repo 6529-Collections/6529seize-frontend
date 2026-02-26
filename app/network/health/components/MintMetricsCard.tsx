@@ -1,7 +1,9 @@
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiMintMetrics } from "@/generated/models/ApiMintMetrics";
-import type { ReactNode } from "react";
+
 import { formatNumberWithCommas } from "../utils/formatNumbers";
+
+import type { ReactNode } from "react";
 
 interface MintMetricsCardProps {
   readonly data: ApiMintMetrics[];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Col, Container, Row, Image } from "react-bootstrap";
+import { Col, Container, Image, Row } from "react-bootstrap";
 
 export default function AboutNakamotoThreshold() {
   return (

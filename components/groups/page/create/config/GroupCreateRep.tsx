@@ -1,16 +1,18 @@
 "use client";
 
-import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
-import GroupCreateDirection from "./common/GroupCreateDirection";
+import { useState } from "react";
+
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";
-import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import RepCategorySearch, {
   RepCategorySearchSize,
 } from "@/components/utils/input/rep-category/RepCategorySearch";
+import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
-import { useState } from "react";
+
+import GroupCreateDirection from "./common/GroupCreateDirection";
+import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import PositiveOnlyToggle from "./rep/PositiveOnlyToggle";
 
 export default function GroupCreateRep({

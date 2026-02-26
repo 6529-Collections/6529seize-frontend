@@ -1,12 +1,13 @@
-import CollectionsMenuIcon from "@/components/common/icons/CollectionsMenuIcon";
-import type { SidebarSection } from "@/components/navigation/navTypes";
-import { AboutSection } from "@/types/enums";
 import {
   DocumentTextIcon,
   UsersIcon,
   WrenchIcon,
 } from "@heroicons/react/24/outline";
-import { useMemo, type ComponentType } from "react";
+import { type ComponentType, useMemo } from "react";
+
+import CollectionsMenuIcon from "@/components/common/icons/CollectionsMenuIcon";
+import type { SidebarSection } from "@/components/navigation/navTypes";
+import { AboutSection } from "@/types/enums";
 
 export function useSidebarSections(
   appWalletsSupported: boolean,

@@ -5,6 +5,7 @@ import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { INotificationPriorityAlert } from "@/types/feed.types";
+
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationHeader from "../subcomponents/NotificationHeader";

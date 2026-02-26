@@ -1,19 +1,21 @@
-import type { ReactElement } from "react";
 
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import {
-  getSeizeBaseOrigin,
-  parseSeizeQueryLink,
-  parseSeizeWaveLink,
-  parseSeizeQuoteLink,
-  type SeizeQuoteLinkInfo,
-} from "@/helpers/SeizeLinkParser";
 
 import GroupCardChat from "@/components/groups/page/list/card/GroupCardChat";
 import DropItemChat from "@/components/waves/drops/DropItemChat";
 import WaveItemChat from "@/components/waves/list/WaveItemChat";
-import type { LinkHandler } from "../linkTypes";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import {
+  getSeizeBaseOrigin,
+  parseSeizeQueryLink,
+  parseSeizeQuoteLink,
+  parseSeizeWaveLink,
+  type SeizeQuoteLinkInfo,
+} from "@/helpers/SeizeLinkParser";
+
 import { renderSeizeQuote } from "../renderers";
+
+import type { LinkHandler } from "../linkTypes";
+import type { ReactElement } from "react";
 
 interface CreateSeizeHandlersConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;

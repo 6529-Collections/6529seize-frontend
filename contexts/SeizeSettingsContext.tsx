@@ -1,11 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
-import { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
-import { fetchUrl } from "@/services/6529api";
-import type { ReactNode } from "react";
 import {
   createContext,
   useCallback,
@@ -15,6 +9,14 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { publicEnv } from "@/config/env";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiSeizeSettings } from "@/generated/models/ApiSeizeSettings";
+import { fetchUrl } from "@/services/6529api";
+
+import type { ReactNode } from "react";
 
 type TempApiSeizeSettings = ApiSeizeSettings & {
   curation_wave_id: string | null;

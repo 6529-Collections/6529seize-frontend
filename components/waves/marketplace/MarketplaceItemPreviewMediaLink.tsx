@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import type { ResolvedPreviewHref } from "./MarketplaceItemPreviewCard.types";
+
 import { MARKETPLACE_MEDIA_FRAME_CLASS } from "./previewLayout";
+
+import type { ResolvedPreviewHref } from "./MarketplaceItemPreviewCard.types";
 
 interface MarketplaceItemPreviewMediaLinkProps {
   readonly mediaUrl: string;

@@ -1,17 +1,22 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import type { KeyboardEvent} from "react";
-import { useEffect, useRef, useState, useId } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleExclamation, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useId, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { commonApiFetch } from "@/services/api/common-api";
-import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getSelectableIdentity } from "@/components/utils/input/profile-search/getSelectableIdentity";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import CommonProfileSearchItems from "../profile-search/CommonProfileSearchItems";
+
+
+import type { KeyboardEvent} from "react";
+
 
 export enum IdentitySearchSize {
   SM = "SM",

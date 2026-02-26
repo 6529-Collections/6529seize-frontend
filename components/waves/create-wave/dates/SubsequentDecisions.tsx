@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarPlus,
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { Period } from "@/helpers/Types";
-import DecisionPointDropdown from "./DecisionPointDropdown";
+
 import {
   calculateDecisionTimes,
   formatDate,
 } from "../services/waveDecisionService";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+
+import DecisionPointDropdown from "./DecisionPointDropdown";
 
 interface SubsequentDecisionsProps {
   readonly firstDecisionTime: number;

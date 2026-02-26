@@ -1,5 +1,8 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { useReadContract } from "wagmi";
+
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
@@ -10,9 +13,9 @@ import {
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import { useCallback, useEffect, useState } from "react";
+
 import type { Abi } from "viem";
-import { useReadContract } from "wagmi";
+
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",

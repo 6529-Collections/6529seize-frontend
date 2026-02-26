@@ -1,9 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import { motion } from "framer-motion";
-import type { FC } from "react";
+
+
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
 import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, {
@@ -17,6 +19,8 @@ import {
 } from "../types/OperationalData";
 import { validateStrictAddress } from "../utils/addressValidation";
 import { validateTokenIdFormat } from "../utils/tokenParsing";
+
+import type { FC } from "react";
 
 interface AdditionalInfoStepProps {
   readonly airdropEntries: AirdropEntry[];

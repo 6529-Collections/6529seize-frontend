@@ -1,3 +1,12 @@
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { AuthContext, useAuth } from "@/components/auth/Auth";
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import type { LinkPreviewToggleControl } from "@/components/waves/LinkPreviewContext";
@@ -10,14 +19,7 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+
 import EditDropLexical from "./EditDropLexical";
 import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
 

@@ -4,6 +4,7 @@ import {
   CREATE_WAVE_STEPS_LABELS,
 } from "@/helpers/waves/waves.constants";
 import type { CreateWaveStep } from "@/types/waves.types";
+
 import CreateWavesMainStep from "./CreateWavesMainStep";
 
 export default function CreateWavesMainSteps({

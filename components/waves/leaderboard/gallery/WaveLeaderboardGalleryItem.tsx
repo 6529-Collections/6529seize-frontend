@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -22,8 +25,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import Link from "next/link";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 
 interface WaveLeaderboardGalleryItemProps {

@@ -1,16 +1,18 @@
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   PROFILE_PROXY_ACTION_HAVE_CREDIT,
   PROFILE_PROXY_ACTION_LABELS,
   ProfileProxySide,
 } from "@/entities/IProxy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
 import { getTimeAgo } from "@/helpers/Helpers";
 import { getProfileProxyActionStatus } from "@/helpers/profile-proxy.helpers";
+
 import ProxyActionAcceptanceButton from "../action/ProxyActionAcceptanceButton";
 import ProfileProxyCredit from "../action/utils/credit/ProfileProxyCredit";
 import ProfileProxyEndTime from "../action/utils/time/ProfileProxyEndTime";
+
 import { PROXY_ACTION_ROW_VIEW_MODE } from "./ProxyActionRow";
 import ProxyActionRowStatus from "./ProxyActionRowStatus";
 

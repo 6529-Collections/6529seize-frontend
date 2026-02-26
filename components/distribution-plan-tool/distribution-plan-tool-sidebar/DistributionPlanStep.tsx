@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DistributionPlanStepDone from "./DistributionPlanStepDone";
-import type { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
+
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
 import DistributionPlanStepCurrent from "./DistributionPlanStepCurrent";
+import DistributionPlanStepDone from "./DistributionPlanStepDone";
 import DistributionPlanStepUpcoming from "./DistributionPlanStepUpcoming";
+
+import type { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
 
 interface DistributionPlanStepProps {
   step: DistributionPlanStepDescription;

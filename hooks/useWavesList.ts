@@ -1,13 +1,15 @@
 "use client";
 
-import { useContext, useMemo, useCallback } from "react";
+import { useCallback, useContext, useMemo } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
-import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
-import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
+import { usePinnedWavesServer } from "./usePinnedWavesServer";
+import { useShowFollowingWaves } from "./useShowFollowingWaves";
+import { useWavesOverview } from "./useWavesOverview";
 
 // Enhanced wave interface with isPinned field and newDropsCount
 interface EnhancedWave extends ApiWave {

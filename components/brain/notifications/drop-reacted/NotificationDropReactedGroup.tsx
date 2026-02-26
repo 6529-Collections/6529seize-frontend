@@ -1,5 +1,7 @@
 "use client";
 
+import { Fragment, useEffect, useRef } from "react";
+
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
@@ -10,7 +12,7 @@ import type {
   GroupedReactionsItem,
   INotificationDropReacted,
 } from "@/types/feed.types";
-import { Fragment, useEffect, useRef } from "react";
+
 import NotificationsFollowAllBtn from "../NotificationsFollowAllBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
@@ -18,6 +20,7 @@ import {
   getIsDirectMessage,
   useWaveNavigation,
 } from "../utils/navigationUtils";
+
 import ReactionEmojiPreview from "./ReactionEmojiPreview";
 
 function notificationsLatestPerUser(

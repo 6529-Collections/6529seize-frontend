@@ -1,6 +1,7 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { Time } from "@/helpers/time";
+
 import ProxyActionRow from "./ProxyActionRow";
 
 export default function ProxyActions({

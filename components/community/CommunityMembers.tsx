@@ -1,29 +1,34 @@
 "use client";
 
-import type { CommunityMembersQuery } from "@/app/network/page";
-import { SortDirection } from "@/entities/ISort";
-import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
-import type { Page } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
+import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FunnelIcon } from "@heroicons/react/24/outline";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useDebounce } from "react-use";
+
+import type { CommunityMembersQuery } from "@/app/network/page";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { SortDirection } from "@/entities/ISort";
+import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import type { Page } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
+import { selectActiveGroupId } from "@/store/groupSlice";
+
+import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
+import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+
 import CommunityMembersMobileSortContent from "./members-table/CommunityMembersMobileSortContent";
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { useSetTitle } from "@/contexts/TitleContext";
-import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-import { selectActiveGroupId } from "@/store/groupSlice";
-import { faArrowDownWideShort } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FunnelIcon } from "@heroicons/react/24/outline";
-import { useSelector } from "react-redux";
-import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
-import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+
+
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;

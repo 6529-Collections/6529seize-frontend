@@ -1,15 +1,19 @@
 "use client";
 
-import type { NFT } from "@/entities/INFT";
+import { useEffect, useState } from "react";
+import { Container, Row } from "react-bootstrap";
+
 import type { NextGenCollection } from "@/entities/INextgen";
+import type { NFT } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useActivityData } from "@/hooks/useActivityData";
 import { useActivityFilters } from "@/hooks/useActivityFilters";
 import { useNFTCollections } from "@/hooks/useNFTCollections";
-import { useEffect, useState } from "react";
-import { Container, Row } from "react-bootstrap";
+
+
 import Pagination from "../pagination/Pagination";
+
 import ActivityFilters from "./ActivityFilters";
 import ActivityHeader from "./ActivityHeader";
 import ActivityTable from "./ActivityTable";

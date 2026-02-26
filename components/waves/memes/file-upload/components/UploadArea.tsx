@@ -1,9 +1,14 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import type { UploadAreaProps } from '../reducers/types';
+import React from 'react';
+
+import { SUBMISSION_UI_FORMAT_CATEGORIES } from '@/constants/submission-media.constants';
+
 import ErrorMessage from './ErrorMessage';
 import FileTypeIndicator from './FileTypeIndicator';
-import { SUBMISSION_UI_FORMAT_CATEGORIES } from '@/constants/submission-media.constants';
+
+import type { UploadAreaProps } from '../reducers/types';
+
+
 
 /**
  * Upload Area Component

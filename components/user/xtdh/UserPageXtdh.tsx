@@ -1,17 +1,20 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo } from "react";
+import {
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+} from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useCallback, useContext, useEffect, useMemo } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
+import UserPageXtdhReceived from "@/components/xtdh/user/received";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageXtdhGranted from "./UserPageXtdhGranted";
 import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
-import UserPageXtdhReceived from "@/components/xtdh/user/received";
 import { UserXtdhTestModeBanner } from "./UserXtdhTestModeBanner";
-import {
-  ArrowUpRightIcon,
-  ArrowDownLeftIcon,
-} from "@heroicons/react/24/outline";
+
 
 type XtdhViewFilter = "granted" | "received";
 

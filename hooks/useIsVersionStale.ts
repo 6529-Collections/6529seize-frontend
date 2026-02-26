@@ -1,7 +1,8 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
+
+import { publicEnv } from "@/config/env";
 
 const CURRENT = publicEnv.VERSION!; // baked into the bundle
 

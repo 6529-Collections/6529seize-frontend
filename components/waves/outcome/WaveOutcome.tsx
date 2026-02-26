@@ -1,14 +1,18 @@
 "use client";
 
-import type { FC} from "react";
 import { type JSX, useMemo } from "react";
+
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
-import type { WaveOutcomeDistributionState } from "@/types/waves.types";
-import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
-import { WaveRepOutcome } from "./WaveRepOutcome";
-import { WaveNICOutcome } from "./WaveNICOutcome";
-import { WaveManualOutcome } from "./WaveManualOutcome";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
+import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
+import type { WaveOutcomeDistributionState } from "@/types/waves.types";
+
+import { WaveManualOutcome } from "./WaveManualOutcome";
+import { WaveNICOutcome } from "./WaveNICOutcome";
+import { WaveRepOutcome } from "./WaveRepOutcome";
+
+
+import type { FC} from "react";
 
 enum OutcomeType {
   MANUAL = "MANUAL",

@@ -1,14 +1,5 @@
 "use client";
 
-import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { selectEditingDropId } from "@/store/editSlice";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import dynamic from "next/dynamic";
 import React, {
   type ReactNode,
@@ -21,23 +12,38 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
+
+import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useDropSignature } from "@/hooks/drops/useDropSignature";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { selectEditingDropId } from "@/store/editSlice";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
+
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
-import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { DropMutationBody } from "./CreateDrop";
+
+
+import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
-import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";
-import type { CurationComposerVariant } from "./PrivilegedDropCreator";
 import ModalLayout from "./memes/submission/layout/ModalLayout";
+import { getOptimisticDrop } from "./utils/getOptimisticDrop";
 import {
   normalizeCurationDropInput,
   SUPPORTED_CURATION_URL_EXAMPLES,
   validateCurationDropInput,
 } from "./utils/validateCurationDropUrl";
-import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+
+import type { DropMutationBody } from "./CreateDrop";
+import type { CurationComposerVariant } from "./PrivilegedDropCreator";
+
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(

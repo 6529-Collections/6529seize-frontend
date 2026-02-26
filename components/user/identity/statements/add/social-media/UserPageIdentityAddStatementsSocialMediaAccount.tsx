@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import UserPageIdentityAddStatementsSocialMediaAccountHeader from "./UserPageIdentityAddStatementsSocialMediaAccountHeader";
+
+import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
   STATEMENT_GROUP,
   STATEMENT_TYPE,
 } from "@/helpers/Types";
+
+import UserPageIdentityAddStatementsSocialMediaAccountHeader from "./UserPageIdentityAddStatementsSocialMediaAccountHeader";
 import UserPageIdentityAddStatementsSocialMediaAccountItems from "./UserPageIdentityAddStatementsSocialMediaAccountItems";
-import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 
 export default function UserPageIdentityAddStatementsSocialMediaAccount({
   onClose,

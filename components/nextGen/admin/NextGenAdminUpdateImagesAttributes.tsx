@@ -1,10 +1,12 @@
 "use client";
 
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { useEffect, useState } from "react";
-import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
-import { printAdminErrors } from "./NextGenAdmin";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+
 import { useCoreContractWrite } from "../nextgen_helpers";
+import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
+
+import { printAdminErrors } from "./NextGenAdmin";
 import { NextGenAdminHeadingRow } from "./NextGenAdminShared";
 
 interface Props {

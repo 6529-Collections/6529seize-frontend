@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
-import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
+import { Tooltip } from "react-tooltip";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { Tooltip } from "react-tooltip";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+
+import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
+import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
+
+
 
 export enum RateChangeType {
   INCREASE = "INCREASE",

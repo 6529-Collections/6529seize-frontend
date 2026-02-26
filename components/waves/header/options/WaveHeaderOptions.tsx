@@ -1,9 +1,11 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
+
 import WaveDelete from "./delete/WaveDelete";
 import WaveMute from "./mute/WaveMute";
 

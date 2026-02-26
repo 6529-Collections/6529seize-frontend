@@ -1,5 +1,6 @@
-import type { TraitsData } from "../types/TraitsData";
 import type { BaseFieldDefinition } from "@/components/waves/memes/traits/schema";
+
+import type { TraitsData } from "../types/TraitsData";
 
 /**
  * Options to configure validation behavior

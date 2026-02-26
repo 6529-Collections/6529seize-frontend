@@ -1,7 +1,8 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
 import React from "react";
 import { Tooltip } from "react-tooltip";
+
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 interface MemeDropTraitProps {
   readonly label: string;

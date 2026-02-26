@@ -1,8 +1,10 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ReactElement } from "react";
 import { Tooltip } from "react-tooltip";
+
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+
+import type { ReactElement } from "react";
 
 interface DropVoteProgressingProps {
   readonly current: number | null | undefined;

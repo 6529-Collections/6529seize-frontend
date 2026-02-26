@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
 import {
-  keepPreviousData,
   type InfiniteData,
-  type UseInfiniteQueryResult,
+  keepPreviousData,
   useInfiniteQuery,
+  type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";

@@ -1,6 +1,7 @@
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
 import type { ReactNode } from "react";
 
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export enum ProfileBadgeSize {
   SMALL = "SMALL",

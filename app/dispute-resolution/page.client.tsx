@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import { AboutSection } from "@/types/enums";
-import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
 
 export default function DisputeResolutionPage() {
   useSetTitle("Dispute Resolution | 6529.io");

@@ -1,7 +1,8 @@
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function WavesListSearch({
   identity,

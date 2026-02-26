@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef, type CSSProperties } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Keyboard } from '@capacitor/keyboard';
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 
 interface AndroidKeyboardHookReturn {
   keyboardHeight: number;

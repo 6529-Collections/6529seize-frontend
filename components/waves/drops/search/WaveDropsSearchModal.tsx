@@ -1,12 +1,14 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
+
 import Drop, { DropLocation } from "../Drop";
 
 const MIN_QUERY_LENGTH = 2;

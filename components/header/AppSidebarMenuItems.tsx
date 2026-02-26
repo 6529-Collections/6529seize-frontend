@@ -1,4 +1,3 @@
-import { useIdentity } from "@/hooks/useIdentity";
 import {
     Disclosure,
     DisclosureButton,
@@ -8,6 +7,9 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
 import { Fragment } from "react";
+
+import { useIdentity } from "@/hooks/useIdentity";
+
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 type MenuItem = {

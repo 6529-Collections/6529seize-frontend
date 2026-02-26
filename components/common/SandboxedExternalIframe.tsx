@@ -1,7 +1,8 @@
 "use client";
 
-import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+
+import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 
 // Sandbox policy for external interactive media:
 // - allow-scripts: Required for interactive HTML content.

@@ -1,3 +1,7 @@
+import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip } from "react-tooltip";
+
 import { useAuth } from "@/components/auth/Auth";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import {
@@ -7,9 +11,7 @@ import {
 } from "@/helpers/manifoldDisplayHelpers";
 import { useMemesManifoldClaim } from "@/hooks/useManifoldClaim";
 import { useNftBalance } from "@/hooks/useNftBalance";
-import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
+
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
 interface NowMintingStatsGridProps {

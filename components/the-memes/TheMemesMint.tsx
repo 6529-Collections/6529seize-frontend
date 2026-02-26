@@ -1,5 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
+
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import {
   MEMES_CONTRACT,
@@ -8,8 +11,6 @@ import {
 import { useTitle } from "@/contexts/TitleContext";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Time } from "@/helpers/time";
-import dynamic from "next/dynamic";
-import { useEffect } from "react";
 
 const ManifoldMinting = dynamic(
   () => import("../../components/manifoldMinting/ManifoldMinting"),

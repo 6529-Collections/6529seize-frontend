@@ -1,4 +1,5 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+
 import type { Metadata } from "next";
 
 export default function PodcastsPage() {

@@ -1,24 +1,25 @@
 
 "use client";
 
-import { useRef, useId, useMemo, useEffect } from "react";
 import clsx from "clsx";
+import { useEffect, useId, useMemo, useRef } from "react";
+import { useClickAway } from "react-use";
+
+import { useNftSearch, useNftSelection, useNftTokenInput } from "./hooks";
+import {
+  AllTokensSelectedCard,
+  NftContractHeader,
+  NftEditRanges,
+  NftPickerActions,
+  NftPickerInput,
+  NftPickerSearch,
+  NftPickerStatus,
+  NftTokenList,
+} from "./subcomponents";
+import { formatCanonical, parseTokenExpressionToRanges } from "./utils";
+import { mapSuggestionToOverview } from "./utils/mappers";
 
 import type { NftPickerProps, Suggestion, SupportedChain } from "./types";
-import { mapSuggestionToOverview } from "./utils/mappers";
-import { formatCanonical, parseTokenExpressionToRanges } from "./utils";
-import { useNftSearch, useNftSelection, useNftTokenInput } from "./hooks";
-import { useClickAway } from "react-use";
-import {
-  NftContractHeader,
-  NftPickerSearch,
-  NftPickerInput,
-  NftPickerStatus,
-  NftPickerActions,
-  NftEditRanges,
-  NftTokenList,
-  AllTokensSelectedCard,
-} from "./subcomponents";
 
 const DEFAULT_DEBOUNCE = 250;
 const DEFAULT_OVERSCAN = 8;

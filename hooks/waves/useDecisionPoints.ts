@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { Time } from "@/helpers/time";
 import type { DecisionPoint } from "@/helpers/waves/time.types";
 import {
   calculateLastDecisionTime,
   FALLBACK_END_TIME,
 } from "@/helpers/waves/time.utils";
-import { Time } from "@/helpers/time";
 
 const DEFAULT_PAST_WINDOW = 6;
 const DEFAULT_FUTURE_WINDOW = 10;

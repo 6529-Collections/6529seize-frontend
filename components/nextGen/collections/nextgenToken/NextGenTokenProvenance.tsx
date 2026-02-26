@@ -1,14 +1,16 @@
 "use client";
 
-import styles from "../NextGen.module.scss";
-import { Container, Row, Col, Table } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
-import Pagination from "@/components/pagination/Pagination";
-import type { Transaction } from "@/entities/ITransaction";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import Pagination from "@/components/pagination/Pagination";
 import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
+import type { Transaction } from "@/entities/ITransaction";
+import { commonApiFetch } from "@/services/api/common-api";
+
 import { NextGenCollectionProvenanceRow } from "../collectionParts/NextGenCollectionProvenance";
+import styles from "../NextGen.module.scss";
 
 interface Props {
   collection: NextGenCollection;

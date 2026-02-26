@@ -1,13 +1,14 @@
-import { Fragment, type ReactElement, type ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { Fragment, type ReactElement, type ReactNode } from "react";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import {
-  useLinkPreviewVariant,
   type LinkPreviewVariant,
+  useLinkPreviewVariant,
 } from "./LinkPreviewContext";
 
 export interface OpenGraphPreviewData {

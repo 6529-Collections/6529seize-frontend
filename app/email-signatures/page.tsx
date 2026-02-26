@@ -1,5 +1,7 @@
-import { getAppMetadata } from "@/components/providers/metadata";
 import Link from "next/link";
+
+import { getAppMetadata } from "@/components/providers/metadata";
+
 import type { Metadata } from "next";
 
 export default function EmailSignaturesPage() {

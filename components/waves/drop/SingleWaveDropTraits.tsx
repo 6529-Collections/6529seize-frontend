@@ -1,17 +1,20 @@
 "use client";
 
-import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { isNumber } from "lodash";
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
-import type { TraitsData } from "../memes/submission/types/TraitsData";
+
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+
 import {
   FIELD_TO_LABEL_MAP,
   MEME_TRAITS_SORT_ORDER,
 } from "../memes/traits/schema";
+
+import type { TraitsData } from "../memes/submission/types/TraitsData";
 
 interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;

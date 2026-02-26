@@ -1,7 +1,8 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
+
+import { publicEnv } from "@/config/env";
 import { WsMessageType } from "@/helpers/Types";
 
 interface UseWaveWebSocketResult {

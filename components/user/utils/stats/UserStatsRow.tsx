@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { formatNumberWithCommas, formatStatFloor } from "@/helpers/Helpers";
 
 export enum UserStatsRowSize {

@@ -1,5 +1,8 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -14,14 +17,16 @@ import {
   commonApiDeleteWithBody,
   commonApiPost,
 } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import type { FC } from "react";
-import { useContext, useState } from "react";
+
 import {
   DEFAULT_SUBSCRIPTION_BODY,
   FollowBtnCheckIcon,
   FollowBtnPlusIcon,
 } from "./notificationsFollowShared";
+
+import type { FC } from "react";
+
+
 
 interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;

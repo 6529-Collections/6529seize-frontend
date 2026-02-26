@@ -1,14 +1,16 @@
 "use client";
 
+
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useState } from "react";
 
-import WavesListSearch from "./WavesListSearch";
 import { AuthContext } from "@/components/auth/Auth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
+
+import WavesListSearch from "./WavesListSearch";
 
 export default function WavesListHeader({
   title = "Waves",

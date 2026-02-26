@@ -1,21 +1,22 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React from "react";
 import { Tooltip } from "react-tooltip";
-import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import { useWaveData } from "@/hooks/useWaveData";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { ApiWaveType } from "@/generated/models/ObjectSerializer";
+
 import WavePicture from "@/components/waves/WavePicture";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { ApiWaveType } from "@/generated/models/ObjectSerializer";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+import { useWaveData } from "@/hooks/useWaveData";
 
 interface BrainContentPinnedWaveProps {
   readonly waveId: string;

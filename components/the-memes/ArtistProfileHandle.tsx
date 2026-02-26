@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import type { BaseNFT } from "@/entities/INFT";
 
 export default function ArtistProfileHandle(

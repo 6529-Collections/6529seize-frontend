@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import type { ApiDrop } from "@/generated/models/ObjectSerializer";
 import Link from "next/link";
+import React, { useState } from "react";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
+import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
+import type { ApiDrop } from "@/generated/models/ObjectSerializer";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;

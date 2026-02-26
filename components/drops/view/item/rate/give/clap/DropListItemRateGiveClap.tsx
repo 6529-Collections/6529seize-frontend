@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "./Clap.module.scss";
 import mojs from "@mojs/core";
-import { formatLargeNumber } from "@/helpers/Helpers";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
+
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { formatLargeNumber } from "@/helpers/Helpers";
 import type { DropVoteState } from "@/hooks/drops/types";
+
 import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
+
+import styles from "./Clap.module.scss";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",

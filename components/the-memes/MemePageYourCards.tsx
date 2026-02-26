@@ -1,3 +1,5 @@
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import TransferSingle from "@/components/nft-transfer/TransferSingle";
 import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants/constants";
 import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
@@ -10,8 +12,9 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import { ContractType } from "@/types/enums";
-import { Col, Container, Row, Table } from "react-bootstrap";
+
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
+
 import styles from "./TheMemes.module.scss";
 
 export function MemePageYourCardsRightMenu(props: {

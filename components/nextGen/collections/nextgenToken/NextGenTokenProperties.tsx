@@ -1,18 +1,20 @@
 "use client";
 
-import styles from "./NextGenToken.module.scss";
 
+
+import Link from "next/link";
+import { useState } from "react";
 import { Accordion, Col, Container, Row } from "react-bootstrap";
+import Toggle from "react-toggle";
+
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import type {
   NextGenCollection,
   NextGenToken,
   NextGenTrait,
 } from "@/entities/INextgen";
 
-import Link from "next/link";
-import { useState } from "react";
-import Toggle from "react-toggle";
-import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
+import styles from "./NextGenToken.module.scss";
 
 interface Props {
   collection: NextGenCollection;

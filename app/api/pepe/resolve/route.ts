@@ -1,14 +1,15 @@
 import * as cheerio from "cheerio";
-import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import {
-  UrlGuardError,
   fetchPublicJson,
   fetchPublicUrl,
+  UrlGuardError,
 } from "@/lib/security/urlGuard";
+
+import type { NextRequest} from "next/server";
 
 const TOKENSCAN_BASE = "https://tokenscan.io/api";
 

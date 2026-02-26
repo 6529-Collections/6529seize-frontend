@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useEffect, useState } from "react";
 
 type MemesSeason = `SZN${number}`;
 

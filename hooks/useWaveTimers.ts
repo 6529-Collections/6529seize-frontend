@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
 import type {
   TimeLeft} from "@/helpers/waves/time.utils";
 import {
-  calculateTimeLeft,
   calculateLastDecisionTime,
-  FALLBACK_START_TIME,
+  calculateTimeLeft,
   FALLBACK_END_TIME,
+  FALLBACK_START_TIME,
 } from "@/helpers/waves/time.utils";
 
 type PhaseState = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";

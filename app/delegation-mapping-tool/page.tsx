@@ -1,5 +1,7 @@
-import DelegationMappingToolPageClient from './page.client';
 import { getAppMetadata } from '@/components/providers/metadata';
+
+import DelegationMappingToolPageClient from './page.client';
+
 import type { Metadata } from 'next';
 
 export default function DelegationMappingToolPage() {

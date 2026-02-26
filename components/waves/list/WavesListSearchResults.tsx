@@ -1,9 +1,10 @@
-import WaveItem from "./WaveItem";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
 import { useWaves } from "@/hooks/useWaves";
+
+import WaveItem from "./WaveItem";
 
 export default function WavesListSearchResults({
   identity,

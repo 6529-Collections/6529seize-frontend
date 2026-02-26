@@ -1,5 +1,5 @@
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 
 type NextMintDropState = {

@@ -1,6 +1,5 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
 import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ShareIcon } from "@heroicons/react/24/outline";
@@ -10,6 +9,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { publicEnv } from "@/config/env";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
@@ -19,7 +21,7 @@ import {
   getWalletAddress,
   getWalletRole,
 } from "@/services/auth/auth.utils";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+
 import styles from "./HeaderShare.module.scss";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 

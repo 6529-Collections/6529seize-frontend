@@ -1,12 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { useEffect, useState } from "react";
-import { Tooltip } from "react-tooltip";
+
 import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
 export default function UserPageIdentityDeleteStatementButton({
   statement,

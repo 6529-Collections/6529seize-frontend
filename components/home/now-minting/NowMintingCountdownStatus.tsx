@@ -1,9 +1,11 @@
-import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
-import ClockIcon from "@/components/utils/icons/ClockIcon";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+
+import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
+import ClockIcon from "@/components/utils/icons/ClockIcon";
+
 import type { ReactNode } from "react";
 
 type StatusType = "error" | "sold_out" | "finalized";

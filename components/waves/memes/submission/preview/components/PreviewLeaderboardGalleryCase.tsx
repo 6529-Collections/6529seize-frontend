@@ -1,6 +1,8 @@
 import { WaveLeaderboardGalleryItem } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { PREVIEW_CASE_WIDTHS } from "../presentation/presets";
+
 import { PreviewCaseSection } from "./PreviewCaseSection";
 import { PreviewWidthFrame } from "./PreviewWidthFrame";
 

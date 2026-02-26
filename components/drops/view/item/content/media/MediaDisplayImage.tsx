@@ -1,10 +1,11 @@
 "use client";
 
+import React, { useCallback, useState } from "react";
+
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
-import React, { useCallback, useState } from "react";
 
 interface Props {
   readonly src: string;

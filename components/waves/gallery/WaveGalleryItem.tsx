@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { memo, useMemo } from "react";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -8,10 +11,8 @@ import {
   type ExtendedDrop,
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import Link from "next/link";
-import { memo, useMemo } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface WaveGalleryItemProps {
   readonly drop: ExtendedDrop;

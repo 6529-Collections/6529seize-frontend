@@ -1,19 +1,19 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-
 import { UserPageXtdhGrantedListContent } from "@/components/user/xtdh/granted-list/UserPageXtdhGrantedListContent";
-import { UserPageXtdhGrantedListTabs } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListTabs";
 import { UserPageXtdhGrantedListSubFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListSubFilters";
+import { UserPageXtdhGrantedListTabs } from "@/components/user/xtdh/user-page-xtdh-granted-list/components/UserPageXtdhGrantedListTabs";
 import { getApiParamsFromFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/constants";
 import { useUserPageXtdhGrantedListFilters } from "@/components/user/xtdh/user-page-xtdh-granted-list/hooks/useUserPageXtdhGrantedListFilters";
-import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 import { usePendingGrantsCount } from "@/hooks/usePendingGrantsCount";
+import { useXtdhGrantsQuery } from "@/hooks/useXtdhGrantsQuery";
 
 interface UserPageXtdhGrantedListProps {
   readonly grantor: string;

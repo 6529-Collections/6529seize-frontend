@@ -1,5 +1,6 @@
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
+
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 export default function MentionsTypeaheadMenuItem({
   index,
   isSelected,

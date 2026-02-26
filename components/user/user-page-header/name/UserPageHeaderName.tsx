@@ -1,12 +1,13 @@
-import { CLASSIFICATIONS } from "@/entities/IProfile";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
+import { CLASSIFICATIONS } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatTimestampToMonthYear } from "@/helpers/Helpers";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
+
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 

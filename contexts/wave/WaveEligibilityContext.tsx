@@ -1,8 +1,9 @@
 "use client"
 
-import React, { createContext, useContext, useCallback, useState, useRef, useMemo } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface WaveEligibility {
   authenticated_user_eligible_to_chat: boolean;

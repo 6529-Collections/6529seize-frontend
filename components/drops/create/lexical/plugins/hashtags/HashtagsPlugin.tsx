@@ -6,7 +6,6 @@ import {
   MenuOption,
   useBasicTypeaheadTriggerMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import type { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
@@ -18,12 +17,15 @@ import {
 import * as ReactDOM from "react-dom";
 
 import { $createHashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
-import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
-import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
+import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 import type { ReferencedNft } from "@/entities/IDrop";
 import type { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
-import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
+import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
+
 import { getPossibleQueryMatch } from "./getPossibleQueryMatch";
+import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
+
+import type { TextNode } from "lexical";
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;

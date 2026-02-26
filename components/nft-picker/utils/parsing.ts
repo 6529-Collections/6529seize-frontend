@@ -1,7 +1,8 @@
-import type { ParseError, TokenRange } from "../types";
 import { BIGINT_ONE, BIGINT_ZERO, MAX_ENUMERATION } from "./constants";
 import { makeError, throwParseErrors } from "./errors";
 import { canonicalizeRanges } from "./ranges";
+
+import type { ParseError, TokenRange } from "../types";
 
 interface Segment {
   value: string;

@@ -1,24 +1,26 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import {
+  formatCanonical,
+  fromCanonicalRanges,
+  isRangeTooLargeError,
+  MAX_SAFE,
+  mergeCanonicalRanges,
+  removeTokenFromRanges,
+  toCanonicalRanges,
+  tryToNumberArray,
+} from "../utils";
+
 import type {
   ContractOverview,
   NftPickerProps,
   NftPickerSelection,
   NftPickerSelectionError,
+  OutputMode,
   ParseError,
   TokenRange,
   TokenSelection,
-  OutputMode,
 } from "../types";
-import {
-  toCanonicalRanges,
-  mergeCanonicalRanges,
-  removeTokenFromRanges,
-  fromCanonicalRanges,
-  tryToNumberArray,
-  isRangeTooLargeError,
-  formatCanonical,
-  MAX_SAFE,
-} from "../utils";
 
 const EMPTY_SELECTION: TokenSelection = [];
 

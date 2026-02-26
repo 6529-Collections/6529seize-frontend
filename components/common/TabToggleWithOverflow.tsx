@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
-import clsx from "clsx";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import clsx from "clsx";
+import React from "react";
+
 import { CompactMenu } from "@/components/compact-menu";
+import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
 
 interface TabOption {
   readonly key: string;

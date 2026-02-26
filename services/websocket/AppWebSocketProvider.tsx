@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { WebSocketProvider } from "./WebSocketProvider";
-import type { WebSocketConfig } from "./index";
-import { DEFAULT_WEBSOCKET_CONFIG } from "./index";
+
+import { MarketplacePreviewWebSocketSync } from "./MarketplacePreviewWebSocketSync";
 import { useWebSocket } from "./useWebSocket";
 import { useWebSocketHealth } from "./useWebSocketHealth";
-import { MarketplacePreviewWebSocketSync } from "./MarketplacePreviewWebSocketSync";
+import { WebSocketProvider } from "./WebSocketProvider";
+
+import { DEFAULT_WEBSOCKET_CONFIG } from "./index";
+
+import type { WebSocketConfig } from "./index";
 
 /**
  * WebSocket connection initializer with coordinated health monitoring

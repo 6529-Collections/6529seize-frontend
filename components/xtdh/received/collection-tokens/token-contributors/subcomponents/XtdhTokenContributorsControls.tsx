@@ -1,13 +1,13 @@
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
-import type { SortDirection } from "@/entities/ISort";
-import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
-
 import {
   TOKEN_CONTRIBUTORS_GROUP_BY_ITEMS,
   TOKENS_SORT_ITEMS,
   type XtdhTokenContributorsGroupBy,
 } from "@/components/xtdh/received/constants";
+import type { SortDirection } from "@/entities/ISort";
+import type { XtdhTokensSortField } from "@/hooks/useXtdhTokensQuery";
+
 
 interface XtdhTokenContributorsControlsProps {
   readonly activeSortField: XtdhTokensSortField;

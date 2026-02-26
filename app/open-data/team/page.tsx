@@ -1,6 +1,7 @@
-import styles from "@/styles/Home.module.scss";
 import CommunityDownloadsTeam from "@/components/community-downloads/CommunityDownloadsTeam";
 import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
+
 import type { Metadata } from "next";
 
 export default function TeamDownloads() {

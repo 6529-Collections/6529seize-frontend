@@ -1,6 +1,8 @@
-import type { TokenRange, Suggestion } from "../types";
 import { shortenAddress } from "@/helpers/address.helpers";
+
 import { BIGINT_ZERO } from "./constants";
+
+import type { Suggestion, TokenRange } from "../types";
 
 export function formatCanonical(ranges: TokenRange[]): string {
     return ranges

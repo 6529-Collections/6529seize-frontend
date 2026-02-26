@@ -5,9 +5,11 @@ import { DRAG_DROP_PASTE } from "@lexical/rich-text";
 import { isMimeType, mediaFileReader } from "@lexical/utils";
 import { $getNodeByKey, $insertNodes, COMMAND_PRIORITY_LOW } from "lexical";
 import { useEffect } from "react";
-import { $createImageNode } from "../nodes/ImageNode";
-import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+
 import { useAuth } from "@/components/auth/Auth";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+
+import { $createImageNode } from "../nodes/ImageNode";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",

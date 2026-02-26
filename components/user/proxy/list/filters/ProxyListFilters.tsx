@@ -2,6 +2,7 @@ import type {
   CommonSelectItem,
 } from "@/components/utils/select/CommonSelect";
 import CommonSelect from "@/components/utils/select/CommonSelect";
+
 import { ProfileProxyListType } from "../ProxyList";
 
 export default function ProxyListFilters({

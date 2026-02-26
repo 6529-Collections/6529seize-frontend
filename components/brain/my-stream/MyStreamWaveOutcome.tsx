@@ -1,13 +1,16 @@
 "use client";
 
-import type { FC} from "react";
 import { useMemo, useRef } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
-import { useLayout } from "./layout/LayoutContext";
+
 import SpinnerLoader from "@/components/common/SpinnerLoader";
+import { WaveOutcome } from "@/components/waves/outcome/WaveOutcome";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useWaveOutcomesQuery } from "@/hooks/waves/useWaveOutcomesQuery";
+
+import { useLayout } from "./layout/LayoutContext";
+
+import type { FC} from "react";
 
 interface MyStreamWaveOutcomeProps {
   readonly wave: ApiWave;

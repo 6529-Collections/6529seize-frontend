@@ -1,6 +1,7 @@
-import type { ProcessedContent } from "./media-utils";
 import ContentSegmentComponent from "./ContentSegmentComponent";
 import MediaThumbnail from "./MediaThumbnail";
+
+import type { ProcessedContent } from "./media-utils";
 
 interface ContentDisplayProps {
   readonly content: ProcessedContent;

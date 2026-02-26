@@ -1,17 +1,18 @@
 "use client";
 
-import React from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import {
   ArrowTopRightOnSquareIcon,
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
+
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { getTimeAgoShort } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveCreatorPreviewItemProps {
   readonly wave: ApiWave;

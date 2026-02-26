@@ -1,10 +1,14 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
+
 import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
+
+import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
+
 
 const UNREAD_CLEAR_DELAY_MS = 1000;
 

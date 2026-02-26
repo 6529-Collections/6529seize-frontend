@@ -1,9 +1,10 @@
-import DistributionPlanToolContextWrapper from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import DistributionPlanToolPage from "@/components/distribution-plan-tool/DistributionPlanToolPage";
 import DistributionPlanWarnings from "@/components/distribution-plan-tool/common/DistributionPlanWarnings";
 import DistributionPlanToolSidebar from "@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar";
+import DistributionPlanToolContextWrapper from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import DistributionPlanToolPage from "@/components/distribution-plan-tool/DistributionPlanToolPage";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
 import { getAppMetadata } from "@/components/providers/metadata";
+
 import type { Metadata } from "next";
 
 export default async function DistributionPlanToolPlan({

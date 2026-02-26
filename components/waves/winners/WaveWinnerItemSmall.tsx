@@ -1,9 +1,11 @@
 import { memo } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWave } from "@/hooks/useWave";
-import { MemesWaveWinnerDropSmall } from "./MemesWaveWinnerDropSmall";
+
 import { DefaultWaveWinnerDropSmall } from "./DefaultWaveWinnerDropSmall";
+import { MemesWaveWinnerDropSmall } from "./MemesWaveWinnerDropSmall";
 
 interface WaveWinnerItemSmallProps {
   readonly drop: ExtendedDrop;

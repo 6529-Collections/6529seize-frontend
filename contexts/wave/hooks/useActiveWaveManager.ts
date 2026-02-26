@@ -1,5 +1,8 @@
 "use client";
 
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
+
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
@@ -7,8 +10,6 @@ import {
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean | undefined;

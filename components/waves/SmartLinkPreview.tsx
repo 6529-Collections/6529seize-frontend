@@ -3,19 +3,19 @@
 import { type ReactElement, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { createLinkHandlers } from "@/components/drops/view/part/dropPartMarkdown/handlers";
 import type { LinkHandler } from "@/components/drops/view/part/dropPartMarkdown/linkTypes";
 import {
   parseUrl,
   shouldUseOpenGraphPreview,
 } from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
+import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "./LinkPreviewCard";
 import {
   LinkPreviewProvider,
-  useLinkPreviewContext,
   type LinkPreviewVariant,
+  useLinkPreviewContext,
 } from "./LinkPreviewContext";
 
 interface SmartLinkPreviewProps {

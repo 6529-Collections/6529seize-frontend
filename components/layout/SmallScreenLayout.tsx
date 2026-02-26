@@ -1,13 +1,17 @@
 "use client";
 
-import { useHeaderContext } from "@/contexts/HeaderContext";
-import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { useHeaderContext } from "@/contexts/HeaderContext";
+
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider } from "../../hooks/useSidebarState";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
-import SmallScreenHeader from "./SmallScreenHeader";
+
 import WebSidebar from "./sidebar/WebSidebar";
+import SmallScreenHeader from "./SmallScreenHeader";
+
+import type { ReactNode } from "react";
 
 interface Props {
   readonly children: ReactNode;

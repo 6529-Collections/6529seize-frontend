@@ -1,21 +1,26 @@
 "use client";
 
+import { useCallback, useEffect, useReducer, useRef } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
 import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+
 import { validateInteractivePreview } from "../actions/validateInteractivePreview";
-import type {
-  InteractiveMediaMimeType,
-  InteractiveMediaProvider,
-} from "../constants/media";
 import { DEFAULT_INTERACTIVE_MEDIA_MIME_TYPE } from "../constants/media";
 import {
   INTERACTIVE_MEDIA_GATEWAY_BASE_URL,
   isInteractiveMediaContentIdentifier,
 } from "../constants/security";
+import { AIRDROP_TOTAL } from "../types/OperationalData";
+import { SubmissionStep } from "../types/Steps";
+
+import type {
+  InteractiveMediaMimeType,
+  InteractiveMediaProvider,
+} from "../constants/media";
 import type {
   AdditionalMedia,
   AirdropEntry,
@@ -23,8 +28,6 @@ import type {
   OperationalData,
   PaymentInfo,
 } from "../types/OperationalData";
-import { AIRDROP_TOTAL } from "../types/OperationalData";
-import { SubmissionStep } from "../types/Steps";
 import type { TraitsData } from "../types/TraitsData";
 
 type MediaSource = "upload" | "url";

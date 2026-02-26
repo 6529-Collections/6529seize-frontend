@@ -1,10 +1,12 @@
 "use client";
 
+import React from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
-import React from "react";
+
 import { WaveLeaderboardGridItem } from "./WaveLeaderboardGridItem";
 
 export type WaveLeaderboardGridMode = "compact" | "content_only";

@@ -1,7 +1,8 @@
-import type { ReactNode, RefObject } from "react";
 import { TweetContainer } from "react-tweet";
 
 import styles from "./ExpandableTweetPreview.module.css";
+
+import type { ReactNode, RefObject } from "react";
 
 export default function MeasurementShell({
   show,

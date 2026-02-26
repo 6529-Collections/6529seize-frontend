@@ -1,3 +1,6 @@
+import React from "react";
+import { createPortal } from "react-dom";
+
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -12,8 +15,7 @@ import {
 import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import React from "react";
-import { createPortal } from "react-dom";
+
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotalVotes";

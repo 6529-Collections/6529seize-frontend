@@ -1,11 +1,12 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import ClientOnly from "@/components/client-only/ClientOnly";
 import { ShareMobileApp } from "@/components/header/share/HeaderShareMobileApps";
 import { publicEnv } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function OpenMobilePage() {

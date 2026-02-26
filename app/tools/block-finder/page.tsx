@@ -1,6 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+
 import BlockPickerClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export default function BlockFinderPage() {
   return <BlockPickerClient />;

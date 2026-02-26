@@ -1,17 +1,21 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { BrainView } from "../BrainMobile";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
-import { useLayout } from "../my-stream/layout/LayoutContext";
-import { useWave } from "@/hooks/useWave";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useRef } from "react";
+
+import { useAuth } from "@/components/auth/Auth";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
-import { useAuth } from "@/components/auth/Auth";
+import { useWave } from "@/hooks/useWave";
+
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
+import { BrainView } from "../BrainMobile";
+import { useLayout } from "../my-stream/layout/LayoutContext";
+import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
+
+
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;

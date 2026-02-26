@@ -1,13 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { mainnet } from "wagmi/chains";
+
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { numberWithCommas } from "@/helpers/Helpers";
-import { useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
-import { mainnet } from "wagmi/chains";
+
 import styles from "./NextGenToken.module.scss";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
 

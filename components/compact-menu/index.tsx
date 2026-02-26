@@ -1,12 +1,14 @@
 "use client";
 
-import { Fragment } from "react";
 import { Menu, MenuItems, Transition } from "@headlessui/react";
 import clsx from "clsx";
-import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
-import { CompactMenuItemsPanel } from "./subcomponents/CompactMenuItemsPanel";
-import { useCompactMenuFocus } from "./hooks/useCompactMenuFocus";
+import { Fragment } from "react";
+
 import { DEFAULT_ANCHOR, DEFAULT_MENU_CLASSES } from "./constants";
+import { useCompactMenuFocus } from "./hooks/useCompactMenuFocus";
+import { CompactMenuItemsPanel } from "./subcomponents/CompactMenuItemsPanel";
+import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
+
 import type { CompactMenuProps } from "./types";
 
 export function CompactMenu({

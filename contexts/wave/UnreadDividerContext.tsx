@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode} from "react";
 import { createContext, useContext, useMemo, useState } from "react";
+
+import type { ReactNode} from "react";
 
 type SetUnreadDividerSerialNo = (
   serialNo: number | null | ((current: number | null) => number | null)

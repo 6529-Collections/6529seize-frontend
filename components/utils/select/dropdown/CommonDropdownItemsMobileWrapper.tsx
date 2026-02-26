@@ -7,9 +7,11 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import type { ReactNode } from "react";
 import { Fragment } from "react";
+
 import useHasTouchInput from "@/hooks/useHasTouchInput";
+
+import type { ReactNode } from "react";
 
 export default function CommonDropdownItemsMobileWrapper({
   isOpen,

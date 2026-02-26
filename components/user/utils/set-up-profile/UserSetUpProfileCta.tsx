@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import Link from "next/link";
 
 export default function UserSetUpProfileCta() {
   const { connectedProfile } = useContext(AuthContext);

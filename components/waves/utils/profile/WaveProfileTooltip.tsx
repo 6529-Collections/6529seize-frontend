@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { useWaveById } from "@/hooks/useWaveById";
-import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
+
 import WavePicture from "@/components/waves/WavePicture";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
+import { useWaveById } from "@/hooks/useWaveById";
 
 interface WaveProfileTooltipProps {
   readonly waveId: string;

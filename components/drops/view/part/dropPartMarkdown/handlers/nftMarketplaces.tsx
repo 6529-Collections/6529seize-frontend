@@ -1,5 +1,5 @@
-import MarketplacePreview from "@/components/waves/MarketplacePreview";
 import { isNftMarketplaceLink } from "@/components/waves/marketplace/urlKind";
+import MarketplacePreview from "@/components/waves/MarketplacePreview";
 
 import type { LinkHandler } from "../linkTypes";
 

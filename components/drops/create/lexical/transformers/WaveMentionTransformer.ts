@@ -1,9 +1,10 @@
-import type { TextMatchTransformer } from "@lexical/markdown";
 import {
   $createWaveMentionNode,
   $isWaveMentionNode,
   WaveMentionNode,
 } from "../nodes/WaveMentionNode";
+
+import type { TextMatchTransformer } from "@lexical/markdown";
 
 export const WAVE_MENTION_TRANSFORMER: TextMatchTransformer = {
   dependencies: [WaveMentionNode],

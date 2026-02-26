@@ -1,5 +1,8 @@
 "use client";
 
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -10,8 +13,6 @@ import {
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 const toWaveMin = (wave: ApiWave): ApiWaveMin => {
   return {

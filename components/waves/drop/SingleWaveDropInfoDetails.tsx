@@ -1,5 +1,7 @@
 import React from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { SingleWaveDropLogs } from "./SingleWaveDropLogs";
 import { SingleWaveDropTechnicalDetails } from "./SingleWaveDropTechnicalDetails";
 import { SingleWaveDropVoters } from "./SingleWaveDropVoters";

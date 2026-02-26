@@ -1,13 +1,15 @@
 "use client";
 
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+
 import DotLoader from "../dotLoader/DotLoader";
+
 import AppWalletCard from "./AppWalletCard";
 import { CreateAppWalletModal } from "./AppWalletModal";
-import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
 import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 

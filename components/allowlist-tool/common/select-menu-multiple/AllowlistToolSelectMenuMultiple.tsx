@@ -3,7 +3,9 @@
 import { motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
 import AllowlistToolAnimationWrapper from "../animation/AllowlistToolAnimationWrapper";
+
 import AllowlistToolSelectMenuMultipleList from "./AllowlistToolSelectMenuMultipleList";
 
 export interface AllowlistToolSelectMenuMultipleOption {

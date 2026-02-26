@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-
 import {
   buildWavesMetadata,
   renderWavesPageContent,
   type WavesSearchParams,
 } from "../waves-page.shared";
+
+import type { Metadata } from "next";
+
 
 export default async function WavePage({
   params,

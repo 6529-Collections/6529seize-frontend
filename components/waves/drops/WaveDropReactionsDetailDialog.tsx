@@ -1,13 +1,14 @@
 "use client";
 
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { useEmoji } from "@/contexts/EmojiContext";
-import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useEmoji } from "@/contexts/EmojiContext";
+import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropReactionsDetailDialogProps {
   readonly isOpen: boolean;

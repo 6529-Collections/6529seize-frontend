@@ -1,20 +1,22 @@
 "use client";
 
-import { useState, type JSX } from "react";
+import { type JSX, useState } from "react";
+
+import CommonTimeSelect from "@/components/utils/time/CommonTimeSelect";
 import type {
   CreateProxyAction} from "@/entities/IProxy";
 import {
   PROFILE_PROXY_ACTION_LABELS,
 } from "@/entities/IProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+
 import ProxyCreateActionConfigAllocateCic from "./ProxyCreateActionConfigAllocateCic";
 import ProxyCreateActionConfigAllocateRep from "./ProxyCreateActionConfigAllocateRep";
 import ProxyCreateActionConfigCreateDropToWave from "./ProxyCreateActionConfigCreateDropToWave";
 import ProxyCreateActionConfigCreateWave from "./ProxyCreateActionConfigCreateWave";
+import ProxyCreateActionConfigEndTimeSwitch from "./ProxyCreateActionConfigEndTimeSwitch";
 import ProxyCreateActionConfigRateWaveDrop from "./ProxyCreateActionConfigRateWaveDrop";
 import ProxyCreateActionConfigReadWave from "./ProxyCreateActionConfigReadWave";
-import CommonTimeSelect from "@/components/utils/time/CommonTimeSelect";
-import ProxyCreateActionConfigEndTimeSwitch from "./ProxyCreateActionConfigEndTimeSwitch";
 
 export default function ProxyCreateActionConfig({
   selectedActionType,

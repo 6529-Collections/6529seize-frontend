@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useUnreadNotifications } from "./useUnreadNotifications";
+import { useEffect, useState } from "react";
+
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+
+import { useUnreadNotifications } from "./useUnreadNotifications";
 
 type UnreadIndicatorType = "notifications" | "messages";
 

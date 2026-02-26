@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
-import type { TraitsData } from "../submission/types/TraitsData";
+
 import { TraitWrapper } from "./TraitWrapper";
+
+import type { TraitsData } from "../submission/types/TraitsData";
 
 type BooleanTraitProps = {
   readonly label: string;

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+
 import type { DecisionPoint } from "@/helpers/waves/time.types";
+
 import { HorizontalTimelineItem } from "./HorizontalTimelineItem";
 
 interface HorizontalTimelineProps {

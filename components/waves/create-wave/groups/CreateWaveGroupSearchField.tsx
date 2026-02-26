@@ -1,25 +1,26 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
+  type KeyboardEvent,
   useCallback,
   useEffect,
   useId,
   useRef,
   useState,
-  type KeyboardEvent,
 } from "react";
-import { useDebounce, useClickAway, useKeyPressEvent } from "react-use";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { escapeRegExp } from "@/lib/text/regex";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import type { GroupsRequestParams } from "@/entities/IGroup";
-import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { GroupsRequestParams } from "@/entities/IGroup";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import { escapeRegExp } from "@/lib/text/regex";
+import { commonApiFetch } from "@/services/api/common-api";
 
 const MAX_RESULTS = 7;
 const DEBOUNCE_MS = 200;

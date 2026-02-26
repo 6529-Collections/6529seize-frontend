@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useWaveWebSocket } from "./useWaveWebSocket";
+
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type {
   WsDropUpdateMessage,
   WsTypingMessage} from "@/helpers/Types";
 import {
   WsMessageType
 } from "@/helpers/Types";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+
+import { useWaveWebSocket } from "./useWaveWebSocket";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */

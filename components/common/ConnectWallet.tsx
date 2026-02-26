@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React from "react";
+
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 
 const ConnectWallet: React.FC = () => {

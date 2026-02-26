@@ -1,13 +1,14 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiDelete } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useRef, useState } from "react";
-import { useClickAway, useKeyPressEvent } from "react-use";
 export default function UserPageIdentityDeleteStatementModal({
   statement,
   profile,

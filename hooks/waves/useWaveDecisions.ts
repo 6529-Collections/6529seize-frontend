@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
+import { commonApiFetch } from "@/services/api/common-api";
 
 interface UseWaveDecisionsProps {
   readonly waveId: string;

@@ -1,9 +1,11 @@
-import { cloneElement, isValidElement } from "react";
-import type { ReactElement } from "react";
 import { MenuButton } from "@headlessui/react";
 import clsx from "clsx";
-import type { CompactMenuProps } from "../types";
+import { cloneElement, isValidElement } from "react";
+
 import { DEFAULT_TRIGGER_CLASSES } from "../constants";
+
+import type { CompactMenuProps } from "../types";
+import type { ReactElement } from "react";
 
 interface CompactMenuTriggerProps {
   readonly trigger: CompactMenuProps["trigger"];

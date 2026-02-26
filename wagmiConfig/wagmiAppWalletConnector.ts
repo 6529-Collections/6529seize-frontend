@@ -1,15 +1,18 @@
-import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
+import { createWalletClient, fallback, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { createConnector } from "wagmi";
+
 import { decryptData } from "@/components/app-wallets/app-wallet-helpers";
+import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import {
   InvalidPasswordError,
   PrivateKeyDecryptionError,
   WalletAuthenticationError,
 } from "@/src/errors/wallet-auth";
+
 import type { Address, Chain, Hex , WalletClient } from "viem";
-import { createWalletClient, fallback, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { createConnector } from "wagmi";
+
 
 export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
 

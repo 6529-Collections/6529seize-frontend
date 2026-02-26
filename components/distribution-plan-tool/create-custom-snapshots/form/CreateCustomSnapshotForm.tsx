@@ -1,5 +1,10 @@
 "use client";
 
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useEffect, useMemo, useState } from "react";
+
 import type {
     AllowlistOperation,
     CustomTokenPoolParamsToken,
@@ -17,10 +22,7 @@ import {
     isEthereumAddress,
 } from "@/helpers/AllowlistToolHelpers";
 import { distributionPlanApiPost } from "@/services/distribution-plan-api";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useMemo, useState } from "react";
+
 import CreateCustomSnapshotFormAddWalletsModal from "./CreateCustomSnapshotFormAddWalletsModal";
 import CreateCustomSnapshotFormTable from "./CreateCustomSnapshotFormTable";
 

@@ -1,13 +1,15 @@
-import type { ClassAttributes, HTMLAttributes, ReactNode } from "react";
 import { Children, Fragment, isValidElement } from "react";
-import type { ExtraProps } from "react-markdown";
 
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+
 import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
-import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
+import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
+import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+
+import type { ClassAttributes, HTMLAttributes, ReactNode } from "react";
+import type { ExtraProps } from "react-markdown";
 
 export enum DropContentPartType {
   MENTION = "MENTION",

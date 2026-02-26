@@ -1,9 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import type { TDHHistory } from "@/entities/ITDH";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
+
 import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
 
 export default function UserPageStatsActivityTDHHistory({

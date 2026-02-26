@@ -1,9 +1,12 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ReactNode } from "react";
+
 import UserPageHeader from "../user-page-header/UserPageHeader";
+
 import UserPageClientHydrator from "./UserPageClientHydrator";
 import UserPageDropModal from "./UserPageDropModal";
 import UserPageTabs from "./UserPageTabs";
+
+import type { ReactNode } from "react";
 
 export default function UserPageLayout({
   profile: initialProfile,

@@ -1,16 +1,17 @@
 "use client";
 
-import clsx from "clsx";
-import type { ReactNode } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import clsx from "clsx";
 
 import type { SupportedChain } from "@/components/nft-picker/NftPicker.types";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
 import Spinner from "@/components/utils/Spinner";
 
-import type { GrantTokensDisclosureState } from "../types";
 import { useGrantTokensDisclosure } from "../hooks/useGrantTokensDisclosure";
+
+import type { GrantTokensDisclosureState } from "../types";
+import type { ReactNode } from "react";
 
 const END_REACHED_OFFSET = 48;
 

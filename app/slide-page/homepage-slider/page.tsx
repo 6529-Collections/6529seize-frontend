@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { getAppMetadata } from "@/components/providers/metadata";
 
 const IndexPage = () => {

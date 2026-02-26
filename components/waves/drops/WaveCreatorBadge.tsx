@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useId } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useId } from "react";
 import { Tooltip } from "react-tooltip";
+
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 
 const TOOLTIP_STYLES = {

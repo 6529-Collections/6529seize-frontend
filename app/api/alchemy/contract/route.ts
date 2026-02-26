@@ -1,10 +1,11 @@
-import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { normaliseAddress } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+
+import type { NextRequest} from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 

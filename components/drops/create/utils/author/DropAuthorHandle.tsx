@@ -1,12 +1,12 @@
 "use client";
 
-import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
 import type {
   ProfileHandleProps,
 } from "@/components/common/profile/ProfileHandle";
 import ProfileHandle from "@/components/common/profile/ProfileHandle";
-import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
 import { DropPartSize } from "@/components/drops/view/part/DropPart.types";
+import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 const PROFILE_SIZE_MAP: Record<DropPartSize, ProfileBadgeSize> = {
   [DropPartSize.SMALL]: ProfileBadgeSize.SMALL,

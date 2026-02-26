@@ -2,10 +2,12 @@
 
 import clsx from "clsx";
 import { useEffect, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { SortDirection } from "@/entities/ISort";
+
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
+import { SortDirection } from "@/entities/ISort";
+
 import type { CommonSelectItemProps } from "../CommonSelect";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
 export default function CommonTabsTab<T, U = unknown>(
   props: Readonly<

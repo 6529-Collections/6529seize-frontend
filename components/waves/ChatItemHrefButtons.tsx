@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import {
-  useState,
   type MouseEvent,
   type PointerEvent,
   type TouchEvent,
+  useState,
 } from "react";
+
 import { useLinkPreviewContext } from "./LinkPreviewContext";
 
 type StopEvent =

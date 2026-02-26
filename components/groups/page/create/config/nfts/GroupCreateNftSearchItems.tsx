@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import { AnimatePresence, motion } from "framer-motion";
-import GroupCreateNftSearchItemsContent from "./GroupCreateNftSearchItemsContent";
-import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
+
+import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
+import { commonApiFetch } from "@/services/api/common-api";
+
+import GroupCreateNftSearchItemsContent from "./GroupCreateNftSearchItemsContent";
+
 
 export default function GroupCreateNftSearchItems({
   open,

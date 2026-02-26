@@ -1,12 +1,15 @@
+import { notFound } from "next/navigation";
+
 import NextGenCollectionArtPage from "@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+
 import CollectionPageShell from "../CollectionPageShell";
 import {
   fetchCollection,
   generateNextgenCollectionMetadata,
 } from "../page-utils";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,

@@ -1,4 +1,3 @@
-import type { TokenRange, TokenSelection } from "../types";
 import {
   BIGINT_ONE,
   BIGINT_ZERO,
@@ -6,6 +5,8 @@ import {
   MAX_SAFE,
 } from "./constants";
 import { createRangeTooLargeError } from "./errors";
+
+import type { TokenRange, TokenSelection } from "../types";
 
 export function canonicalizeRanges(ranges: TokenRange[]): TokenRange[] {
   if (!ranges.length) {

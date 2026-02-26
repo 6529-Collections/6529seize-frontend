@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Time } from "@/helpers/time";
+
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { Time } from "@/helpers/time";
 
 type WaveDropTimeSize = "xs" | "sm";
 

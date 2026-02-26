@@ -1,10 +1,12 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
+
+import { publicEnv } from "@/config/env";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+
 import CreateDropGifPicker from "./CreateDropGifPicker";
 import StormButton from "./StormButton";
 

@@ -1,5 +1,6 @@
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import React from "react";
+
 import ValidationError from "../submission/ui/ValidationError";
 
 interface TraitWrapperProps {

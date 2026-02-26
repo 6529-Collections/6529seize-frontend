@@ -3,10 +3,11 @@ import { useCallback } from "react";
 import { useXtdhTokenContributorsQuery } from "@/hooks/useXtdhTokenContributorsQuery";
 
 import { CollectionLoadMore } from "../subcomponents/CollectionLoadMore";
+
 import { useXtdhTokenContributorsFilters } from "./hooks/useXtdhTokenContributorsFilters";
+import { XtdhGrantDetailsPanel } from "./subcomponents/XtdhGrantDetailsPanel";
 import { XtdhTokenContributorsControls } from "./subcomponents/XtdhTokenContributorsControls";
 import { XtdhTokenContributorsList } from "./subcomponents/XtdhTokenContributorsList";
-import { XtdhGrantDetailsPanel } from "./subcomponents/XtdhGrantDetailsPanel";
 
 interface XtdhTokenContributorsPanelProps {
   readonly contract: string;

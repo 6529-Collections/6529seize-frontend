@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
+import React from "react";
+
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface WaveDropAuthorPfpProps {
   readonly drop: ApiDrop;

@@ -3,6 +3,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
 import styles from "@/styles/Home.module.scss";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
+
 import type { Metadata } from "next";
 
 export default function MemeAccountingPage() {

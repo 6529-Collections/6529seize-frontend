@@ -1,13 +1,15 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+import { useInterval } from "react-use";
+
 import type {
     AllowlistDescription} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
     AllowlistRunStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
-import { useInterval } from "react-use";
+
 import { DistributionPlanToolContext } from "../DistributionPlanToolContext";
 
 const LOADING_STATES = [AllowlistRunStatus.CLAIMED, AllowlistRunStatus.PENDING];

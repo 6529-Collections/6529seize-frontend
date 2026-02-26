@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import NextGenTokenComponent from "@/components/nextGen/collections/nextgenToken/NextGenToken";
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
@@ -11,8 +14,6 @@ import type {
 } from "@/entities/INextgen";
 import styles from "@/styles/Home.module.scss";
 import { NextgenCollectionView } from "@/types/enums";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function NextGenTokenPageClient({
   tokenId,

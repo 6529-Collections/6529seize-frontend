@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import type { MenuItemsProps } from "@headlessui/react";
+import type { ReactNode } from "react";
 
 export interface CompactMenuItem {
   readonly id: string;

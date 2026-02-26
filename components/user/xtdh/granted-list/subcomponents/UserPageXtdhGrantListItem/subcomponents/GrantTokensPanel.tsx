@@ -2,9 +2,10 @@
 
 import type { SupportedChain } from "@/components/nft-picker/NftPicker.types";
 
+import { GrantTokensDisclosure } from "./GrantTokensDisclosure";
+
 import type { TokenPanelState } from "../types";
 
-import { GrantTokensDisclosure } from "./GrantTokensDisclosure";
 
 interface GrantTokensPanelProps {
   readonly chain: SupportedChain | null;

@@ -4,12 +4,14 @@ import { memo, useRef } from "react";
 import { Col, Row } from "react-bootstrap";
 import { A11y, Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import type { NextGenToken } from "@/entities/INextgen";
+
 import { NextGenTokenImage } from "@/components/nextGen/collections/nextgenToken/NextGenTokenImage";
+import type { NextGenToken } from "@/entities/INextgen";
+
 import SwiperAutoplayButton from "./SwiperAutoplayButton";
-import { useTokenSlideshow } from "./useTokenSlideshow";
-import { useSlideshowConfig } from "./useSlideshowConfig";
 import { useSlideshowAutoplay } from "./useSlideshowAutoplay";
+import { useSlideshowConfig } from "./useSlideshowConfig";
+import { useTokenSlideshow } from "./useTokenSlideshow";
 
 // Memoized image component to prevent re-downloads on parent re-renders
 const MemoizedTokenImage = memo(NextGenTokenImage);

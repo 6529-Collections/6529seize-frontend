@@ -1,7 +1,8 @@
 import React from "react";
-import type { ApiDropPart } from "@/generated/models/ApiDropPart";
-import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import { ImageScale } from "@/helpers/image.helpers";
 
 interface WaveDropPartContentMediasProps {

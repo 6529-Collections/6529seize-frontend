@@ -1,7 +1,8 @@
-import type { RefObject } from "react";
-import type { Suggestion } from "../types";
 import { NftSuggestItem } from "./NftSuggestItem";
 import { NftSuggestSentinel } from "./NftSuggestSentinel";
+
+import type { Suggestion } from "../types";
+import type { RefObject } from "react";
 
 interface VirtualItem {
   index: number;

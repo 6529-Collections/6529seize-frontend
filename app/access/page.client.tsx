@@ -1,14 +1,15 @@
 "use client";
 
+import Cookies from "js-cookie";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.scss";
-import Cookies from "js-cookie";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function AccessPage() {
   useSetTitle("Access Page");

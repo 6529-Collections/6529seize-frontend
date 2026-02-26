@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
@@ -19,9 +23,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import Link from "next/link";
-import React, { useState } from "react";
-import { createPortal } from "react-dom";
+
 import MemeDropTraits from "./MemeDropTraits";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
 import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";

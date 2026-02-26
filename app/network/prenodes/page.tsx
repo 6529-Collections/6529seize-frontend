@@ -1,7 +1,8 @@
-import styles from "@/styles/Home.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
+
 import PrenodesStatus from "@/components/prenodes/PrenodesStatus";
 import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
 
 export default function PrenodesPage() {
   return (

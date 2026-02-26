@@ -1,5 +1,6 @@
-import { publicEnv } from "@/config/env";
 import type { AllowlistToolResponse } from "@/components/allowlist-tool/allowlist-tool.types";
+import { publicEnv } from "@/config/env";
+
 import { getAuthJwt, removeAuthJwt } from "./auth/auth.utils";
 import { makeErrorToast } from "./distribution-plan.utils";
 

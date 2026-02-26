@@ -1,10 +1,10 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageSubscriptions from "@/components/user/subscriptions/UserPageSubscriptions";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   USER_PAGE_TAB_IDS,
   USER_PAGE_TAB_MAP,
 } from "@/components/user/layout/userTabs.config";
+import UserPageSubscriptions from "@/components/user/subscriptions/UserPageSubscriptions";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 function SubscriptionsTab({ profile }: { readonly profile: ApiIdentity }) {
   return <UserPageSubscriptions profile={profile} />;

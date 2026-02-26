@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
@@ -7,7 +9,6 @@ import { GRADIENT_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";
-import { useEffect, useState } from "react";
 
 export enum TypeFilter {
   ALL = "All Transactions",

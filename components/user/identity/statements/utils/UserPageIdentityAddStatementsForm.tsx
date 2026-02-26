@@ -1,5 +1,8 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type {
@@ -14,8 +17,7 @@ import {
     STATEMENT_META
 } from "@/helpers/Types";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
+
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 export default function UserPageIdentityAddStatementsForm({
   profile,

@@ -1,10 +1,11 @@
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type {
   CreateWaveDatesConfig,
   CreateWaveOutcomeConfig,
 } from "@/types/waves.types";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import CreateWaveOutcomesCICRank from "./CreateWaveOutcomesCICRank";
+
 import CreateWaveOutcomesCICApprove from "./CreateWaveOutcomesCICApprove";
+import CreateWaveOutcomesCICRank from "./CreateWaveOutcomesCICRank";
 
 import type { JSX } from "react";
 

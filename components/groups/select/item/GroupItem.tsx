@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import Link from "next/link";
-import GroupItemWrapper from "./GroupItemWrapper";
+import { useEffect, useState } from "react";
+
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getTimeAgo } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+
+import GroupItemWrapper from "./GroupItemWrapper";
+
 
 export default function GroupItem({
   group,

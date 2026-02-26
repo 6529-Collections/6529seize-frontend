@@ -1,6 +1,5 @@
 "use client";
 
-import type { ContractType } from "@/types/enums";
 import React, {
   createContext,
   useCallback,
@@ -8,6 +7,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
+
+import type { ContractType } from "@/types/enums";
 
 type TransferItem = {
   key: string;

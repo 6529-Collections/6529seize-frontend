@@ -1,7 +1,8 @@
 import { useRouter } from "next/navigation";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 export function getIsDirectMessage(
   wave: { id: string },

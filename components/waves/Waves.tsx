@@ -1,23 +1,26 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
-import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
-import { useSetTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, type JSX } from "react";
-import CreateDirectMessage from "./create-dm/CreateDirectMessage";
-import CreateWave from "./create-wave/CreateWave";
-import CreateWaveModal from "./create-wave/CreateWaveModal";
-import WavesList from "./list/WavesList";
+import { type JSX, useCallback, useMemo } from "react";
+
+import { useAuth } from "@/components/auth/Auth";
 import ConnectWallet from "@/components/common/ConnectWallet";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import { useSetTitle } from "@/contexts/TitleContext";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
-import CreateDirectMessageModal from "./create-dm/CreateDirectMessageModal";
 import useCreateModalState, {
   CREATE_DIRECT_MESSAGE_VALUE,
   CREATE_QUERY_KEY,
   CREATE_WAVE_VALUE,
 } from "@/hooks/useCreateModalState";
+
+import CreateDirectMessage from "./create-dm/CreateDirectMessage";
+import CreateDirectMessageModal from "./create-dm/CreateDirectMessageModal";
+import CreateWave from "./create-wave/CreateWave";
+import CreateWaveModal from "./create-wave/CreateWaveModal";
+import WavesList from "./list/WavesList";
+
 
 interface WavesProps {
   readonly heading?: string | undefined;

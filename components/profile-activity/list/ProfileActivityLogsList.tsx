@@ -1,6 +1,7 @@
 import type { ProfileActivityLog } from "@/entities/IProfile";
-import ProfileActivityLogsItem from "./ProfileActivityLogsItem";
+
 import ProfileActivityLogItemWrapper from "./items/utils/ProfileActivityLogItemWrapper";
+import ProfileActivityLogsItem from "./ProfileActivityLogsItem";
 
 export default function UserPageIdentityActivityLogList({
   logs,

@@ -1,21 +1,20 @@
-import { useMemo } from "react";
 import Image from "next/image";
+import { useMemo } from "react";
 
-import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
-import { GrantedListSkeleton } from "@/components/user/xtdh/granted-list/subcomponents/GrantedListSkeleton";
 import { GrantedListError } from "@/components/user/xtdh/granted-list/subcomponents/GrantedListError";
+import { GrantedListSkeleton } from "@/components/user/xtdh/granted-list/subcomponents/GrantedListSkeleton";
 import {
-  GrantListItemContainer,
-  StatusBadge,
-  GrantExpiryBadge,
-  GrantDetailsRow,
-  GrantTokensPanel,
-} from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/subcomponents";
-import {
-  mapTokenCountToState,
   getContractAddress,
   mapGrantChainToSupportedChain,
+  mapTokenCountToState,
 } from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/formatters";
+import {
+  GrantDetailsRow,
+  GrantExpiryBadge,
+  GrantListItemContainer,
+  GrantTokensPanel,
+  StatusBadge,
+} from "@/components/user/xtdh/granted-list/subcomponents/UserPageXtdhGrantListItem/subcomponents";
 import {
   formatAmount,
   formatDateTime,
@@ -23,6 +22,7 @@ import {
   getTargetTokensCountInfo,
 } from "@/components/user/xtdh/utils/xtdhGrantFormatters";
 import { shortenAddress } from "@/helpers/address.helpers";
+import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
 
 interface XtdhGrantDetailsPanelProps {
   readonly grantId: string;

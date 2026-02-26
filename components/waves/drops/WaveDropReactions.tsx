@@ -1,5 +1,17 @@
 "use client";
 
+import clsx from "clsx";
+import Image from "next/image";
+import Link from "next/link";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Tooltip } from "react-tooltip";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -14,17 +26,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
-import clsx from "clsx";
-import Image from "next/image";
-import Link from "next/link";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Tooltip } from "react-tooltip";
+
 import {
   cloneReactionEntries,
   findReactionIndex,

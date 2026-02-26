@@ -1,8 +1,9 @@
 "use client";
 
-import { useTitle } from "@/contexts/TitleContext";
 import Image from "next/image";
 import { useEffect } from "react";
+
+import { useTitle } from "@/contexts/TitleContext";
 
 export default function NotFound({ label }: { readonly label?: string | undefined }) {
   let titleLabel;

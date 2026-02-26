@@ -1,5 +1,13 @@
 "use client";
 
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import Toggle from "react-toggle";
+import { Tooltip } from "react-tooltip";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import type {
@@ -16,13 +24,7 @@ import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import Toggle from "react-toggle";
-import { Tooltip } from "react-tooltip";
+
 import styles from "./UserPageSubscriptions.module.scss";
 
 export default function UserPageSubscriptionsUpcoming(

@@ -1,15 +1,18 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
+
 import {
     DistributionPlanToolContext,
     DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
-import type {
-    DistributionPlanStepDescription} from "./DistributionPlanToolSidebar";
+
 import {
     DISTRIBUTION_PLAN_STEPS
 } from "./DistributionPlanToolSidebar";
+
+import type {
+    DistributionPlanStepDescription} from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepDone({
   step,

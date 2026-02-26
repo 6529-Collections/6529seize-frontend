@@ -1,9 +1,11 @@
+import Image from "next/image";
+
 import type { ProfileActivityLogPfpEdit } from "@/entities/IProfile";
 import {
     getScaledImageUri,
     ImageScale,
 } from "@/helpers/image.helpers";
-import Image from "next/image";
+
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 export default function ProfileActivityLogPfp({

@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
 import React from "react";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
+import type { ReactNode } from "react";
 
 interface MemesLeaderboardDropCardProps {
   readonly drop: ExtendedDrop;

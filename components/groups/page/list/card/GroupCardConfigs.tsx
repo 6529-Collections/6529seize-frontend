@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
+import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
 import { GroupDescriptionType } from "@/entities/IGroup";
 import type { ApiGroupDescription } from "@/generated/models/ApiGroupDescription";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
-import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
+
 import GroupCardConfig from "./GroupCardConfig";
 
 export interface GroupCardConfigProps {

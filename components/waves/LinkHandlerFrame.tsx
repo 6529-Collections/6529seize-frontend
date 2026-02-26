@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
 
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import { useLinkPreviewContext } from "./LinkPreviewContext";
+
+import type { ReactNode } from "react";
 
 interface LinkHandlerFrameProps {
   readonly href: string;

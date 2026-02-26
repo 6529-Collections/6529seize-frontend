@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import {
   formatNumberWithCommasOrDash,
   getTimeAgo,
 } from "@/helpers/Helpers";
-import type {
-  DistributionTableItem} from "./UserPageStatsActivityDistributionsTable";
+
 import {
   DistributionCollection
 } from "./UserPageStatsActivityDistributionsTable";
-import { useEffect, useState } from "react";
+
+import type {
+  DistributionTableItem} from "./UserPageStatsActivityDistributionsTable";
 
 export default function UserPageStatsActivityDistributionsTableItem({
   item,

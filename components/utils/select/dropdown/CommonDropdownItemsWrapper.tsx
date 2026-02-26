@@ -1,10 +1,12 @@
 "use client";
 
-import type { ReactElement, RefObject} from "react";
 import { useEffect, useState } from "react";
-import CommonDropdownItemsMobileWrapper from "./CommonDropdownItemsMobileWrapper";
 import { createBreakpoint } from "react-use";
+
 import CommonDropdownItemsDefaultWrapper from "./CommonDropdownItemsDefaultWrapper";
+import CommonDropdownItemsMobileWrapper from "./CommonDropdownItemsMobileWrapper";
+
+import type { ReactElement, RefObject} from "react";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 export default function CommonDropdownItemsWrapper({

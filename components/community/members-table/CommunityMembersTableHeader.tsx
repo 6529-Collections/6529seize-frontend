@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 import type { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-import { useState } from "react";
+
 import CommunityMembersTableHeaderSortableContent from "./CommunityMembersTableHeaderSortableContent";
 
 export default function CommunityMembersTableHeader({

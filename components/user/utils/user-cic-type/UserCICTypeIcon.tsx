@@ -1,10 +1,11 @@
 import { CICType } from "@/entities/IProfile";
 import { cicToType } from "@/helpers/Helpers";
+
 import UserCICAccurateIcon from "./icons/UserCICAccurateIcon";
-import UserCICUnknownIcon from "./icons/UserCICUnknownIcon";
+import UserCICHighlyAccurateIcon from "./icons/UserCICHighlyAccurateIcon";
 import UserCICInaccurateIcon from "./icons/UserCICInaccurateIcon";
 import UserCICProbablyAccurateIcon from "./icons/UserCICProbablyAccurateIcon";
-import UserCICHighlyAccurateIcon from "./icons/UserCICHighlyAccurateIcon";
+import UserCICUnknownIcon from "./icons/UserCICUnknownIcon";
 
 import type { JSX } from "react";
 

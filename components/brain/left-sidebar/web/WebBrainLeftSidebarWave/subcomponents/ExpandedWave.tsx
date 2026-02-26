@@ -1,11 +1,14 @@
-import type { MutableRefObject } from "react";
 import Link from "next/link";
+
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
-import { WaveAvatar } from "./WaveAvatar";
-import type { WaveTooltipPlacement } from "./WaveTooltip";
-import { WaveTooltip } from "./WaveTooltip";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+import { WaveAvatar } from "./WaveAvatar";
+import { WaveTooltip } from "./WaveTooltip";
+
+import type { WaveTooltipPlacement } from "./WaveTooltip";
+import type { MutableRefObject } from "react";
 
 interface ExpandedWaveProps {
   readonly formattedWaveName: string;

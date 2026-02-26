@@ -1,7 +1,8 @@
+import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
+
 import UserPageStatsActivityDistributionsTable from "./UserPageStatsActivityDistributionsTable";
 
 export default function UserPageStatsActivityDistributionsTableWrapper({

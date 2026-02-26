@@ -1,9 +1,10 @@
 import React from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
+
 import PrivilegedDropCreator, {
   type CurationComposerVariant,
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface WaveDropCreateProps {
   readonly wave: ApiWave;

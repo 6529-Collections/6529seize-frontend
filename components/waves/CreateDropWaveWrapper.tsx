@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useCallback, useMemo, useRef } from "react";
-import useCapacitor from "@/hooks/useCapacitor";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
+
+import useCapacitor from "@/hooks/useCapacitor";
 
 export enum CreateDropWaveWrapperContext {
   WAVE_CHAT = "WAVE_CHAT",

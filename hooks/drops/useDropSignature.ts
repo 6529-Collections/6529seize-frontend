@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useContext } from "react";
-import { useSignMessage } from "wagmi";
+import { useContext, useState } from "react";
 import { UserRejectedRequestError } from "viem";
+import { useSignMessage } from "wagmi";
+
+import { AuthContext } from "@/components/auth/Auth";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { DropHasher } from "@/utils/drop-hasher";
-import { AuthContext } from "@/components/auth/Auth";
 
 /**
  * Hook for hashing drop data and requesting user signature

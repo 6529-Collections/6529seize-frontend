@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
+
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { WaveLeaderboardGalleryItem } from "./WaveLeaderboardGalleryItem";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
+
+import { WaveLeaderboardGalleryItem } from "./WaveLeaderboardGalleryItem";
 
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;

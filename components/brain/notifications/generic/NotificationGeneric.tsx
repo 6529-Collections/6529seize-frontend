@@ -1,4 +1,5 @@
 import type { INotificationGeneric } from "@/types/feed.types";
+
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 

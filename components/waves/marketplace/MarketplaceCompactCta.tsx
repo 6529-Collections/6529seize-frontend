@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import MarketplaceExternalOpenIcon from "./MarketplaceExternalOpenIcon";
+
 import type {
   MarketplaceBrand,
   ResolvedPreviewHref,
 } from "./MarketplaceItemPreviewCard.types";
-import MarketplaceExternalOpenIcon from "./MarketplaceExternalOpenIcon";
 
 interface MarketplaceCompactCtaProps {
   readonly resolvedPreviewHref: ResolvedPreviewHref;

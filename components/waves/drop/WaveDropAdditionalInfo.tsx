@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import { useMemo } from "react";
+
 import {
   AdditionalMedia,
   MemesSubmissionAdditionalInfoKey,
@@ -8,8 +11,6 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { parseIpfsUrl } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import Image from "next/image";
-import { useMemo } from "react";
 
 const MAX_MEDIA = 4;
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "ogv"]);

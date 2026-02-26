@@ -1,13 +1,15 @@
 "use client";
 
+import { useContext, useState } from "react";
+import { Tooltip } from "react-tooltip";
+
 import AllowlistToolCommonModalWrapper, {
     AllowlistToolModalSize,
 } from "@/components/allowlist-tool/common/modals/AllowlistToolCommonModalWrapper";
-import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
-import { useContext, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+
 import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
 
 export default function BuildPhaseForm({

@@ -1,9 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
 import React from "react";
+
 import { ContentTabProvider } from "../brain/ContentTabContext";
 import WavesMessagesWrapper from "../shared/WavesMessagesWrapper";
+
+import type { ReactNode } from "react";
 
 interface Props {
   readonly children: ReactNode;

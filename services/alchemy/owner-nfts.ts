@@ -2,12 +2,14 @@
 import { goerli, sepolia } from "wagmi/chains";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+
+import { processOwnerNftsResponse } from "./utils";
+
 import type {
   AlchemyGetNftsForOwnerResponse,
   AlchemyTokenMetadataEntry,
   OwnerNft,
 } from "./types";
-import { processOwnerNftsResponse } from "./utils";
 
 const MAX_GET_NFTS_RETRIES = 3;
 const legacyOptions = {

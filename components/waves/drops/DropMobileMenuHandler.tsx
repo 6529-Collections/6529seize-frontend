@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from "react";
-import WaveDropMobileMenu from "./WaveDropMobileMenu";
+
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+
+import WaveDropMobileMenu from "./WaveDropMobileMenu";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;

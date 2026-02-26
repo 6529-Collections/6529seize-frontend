@@ -1,10 +1,12 @@
 "use client";
 
-import type { SyntheticEvent } from "react";
 
 import { ensureTwitterLink } from "@/components/drops/view/part/dropPartMarkdown/twitter";
 import SmartLinkPreview from "@/components/waves/SmartLinkPreview";
+
 import BoostedTweetPreview from "./BoostedTweetPreview";
+
+import type { SyntheticEvent } from "react";
 
 const getFallbackLabel = (href: string): string => {
   try {

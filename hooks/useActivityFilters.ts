@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { TypeFilter, ContractFilter } from "./useActivityData";
+
+import { ContractFilter, TypeFilter } from "./useActivityData";
 
 interface UseActivityFiltersReturn {
   // Filter states

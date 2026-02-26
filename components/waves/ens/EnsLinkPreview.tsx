@@ -6,7 +6,7 @@ import { LinkPreviewCardLayout } from "@/components/waves/OpenGraphPreview";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 
 import EnsPreviewCard from "./EnsPreviewCard";
-import { isEnsPreview, type EnsPreview } from "./types";
+import { type EnsPreview, isEnsPreview } from "./types";
 
 interface EnsLinkPreviewProps {
   readonly href: string;

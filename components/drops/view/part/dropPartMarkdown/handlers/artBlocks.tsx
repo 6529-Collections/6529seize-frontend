@@ -1,10 +1,10 @@
+import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import { publicEnv } from "@/config/env";
 import ArtBlocksTokenCard from "@/src/components/waves/ArtBlocksTokenCard";
 import {
-  parseArtBlocksLink,
   type ArtBlocksTokenIdentifier,
+  parseArtBlocksLink,
 } from "@/src/services/artblocks/url";
-import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 
 import type { LinkHandler } from "../linkTypes";
 

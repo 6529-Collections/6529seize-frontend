@@ -1,17 +1,21 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import type { FC } from "react";
-import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+
 import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
+
 import CreateDropStormPart from "./CreateDropStormPart";
+
+import type { FC } from "react";
 
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];

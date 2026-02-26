@@ -1,13 +1,14 @@
+import Image from "next/image";
+import Link from "next/link";
 import React from "react";
+import { Tooltip } from "react-tooltip";
+
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
-import Image from "next/image";
-import { Tooltip } from "react-tooltip";
-import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { WAVE_VOTE_STATS_LABELS, WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;

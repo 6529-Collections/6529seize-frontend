@@ -1,5 +1,7 @@
 "use client";
 
+import { useContext } from "react";
+
 import type {
     AllowlistOperation} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
@@ -12,7 +14,6 @@ import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool
 import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { useContext } from "react";
 
 interface ExcludedSnapshot {
   readonly id: string;

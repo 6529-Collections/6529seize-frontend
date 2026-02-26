@@ -1,5 +1,3 @@
-import type { AnchorHTMLAttributes } from "react";
-import type { ExtraProps } from "react-markdown";
 
 import { publicEnv } from "@/config/env";
 import { isLikelyEnsTarget } from "@/lib/ens/detect";
@@ -7,6 +5,9 @@ import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import { isPepeHost } from "./pepe";
 import { TWITTER_DOMAINS } from "./twitter";
+
+import type { AnchorHTMLAttributes } from "react";
+import type { ExtraProps } from "react-markdown";
 
 const parseUrl = (href: string): URL | null => {
   try {

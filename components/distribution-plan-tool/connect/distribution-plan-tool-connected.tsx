@@ -1,9 +1,10 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function DistributionPlanToolConnected() {
   const { requestAuth } = useContext(AuthContext);

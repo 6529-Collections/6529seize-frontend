@@ -1,5 +1,12 @@
 "use client";
 
+import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Accordion, Col, Container, Row } from "react-bootstrap";
+
 import {
   printGas,
   printRoyalties,
@@ -15,12 +22,7 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { Accordion, Col, Container, Row } from "react-bootstrap";
+
 import styles from "../NextGen.module.scss";
 import {
   getNextGenIconUrl,

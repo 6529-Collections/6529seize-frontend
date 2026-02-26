@@ -1,9 +1,12 @@
 "use client";
 
-import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { useState } from "react";
 import { Tooltip } from "react-tooltip";
+
+import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
+
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
 import ComponentConfigNextBtn from "./ComponentConfigNextBtn";

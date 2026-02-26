@@ -1,11 +1,12 @@
 "use client";
 
-import NetworkHealthCTA from "@/components/header/NetworkHealthCTA";
-import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
+import NetworkHealthCTA from "@/components/header/NetworkHealthCTA";
 
 interface SmallScreenHeaderProps {
   readonly onMenuToggle: () => void;

@@ -1,5 +1,6 @@
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityStatementsStatementsList";
 
 export default function UserPageIdentityStatementsSocialMediaVerificationPosts({

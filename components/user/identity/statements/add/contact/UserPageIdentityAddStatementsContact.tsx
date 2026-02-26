@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import UserPageIdentityAddStatementsContactItems from "./UserPageIdentityAddStatementsContactItems";
-import UserPageIdentityAddStatementsContactHeader from "./UserPageIdentityAddStatementsContactHeader";
+
+import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type {
   CONTACT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
   STATEMENT_GROUP,
   STATEMENT_TYPE,
 } from "@/helpers/Types";
-import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+import UserPageIdentityAddStatementsContactHeader from "./UserPageIdentityAddStatementsContactHeader";
+import UserPageIdentityAddStatementsContactItems from "./UserPageIdentityAddStatementsContactItems";
 
 export default function UserPageIdentityAddStatementsContact({
   profile,

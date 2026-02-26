@@ -1,5 +1,11 @@
 "use client";
 
+import { faAt, faBellSlash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+
 import { useAuth } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -7,11 +13,6 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
-import { faAt, faBellSlash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 interface WaveRatingProps {
   readonly wave: ApiWave;

@@ -1,9 +1,10 @@
-import type { RefObject } from "react";
-import { CollectionSeized } from "@/entities/IProfile";
 import type {
   CommonSelectItem,
 } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import { CollectionSeized } from "@/entities/IProfile";
+
+import type { RefObject } from "react";
 
 type SelectedType = CollectionSeized | null;
 

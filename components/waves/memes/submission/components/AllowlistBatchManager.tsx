@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useCallback } from "react";
-import FormSection from "../ui/FormSection";
-import { TraitWrapper } from "../../traits/TraitWrapper";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import React, { useCallback } from "react";
+
+import { TraitWrapper } from "../../traits/TraitWrapper";
+import FormSection from "../ui/FormSection";
+
 import type { AllowlistBatchRaw } from "../types/OperationalData";
 
 export type { AllowlistBatchRaw } from "../types/OperationalData";

@@ -1,3 +1,10 @@
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { Col, Container, Row } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+
 import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
 import UserCICAndLevel from "@/components/user/utils/UserCICAndLevel";
 import {
@@ -7,12 +14,7 @@ import {
 import type { NextGenToken } from "@/entities/INextgen";
 import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
+
 import { TraitScore } from "./NextGenTokenAbout";
 
 export function NextGenTokenImage(

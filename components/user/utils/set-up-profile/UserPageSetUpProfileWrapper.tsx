@@ -1,11 +1,13 @@
 "use client";
 
-import type { ReactNode} from "react";
 import { useEffect, useState } from "react";
 
-import UserPageSetUpProfile from "./UserPageSetUpProfile";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+import UserPageSetUpProfile from "./UserPageSetUpProfile";
+
+import type { ReactNode} from "react";
 
 export default function UserPageSetUpProfileWrapper({
   profile,

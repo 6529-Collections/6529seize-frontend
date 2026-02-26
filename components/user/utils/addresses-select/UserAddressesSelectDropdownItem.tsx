@@ -1,5 +1,6 @@
-import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { useCopyToClipboard } from "react-use";
+
+import type { ApiWallet } from "@/generated/models/ApiWallet";
 
 export default function UserAddressesSelectDropdownItem({
   wallet,

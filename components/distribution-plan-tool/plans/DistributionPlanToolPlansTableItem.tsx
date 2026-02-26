@@ -1,10 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolLoader from "@/components/allowlist-tool/common/AllowlistToolLoader";
 import { distributionPlanApiDelete } from "@/services/distribution-plan-api";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function DistributionPlanToolPlansTableItem({
   plan,

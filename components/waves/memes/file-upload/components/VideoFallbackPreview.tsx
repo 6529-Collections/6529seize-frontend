@@ -1,10 +1,12 @@
 import React from "react";
-import type { VideoFallbackPreviewProps } from "../reducers/types";
+
 import {
-  getFileExtension,
   formatFileSize,
   getBrowserSpecificMessage,
+  getFileExtension,
 } from "../utils/formatHelpers";
+
+import type { VideoFallbackPreviewProps } from "../reducers/types";
 
 /**
  * Video Fallback Preview Component

@@ -1,16 +1,16 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { useContext, useEffect, useState } from "react";
+
 import {
     PhaseConfigStep,
     RandomHoldersType,
 } from "../BuildPhaseFormConfigModal";
-import type {
-    BuildPhaseFormConfigModalSidebarOption,
-} from "./BuildPhaseFormConfigModalSidebar";
+
 import BuildPhaseFormConfigModalSidebar from "./BuildPhaseFormConfigModalSidebar";
 import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
 import ComponentConfigMeta from "./ComponentConfigMeta";
@@ -18,6 +18,10 @@ import ComponentConfigNextBtn from "./ComponentConfigNextBtn";
 import ComponentRandomHoldersWeight, {
     ComponentRandomHoldersWeightType,
 } from "./utils/ComponentRandomHoldersWeight";
+
+import type {
+    BuildPhaseFormConfigModalSidebarOption,
+} from "./BuildPhaseFormConfigModalSidebar";
 
 export default function ComponentSelectRandomHolders({
   onNextStep,

@@ -1,15 +1,17 @@
 "use client";
 
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+
 import type {
   ReactNode} from "react";
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 /**
  * Props for VirtualScrollWrapper

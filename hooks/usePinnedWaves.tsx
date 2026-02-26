@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const MAX_PINNED_WAVES = 20;
 const STORAGE_KEY = "pinnedWave";

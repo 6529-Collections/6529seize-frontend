@@ -1,15 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTransfer } from "./TransferState";
 
-import RecipientSelector from "@/components/common/RecipientSelector";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { ContractType } from "@/types/enums";
 import {
   faAnglesDown,
   faAnglesUp,
@@ -17,11 +8,23 @@ import {
   faXmarkCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { Address, PublicClient } from "viem";
 import { isAddress, type WriteContractParameters } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+
+import RecipientSelector from "@/components/common/RecipientSelector";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { ContractType } from "@/types/enums";
+
+import { useTransfer } from "./TransferState";
+
+import type { Address, PublicClient } from "viem";
 
 const ERC721_ABI = [
   {

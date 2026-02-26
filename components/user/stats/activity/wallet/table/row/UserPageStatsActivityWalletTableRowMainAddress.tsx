@@ -1,7 +1,8 @@
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Transaction } from "@/entities/ITransaction";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatAddress } from "@/helpers/Helpers";
+
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
 
 export default function UserPageStatsActivityWalletTableRowMainAddress({

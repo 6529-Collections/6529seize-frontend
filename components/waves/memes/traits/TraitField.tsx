@@ -1,10 +1,12 @@
 import React, { memo } from "react";
-import { TextTrait } from "./TextTrait";
-import { NumberTrait } from "./NumberTrait";
-import { DropdownTrait } from "./DropdownTrait";
+
 import { BooleanTrait } from "./BooleanTrait";
-import type { FieldDefinition} from "./schema";
+import { DropdownTrait } from "./DropdownTrait";
+import { NumberTrait } from "./NumberTrait";
 import { FieldType } from "./schema";
+import { TextTrait } from "./TextTrait";
+
+import type { FieldDefinition} from "./schema";
 import type { TraitsData } from "../submission/types/TraitsData";
 
 interface TraitFieldProps {

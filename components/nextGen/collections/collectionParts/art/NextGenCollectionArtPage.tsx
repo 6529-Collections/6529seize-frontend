@@ -1,8 +1,10 @@
 import { Col, Container, Row } from "react-bootstrap";
-import NextGenCollectionHeader from "../NextGenCollectionHeader";
-import NextGenCollectionArt from "../NextGenCollectionArt";
-import type { NextGenCollection } from "@/entities/INextgen";
+
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+import type { NextGenCollection } from "@/entities/INextgen";
+
+import NextGenCollectionArt from "../NextGenCollectionArt";
+import NextGenCollectionHeader from "../NextGenCollectionHeader";
 
 interface Props {
   collection: NextGenCollection;

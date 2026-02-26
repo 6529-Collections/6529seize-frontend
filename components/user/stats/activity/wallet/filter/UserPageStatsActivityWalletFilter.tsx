@@ -3,7 +3,9 @@
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
+
 import UserPageStatsActivityWalletFilterItem from "./UserPageStatsActivityWalletFilterItem";
 
 export default function UserPageStatsActivityWalletFilter({

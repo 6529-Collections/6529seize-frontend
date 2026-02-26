@@ -1,14 +1,19 @@
-import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
-import type { MetricData } from "@/hooks/useCommunityMetrics";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import type { ReactNode } from "react";
+
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import type { MetricData } from "@/hooks/useCommunityMetrics";
+
+
 import {
   formatCompactNumber,
   formatNumberWithCommas,
   formatPercent,
 } from "../utils/formatNumbers";
+
 import MetricSparkline from "./MetricSparkline";
+
+import type { ReactNode } from "react";
 
 interface MetricCardProps {
   readonly title: string;

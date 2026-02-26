@@ -1,11 +1,13 @@
 import clsx from "clsx";
-import type { CompactMenuItem } from "../types";
+
 import {
   DEFAULT_ACTIVE_ITEM_CLASSES,
   DEFAULT_FOCUS_ITEM_CLASSES,
   DEFAULT_INACTIVE_ITEM_CLASSES,
   DEFAULT_ITEM_CLASSES,
 } from "../constants";
+
+import type { CompactMenuItem } from "../types";
 
 interface CompactMenuItemButtonProps {
   readonly item: CompactMenuItem;

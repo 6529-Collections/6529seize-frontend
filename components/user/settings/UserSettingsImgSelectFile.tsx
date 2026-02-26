@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useImageUpload } from "./useImageUpload";
+
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
+import { useImageUpload } from "./useImageUpload";
 
 export default function UserSettingsImgSelectFile({
   imageToShow,

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
+
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useState } from "react";
+
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";

@@ -1,17 +1,20 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import React, { useMemo } from "react";
+
+import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import Link from "next/link";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
-import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
-import WaveDropTime from "./time/WaveDropTime";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import Image from "next/image";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+
+import WaveDropTime from "./time/WaveDropTime";
+
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;

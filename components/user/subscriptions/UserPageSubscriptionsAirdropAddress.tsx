@@ -1,9 +1,10 @@
-import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
-import { MEMES_CONTRACT } from "@/constants/constants";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Col, Container, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+
+import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
+import { MEMES_CONTRACT } from "@/constants/constants";
 
 interface AirdropAddress {
   address: string;

@@ -1,7 +1,5 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { MyStreamWaveTab } from "@/types/waves.types";
 import {
   faArrowRight,
   faBook,
@@ -15,7 +13,12 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import React, { useEffect } from "react";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
 import { useContentTab } from "../ContentTabContext";
+
 import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveFAQProps {

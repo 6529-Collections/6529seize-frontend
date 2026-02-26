@@ -1,9 +1,10 @@
 "use client";
 
+import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
 import { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
-import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
+
 import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
 

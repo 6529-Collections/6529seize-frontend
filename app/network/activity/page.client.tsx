@@ -1,5 +1,7 @@
 "use client";
 
+import { useContext } from "react";
+
 import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -7,7 +9,6 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import { INITIAL_ACTIVITY_LOGS_PARAMS } from "@/helpers/profile-logs.helpers";
 import type { CountlessPage } from "@/helpers/Types";
-import { useContext } from "react";
 
 export default function CommunityActivityPageClient({
   logsPage,

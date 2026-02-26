@@ -1,14 +1,16 @@
 "use client";
 
-import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+
+import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
-import type { ApiDrop } from "../../generated/models/ApiDrop";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { useClosingDropId } from "@/hooks/useClosingDropId";
+import useCreateModalState from "@/hooks/useCreateModalState";
+
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
 import { commonApiFetch } from "../../services/api/common-api";
@@ -21,8 +23,9 @@ import BrainRightSidebar, {
 } from "../brain/right-sidebar/BrainRightSidebar";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
-import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
-import { useClosingDropId } from "@/hooks/useClosingDropId";
+
+import type { ApiDrop } from "../../generated/models/ApiDrop";
+import type { ReactNode } from "react";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 

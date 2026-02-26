@@ -1,6 +1,7 @@
+import HomePageContent from "@/components/home/HomePageContent";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import HomePageContent from "@/components/home/HomePageContent";
+
 import type { Metadata } from "next";
 
 export default function Page() {

@@ -1,11 +1,12 @@
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import UserPageIdentityAddStatementsSelect from "./UserPageIdentityAddStatementsSelect";
-import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddStatementsContact";
-import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/UserPageIdentityAddStatementsSocialMediaAccount";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+
+import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddStatementsContact";
+import UserPageIdentityAddStatementsNFTAccounts from "./nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
+import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/UserPageIdentityAddStatementsSocialMediaAccount";
 import UserPageIdentityAddStatementsSocialMediaPosts from "./social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
-import UserPageIdentityAddStatementsNFTAccounts from "./nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
+import UserPageIdentityAddStatementsSelect from "./UserPageIdentityAddStatementsSelect";
 
 export default function UserPageIdentityAddStatementsViews({
   profile,

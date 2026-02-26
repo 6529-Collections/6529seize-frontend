@@ -1,14 +1,16 @@
 "use client";
 
-import { useContext, useEffect, useState, type JSX } from "react";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import ProxyActions from "../proxy/list/ProxyActions";
+import Link from "next/link";
+import { type JSX, useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";
-import Link from "next/link";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+
+import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
+import ProxyActions from "../proxy/list/ProxyActions";
 
 enum VIEW_TYPE {
   LIST = "LIST",

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   GRADIENT_CONTRACT,
@@ -10,7 +12,7 @@ import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, capitalizeEveryWord } from "@/helpers/Helpers";
-import { useEffect, useState } from "react";
+
 import UserPageStatsActivityDistributionsTableItem from "./UserPageStatsActivityDistributionsTableItem";
 
 export enum DistributionCollection {

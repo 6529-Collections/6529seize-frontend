@@ -1,28 +1,5 @@
 "use client";
 
-import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { MobileVotingModal, VotingModal } from "@/components/voting";
-import VotingModalButton from "@/components/voting/VotingModalButton";
-import DropCurationButton from "@/components/waves/drops/DropCurationButton";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
-import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
-import { ImageScale } from "@/helpers/image.helpers";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { useDropCurationMutation } from "@/hooks/drops/useDropCurationMutation";
-import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import Link from "next/link";
 import React, {
   useCallback,
@@ -31,7 +8,33 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
+
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { MobileVotingModal, VotingModal } from "@/components/voting";
+import VotingModalButton from "@/components/voting/VotingModalButton";
+import DropCurationButton from "@/components/waves/drops/DropCurationButton";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
+import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ImageScale } from "@/helpers/image.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { useDropCurationMutation } from "@/hooks/drops/useDropCurationMutation";
+import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
+
 import WaveLeaderboardGalleryItemVotes from "../gallery/WaveLeaderboardGalleryItemVotes";
+
 import type { WaveLeaderboardGridMode } from "./WaveLeaderboardGrid";
 
 interface WaveLeaderboardGridItemProps {

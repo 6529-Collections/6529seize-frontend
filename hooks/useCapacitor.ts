@@ -1,10 +1,11 @@
 "use client";
 
 import { App } from "@capacitor/app";
-import type { PluginListenerHandle } from "@capacitor/core";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { useEffect, useState } from "react";
+
+import type { PluginListenerHandle } from "@capacitor/core";
 
 enum CapacitorOrientationType {
   PORTRAIT,

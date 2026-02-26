@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { BuildPhasesPhase } from "../BuildPhases";
+
+import DistributionPlanEmptyTablePlaceholder from "@/components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder";
+import DistributionPlanNextStepBtn from "@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn";
+import DistributionPlanStepWrapper from "@/components/distribution-plan-tool/common/DistributionPlanStepWrapper";
+import StepHeader from "@/components/distribution-plan-tool/common/StepHeader";
 import {
   DistributionPlanToolStep,
 } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import StepHeader from "@/components/distribution-plan-tool/common/StepHeader";
+
+
 import BuildPhaseForm from "./form/BuildPhaseForm";
-import DistributionPlanStepWrapper from "@/components/distribution-plan-tool/common/DistributionPlanStepWrapper";
-import DistributionPlanNextStepBtn from "@/components/distribution-plan-tool/common/DistributionPlanNextStepBtn";
 import BuildPhaseTable from "./table/BuildPhaseTable";
-import DistributionPlanEmptyTablePlaceholder from "@/components/distribution-plan-tool/common/DistributionPlanEmptyTablePlaceholder";
+
+import type { BuildPhasesPhase } from "../BuildPhases";
+
 
 export default function BuildPhase({
   selectedPhase,

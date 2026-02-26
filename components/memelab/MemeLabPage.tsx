@@ -1,6 +1,12 @@
 "use client";
 
-import styles from "./MemeLab.module.scss";
+
+import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -57,12 +63,8 @@ import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { ContractType } from "@/types/enums";
-import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Fragment, useEffect, useMemo, useState } from "react";
-import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+
+import styles from "./MemeLab.module.scss";
 
 const ACTIVITY_PAGE_SIZE = 25;
 

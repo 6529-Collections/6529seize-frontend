@@ -1,5 +1,7 @@
-import { publicEnv } from "@/config/env";
 import { configureStore } from "@reduxjs/toolkit";
+
+import { publicEnv } from "@/config/env";
+
 import { editSlice } from "./editSlice";
 import { groupSlice } from "./groupSlice";
 

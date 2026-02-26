@@ -14,10 +14,11 @@ import "@/styles/globals.scss";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
+import { getAppMetadata } from "@/components/providers/metadata";
 import Providers from "@/components/providers/Providers";
 import StoreSetup from "@/components/providers/StoreSetup";
-import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+
 import type { Viewport } from "next";
 
 export const metadata = getAppMetadata();

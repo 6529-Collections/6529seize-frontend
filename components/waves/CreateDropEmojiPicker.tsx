@@ -1,15 +1,19 @@
 "use client";
 
-import type { FC} from "react";
-import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
-import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
+
 import { useEmoji } from "@/contexts/EmojiContext";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+
+import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+
+import type { FC} from "react";
 
 interface CreateDropEmojiPickerProps {
   top?: string | undefined;

@@ -1,14 +1,18 @@
-import React from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
-import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
-import { CICType } from "@/entities/IProfile";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
-import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
-import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import React from "react";
+
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { CICType } from "@/entities/IProfile";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { cicToType, formatNumberWithCommas } from "@/helpers/Helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+
+import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
+import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
+
 
 interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;

@@ -1,5 +1,13 @@
 "use client";
 
+import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
+
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { NftPageStats } from "@/components/nft-attributes/NftStats";
 import RememeImage from "@/components/nft-image/RememeImage";
@@ -19,13 +27,7 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchUrl } from "@/services/6529api";
-import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import { Tooltip } from "react-tooltip";
+
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import styles from "./TheMemes.module.scss";

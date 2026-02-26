@@ -1,10 +1,12 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SortDirection } from "@/entities/ISort";
-import styles from "./Leaderboard.module.scss";
 import {
   faSquareCaretDown,
   faSquareCaretUp,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import { SortDirection } from "@/entities/ISort";
+
+import styles from "./Leaderboard.module.scss";
 
 export default function LeaderboardSort<LeaderboardSortType>(
   props: Readonly<{

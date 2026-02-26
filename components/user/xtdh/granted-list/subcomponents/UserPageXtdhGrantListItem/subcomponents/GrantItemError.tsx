@@ -1,9 +1,11 @@
 import { formatContractLabel } from "../formatters";
-import type { GrantItemErrorProps } from "../types";
-import { GrantExpiryBadge } from "./GrantExpiryBadge";
-import { StatusBadge } from "./StatusBadge";
+
 import { GrantDetailsGrid } from "./GrantDetailsGrid";
 import { GrantErrorDetails } from "./GrantErrorDetails";
+import { GrantExpiryBadge } from "./GrantExpiryBadge";
+import { StatusBadge } from "./StatusBadge";
+
+import type { GrantItemErrorProps } from "../types";
 
 export function GrantItemError({
   contractLabel,

@@ -1,11 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { type JSX, useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
-import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState, type JSX } from "react";
+
 import GroupCardView from "./GroupCardView";
 import GroupCardVoteAll from "./vote-all/GroupCardVoteAll";
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import { Col, Container, Row } from "react-bootstrap";
+
+import { useSetTitle } from "@/contexts/TitleContext";
 export default function XTDHMainPage() {
   useSetTitle("xTDH | Network");
 

@@ -1,5 +1,8 @@
 "use client";
 
+import { useContext, useEffect, useRef, useState } from "react";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+
 import type { DistributionPlanSearchContractMetadataResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import AllowlistToolCommonModalWrapper, {
   AllowlistToolModalSize,
@@ -10,8 +13,7 @@ import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
 } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useRef, useState } from "react";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+
 import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSearchCollectionDropdown";
 import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
 import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";

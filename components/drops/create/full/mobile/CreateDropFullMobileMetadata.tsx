@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
+
 import CreateDropMetadataItems from "@/components/drops/create/utils/metadata/CreateDropMetadataItems";
 import type { DropMetadata } from "@/entities/IDrop";
-import { useState } from "react";
 
 export default function CreateDropFullMobileMetadata({
   metadata,

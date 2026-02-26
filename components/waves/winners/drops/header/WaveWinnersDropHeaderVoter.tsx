@@ -1,12 +1,13 @@
+import Link from "next/link";
 import { Tooltip } from "react-tooltip";
+
+import type { ApiDropRater } from "@/generated/models/ApiDropRater";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "@/helpers/image.helpers";
-import type { ApiDropRater } from "@/generated/models/ApiDropRater";
-import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import Link from "next/link";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface WaveWinnersDropHeaderVoterProps {

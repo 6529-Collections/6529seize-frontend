@@ -1,12 +1,14 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLogProxyActionStateChanged } from "@/entities/IProfile";
 import { PROFILE_PROXY_ACTION_LABELS } from "@/entities/IProxy";
 import { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
+
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
-import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
-import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 
 const ACTION: Record<AcceptActionRequestActionEnum, string> = {
   [AcceptActionRequestActionEnum.Accept]: "accepted",

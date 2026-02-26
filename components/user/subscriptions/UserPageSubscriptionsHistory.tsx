@@ -1,3 +1,6 @@
+import { Accordion, Col, Container, Row } from "react-bootstrap";
+import { mainnet } from "wagmi/chains";
+
 import Pagination from "@/components/pagination/Pagination";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
@@ -10,10 +13,10 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import { Accordion, Col, Container, Row } from "react-bootstrap";
-import { mainnet } from "wagmi/chains";
+
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
+
 import styles from "./UserPageSubscriptions.module.scss";
 
 export default function UserPageSubscriptionsHistory(

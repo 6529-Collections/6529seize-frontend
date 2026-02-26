@@ -1,7 +1,8 @@
-import React from "react";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from "react";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface SubmissionPositionProps {
   readonly drop: ApiDrop;

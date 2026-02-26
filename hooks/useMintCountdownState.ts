@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
@@ -7,7 +9,6 @@ import {
   ManifoldPhase,
   useMemesManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { useMemo, useState } from "react";
 
 export interface CountdownData {
   readonly title: string;

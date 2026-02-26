@@ -1,18 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
-import { useEffect, useState } from "react";
+
+
+import {
+    RandomHoldersType,
+} from "../BuildPhaseFormConfigModal";
+
+import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
+import ComponentConfigMeta from "./ComponentConfigMeta";
+import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
+
 import type {
     DistributionPlanSnapshot,
     PhaseGroupConfig,
     PhaseGroupSnapshotConfig} from "../BuildPhaseFormConfigModal";
-import {
-    RandomHoldersType,
-} from "../BuildPhaseFormConfigModal";
-import BuildPhaseFormConfigModalTitle from "./BuildPhaseFormConfigModalTitle";
-import ComponentConfigMeta from "./ComponentConfigMeta";
-import FinalizeSnapshotsTable from "./snapshots-table/FinalizeSnapshotsTable";
 
 export default function FinalizeComponent({
   onSave,

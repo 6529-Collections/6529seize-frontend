@@ -1,11 +1,20 @@
 "use client";
 
+import {
+  type InfiniteData,
+  type QueryClient,
+  useQueryClient,
+} from "@tanstack/react-query";
+import Cookies from "js-cookie";
+import { createContext, useMemo } from "react";
+
 import type { UserPageRepPropsRepRates } from "@/app/[user]/page";
 import type {
   ApiProfileRepRatesState,
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
 } from "@/entities/IProfile";
+import type { SortDirection } from "@/entities/ISort";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -18,14 +27,7 @@ import type { CountlessPage, Page } from "@/helpers/Types";
 import { useQueryKeyListener } from "@/hooks/useQueryKeyListener";
 import { type ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
 
-import {
-  type InfiniteData,
-  type QueryClient,
-  useQueryClient,
-} from "@tanstack/react-query";
-import Cookies from "js-cookie";
-import { createContext, useMemo } from "react";
-import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
+
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
 import {
@@ -33,7 +35,9 @@ import {
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "./utils/query-utils";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
-import type { SortDirection } from "@/entities/ISort";
+
+import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
+
 
 export enum QueryKey {
   PROFILE = "PROFILE",

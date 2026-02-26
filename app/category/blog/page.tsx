@@ -1,6 +1,8 @@
-import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
 import Link from "next/link";
+
+import { getAppMetadata } from "@/components/providers/metadata";
+
+import type { Metadata } from "next";
 
 export default function CategoryBlogPage() {
   return (

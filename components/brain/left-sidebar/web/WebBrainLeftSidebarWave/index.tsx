@@ -1,17 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMemo } from "react";
+
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
+
+import { useWaveNameTruncation } from "./hooks/useWaveNameTruncation";
+import { useWaveNavigation } from "./hooks/useWaveNavigation";
 import { CollapsedWave } from "./subcomponents/CollapsedWave";
 import { ExpandedWave } from "./subcomponents/ExpandedWave";
-import { useWaveNavigation } from "./hooks/useWaveNavigation";
-import { useWaveNameTruncation } from "./hooks/useWaveNameTruncation";
 import { formatWaveName } from "./utils/formatWaveName";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
 
 interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;

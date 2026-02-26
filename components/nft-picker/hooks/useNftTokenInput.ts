@@ -1,12 +1,14 @@
-import { useState, useMemo, useCallback } from "react";
-import type { ParseError, TokenRange } from "../types";
+import { useCallback, useMemo, useState } from "react";
+
 import {
-  parseTokenExpressionToRanges,
-  formatCanonical,
-  BIGINT_ZERO,
   BIGINT_ONE,
+  BIGINT_ZERO,
   formatBigIntWithSeparators,
+  formatCanonical,
+  parseTokenExpressionToRanges,
 } from "../utils";
+
+import type { ParseError, TokenRange } from "../types";
 
 type UseNftTokenInputProps = {
   allowRanges: boolean;

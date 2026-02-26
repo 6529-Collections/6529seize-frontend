@@ -1,8 +1,10 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
+
 
 import Spinner from "@/components/utils/Spinner";
 import type { TokenMetadata } from "@/types/nft";
+
+import type { ReactNode } from "react";
 
 interface XtdhTokenListItemThumbnailProps {
   readonly tokenLabel: string;

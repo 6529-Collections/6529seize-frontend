@@ -1,31 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
-import { useContentTab } from "@/components/brain/ContentTabContext";
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
-import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
-import { useWave } from "../../../../hooks/useWave";
-import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
-import { Time } from "../../../../helpers/time";
-import type { TimeLeft } from "../../../../helpers/waves/time.utils";
-import { calculateTimeLeft } from "../../../../helpers/waves/time.utils";
-import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
-import { useSidebarState } from "../../../../hooks/useSidebarState";
 import {
-  ChevronDoubleLeftIcon,
   ArrowLeftIcon,
+  ChevronDoubleLeftIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import WavePicture from "../../../waves/WavePicture";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { createBreakpoint } from "react-use";
+
+import { useContentTab } from "@/components/brain/ContentTabContext";
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
-import { MyStreamWaveTab } from "@/types/waves.types";
+import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { MyStreamWaveTab } from "@/types/waves.types";
+
+import { Time } from "../../../../helpers/time";
+import { calculateTimeLeft } from "../../../../helpers/waves/time.utils";
+import { useSidebarState } from "../../../../hooks/useSidebarState";
+import { useWave } from "../../../../hooks/useWave";
+import { useDecisionPoints } from "../../../../hooks/waves/useDecisionPoints";
+import { CompactTimeCountdown } from "../../../waves/leaderboard/time/CompactTimeCountdown";
+import WavePicture from "../../../waves/WavePicture";
+import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
+
+import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
+
+import type { TimeLeft } from "../../../../helpers/waves/time.utils";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 

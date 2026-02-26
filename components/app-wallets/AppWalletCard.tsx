@@ -1,8 +1,10 @@
-import styles from "./AppWallet.module.scss";
-import { Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
-import type { AppWallet } from "./AppWalletsContext";
+import { Col, Container, Row } from "react-bootstrap";
+
+import styles from "./AppWallet.module.scss";
 import AppWalletAvatar from "./AppWalletAvatar";
+
+import type { AppWallet } from "./AppWalletsContext";
 
 export default function AppWalletCard(
   props: Readonly<{

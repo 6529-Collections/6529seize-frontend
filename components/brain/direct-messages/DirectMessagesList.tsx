@@ -1,26 +1,29 @@
 "use client";
 
+import Image from "next/image";
 import React, {
-  useRef,
-  useEffect,
   useContext,
+  useEffect,
   useEffectEvent,
   useMemo,
+  useRef,
 } from "react";
+
+import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import ConnectWallet from "@/components/common/ConnectWallet";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
+import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
+import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
+import UnifiedWavesListWaves from "../left-sidebar/waves/UnifiedWavesListWaves";
+
 import type {
   UnifiedWavesListWavesHandle,
 } from "../left-sidebar/waves/UnifiedWavesListWaves";
-import UnifiedWavesListWaves from "../left-sidebar/waves/UnifiedWavesListWaves";
-import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
-import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
-import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { AuthContext } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import ConnectWallet from "@/components/common/ConnectWallet";
-import Image from "next/image";
 
 interface DirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;

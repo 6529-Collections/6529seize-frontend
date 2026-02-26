@@ -1,12 +1,15 @@
 "use client";
 
+import Link from "next/link";
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
+
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import Link from "next/link";
+
 import type { MouseEvent, ReactNode } from "react";
-import { useId } from "react";
-import { Tooltip } from "react-tooltip";
+
 
 interface OverlappingAvatarItem {
   readonly key: string;

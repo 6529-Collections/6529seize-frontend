@@ -1,13 +1,15 @@
 "use client";
 
-import type { CicStatement } from "@/entities/IProfile";
-import UserPageIdentityStatementsStatement from "./UserPageIdentityStatementsStatement";
 import { useContext, useEffect, useState } from "react";
-import { amIUser } from "@/helpers/Helpers";
-import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
+import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { amIUser } from "@/helpers/Helpers";
+
+import UserPageIdentityStatementsStatement from "./UserPageIdentityStatementsStatement";
 export default function UserPageIdentityStatementsStatementsList({
   statements,
   profile,

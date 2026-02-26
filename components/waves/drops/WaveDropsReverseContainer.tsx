@@ -1,6 +1,7 @@
 "use client";
 
-import React, { forwardRef, useRef, useEffect, useCallback } from "react";
+import React, { forwardRef, useCallback, useEffect, useRef } from "react";
+
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";

@@ -1,13 +1,7 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-import { SortDirection } from "@/entities/ISort";
-import type {
-  XtdhTokensOrder,
-  XtdhTokensSortField,
-} from "@/hooks/useXtdhTokensQuery";
+import { useCallback, useMemo } from "react";
 
 import {
   DEFAULT_TOKEN_CONTRIBUTORS_GROUP_BY,
@@ -18,6 +12,12 @@ import {
   parseTokensSortField,
   type XtdhTokenContributorsGroupBy,
 } from "@/components/xtdh/received/constants";
+import { SortDirection } from "@/entities/ISort";
+import type {
+  XtdhTokensOrder,
+  XtdhTokensSortField,
+} from "@/hooks/useXtdhTokensQuery";
+
 
 const SORT_PARAM = "xtdh_token_contrib_sort";
 const DIRECTION_PARAM = "xtdh_token_contrib_dir";

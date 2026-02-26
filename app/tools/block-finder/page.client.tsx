@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
 import BlockPickerBlockNumberIncludes from "@/components/block-picker/BlockPickerBlockNumberIncludes";
 import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSelect";
@@ -8,7 +10,6 @@ import BlockPickerResult from "@/components/block-picker/result/BlockPickerResul
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { publicEnv } from "@/config/env";
 import { useTitle } from "@/contexts/TitleContext";
-import { useEffect, useState } from "react";
 
 interface PredictBlockNumberRequestApiModel {
   timestamp: number;

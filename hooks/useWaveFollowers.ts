@@ -2,10 +2,11 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
-import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+import { commonApiFetch } from "@/services/api/common-api";
 const REQUEST_SIZE = 100;
 
 export function useWaveFollowers(waveId: string) {

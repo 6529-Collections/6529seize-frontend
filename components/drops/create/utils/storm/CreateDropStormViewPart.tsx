@@ -1,13 +1,16 @@
 import { memo } from "react";
+
+import DropPart from "@/components/drops/view/part/DropPart";
 import type {
   CreateDropPart,
   MentionedUser,
   MentionedWave,
   ReferencedNft,
 } from "@/entities/IDrop";
-import DropPart from "@/components/drops/view/part/DropPart";
-import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+
+import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
+
 
 interface CreateDropStormViewPartWaveProps {
   name: string;

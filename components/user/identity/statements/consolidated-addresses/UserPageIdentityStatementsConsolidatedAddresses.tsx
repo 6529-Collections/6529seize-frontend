@@ -1,19 +1,22 @@
 "use client";
 
-import type { WalletConsolidationState } from "@/entities/IProfile";
+import { useQueries } from "@tanstack/react-query";
+import { AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
+
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { WalletConsolidationState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { amIUser } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useQueries } from "@tanstack/react-query";
-import { AnimatePresence } from "framer-motion";
-import Link from "next/link";
+
+
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,

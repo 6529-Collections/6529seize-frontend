@@ -1,5 +1,8 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
@@ -9,15 +12,14 @@ import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
-import type { InteractiveMediaMimeType } from "../constants/media";
-import type { TraitsData } from "../types/TraitsData";
-import type { SubmissionPhase } from "../ui/SubmissionProgress";
+
+import { OperationalData } from "../types/OperationalData";
 import { validateStrictAddress } from "../utils/addressValidation";
 import { objectEntries } from "../utils/objectEntries";
 
-import { OperationalData } from "../types/OperationalData";
+import type { InteractiveMediaMimeType } from "../constants/media";
+import type { TraitsData } from "../types/TraitsData";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
 
 /**
  * Interface for the artwork submission data

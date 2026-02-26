@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useClickAway, useKeyPressEvent } from "react-use";
+
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 import EmmaListSearchItems from "./EmmaListSearchItems";
-import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 
 export default function EmmaListSearch({
   selectedId,

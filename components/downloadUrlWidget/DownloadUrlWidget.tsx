@@ -1,9 +1,13 @@
-import styles from "./DownloadUrlWidget.module.scss";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
-import { Spinner } from "../dotLoader/DotLoader";
+
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
+
+import { Spinner } from "../dotLoader/DotLoader";
+
+import styles from "./DownloadUrlWidget.module.scss";
+
 
 interface Props {
   preview: string;

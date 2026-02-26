@@ -1,5 +1,5 @@
-import React from "react";
 import { TrophyIcon } from "@heroicons/react/24/outline";
+import React from "react";
 
 export const WaveWinnersEmpty: React.FC = () => {
   return (

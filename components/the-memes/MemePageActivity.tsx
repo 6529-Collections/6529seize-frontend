@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -16,8 +19,7 @@ import type { Transaction } from "@/entities/ITransaction";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import { fetchUrl } from "@/services/6529api";
-import { useEffect, useMemo, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+
 import styles from "./TheMemes.module.scss";
 
 export function MemePageActivity(

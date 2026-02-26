@@ -1,7 +1,9 @@
-import { Container, Row, Col } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
+
 import DownloadUrlWidget from "../downloadUrlWidget/DownloadUrlWidget";
-import { getLeaderboardDownloadFileName } from "./leaderboard_helpers";
 import Pagination from "../pagination/Pagination";
+
+import { getLeaderboardDownloadFileName } from "./leaderboard_helpers";
 
 function LeaderboardDownload(
   props: Readonly<{

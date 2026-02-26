@@ -2,6 +2,13 @@ import { getAddress } from "viem";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
+  ContractOverview,
+  Suggestion,
+  SupportedChain,
+  TokenMetadata,
+} from "@/types/nft";
+
+import type {
   AlchemyContractMetadata,
   AlchemyContractMetadataResponse,
   AlchemyContractResult,
@@ -12,12 +19,6 @@ import type {
   OwnerNft,
   SearchContractsResult,
 } from "./types";
-import type {
-  ContractOverview,
-  Suggestion,
-  SupportedChain,
-  TokenMetadata,
-} from "@/types/nft";
 
 const NETWORK_MAP: Record<SupportedChain, string> = {
   ethereum: "eth-mainnet",

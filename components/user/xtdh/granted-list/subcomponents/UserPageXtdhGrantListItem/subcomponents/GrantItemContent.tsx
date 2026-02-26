@@ -1,10 +1,13 @@
 import Image from "next/image";
+
 import { shortenAddress } from "../formatters";
-import type { GrantItemContentProps } from "../types";
-import { GrantExpiryBadge } from "./GrantExpiryBadge";
-import { StatusBadge } from "./StatusBadge";
+
 import { GrantDetailsGrid } from "./GrantDetailsGrid";
 import { GrantErrorDetails } from "./GrantErrorDetails";
+import { GrantExpiryBadge } from "./GrantExpiryBadge";
+import { StatusBadge } from "./StatusBadge";
+
+import type { GrantItemContentProps } from "../types";
 
 export function GrantItemContent({
   contract,

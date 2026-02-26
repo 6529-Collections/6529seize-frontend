@@ -4,9 +4,11 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useViewContext } from "../navigation/ViewContext";
-import useCreateModalState from "@/hooks/useCreateModalState";
+
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import useCreateModalState from "@/hooks/useCreateModalState";
+
+import { useViewContext } from "../navigation/ViewContext";
 
 export default function HeaderViewActionButtons() {
   const { activeView } = useViewContext();

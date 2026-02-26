@@ -1,16 +1,18 @@
 "use client";
 
-import { Col, Container, Row } from "react-bootstrap";
-import NextGenMint from "./NextGenMint";
 import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import { useReadContract } from "wagmi";
+
+import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
 import {
-  NEXTGEN_CORE,
   NEXTGEN_CHAIN_ID,
+  NEXTGEN_CORE,
   NEXTGEN_MINTER,
 } from "@/components/nextGen/nextgen_contracts";
 import type { NextGenCollection } from "@/entities/INextgen";
-import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+
+import NextGenMint from "./NextGenMint";
 
 interface Props {
   collection: NextGenCollection;

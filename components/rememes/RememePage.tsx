@@ -1,6 +1,13 @@
 "use client";
 
-import styles from "./Rememes.module.scss";
+
+import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
+import { useEnsName } from "wagmi";
 
 import Address from "@/components/address/Address";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -30,13 +37,8 @@ import {
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
-import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import { useEnsName } from "wagmi";
+
+import styles from "./Rememes.module.scss";
 
 interface Props {
   contract: string;

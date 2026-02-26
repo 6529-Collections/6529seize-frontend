@@ -1,4 +1,5 @@
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
+
 import EmmaListSearchItem from "./EmmaListSearchItem";
 
 export default function EmmaListSearchItemsContent({

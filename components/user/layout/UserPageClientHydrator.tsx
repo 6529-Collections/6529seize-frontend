@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useContext } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useContext, useEffect, useMemo } from "react";
+
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -8,7 +10,6 @@ import {
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { containsEmojis, formatAddress } from "@/helpers/Helpers";
-import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   readonly profile: ApiIdentity;

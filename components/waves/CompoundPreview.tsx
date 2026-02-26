@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import OpenGraphPreview from "./OpenGraphPreview";
-import CompoundCard, { toCompoundResponse } from "./compound/CompoundCard";
-import type { CompoundResponse } from "./compound/types";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
+
+import CompoundCard, { toCompoundResponse } from "./compound/CompoundCard";
+import OpenGraphPreview from "./OpenGraphPreview";
+
+import type { CompoundResponse } from "./compound/types";
+
 
 interface CompoundPreviewProps {
   readonly href: string;

@@ -1,8 +1,9 @@
 "use client";
 
+import { Tooltip } from "react-tooltip";
+
 import { getMediaTypeInfo, type MediaCategory } from "@/helpers/file.helpers";
 import { useControlledTooltip } from "@/hooks/useControlledTooltip";
-import { Tooltip } from "react-tooltip";
 
 const FORMAT_ICONS: Record<MediaCategory, { viewBox: string; path: string }> = {
   image: {

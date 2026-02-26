@@ -1,6 +1,7 @@
 "use client";
 
 import { startSpanManual } from "@sentry/nextjs";
+
 import type { Span } from "@sentry/nextjs";
 
 type DropOpenSource =

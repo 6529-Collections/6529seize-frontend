@@ -1,16 +1,16 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
-  useCallback,
-  useState,
-  useRef,
   useMemo,
+  useRef,
+  useState,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
 import {
@@ -19,6 +19,8 @@ import {
   mainSegment,
   sameMainPath,
 } from "@/helpers/navigation.helpers";
+
+import type { ReactNode } from "react";
 
 interface StackRoute {
   type: "route";

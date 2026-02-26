@@ -1,8 +1,10 @@
-import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+
 import CommonIntersectionElement from "../CommonIntersectionElement";
+
 import FollowersList from "./FollowersList";
 
 export default function FollowersListWrapper({

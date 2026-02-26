@@ -1,10 +1,11 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState, useEffect } from "react";
-import styles from "./ScrollToButton.module.scss";
-import { Link } from "react-scroll";
 import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
+import { Link } from "react-scroll";
+
+import styles from "./ScrollToButton.module.scss";
 
 interface Props {
   to: string;

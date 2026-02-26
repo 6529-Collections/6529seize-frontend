@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDebounce } from "react-use";
-import type { TraitsData } from "../submission/types/TraitsData";
+
 import { TraitWrapper } from "./TraitWrapper";
+
+import type { TraitsData } from "../submission/types/TraitsData";
 
 interface NumberTraitProps {
   readonly label: string;

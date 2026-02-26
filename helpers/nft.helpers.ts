@@ -4,6 +4,7 @@ import {
   MEMES_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
+
 import { numberWithCommas } from "./Helpers";
 
 export function getFileTypeFromMetadata(metadata: any) {

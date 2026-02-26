@@ -1,19 +1,20 @@
 "use client";
 
 import { useLinkPreviewVariant } from "./LinkPreviewContext";
-import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 import MarketplaceCompactCta from "./marketplace/MarketplaceCompactCta";
 import MarketplaceFullFooter from "./marketplace/MarketplaceFullFooter";
-import MarketplaceItemPreviewMediaLink from "./marketplace/MarketplaceItemPreviewMediaLink";
 import { DEFAULT_MARKETPLACE_TITLE } from "./marketplace/MarketplaceItemPreviewCard.constants";
-import type { MarketplaceItemPreviewCardProps } from "./marketplace/MarketplaceItemPreviewCard.types";
 import {
   buildMarketplaceCtaLabel,
   getMarketplaceBrand,
   resolvePreviewHref,
 } from "./marketplace/MarketplaceItemPreviewCard.utils";
+import MarketplaceItemPreviewMediaLink from "./marketplace/MarketplaceItemPreviewMediaLink";
 import MarketplaceOverlayActionButtons from "./marketplace/MarketplaceOverlayActionButtons";
 import { getMarketplaceContainerClass } from "./marketplace/previewLayout";
+import { LinkPreviewCardLayout } from "./OpenGraphPreview";
+
+import type { MarketplaceItemPreviewCardProps } from "./marketplace/MarketplaceItemPreviewCard.types";
 
 export default function MarketplaceItemPreviewCard({
   href,

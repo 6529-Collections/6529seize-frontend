@@ -1,8 +1,9 @@
+import Image from "next/image";
+import Link from "next/link";
+
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import Image from "next/image";
-import Link from "next/link";
 
 interface WaveRatingRepProps {
   readonly wave: ApiWave;

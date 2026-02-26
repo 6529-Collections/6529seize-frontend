@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { isAddress } from "viem";
+
 import type {
   ContractOverview,
   NftPickerChange,

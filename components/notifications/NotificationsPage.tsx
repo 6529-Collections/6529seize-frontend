@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import Notifications from "../brain/notifications";
-import type { ActiveDropState } from "../../types/dropInteractionTypes";
-import BrainContent from "../brain/content/BrainContent";
-import { useDropModal } from "@/hooks/useDropModal";
+
 import BrainDesktopDrop from "@/components/brain/BrainDesktopDrop";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import ConnectWallet from "@/components/common/ConnectWallet";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useDropModal } from "@/hooks/useDropModal";
+
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import BrainContent from "../brain/content/BrainContent";
+import Notifications from "../brain/notifications";
+
+import type { ActiveDropState } from "../../types/dropInteractionTypes";
 
 export default function NotificationsPage() {
   const { isAuthenticated } = useSeizeConnectContext();

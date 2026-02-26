@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-import type { ResolvedPreviewHref } from "./MarketplaceItemPreviewCard.types";
 import MarketplaceCopyListingButton from "./MarketplaceCopyListingButton";
 import MarketplaceExternalOpenIcon from "./MarketplaceExternalOpenIcon";
+
+import type { ResolvedPreviewHref } from "./MarketplaceItemPreviewCard.types";
 
 interface MarketplaceOverlayActionButtonsProps {
   readonly href: string;

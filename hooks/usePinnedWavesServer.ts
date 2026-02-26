@@ -1,17 +1,18 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
   type QueryObserverResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
-import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 
 export const MAX_PINNED_WAVES = 20;
 

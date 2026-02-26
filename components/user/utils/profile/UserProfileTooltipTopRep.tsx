@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
+
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { useMemo } from "react";
 
 export default function UserProfileTooltipTopRep({
   repRates,

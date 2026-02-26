@@ -1,11 +1,16 @@
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams, DropLocation } from "../Drop";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import React from "react";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import OngoingParticipationDrop from "./OngoingParticipationDrop";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
 import EndedParticipationDrop from "./EndedParticipationDrop";
+import OngoingParticipationDrop from "./OngoingParticipationDrop";
+
+import type { DropInteractionParams, DropLocation } from "../Drop";
+
+
 
 interface DefaultParticipationDropProps {
   readonly drop: ExtendedDrop;

@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
-import type { XtdhProgressBarProps } from "./XtdhProgressBar";
 import { XtdhProgressBar } from "./XtdhProgressBar";
+
+import type { XtdhProgressBarProps } from "./XtdhProgressBar";
+import type { ReactNode } from "react";
 
 interface XtdhLabeledProgressBarProps extends XtdhProgressBarProps {
   readonly label: string;

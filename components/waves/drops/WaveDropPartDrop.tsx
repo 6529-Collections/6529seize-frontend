@@ -1,11 +1,13 @@
 import React from "react";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import WaveDropPartTitle from "./WaveDropPartTitle";
-import WaveDropPartContent from "./WaveDropPartContent";
 import { ImageScale } from "@/helpers/image.helpers";
+
+import WaveDropPartContent from "./WaveDropPartContent";
+import WaveDropPartTitle from "./WaveDropPartTitle";
 
 interface WaveDropPartDropProps {
   drop: ApiDrop;

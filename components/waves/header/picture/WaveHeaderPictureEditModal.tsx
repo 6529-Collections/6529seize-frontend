@@ -1,17 +1,19 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useContext, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { multiPartUpload } from "../../create-wave/services/multiPartUpload";
+
 import CreateWaveImageInput from "../../create-wave/overview/CreateWaveImageInput";
+import { multiPartUpload } from "../../create-wave/services/multiPartUpload";
 
 export default function WaveHeaderPictureEditModal({
   wave,

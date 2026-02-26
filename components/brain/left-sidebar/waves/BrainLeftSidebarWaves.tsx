@@ -1,6 +1,8 @@
 import React from "react";
-import UnifiedWavesList from "./UnifiedWavesList";
+
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+
+import UnifiedWavesList from "./UnifiedWavesList";
 
 interface BrainLeftSidebarWavesProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;

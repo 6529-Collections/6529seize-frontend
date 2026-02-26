@@ -1,5 +1,11 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { useReadContract, useReadContracts } from "wagmi";
+
 import { DELEGATION_ABI } from "@/abis/abis";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -29,16 +35,13 @@ import {
 import type { NextGenCollection } from "@/entities/INextgen";
 import { fromGWEI } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import { useReadContract, useReadContracts } from "wagmi";
+
 import {
   NextGenCountdown,
   NextGenMintCounts,
   NextGenPhases,
 } from "../NextGenCollectionHeader";
+
 import NextGenMintBurnWidget from "./NextGenMintBurnWidget";
 import NextGenMintWidget from "./NextGenMintWidget";
 

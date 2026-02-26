@@ -1,17 +1,22 @@
 "use client";
 
 import { useCallback, useRef } from "react";
+
+import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useWaveAbortController } from "./useWaveAbortController";
-import type { WaveDataStoreUpdater } from "./types";
+import type { ApiDropId } from "@/generated/models/ApiDropId";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+
 import {
+  fetchAroundSerialNoWaveMessages,
   fetchLightWaveMessages,
   fetchWaveMessages,
-  fetchAroundSerialNoWaveMessages,
 } from "../utils/wave-messages-utils";
-import { DropSize } from "@/helpers/waves/drop.helpers";
-import type { ApiDropId } from "@/generated/models/ApiDropId";
-import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+
+import { useWaveAbortController } from "./useWaveAbortController";
+
+import type { WaveDataStoreUpdater } from "./types";
+
 
 // Tracks which waves are currently loading next page
 interface PaginationState {

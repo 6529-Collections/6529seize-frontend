@@ -1,7 +1,8 @@
 "use client";
 
-import useCapacitor from "@/hooks/useCapacitor";
 import { useEffect, useRef } from "react";
+
+import useCapacitor from "@/hooks/useCapacitor";
 
 export default function CapacitorSetup() {
   const { isCapacitor } = useCapacitor();

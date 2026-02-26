@@ -1,14 +1,17 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+
 import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
+
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({

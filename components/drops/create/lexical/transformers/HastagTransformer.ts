@@ -1,9 +1,10 @@
-import type { TextMatchTransformer } from "@lexical/markdown";
 import {
   $createHashtagNode,
   $isHashtagNode,
   HashtagNode,
 } from "../nodes/HashtagNode";
+
+import type { TextMatchTransformer } from "@lexical/markdown";
 
 export const HASHTAG_TRANSFORMER: TextMatchTransformer = {
   dependencies: [HashtagNode],

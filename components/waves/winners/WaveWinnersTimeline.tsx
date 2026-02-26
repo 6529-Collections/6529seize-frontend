@@ -1,11 +1,13 @@
-import React from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
-import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
 import { format } from "date-fns";
-import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
+import React from "react";
+
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
+import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
+import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 
 interface WaveWinnersTimelineProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;

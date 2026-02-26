@@ -2,12 +2,14 @@
 
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import type { ChangeEvent, FC, RefObject } from "react";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import { MediaUploadItem, useMediaUpload } from "../hooks/useMediaUpload";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
+
+import type { ChangeEvent, FC, RefObject } from "react";
 
 interface AdditionalMediaUploadProps {
   readonly supportingMedia: string[];

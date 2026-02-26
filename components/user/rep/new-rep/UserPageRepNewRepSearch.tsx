@@ -1,24 +1,27 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { AnimatePresence, motion } from "framer-motion";
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
-import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
+
+
+import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import UserPageRepNewRepError from "./UserPageRepNewRepError";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "@/components/auth/Auth";
+import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
+import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas, getStringAsNumberOrZero } from "@/helpers/Helpers";
-import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
-import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+
+import UserPageRepNewRepError from "./UserPageRepNewRepError";
+import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 
 const SEARCH_LENGTH = {
   MIN: 3,

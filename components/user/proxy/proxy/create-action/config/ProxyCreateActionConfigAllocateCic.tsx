@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CreateProxyAllocateCicAction } from "@/entities/IProxy";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import CommonInput from "@/components/utils/input/CommonInput";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import CommonInput from "@/components/utils/input/CommonInput";
+import type { CreateProxyAllocateCicAction } from "@/entities/IProxy";
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function ProxyCreateActionConfigAllocateCic({
   endTime,

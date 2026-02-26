@@ -5,12 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 import { fetchNftLink } from "@/services/api/nft-link-api";
+
 import {
   fromNftLink,
-  mergeOpenGraphFallback,
-  needsOpenGraphFallback,
   type MarketplacePreviewMode,
   type MarketplacePreviewState,
+  mergeOpenGraphFallback,
+  needsOpenGraphFallback,
 } from "./common";
 
 interface UseMarketplacePreviewStateParams {

@@ -1,25 +1,27 @@
 "use client";
 
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
+import { Tooltip } from "react-tooltip";
+
+import { AuthContext } from "@/components/auth/Auth";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "@/components/auth/Auth";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import {
   commonApiDeleteWithBody,
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
-import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { Tooltip } from "react-tooltip";
+
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",

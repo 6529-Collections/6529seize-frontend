@@ -1,11 +1,13 @@
-import React from "react";
-import type { ApiWave } from "@/generated/models/ObjectSerializer";
-import { useAuth } from "@/components/auth/Auth";
-import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
-import { WaveLeaderboardRightSidebarVoter } from "./WaveLeaderboardRightSidebarVoter";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from "react";
+
+import { useAuth } from "@/components/auth/Auth";
+import type { ApiWave } from "@/generated/models/ObjectSerializer";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
+
+import { WaveLeaderboardRightSidebarVoter } from "./WaveLeaderboardRightSidebarVoter";
 
 interface WaveLeaderboardRightSidebarVotersProps {
   readonly wave: ApiWave;

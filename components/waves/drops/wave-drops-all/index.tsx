@@ -1,7 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import {
+  type TweetPreviewMode,
+  TweetPreviewModeProvider,
+} from "@/components/tweets/TweetPreviewModeContext";
 import WaveDropsScrollingOverlay from "@/components/waves/drops/WaveDropsScrollingOverlay";
 import {
   UnreadDividerProvider,
@@ -19,12 +26,8 @@ import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  TweetPreviewModeProvider,
-  type TweetPreviewMode,
-} from "@/components/tweets/TweetPreviewModeContext";
+
+
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";

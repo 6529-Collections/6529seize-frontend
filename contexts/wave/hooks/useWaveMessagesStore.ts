@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
+
 import type { Drop } from "@/helpers/waves/drop.helpers";
+
+import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
+
 import type { WaveMessages, WaveMessagesUpdate } from "./types";
 
 type DropChange = {

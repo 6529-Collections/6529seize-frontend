@@ -1,6 +1,7 @@
 import DistributionPlanToolConnect from "@/components/distribution-plan-tool/connect/distribution-plan-tool-connect";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
 import { getAppMetadata } from "@/components/providers/metadata";
+
 import type { Metadata } from "next";
 
 export default function DistributionPlanTool() {

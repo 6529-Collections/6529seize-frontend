@@ -1,10 +1,12 @@
+import { faRefresh } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Col, Container, Row } from "react-bootstrap";
+
 import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
 import { MEMES_MINT_PRICE } from "@/constants/constants";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { numberWithCommas } from "@/helpers/Helpers";
-import { faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Col, Container, Row } from "react-bootstrap";
+
 import EthereumIcon from "../utils/icons/EthereumIcon";
 
 export default function UserPageSubscriptionsBalance(

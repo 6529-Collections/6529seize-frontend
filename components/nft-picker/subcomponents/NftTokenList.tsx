@@ -1,10 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
+
+import { formatCanonical } from "../utils";
 
 import type { SupportedChain, TokenMetadata, TokenRange } from "../types";
-import { formatCanonical } from "../utils";
-import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
+import type { ReactNode } from "react";
+
+
 
 interface NftTokenListProps {
   readonly contractAddress?: `0x${string}` | undefined;

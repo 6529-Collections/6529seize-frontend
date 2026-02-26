@@ -1,34 +1,39 @@
 "use client";
 
 /* istanbul ignore file */
-import { useContext, useRef, useState, type JSX } from "react";
-import CreateWaveDrops from "./drops/CreateWaveDrops";
-import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
-import CreateWaveOverview from "./overview/CreateWaveOverview";
-import CreateWaveGroups from "./groups/CreateWaveGroups";
-import CreateWaveDates from "./dates/CreateWaveDates";
-import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
-import { CreateWaveStep } from "@/types/waves.types";
-import CreateWaveVoting from "./voting/CreateWaveVoting";
-import CreateWaveApproval from "./approval/CreateWaveApproval";
-import CreateWaveActions from "./utils/CreateWaveActions";
-import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
-import CreateWaveDescription from "./description/CreateWaveDescription";
-import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
+import { useRouter } from "next/navigation";
+import { type JSX, useContext, useRef, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
-import { useRouter } from "next/navigation";
-import { generateDropPart } from "./services/waveMediaService";
-import { getAdminGroupId } from "./services/waveGroupService";
-import { useAddWaveMutation } from "./services/waveApiService";
-import { useWaveConfig } from "./hooks/useWaveConfig";
-import useCapacitor from "@/hooks/useCapacitor";
-import CreateWaveFlow from "./CreateWaveFlow";
-import { multiPartUpload } from "./services/multiPartUpload";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { CreateWaveStep } from "@/types/waves.types";
+
+import CreateWaveApproval from "./approval/CreateWaveApproval";
+import CreateWaveFlow from "./CreateWaveFlow";
+import CreateWaveDates from "./dates/CreateWaveDates";
+import CreateWaveDescription from "./description/CreateWaveDescription";
+import CreateWaveDrops from "./drops/CreateWaveDrops";
+import CreateWaveGroups from "./groups/CreateWaveGroups";
+import { useWaveConfig } from "./hooks/useWaveConfig";
+import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
+import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
+import CreateWaveOverview from "./overview/CreateWaveOverview";
+import { multiPartUpload } from "./services/multiPartUpload";
+import { useAddWaveMutation } from "./services/waveApiService";
+import { getAdminGroupId } from "./services/waveGroupService";
+import { generateDropPart } from "./services/waveMediaService";
+import CreateWaveActions from "./utils/CreateWaveActions";
+import CreateWaveVoting from "./voting/CreateWaveVoting";
+
+import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
+
+
 export default function CreateWave({
   profile,
   onBack,

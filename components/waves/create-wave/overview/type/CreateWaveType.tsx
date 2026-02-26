@@ -1,6 +1,7 @@
 
 
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+
 import CreateWaveTypeInputs from "./CreateWaveTypeInputs";
 
 export default function CreateWaveType({

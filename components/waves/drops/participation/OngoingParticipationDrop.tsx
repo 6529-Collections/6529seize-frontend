@@ -1,20 +1,27 @@
 "use client";
 
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { DropInteractionParams, DropLocation } from "../Drop";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useCallback, useState } from "react";
+
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import WaveDropActions from "../WaveDropActions";
-import WaveDropMobileMenu from "../WaveDropMobileMenu";
-import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
-import ParticipationDropContainer from "./ParticipationDropContainer";
-import ParticipationDropHeader from "./ParticipationDropHeader";
-import ParticipationDropContent from "./ParticipationDropContent";
-import ParticipationDropMetadata from "./ParticipationDropMetadata";
-import ParticipationDropFooter from "./ParticipationDropFooter";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
+
+
+import WaveDropActions from "../WaveDropActions";
+import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
+import WaveDropMobileMenu from "../WaveDropMobileMenu";
+
+import ParticipationDropContainer from "./ParticipationDropContainer";
+import ParticipationDropContent from "./ParticipationDropContent";
+import ParticipationDropFooter from "./ParticipationDropFooter";
+import ParticipationDropHeader from "./ParticipationDropHeader";
+import ParticipationDropMetadata from "./ParticipationDropMetadata";
+
+import type { DropInteractionParams, DropLocation } from "../Drop";
+
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;

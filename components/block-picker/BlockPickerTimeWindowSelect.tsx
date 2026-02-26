@@ -1,10 +1,13 @@
 "use client";
 
-import { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
 import { motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
+import { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
+
 import AllowlistToolAnimationWrapper from "../allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
+
 import BlockPickerTimeWindowSelectList from "./BlockPickerTimeWindowSelectList";
 
 export default function BlockPickerTimeWindowSelect({

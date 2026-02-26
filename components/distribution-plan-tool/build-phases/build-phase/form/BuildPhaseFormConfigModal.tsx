@@ -1,5 +1,7 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+
 import type {
   AllowlistOperation,
   AllowlistOperationBase,
@@ -18,7 +20,7 @@ import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
 } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
+
 import ComponentAddSpots from "./component-config/ComponentAddSpots";
 import ComponentSelectRandomHolders from "./component-config/ComponentSelectRandomHolders";
 import FinalizeComponent from "./component-config/FinalizeComponent";

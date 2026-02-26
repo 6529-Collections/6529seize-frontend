@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import PencilIcon from "@/components/utils/icons/PencilIcon";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import PencilIcon from "@/components/utils/icons/PencilIcon";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   getBannerColorValue,
   getBannerImageUrl,
 } from "@/helpers/profile-banner.helpers";
+
 import UserPageHeaderEditBanner from "./UserPageHeaderEditBanner";
 
 export default function UserPageHeaderBanner({

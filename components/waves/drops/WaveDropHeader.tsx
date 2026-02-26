@@ -1,23 +1,27 @@
 "use client";
 
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { useCallback, useMemo } from "react";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import WaveDropTime from "./time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { ArtistPreviewModal } from "./ArtistPreviewModal";
-import { ArtistActivityBadge } from "./ArtistActivityBadge";
-import { WaveCreatorBadge } from "./WaveCreatorBadge";
-import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
-import { useMemo, useCallback } from "react";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { useCompactMode } from "@/contexts/CompactModeContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
-import { useCompactMode } from "@/contexts/CompactModeContext";
+
+import { ArtistActivityBadge } from "./ArtistActivityBadge";
+import { ArtistPreviewModal } from "./ArtistPreviewModal";
+import WaveDropTime from "./time/WaveDropTime";
+import { WaveCreatorBadge } from "./WaveCreatorBadge";
+import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
+
+
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
 import { useImageUpload } from "./useImageUpload";
 

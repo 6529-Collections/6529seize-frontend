@@ -1,9 +1,11 @@
 "use client";
 
-import { RateChangeType } from "./DropListItemRateGive";
 import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
+
+import { RateChangeType } from "./DropListItemRateGive";
 
 export default function DropListItemRateGiveChangeButton({
   type,

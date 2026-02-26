@@ -1,7 +1,8 @@
 "use client";
 
-import { DEFAULT_TITLE, useTitle } from "@/contexts/TitleContext";
 import { useEffect } from "react";
+
+import { DEFAULT_TITLE, useTitle } from "@/contexts/TitleContext";
 
 export default function DynamicHeadTitle() {
   const { title } = useTitle();

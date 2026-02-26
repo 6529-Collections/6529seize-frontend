@@ -1,5 +1,13 @@
 "use client";
 
+import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { FocusTrap } from "focus-trap-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -8,10 +16,12 @@ import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
-import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
@@ -22,30 +32,24 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
-  useSidebarSections,
   type SidebarPageEntry,
+  useSidebarSections,
 } from "@/hooks/useSidebarSections";
-import { useWaves } from "@/hooks/useWaves";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import { useWaves } from "@/hooks/useWaves";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { FocusTrap } from "focus-trap-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+
+import HeaderSearchModalItem, {
+  getNftCollectionMap,
+} from "./HeaderSearchModalItem";
+import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
+
 import type {
   HeaderSearchModalItemType,
   NFTSearchResult,
   PageSearchResult,
 } from "./HeaderSearchModalItem";
-import HeaderSearchModalItem, {
-  getNftCollectionMap,
-} from "./HeaderSearchModalItem";
-import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
-import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+
 
 enum STATE {
   INITIAL = "INITIAL",

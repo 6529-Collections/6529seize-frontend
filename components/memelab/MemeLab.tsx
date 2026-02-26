@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -8,8 +18,8 @@ import styles from "@/components/memelab/MemeLab.module.scss";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import {
-  SortButton,
   printVolumeTypeDropdown,
+  SortButton,
 } from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
@@ -24,15 +34,6 @@ import {
 } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
 
 export function getInitialRouterValues(
   sortDir: string | null,

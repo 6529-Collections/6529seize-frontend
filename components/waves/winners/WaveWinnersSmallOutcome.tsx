@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
-import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 
 interface WaveWinnersSmallOutcomeProps {

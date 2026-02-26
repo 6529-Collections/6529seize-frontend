@@ -3,16 +3,18 @@ import { buildResponse } from "@/app/api/open-graph/utils";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
+
+import { fetchAlchemyMetadataCandidate } from "./alchemy";
 import {
-  OPEN_SEA_IMAGE_CANDIDATE_SOURCES,
-  OPEN_SEA_IMAGE_SOURCE_READERS,
   asNonEmptyString,
   createRequestId,
   getObjectKeys,
+  OPEN_SEA_IMAGE_CANDIDATE_SOURCES,
+  OPEN_SEA_IMAGE_SOURCE_READERS,
   toObjectRecord,
   truncateForLog,
 } from "./shared";
-import { fetchAlchemyMetadataCandidate } from "./alchemy";
+
 import type {
   AlchemyNftMetadata,
   CreateOpenSeaPlanDeps,

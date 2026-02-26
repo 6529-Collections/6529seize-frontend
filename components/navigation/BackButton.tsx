@@ -2,22 +2,26 @@
 
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import Spinner from "../utils/Spinner";
-import { useWave } from "@/hooks/useWave";
-import { useWaveData } from "@/hooks/useWaveData";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useEffect, useState } from "react";
+
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import {
   getActiveWaveIdFromUrl,
   getMessagesBaseRoute,
-  getWavesBaseRoute,
   getWaveHomeRoute,
+  getWavesBaseRoute,
 } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
-import { useViewContext } from "./ViewContext";
-import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWave } from "@/hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
+
+import Spinner from "../utils/Spinner";
+
+import { useViewContext } from "./ViewContext";
+
 
 export default function BackButton() {
   const router = useRouter();

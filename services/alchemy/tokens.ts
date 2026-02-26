@@ -1,17 +1,19 @@
 /** @api */
+import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type { TokenMetadata } from "@/types/nft";
 
-import { getAlchemyApiKey } from "@/config/alchemyEnv";
-import type {
-  AlchemyTokenMetadataResponse,
-  TokenMetadataParams,
-} from "./types";
 import {
   normaliseAddress,
   processTokenMetadataResponse,
   resolveNetwork,
 } from "./utils";
+
+import type {
+  AlchemyTokenMetadataResponse,
+  TokenMetadataParams,
+} from "./types";
+
 
 const MAX_BATCH_SIZE = 100;
 

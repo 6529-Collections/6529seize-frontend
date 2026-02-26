@@ -1,19 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatNameForUrl, normalizeNextgenTokenID } from "@/helpers/nextgen-utils";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
+
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { formatNameForUrl, normalizeNextgenTokenID } from "@/helpers/nextgen-utils";
+
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import type {
-  NextGenContract} from "./nextgen_contracts";
+
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
   NEXTGEN_MINTER
 } from "./nextgen_contracts";
+import {
+  Status
+} from "./nextgen_entities";
+
+import type {
+  NextGenContract} from "./nextgen_contracts";
 import type {
   AdditionalData,
   Info,
@@ -23,9 +30,6 @@ import type {
   ProofResponse,
   ProofResponseBurn,
   TokensPerAddress} from "./nextgen_entities";
-import {
-  Status
-} from "./nextgen_entities";
 
 interface Crumb {
   display: string;

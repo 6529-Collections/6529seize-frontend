@@ -1,16 +1,18 @@
 "use client";
 
-import { useTitle } from "@/contexts/TitleContext";
-import type { Royalty } from "@/entities/IRoyalty";
-import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
-import { fetchUrl } from "@/services/6529api";
-import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+
+import { useTitle } from "@/contexts/TitleContext";
+import type { Royalty } from "@/entities/IRoyalty";
+import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
+import { fetchUrl } from "@/services/6529api";
+import { GasRoyaltiesCollectionFocus } from "@/types/enums";
+
 import {
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,

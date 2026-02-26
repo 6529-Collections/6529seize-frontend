@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement, useMemo } from "react";
 
 import { XtdhStats } from "@/components/xtdh/stats";
 import { buildGlobalXtdhStatsContent } from "@/components/xtdh/stats/buildGlobalXtdhStatsContent";

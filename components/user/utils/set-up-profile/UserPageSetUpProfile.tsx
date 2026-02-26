@@ -1,7 +1,9 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
+
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -13,8 +15,8 @@ import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
+
+import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 export default function UserPageSetUpProfile({
   profile,
 }: {

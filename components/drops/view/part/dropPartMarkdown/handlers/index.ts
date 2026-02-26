@@ -1,4 +1,6 @@
-import type { LinkHandler } from "../linkTypes";
+import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
+import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
+
 import { createArtBlocksHandler } from "./artBlocks";
 import { createCompoundHandler } from "./compound";
 import { createEnsHandler } from "./ens";
@@ -11,8 +13,8 @@ import { createTikTokHandler } from "./tiktok";
 import { createTwitterHandler } from "./twitter";
 import { createWikimediaHandler } from "./wikimedia";
 import { createYoutubeHandler } from "./youtube";
-import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
-import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
+
+import type { LinkHandler } from "../linkTypes";
 
 export const createLinkHandlers = (options?: {
   readonly tweetPreviewMode?: TweetPreviewMode;

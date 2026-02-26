@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import {
-  SIDEBAR_WIDTHS,
   SIDEBAR_BREAKPOINT,
   SIDEBAR_MOBILE_BREAKPOINT,
+  SIDEBAR_WIDTHS,
 } from "../constants/sidebar";
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
 

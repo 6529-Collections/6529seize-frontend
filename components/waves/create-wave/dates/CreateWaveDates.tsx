@@ -1,16 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { CreateWaveDatesConfig } from "@/types/waves.types";
+import { useEffect, useState } from "react";
+
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
-import StartDates from "./StartDates";
-import Decisions from "./Decisions";
-import RollingEndDate from "./RollingEndDate";
+import type { CreateWaveDatesConfig } from "@/types/waves.types";
+
 import {
   adjustDatesAfterSubmissionChange,
   calculateEndDate,
   validateDateSequence,
 } from "../services/waveDecisionService";
+
+import Decisions from "./Decisions";
+import RollingEndDate from "./RollingEndDate";
+import StartDates from "./StartDates";
+
 
 interface CreateWaveDatesProps {
   readonly waveType: ApiWaveType;

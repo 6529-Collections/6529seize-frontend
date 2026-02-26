@@ -1,9 +1,10 @@
 "use client";
 
-import type { FC, RefObject } from "react";
+import { useUnreadDividerVisibility } from "./useUnreadDividerVisibility";
 import { WaveDropsScrollControlsBottomButton } from "./WaveDropsScrollControlsBottomButton";
 import { WaveDropsScrollControlsUnreadButton } from "./WaveDropsScrollControlsUnreadButton";
-import { useUnreadDividerVisibility } from "./useUnreadDividerVisibility";
+
+import type { FC, RefObject } from "react";
 
 interface WaveDropsScrollControlsProps {
   readonly unreadDividerSerialNo: number | null;

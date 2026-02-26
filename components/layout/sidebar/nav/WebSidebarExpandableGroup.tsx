@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
-import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import React, { useCallback, useMemo } from "react";
 
 interface WebSidebarExpandableGroupProps {
   readonly name: string;

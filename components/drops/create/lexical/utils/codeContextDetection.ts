@@ -1,6 +1,7 @@
-import { $getSelection, $isRangeSelection } from "lexical";
-import type { LexicalEditor, LexicalNode } from "lexical";
 import { $isCodeNode } from "@lexical/code";
+import { $getSelection, $isRangeSelection } from "lexical";
+
+import type { LexicalEditor, LexicalNode } from "lexical";
 
 export function isInCodeContext(editor: LexicalEditor): boolean {
   return editor.getEditorState().read(() => {

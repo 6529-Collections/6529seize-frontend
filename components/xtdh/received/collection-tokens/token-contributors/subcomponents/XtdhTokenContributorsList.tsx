@@ -1,12 +1,13 @@
-import type { ApiXTdhContribution } from "@/generated/models/ApiXTdhContribution";
-
-import { InlineRetry, ListError, ListMessage } from "../../subcomponents/XtdhTokensFallbacks";
-import { XtdhTokensSkeleton } from "../../subcomponents/XtdhTokensSkeleton";
 import {
   TOKEN_CONTRIBUTORS_GROUP_BY_LABELS,
   type XtdhTokenContributorsGroupBy,
 } from "@/components/xtdh/received/constants";
+import type { ApiXTdhContribution } from "@/generated/models/ApiXTdhContribution";
+
+import { InlineRetry, ListError, ListMessage } from "../../subcomponents/XtdhTokensFallbacks";
+import { XtdhTokensSkeleton } from "../../subcomponents/XtdhTokensSkeleton";
 import { useXtdhTokenContributorsListState } from "../hooks/useXtdhTokenContributorsListState";
+
 import { XtdhTokenContributorsListItem } from "./XtdhTokenContributorsListItem";
 
 interface XtdhTokenContributorsListProps {

@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
+
 import { useAuth } from "@/components/auth/Auth";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import {
-  usePinnedWavesServer,
   MAX_PINNED_WAVES,
+  usePinnedWavesServer,
 } from "@/hooks/usePinnedWavesServer";
 
 interface WaveHeaderPinButtonProps {

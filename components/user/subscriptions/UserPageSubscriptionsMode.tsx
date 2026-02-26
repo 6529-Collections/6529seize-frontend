@@ -1,14 +1,15 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import Toggle from "react-toggle";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import Toggle from "react-toggle";
 
 export default function UserPageSubscriptionsMode(
   props: Readonly<{

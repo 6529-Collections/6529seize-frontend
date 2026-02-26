@@ -1,13 +1,15 @@
 "use client";
 
+import { useContext, useEffect, useMemo, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { useContext, useEffect, useMemo, useState } from "react";
-import RepCategoryPill from "../RepCategoryPill";
+
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
+import RepCategoryPill from "../RepCategoryPill";
 import {
   getCanEditRep,
   sortRepsByRatingAndContributors,

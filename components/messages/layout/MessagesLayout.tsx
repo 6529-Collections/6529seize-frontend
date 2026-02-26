@@ -1,14 +1,16 @@
 "use client";
 
-import type { ReactNode} from "react";
-import { useMemo } from "react";
 import Head from "next/head";
+import { useMemo } from "react";
+
+import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import ConnectWallet from "../../common/ConnectWallet";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import MessagesDesktop from "../MessagesDesktop";
 import MessagesMobile from "../MessagesMobile";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import ConnectWallet from "../../common/ConnectWallet";
-import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
+
+import type { ReactNode} from "react";
 
 // Main layout content that uses the Layout context
 function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {

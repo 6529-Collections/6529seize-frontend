@@ -1,13 +1,16 @@
 import { redirect } from "next/navigation";
-import type { Metadata } from "next";
+
 
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
+
 import {
   buildWavesMetadata,
   getFirstSearchParamValue,
   renderWavesPageContent,
   type WavesSearchParams,
 } from "./waves-page.shared";
+
+import type { Metadata } from "next";
 
 const buildLegacyWaveRedirect = (
   waveId: string,

@@ -5,6 +5,7 @@ import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import type { ApiNftLinkResponse } from "@/services/api/nft-link-api";
+
 import type { QueryClient } from "@tanstack/react-query";
 
 type MediaCandidate =

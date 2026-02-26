@@ -1,20 +1,22 @@
 "use client";
 
-import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
-import styles from "./Delegation.module.scss";
+
 
 import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
-import type { DelegationCollection } from "./delegation-constants";
+import { useEnsResolution } from "@/hooks/useEnsResolution";
+
+
 import {
   CONSOLIDATION_USE_CASE,
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
 import { getGasError } from "./delegation-shared";
+import styles from "./Delegation.module.scss";
 import {
   DelegationAddressDisabledInput,
   DelegationCloseButton,
@@ -23,6 +25,8 @@ import {
   DelegationSubmitGroups,
   DelegationTokenSelection,
 } from "./DelegationFormParts";
+
+import type { DelegationCollection } from "./delegation-constants";
 
 interface Props {
   address: string;

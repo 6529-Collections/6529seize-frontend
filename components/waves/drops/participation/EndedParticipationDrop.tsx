@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -10,10 +14,8 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
-import type { DropInteractionParams } from "../Drop";
+
+
 import { DropLocation } from "../Drop";
 import DropCurationButton from "../DropCurationButton";
 import WaveDropActions from "../WaveDropActions";
@@ -22,6 +24,8 @@ import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropReactions from "../WaveDropReactions";
+
+import type { DropInteractionParams } from "../Drop";
 
 interface EndedParticipationDropProps {
   readonly drop: ExtendedDrop;

@@ -1,9 +1,6 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import type {
-  ReactNode,
-  RefObject} from "react";
 import {
   useCallback,
   useEffect,
@@ -13,6 +10,10 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+
+import type {
+  ReactNode,
+  RefObject} from "react";
 
 export default function SeasonsGridDropdownDesktopWrapper({
   isOpen,

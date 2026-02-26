@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useRef } from "react";
+
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
-import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
+
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
-import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+import type { WebUnifiedWavesListWavesHandle } from "./WebUnifiedWavesListWaves";
 
 interface WebUnifiedWavesListProps {
   readonly waves: MinimalWave[];

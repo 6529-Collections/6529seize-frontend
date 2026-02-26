@@ -3,13 +3,16 @@
 import Link from "next/link";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+
 import { useLinkPreviewVariant } from "../LinkPreviewContext";
 import { LinkPreviewCardLayout } from "../OpenGraphPreview";
-import type { MarketplaceTypePreviewProps } from "./common";
+
 import {
   getMarketplaceContainerClass,
   MARKETPLACE_MEDIA_FRAME_CLASS,
 } from "./previewLayout";
+
+import type { MarketplaceTypePreviewProps } from "./common";
 
 export default function MarketplaceUnavailableCard({
   href,

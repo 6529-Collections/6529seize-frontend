@@ -1,16 +1,17 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useState } from "react";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "@/services/api/common-api";
 import type {
   ApiProfileRepRatesState,
   RatingStats,
 } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export function useRepAllocation({
   profile,

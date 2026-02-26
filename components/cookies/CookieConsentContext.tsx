@@ -1,5 +1,15 @@
 "use client";
 
+import Cookies from "js-cookie";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
@@ -9,18 +19,12 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
-import Cookies from "js-cookie";
-import type { ReactNode } from "react";
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+
 import { AuthContext } from "../auth/Auth";
+
 import CookiesBanner from "./CookiesBanner";
+
+import type { ReactNode } from "react";
 
 const GTM_ID = "G-71NLVV3KY3";
 

@@ -1,14 +1,15 @@
 "use client";
 
 import { Combobox } from "@headlessui/react";
-import { useContext, useEffect, useState } from "react";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { useDebounce } from "react-use";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { useContext, useEffect, useState } from "react";
+import { useDebounce } from "react-use";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { commonApiFetch } from "@/services/api/common-api";
 
 const MIN_SEARCH_LENGTH = 3;
 function classNames(...classes: any) {

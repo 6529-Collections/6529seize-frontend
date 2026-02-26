@@ -1,5 +1,11 @@
 "use client";
 
+import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+
 import Download from "@/components/download/Download";
 import NFTAttributes from "@/components/nft-attributes/NFTAttributes";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -15,11 +21,7 @@ import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
-import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
+
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import styles from "./TheMemes.module.scss";
 

@@ -1,14 +1,17 @@
 "use client";
 
+import { format } from "date-fns";
+import { useState } from "react";
+
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { format } from "date-fns";
-import { useState } from "react";
+
 import DropCurationButton from "../DropCurationButton";
 import WaveDropReactions from "../WaveDropReactions";
+
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
 interface ParticipationDropFooterProps {

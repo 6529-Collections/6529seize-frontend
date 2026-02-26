@@ -1,13 +1,15 @@
 "use client";
 
-import type { IProfileConsolidation } from "@/entities/IProfile";
-import { numberWithCommas, parseEmojis } from "@/helpers/Helpers";
 import { faArrowsTurnRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
+
+import type { IProfileConsolidation } from "@/entities/IProfile";
+import { numberWithCommas, parseEmojis } from "@/helpers/Helpers";
+
 import styles from "./Address.module.scss";
 import { WalletAddress } from "./WalletAddress";
 

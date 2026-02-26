@@ -1,9 +1,11 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useDropPrivileges } from "@/hooks/useDropPriviledges";
+import type { ActiveDropState } from "@/types/dropInteractionTypes";
+
 import { useAuth } from "../auth/Auth";
-import DropPlaceholder from "./DropPlaceholder";
+
 import CreateDrop from "./CreateDrop";
+import DropPlaceholder from "./DropPlaceholder";
 
 export enum DropMode {
   CHAT = "CHAT",

@@ -1,10 +1,12 @@
-import React from "react";
+import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import type { FilePreviewProps } from "../reducers/types";
+import React from "react";
+
 import VideoFallbackPreview from "./VideoFallbackPreview";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
+
+import type { FilePreviewProps } from "../reducers/types";
 
 // Dynamically import GLB viewer to avoid SSR issues
 const MediaDisplayGLB = dynamic(

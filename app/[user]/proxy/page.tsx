@@ -1,10 +1,10 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageProxy from "@/components/user/proxy/UserPageProxy";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   USER_PAGE_TAB_IDS,
   USER_PAGE_TAB_MAP,
 } from "@/components/user/layout/userTabs.config";
+import UserPageProxy from "@/components/user/proxy/UserPageProxy";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 function ProxyTab({ profile }: { readonly profile: ApiIdentity }) {
   return <UserPageProxy profile={profile} />;

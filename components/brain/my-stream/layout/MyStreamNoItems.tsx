@@ -1,7 +1,8 @@
-import { CREATE_WAVE_SEARCH_PATH } from "@/components/waves/Waves";
 import Link from "next/link";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+
+import { CREATE_WAVE_SEARCH_PATH } from "@/components/waves/Waves";
 import { getWavesBaseRoute } from "@/helpers/navigation.helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 export default function MyStreamNoItems() {
   const { isApp } = useDeviceInfo();

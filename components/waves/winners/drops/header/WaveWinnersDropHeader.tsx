@@ -1,10 +1,12 @@
 import React from "react";
+
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+
+import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
 import WaveWinnersDropHeaderTotalVotes from "./WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./WaveWinnersDropHeaderVoters";
-import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
-import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 
 interface WaveWinnersDropHeaderProps {
   readonly winner: ApiWaveDecisionWinner;

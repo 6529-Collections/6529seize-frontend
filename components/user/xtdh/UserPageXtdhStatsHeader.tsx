@@ -1,11 +1,11 @@
 "use client";
 
-import { UserXtdhStats } from "./UserXtdhStats";
 import { useIdentityTdhStats } from "@/hooks/useIdentityTdhStats";
 
 import { normalizeProfileIdentifier } from "./user-page-xtdh-stats-header/normalizeProfileIdentifier";
 import { UserPageXtdhStatsHeaderError } from "./user-page-xtdh-stats-header/UserPageXtdhStatsHeaderError";
 import { UserPageXtdhStatsHeaderSkeleton } from "./user-page-xtdh-stats-header/UserPageXtdhStatsHeaderSkeleton";
+import { UserXtdhStats } from "./UserXtdhStats";
 
 interface UserPageXtdhStatsHeaderProps {
   readonly profileId: string | null;

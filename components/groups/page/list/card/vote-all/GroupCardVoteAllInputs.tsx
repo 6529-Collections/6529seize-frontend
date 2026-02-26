@@ -1,11 +1,12 @@
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import RepCategorySearch, {
   RepCategorySearchSize,
 } from "@/components/utils/input/rep-category/RepCategorySearch";
-import type { CreditDirection } from "../GroupCard";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
 
+import type { CreditDirection } from "../GroupCard";
 import type { JSX } from "react";
 
 export default function GroupCardVoteAllInputs({

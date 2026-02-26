@@ -1,6 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
+
 import AppWalletImportClient from "./page.client";
+
+import type { Metadata } from "next";
 
 export default function AppWalletImportPage() {
   return <AppWalletImportClient />;

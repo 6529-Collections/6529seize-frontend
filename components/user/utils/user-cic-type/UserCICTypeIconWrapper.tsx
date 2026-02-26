@@ -1,9 +1,11 @@
 "use client";
 
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
+
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";
 

@@ -1,18 +1,20 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useCallback,
-  useMemo,
 } from "react";
-import useCapacitor from "@/hooks/useCapacitor";
+
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
+import useCapacitor from "@/hooks/useCapacitor";
+
+import type {
+  ReactNode} from "react";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {

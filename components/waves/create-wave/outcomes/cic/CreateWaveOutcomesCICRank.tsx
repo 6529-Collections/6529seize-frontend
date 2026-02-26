@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type {
   CreateWaveOutcomeConfig,
   CreateWaveOutcomeConfigWinnersConfig} from "@/types/waves.types";
@@ -8,8 +10,8 @@ import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
+
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesCICRank({
   onOutcome,

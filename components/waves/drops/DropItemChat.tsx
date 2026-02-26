@@ -1,10 +1,12 @@
+import Link from "next/link";
+
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { removeBaseEndpoint } from "@/helpers/Helpers";
 import { useDrop } from "@/hooks/useDrop";
-import Link from "next/link";
+
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
 import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
 import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";
