@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserStatsRow from "../../utils/stats/UserStatsRow";
-
+import UserPageFollowersModal from "../../followers/UserPageFollowersModal";
 
 const SAFE_ROUTE_SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
 
@@ -30,6 +31,7 @@ export default function UserPageHeaderStats({
   readonly handleOrWallet: string;
   readonly followersCount: number | null;
 }) {
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const routeHandle = sanitizeRouteSegment(handleOrWallet);
 
   if (!routeHandle) {
@@ -47,6 +49,12 @@ export default function UserPageHeaderStats({
         rep={profile.rep}
         cic={profile.cic}
         followersCount={followersCount}
+        onFollowersClick={() => setIsFollowersModalOpen(true)}
+      />
+      <UserPageFollowersModal
+        profileId={profile.id}
+        isOpen={isFollowersModalOpen}
+        onClose={() => setIsFollowersModalOpen(false)}
       />
     </div>
   );

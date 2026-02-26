@@ -41,7 +41,7 @@ export default function NotificationIdentityRating({
   const myHandle = connectedProfile?.handle;
   const getProfileLink = (): string | null => {
     if (!myHandle) return null;
-    return `/${myHandle}/identity`;
+    return `/${myHandle}`;
   };
   const linkHref = getProfileLink();
 

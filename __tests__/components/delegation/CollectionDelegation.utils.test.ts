@@ -60,4 +60,38 @@ describe("CollectionDelegation utility functions", () => {
     const res = getDelegationsFromData(data);
     expect(res[0]?.wallets[0].expiry).toContain("expired");
   });
+
+  it("treats primary and higher reserved use cases as non-expiring", () => {
+    const past = Math.floor(Date.now() / 1000) - 100;
+    const data = Array.from(
+      { length: CONSOLIDATION_USE_CASE.index + 1 },
+      () => ({ result: null })
+    ) as any[];
+
+    data[PRIMARY_ADDRESS_USE_CASE.index] = {
+      result: [["0x1"], [past], [true], [1]],
+    };
+    data[SUB_DELEGATION_USE_CASE.index] = {
+      result: [["0x2"], [past], [true], [1]],
+    };
+    data[CONSOLIDATION_USE_CASE.index] = {
+      result: [["0x3"], [past], [true], [1]],
+    };
+
+    const res = getDelegationsFromData(data);
+
+    const primary = res.find(
+      (d) => d.useCase.use_case === PRIMARY_ADDRESS_USE_CASE.use_case
+    );
+    const subDelegation = res.find(
+      (d) => d.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case
+    );
+    const consolidation = res.find(
+      (d) => d.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
+    );
+
+    expect(primary?.wallets[0].expiry).toBe("active - non-expiring");
+    expect(subDelegation?.wallets[0].expiry).toBe("active - non-expiring");
+    expect(consolidation?.wallets[0].expiry).toBe("active - non-expiring");
+  });
 });

@@ -1,60 +1,31 @@
-import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import {
-  USER_PAGE_TAB_IDS,
-  USER_PAGE_TAB_MAP,
-} from "@/components/user/layout/userTabs.config";
-import UserPageRepWrapper from "@/components/user/rep/UserPageRepWrapper";
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getProfileLogTypes } from "@/helpers/profile-logs.helpers";
-import { ProfileActivityFilterTargetType } from "@/types/enums";
+import { permanentRedirect } from "next/navigation";
 
-export interface UserPageRepPropsRepRates {
-  readonly ratings: ApiProfileRepRatesState;
-  readonly rater: string | null;
+type PageProps = {
+  readonly params?: Promise<{ user: string }> | undefined;
+  readonly searchParams?: Promise<Record<string, string | string[] | undefined>> | undefined;
+};
+
+function buildQueryString(
+  params: Record<string, string | string[] | undefined>
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((v) => query.append(key, v));
+  }
+  return query.toString();
 }
 
-const getInitialActivityLogParams = (
-  handleOrWallet: string
-): ActivityLogParams => ({
-  page: 1,
-  pageSize: 10,
-  logTypes: getProfileLogTypes({
-    logTypes: [],
-  }),
-  matter: null,
-  targetType: ProfileActivityFilterTargetType.ALL,
-  handleOrWallet,
-  groupId: null,
-});
+export default async function IdentityRedirectPage({
+  params,
+  searchParams,
+}: PageProps) {
+  const resolvedParams = params ? await params : undefined;
+  const user = resolvedParams?.user ?? "";
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
-function RepTab({ profile }: { readonly profile: ApiIdentity }) {
-  const handleOrWallet = (
-    profile.handle ??
-    profile.wallets?.[0]?.wallet ??
-    ""
-  ).toLowerCase();
-
-  const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
-
-  return (
-    <div className="tailwind-scope">
-      <UserPageRepWrapper
-        profile={profile}
-        initialActivityLogParams={initialActivityLogParams}
-      />
-    </div>
-  );
+  const qs = resolvedSearchParams ? buildQueryString(resolvedSearchParams) : "";
+  const destination = qs ? `/${user}?${qs}` : `/${user}`;
+  permanentRedirect(destination);
 }
-
-const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.REP];
-
-const { Page, generateMetadata } = createUserTabPage({
-  subroute: TAB_CONFIG.route,
-  metaLabel: TAB_CONFIG.metaLabel,
-  Tab: RepTab,
-});
-
-export default Page;
-export { generateMetadata };

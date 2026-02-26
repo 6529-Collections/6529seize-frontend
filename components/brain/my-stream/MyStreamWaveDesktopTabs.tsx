@@ -28,6 +28,15 @@ const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
 
 const AUTO_EXPAND_LIMIT = 5;
 
+const TAB_LABELS: Record<MyStreamWaveTab, string> = {
+  [MyStreamWaveTab.CHAT]: "Chat",
+  [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
+  [MyStreamWaveTab.WINNERS]: "Winners",
+  [MyStreamWaveTab.OUTCOME]: "Outcome",
+  [MyStreamWaveTab.MY_VOTES]: "My Votes",
+  [MyStreamWaveTab.FAQ]: "FAQ",
+};
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
@@ -156,41 +165,35 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     }
   }, [wave?.wave?.type, setActiveContentTab]);
 
-  // Map enum values to label names
-  const tabLabels: Record<MyStreamWaveTab, string> = {
-    [MyStreamWaveTab.CHAT]: "Chat",
-    [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
-    [MyStreamWaveTab.WINNERS]: "Winners",
-    [MyStreamWaveTab.OUTCOME]: "Outcome",
-    [MyStreamWaveTab.MY_VOTES]: "My Votes",
-    [MyStreamWaveTab.FAQ]: "FAQ",
-  };
-
   const options: TabOption[] = React.useMemo(
     () =>
       availableTabs
-        .filter(
-          (tab) =>
-            isMemesWave ||
-            ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab)
-        )
+        .filter((tab) => {
+          if (tab === MyStreamWaveTab.MY_VOTES) {
+            return isMemesWave || isCurationWave;
+          }
+          if (tab === MyStreamWaveTab.FAQ) {
+            return isMemesWave;
+          }
+          return true;
+        })
         .map((tab) => ({
           key: tab,
-          label: tabLabels[tab],
+          label: TAB_LABELS[tab],
           panelId: getContentTabPanelId(tab),
         })),
-    [availableTabs, isMemesWave]
+    [availableTabs, isMemesWave, isCurationWave]
   );
 
   useEffect(() => {
-    if (
-      !isMemesWave &&
-      [MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(activeTab) &&
-      options.length > 0
-    ) {
+    const isMyVotesHidden =
+      activeTab === MyStreamWaveTab.MY_VOTES && !isMemesWave && !isCurationWave;
+    const isFaqHidden = activeTab === MyStreamWaveTab.FAQ && !isMemesWave;
+
+    if ((isMyVotesHidden || isFaqHidden) && options.length > 0) {
       setActiveTab(options[0]?.key!);
     }
-  }, [isMemesWave, activeTab, options, setActiveTab]);
+  }, [isMemesWave, isCurationWave, activeTab, options, setActiveTab]);
 
   // For simple waves, don't render any tabs
   if (isChatWave) {

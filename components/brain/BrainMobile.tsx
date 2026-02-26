@@ -107,7 +107,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const { isMemesWave } = useWave(wave);
+  const { isMemesWave, isCurationWave } = useWave(wave);
 
   const {
     voting: { isCompleted },
@@ -208,7 +208,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     const shouldResetToDefault =
       (activeView === BrainView.LEADERBOARD && isCompleted) ||
       (activeView === BrainView.WINNERS && !firstDecisionDone) ||
-      (activeView === BrainView.MY_VOTES && !isMemesWave) ||
+      (activeView === BrainView.MY_VOTES && !isMemesWave && !isCurationWave) ||
       (activeView === BrainView.FAQ && !isMemesWave);
 
     if (shouldResetToDefault) {
@@ -232,6 +232,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     firstDecisionDone,
     activeView,
     isMemesWave,
+    isCurationWave,
     waveId,
     pathname,
   ]);

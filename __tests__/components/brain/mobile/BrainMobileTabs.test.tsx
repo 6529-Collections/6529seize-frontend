@@ -18,12 +18,12 @@ enum BrainView {
 
 const push = jest.fn();
 
-jest.mock("next/navigation", () => ({ 
-  useRouter: () => ({ push }), 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
   useSearchParams: () => ({
-    get: jest.fn().mockReturnValue(null)
+    get: jest.fn().mockReturnValue(null),
   }),
-  usePathname: () => "/brain"
+  usePathname: () => "/brain",
 }));
 
 jest.mock("react-use", () => ({
@@ -72,6 +72,7 @@ describe("BrainMobileTabs", () => {
     jest.clearAllMocks();
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
+      isCurationWave: false,
       isRankWave: false,
     });
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
@@ -83,6 +84,7 @@ describe("BrainMobileTabs", () => {
   it("renders back button and navigates to My Stream", async () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
+      isCurationWave: false,
       isRankWave: false,
     });
     render(
@@ -106,6 +108,7 @@ describe("BrainMobileTabs", () => {
   it("shows unread indicators and handles message/notification clicks", async () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
+      isCurationWave: false,
       isRankWave: false,
     });
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: true });
@@ -141,6 +144,7 @@ describe("BrainMobileTabs", () => {
   it("renders leaderboard and extra tabs for memes rank wave", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: true,
+      isCurationWave: false,
       isRankWave: true,
     });
 
@@ -167,5 +171,28 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
+  });
+
+  it("renders My Votes for curation rank wave", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: true,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={{ id: "1" } as any}
+      />
+    );
+
+    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.queryByText("FAQ")).toBeNull();
   });
 });

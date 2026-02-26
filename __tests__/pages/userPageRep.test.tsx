@@ -52,7 +52,7 @@ function DummyRepTab({ profile }: { readonly profile: any }) {
 }
 
 const buildFactory = () =>
-  createUserTabPage({ subroute: "identity", metaLabel: "Identity", Tab: DummyRepTab });
+  createUserTabPage({ subroute: "", metaLabel: "Identity", Tab: DummyRepTab });
 
 describe("rep page via createUserTabPage", () => {
   beforeEach(() => {
@@ -79,7 +79,7 @@ describe("rep page via createUserTabPage", () => {
     expect(userPageNeedsRedirect).toHaveBeenCalledWith({
       profile: expect.any(Object),
       req: { query: { user: "Alice", foo: "bar" } },
-      subroute: "identity",
+      subroute: "",
     });
     expect(redirectMock).not.toHaveBeenCalled();
   });
