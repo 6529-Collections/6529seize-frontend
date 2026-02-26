@@ -50,6 +50,24 @@ provides an in-tab toggle between `Rep` and `Identity` sections.
   - mobile rep section: REP-only log context
   - mobile identity section: NIC-only log context with NIC log-type filter options
 
+## Grant Rep Input Behavior
+
+- The `Grant Rep` category field is live-search with a 500ms debounce:
+  - It requires at least 3 and at most 100 characters.
+  - While it is below/above that range, the dropdown explains the length constraint.
+- While searching, a category dropdown opens on focus/typing and closes via outside click or `Esc`.
+- Dropdown options include:
+  - The current typed term first (when in range), then matching backend categories.
+  - Duplicate entries are removed from backend matches if they match the typed term.
+- Clicking a dropdown item (or pressing Enter in the search form) triggers a category availability check before selection.
+- If a category is selected and the user edits the category text, the component clears the selection and amount so a fresh choose+check is required.
+- The `Grant Rep` button is blocked when:
+  - no category is selected,
+  - amount is empty,
+  - amount is unchanged from current contribution,
+  - value is outside min/max rules (unless a proxy is active),
+  - or submit/mutation is already in progress.
+
 ## Edge Cases
 
 - If a profile has no rep categories, the rep table can be hidden while summary and log areas still load.
