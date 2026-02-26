@@ -25,19 +25,24 @@ analysis so operation state is computed and persisted before continuing.
    custom snapshots, phases, and delegation mapping).
 3. When a step requires execution before you can safely continue, the UI shows
    `Run analysis` and the step gates progression.
-4. Running analysis sends a run request for the plan and updates the active run state.
-5. While the run is active (`CLAIMED` or `PENDING`), the UI shows a fullscreen
+4. In `Map Delegations`, add `Contract to return registered Delegations` and submit
+   to create the delegation-mapping operation, or skip the step entirely.
+5. Running analysis sends a run request for the plan and updates the active run
+   state.
+6. While the run is active (`CLAIMED` or `PENDING`), the UI shows a fullscreen
    blocking overlay with a spinner so interaction stays paused during execution.
-6. The page polls `/allowlists/{planId}` every 2 seconds until run status leaves the
+7. The page polls `/allowlists/{planId}` every 2 seconds until run status leaves the
    active states.
-7. If polling detects non-active status, the plan state refreshes and the overlay
+8. If polling detects non-active status, the plan state refreshes and the overlay
    exits.
-8. If the run fails, the page shows a failure warning with the backend error reason
+9. If the run fails, the page shows a failure warning with the backend error reason
    and a retry control.
 
 ## Common Scenarios
 
 - Run analysis from an incomplete step to execute pending operations.
+- In `Map Delegations`, `Run analysis` appears when operations are unrun, and
+  `Next` appears after all operations in the step are run.
 - Continue from `Build Phases` or `Map Delegations` only after run state is clear and
   required operations are marked as run.
 - Retry failed analysis directly from the warning bar in the plan context.
@@ -50,6 +55,8 @@ analysis so operation state is computed and persisted before continuing.
   can tell execution is still in progress.
 - Operations are reloaded after a successful non-active run state, so step tables and
   navigation state reflect the latest run results.
+- In `Map Delegations`, if you skip because no contract was added, the step transitions
+  directly to `Review`.
 
 ## Failure and Recovery
 

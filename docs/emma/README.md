@@ -9,11 +9,13 @@ review tooling.
 ## Features
 
 - [Custom Snapshot Wallet Batching](feature-custom-snapshot-wallet-batching.md)
+- [Map Delegations](feature-map-delegations.md)
 - [Subscriptions Distribution Review](feature-subscriptions-distribution-review.md)
 
 ## Flows
 
 - [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
+- Map Delegations flow: optional contract mapping and skip/run gating.
 - Custom snapshot flow: wallet import (manual/CSV), chunking, and sequential
   custom snapshot creation.
 - Subscription review flow: token confirmation, subscription exports, asset
