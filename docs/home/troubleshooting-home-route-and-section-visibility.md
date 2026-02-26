@@ -2,8 +2,15 @@
 
 ## Overview
 
-Use this page when homepage sections at `/` are missing, stale, or routing to
-unexpected targets.
+Use this page when `/` loads but one home section is missing or routes from that
+section look wrong.
+
+This page covers:
+- `Latest Drop` or `Next Drop`
+- `Coming up`
+- `Boosted Drops`
+- `Most active waves`
+- The health-heart shortcut to `/network/health`
 
 ## Location in the Site
 
@@ -12,64 +19,95 @@ unexpected targets.
   - `/network/health`
   - `/the-memes/mint`
   - `/the-memes/{id}`
+  - `/the-memes/{id}/distribution`
   - `/waves`
+  - `/messages`
 
 ## Entry Points
 
-- Open `/` and verify latest-drop, coming-up, boosted, and most active waves sections.
+- Open `/`.
+- Wait for initial loading placeholders to settle.
+- Verify section order: header -> top slot (`Latest Drop` or `Next Drop`) ->
+  mission block -> `Coming up` -> `Boosted Drops` -> `Most active waves`.
 
 ## User Journey
 
-1. Open `/` and wait for initial loading placeholders to finish.
-2. Check whether the missing area is `Latest Drop`, `Coming up`,
-   `Boosted Drops`, or `Most active waves`.
-3. Use the matching recovery path below.
+1. Open `/` and identify the missing section or broken route.
+2. Match the issue in `Common Scenarios`.
+3. Confirm any expected edge behavior in `Edge Cases`.
+4. Use direct recovery routes if the section still does not render.
 
 ## Common Scenarios
 
-- `Latest Drop` is missing:
-  - A current meme card may be unavailable after data load.
-- `Next Drop` never appears:
-  - It only replaces latest-drop when the current mint has ended and a next
-    winner exists.
-- `Coming up` is missing:
-  - The memes wave setting may be unavailable, or no cards are ready.
-- `Boosted Drops` is missing:
-  - Boosted feed returned empty or the request failed.
-- `Most active waves` is missing:
-  - Hot-waves request failed or returned no waves.
-- `Mint` button missing in latest-drop countdown:
-  - Hidden on iOS outside the US.
+- `Latest Drop` or `Next Drop` missing:
+  - Top slot starts with a loading placeholder while mint/status and
+    next-winner checks resolve.
+  - After load, it resolves to `Latest Drop`, `Next Drop`, or hidden.
+  - `Next Drop` shows only when the current mint is ended and a next winner
+    exists.
+  - If there is no current mint and no eligible next winner, the top slot stays
+    hidden.
+- `Coming up` missing:
+  - Hidden until settings load with a valid memes wave id.
+  - Hidden after load when no cards are ready.
+  - While leaderboard data is still loading, the section can render with only
+    the `NEXT MINT` card.
+- `NEXT MINT` card missing in `Coming up`:
+  - It is hidden when the current mint is ended.
+  - It is hidden when next-winner title matches current mint title.
+- `Boosted Drops` missing:
+  - While loading, section shows `Loading...`.
+  - Hidden after load when boosted feed is empty or request fails.
+- `Most active waves` missing:
+  - While loading, section shows skeleton cards.
+  - Hidden when hot-waves is empty or request fails.
 - Health heart shortcut missing:
-  - Verify you are on `/`; placement changes by layout (hero area on larger layouts, header action row on small/mobile layouts).
+  - It appears only on `/`.
+  - Larger layouts: fixed in the hero region.
+  - Small/mobile/app layouts: shown in header actions.
+- `Mint` button missing in latest-drop countdown:
+  - Hidden when device is iOS and country is not `US`.
 
 ## Edge Cases
 
-- `Coming up` can show fewer cards when `NEXT MINT` is included (two leaders
-  instead of three).
-- Discovery cards may open `/messages` for direct-message waves instead of a
-  `/waves/{waveId}` route.
-- Most active waves preview text does not make URLs clickable in the compact snippet.
+- `Coming up` leader count changes with `NEXT MINT`:
+  - With `NEXT MINT`: up to 2 leaders.
+  - Without `NEXT MINT`: up to 3 leaders.
+- Top `Next Drop` links use query-style wave routes (`/waves?wave=...`).
+- Lower home sections use path-style wave routes (`/waves/{waveId}` with
+  optional query params).
+- Discovery cards can route to `/messages` for direct-message waves.
+- Most active waves preview text is compact display only; links in that snippet
+  are not clickable.
 
 ## Failure and Recovery
 
-- Refresh `/` to re-run homepage queries.
-- Open fallback routes directly when a section is unavailable:
-  - `/the-memes/mint` for mint access
-  - `/waves` for wave discovery
-  - `/network/health` for health view
-- If a specific card route fails, retry from `/waves` list views.
+- Refresh `/` to rerun home queries.
+- Open `/network/health` directly if the heart shortcut is unavailable.
+- Open `/the-memes/mint` if latest-drop mint actions are unavailable.
+- Open `/the-memes/{id}` or `/the-memes/{id}/distribution` when latest-drop
+  card links fail.
+- Open `/waves` when `Coming up`, `Boosted Drops`, or `Most active waves`
+  routes fail.
+- For direct-message wave targets, retry from:
+  - `/messages?wave={waveId}`
+  - `/messages?wave={waveId}&serialNo={serialNo}` for boosted-drop deep links.
 
 ## Limitations / Notes
 
-- Home section rendering is data-dependent; hidden sections are often a valid
-  empty/error behavior, not a full page failure.
+- Home sections use independent data sources and can appear or disappear at
+  different times.
+- A hidden section is often a valid empty/error result, not a full route
+  outage.
+- Viewing home content has no auth or wallet gate.
 
 ## Related Pages
 
 - [Home Index](README.md)
+- [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
 - [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Network Routes and Health](../network/troubleshooting-network-routes-and-health.md)
 - [Navigation and Shell Controls](../navigation/troubleshooting-navigation-and-shell-controls.md)
 - [Media Routes and Minting](../media/troubleshooting-media-routes-and-minting.md)
 - [Wave Navigation and Posting](../waves/troubleshooting-wave-navigation-and-posting.md)
