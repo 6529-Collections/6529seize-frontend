@@ -60,6 +60,10 @@ visible while discussion mode can be shown/hidden inline.
 - Serial-target links may require historical fetches before target becomes visible.
 - Desktop copy actions can still resolve DM routing from stream context when direct
   DM metadata is incomplete.
+- Opening a drop via `drop` query disables the route-level wave overview prefetch
+  while that drop is open. After closing, the app sets a short-lived
+  `drop_close` marker for about 5 seconds, so the next server-side render also
+  keeps prefetching disabled.
 
 ## Failure and Recovery
 
@@ -77,6 +81,8 @@ visible while discussion mode can be shown/hidden inline.
 - `Copy link` is unavailable for temporary drops.
 - Copied links target thread position; they do not force persistent single-drop
   overlay state.
+- If a user relies on immediate full-thread prefetch after closing a drop, there is
+  a short delay before that behavior resumes.
 
 ## Related Pages
 
