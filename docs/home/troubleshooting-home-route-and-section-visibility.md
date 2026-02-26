@@ -35,7 +35,7 @@ unexpected targets.
 - `Coming up` is missing:
   - The memes wave setting may be unavailable, or no cards are ready.
 - `Boosted Drops` is missing:
-  - Boosted feed returned empty.
+  - Boosted feed returned empty or the request failed.
 - `Most active waves` is missing:
   - Hot-waves request failed or returned no waves.
 - `Mint` button missing in latest-drop countdown:
