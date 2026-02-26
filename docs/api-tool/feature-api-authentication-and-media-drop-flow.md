@@ -70,6 +70,9 @@ descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
 - Non-standard file extensions can resolve to a generic content type, which may
   affect downstream media behavior.
 - Auth examples explicitly warn against hardcoding private keys.
+- The Node auth snippet parses JSON from nonce/login/feed responses without an
+  explicit `resp.ok` check. Non-2xx or non-JSON bodies can fail with a JSON
+  parse error before showing HTTP status context.
 - Multipart completion requires matching ETags for every uploaded part; missing
   values block completion.
 - Drop creation requires a valid target `wave_id`; placeholder values must be
@@ -88,6 +91,9 @@ descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
 
 - If nonce/login requests fail, token generation does not complete; retry after
   confirming wallet address and signature flow.
+- If you script from the auth snippet, add explicit response-status guards
+  before `resp.json()` for nonce/login/feed so failures include status/body
+  details.
 - If nonce response fields are incomplete (for example missing
   `server_signature`), rerun the nonce/sign/login sequence with fresh values.
 - If part upload fails, retry that part and keep the ETag returned by the
