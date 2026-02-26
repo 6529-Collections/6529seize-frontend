@@ -46,6 +46,9 @@ be refreshed and shared.
 - `By Identity` suggestions open only after at least 3 typed characters.
 - Typing in `By Identity` alone does not apply a creator filter until a
   suggestion is selected.
+- `By Identity` suggestions are keyboard-focusable: `ArrowUp`/`ArrowDown` move the
+  highlighted suggestion, `Enter` selects it, and `Escape` closes the suggestion
+  list.
 - When `By Group Name` or `By Identity` changes, the list restarts from newest
   results and the `created_at_less_than` cursor parameter is removed.
 - `My groups` is shown only when a connected account or proxy context exists.
