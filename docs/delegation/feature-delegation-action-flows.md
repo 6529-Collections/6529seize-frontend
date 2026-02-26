@@ -22,6 +22,8 @@ locks) and collection-scoped delegation management inside `/delegation/*`.
 
 - Use delegation-center action buttons.
 - Open action URLs directly.
+- Use profile-level deep links that prefill action routes, such as
+  `/delegation/register-delegation?collection=<contract>&use_case=<id>`.
 - On collection routes, use outgoing row controls (`Edit`, `Revoke`) and bulk
   controls (`Batch Revoke`).
 - On incoming sub-delegation rows, select one delegator and launch manager
@@ -46,6 +48,9 @@ locks) and collection-scoped delegation management inside `/delegation/*`.
 - `assign-primary-address` requires a connected profile plus a consolidation key
   with more than one wallet, then selecting a wallet option for primary
   assignment.
+- `assign-primary-address` can start with `?address=<wallet>`:
+  - If the value matches one wallet in the consolidation key, that wallet is preselected.
+  - If the value is missing or not found, the form opens with no preselected primary-address option.
 - Forms block self-targeting (`cannot delegate to your own wallet`).
 
 ## Collection Management Behavior
@@ -75,9 +80,8 @@ locks) and collection-scoped delegation management inside `/delegation/*`.
 
 - `Assign Primary Address` in manager-driven sub-delegation actions appears only
   on `Any Collection` and `The Memes`.
-- In `/delegation/assign-primary-address`, a valid `address` query can be passed to
-  preselect a wallet, and invalid/empty values are normalized to a valid
-  consolidation member before the action form loads.
+- In `/delegation/assign-primary-address`, invalid or missing `address` query
+  values are not auto-corrected to another wallet.
 - Wrong-network write attempts show a toast requesting switch to configured
   chain (`Ethereum Mainnet` or `Sepolia Network`).
 - Global lock state can block collection-specific lock controls until unlocked

@@ -15,6 +15,8 @@ wallet.
 
 - Open `Wallet Checker` from the delegation section menu.
 - Open `/delegation/wallet-checker` directly.
+- Open profile-level deep links such as
+  `/delegation/wallet-checker?address=<wallet-or-ens>`.
 - Paste a wallet address or ENS name and run `Check`.
 
 ## User Journey
@@ -39,7 +41,8 @@ wallet.
 ## Edge Cases
 
 - Invalid input shows `Invalid address`.
-- If `?address=<wallet-or-ens>` is present, Wallet Checker starts an initial check immediately after the page initializes.
+- If `?address=<wallet-or-ens>` is present, Wallet Checker starts an initial
+  check automatically after that value resolves to a valid address.
 - ENS resolution blocks submit while address resolution is still loading.
 - While a check is in progress, `Check` and `Enter` do not start another request.
 - `Clear` resets the address input, clears cached query state, and empties all

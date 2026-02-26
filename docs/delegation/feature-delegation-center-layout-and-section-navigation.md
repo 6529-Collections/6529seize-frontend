@@ -65,8 +65,9 @@ paths fall back to the delegation HTML renderer.
 
 - If delegated HTML content does not return `200`, the panel shows
   `404 | PAGE NOT FOUND`.
-- If an action card was started while disconnected, complete wallet connection
-  and retry the intended route transition.
+- If an action card was started while disconnected, wallet connect opens first.
+  After successful connect and modal close, the pending route transition should
+  complete automatically.
 - If section state looks stale, navigate to `/delegation/delegation-center` and
   re-enter the section from menu links.
 

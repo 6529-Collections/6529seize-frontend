@@ -29,7 +29,7 @@ Profile `about/*` behavior is documented under [Profiles](profiles/README.md).
 ### Product operations
 
 - [Groups](groups/README.md): `/network/groups` listing, creation, and edits.
-- [Delegation](delegation/README.md): `/delegation/*` routing and onchain action flows.
+- [Delegation](delegation/README.md): `/delegation/*` routing, onchain action flows, and wallet diagnostics.
 - [NextGen](nextgen/README.md): `/nextgen` collection and token-media workflows.
 - [Realtime](realtime/README.md): `/nft-activity` websocket updates and event-driven feed behavior.
 - [API Tool](api-tool/README.md): `/tools/*` API access, block finder, and subscription reports.

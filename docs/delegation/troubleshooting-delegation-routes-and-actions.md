@@ -32,6 +32,8 @@ wallet/network blockers, and checker result confusion.
 - HTML-backed section (`Delegation FAQs`, `Wallet Architecture`,
   `Consolidation Use Cases`) shows `404 | PAGE NOT FOUND`: backing content path
   did not resolve.
+- Collection route tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:
+  wallet is not connected for collection reads.
 - `Assign Primary Address` does not show actionable form: wallet does not
   currently have a qualifying consolidation key.
 - Submit keeps failing with inline `Errors`: required fields are missing or
@@ -53,6 +55,8 @@ wallet/network blockers, and checker result confusion.
 
 - For route fallback errors, return to `/delegation/delegation-center` and
   re-enter the target section.
+- For stuck collection fetch states, connect wallet and reload the same
+  collection route.
 - For network mismatch errors, switch wallet chain and resubmit.
 - For rejected/failed transactions, review toast error text and retry after
   correcting wallet/input state.

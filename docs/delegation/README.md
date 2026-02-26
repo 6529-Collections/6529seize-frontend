@@ -2,23 +2,31 @@
 
 ## Overview
 
-Delegation docs cover user-facing behavior for `/delegation/*`, including
-section routing, onchain delegation actions, collection-level management, and
-wallet-checker diagnostics.
+Delegation docs cover user-facing behavior for `/delegation/*`.
+
+This area includes:
+
+- section navigation and HTML-backed content routes
+- write routes for delegation, consolidation, sub-delegation, and primary-address assignment
+- collection management (`Outgoing`/`Incoming`, edit, revoke, batch revoke, lock/unlock)
+- wallet diagnostics in Wallet Checker (`/delegation/wallet-checker`)
+
+Use this area when you need route behavior, action requirements, wallet/network
+prerequisites, transaction feedback states, or checker recovery paths.
 
 ## Features
 
-- [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)
-- [Delegation Action Routes and Collection Management](feature-delegation-action-flows.md)
-- [Wallet Checker](feature-wallet-checker.md)
+- [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md): section routes, menu behavior, HTML fallback, and query-param persistence rules.
+- [Delegation Action Routes and Collection Management](feature-delegation-action-flows.md): write forms, collection actions, lock behavior, and onchain feedback states.
+- [Wallet Checker](feature-wallet-checker.md): read-only diagnostics, deep-link checks, and consolidation recommendations.
 
 ## Flows
 
-- [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
+- [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md): start at Delegation Center, execute writes, then verify outcomes.
 
 ## Troubleshooting
 
-- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md)
+- [Delegation Routes and Action States](troubleshooting-delegation-routes-and-actions.md): route fallback issues, validation failures, network mismatch, and checker confusion.
 
 ## Stubs
 
