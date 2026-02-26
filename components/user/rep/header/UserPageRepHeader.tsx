@@ -86,7 +86,7 @@ export default function UserPageRepHeader({
             </div>
           </div>
 
-          {visibleReps.length > 0 && (
+          {(visibleReps.length > 0 || canEditRep) && (
             <div className="tw-mt-6 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
               <div className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                 Rep Categories
