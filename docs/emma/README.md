@@ -13,6 +13,7 @@ review tooling.
 
 ## Flows
 
+- [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md)
 - Custom snapshot flow: wallet import (manual/CSV), chunking, and sequential
   custom snapshot creation.
 - Subscription review flow: token confirmation, subscription exports, asset

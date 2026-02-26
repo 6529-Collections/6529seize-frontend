@@ -93,6 +93,8 @@ publish finalized allowlists to GitHub from the plan review area.
   retry after fixing the input or network issue.
 - `Publish to GitHub` failures show the API/backend error message in the modal and
   keep the workflow available for retry.
+- If a plan operation run fails, the plan context displays a build failure warning with
+  the backend reason and an explicit `Run Analysis` retry control.
 
 ## Limitations / Notes
 
