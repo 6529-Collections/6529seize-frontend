@@ -38,16 +38,18 @@ descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
      this is friendlier for GUIs but can expose encoding pitfalls with multiline
      text.
 5. Use the returned JWT bearer token for protected API requests.
-4. Use that token for protected API requests.
-5. For media drops, start multipart upload (`/api/drop-media/multipart-upload`)
+6. Use that token for the feed call and media-upload helpers; changing
+   `short_nonce` only changes the signed nonce value, not downstream request
+   contracts.
+7. For media drops, start multipart upload (`/api/drop-media/multipart-upload`)
    with file name and MIME type.
-6. Request signed upload URLs for each part
+8. Request signed upload URLs for each part
    (`/api/drop-media/multipart-upload/part`) using `upload_id`, `key`, and
    `part_no`, then upload file bytes.
-7. Collect ETags from each successful part upload and keep only valid values.
-8. Complete multipart upload (`/api/drop-media/multipart-upload/completion`)
+9. Collect ETags from each successful part upload and keep only valid values.
+10. Complete multipart upload (`/api/drop-media/multipart-upload/completion`)
    with `upload_id`, `key`, and `parts` to receive a `media_url`.
-9. Submit drop payload with the `media_url` and target `wave_id` (replace the
+11. Submit drop payload with the `media_url` and target `wave_id` (replace the
    example placeholder before sending).
 
 ## Common Scenarios
@@ -57,6 +59,9 @@ descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
   media URL.
 - Upload larger media as multiple parts by repeating part URL retrieval and
   upload steps before completion.
+- Nonce mode (`short_nonce=true` vs `short_nonce=false`) changes only the nonce
+  message you sign; once login returns a token, feed and media-drop calls are
+  unchanged.
 - Use the page examples as a starting point for scripting with Node.js.
 - Use the glossary section first when mapping API terms to UI concepts.
 
