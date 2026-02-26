@@ -29,8 +29,15 @@ descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
 2. Follow the authentication flow: request nonce, sign it with wallet, submit
    signature, and receive a bearer token.
 3. In the auth example, include `short_nonce=true` on nonce request, read
-   `nonce` and `server_signature` from that nonce response, then submit the
-   signed payload to login with `server_signature`.
+  `nonce` and `server_signature` from that nonce response, then submit the
+  signed payload to login with `server_signature`.
+4. `short_nonce` can be used to choose nonce shape:
+   - `short_nonce=true` returns a UUID-like nonce that is easier for automated
+     callers.
+   - `short_nonce=false` (or omitted) returns a longer welcome-message-style nonce;
+     this is friendlier for GUIs but can expose encoding pitfalls with multiline
+     text.
+5. Use the returned JWT bearer token for protected API requests.
 4. Use that token for protected API requests.
 5. For media drops, start multipart upload (`/api/drop-media/multipart-upload`)
    with file name and MIME type.
@@ -64,6 +71,13 @@ descriptions, including `Identity`, `Profile`, `Brain`, `Wave`, drop types,
   replaced before requests succeed.
 - The page notes that some API routes are still undocumented even though they
   are in active use.
+- Nonce format is controlled by the `short_nonce` query parameter:
+  - `short_nonce=true` returns a compact UUID-style nonce.
+  - `short_nonce=false` or omitted returns a longer multiline nonce intended for
+    human-facing UX, but this can create encoding complexity in some runtimes.
+- Authentication requires the same nonce response and matching server signature in
+  the login call; reusing a stale `server_signature` with a newly requested nonce
+  will fail.
 
 ## Failure and Recovery
 
