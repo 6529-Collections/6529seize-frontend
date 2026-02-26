@@ -9,10 +9,13 @@ states, active-thread live read behavior, and retry/reconnect recovery actions.
 - `/notifications` is the authenticated activity feed in My Stream.
 - Users can filter activity causes, open drop context, and load older pages
   while keeping the newest rows anchored.
+- On native app builds, users can manage push-notification preferences and
+  tap-to-open behavior with profile-safe routing.
 
 ## Features
 
 - [Notifications Feed](feature-notifications-feed.md)
+- [Mobile Push Notifications](feature-mobile-push-notifications.md)
 
 ## Flows
 
