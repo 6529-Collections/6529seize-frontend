@@ -14,6 +14,11 @@ jest.mock('next/link', () => ({
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
 }));
 
+jest.mock('@/components/user/followers/UserPageFollowersModal', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 jest.mock('@/services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
 }));
@@ -50,7 +55,7 @@ describe('AppSidebarUserStats', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('Followers')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Followers/ })!.getAttribute('href')).toBe('/alice/followers');
+    expect(screen.getByRole('button', { name: /Followers/ })).toBeInTheDocument();
   });
 
   it('disables query when profileId is missing', () => {
@@ -62,8 +67,9 @@ describe('AppSidebarUserStats', () => {
     render(<AppSidebarUserStats handle="bob" tdh={10} rep={20} profileId={undefined} />);
 
     expect(commonApiFetch).not.toHaveBeenCalled();
-    expect(screen.getByText('0')).toBeInTheDocument();
-    expect(screen.getByText('Followers')).toBeInTheDocument();
+    const followersBtn = screen.getByRole('button', { name: /Followers/ });
+    expect(followersBtn).toHaveTextContent('0');
+    expect(followersBtn).toBeInTheDocument();
   });
 
   it('uses singular follower label', () => {
@@ -71,8 +77,8 @@ describe('AppSidebarUserStats', () => {
 
     render(<AppSidebarUserStats handle="carol" tdh={1} rep={0} profileId="pid" />);
 
-    const link = screen.getByRole('link', { name: /Follower/ });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveTextContent('1');
+    const btn = screen.getByRole('button', { name: /Follower/ });
+    expect(btn).toBeInTheDocument();
+    expect(btn).toHaveTextContent('1');
   });
 });

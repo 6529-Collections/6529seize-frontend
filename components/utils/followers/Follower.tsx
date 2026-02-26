@@ -31,10 +31,6 @@ export default function Follower({
       <div className="tw-flex tw-flex-col">
         <div className="tw-flex tw-items-center tw-gap-x-1">
           <div className="tw-items-center tw-flex tw-gap-x-2">
-            <UserCICAndLevel
-              level={follower.identity.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-50">
               <Link
                 href={`/${follower.identity.handle}`}
@@ -43,6 +39,10 @@ export default function Follower({
                 {follower.identity.handle}
               </Link>
             </p>
+            <UserCICAndLevel
+              level={follower.identity.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
           </div>
         </div>
       </div>
