@@ -15,6 +15,7 @@ from latest-drop, coming-up, and discovery sections.
   - `/the-memes/{id}`
   - `/the-memes/{id}/distribution`
   - `/the-memes/mint`
+  - `/waves?wave={waveId}` or `/waves?wave={waveId}&drop={dropId}`
   - `/waves/{waveId}` or `/waves/{waveId}?drop={dropId}`
   - `/messages?wave={waveId}` (direct-message waves)
   - `/waves`
@@ -28,7 +29,8 @@ from latest-drop, coming-up, and discovery sections.
 
 1. Open `/` and wait for latest-drop data resolution.
 2. Read the top context (header and mission block).
-3. Use `Latest Drop`/`Next Drop` actions for meme card or wave context.
+3. Use `Latest Drop` actions for meme routes, or `Next Drop` actions for wave
+   routes.
 4. Open `Coming up` cards for queued winner/leader routes.
 5. Open boosted or most active waves cards for wave discovery.
 6. Use section `View all` actions (`Coming up` or `Most active waves`) to continue in
@@ -46,6 +48,8 @@ from latest-drop, coming-up, and discovery sections.
 ## Edge Cases
 
 - Sections can be hidden when backing data is empty or unavailable.
+- Home can open wave context with either `/waves?wave=...` (next-drop mode) or
+  `/waves/{waveId}` path routes (coming-up/discovery cards).
 - Some wave cards route to `/messages` when the target wave is a direct-message
   thread.
 
