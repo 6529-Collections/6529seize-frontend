@@ -17,7 +17,7 @@ confirmation and on-chain execution.
 - Collected tab bulk transfer: `/{user}/collected`
 - The Memes detail card: `/the-memes/{id}`
 - Meme Lab detail card: `/meme-lab/{id}`
-- NextGen token detail: `/nextgen/token/{id}`
+- NextGen token detail: `/nextgen/token/{id}/{view}`
 
 ## Entry Points
 

@@ -67,4 +67,13 @@ ln -s "$REPO_ROOT/docs" "$worktree_path/docs"
 printf 'Running docs updater in worktree scope...\n'
 (cd "$worktree_path" && ./docs/update_docs.sh)
 
-printf 'Prepared worktree: %s\nCommit: %s\n' "$worktree_path" "$next_commit"
+tmp_meta_file="${META_FILE}.tmp"
+jq --indent 4 --arg commit "$next_commit" '.last_commit = $commit' "$META_FILE" > "$tmp_meta_file"
+mv "$tmp_meta_file" "$META_FILE"
+
+git -C "$REPO_ROOT" worktree remove -f "$worktree_path"
+
+git -C "$REPO_ROOT" add docs
+git -C "$REPO_ROOT" commit -m "docs updated ${next_commit}"
+
+printf 'Updated docs/meta.json to %s, removed worktree, committed source branch.\n' "$next_commit"

@@ -24,11 +24,11 @@ dashboards.
 
 ## Troubleshooting
 
-- No dedicated troubleshooting page documented yet.
+- [Network Troubleshooting](troubleshooting-network-routes-and-health.md)
 
 ## Stubs
 
-- [Network Stats](feature-network-stats.md)
+- None.
 
 ## Related Areas
 

@@ -9,12 +9,9 @@ media controls.
 ## Location in the Site
 
 - Featured NextGen route: `/nextgen`
-- Collection slideshow routes: `/nextgen/collection/{collection}`,
-  `/nextgen/collection/{collection}/about`,
-  `/nextgen/collection/{collection}/provenance`, and
-  `/nextgen/collection/{collection}/top-trait-sets`
+- Collection slideshow routes: `/nextgen/collection/{collection}/{view}`
 - Collection art route: `/nextgen/collection/{collection}/art`
-- Token routes: `/nextgen/token/{token}` and `/nextgen/token/{token}/{view}`
+- Token routes: `/nextgen/token/{token}/{view}`
 
 ## Entry Points
 

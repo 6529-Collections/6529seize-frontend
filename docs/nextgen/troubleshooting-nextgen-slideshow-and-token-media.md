@@ -8,13 +8,9 @@ do not behave as expected, or high-res/fullscreen actions fail.
 ## Location in the Site
 
 - Featured slideshow: `/nextgen`
-- Collection slideshow surfaces: `/nextgen/collection/{collection}`,
-  `/nextgen/collection/{collection}/about`,
-  `/nextgen/collection/{collection}/provenance`, and
-  `/nextgen/collection/{collection}/top-trait-sets`
+- Collection slideshow surfaces: `/nextgen/collection/{collection}/{view}`
 - Collection art route: `/nextgen/collection/{collection}/art`
-- Token media routes: `/nextgen/token/{token}` and
-  `/nextgen/token/{token}/{view}`
+- Token media routes: `/nextgen/token/{token}/{view}`
 
 ## Entry Points
 

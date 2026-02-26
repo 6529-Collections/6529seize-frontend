@@ -12,9 +12,9 @@ leaderboard component in a compact Network view and supports two focus modes:
 
 ## Location in the Site
 
-- Route family: `/network/nerd` with optional path focus.
+- Route family: `/network/nerd/{focus}`
 - Valid routes:
-  - `/network/nerd` or `/network/nerd/cards-collected` (default focus)
+  - `/network/nerd/{focus}` or `/network/nerd/cards-collected` (default focus)
   - `/network/nerd/interactions` (interactions focus)
 - No query string controls are used on this route.
 
@@ -25,7 +25,7 @@ leaderboard component in a compact Network view and supports two focus modes:
   - anything else (including no segment) -> Cards Collected
 - Switching focus updates the path via `router.replace` so the active view is reflected
   in the URL without a full page reload.
-- Sharing `/network/nerd` and `/network/nerd/interactions` preserves the selected focus
+- Sharing `/network/nerd/{focus}` and `/network/nerd/interactions` preserves the selected focus
   when reopened.
 
 ## Entry Points

@@ -11,10 +11,7 @@ navigation controls and a direct path to the full art view.
 
 - NextGen featured collection page: `/nextgen`
 - NextGen collection overview/tab routes (slideshow shown only when
-  `mint_count > 0`): `/nextgen/collection/{collection}`,
-  `/nextgen/collection/{collection}/about`,
-  `/nextgen/collection/{collection}/provenance`, and
-  `/nextgen/collection/{collection}/top-trait-sets`
+  `mint_count > 0`): `/nextgen/collection/{collection}/{view}`
 - Full collection art route linked from slideshow: `/nextgen/collection/{collection}/art`
 
 ## Entry Points
@@ -29,7 +26,7 @@ navigation controls and a direct path to the full art view.
 1. Open a page containing the slideshow.
 2. Scroll to the slideshow section.
 3. Browse token cards with carousel navigation arrows.
-4. Open a token card to jump to `/nextgen/token/{token}`.
+4. Open a token card to jump to `/nextgen/token/{token}/{view}`.
 5. Use the play/pause control (when present) to override autoplay behavior.
 6. Select `View All` to move from carousel preview to the full collection art
    view.

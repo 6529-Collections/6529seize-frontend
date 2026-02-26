@@ -9,7 +9,7 @@ or outbound marketplace actions do not behave as expected.
 
 - Memes mint and card routes: `/the-memes/mint`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`
-- Memes calendar routes/API: `/meme-calendar`, `/api/meme-calendar/{id}`
+- Memes calendar surfaces: `/meme-calendar`
 - Gradient routes: `/6529-gradient`, `/6529-gradient/{id}`
 - NFT detail routes that expose marketplace shortcuts
 - Interactive submission preview surfaces that render sandboxed external
@@ -48,7 +48,7 @@ or outbound marketplace actions do not behave as expected.
   `Live`.
 - `/the-memes/{id}` or `/the-memes/{id}/distribution` shows not-found:
   replace `{id}` with a valid positive integer and retry.
-- `/api/meme-calendar/{id}` fails:
+- Meme calendar API lookup fails:
   invalid/non-positive IDs return `400`; valid but unresolved IDs return `422`.
 - `/6529-gradient` query values behave unexpectedly:
   unsupported `sort`/`sort_dir` values are normalized to defaults.

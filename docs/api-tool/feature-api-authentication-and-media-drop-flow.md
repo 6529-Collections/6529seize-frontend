@@ -7,14 +7,14 @@ to create wave drops with embedded media using multipart upload.
 
 ## Location in the Site
 
-- Route: `/tools/api`
+- Route: tools/api
 - Navigation path: `Tools -> API`
 - External API reference linked from the page: `https://api.6529.io/docs/`
 
 ## Entry Points
 
 - Open `Tools -> API` from the sidebar.
-- Open `/tools/api` directly.
+- Open the Tools API page directly.
 - Open the external API reference from the link on the page.
 
 ## Terminology Snapshot

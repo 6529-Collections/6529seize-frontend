@@ -11,20 +11,15 @@ render output, and switch to large-resolution downloads with zoom controls.
 ## Location in the Site
 
 - NextGen featured slideshow cards: `/nextgen`
-- NextGen collection slideshow cards:
-  `/nextgen/collection/{collection}`,
-  `/nextgen/collection/{collection}/about`,
-  `/nextgen/collection/{collection}/provenance`, and
-  `/nextgen/collection/{collection}/top-trait-sets`
+- NextGen collection slideshow cards: `/nextgen/collection/{collection}/{view}`
 - NextGen collection art list cards: `/nextgen/collection/{collection}/art`
-- NextGen token art panel route family: `/nextgen/token/{token}` and
-  `/nextgen/token/{token}/{view}`
+- NextGen token art panel route family: `/nextgen/token/{token}/{view}`
 
 ## Entry Points
 
 - Open NextGen featured or collection pages and select a token card.
 - Open the collection art route directly, then select a token card.
-- Open a token route directly using `/nextgen/token/{token}` (or any
+- Open a token route directly using `/nextgen/token/{token}/{view}` (or any
   `/nextgen/token/{token}/{view}` variant).
 
 ## User Journey
