@@ -37,7 +37,9 @@ import {
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
 // Normalize consent country to uppercase code; empty or non-strings become null.
-const normalizeCountry = (country: string | null | undefined): string | null => {
+const normalizeCountry = (
+  country: string | null | undefined
+): string | null => {
   if (typeof country !== "string") {
     return null;
   }
@@ -49,16 +51,19 @@ const getVisibilityContext = ({
   showWaves,
   capacitorIsIos,
   country,
+  isOwnProfile,
 }: {
   readonly showWaves: boolean;
   readonly capacitorIsIos: boolean;
   readonly country: string | null | undefined;
+  readonly isOwnProfile: boolean;
 }): UserPageVisibilityContext => {
   const normalizedCountry = normalizeCountry(country);
 
   return {
     showWaves,
     hideSubscriptions: capacitorIsIos && normalizedCountry !== "US",
+    isOwnProfile,
   };
 };
 
@@ -72,8 +77,7 @@ const resolveTabFromPath = (pathname: string): UserPageTabKey => {
 const filterVisibleTabs = (
   tabs: readonly UserPageTabConfig[],
   context: UserPageVisibilityContext
-) =>
-  tabs.filter((tab) => (tab.isVisible ? tab.isVisible(context) : true));
+) => tabs.filter((tab) => (tab.isVisible ? tab.isVisible(context) : true));
 
 export default function UserPageTabs() {
   const pathname = usePathname() ?? "";
@@ -84,7 +88,17 @@ export default function UserPageTabs() {
   const searchString = searchParams?.toString() ?? "";
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { showWaves } = useContext(AuthContext);
+  const { showWaves, connectedProfile } = useContext(AuthContext);
+
+  const isOwnProfile = useMemo(() => {
+    if (!connectedProfile || !handleOrWallet) return false;
+    const lower = handleOrWallet.toLowerCase();
+    if (connectedProfile.normalised_handle === lower) return true;
+    return (
+      connectedProfile.wallets?.some((w) => w.wallet.toLowerCase() === lower) ??
+      false
+    );
+  }, [connectedProfile, handleOrWallet]);
 
   const visibilityContext = useMemo(
     () =>
@@ -92,8 +106,9 @@ export default function UserPageTabs() {
         showWaves,
         capacitorIsIos: capacitor.isIos,
         country,
+        isOwnProfile,
       }),
-    [capacitor.isIos, country, showWaves]
+    [capacitor.isIos, country, isOwnProfile, showWaves]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -150,7 +165,9 @@ export default function UserPageTabs() {
       return;
     }
 
-    const nextUrl = searchString ? `${fallbackPath}?${searchString}` : fallbackPath;
+    const nextUrl = searchString
+      ? `${fallbackPath}?${searchString}`
+      : fallbackPath;
     router.replace(nextUrl);
   }, [
     handleOrWallet,
@@ -221,15 +238,17 @@ export default function UserPageTabs() {
   };
 
   return (
-    <div className="tw-relative tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
+    <div className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700">
       <div
         ref={scrollContainerRef}
-        className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        aria-label="Tabs">
+        className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden"
+        aria-label="Tabs"
+      >
         <div
           ref={contentContainerRef}
-          className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-min-w-max"
-          aria-label="Tabs">
+          className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
+          aria-label="Tabs"
+        >
           {visibleTabs.map((tabConfig) => (
             <UserPageTab
               key={tabConfig.id}
@@ -242,28 +261,30 @@ export default function UserPageTabs() {
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-absolute tw-left-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollLeft}
             aria-label="Scroll tabs left"
-            className="tw-absolute tw-left-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-start tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
+            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
+          >
             <FontAwesomeIcon
               icon={faChevronLeft}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
             />
           </button>
         </>
       )}
       {canScrollRight && (
         <>
-          <div className="tw-absolute tw-right-0 tw-top-0 tw-bottom-0 tw-w-24 tw-pointer-events-none tw-z-10 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollRight}
             aria-label="Scroll tabs right"
-            className="tw-absolute tw-right-0 tw-top-1/2 tw--translate-y-1/2 tw-z-20 tw-inline-flex tw-items-center tw-justify-end tw-group tw-p-0 tw-h-10 tw-w-10 tw-bg-transparent tw-border-none tw-outline-none">
+            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
+          >
             <FontAwesomeIcon
               icon={faChevronRight}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 group-hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
             />
           </button>
         </>
