@@ -40,13 +40,15 @@ describe("ImageComponent", () => {
   });
 
   it("uses markdown-matching fixed height for URL-preview Tenor GIFs", () => {
-    render(
+    const { container } = render(
       <ImageComponent
         src="https://media.tenor.com/abc/tenor.gif"
         altText={URL_PREVIEW_IMAGE_ALT_TEXT}
       />
     );
-    const img = screen.getByRole("img") as HTMLImageElement;
+    const img = container.querySelector("img") as HTMLImageElement;
+    expect(img).toBeTruthy();
+    expect(img.getAttribute("alt")).toBe("");
 
     Object.defineProperty(img, "naturalWidth", { value: 1200 });
     Object.defineProperty(img, "naturalHeight", { value: 600 });

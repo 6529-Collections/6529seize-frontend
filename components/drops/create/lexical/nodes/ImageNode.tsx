@@ -20,8 +20,10 @@ import type {
 import { $applyNodeReplacement, DecoratorNode } from "lexical";
 import * as React from "react";
 import { Suspense, type JSX } from "react";
+import { CHAT_GIF_PREVIEW_HEIGHT_PX } from "@/components/waves/drops/gifPreview";
 
 const ImageComponent = React.lazy(() => import("./ImageComponent"));
+const LOADING_IMAGE_SRC = "loading";
 
 interface ImagePayload {
   key?: NodeKey | undefined;
@@ -152,8 +154,17 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   override decorate(): JSX.Element {
+    const fallback =
+      this.__src === LOADING_IMAGE_SRC ? (
+        <span
+          aria-hidden="true"
+          className="tw-block tw-max-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-800"
+          style={{ height: `${CHAT_GIF_PREVIEW_HEIGHT_PX}px`, width: "140px" }}
+        />
+      ) : null;
+
     return (
-      <Suspense fallback={null}>
+      <Suspense fallback={fallback}>
         <ImageComponent
           src={this.__src}
           altText={this.getAltText()}

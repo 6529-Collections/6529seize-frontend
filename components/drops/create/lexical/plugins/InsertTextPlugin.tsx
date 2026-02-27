@@ -1,6 +1,7 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $createTextNode,
+  $getNodeByKey,
   $getRoot,
   $getSelection,
   $insertNodes,
@@ -9,8 +10,9 @@ import {
   type RangeSelection,
 } from "lexical";
 import { forwardRef, useImperativeHandle } from "react";
-import { $createImageNode } from "../nodes/ImageNode";
+import { $createImageNode, $isImageNode } from "../nodes/ImageNode";
 import { URL_PREVIEW_IMAGE_ALT_TEXT } from "../nodes/urlPreviewImage.constants";
+import { isTenorGifUrl } from "@/components/waves/drops/gifPreview";
 
 export interface InsertTextOptions {
   readonly smartSpacing?: boolean;
@@ -23,6 +25,7 @@ export interface InsertTextPluginHandles {
 
 const hasNonWhitespace = (value: string | undefined): boolean =>
   Boolean(value && /\S/.test(value));
+const LOADING_IMAGE_SRC = "loading";
 
 const applySmartSpacing = (
   selection: RangeSelection,
@@ -113,6 +116,8 @@ const InsertTextPlugin = forwardRef<InsertTextPluginHandles, {}>((_, ref) => {
     if (!normalizedUrl.length) {
       return;
     }
+    const shouldUseLoadingPlaceholder = isTenorGifUrl(normalizedUrl);
+    let placeholderNodeKey: string | null = null;
 
     editor.update(() => {
       let selection = $getSelection();
@@ -129,13 +134,17 @@ const InsertTextPlugin = forwardRef<InsertTextPluginHandles, {}>((_, ref) => {
         selection,
         Boolean(options?.smartSpacing)
       );
+      const imageNode = $createImageNode({
+        src: shouldUseLoadingPlaceholder ? LOADING_IMAGE_SRC : normalizedUrl,
+        altText: URL_PREVIEW_IMAGE_ALT_TEXT,
+      });
+      if (shouldUseLoadingPlaceholder) {
+        placeholderNodeKey = imageNode.getKey();
+      }
 
       const nodes = [
         ...(leading ? [$createTextNode(" ")] : []),
-        $createImageNode({
-          src: normalizedUrl,
-          altText: URL_PREVIEW_IMAGE_ALT_TEXT,
-        }),
+        imageNode,
         ...(trailing ? [$createTextNode(" ")] : []),
       ];
 
@@ -146,6 +155,45 @@ const InsertTextPlugin = forwardRef<InsertTextPluginHandles, {}>((_, ref) => {
         trailingSpaceNode.selectEnd();
       }
     });
+
+    if (!shouldUseLoadingPlaceholder || !placeholderNodeKey) {
+      return;
+    }
+    const placeholderKey = placeholderNodeKey;
+
+    const replacePlaceholderWithPreview = () => {
+      editor.update(() => {
+        const placeholderNode = $getNodeByKey(placeholderKey);
+        if (!$isImageNode(placeholderNode)) {
+          return;
+        }
+        if (placeholderNode.getSrc() !== LOADING_IMAGE_SRC) {
+          return;
+        }
+        placeholderNode.replace(
+          $createImageNode({
+            src: normalizedUrl,
+            altText: URL_PREVIEW_IMAGE_ALT_TEXT,
+          })
+        );
+      });
+    };
+
+    if (typeof globalThis.Image === "undefined") {
+      replacePlaceholderWithPreview();
+      return;
+    }
+
+    const preloader = new globalThis.Image();
+    const finalize = () => {
+      preloader.onload = null;
+      preloader.onerror = null;
+      replacePlaceholderWithPreview();
+    };
+
+    preloader.onload = finalize;
+    preloader.onerror = finalize;
+    preloader.src = normalizedUrl;
   };
 
   useImperativeHandle(ref, () => ({

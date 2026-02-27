@@ -1,4 +1,5 @@
 import type { Transformer } from "@lexical/markdown";
+import type { ElementNode, LexicalNode } from "lexical";
 import { $isImageNode, ImageNode } from "../nodes/ImageNode";
 import { URL_PREVIEW_IMAGE_ALT_TEXT } from "../nodes/urlPreviewImage.constants";
 
@@ -16,6 +17,12 @@ export const URL_PREVIEW_IMAGE_TRANSFORMER: Transformer = {
 
     return node.getSrc();
   },
-  regExp: /(?:)/,
-  replace: () => {},
+  // Defensive: this transformer is export-only, so import regex should never match.
+  regExp: /$^/,
+  replace: (
+    _parentNode: ElementNode,
+    _children: Array<LexicalNode>,
+    _match: Array<string>,
+    _isImport: boolean
+  ) => {},
 };

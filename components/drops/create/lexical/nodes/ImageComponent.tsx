@@ -25,6 +25,8 @@ export default function ImageComponent({
 }: ImageComponentProps): JSX.Element {
   const isUrlPreviewGif =
     altText === URL_PREVIEW_IMAGE_ALT_TEXT && isTenorGifUrl(src);
+  const displayAltText =
+    altText === URL_PREVIEW_IMAGE_ALT_TEXT ? "" : (altText ?? "");
   const [dimensions, setDimensions] = useState({
     width: width ?? 0,
     height: height ?? 0,
@@ -58,7 +60,7 @@ export default function ImageComponent({
   return (
     <img
       src={src}
-      alt={altText}
+      alt={displayAltText}
       width={dimensions.width}
       height={dimensions.height}
       onLoad={handleImageLoad}

@@ -12,6 +12,7 @@ const getRootMock = jest.fn(() => ({
   selectEnd: selectEndMock,
 }));
 const getSelectionMock = jest.fn();
+const getNodeByKeyMock = jest.fn();
 const insertNodesMock = jest.fn();
 const isRangeSelectionMock = jest.fn((selection: unknown) =>
   Boolean(
@@ -30,6 +31,7 @@ jest.mock("lexical", () => ({
     insertAfter: jest.fn(),
     selectEnd: jest.fn(),
   })),
+  $getNodeByKey: (key: string) => getNodeByKeyMock(key),
   $getRoot: () => getRootMock(),
   $getSelection: () => getSelectionMock(),
   $insertNodes: (...args: unknown[]) => insertNodesMock(...args),
@@ -37,15 +39,27 @@ jest.mock("lexical", () => ({
   $isTextNode: (node: unknown) => isTextNodeMock(node),
 }));
 
+let imageNodeCounter = 0;
 const createImageNodeMock = jest.fn(
-  (opts: { src: string; altText: string }) => ({
-    ...opts,
-    insertAfter: jest.fn(),
-    selectNext: jest.fn(),
-  })
+  (opts: { src: string; altText: string }) => {
+    const key = `image-${++imageNodeCounter}`;
+    return {
+      __isImageNode: true,
+      ...opts,
+      getSrc: () => opts.src,
+      getKey: () => key,
+      replace: jest.fn(),
+      insertAfter: jest.fn(),
+      selectNext: jest.fn(),
+    };
+  }
 );
 
 jest.mock("@/components/drops/create/lexical/nodes/ImageNode", () => ({
+  $isImageNode: (node: unknown) =>
+    Boolean(
+      (node as { readonly __isImageNode?: boolean } | null)?.__isImageNode
+    ),
   $createImageNode: (opts: { src: string; altText: string }) =>
     createImageNodeMock(opts),
 }));
@@ -93,6 +107,7 @@ const createSelection = ({
 describe("InsertTextPlugin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    imageNodeCounter = 0;
   });
 
   it("inserts text with smart spacing when needed", () => {
@@ -156,5 +171,55 @@ describe("InsertTextPlugin", () => {
       expect.objectContaining({ src: "https://example.com/cat.gif" })
     );
     expect(insertNodesMock).toHaveBeenCalled();
+  });
+
+  it("inserts loading placeholder for Tenor GIF and swaps to preview URL", () => {
+    const OriginalImage = global.Image;
+    class MockImage {
+      onload: null | (() => void) = null;
+      onerror: null | (() => void) = null;
+      set src(_value: string) {
+        this.onload?.();
+      }
+    }
+    (global as typeof globalThis & { Image: typeof Image }).Image =
+      MockImage as unknown as typeof Image;
+
+    try {
+      const selection = createSelection({ text: "hello", offset: 5 });
+      getSelectionMock.mockReturnValue(selection);
+
+      const placeholderNode = {
+        __isImageNode: true as const,
+        getSrc: () => "loading",
+        replace: jest.fn(),
+      };
+      getNodeByKeyMock.mockReturnValue(placeholderNode);
+
+      const update = jest.fn((fn: () => void) => fn());
+      useCtx.mockReturnValue([{ update }]);
+
+      const ref = createRef<InsertTextPluginHandles>();
+      render(<InsertTextPlugin ref={ref} />);
+
+      ref.current?.insertImagePreviewFromUrl(
+        "https://media.tenor.com/abc/tenor.gif",
+        { smartSpacing: true }
+      );
+
+      expect(createImageNodeMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ src: "loading" })
+      );
+      expect(getNodeByKeyMock).toHaveBeenCalled();
+      expect(placeholderNode.replace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          src: "https://media.tenor.com/abc/tenor.gif",
+        })
+      );
+    } finally {
+      (global as typeof globalThis & { Image: typeof Image }).Image =
+        OriginalImage;
+    }
   });
 });

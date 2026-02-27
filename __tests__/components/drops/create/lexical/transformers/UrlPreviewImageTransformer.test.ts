@@ -28,4 +28,28 @@ describe("URL_PREVIEW_IMAGE_TRANSFORMER", () => {
 
     expect(URL_PREVIEW_IMAGE_TRANSFORMER.export?.(node)).toBeNull();
   });
+
+  it("uses a non-matching defensive regex for import-side behavior", () => {
+    expect(URL_PREVIEW_IMAGE_TRANSFORMER.regExp.test("")).toBe(false);
+    expect(
+      URL_PREVIEW_IMAGE_TRANSFORMER.regExp.test(
+        "https://media.tenor.com/abc/tenor.gif"
+      )
+    ).toBe(false);
+    expect(
+      URL_PREVIEW_IMAGE_TRANSFORMER.regExp.test("![Seize](https://x.com/a.png)")
+    ).toBe(false);
+  });
+
+  it("has a safe no-op replace handler", () => {
+    const children: any[] = [{ id: "node-1" }];
+    const parentNode: any = { type: "paragraph" };
+    const match = ["token"];
+
+    expect(() =>
+      URL_PREVIEW_IMAGE_TRANSFORMER.replace?.(parentNode, children, match, true)
+    ).not.toThrow();
+    expect(children).toHaveLength(1);
+    expect(children[0]).toEqual({ id: "node-1" });
+  });
 });
