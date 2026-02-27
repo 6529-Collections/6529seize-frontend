@@ -11,6 +11,8 @@ reference routes.
   `/network/levels`.
 - Adjacent reference routes owned here: `/network/xtdh`, `/xtdh`, and
   `/network/prenodes`.
+- Group scope behavior: `/network` owns scope controls; `/network/activity`
+  has no scope controls but can consume active group scope.
 - `/network/groups` behavior is owned by the Groups docs area. This area owns
   the handoff into network-scoped views.
 

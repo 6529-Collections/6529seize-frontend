@@ -37,8 +37,8 @@ activity feeds, and rule/reference pages.
 
 - `/network` list looks wrong after scope changes:
   clear and reapply group filter from the filter panel.
-- `/network/activity` appears unscoped:
-  this route intentionally ignores active group scope.
+- `/network/activity` looks unexpectedly scoped:
+  this route can inherit active group scope from `/network` state.
 - `/network/health` shows `Failed to load metrics. Please try again later.`:
   refresh the route to trigger a new fetch.
 - `/network/health/network-tdh` shows no charts:
@@ -52,14 +52,19 @@ activity feeds, and rule/reference pages.
 
 - `/network/nerd/*` treats unknown focus segments as `Cards Collected`.
 - `/network` normalizes invalid `page`, `sort-by`, and `sort-direction` values.
-- `/network/activity` and `/network/prenodes` do not expose inline filter controls.
+- `/network/activity` does not expose inline filter/scope controls but can still
+  use active group scope.
+- `/network/prenodes` does not expose inline filter controls.
 - `/network/levels` and `/network/definitions` are static references, not live
   metrics views.
 
 ## Failure and Recovery
 
 - If a route fails, reopen from `Network` sidebar navigation.
-- If `/network/activity` returns not-found, reload `/network/activity` directly.
+- If `/network/activity` data is unexpectedly scoped, clear group scope on
+  `/network`, then reopen `/network/activity`.
+- If `/network/activity` looks stale or empty, refresh `/network/activity`
+  directly.
 - If `/network` leaderboard is empty, remove `group` scope and retry.
 - If `/network/prenodes` is empty, retry later; no route-level retry control exists.
 
