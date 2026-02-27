@@ -6,8 +6,8 @@ Users can move owned NFTs to another wallet from two contexts:
 
 - The profile collected tab (`/{user}/collected`) supports batch selection and
   a persistent transfer panel.
-- Single-card detail pages for The Memes, Meme Lab, and NextGen expose one-card
-  transfer controls.
+- Single-card detail pages for The Memes, Meme Lab, 6529 Gradient, and NextGen
+  expose one-card transfer controls.
 
 The flow uses a recipient search first (handle, ENS, or wallet), then wallet
 confirmation and on-chain execution.
@@ -17,7 +17,8 @@ confirmation and on-chain execution.
 - Collected tab bulk transfer: `/{user}/collected`
 - The Memes detail card: `/the-memes/{id}`
 - Meme Lab detail card: `/meme-lab/{id}`
-- NextGen token detail: `/nextgen/token/{id}/{view}`
+- 6529 Gradient detail card: `/6529-gradient/{id}`
+- NextGen token detail: `/nextgen/token/{token}` (optional `/{view}`)
 
 ## Entry Points
 
@@ -66,12 +67,15 @@ For single-token pages, users usually transfer one card/asset at a time with:
 - Transfer from a card detail page:
   - On The Memes and Meme Lab, transfer controls appear in the “Your Cards” area
     when the connected profile owns editions.
+  - On 6529 Gradient detail pages, transfer control appears only for the
+    connected address that owns the current token.
   - On NextGen pages, transfer control appears for owner-owned tokens.
 
 ## Edge Cases
 
 - Transfer mode is not shown on mobile in the collected tab and not shown for
   users who are not connected to a wallet.
+- Single-card transfer controls are also hidden on mobile detail views.
 - Transfer mode is hidden unless the viewed profile includes the connected wallet
   and the page has transferable cards.
 - A card can show an explicit “not owned” indicator in transfer mode if the

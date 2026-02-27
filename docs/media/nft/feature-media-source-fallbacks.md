@@ -14,6 +14,7 @@ asset URL is unavailable.
 - Meme Lab list: `/meme-lab`
 - Meme Lab collection page: `/meme-lab/collection/{collection}`
 - Meme Lab card page: `/meme-lab/{id}` (`Live`, `Your Cards`, and `The Art`)
+- ReMeme card page: `/rememes/{contract}/{id}` (`Live`)
 - 6529 Gradient list and card pages: `/6529-gradient`, `/6529-gradient/{id}`
 - Home latest-drop artwork: `/`
 - The Memes mint artwork panel: `/the-memes/mint`
@@ -23,6 +24,7 @@ asset URL is unavailable.
 - Browse NFT list/grid pages where artwork appears on cards.
 - Open a direct card route (`/the-memes/{id}`, `/meme-lab/{id}`,
   `/6529-gradient/{id}`).
+- Open a ReMeme detail route (`/rememes/{contract}/{id}`).
 - Open home latest-drop or The Memes mint pages.
 
 ## User Journey
@@ -45,6 +47,10 @@ asset URL is unavailable.
   `image -> metadata.image (if present)`.
 - Video surfaces try:
   `compressed_animation (if present) -> animation -> metadata.animation (if present)`.
+- ReMeme image surfaces try:
+  `s3_thumbnail (height 300 only) -> s3_scaled -> s3_original -> image (gateway and direct IPFS forms) -> metadata.image (gateway and direct IPFS forms) -> OpenSea collection image`.
+- ReMeme video surfaces try:
+  `image (when mp4) in direct and gateway forms -> metadata.animation in direct and gateway forms`.
 - Grid/thumbnail-style image surfaces load lazily; larger detail-image surfaces
   load eagerly so hero artwork is ready sooner.
 
@@ -54,6 +60,8 @@ asset URL is unavailable.
   in the NFT payload.
 - Video fallback applies only to video-rendered animation formats; non-video
   animation formats use separate renderers.
+- ReMeme fallback sequence can include both direct IPFS URLs and normalized
+  gateway URLs in one attempt chain.
 - Fallback behavior is local to each rendered media component; opening another
   page or tab starts a fresh attempt sequence for that view.
 

@@ -15,8 +15,9 @@
 - [Collections](collections/README.md): `/meme-lab`, `/meme-lab/{id}`,
   `/meme-lab/collection/{collection}`, `/meme-lab/{id}/distribution`,
   `/rememes`, `/rememes/{contract}/{id}`, and `/rememes/add`.
-- [NFT](nft/README.md): ownership indicators, source fallbacks, marketplace
-  shortcuts, and transfer actions across media detail routes.
+- [NFT](nft/README.md): shared ownership indicators, source fallbacks,
+  marketplace shortcuts, and transfer actions across media routes plus adjacent
+  collected and NextGen token routes.
 - [Rendering](rendering/README.md): interactive HTML sandbox behavior and
   `/6529-gradient` list/detail loading.
 
