@@ -6,13 +6,16 @@ Parent: [Open Data Index](README.md)
 
 Use this page when an Open Data route is missing, blank, or not loading as expected.
 
-## `Meme Subscriptions` card is missing on `/open-data`
+## `Meme Subscriptions` is missing in hub/sidebar on iOS
 
-- Cause: in the native iOS app, the card is hidden when cookie-country is not
-  `US`.
+- Causes:
+  - In the native iOS app, the link is hidden when cookie-country is not `US`.
+  - In the native iOS app, the link can be temporarily hidden while
+    cookie-country is still loading.
 - Recovery:
   1. Open `/open-data/meme-subscriptions` directly.
-  2. If needed, confirm whether you are using the iOS app path.
+  2. If needed, confirm whether you are on native iOS and whether country check
+     has finished.
 
 ## `Failed to load community downloads. Please try again.`
 

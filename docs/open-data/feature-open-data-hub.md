@@ -4,46 +4,56 @@ Parent: [Open Data Index](README.md)
 
 ## Overview
 
-`/open-data` is the card-based hub for all Open Data dataset routes.
+`/open-data` is the Open Data hub route.
+It shows dataset cards only. File tables and download links are handled on
+dataset routes.
 
 ## Location in the Site
 
 - Route: `/open-data`
-- Sidebar path: `Tools -> Open Data`
+- Desktop sidebar path: `Tools -> Open Data -> Open Data`
+- Mobile sidebar path: `Tools -> Open Data`
 
 ## Entry Points
 
-- Open `Tools -> Open Data -> Open Data` in the desktop sidebar.
-- Open `Tools -> Open Data` in the mobile sidebar.
+- Open `Tools -> Open Data -> Open Data` from the desktop sidebar.
+- Open `Tools -> Open Data` from the mobile sidebar.
 - Open `/open-data` directly.
+- Open the `/open-data` links from `/about/minting` and
+  `/about/data-decentralization`.
 
-## User Journey
+## Cards and Route Outcomes
 
 1. Open `/open-data`.
-2. Review the card list.
-3. Open the route you need:
+2. Pick a dataset card:
    - Network Metrics
-   - Meme Subscriptions
+   - Meme Subscriptions (conditional visibility)
    - Rememes
    - Team
    - Royalties
-4. The selected card opens a dataset table route under `/open-data/*`.
+3. The selected card opens its dataset route under `/open-data/*`.
+
+Desktop sidebar navigation also includes direct links to each dataset route.
+Mobile sidebar navigation links only to `/open-data`.
 
 ## Visibility Rules
 
-- `Meme Subscriptions` is shown unless both conditions are true:
-  - The user is in the native iOS app.
-  - Cookie-country is not `US`.
-- If the card is hidden, direct navigation to `/open-data/meme-subscriptions`
-  still works.
+- `Meme Subscriptions` is shown when either condition is true:
+  - The user is not in the native iOS app.
+  - Country check returns `US`.
+- `Meme Subscriptions` is hidden on native iOS when cookie-country is not `US`.
+- On native iOS, the card can be temporarily hidden while cookie-country is
+  still loading.
+- Direct navigation to `/open-data/meme-subscriptions` still works when the
+  card is hidden.
 
-## Load, Error, and Empty States
+## States on the Hub
 
-- This hub page is static and does not show dataset loading, empty, or error
-  states.
+- The hub does not request dataset APIs.
+- The hub does not show dataset loading, empty, or error banners.
 - Download-state behavior is handled on each dataset route.
 
-## Limitations / Notes
+## Limitations
 
 - The hub has no search, filtering, or sorting controls.
 - Cards are route links only.

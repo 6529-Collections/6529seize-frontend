@@ -8,11 +8,21 @@ Open Data docs cover dataset download routes under `/open-data/*`.
 - Dataset routes:
   `/open-data/network-metrics`, `/open-data/meme-subscriptions`,
   `/open-data/rememes`, `/open-data/team`, and `/open-data/royalties`.
-- Entry path: `Tools -> Open Data` in sidebar navigation, or direct URL entry.
-- Visibility rule: on native iOS with non-US cookie country, `Meme Subscriptions`
-  is hidden in the hub and Open Data sidebar section.
-- Direct fallback: `/open-data/meme-subscriptions` still opens when the link is
-  hidden.
+- Entry paths:
+  - Desktop sidebar: `Tools -> Open Data -> Open Data`
+  - Mobile sidebar: `Tools -> Open Data`
+  - Direct URL: `/open-data`
+  - About-page links from `/about/minting` and `/about/data-decentralization`
+- Desktop sidebar also includes direct links to each dataset route under
+  `Tools -> Open Data`.
+- Mobile sidebar links only to `/open-data`; dataset routes are reached from hub
+  cards or direct URLs.
+- Visibility rule: on native iOS, `Meme Subscriptions` in hub/sidebar is shown
+  only when cookie-country is `US`.
+- On native iOS, `Meme Subscriptions` can be temporarily hidden while
+  cookie-country is still loading.
+- Direct fallback: `/open-data/meme-subscriptions` still opens when the hub card
+  or sidebar link is hidden.
 - Route behavior families:
   - API + pagination + loading/error banners: Network Metrics, Rememes, Royalties.
   - API + pagination without inline loading/error banners: Meme Subscriptions

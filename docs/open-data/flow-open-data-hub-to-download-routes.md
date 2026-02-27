@@ -17,7 +17,7 @@ This flow covers opening `/open-data` and moving into one dataset route.
 1. Open `/open-data`.
 2. Pick the dataset route card you need:
    - `Network Metrics`
-   - `Meme Subscriptions`
+   - `Meme Subscriptions` (can be hidden on native iOS outside US)
    - `Rememes`
    - `Team`
    - `Royalties`
