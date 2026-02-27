@@ -13,8 +13,8 @@ owned by:
 
 - [Profile Identity Tab](feature-identity-tab.md): combined `Rep` and `NIC`
   behavior at `/{user}`.
-- [Profile Identity Statements](feature-identity-statements.md): add/edit/delete
-  statement rows inside Identity.
+- [Profile Identity Statements](feature-identity-statements.md): consolidated
+  addresses plus statement add/open/copy/delete behavior inside Identity.
 - [Profile Brain Tab](feature-brain-tab.md): profile feed behavior at
   `/{user}/brain`, including drop-open routing to Waves or Messages.
 - [Collected Tab and Transfer Mode](feature-collected-tab.md): native and
