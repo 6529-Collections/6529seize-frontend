@@ -18,7 +18,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 ## Entry Points
 
 - Open any app-shell route.
-- Open a thread (`/waves/{waveId}` or `?wave={waveId}`).
+- Open a thread (`/waves/{waveId}`, `/waves?wave={waveId}`, or
+  `/messages?wave={waveId}`).
 - Open create routes (`/waves/create`, `/messages/create`).
 - Return to `/` to access the home-only health shortcut.
 

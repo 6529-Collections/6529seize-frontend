@@ -2,80 +2,71 @@
 
 ## Overview
 
-The app-header back button is context-aware. It appears only when the app has a
-predictable in-app backward action and runs route-specific logic before falling
-back to navigation-history behavior.
+In the app layout, header `Back` is context-aware. It appears only in supported
+contexts, then runs route rules before history.
 
 ## Location in the Site
 
-- App header on wave/detail contexts.
-- Create routes: `/waves/create` and `/messages/create`.
-- Wave thread route context (`/waves/{waveId}`).
-- Message thread query context (`/messages?wave={waveId}`).
-- Profile routes (`/{user}`) when in-app history provides a valid back target.
+- App header in app-layout routes.
+- Create routes: `/waves/create`, `/messages/create`.
+- Active wave routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Legacy `/waves?wave={waveId}` links are normalized to `/waves/{waveId}`.
+- Profile routes (`/{user}` and tabs) only when in-app history can go back.
 
 ## Entry Points
 
-- Open a wave thread.
-- Open a message thread (`/messages?wave={waveId}`).
-- Open a create route.
-- Open a route with an active `drop` query parameter.
-- Open a profile route after navigating from another in-app route.
+- Open a wave or DM thread.
+- Open a route with `?drop={dropId}`.
+- Open `/waves/create` or `/messages/create`.
+- Open a profile route after moving from another app route.
 
 ## User Journey
 
-1. Header shows `Back` when one of these conditions is true:
-   - active wave context is present (`/waves/{waveId}` or
-     `/messages?wave={waveId}`),
-   - current route is `/waves/create` or `/messages/create`,
-   - current route is a profile route and history can go back.
-2. User selects `Back`.
-3. The app applies the first matching rule:
-   - `/waves/create` -> `/waves`
-   - `/messages/create` -> `/messages`
-   - active `drop` query -> remove `drop` while keeping current thread context
-     and other query state
-   - active wave context -> clear active wave and return to section home
-     (`/waves` or `/messages`)
-4. If no route-specific rule matches, the app falls back to navigation-history
-   `goBack`.
+1. Header shows `Back` only when at least one condition is true:
+   - active wave context exists,
+   - route is `/waves/create` or `/messages/create`,
+   - route is a profile page and in-app history can go back.
+2. User taps `Back`.
+3. The app applies the first match in this order:
+   - `/waves/create` -> replace to `/waves`
+   - `/messages/create` -> replace to `/messages`
+   - `drop` query exists -> remove only `drop`, keep path and other query params
+   - active wave context -> clear active wave state and return to `/waves` or
+     `/messages`
+4. If no route rule matches, `Back` runs in-app history and shows a spinner
+   while navigation resolves.
 
 ## Common Scenarios
 
-- Leave create flow:
-  use `Back` from `/waves/create` or `/messages/create` to return to the
-  section list.
-- Close a focused drop:
-  when `?drop=` is present, `Back` removes that query state and stays in the
-  same route context with remaining query params preserved.
-- Leave active wave/thread:
-  `Back` clears the active thread and returns to `/waves` or `/messages`
-  depending on wave type.
-- Leave a profile route:
-  if a prior in-app route exists, `Back` returns there.
+- Leave create flow: `Back` from `/waves/create` or `/messages/create` returns
+  to the matching list route.
+- Close focused drop: if `?drop=` exists, `Back` removes only `drop`.
+- Leave thread: `Back` clears active thread state and returns to section root.
+- Return from profile: if in-app history has a valid target, `Back` returns to
+  it.
 
 ## Edge Cases
 
-- Repeat clicks during fallback history loading are ignored.
-- Profile routes do not show `Back` when in-app history has no valid prior
-  target.
-- If active wave metadata disappears while viewing a thread, wave state is
-  cleared and routing falls back to section-home behavior (`/waves` or
-  `/messages`).
+- Repeat taps are ignored while fallback loading is active.
+- Profile routes hide `Back` when there is no valid in-app target (for example
+  direct entry or same-profile-only browsing).
+- If active wave metadata is missing, the app clears wave state and routes to
+  `/waves` or `/messages`, preserving non-`wave` query params.
 
 ## Failure and Recovery
 
-- If drop query cleanup does not apply immediately, retry once; the route rule
-  still removes `drop` in-place.
-- If no in-app history target exists, use sidebar/bottom-navigation controls to
-  return to the desired section root.
-- If route transition stalls, reload the current route and retry the action.
+- If `Back` is missing, use menu or bottom navigation to return to section root.
+- If no valid history target exists, navigate directly to `/waves`,
+  `/messages`, or another root route from navigation controls.
+- If a route transition stalls, refresh the current route and retry.
 
 ## Limitations / Notes
 
-- Back behavior is intentionally context-aware and is not a strict one-to-one
-  wrapper over browser history.
-- A loading spinner appears only during fallback history navigation.
+- This behavior is app-layout only.
+- `Back` is context-aware, not a strict browser-back wrapper.
+- Leaving a thread with `Back` clears last-visited thread memory for that
+  section.
+- Loading spinner appears only during history fallback.
 
 ## Related Pages
 

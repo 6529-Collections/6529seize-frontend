@@ -33,9 +33,9 @@ controls do not behave as expected across web and app layouts.
 ## Common Scenarios
 
 - `Back` button is missing:
-  it appears only for active wave contexts (`/waves/{waveId}` or
-  `/messages?wave={waveId}`), create routes, or profile routes with valid
-  in-app back history.
+  it appears only for active wave contexts (`/waves/{waveId}`,
+  `/waves?wave={waveId}`, or `/messages?wave={waveId}`), create routes, or
+  profile routes with valid in-app back history.
 - Sidebar link seems missing:
   expand the relevant section (`Network`, `Collections`, `Tools`, `About`) or
   open the collapsed flyout first.
