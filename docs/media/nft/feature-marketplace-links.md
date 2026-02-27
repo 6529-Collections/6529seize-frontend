@@ -2,34 +2,28 @@
 
 ## Overview
 
-Supported NFT detail pages expose marketplace shortcut icons that open the same
-token on major external marketplaces. This gives users a direct path from a
-token detail view to trading/listing pages without manually copying contract and
-token IDs.
+- Supported NFT detail routes can show marketplace logo links in the token
+  details panel.
+- Selecting a logo opens the same token on an external marketplace in a new
+  tab.
+- Providers: OpenSea, Magic Eden, Rarible, and Blur (Blur only for the 6529
+  Gradient contract).
+- No sign-in or wallet connection is required.
 
 ## Location in the Site
 
-- The Memes card route: `/the-memes/{id}` (`Live` tab)
-- Meme Lab card route: `/meme-lab/{id}` (`Live` tab)
-- ReMemes token route: `/rememes/{contract}/{id}` (`Live` tab)
-- 6529 Gradient token route: `/6529-gradient/{id}`
+- `/the-memes/{id}` on `Live` (`focus=live`)
+- `/meme-lab/{id}` on `Live` (`focus=live`)
+- `/rememes/{contract}/{id}` on `Live` (default tab)
+- `/6529-gradient/{id}` detail view
 
 ## Entry Points
 
-- Open a supported NFT detail route above.
-- On tabbed routes, keep or switch to `Live`.
-- Scroll the right-side detail column to the marketplace icon row.
+- Open one of the supported detail routes.
+- On The Memes and Meme Lab, switch to `Live`.
+- Open the token details column and find the marketplace icon row.
 
-## User Journey
-
-1. User opens a supported NFT detail page.
-2. The page renders marketplace icon buttons in the token details area when the
-   platform/region gate allows them.
-3. User selects a marketplace icon.
-4. The destination opens in a new browser tab on the corresponding external
-   marketplace item page.
-
-## Common Scenarios
+## Destination URLs
 
 - OpenSea opens:
   `https://opensea.io/assets/ethereum/{contract}/{tokenId}`
@@ -38,37 +32,50 @@ token IDs.
 - Rarible opens:
   `https://rarible.com/ethereum/items/{contract}:{tokenId}`
 - Blur opens:
-  `https://blur.io/eth/asset/{contract}/{tokenId}` when the NFT contract is the
-  6529 Gradient contract.
+  `https://blur.io/eth/asset/{contract}/{tokenId}` only when the token contract
+  matches 6529 Gradient.
+
+## Visibility Rules
+
+- Marketplace links render only after token detail data is loaded.
+- On tabbed routes, links render only on `Live`.
+- On Capacitor iOS sessions, icons are shown only when detected country is
+  exactly `US`.
+- On Capacitor iOS with empty, unknown, or non-`US` country values, icons stay
+  hidden.
+- On non-iOS sessions, links are not country-gated.
 
 ## Edge Cases
 
-- Marketplace icons are hidden on iOS when the detected country is not `US`.
-- On iOS with `US` country detection, marketplace icons remain available.
-- Blur is contract-specific and does not appear for non-Gradient collections.
-- Icons are visual buttons (logo-only); hover/focus title text provides
-  marketplace names.
+- If the token detail route is unresolved or still loading, marketplace links do
+  not render.
+- Blur never appears for non-Gradient contracts.
+- Icons are logo-only controls; link `title` text carries marketplace names.
 
 ## Failure and Recovery
 
-- If an external marketplace page is unavailable, users see the destination
-  site error in the new tab while the original 6529 page remains unchanged.
-- Retrying uses the same icon again after the external site recovers.
-- Users can still open other marketplace destinations if one provider is down.
+- If an external marketplace is unavailable, the new tab shows provider-side
+  errors while the 6529 page remains unchanged.
+- Retry by selecting the same icon after provider recovery.
+- If one provider fails, other available provider links can still be used.
+- If icons are missing on iOS, verify detected country is `US` and retry after
+  route reload.
 
 ## Limitations / Notes
 
 - These shortcuts are outbound navigation only and do not provide in-app listing
   or trading controls.
 - Destination content/availability depends on third-party marketplace services.
-- URL formats are marketplace-specific and can differ by provider.
-- Marketplace icons use provider-supplied branding assets, so logo artwork can
-  change while destination URLs and click behavior remain the same.
+- URL formats are provider-specific.
+- Provider logos can change without changing link behavior.
 
 ## Related Pages
 
 - [Media Index](../README.md)
+- [Media NFT Index](README.md)
 - [NFT Balance Indicators](feature-balance-indicators.md)
 - [NFT Media Source Fallbacks](feature-media-source-fallbacks.md)
 - [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
+- [Meme Lab Card Route Tabs and Navigation](../collections/feature-meme-lab-card-route-tabs-and-navigation.md)
+- [Media Routes and Minting Troubleshooting](../troubleshooting-media-routes-and-minting.md)
 - [Docs Home](../../README.md)

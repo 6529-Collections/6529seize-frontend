@@ -21,8 +21,9 @@
   signed-in `SEIZED xN` / `UNSEIZED` states and ownership badge variants across
   supported list/detail surfaces.
 - [NFT Marketplace Shortcut Links](feature-marketplace-links.md):
-  outbound OpenSea, Magic Eden, Rarible, and Blur links on supported detail
-  routes, including iOS country gating.
+  outbound OpenSea, Magic Eden, Rarible, and contract-specific Blur links on
+  The Memes, Meme Lab, ReMemes (`Live` tab) and 6529 Gradient detail routes,
+  with iOS country gating.
 - [NFT Media Source Fallbacks](feature-media-source-fallbacks.md):
   image/video source order on list/detail routes, home latest-drop artwork, and
   The Memes mint artwork.
