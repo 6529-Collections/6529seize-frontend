@@ -98,9 +98,6 @@ available yet.
   downloadable ICS file instead.
 - If screenshot export fails, no inline recovery message is shown; retry the
   action or capture the panel with OS screenshot tools.
-- `/api/meme-calendar/{id}` returns:
-  - `400` for invalid/non-positive IDs.
-  - `422` when timeline resolution fails for the provided ID.
 - If a fallback route opens a not-found screen, replace `{id}` with a valid
   numeric card id or open `/meme-calendar` directly.
 - If timezone output is unclear, switch between `Local` and `UTC` to compare

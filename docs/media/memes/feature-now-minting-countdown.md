@@ -64,7 +64,7 @@ the card’s distribution view.
   - Header uses `Public Phase Starts In` before activation and
     `Public Phase Ends In` after activation
 - Sold out:
-  - Card shows `Mint Complete` with `All NFTs have been successfully minted.`
+  - Card shows `Mint Complete` with `All editions have been minted!`
 - Finalized (ended without full sell-out):
   - Card shows `Mint Complete` with `Minting for this drop has ended.`
   - This state appears when the mint window closes with editions still
