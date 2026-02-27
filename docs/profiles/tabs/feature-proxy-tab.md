@@ -14,7 +14,7 @@ proxy lists in one surface.
 ## Entry Points
 
 - Open `/{user}/proxy` directly.
-- Switch to `Proxy` from any profile tab.
+- Switch to `Proxy` from your own profile tab bar.
 - Open a shared profile link that lands on the proxy tab.
 
 ## User Journey
@@ -44,10 +44,11 @@ proxy lists in one surface.
 
 ## Edge Cases
 
+- If you are not on your own connected profile, `Proxy` is hidden in the tab
+  bar and `/{user}/proxy` is replaced with the first visible tab route.
 - `Assign Proxy` is hidden unless viewing your own connected profile and no
   proxy profile is active.
 - You can add a proxy only to another profile owner and not to yourself.
-- For non-owners, the list shows only currently active proxy actions.
 - Action rows are grouped by grantor/receiver status and can show `Accepted`,
   `Pending`, `Rejected`, `Active`, or `Revoked`.
 
