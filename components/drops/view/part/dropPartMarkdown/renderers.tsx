@@ -8,6 +8,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "@/components/waves/drops/WaveDropQuoteWithSerialNo";
+import { CHAT_GIF_PREVIEW_HEIGHT_PX } from "@/components/waves/drops/gifPreview";
 import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import { ensureTwitterLink } from "./twitter";
@@ -57,8 +58,6 @@ const renderTweetEmbed = (
   );
 };
 
-const CHAT_GIF_HEIGHT = 180;
-
 interface GifEmbedOptions {
   readonly fixedSize?: boolean | undefined;
 }
@@ -74,7 +73,7 @@ const renderGifEmbed = (
         src={url}
         alt="Embedded GIF"
         className="tw-block tw-w-auto tw-max-w-full tw-rounded-xl tw-object-contain"
-        style={{ height: `${CHAT_GIF_HEIGHT}px` }}
+        style={{ height: `${CHAT_GIF_PREVIEW_HEIGHT_PX}px` }}
         loading="lazy"
       />
     );

@@ -59,9 +59,16 @@ import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
+import InsertTextPlugin, {
+  type InsertTextOptions,
+  type InsertTextPluginHandles,
+} from "../drops/create/lexical/plugins/InsertTextPlugin";
+import StandaloneImageUrlPreviewPlugin from "../drops/create/lexical/plugins/StandaloneImageUrlPreviewPlugin";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
+  insertTextAtCursor: (text: string, options?: InsertTextOptions) => void;
+  insertImagePreviewFromUrl: (url: string, options?: InsertTextOptions) => void;
   focus: () => void;
 }
 
@@ -192,13 +199,25 @@ const CreateDropInput = forwardRef<
     }
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
+    const insertTextRef = useRef<InsertTextPluginHandles | null>(null);
     const editorRef = useRef<HTMLDivElement>(null);
     const clearEditorState = () => {
       clearEditorRef.current?.clearEditorState();
     };
+    const insertTextAtCursor = (text: string, options?: InsertTextOptions) => {
+      insertTextRef.current?.insertTextAtCursor(text, options);
+    };
+    const insertImagePreviewFromUrl = (
+      url: string,
+      options?: InsertTextOptions
+    ) => {
+      insertTextRef.current?.insertImagePreviewFromUrl(url, options);
+    };
 
     useImperativeHandle(ref, () => ({
       clearEditorState,
+      insertTextAtCursor,
+      insertImagePreviewFromUrl,
       focus: () => {
         (
           editorRef.current?.querySelector(
@@ -309,12 +328,14 @@ const CreateDropInput = forwardRef<
               <DragDropPastePlugin />
               <ListPlugin />
               <PlainTextPastePlugin />
+              <StandaloneImageUrlPreviewPlugin />
               <MarkdownShortcutPlugin
                 transformers={SAFE_MARKDOWN_TRANSFORMERS}
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
+              <InsertTextPlugin ref={insertTextRef} />
               <DisableEditPlugin disabled={submitting} />
               <EnterKeyPlugin
                 handleSubmit={handleSubmit}

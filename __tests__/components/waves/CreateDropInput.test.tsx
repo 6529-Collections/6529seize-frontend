@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import { render, screen } from "@testing-library/react";
 import CreateDropInput from "@/components/waves/CreateDropInput";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
@@ -89,6 +89,17 @@ jest.mock(
   "@/components/drops/create/lexical/plugins/DragDropPastePlugin",
   () => ({ __esModule: true, default: () => <div /> })
 );
+jest.mock("@/components/drops/create/lexical/plugins/InsertTextPlugin", () => ({
+  __esModule: true,
+  default: React.forwardRef<any, {}>(() => <div />),
+}));
+jest.mock(
+  "@/components/drops/create/lexical/plugins/StandaloneImageUrlPreviewPlugin",
+  () => ({
+    __esModule: true,
+    default: () => <div />,
+  })
+);
 jest.mock(
   "@/components/drops/create/lexical/plugins/enter/EnterKeyPlugin",
   () => ({ __esModule: true, default: () => <div /> })
@@ -161,4 +172,28 @@ it("renders validation helper text when provided", () => {
   expect(screen.getByRole("alert")).toHaveTextContent(
     "URL must be from superrare.com, manifold.xyz, opensea.io, transient.xyz, or foundation.app."
   );
+});
+
+it("exposes insertTextAtCursor on the forwarded ref", () => {
+  const ref = createRef<any>();
+
+  render(
+    <CreateDropInput
+      ref={ref}
+      waveId="w"
+      editorState={null}
+      type={null}
+      canSubmit={false}
+      isStormMode={false}
+      isDropMode={true}
+      submitting={false}
+      onEditorState={jest.fn()}
+      onReferencedNft={jest.fn()}
+      onMentionedUser={jest.fn()}
+      onMentionedWave={jest.fn()}
+    />
+  );
+
+  expect(typeof ref.current?.insertTextAtCursor).toBe("function");
+  expect(typeof ref.current?.insertImagePreviewFromUrl).toBe("function");
 });

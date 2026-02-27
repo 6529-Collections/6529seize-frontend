@@ -1,0 +1,1 @@
+export const URL_PREVIEW_IMAGE_ALT_TEXT = "__URL_PREVIEW_IMAGE__";

@@ -4,6 +4,11 @@ import React, { useState, type JSX } from "react";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import {
+  CHAT_GIF_PREVIEW_HEIGHT_PX,
+  isTenorGifUrl,
+} from "@/components/waves/drops/gifPreview";
+import { URL_PREVIEW_IMAGE_ALT_TEXT } from "./urlPreviewImage.constants";
 
 interface ImageComponentProps {
   readonly src: string;
@@ -18,6 +23,10 @@ export default function ImageComponent({
   width,
   height,
 }: ImageComponentProps): JSX.Element {
+  const isUrlPreviewGif =
+    altText === URL_PREVIEW_IMAGE_ALT_TEXT && isTenorGifUrl(src);
+  const displayAltText =
+    altText === URL_PREVIEW_IMAGE_ALT_TEXT ? "" : (altText ?? "");
   const [dimensions, setDimensions] = useState({
     width: width ?? 0,
     height: height ?? 0,
@@ -51,11 +60,20 @@ export default function ImageComponent({
   return (
     <img
       src={src}
-      alt={altText}
+      alt={displayAltText}
       width={dimensions.width}
       height={dimensions.height}
       onLoad={handleImageLoad}
-      style={{ maxWidth: "100%", height: "auto" }}
+      style={
+        isUrlPreviewGif
+          ? {
+              maxWidth: "100%",
+              width: "auto",
+              height: `${CHAT_GIF_PREVIEW_HEIGHT_PX}px`,
+              objectFit: "contain",
+            }
+          : { maxWidth: "100%", height: "auto" }
+      }
     />
   );
 }
