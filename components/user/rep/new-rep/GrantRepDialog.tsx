@@ -23,24 +23,14 @@ export default function GrantRepDialog({
       onClose={onClose}
       tabletModal
     >
-      <div>
-        <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
-          <UserPageRepNewRep
-            profile={profile}
-            repRates={repRates}
-            onSuccess={onClose}
-          />
-        </UserPageRateWrapper>
-        <div className="tw-mt-4 tw-px-4 sm:tw-px-6">
-          <button
-            onClick={onClose}
-            type="button"
-            className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
+      <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
+        <UserPageRepNewRep
+          profile={profile}
+          repRates={repRates}
+          onSuccess={onClose}
+          onCancel={onClose}
+        />
+      </UserPageRateWrapper>
     </MobileWrapperDialog>
   );
 }
