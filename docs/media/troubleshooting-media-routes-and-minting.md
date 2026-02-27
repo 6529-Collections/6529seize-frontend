@@ -2,111 +2,119 @@
 
 ## Overview
 
-Use this page when media routes, minting controls, calendar lookups, rendering,
-or outbound marketplace actions do not behave as expected.
+Use this page when media routes, minting controls, calendar lookups,
+interactive previews, or marketplace shortcuts fail.
 
 ## Location in the Site
 
-- Memes mint and card routes: `/the-memes/mint`, `/the-memes/{id}`,
+- The Memes: `/the-memes`, `/the-memes/mint`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`
-- Meme Lab routes: `/meme-lab`, `/meme-lab/{id}`,
-  `/meme-lab/collection/{collection}`, `/meme-lab/{id}/distribution`
-- ReMemes routes: `/rememes`, `/rememes/{contract}/{id}`, `/rememes/add`
-- Memes calendar surfaces: `/meme-calendar`
-- Gradient routes: `/6529-gradient`, `/6529-gradient/{id}`
-- NFT detail routes that expose marketplace shortcuts
-- Interactive submission preview surfaces that render sandboxed external
-  content
+- Meme Lab: `/meme-lab`, `/meme-lab/collection/{collection}`, `/meme-lab/{id}`,
+  `/meme-lab/{id}/distribution`
+- ReMemes: `/rememes`, `/rememes/{contract}/{id}`, `/rememes/add`
+- Calendar: `/meme-calendar`, `/api/meme-calendar/{id}`
+- 6529 Gradient: `/6529-gradient`, `/6529-gradient/{id}`
+- Interactive HTML preview in Memes submission
+- NFT detail pages with marketplace shortcuts
 
 ## Entry Points
 
-- Mint page shows loading/error/no-data states longer than expected.
-- `Mint` action is unavailable or hidden.
-- Card/deep-link route opens unexpected tab or not-found screen.
-- Meme Lab list/collection routes show no cards after sorting or direct links.
-- ReMemes list/detail/add routes show empty panels, validation failures, or
-  blocked submissions.
-- Calendar route/API lookup returns invalid-id or out-of-range responses.
-- Gradient list appears empty or stuck in loading state.
-- Interactive HTML submission preview is missing or blocked.
-- Marketplace links fail after opening new tabs.
+- `/the-memes/mint` stays in loading, error, or no-data state.
+- A detail route opens the wrong tab, fallback panel, or mostly blank layout.
+- Meme Lab, ReMemes, or Gradient routes show empty results.
+- ReMemes add flow cannot validate or submit.
+- Calendar lookup fails for a mint ID.
+- Interactive preview does not render.
+- Marketplace shortcuts are missing or do not open.
 
 ## User Journey
 
-1. Confirm the exact route and query values first.
-2. Confirm wallet/session prerequisites for minting or ownership-only actions.
-3. Confirm platform-specific constraints (for example iOS country gating).
-4. Retry from a canonical route with minimal query state.
-5. If needed, switch to related fallback routes (calendar home, card home, list
-   home) and re-enter the same action.
+1. Start from a canonical route root (`/the-memes`, `/meme-lab`, `/rememes`,
+   `/6529-gradient`, `/meme-calendar`).
+2. Recheck route parameters and query values (`id`, `contract`, `collection`,
+   `focus`, `sort`, `sort_dir`, `meme_id`).
+3. Recheck wallet and profile state for minting or owner-only actions.
+4. Recheck iOS + country gating before troubleshooting missing actions.
+5. Retry the action from the parent list route with minimal query state.
 
 ## Common Scenarios
 
-- Mint page stuck on fetch state:
-  refresh `/the-memes/mint` to retry mint claim and instance loading.
-- `Mint for fren` selected but mint action remains unavailable:
-  choose a recipient profile and destination wallet first.
-- Mint controls hidden on iOS:
-  confirm country/platform handling and use the available handoff controls when
-  shown.
-- Card deep link opens unexpected tab:
-  verify `focus` uses a supported tab key; unsupported values fall back to
-  `Live`.
-- `/the-memes/{id}` or `/the-memes/{id}/distribution` shows not-found:
-  replace `{id}` with a valid positive integer and retry.
-- `/meme-lab/collection/{collection}` shows no cards:
-  confirm collection slug and reopen from `/meme-lab` `Collections` view links.
-- `/rememes` list appears empty after filters:
-  reset `Meme Reference` and `Token Type`, then retry with `Random` refresh.
+- `/the-memes/mint` shows `Retrieving Mint information`, `Error fetching mint information`,
+  or `No mint information found`:
+  refresh `/the-memes/mint` and retry.
+- Mint action is missing after wallet connect:
+  controls are hidden when claim status is ended or finalized.
+- `Mint for fren` is selected but mint action is missing:
+  choose a recipient wallet first.
+- Mint controls are missing on iOS:
+  only iOS + `US` shows `Mint on 6529.io`; non-`US` iOS can hide controls.
+- `/the-memes/{id}` opens unexpected content:
+  unsupported `focus` falls back to `live`; non-integer IDs show not-found;
+  unresolved numeric IDs show the next-mint fallback panel.
+- `/the-memes/{id}/distribution` looks wrong:
+  invalid or non-positive IDs show `DISTRIBUTION` not-found; valid IDs without
+  a published plan show upcoming fallback content.
+- `/meme-lab/collection/{collection}` is empty:
+  confirm the slug and reopen from `/meme-lab` collection links.
+- `/meme-lab/{id}`, `/rememes/{contract}/{id}`, or `/6529-gradient/{id}` looks
+  blank:
+  unresolved records can render only partial layout without a dedicated
+  not-found panel.
+- `/rememes` looks empty:
+  set `Meme Reference` to `All`, `Token Type` to `All`, `Sort` to `Random`, then
+  refresh results.
 - `/rememes/add` submit stays disabled:
-  verify wallet connection, successful `Validate` state, selected meme
-  references, and eligibility checklist status.
-- Meme calendar API lookup fails:
-  invalid/non-positive IDs return `400`; valid but unresolved IDs return `422`.
-- `/6529-gradient` query values behave unexpectedly:
-  unsupported `sort`/`sort_dir` values are normalized to defaults.
-- Interactive HTML preview does not render:
-  confirm media URL is HTTPS and on allowed interactive hosts
-  (`ipfs.io` or `arweave.net` forms).
-- Marketplace icons are missing on iOS:
-  shortcut links are hidden unless detected country is `US`.
+  `Validate` must pass, at least one meme reference is required, wallet must be
+  connected, and all checklist checks must pass.
+- `/api/meme-calendar/{id}` fails:
+  invalid, non-positive, or non-safe-integer IDs return `400`; unresolved IDs
+  return `422`.
+- `/6529-gradient` query behavior is unexpected:
+  unsupported `sort` or `sort_dir` normalizes to `sort=id&sort_dir=asc`.
+- Interactive preview is missing in Memes submission:
+  only HTTPS HTML documents from approved hosts are allowed (`ipfs.io`,
+  `www.ipfs.io`, `arweave.net`, `www.arweave.net`, valid
+  `*.arweave.net` tx subdomains), with root CID/tx IDs only.
+- Marketplace icons are missing:
+  icons are hidden on iOS unless detected country is `US`; Blur only appears
+  for Gradient contracts.
 
 ## Edge Cases
 
-- Upcoming numeric Memes card URLs can intentionally show next-mint fallback
-  panels instead of full card content.
-- Mint availability can change exactly at phase boundary timestamps.
-- ReMeme detail route can render without a dedicated not-found message when the
-  contract/token pair does not resolve.
-- Marketplace links may differ by contract (for example Blur appears for
-  Gradient contracts only).
-- Interactive submission preview can be withheld when URL canonicalization or
-  host/path validation fails.
+- Numeric but unresolved Memes card IDs can intentionally render next-mint
+  fallback content instead of full card content.
+- Mint button availability can change at phase boundary timestamps.
+- Allowlist phases can show `No spots in current phase for this address` while
+  the drop is still active.
+- ReMemes keeps only `meme_id` in the URL; token type and sort reset on reload.
+- Some detail routes render partial layout without an explicit route-level
+  not-found panel.
+- Interactive preview validation rejects query strings, fragments, unsupported
+  ports, and redirects to unapproved hosts.
 
 ## Failure and Recovery
 
-- If route data appears stale, refresh and retry from canonical route roots:
-  `/`, `/the-memes/mint`, `/the-memes/{id}`, `/meme-lab`, `/rememes`,
-  `/meme-calendar`, `/6529-gradient`.
-- If wallet actions fail, reconnect wallet/session and retry with the same
-  destination wallet selection.
-- If ReMeme add flow fails validation, fix listed contract/token/reference
-  errors and re-run `Validate` before signing.
-- If calendar export popup is blocked, allow popups or use ICS download.
-- If an external marketplace page fails, keep current app state and retry in a
-  new tab later.
-- If interactive submission preview is absent, open the canonical media URL
-  separately and confirm it meets supported host/path constraints before
-  retrying in-app.
+- Retry from canonical roots first:
+  `/the-memes/mint`, `/the-memes`, `/meme-lab`, `/rememes`, `/meme-calendar`,
+  `/6529-gradient`.
+- Reopen deep links from a parent list card when detail routes look blank.
+- Reconnect wallet/profile state before retrying mint or transfer actions.
+- For ReMemes add flow, fix validation/checklist errors, run `Validate` again,
+  then sign again.
+- If calendar invite links fail, retry from `/meme-calendar` and use ICS
+  download fallback.
+- If marketplace pages fail, keep app state and retry in a new tab.
+- If interactive preview fails, recheck host, root CID/tx ID, and HTML
+  content-type requirements.
 
 ## Limitations / Notes
 
-- Some issues are external-provider problems (marketplace uptime, wallet popup
-  policies, CDN/media host responses).
-- Route-level not-found handling and feature-level action errors can happen
-  independently on the same page family.
-- Mint, schedule, and ownership displays are live-data driven and can be
-  briefly inconsistent during updates.
+- Some failures come from external providers (wallets, gateways, marketplaces,
+  media hosts).
+- Several media detail routes do not render explicit in-app not-found banners.
+- Route-level fallback rendering and action-level errors can happen separately.
+- Mint, schedule, and ownership values are live-data driven and can be briefly
+  inconsistent during updates.
 
 ## Related Pages
 
@@ -119,6 +127,8 @@ or outbound marketplace actions do not behave as expected.
 - [Meme Lab Card Route Tabs and Navigation](collections/feature-meme-lab-card-route-tabs-and-navigation.md)
 - [ReMemes Browse and Detail](collections/feature-rememes-browse-and-detail.md)
 - [ReMemes Add Submission](collections/feature-rememes-add-submission.md)
+- [6529 Gradient List Sorting and Loading](rendering/feature-6529-gradient-list-sorting-and-loading.md)
 - [NFT Marketplace Shortcut Links](nft/feature-marketplace-links.md)
 - [Interactive HTML Media Rendering](rendering/feature-interactive-html-rendering.md)
+- [Memes Submission Workflows](../waves/memes/feature-memes-submission.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
