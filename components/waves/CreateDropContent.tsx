@@ -39,6 +39,7 @@ import { AuthContext } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { URL_PREVIEW_IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/UrlPreviewImageTransformer";
 import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import CreateDropActions from "./CreateDropActions";
@@ -422,6 +423,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             MENTION_TRANSFORMER,
             HASHTAG_TRANSFORMER,
             WAVE_MENTION_TRANSFORMER,
+            URL_PREVIEW_IMAGE_TRANSFORMER,
             IMAGE_TRANSFORMER,
             EMOJI_TRANSFORMER,
           ])
@@ -542,38 +544,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       };
     }
     return null;
-  };
-
-  const replyTo = getReplyTo();
-  const replyToObj = replyTo ? { reply_to: replyTo } : {};
-
-  const createGifDrop = (gif: string): CreateDropConfig => {
-    return {
-      title: null,
-      drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
-      ...replyToObj,
-      parts: [
-        ...(drop?.parts ?? []),
-        {
-          content: gif,
-          quoted_drop:
-            activeDrop?.action === ActiveDropAction.QUOTE
-              ? {
-                  drop_id: activeDrop.drop.id,
-                  drop_part_id: activeDrop.partId,
-                }
-              : null,
-          media: files,
-        },
-      ],
-      mentioned_users: [],
-      mentioned_waves: [],
-      referenced_nfts: [],
-      metadata: [],
-      signature: null,
-      is_safe_signature: isSafeWallet,
-      signer_address: address ?? "",
-    };
   };
 
   const createCurrentDrop = (
@@ -901,11 +871,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
-  const onGifDrop = async (gif: string): Promise<void> => {
-    if (submitting) {
+  const onGifDrop = (gif: string): void => {
+    const trimmedGif = gif.trim();
+    if (submitting || !trimmedGif.length) {
       return;
     }
-    await prepareAndSubmitDrop(createGifDrop(gif));
+
+    createDropInputRef.current?.insertImagePreviewFromUrl(trimmedGif, {
+      smartSpacing: true,
+    });
+    createDropInputRef.current?.focus();
   };
 
   const focusInputWithDelay = (delay: number) => {
