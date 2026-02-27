@@ -1,96 +1,97 @@
-# Collected Tab and Transfer Controls
+# Collected Tab and Transfer Mode
 
 ## Overview
 
-The `Collected` profile tab shows owned NFTs by collection with list-level filtering,
-sorting, and pagination. It now also exposes owner-only transfer mode on desktop
-for bulk NFT movement to another wallet.
+The `Collected` tab at `/{user}/collected` shows profile holdings with filters,
+sorting, and pagination.
 
-Transfer mode is a separate interaction state inside the same tab. It is not a
-separate route and does not alter the tab's sort/filter/pagination behavior.
+It has two views:
+- `Native`: profile card holdings for The Memes, Gradients, NextGen, and Meme Lab.
+- `Network`: xTDH token holdings by contract.
+
+Transfer mode is part of this tab (not a separate route) and applies to native
+cards.
 
 ## Location in the Site
 
 - Route: `/{user}/collected`
-- Optional query parameters:
-  - `search=<keyword>` for collection search
-  - `sort_by=<field>` and `sort_direction=<asc|desc>` for list ordering
-  - `seized=<all|yes|no>` where available for the selected collection type
-  - `szn=<season-id>` for seasonal card views where supported
-  - `address=<wallet>` to scope tab-level identity row context
-  - `page=<n>` for pagination
+- Query parameters:
+  - `address=<wallet>`: scope results to one wallet address.
+  - `collection=<memes|gradients|nextgen|memelab|network>`
+  - `subcollection=<contract-address>`: network collection filter.
+  - `seized=<seized|not_seized>`: Memes-only filter.
+  - `szn=<season-id>`: Memes-only season filter.
+  - `sort-by=<token_id|tdh|rank|xtdh|xtdh_day>`
+  - `sort-direction=<asc|desc>`
+  - `page=<n>`
 
 ## Entry Points
 
-- Open any profile with `/{user}/collected`.
-- Use profile tab links from the shared profile header.
-- Open a profile collected deep link with preserved query parameters.
+- Open `/{user}/collected` directly.
+- Click `TDH` in the profile header stats row.
+- Switch to `Collected` from another profile tab.
+- Open a shared collected deep link with query parameters.
 
 ## User Journey
 
-1. Open the collected tab.
-2. Apply filters and sorting:
-  - collection, sort, seized filter, and season filter by collection rules.
-  - The season filter shows `All Seasons` plus season IDs fetched from the latest
-    seasonal catalog, so new season entries can appear without deployment.
-3. Browse paginated card grid and open card links in normal viewing mode.
-4. Enter transfer mode:
-  - Desktop-only `Transfer` button appears when ownership transfer is applicable.
-  - The toggle hides the regular card link behavior and enables selection.
-5. Select transfer candidates:
-  - ERC-1155 cards can be selected with quantity controls.
-  - ERC-721 cards are selected as single units.
-  - Cards with no transferable connected-wallet balance show a not-owned state.
-6. Open the sticky transfer panel at page bottom:
-  - Review selected items.
-  - Remove selections or continue to recipient step.
-7. Use recipient modal, then sign wallet transactions as in the shared NFT
-   transfer flow.
+1. Open `/{user}/collected`.
+2. Choose `View`:
+   - `Native` for profile card holdings.
+   - `Network` for xTDH token holdings.
+3. Apply filters:
+   - Native collection: `All`, `The Memes`, `Gradients`, `NextGen`, `Meme Lab`.
+   - Network collection: contract list from current xTDH collections.
+   - Memes-only filters: `Seized` and `Season`.
+   - Address filter (`All Addresses` or one wallet) is available in native view.
+4. Apply sort and browse pages.
+5. In native view (outside transfer mode), open token routes from cards:
+   - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.
+6. If transfer is available, click `Transfer`:
+   - cards switch from links to selection controls
+   - ERC-1155 cards support quantity selection
+   - ERC-721 cards are single-select
+7. Use the sticky transfer panel to review selection and continue.
 
 ## Common Scenarios
 
-- Filter by collection and sort before entering transfer mode; selected items stay in
-  the same filtered/paginated context.
-- Transfer across mixed collections as long as the destination wallet and connected
-  wallet context are valid.
-- Reduce selected quantities for ERC-1155 items to send only part of a balance.
-- Exit transfer mode to return card links to normal navigation.
+- Compare consolidated holdings (`All Addresses`) against one wallet (`address=...`).
+- Filter Memes by season and clear back to `All Seasons`.
+- Keep a transfer selection while changing pages or filters.
+- Switch to `Network` to inspect per-token `xTDH` and `xTDH/day`.
 
 ## Edge Cases
 
-- Transfer mode is hidden when:
-  - the user is not on desktop,
-  - no cards are shown on the current view,
-  - the connected wallet does not match a profile wallet for the viewed profile.
-- For profiles that have connected-wallet ownership but mixed balances, some cards
-  can be selectable while others are informational-only.
-- If a `szn` value in the URL does not match a known season id, the filter
-  defaults to `All Seasons`.
-- The transfer panel requires at least one selected item before `Continue` is
-  enabled.
-- Data for wallet-scoped transfer quantities loads separately from base collected
-  rows and can lag one render cycle when entering transfer mode.
+- Transfer controls are hidden when:
+  - screen is mobile,
+  - connected wallet is not one of the profile wallets,
+  - current native page has no cards.
+- If `szn` does not match an available season, the UI stays on `All Seasons`.
+- Cards can show `Not owned by your connected wallet` in transfer mode when the
+  current result set includes cards from other profile wallets.
+- Selecting the same sort field toggles sort direction.
+- Switching collection/view resets page and clears incompatible filters/sort.
 
 ## Failure and Recovery
 
-- If transfer quantity data fails to load, cards can still be browsed but transfer
-  controls may remain in loading state until request completion.
-- If the connected wallet disconnects while transfer mode is active, transfer mode
-  is cleared and must be re-enabled.
-- If transfer submission fails in modal, users can re-open transfer mode and rebuild
-  the selection.
-- If profile tabs fail to resolve in normal route mode, profile-level not-found
-  behavior applies:
-  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
+- Initial load shows skeleton placeholders.
+- If native collected data fails, the tab falls back to empty-state copy
+  (for example `No cards to display`).
+- If network token data fails, network cards can fall back to `No tokens found`.
+- If transfer-balance data fails, cards can appear not selectable in transfer mode;
+  exit transfer mode and retry.
+- If wallet connection is lost during transfer mode, transfer mode closes and
+  selection is cleared.
+- If route/profile resolution fails before render, shared not-found behavior applies:
+  [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 
 ## Limitations / Notes
 
-- Transfer mode is an enhancement of the existing tab and does not add new profile
-  rows or alter card ownership calculations outside the transfer flow.
-- Only cards visible in the current page/filter context are selectable.
-- Multi-card recipient selection and all transaction execution details are shared
-  with the global transfer flow documented in
-  [NFT Transfer](../../media/nft/feature-transfer.md).
+- `Seized` and `Season` controls appear only when `Collection` is `The Memes`.
+- Network cards are informational in this tab and do not open token detail routes.
+- Transfer mode uses the connected wallet's transferable balance, not consolidated
+  profile balance.
+- Transfer execution details are documented in:
+  [NFT Transfer](../../media/nft/feature-transfer.md)
 
 ## Related Pages
 
