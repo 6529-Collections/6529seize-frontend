@@ -9,11 +9,13 @@ export default function WaveMentionsTypeaheadMenu({
   options,
   setHighlightedIndex,
   selectOptionAndCleanUp,
+  anchorElement,
 }: {
   readonly selectedIndex: number | null;
   readonly options: WaveMentionTypeaheadOption[];
   readonly setHighlightedIndex: (index: number) => void;
   readonly selectOptionAndCleanUp: (option: WaveMentionTypeaheadOption) => void;
+  readonly anchorElement: HTMLElement;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<"top" | "bottom">("bottom");
@@ -21,18 +23,16 @@ export default function WaveMentionsTypeaheadMenu({
   const updatePosition = useCallback(() => {
     if (globalThis.window === undefined) return;
     const win = globalThis.window;
-    const element = menuRef.current;
-    if (!element) return;
-    const rect = element.getBoundingClientRect();
-    const spaceAbove = rect.top;
-    const spaceBelow = win.innerHeight - rect.bottom;
+    const anchorRect = anchorElement.getBoundingClientRect();
+    const spaceAbove = anchorRect.top;
+    const spaceBelow = win.innerHeight - anchorRect.bottom;
     const nextPosition: "top" | "bottom" =
       spaceBelow >= spaceAbove ? "bottom" : "top";
 
     setPosition((current) =>
       current === nextPosition ? current : nextPosition
     );
-  }, []);
+  }, [anchorElement]);
 
   useEffect(() => {
     if (globalThis.window === undefined) return;
