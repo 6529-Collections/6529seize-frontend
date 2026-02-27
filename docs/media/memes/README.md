@@ -26,7 +26,8 @@
   countdown/status card behavior on `/`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, and `/the-memes/mint`.
 - [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md):
-  latest-drop `Edition`, `Status`, `Mint price`, and `Floor` rows on `/`.
+  latest-drop `Edition`, `Status`, `Mint price`, and `Floor` rows on `/` when
+  home renders `Latest Drop` instead of `Next Drop`.
 - [Memes Minting Calendar](feature-minting-calendar.md):
   `/meme-calendar` controls plus the shared next-mint fallback panel on card
   and distribution routes.
