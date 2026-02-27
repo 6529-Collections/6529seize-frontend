@@ -2,114 +2,109 @@
 
 ## Overview
 
-The `Subscriptions` tab shows a profile's subscription status and history for
-upcoming drops. Eligible users can update subscription settings, top up ETH,
-set edition preference, and manage per-drop upcoming subscription counts.
+The `Subscriptions` tab at `/{user}/subscriptions` shows meme subscription
+balance, settings, top-up options, upcoming drops, and subscription history.
+
+This page covers tab content only. Tab visibility and hidden-tab URL fallback
+are documented in
+[Profile Routes and Tab Visibility](../navigation/feature-tabs.md).
 
 ## Location in the Site
 
 - Route: `/{user}/subscriptions`
-- Primary sections:
-  - `Subscribe` (balance, airdrop address, mode, edition preference)
-  - `Top Up` (eligible editing sessions only)
-  - `Upcoming Drops`
-  - `Subscription History`
+- Sections: `Subscribe`, `Top Up` (owner mode only), `Upcoming Drops`,
+  `Subscription History`
+- `Learn More` link: `/about/subscriptions`
 
-## Entry Points
+## Access Modes
 
-- Open `/{user}/subscriptions` directly.
-- Switch to `Subscriptions` from another profile tab.
-- Follow a shared profile link that lands on the subscriptions route.
+- Owner mode:
+  - connected profile matches the viewed profile
+  - no active proxy session
+  - settings and upcoming-drop actions are enabled
+  - `Top Up` is shown
+- Read-only mode:
+  - any non-owner context (for example viewing another profile)
+  - settings and upcoming-drop controls stay visible but disabled
+  - `Top Up` is hidden
+- Active proxy session:
+  - subscriptions content is not rendered
 
 ## User Journey
 
-1. Open the subscriptions route for a profile.
-2. Review current subscription balance and airdrop address.
-3. If viewing your own connected profile (without proxy mode), update:
-   - subscription mode (`Manual` or `Automatic`)
-   - edition preference (`One edition` or `All eligible`)
-   - edition preference count (`1` to total eligible count)
-   - top-up amount using preset or custom card-count options
-4. Review and optionally update upcoming drop subscriptions.
-5. Use history accordions to review redeemed subscriptions, logs, and top-ups.
+1. Open `/{user}/subscriptions`.
+2. Review `Subscribe`:
+   - `Current Balance` (ETH and card estimate)
+   - `Airdrop Address`
+   - `Mode` (`Manual` or `Automatic`)
+   - `Edition Preference` (`One edition` or `All eligible`)
+3. In owner mode:
+   - refresh balance
+   - open the airdrop-address edit link (delegation registration flow)
+   - update mode and edition preference
+4. In `Top Up` (owner mode only):
+   - choose `1 Card`, remaining `SZN`, `Year`, or `Epoch`
+   - optionally expand `Show Deep Time Subscriptions` for `Period`, `Era`,
+     `Eon`
+   - or choose `Other` and enter a card count
+5. In `Upcoming Drops`, toggle subscription rows and update quantity for
+   subscribed rows.
+6. In `Subscription History`, expand accordions for redeemed records, logs, and
+   top-ups.
 
-## Common Scenarios
+## Current Behavior
 
-- Own profile management:
-  - refresh current balance
-  - change airdrop address via delegation link
-  - toggle mode and set edition preference (`One edition` / `All eligible`)
-  - top up using quick options such as `1 Card`, `Remaining SZN`, `Remaining Year`,
-    and `Remaining Epoch`
-  - set per-drop subscription quantity from `1` up to your eligibility count
-  - reveal `Show Deep Time Subscriptions` to include `Remaining Period`,
-    `Remaining Era`, and `Remaining Eon`
-  - enter a custom card count with `Other`
-- Read-only viewing for minting-day controls:
-  - the first upcoming row cannot be toggled or re-quantified when it is
-    `Minting Today`
-- Read-only viewing for another profile:
-  - settings are visible but edit controls are disabled
-  - top-up section is not shown
-- Expand `Upcoming Drops` to show beyond the first three rows.
-- On iOS in the US, use `Top-up on 6529.io` from the top-up panel instead of
-  in-page send controls.
+- `Mode` can show a UTC last-update timestamp.
+- `Edition Preference` shows `Eligibility xN` and uses a toggle.
+- `Top Up`:
+  - sends ETH to the configured subscriptions address on the configured chain
+  - on iOS with consent country `US`, shows `Top-up on 6529.io` instead of
+    in-page send controls
+  - shows modal states for wallet confirm, pending confirmation, success, and
+    error
+  - can show `View Tx` while pending or after success
+- `Upcoming Drops`:
+  - shows first 3 rows by default; `Show More` expands the list
+  - first row can show phase metadata (phase, position, airdrop address,
+    subscribed count)
+  - subscribed rows show a quantity selector capped by eligibility count
+- `Subscription History`:
+  - `Redeemed Subscriptions`
+  - `Log History`
+  - `Top Up History`
+  - pagination when a section has more than 10 rows
+
+## States and Recovery
+
+- Auth rejection stops updates; no write call is submitted.
+- Failed settings or upcoming-drop updates keep current values and show an
+  error toast.
+- Failed subscription-count updates reset the selector to the previous value.
+- Top-up without a connected wallet shows
+  `You must have an active wallet connection to top up`.
+- Empty history states:
+  - `No Redeemed Subscriptions found`
+  - `No logs found`
+  - `No Top Ups found`
 
 ## Edge Cases
 
-- On iOS outside the US, the `Subscriptions` tab is hidden from profile tabs.
-- If a user loads a hidden `subscriptions` route, profile tab logic redirects
-  to the first visible tab.
-- On minting day, subscription toggles/count updates for the first upcoming row
-  are disabled and `Minting Today` messaging is shown for that row.
-- Upcoming rows include season and mint date labels and can span future seasons
-  when the requested row count exceeds remaining rows in the current season.
-- Upcoming row dates are anchored to the UTC mint day, so the first row stays
-  aligned with the current mint date throughout mint day instead of advancing
-  early by local timezone/time-of-day.
-- Top-up action requires selecting a valid option before `Send` is enabled.
-- `Top Up` uses `Other` as a free-text card-count input:
-  - entering free-text is accepted as text but validated through integer parsing.
-  - non-numeric input, blank input, `0`, and negative counts are rejected with
-    `Select a top-up option`.
-  - values with decimals or numeric prefixes (for example `1.8`) are parsed to
-    the integer prefix before sending (`1` in this example).
-  - switching back to a preset option clears the `Other` input and removes
-    validation errors for that field.
-- Per-drop subscription count is capped by the profile's eligibility count.
-- `Mode` and `Upcoming Drops` rows show updated UTC last-update/time context:
-  - `Mode` includes the last settings update timestamp when available.
-  - The first upcoming row displays current phase/position, airdrop address,
-    and currently subscribed quantity for that drop.
-
-## Failure and Recovery
-
-- If authentication is rejected, settings are not changed.
-- If update calls fail, the UI keeps previous values and shows an error toast.
-- If history lists are empty, users see explicit empty states (for example `No
-  logs found`).
-- If top-up send is attempted without a connected wallet, the modal returns:
-  `You must have an active wallet connection to top up`.
-- Top-up flow shows modal states for wallet confirmation, pending transaction,
-  success, and error. Pending/success states can include a transaction link for
-  on-chain verification, and users can retry after closing an error state.
-
-## Limitations / Notes
-
-- Edit actions require an authenticated session for the same profile being
-  viewed.
-- When a proxy profile is active, subscription edit actions are disabled.
-- Top-ups send ETH to the configured subscriptions contract and chain only.
-- Preset top-up options depend on currently remaining mint counts and can change
-  over time.
-- Edition preference changes affect whether subscriptions are requested for one
-  eligible edition or all eligible editions.
+- On minting day, first-row upcoming controls are locked and show
+  `Minting Today`.
+- `Send` stays disabled until a valid top-up option is selected.
+- `Other` input uses integer parsing:
+  - decimal input (for example `1.8`) sends as `1`
+  - blank, non-numeric, `0`, and negative values are rejected with
+    `Select a top-up option`
+  - switching back to a preset clears `Other` input and top-up errors
+- Upcoming rows include season/date labels and can extend into future seasons.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profiles Tabs Index](README.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
+- [Delegation Action Flows](../../delegation/feature-delegation-action-flows.md)
 - [Memes Subscriptions Report](../../api-tool/feature-memes-subscriptions-report.md)

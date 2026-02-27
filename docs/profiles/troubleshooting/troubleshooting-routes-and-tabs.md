@@ -53,7 +53,8 @@ profile link lands somewhere unexpected.
   - The drops request failed and the tab fell back to the same empty state.
 - Subscriptions controls are disabled:
   - You are viewing another profile.
-  - A profile proxy context is active, so the tab is read-only.
+- Subscriptions tab content is blank:
+  - A profile proxy context is active.
 - Top-up submit fails immediately:
   - No active wallet connection is available for signing/sending.
   - No valid top-up option is currently selected.
