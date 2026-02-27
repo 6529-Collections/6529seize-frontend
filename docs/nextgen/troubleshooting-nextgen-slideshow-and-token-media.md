@@ -1,67 +1,72 @@
 # NextGen Slideshow and Token Media Troubleshooting
 
-## Overview
+## When to Use This Page
 
-Use this page when the NextGen slideshow looks empty/stuck, token media modes
-do not behave as expected, or high-res/fullscreen actions fail.
+Use this page when:
+
+- slideshow cards are missing, static, or not advancing;
+- token media mode (`2K`, `8K`/`16K`, `Live`) does not behave as expected;
+- high-res zoom controls do not appear;
+- fullscreen fails;
+- token media route falls back to loading/not-found/indexing states;
+- Display Center rows stay on spinner or show `Coming Soon`.
 
 ## Location in the Site
 
 - Featured slideshow: `/nextgen`
-- Collection slideshow surfaces: `/nextgen/collection/{collection}/{view}`
+- Collection slideshow routes:
+  `/nextgen/collection/{collection}` and
+  `/nextgen/collection/{collection}/{overview|about|provenance|top-trait-sets}`
 - Collection art route: `/nextgen/collection/{collection}/art`
-- Token media routes: `/nextgen/token/{token}/{view}`
+- Token media routes:
+  `/nextgen/token/{token}` and
+  `/nextgen/token/{token}/{provenance|display-center|rarity}`
 
-## Entry Points
+## Quick Checks (Do in Order)
 
-- Slideshow appears empty or does not advance.
-- `Live` mode does not show animated output.
-- High-res mode appears stuck on loading overlay.
-- Fullscreen action does not enter fullscreen.
+1. Confirm the route and whether the issue is slideshow, token media, or both.
+2. If issue is collection slideshow, confirm the collection has minted tokens (`mint_count > 0`).
+3. Scroll slideshow into view; autoplay only runs while visible.
+4. Retry the exact action once (`2K`, high-res, `Live`, fullscreen, Display Center row).
+5. Refresh the route to re-run fetch and media load.
+6. Open the same URL in a new tab if state still looks stale.
 
-## User Journey
+## Scenario Guide
 
-1. Confirm the current route and whether the issue is slideshow or token media.
-2. For collection-route slideshow issues, confirm the collection has minted
-   tokens.
-3. Retry the specific mode/action (`2K`, high-res, `Live`, fullscreen) once.
-4. Refresh the current route to re-run data fetch and media load.
-5. If needed, reopen the same route in a new tab/session to isolate stale page
-   state.
+- Collection slideshow is missing:
+  collection `mint_count = 0`, so slideshow is intentionally hidden.
+- Slideshow container renders but has no cards:
+  slideshow token fetch returned empty/failed; refresh route to retry.
+- Slideshow does not autoplay:
+  autoplay pauses when out of viewport and can also be manually paused.
+- `Live` mode still shows a static image:
+  token has no `animation_url`, so static output is expected.
+- High-res (`8K`/`16K`) stays on loading overlay:
+  large asset load + render delay; zoom controls appear only after load completes.
+- Fullscreen click shows browser alert:
+  fullscreen request failed in current browser/device context.
+- Token subview opens `About`:
+  unsupported token subview slug falls back to `About`.
+- Token route shows `Fetching Token`, `Token Not Found`, or `Token Indexing, check back later`:
+  token payload is missing, pending, or still indexing; on-chain fallback is expected.
+- Display Center rows stay on spinner or show `Coming Soon`:
+  that token/resolution output is not currently available.
 
-## Common Scenarios
+## Recovery Limits and Expected Fallbacks
 
-- Slideshow on collection route is missing:
-  collection has `mint_count = 0`, so slideshow is intentionally not rendered.
-- Slideshow is visible but contains no cards:
-  token fetch returned empty/failed; refresh route to retry.
-- `Live` mode still shows image output:
-  token has no animation URL, so static output is expected.
-- High-res mode keeps loading overlay:
-  wait for the high-res source to finish before zoom controls appear.
-- Fullscreen click shows an error alert:
-  browser/device policy blocked fullscreen request.
-
-## Edge Cases
-
-- Play/pause control is hidden when slideshow has one token only.
-- Capacitor clients start slideshow autoplay in a paused state until user
-  interaction.
-- Token routes with unavailable or pending token payloads show an on-chain panel
-  instead of token media controls.
-
-## Failure and Recovery
-
-- Slideshow has no inline retry button; recovery is route refresh or reopen.
+- Slideshow has no inline retry control.
+- Token media controls have no per-source retry control.
 - Standard token image failures fall back to `/pebbles-loading.jpeg`.
-- High-res failures fall back to `/fallback-image.jpeg`.
-- Fullscreen failures stay in normal layout and surface a browser alert.
+- High-res image failures fall back to `/fallback-image.jpeg`.
+- Fullscreen failures keep normal layout and show a browser alert.
+- If high-res appears stuck, switch to `2K`, then retry high-res.
+- If one Display Center row is unavailable, use another available resolution and retry later.
 
-## Limitations / Notes
+## Not a Bug (Current Behavior)
 
-- Slideshow sorting and ordering are not user-configurable.
-- Token media source selection and fallback order are fixed.
-- There is no dedicated per-source retry button inside token media controls.
+- Play/pause control is hidden when slideshow has one token.
+- Capacitor clients start slideshow autoplay paused until user interaction.
+- Token art mode set is fixed to `2K`, high-res (`8K`/`16K`), and `Live`.
 
 ## Related Pages
 
@@ -69,3 +74,4 @@ do not behave as expected, or high-res/fullscreen actions fail.
 - [NextGen Collection and Token Media Flow](flow-nextgen-collection-and-token-media.md)
 - [NextGen Collection Slideshow](feature-collection-slideshow.md)
 - [NextGen Token Media Rendering](feature-token-media-rendering.md)
+- [NextGen Routes, Mint, and Admin Troubleshooting](troubleshooting-nextgen-routes-mint-and-admin.md)
