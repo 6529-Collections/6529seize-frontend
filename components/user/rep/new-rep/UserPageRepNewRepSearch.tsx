@@ -316,6 +316,7 @@ export default function UserPageRepNewRepSearch({
                         className="tw-will-change-transform md:tw-absolute md:tw-left-0 md:tw-right-0 md:tw-top-full md:tw-z-10 md:tw-mt-1"
                       >
                         <div
+                          role="presentation"
                           className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
