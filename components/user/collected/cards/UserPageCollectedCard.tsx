@@ -29,6 +29,7 @@ export default function UserPageCollectedCard({
   copiesMax,
   qtySelected = 0,
   isTransferLoading = false,
+  showZeroSeizedCount = false,
 }: {
   readonly card: CollectedCard;
   readonly contractType: ContractType;
@@ -41,6 +42,7 @@ export default function UserPageCollectedCard({
   readonly copiesMax: number;
   readonly qtySelected?: number | undefined;
   readonly isTransferLoading?: boolean | undefined;
+  readonly showZeroSeizedCount?: boolean | undefined;
 }) {
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
   const path = `${collectionMeta.cardPath}/${card.token_id}`;
@@ -56,9 +58,12 @@ export default function UserPageCollectedCard({
 
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
+  const hasSeizedCountValue = card.seized_count !== null;
   const showSeizedCount =
     COLLECTED_COLLECTIONS_META[card.collection].dataRows.seizedCount &&
-    !!card.seized_count;
+    (showZeroSeizedCount
+      ? hasSeizedCountValue
+      : typeof card.seized_count === "number" && card.seized_count > 0);
 
   const getSeizedCountDisplay = () => {
     if (isSelectMode) {

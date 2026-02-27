@@ -9,6 +9,10 @@ import UserCICAndLevel, {
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
+import {
+  getSubmissionCount,
+  getTrophyArtworkCount,
+} from "@/helpers/artist-activity.helpers";
 
 interface SingleWaveDropAuthorProps {
   readonly drop: ApiDrop;
@@ -22,13 +26,12 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
     "active"
   );
 
-  const submissionCount =
-    drop.author.active_main_stage_submission_ids?.length || 0;
+  const submissionCount = getSubmissionCount(drop.author);
   const hasSubmissions = submissionCount > 0;
 
-  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
-  const isWinner = winnerCount > 0;
-  const hasActivityBadge = hasSubmissions || isWinner;
+  const trophyCount = getTrophyArtworkCount(drop.author);
+  const hasTrophyArtworks = trophyCount > 0;
+  const hasActivityBadge = hasSubmissions || hasTrophyArtworks;
 
   const handleBadgeClick = (tab: "active" | "winners") => {
     setModalInitialTab(tab);
@@ -47,7 +50,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
           className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
         >
           {drop.author.pfp ? (
-            <div className="tw-w-10 tw-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-overflow-hidden">
+            <div className="tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
               <img
                 className="tw-size-full tw-object-contain tw-opacity-90"
                 src={drop.author.pfp}
@@ -55,7 +58,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
               />
             </div>
           ) : (
-            <div className="tw-w-10 tw-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
+            <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
           )}
           <div className="tw-inline-flex tw-items-center tw-gap-x-2">
             <div className="tw-inline-flex tw-items-center tw-gap-x-1">
@@ -75,7 +78,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
               {hasActivityBadge && (
                 <ArtistActivityBadge
                   submissionCount={submissionCount}
-                  winCount={winnerCount}
+                  trophyCount={trophyCount}
                   onBadgeClick={handleBadgeClick}
                   tooltipId={`single-drop-activity-badge-${drop.id}`}
                 />

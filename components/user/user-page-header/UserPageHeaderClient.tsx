@@ -14,6 +14,10 @@ import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+import {
+  getSubmissionCount,
+  getTrophyArtworkCount,
+} from "@/helpers/artist-activity.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
@@ -129,8 +133,8 @@ export default function UserPageHeaderClient({
     [aboutStatement, canEdit]
   );
 
-  const submissionCount = profile.active_main_stage_submission_ids?.length ?? 0;
-  const winnerCount = profile.winner_main_stage_drop_ids?.length ?? 0;
+  const submissionCount = getSubmissionCount(profile);
+  const trophyCount = getTrophyArtworkCount(profile);
 
   const {
     isModalOpen: isArtistPreviewOpen,
@@ -202,7 +206,7 @@ export default function UserPageHeaderClient({
                   profileEnabledAt={profileEnabledAt}
                   variant="title"
                   submissionCount={submissionCount}
-                  winnerCount={winnerCount}
+                  trophyCount={trophyCount}
                   onBadgeClick={handleArtistBadgeClick}
                 />
                 <div className="tw-mt-2 sm:tw-mt-0.5">
@@ -254,7 +258,7 @@ export default function UserPageHeaderClient({
         </div>
       </section>
 
-      {(submissionCount > 0 || winnerCount > 0) && (
+      {(submissionCount > 0 || trophyCount > 0) && (
         <ArtistPreviewModal
           isOpen={isArtistPreviewOpen}
           onClose={handleArtistModalClose}

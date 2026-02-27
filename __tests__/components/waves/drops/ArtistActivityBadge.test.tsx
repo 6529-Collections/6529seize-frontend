@@ -28,7 +28,11 @@ describe("ArtistActivityBadge", () => {
 
   it("returns null when there are no submissions or wins", () => {
     const { container } = render(
-      <ArtistActivityBadge submissionCount={0} winCount={0} onBadgeClick={jest.fn()} />
+      <ArtistActivityBadge
+        submissionCount={0}
+        trophyCount={0}
+        onBadgeClick={jest.fn()}
+      />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -36,7 +40,11 @@ describe("ArtistActivityBadge", () => {
   it("renders palette state for submissions only and opens active tab", () => {
     const onBadgeClick = jest.fn();
     const { container } = render(
-      <ArtistActivityBadge submissionCount={2} winCount={0} onBadgeClick={onBadgeClick} />
+      <ArtistActivityBadge
+        submissionCount={2}
+        trophyCount={0}
+        onBadgeClick={onBadgeClick}
+      />
     );
 
     const button = screen.getByRole("button");
@@ -52,11 +60,15 @@ describe("ArtistActivityBadge", () => {
   it("renders trophy state for wins only and opens winners tab", () => {
     const onBadgeClick = jest.fn();
     const { container } = render(
-      <ArtistActivityBadge submissionCount={0} winCount={3} onBadgeClick={onBadgeClick} />
+      <ArtistActivityBadge
+        submissionCount={0}
+        trophyCount={3}
+        onBadgeClick={onBadgeClick}
+      />
     );
 
     const button = screen.getByRole("button");
-    expect(button).toHaveAttribute("aria-label", "View 3 winning artworks");
+    expect(button).toHaveAttribute("aria-label", "View 3 trophy artworks");
 
     const trophyIcon = container.querySelector('svg[data-icon="trophy"]');
     expect(trophyIcon).toBeInTheDocument();
@@ -68,13 +80,17 @@ describe("ArtistActivityBadge", () => {
   it("renders trophy with blue dot for both states and opens active tab", () => {
     const onBadgeClick = jest.fn();
     const { container } = render(
-      <ArtistActivityBadge submissionCount={1} winCount={1} onBadgeClick={onBadgeClick} />
+      <ArtistActivityBadge
+        submissionCount={1}
+        trophyCount={1}
+        onBadgeClick={onBadgeClick}
+      />
     );
 
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute(
       "aria-label",
-      "View 1 art submission and 1 winning artwork"
+      "View 1 art submission and 1 trophy artwork"
     );
 
     const trophyIcon = container.querySelector('svg[data-icon="trophy"]');
@@ -94,7 +110,11 @@ describe("ArtistActivityBadge", () => {
     useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
 
     render(
-      <ArtistActivityBadge submissionCount={1} winCount={0} onBadgeClick={jest.fn()} />
+      <ArtistActivityBadge
+        submissionCount={1}
+        trophyCount={0}
+        onBadgeClick={jest.fn()}
+      />
     );
 
     expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument();

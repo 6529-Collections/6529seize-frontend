@@ -42,6 +42,49 @@ describe("UserPageCollectedCard", () => {
     ).toBeInTheDocument();
   });
 
+  it("hides seized count for zero balance by default", () => {
+    render(
+      <UserPageCollectedCard
+        card={{ ...memeCard, seized_count: 0 }}
+        contractType={ContractType.ERC1155}
+        showDataRow={true}
+        onToggle={() => {}}
+        onIncQty={() => {}}
+        onDecQty={() => {}}
+        copiesMax={1}
+      />
+    );
+
+    expect(
+      screen.queryByText((_, element) => {
+        const text = element?.textContent?.replaceAll(" ", "").trim() || "";
+        return /^0\s*x$/.test(text);
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows seized count for zero balance when showZeroSeizedCount is enabled", () => {
+    render(
+      <UserPageCollectedCard
+        card={{ ...memeCard, seized_count: 0 }}
+        contractType={ContractType.ERC1155}
+        showDataRow={true}
+        showZeroSeizedCount={true}
+        onToggle={() => {}}
+        onIncQty={() => {}}
+        onDecQty={() => {}}
+        copiesMax={1}
+      />
+    );
+
+    expect(
+      screen.getByText((_, element) => {
+        const text = element?.textContent?.replaceAll(" ", "").trim() || "";
+        return /^0\s*x$/.test(text);
+      })
+    ).toBeInTheDocument();
+  });
+
   it("handles memelab collection", () => {
     const card: CollectedCard = {
       ...memeCard,
