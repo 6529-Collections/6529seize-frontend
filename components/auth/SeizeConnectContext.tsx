@@ -444,7 +444,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     refreshStoredConnectedAccounts();
 
-    if (typeof globalThis.window === "undefined") return;
+    if (globalThis.window === undefined) return;
 
     const handleAccountsUpdated = () => {
       refreshStoredConnectedAccounts();
