@@ -1,11 +1,11 @@
 "use client";
 
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import RecipientSelector from "../common/RecipientSelector";
@@ -171,11 +171,13 @@ export default function ManifoldMintingConnect(
     return <>{mintForFren ? printMintForFren() : printMintForMe()}</>;
   }
 
+  const mintOn6529Href = globalThis.window?.location?.href ?? "https://6529.io";
+
   if (isIos) {
     if (country === "US") {
       return (
         <Link
-          href={window.location.href}
+          href={mintOn6529Href}
           className="text-center pt-2 pb-2"
           target="_blank" rel="noopener noreferrer">
           <button className="btn btn-light" style={{ width: "100%" }}>

@@ -3,6 +3,7 @@ import { AdapterError } from '@/src/errors/adapter'
 import { WalletValidationError } from '@/src/errors/wallet-validation'
 import type { AppWallet } from '@/components/app-wallets/AppWalletsContext'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { mainnet, sepolia } from 'viem/chains'
 
 const VALID_PRIVATE_KEY =
   '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
@@ -528,8 +529,8 @@ describe('AppKitAdapterManager', () => {
         .toThrow('ADAPTER_014: Cannot generate cache key: invalid wallet object')
     })
 
-    it('should return empty-wallets for empty array', () => {
-      expect(manager['getCacheKey']([])).toBe('empty-wallets')
+    it('should return empty-wallets key with chains for empty array', () => {
+      expect(manager['getCacheKey']([])).toBe('empty-wallets|chains:1')
     })
 
     it('should generate consistent cache key for same wallets', () => {
@@ -541,6 +542,12 @@ describe('AppKitAdapterManager', () => {
     it('should generate different cache keys for different wallets', () => {
       const key1 = manager['getCacheKey']([mockWallet])
       const key2 = manager['getCacheKey']([mockWallet2])
+      expect(key1).not.toBe(key2)
+    })
+
+    it('should generate different cache keys for different chains', () => {
+      const key1 = manager['getCacheKey']([mockWallet], [mainnet])
+      const key2 = manager['getCacheKey']([mockWallet], [sepolia])
       expect(key1).not.toBe(key2)
     })
   })
@@ -582,11 +589,25 @@ describe('AppKitAdapterManager', () => {
       expect(manager.shouldRecreateAdapter([])).toBe(true)
     })
 
+    it('should detect chain changes when checking adapter recreation', () => {
+      manager.createAdapter([mockWallet], false, [mainnet])
+
+      expect(manager.shouldRecreateAdapter([mockWallet], [mainnet])).toBe(false)
+      expect(manager.shouldRecreateAdapter([mockWallet], [sepolia])).toBe(true)
+    })
+
     it('should use cached adapter when available', () => {
       const adapter1 = manager.createAdapterWithCache([mockWallet])
       const adapter2 = manager.createAdapterWithCache([mockWallet])
       
       expect(adapter1).toBe(adapter2)
+    })
+
+    it('should not reuse cached adapter across different chains', () => {
+      const adapter1 = manager.createAdapterWithCache([mockWallet], false, [mainnet])
+      const adapter2 = manager.createAdapterWithCache([mockWallet], false, [sepolia])
+
+      expect(adapter1).not.toBe(adapter2)
     })
 
     it('should enforce cache size limit', () => {

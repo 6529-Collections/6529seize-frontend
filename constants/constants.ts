@@ -3,14 +3,16 @@ import { mainnet } from "wagmi/chains";
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
 
 export const MEMES_CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
+export const MEMES_DEPLOYER = "0x4B76837F8D8Ad0A28590d06E53dCD44b6B7D4554";
 export const NEXTGEN_CONTRACT = "0x45882f9bc325e14fbb298a1df930c43a874b83ae";
-// const MANIFOLD_PROXY = "0x26bbea7803dcac346d5f5f135b57cf2c752a02be";
-export const MEMES_MANIFOLD_PROXY_CONTRACT =
+export const MANIFOLD_LAZY_CLAIM_CONTRACT =
   "0x26bbea7803dcac346d5f5f135b57cf2c752a02be";
 export const GRADIENT_CONTRACT = "0x0C58Ef43fF3032005e472cB5709f8908aCb00205";
 export const MEMELAB_CONTRACT = "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb";
 export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const NULL_DEAD_ADDRESS = "0x000000000000000000000000000000000000dead";
+export const RESEARCH_AIRDROP_ADDRESS =
+  "0xc2ce4ccef11a8171f443745cea3bceeaadd750c7";
 export const MANIFOLD = "0x3A3548e060Be10c2614d0a4Cb0c03CC9093fD799";
 export const NULL_MERKLE =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -51,16 +53,9 @@ export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.6529.io";
 
 export const SUBSCRIPTIONS_CHAIN = mainnet;
 
-export const MANIFOLD_NETWORK = mainnet;
-
 export const SUBSCRIPTIONS_ADDRESS =
   "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";
 export const SUBSCRIPTIONS_ADDRESS_ENS = "seize.6529.eth";
-
-export const SUBSCRIPTIONS_ADMIN_WALLETS = [
-  "0x0187C9a182736ba18b44eE8134eE438374cf87DC",
-  "0xFe49A85E98941F1A115aCD4bEB98521023a25802",
-];
 
 export const MEMES_MINT_PRICE = 0.06529;
 
@@ -68,3 +63,7 @@ export const MOBILE_APP_IOS =
   "https://apps.apple.com/us/app/6529-mobile/id6654923687";
 export const MOBILE_APP_ANDROID =
   "https://play.google.com/store/apps/details?id=com.core6529.app";
+
+export const MAX_CONNECTED_PROFILES = 3;
+
+export const DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP = "/intern-no-bg.png";

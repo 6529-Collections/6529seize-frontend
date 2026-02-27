@@ -1,17 +1,34 @@
 "use client";
 
+import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { FocusTrap } from "focus-trap-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
+import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
+import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_SECTIONS,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
-import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
@@ -19,33 +36,25 @@ import {
 } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
   mapSidebarSectionsToPages,
-  useSidebarSections,
   type SidebarPageEntry,
+  useSidebarSections,
 } from "@/hooks/useSidebarSections";
-import { useWaves } from "@/hooks/useWaves";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import { useWaves } from "@/hooks/useWaves";
 import { commonApiFetch } from "@/services/api/common-api";
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { FocusTrap } from "focus-trap-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import HeaderSearchModalItem, {
+  getNftCollectionMap,
+} from "./HeaderSearchModalItem";
+import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
 import type {
   HeaderSearchModalItemType,
   NFTSearchResult,
   PageSearchResult,
 } from "./HeaderSearchModalItem";
-import HeaderSearchModalItem, {
-  getNftCollectionMap,
-} from "./HeaderSearchModalItem";
-import { HeaderSearchTabToggle } from "./HeaderSearchTabToggle";
-import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 
 enum STATE {
   INITIAL = "INITIAL",
@@ -129,31 +138,46 @@ interface RankedPageMatch {
   readonly priority: number;
 }
 
+const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
+  [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
+  [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
+};
+
 const getPageMatchPriority = (
   normalizedTitle: string,
   hrefSegments: string[],
   normalizedBreadcrumbs: string[],
+  normalizedSearchTerms: string[],
   normalizedQuery: string
 ): number => {
   if (normalizedTitle === normalizedQuery) return 0;
   if (hrefSegments.includes(normalizedQuery)) return 1;
-  if (normalizedTitle.startsWith(normalizedQuery)) return 2;
-  if (normalizedBreadcrumbs.includes(normalizedQuery)) return 3;
-  if (normalizedTitle.includes(normalizedQuery)) return 4;
-  if (hrefSegments.some((segment) => segment.includes(normalizedQuery))) {
+  if (normalizedSearchTerms.includes(normalizedQuery)) return 2;
+  if (normalizedTitle.startsWith(normalizedQuery)) return 3;
+  if (normalizedBreadcrumbs.includes(normalizedQuery)) return 4;
+  if (normalizedSearchTerms.some((term) => term.includes(normalizedQuery))) {
     return 5;
   }
-  return 6;
+  if (normalizedTitle.includes(normalizedQuery)) return 6;
+  if (hrefSegments.some((segment) => segment.includes(normalizedQuery))) {
+    return 7;
+  }
+  return 8;
 };
 
 const pageMatchesQuery = (
   normalizedTitle: string,
   normalizedHref: string,
   normalizedBreadcrumbs: string[],
+  normalizedSearchTerms: string[],
   normalizedQuery: string
 ) => {
   if (normalizedTitle.includes(normalizedQuery)) return true;
   if (normalizedHref.includes(normalizedQuery)) return true;
+  if (normalizedSearchTerms.some((term) => term.includes(normalizedQuery))) {
+    return true;
+  }
   return normalizedBreadcrumbs.some((breadcrumb) =>
     breadcrumb.includes(normalizedQuery)
   );
@@ -250,14 +274,54 @@ export default function HeaderSearchModal({
     () => mapSidebarSectionsToPages(sections),
     [sections]
   );
+  const { canAccessLanding, canAccessCraft, canAccessLaunch } =
+    useDropForgePermissions();
+  const dropForgePages = useMemo<SidebarPageEntry[]>(() => {
+    if (!canAccessLanding) {
+      return [];
+    }
+
+    const pages: SidebarPageEntry[] = [
+      {
+        name: DROP_FORGE_TITLE,
+        href: DROP_FORGE_PATH,
+        section: "Main",
+        icon: DropForgeIcon,
+      },
+    ];
+
+    if (canAccessCraft) {
+      pages.push({
+        name: DROP_FORGE_SECTIONS.CRAFT.title,
+        href: DROP_FORGE_SECTIONS.CRAFT.path,
+        section: DROP_FORGE_TITLE,
+        icon: DropForgeCraftIcon,
+      });
+    }
+
+    if (canAccessLaunch) {
+      pages.push({
+        name: DROP_FORGE_SECTIONS.LAUNCH.title,
+        href: DROP_FORGE_SECTIONS.LAUNCH.path,
+        section: DROP_FORGE_TITLE,
+        icon: DropForgeLaunchIcon,
+      });
+    }
+
+    return pages;
+  }, [canAccessLanding, canAccessCraft, canAccessLaunch]);
   const allPageEntries = useMemo(() => {
     const seen = new Set<string>();
-    return [...PRIMARY_NAVIGATION_PAGES, ...sidebarPages].filter((entry) => {
+    return [
+      ...PRIMARY_NAVIGATION_PAGES,
+      ...sidebarPages,
+      ...dropForgePages,
+    ].filter((entry) => {
       if (seen.has(entry.href)) return false;
       seen.add(entry.href);
       return true;
     });
-  }, [sidebarPages]);
+  }, [sidebarPages, dropForgePages]);
 
   const pageCatalog = useMemo<PageSearchResult[]>(
     () =>
@@ -266,6 +330,7 @@ export default function HeaderSearchModal({
         title: entry.name,
         href: entry.href,
         icon: entry.icon,
+        searchTerms: PAGE_SEARCH_ALIASES_BY_HREF[entry.href] ?? [],
         breadcrumbs: [entry.section, entry.subsection]
           .filter((value): value is string => !!value)
           .map((value) => value),
@@ -391,12 +456,16 @@ export default function HeaderSearchModal({
         const normalizedBreadcrumbs = page.breadcrumbs.map((value) =>
           value.toLowerCase()
         );
+        const normalizedSearchTerms = (page.searchTerms ?? []).map((value) =>
+          value.toLowerCase()
+        );
 
         if (
           !pageMatchesQuery(
             normalizedTitle,
             normalizedHref,
             normalizedBreadcrumbs,
+            normalizedSearchTerms,
             normalizedQuery
           )
         ) {
@@ -412,6 +481,7 @@ export default function HeaderSearchModal({
             normalizedTitle,
             hrefSegments,
             normalizedBreadcrumbs,
+            normalizedSearchTerms,
             normalizedQuery
           ),
         });

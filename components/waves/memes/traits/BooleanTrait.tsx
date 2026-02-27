@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
-import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 type BooleanTraitProps = {
   readonly label: string;
@@ -130,22 +130,22 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         >
           <button
             onClick={handleYesClick}
-            className={`yes-button tw-flex-1 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-transition-all ${
+            className={`yes-button tw-flex-1 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-transition-all ${
               traits[field]
                 ? "tw-bg-primary-400/30 tw-text-primary-300 tw-ring-primary-400/60"
                 : "tw-bg-iron-800/50 tw-text-iron-400 tw-ring-iron-700/50"
-            } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
+            } hover:tw-brightness-125`}
             type="button"
           >
             Yes
           </button>
           <button
             onClick={handleNoClick}
-            className={`no-button tw-flex-1 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-transition-all ${
+            className={`no-button tw-flex-1 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-px-3 tw-py-2 tw-text-sm tw-shadow-sm tw-transition-all ${
               traits[field] === false
                 ? "tw-bg-primary-400/30 tw-text-primary-300 tw-ring-primary-400/60"
                 : "tw-bg-iron-800/50 tw-text-iron-400 tw-ring-iron-700/50"
-            } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
+            } hover:tw-brightness-125`}
             type="button"
           >
             No

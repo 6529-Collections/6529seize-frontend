@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -8,11 +12,10 @@ import type { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemR
 import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { setAuthJwt } from "@/services/auth/auth.utils";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import {
+  canStoreAnotherWalletAccount,
+  setAuthJwt,
+} from "@/services/auth/auth.utils";
 
 interface AcceptConnectionSharingProps {
   token: string;
@@ -25,11 +28,8 @@ function AcceptConnectionSharing(
 ) {
   const router = useRouter();
   const { setToast } = useAuth();
-  const {
-    seizeAcceptConnection,
-    seizeDisconnectAndLogout,
-    address: connectedAddress,
-  } = useSeizeConnectContext();
+  const { seizeAcceptConnection, address: connectedAddress } =
+    useSeizeConnectContext();
 
   const { token, address, role } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
@@ -48,20 +48,42 @@ function AcceptConnectionSharing(
           token,
         },
       });
-      if (
-        redeemResponse.address &&
-        redeemResponse.token &&
-        areEqualAddresses(redeemResponse.address, address)
-      ) {
-        setAuthJwt(
-          redeemResponse.address,
-          redeemResponse.token,
-          token,
-          role ?? undefined
-        );
-        seizeAcceptConnection(redeemResponse.address);
-        router.push("/");
+      const hasValidRedeemResponse =
+        !!redeemResponse.address &&
+        !!redeemResponse.token &&
+        areEqualAddresses(redeemResponse.address, address);
+      if (!hasValidRedeemResponse) {
+        setToast({ message: "Invalid connection response", type: "error" });
+        setAcceptingConnection(false);
+        return;
       }
+
+      if (!canStoreAnotherWalletAccount(redeemResponse.address)) {
+        setToast({
+          message: "Maximum connected profiles reached",
+          type: "error",
+        });
+        setAcceptingConnection(false);
+        return;
+      }
+
+      const didPersistJwt = setAuthJwt(
+        redeemResponse.address,
+        redeemResponse.token,
+        token,
+        role ?? undefined
+      );
+      if (!didPersistJwt) {
+        setToast({
+          message: "Failed to store connected profile",
+          type: "error",
+        });
+        setAcceptingConnection(false);
+        return;
+      }
+
+      seizeAcceptConnection(redeemResponse.address);
+      router.push("/");
     } catch (error) {
       console.error(error);
       setToast({ message: "Failed to accept connection", type: "error" });
@@ -102,36 +124,34 @@ function AcceptConnectionSharing(
                 md={6}
                 className="d-flex flex-column align-items-center justify-content-center"
               >
-                {connectedAddress && !acceptingConnection ? (
-                  <>
-                    <p className="text-center">
-                      Existing connection detected, disconnect first!
-                    </p>
-                    <Button
-                      size="lg"
-                      onClick={() => seizeDisconnectAndLogout()}
-                    >
-                      Disconnect
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="lg"
-                    className="d-flex align-items-center justify-content-center gap-2"
-                    onClick={() => {
-                      setAcceptingConnection(true);
-                      acceptConnection();
-                    }}
-                  >
-                    {acceptingConnection ? (
-                      <>
-                        PROCESSING <Spinner dimension={18} />
-                      </>
-                    ) : (
-                      "ACCEPT CONNECTION"
-                    )}
-                  </Button>
+                {connectedAddress && !acceptingConnection && (
+                  <p className="text-center">
+                    Current profile will stay available. You can switch between
+                    both after accepting.
+                  </p>
                 )}
+                <Button
+                  size="lg"
+                  className="d-flex align-items-center justify-content-center gap-2"
+                  disabled={acceptingConnection}
+                  aria-disabled={acceptingConnection}
+                  aria-busy={acceptingConnection}
+                  onClick={() => {
+                    if (acceptingConnection) {
+                      return;
+                    }
+                    setAcceptingConnection(true);
+                    acceptConnection();
+                  }}
+                >
+                  {acceptingConnection ? (
+                    <>
+                      PROCESSING <Spinner dimension={18} />
+                    </>
+                  ) : (
+                    "ACCEPT CONNECTION"
+                  )}
+                </Button>
               </Col>
             </>
           )}

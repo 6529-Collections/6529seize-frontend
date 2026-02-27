@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDebounce } from "react-use";
-import type { TraitsData } from "../submission/types/TraitsData";
 import { TraitWrapper } from "./TraitWrapper";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 interface NumberTraitProps {
   readonly label: string;
@@ -164,14 +164,13 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
       setCurrentInputValue(String(traitValue));
     }, [traits, field]);
 
-    // Check if field is filled (non-zero value)
     const isFieldFilled = useMemo(() => {
-      const traitValue = (traits[field] as number) ?? 0;
-      const inputValue = parseFloat(currentInputValue) || 0;
-
-      // Return true if either the trait value or current input value is > 0
-      return traitValue > 0 || inputValue > 0;
-    }, [traits, field, currentInputValue]);
+      const n = Number.parseFloat(currentInputValue);
+      if (!Number.isFinite(n)) return false;
+      if (min !== undefined && n < min) return false;
+      if (max !== undefined && n > max) return false;
+      return true;
+    }, [currentInputValue, min, max]);
 
     // Determine input state styling
     let stateClassName: string;

@@ -1,15 +1,21 @@
 "use client";
 
-import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import { usePathname, useSearchParams } from "next/navigation";
+import React, { useCallback, useMemo, useRef } from "react";
+import {
+  getActiveWaveIdFromUrl,
+  getNotificationsRoute,
+} from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import React, { useCallback, useMemo, useRef } from "react";
+import { useWave } from "@/hooks/useWave";
+import { useWaveData } from "@/hooks/useWaveData";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
+import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
 import LogoIcon from "../common/icons/LogoIcon";
-import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
@@ -77,8 +83,16 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) =
   const { registerRef } = useLayout();
   const { isAndroid, isIos } = useCapacitor();
   const { isApp } = useDeviceInfo();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
+  const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const { data: waveData } = useWaveData({
+    waveId: waveIdFromQuery,
+    onWaveNotFound: () => {},
+  });
+  const { isDm: isCurrentWaveDm } = useWave(waveData);
 
   const setMobileNavRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -122,7 +136,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ hidden = false }) =
               className={`tw-flex tw-flex-1 tw-justify-center tw-items-end ${
                 item.name === "Home" ? "-tw-translate-y-1" : ""
               } tw-h-full tw-min-w-0`}>
-              <NavItem item={item} />
+              <NavItem item={item} isCurrentWaveDm={isCurrentWaveDm} />
             </li>
           ))}
         </ul>

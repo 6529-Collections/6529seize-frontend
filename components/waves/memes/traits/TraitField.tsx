@@ -1,10 +1,10 @@
 import React, { memo } from "react";
-import { TextTrait } from "./TextTrait";
-import { NumberTrait } from "./NumberTrait";
-import { DropdownTrait } from "./DropdownTrait";
 import { BooleanTrait } from "./BooleanTrait";
-import type { FieldDefinition} from "./schema";
+import { DropdownTrait } from "./DropdownTrait";
+import { NumberTrait } from "./NumberTrait";
 import { FieldType } from "./schema";
+import { TextTrait } from "./TextTrait";
+import type { FieldDefinition} from "./schema";
 import type { TraitsData } from "../submission/types/TraitsData";
 
 interface TraitFieldProps {
@@ -15,6 +15,7 @@ interface TraitFieldProps {
   readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
   readonly error?: string | null | undefined;
   readonly onBlur?: (() => void) | undefined;
+  readonly readOnlyOverride?: boolean;
 }
 
 // Create the component
@@ -26,17 +27,18 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
   updateBoolean,
   error,
   onBlur,
+  readOnlyOverride,
 }) => {
-  // Text field rendering
+  const effectiveReadOnly =
+    readOnlyOverride === undefined ? definition.readOnly : readOnlyOverride;
   if (definition.type === FieldType.TEXT) {
-    // TypeScript automatically narrows the type here
     return (
       <TextTrait
         label={definition.label}
         field={definition.field}
         traits={traits}
         updateText={updateText}
-        readOnly={definition.readOnly}
+        readOnly={effectiveReadOnly}
         placeholder={definition.placeholder}
         error={error}
         onBlur={onBlur}
@@ -44,16 +46,14 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
     );
   }
 
-  // Number field rendering
   if (definition.type === FieldType.NUMBER) {
-    // TypeScript automatically narrows the type here
     return (
       <NumberTrait
         label={definition.label}
         field={definition.field}
         traits={traits}
         updateNumber={updateNumber}
-        readOnly={definition.readOnly}
+        readOnly={effectiveReadOnly}
         min={definition.min}
         max={definition.max}
         error={error}
@@ -118,13 +118,16 @@ const arePropsEqual = (
     return false; // Always re-render title/description fields
   }
 
-  // Check if definition changed
   const definitionMatches =
     definition.type === nextDefinition.type &&
     definition.field === nextDefinition.field &&
-    definition.label === nextDefinition.label;
+    definition.label === nextDefinition.label &&
+    (definition as { readOnly?: boolean }).readOnly ===
+      (nextDefinition as { readOnly?: boolean }).readOnly;
 
-  // Check if validation error changed
+  const readOnlyOverrideMatches =
+    prevProps.readOnlyOverride === nextProps.readOnlyOverride;
+
   const errorMatches = error === nextError;
 
   // Special handling for dropdown fields - re-render more aggressively
@@ -138,8 +141,12 @@ const arePropsEqual = (
     }
   }
 
-  // Return true if nothing relevant changed (prevent re-render)
-  return fieldMatches && definitionMatches && errorMatches;
+  return (
+    fieldMatches &&
+    definitionMatches &&
+    readOnlyOverrideMatches &&
+    errorMatches
+  );
 };
 
 // Export memoized component with display name

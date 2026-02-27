@@ -1,9 +1,9 @@
 "use client";
 
-import type { TraitsData } from "../submission/types/TraitsData";
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDebounce } from "react-use";
 import { TraitWrapper } from "./TraitWrapper";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 type TextTraitProps = {
   readonly label: string;
@@ -33,26 +33,28 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
     error,
     onBlur,
   }) => {
+    const currentTraitValue = ((traits[field] as string) ?? "").toString();
     // Use a ref to track the input element
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Track current input value for real-time checkmark updates
     const [currentInputValue, setCurrentInputValue] = React.useState<string>(
-      (traits[field] as string) ?? ""
+      currentTraitValue
     );
 
     // Debounced update function - stores the current input value for use in the debounced function
-    const [debouncedValue, setDebouncedValue] = React.useState<string>("");
+    const [debouncedValue, setDebouncedValue] = React.useState<string>(
+      currentTraitValue
+    );
 
-    // Update traits when debounced value changes
     useDebounce(
       () => {
-        if (debouncedValue !== "" && debouncedValue !== traits[field]) {
+        if (debouncedValue !== currentTraitValue) {
           updateText(field, debouncedValue);
         }
       },
-      400, // 400ms is a good balance for typing pauses
-      [debouncedValue]
+      400,
+      [debouncedValue, currentTraitValue]
     );
 
     // Handle input changes with debounce
@@ -67,7 +69,8 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Handle blur (when user finishes typing)
     const handleBlur = useCallback(() => {
-      if (inputRef.current && inputRef.current.value !== traits[field]) {
+      const currentTraitValue = ((traits[field] as string) ?? "").toString();
+      if (inputRef.current && inputRef.current.value !== currentTraitValue) {
         updateText(field, inputRef.current.value);
       }
       // Call parent onBlur if provided
@@ -78,7 +81,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Synchronize the input value with props when traits change from outside
     React.useEffect(() => {
-      const value = (traits[field] as string) ?? "";
+      const value = ((traits[field] as string) ?? "").toString();
       if (inputRef.current && inputRef.current.value !== value) {
         inputRef.current.value = value;
       }
@@ -86,18 +89,14 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
 
     // Update currentInputValue when traits change from outside
     React.useEffect(() => {
-      const traitValue = (traits[field] as string) ?? "";
+      const traitValue = ((traits[field] as string) ?? "").toString();
       setCurrentInputValue(traitValue);
     }, [traits, field]);
 
-    // Check if field is filled (non-empty trimmed value)
     const isFieldFilled = useMemo(() => {
-      const traitValue = (traits[field] as string) ?? "";
       const inputValue = currentInputValue ?? "";
-
-      // Return true if either the trait value or current input value has content
-      return traitValue.trim().length > 0 || inputValue.trim().length > 0;
-    }, [traits, field, currentInputValue]);
+      return inputValue.trim().length > 0;
+    }, [currentInputValue]);
 
     // Prepare input className - add padding for checkmark when field is filled
     const inputClassName = useMemo(() => {

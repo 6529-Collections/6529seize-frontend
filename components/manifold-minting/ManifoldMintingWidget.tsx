@@ -1,6 +1,16 @@
 "use client";
 
-import { MANIFOLD_NETWORK } from "@/constants/constants";
+import { useSearchParams } from "next/navigation";
+import { type JSX, useEffect, useState } from "react";
+import { Col, Container, Form, Row, Table } from "react-bootstrap";
+import {
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
+import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import {
   areEqualAddresses,
   fromGWEI,
@@ -9,28 +19,21 @@ import {
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState, type JSX } from "react";
-import { Col, Container, Form, Row, Table } from "react-bootstrap";
-import {
-  useReadContract,
-  useReadContracts,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
-import type { ManifoldMerkleProof } from "./manifold-types";
 import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
+import type { Chain } from "viem";
+
+const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 
 export default function ManifoldMintingWidget(
   props: Readonly<{
     contract: string;
-    proxy: string;
+    chain: Chain;
     abi: any;
     claim: ManifoldClaim;
-    merkleTreeId: number;
     setFee: (fee: number) => void;
     setMintForAddress: (address: string) => void;
   }>
@@ -42,14 +45,22 @@ export default function ManifoldMintingWidget(
 
   const [isError, setIsError] = useState<boolean>(false);
   const [fetchingMerkle, setFetchingMerkle] = useState<boolean>(false);
-  const [merkleProofs, setMerkleProofs] = useState<ManifoldMerkleProof[]>([]);
+  const [merkleProofs, setMerkleProofs] = useState<MintingClaimsProofItem[]>(
+    []
+  );
   const [merkleProofsMints, setMerkleProofsMints] = useState<boolean[]>([]);
 
   const [mintCount, setMintCount] = useState<number>(0);
-  const [fee, setFee] = useState<number>(0);
+  const [feeWei, setFeeWei] = useState<bigint>(0n);
 
   const [mintStatus, setMintStatus] = useState<JSX.Element>(<></>);
   const [mintError, setMintError] = useState<string>("");
+  const mintWrite = useWriteContract();
+  const waitMintWrite = useWaitForTransactionReceipt({
+    chainId: props.chain.id,
+    confirmations: 1,
+    hash: mintWrite.data,
+  });
 
   useEffect(() => {
     mintWrite.reset();
@@ -60,31 +71,47 @@ export default function ManifoldMintingWidget(
       return;
     }
 
-    if (mintForAddress && props.merkleTreeId) {
+    if (mintForAddress && props.claim.merkleRoot) {
+      setIsError(false);
       setFetchingMerkle(true);
-      const url = `https://apps.api.manifoldxyz.dev/public/merkleTree/${props.merkleTreeId}/merkleInfo?address=${mintForAddress}`;
-      fetch(url)
+      getMemesMintingProofsByAddress(
+        props.claim.instanceId,
+        props.claim.merkleRoot,
+        mintForAddress
+      )
         .then((response) => {
-          response.json().then((data: ManifoldMerkleProof[]) => {
-            setMerkleProofs(data);
-          });
+          const mappedProofs: MintingClaimsProofItem[] = (
+            response.proofs ?? []
+          ).map((proof) => ({
+            merkle_proof: proof.merkle_proof ?? [],
+            value: Number(proof.value ?? 0),
+          }));
+          setMerkleProofs(mappedProofs);
         })
         .catch(() => {
           setIsError(true);
+          setMerkleProofs([]);
         })
         .finally(() => {
           setFetchingMerkle(false);
         });
     }
-  }, [mintForAddress, props.merkleTreeId]);
+  }, [
+    mintForAddress,
+    props.claim.merkleRoot,
+    props.contract,
+    props.claim.instanceId,
+    props.claim.phase,
+    mintWrite,
+  ]);
 
   function getReadContractsParams() {
     const params: any = [];
-    merkleProofs.map((mp) => {
+    merkleProofs.forEach((mp) => {
       params.push({
-        address: props.proxy as `0x${string}`,
+        address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
         abi: props.abi,
-        chainId: MANIFOLD_NETWORK.id,
+        chainId: props.chain.id,
         functionName: "checkMintIndex",
         args: [props.contract, props.claim.instanceId, mp.value],
       });
@@ -100,25 +127,19 @@ export default function ManifoldMintingWidget(
   });
 
   const getFee = useReadContract({
-    address: props.proxy as `0x${string}`,
+    address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
     abi: props.abi,
-    chainId: MANIFOLD_NETWORK.id,
+    chainId: props.chain.id,
     functionName:
       props.claim.phase === ManifoldPhase.ALLOWLIST
         ? "MINT_FEE_MERKLE"
         : "MINT_FEE",
   });
 
-  const mintWrite = useWriteContract();
-  const waitMintWrite = useWaitForTransactionReceipt({
-    chainId: MANIFOLD_NETWORK.id,
-    confirmations: 1,
-    hash: mintWrite.data,
-  });
-
   useEffect(() => {
-    const f = Number(getFee.data ?? 0);
-    setFee(f);
+    const nextFeeWei = (getFee.data as bigint | undefined) ?? 0n;
+    const f = Number(nextFeeWei);
+    setFeeWei(nextFeeWei);
     props.setFee(f);
   }, [getFee.data]);
 
@@ -133,7 +154,7 @@ export default function ManifoldMintingWidget(
   }, [readContracts.data]);
 
   const getSelectedMerkleProofs = () => {
-    const selectedMerkleProofs: ManifoldMerkleProof[] = [];
+    const selectedMerkleProofs: MintingClaimsProofItem[] = [];
     for (let i = 0; i < merkleProofsMints.length; i++) {
       const proof = merkleProofs[i];
       if (!proof) {
@@ -159,7 +180,9 @@ export default function ManifoldMintingWidget(
 
     args.push(...mintArgs, mintForAddress);
 
-    const functionName = getMintFunctionName(isProxy);
+    const functionName = isProxy
+      ? MINT_PROXY_FUNCTION_NAME
+      : getDirectMintFunctionName();
 
     return {
       functionName,
@@ -179,27 +202,24 @@ export default function ManifoldMintingWidget(
       } else {
         mintArgs.push(
           selectedMerkleProofs.map((mp) => mp.value) ?? [],
-          selectedMerkleProofs.map((mp) => mp.merkleProof) ?? []
+          selectedMerkleProofs.map((mp) => mp.merkle_proof) ?? []
         );
       }
     } else {
       mintArgs.push(
         selectedMerkleProofs[0]?.value ?? 0,
-        selectedMerkleProofs[0]?.merkleProof ?? []
+        selectedMerkleProofs[0]?.merkle_proof ?? []
       );
     }
 
     return mintArgs;
   };
 
-  const getMintFunctionName = (isProxy: boolean) => {
-    if (isProxy) {
-      return "mintProxy";
-    } else if (mintCount > 1) {
+  const getDirectMintFunctionName = () => {
+    if (mintCount > 1) {
       return "mintBatch";
-    } else {
-      return "mint";
     }
+    return "mint";
   };
 
   const isMintDebugEnabled = searchParams?.get("mintdebug") === "1";
@@ -222,7 +242,7 @@ export default function ManifoldMintingWidget(
 
     return {
       timestamp: new Date().toISOString(),
-      chainId: MANIFOLD_NETWORK.id,
+      chainId: props.chain.id,
       claimStatus: props.claim.status,
       phase: props.claim.phase,
       connectedWallet,
@@ -231,8 +251,8 @@ export default function ManifoldMintingWidget(
       mintFunction: argsPreview.functionName,
       mintCount,
       valueWei: getValue().toString(),
-      feeWei: fee.toString(),
-      claimCostWei: props.claim.cost.toString(),
+      feeWei: feeWei.toString(),
+      claimCostWei: (props.claim.costWei ?? 0n).toString(),
       availableMerkleProofs: merkleProofs.length,
       selectedMerkleProofs: selectedProofs.length,
       mintedProofs: merkleProofsMints.filter(Boolean).length,
@@ -270,10 +290,10 @@ export default function ManifoldMintingWidget(
     const value = getValue();
     const args = getMintArgs();
     mintWrite.writeContract({
-      address: props.proxy as `0x${string}`,
+      address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
       abi: props.abi,
-      chainId: MANIFOLD_NETWORK.id,
-      value: BigInt(value),
+      chainId: props.chain.id,
+      value,
       functionName: args.functionName,
       args: args.args,
     });
@@ -298,19 +318,19 @@ export default function ManifoldMintingWidget(
   useEffect(() => {
     if (waitMintWrite.error) {
       setMintStatus(<></>);
-      setMintError(
+      const resolvedError =
         waitMintWrite.error.message
           ?.split("Request Arguments")[0]
           ?.split(".")[0]
-          ?.split("Contract Call")[0]!
-      );
+          ?.split("Contract Call")[0] ?? waitMintWrite.error.message;
+      setMintError(resolvedError);
     }
   }, [waitMintWrite.error]);
 
   const getViewLink = (hash: string) => {
     return (
       <a
-        href={getTransactionLink(MANIFOLD_NETWORK.id, hash)}
+        href={getTransactionLink(props.chain.id, hash)}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -404,7 +424,11 @@ export default function ManifoldMintingWidget(
   }
 
   const getValue = () => {
-    return (props.claim.cost + fee) * mintCount;
+    const safeCount =
+      Number.isFinite(mintCount) && !Number.isNaN(mintCount)
+        ? Math.max(0, Math.trunc(mintCount))
+        : 0;
+    return ((props.claim.costWei ?? 0n) + feeWei) * BigInt(safeCount);
   };
 
   function printMint(available?: number) {
@@ -416,7 +440,7 @@ export default function ManifoldMintingWidget(
             {available === undefined
               ? printMintCountInput()
               : printMintCountDropdown(available)}
-            {mintCount > 0 && <b>{fromGWEI(getValue())} ETH</b>}
+            {mintCount > 0 && <b>{fromGWEI(Number(getValue()))} ETH</b>}
           </Col>
         </Row>
         <Row className="pt-3">

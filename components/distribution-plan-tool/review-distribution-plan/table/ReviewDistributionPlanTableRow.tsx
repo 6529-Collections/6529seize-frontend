@@ -1,5 +1,6 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
 import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
@@ -7,18 +8,18 @@ import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/Ro
 import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { formatCount } from "@/helpers/format.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
-import type {
-  FullResultWallet,
-  ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
 import {
   FetchResultsType,
   ReviewDistributionPlanTableItemType
 } from "./ReviewDistributionPlanTable";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
+import type {
+  FullResultWallet,
+  ReviewDistributionPlanTableItem,
+  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
 
 export default function ReviewDistributionPlanTableRow({
   item,
@@ -196,8 +197,12 @@ export default function ReviewDistributionPlanTableRow({
     <DistributionPlanTableRowWrapper>
       <td className={nameClasses}>{item.name}</td>
       <td className={commonClasses}>{item.description}</td>
-      <td className={commonClasses}>{isPublic ? "-" : item.walletsCount}</td>
-      <td className={commonClasses}>{isPublic ? "-" : item.spotsCount}</td>
+      <td className={commonClasses}>
+        {isPublic ? "-" : formatCount(item.walletsCount)}
+      </td>
+      <td className={commonClasses}>
+        {isPublic ? "-" : formatCount(item.spotsCount)}
+      </td>
       <td className={`${commonClasses} tw-flex tw-justify-start tw-gap-x-3`}>
         <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}

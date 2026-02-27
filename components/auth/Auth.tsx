@@ -1,59 +1,62 @@
 "use client";
 
-import styles from "./Auth.module.scss";
+import "react-toastify/dist/ReactToastify.css";
+import { useQuery } from "@tanstack/react-query";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
-  useState,
   useMemo,
-  useCallback,
   useRef,
+  useState,
 } from "react";
-import type { TypeOptions } from "react-toastify";
-import { Slide, ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  useSecureSign,
-  MobileSigningError,
-  ConnectionMismatchError,
-  SigningProviderError,
-} from "@/hooks/useSecureSign";
-import { useIdentity } from "@/hooks/useIdentity";
-import {
-  getAuthJwt,
-  removeAuthJwt,
-  setAuthJwt,
-} from "@/services/auth/auth.utils";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { Button, Modal } from "react-bootstrap";
+import { Slide, toast, ToastContainer } from "react-toastify";
 import { isAddress } from "viem";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
-import { validateJwt, getRole } from "@/services/auth/jwt-validation.utils";
-import { useQuery } from "@tanstack/react-query";
+import {
+  InvalidRoleStateError,
+  MissingActiveProfileError,
+} from "@/errors/authentication";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
+import type { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
+import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
+import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
+import { useIdentity } from "@/hooks/useIdentity";
+import {
+  ConnectionMismatchError,
+  MobileSigningError,
+  SigningProviderError,
+  useSecureSign,
+} from "@/hooks/useSecureSign";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import {
+  canStoreAnotherWalletAccount,
+  getAuthJwt,
+  getWalletAddress,
+  removeAuthJwt,
+  setActiveWalletAccount,
+  setAuthJwt,
+} from "@/services/auth/auth.utils";
+import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
+import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
+import {
+  logErrorSecurely,
+  sanitizeErrorForUser,
+} from "@/utils/error-sanitizer";
+import { validateRoleForAuthentication } from "@/utils/role-validation";
+import DotLoader from "../dotLoader/DotLoader";
 import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
-import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
-import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
-import type { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
-import type { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
-import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
-import { Modal, Button } from "react-bootstrap";
-import DotLoader from "../dotLoader/DotLoader";
+import styles from "./Auth.module.scss";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  sanitizeErrorForUser,
-  logErrorSecurely,
-} from "@/utils/error-sanitizer";
-import { validateRoleForAuthentication } from "@/utils/role-validation";
-import {
-  MissingActiveProfileError,
-  InvalidRoleStateError,
-} from "@/errors/authentication";
-import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
+import type { TypeOptions } from "react-toastify";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {
@@ -128,11 +131,23 @@ export default function Auth({
 
   const {
     address,
+    connectedAccounts,
     isConnected,
+    seizeDisconnect,
     seizeDisconnectAndLogout,
     isSafeWallet,
     connectionState,
   } = useSeizeConnectContext();
+
+  const isAddressAuthorized = useMemo(() => {
+    if (!address) {
+      return false;
+    }
+
+    return connectedAccounts.some(
+      (account) => account.address.toLowerCase() === address.toLowerCase()
+    );
+  }, [address, connectedAccounts]);
 
   const {
     signMessage,
@@ -187,18 +202,25 @@ export default function Auth({
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
+  const authRole = getRole(getAuthJwt());
 
   useEffect(() => {
-    const role = getRole(getAuthJwt());
-
-    if (role) {
-      const activeProxy = receivedProfileProxies?.find(
-        (proxy) => proxy.created_by.id === role
-      );
-
-      setActiveProfileProxy(activeProxy ?? null);
+    if (!address) {
+      setActiveProfileProxy(null);
+      return;
     }
-  }, [receivedProfileProxies]);
+
+    if (!authRole) {
+      setActiveProfileProxy(null);
+      return;
+    }
+
+    const activeProxy = receivedProfileProxies?.find(
+      (proxy) => proxy.created_by.id === authRole
+    );
+
+    setActiveProfileProxy(activeProxy ?? null);
+  }, [address, authRole, receivedProfileProxies]);
 
   const reset = useCallback(() => {
     invalidateAll();
@@ -236,6 +258,26 @@ export default function Auth({
     if (!address || connectionState !== "connected") {
       setShowSignModal(false);
       return;
+    }
+
+    if (!isAddressAuthorized) {
+      if (isConnected) {
+        setShowSignModal(true);
+      }
+      return;
+    }
+
+    // Clear any stale sign modal state when returning to an authorized account.
+    // If JWT validation still needs a signature, validateAuthImmediate will
+    // re-open it via onShowSignModal(true).
+    setShowSignModal(false);
+
+    const activeStoredAddress = getWalletAddress();
+    if (
+      activeStoredAddress &&
+      activeStoredAddress.toLowerCase() !== address.toLowerCase()
+    ) {
+      setActiveWalletAccount(address);
     }
 
     // Capture current address at validation time to prevent race conditions
@@ -296,6 +338,7 @@ export default function Auth({
     address,
     activeProfileProxy,
     connectionState,
+    isAddressAuthorized,
     isConnected,
     abortCurrentAuthOperation,
     invalidateAll,
@@ -453,6 +496,14 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
+      if (!canStoreAnotherWalletAccount(signerAddress)) {
+        setToast({
+          message: "Maximum connected profiles reached",
+          type: "error",
+        });
+        return { success: false };
+      }
+
       const nonceResponse = await getNonce({ signerAddress });
       const { nonce, server_signature } = nonceResponse;
 
@@ -486,12 +537,20 @@ export default function Auth({
           ...(role != null && { role }),
         },
       });
-      setAuthJwt(
+      const isPersisted = setAuthJwt(
         signerAddress,
         tokenResponse.token,
         tokenResponse.refresh_token,
         role ?? undefined
       );
+      if (!isPersisted) {
+        setToast({
+          message: "Failed to persist connected profile",
+          type: "error",
+        });
+        return { success: false };
+      }
+
       return { success: true };
     } catch (error) {
       // Handle specific authentication nonce errors with detailed messages
@@ -538,6 +597,30 @@ export default function Auth({
     setAuthLoadingState("signing");
 
     try {
+      if (!isAddressAuthorized) {
+        if (!canStoreAnotherWalletAccount(address)) {
+          setToast({
+            message: "Maximum connected profiles reached",
+            type: "error",
+          });
+          return { success: false };
+        }
+
+        const { success } = await requestSignIn({
+          signerAddress: address,
+          role: null,
+        });
+        if (!success) {
+          setShowSignModal(false);
+          void seizeDisconnect();
+          return { success: false };
+        }
+
+        invalidateAll();
+        setShowSignModal(false);
+        return { success: true };
+      }
+
       // Create a new abort controller for this auth request
       const abortController = new AbortController();
       const operationId = `manual-auth-${Date.now()}`;
@@ -624,6 +707,17 @@ export default function Auth({
     return !!connectedProfile?.handle && !activeProfileProxy && !!address;
   }, [connectedProfile?.handle, activeProfileProxy, address]);
 
+  const onCancelSignRequest = useCallback(() => {
+    setShowSignModal(false);
+
+    if (!isAddressAuthorized) {
+      void seizeDisconnect();
+      return;
+    }
+
+    void seizeDisconnectAndLogout();
+  }, [isAddressAuthorized, seizeDisconnect, seizeDisconnectAndLogout]);
+
   // Computed modal visibility to prevent flickering during rapid state changes
   const shouldShowSignModal = useMemo(() => {
     return (
@@ -663,46 +757,49 @@ export default function Auth({
         backdrop="static"
         keyboard={false}
         centered
+        dialogClassName={styles["signModalDialog"] ?? ""}
+        contentClassName={styles["signModalSurface"] ?? ""}
       >
-        <div className={styles["signModalHeader"]}>
-          <Modal.Title>Sign Authentication Request</Modal.Title>
-        </div>
-        <Modal.Body className={styles["signModalContent"]}>
-          <p className="mt-2 mb-2">
+        <Modal.Header className={styles["signModalHeader"]}>
+          <div className={styles["signModalTitle"]}>
+            Sign Authentication Request
+          </div>
+        </Modal.Header>
+        <Modal.Body className={styles["signModalBody"]}>
+          <p className={styles["signModalLead"]}>
             To connect your wallet, you will need to sign a message to confirm
             your identity.
           </p>
 
-          <ul className="font-lighter">
-            <li className="mt-1 mb-1">
+          <ul className={styles["signModalList"]}>
+            <li>
               This signature will be used to generate a secure token (JWT) to
               authenticate your session.
             </li>
-            <li className="mt-1 mb-1">
+            <li>
               Your signature will not cost any gas and is purely for
               authentication purposes.
             </li>
           </ul>
         </Modal.Body>
-        <Modal.Footer className={styles["signModalContent"]}>
+        <Modal.Footer className={styles["signModalFooter"]}>
           <Button
-            variant="danger"
-            onClick={() => {
-              setShowSignModal(false);
-              seizeDisconnectAndLogout();
-            }}
+            variant="link"
+            className={styles["signModalCancelButton"]}
+            onClick={onCancelSignRequest}
           >
             Cancel
           </Button>
           <Button
-            variant="primary"
+            variant="link"
+            className={styles["signModalConfirmButton"]}
             onClick={() => requestAuth()}
             disabled={isSigningPending}
           >
             {isSigningPending ? (
-              <>
+              <span className={styles["signModalButtonContent"]}>
                 Confirm in your wallet <DotLoader />
-              </>
+              </span>
             ) : (
               "Sign"
             )}

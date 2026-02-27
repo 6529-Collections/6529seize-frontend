@@ -1,20 +1,5 @@
 "use client";
 
-import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
-import { useAuth } from "@/components/auth/Auth";
-import BellIcon from "@/components/common/icons/BellIcon";
-import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
-import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
-import HomeIcon from "@/components/common/icons/HomeIcon";
-import WavesIcon from "@/components/common/icons/WavesIcon";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import useCapacitor from "@/hooks/useCapacitor";
-import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
-import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import React, {
@@ -25,23 +10,46 @@ import React, {
   useState,
 } from "react";
 import { useKey } from "react-use";
+import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { useAuth } from "@/components/auth/Auth";
+import BellIcon from "@/components/common/icons/BellIcon";
+import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
+import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
+import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
+import HomeIcon from "@/components/common/icons/HomeIcon";
+import WavesIcon from "@/components/common/icons/WavesIcon";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import {
+  DROP_FORGE_PATH,
+  DROP_FORGE_TITLE,
+} from "@/components/drop-forge/drop-forge.constants";
+import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
+import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
+import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import WebSidebarExpandable from "./nav/WebSidebarExpandable";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarSubmenu from "./nav/WebSidebarSubmenu";
 
 interface WebSidebarNavProps {
   readonly isCollapsed: boolean;
+  readonly isMobile?: boolean;
 }
 
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
->(({ isCollapsed = false }, ref) => {
+>(({ isCollapsed = false, isMobile: _isMobile = false }, ref) => {
   const pathname = usePathname();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
+  const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.handle ?? null
   );
@@ -327,21 +335,37 @@ const WebSidebarNav = React.forwardRef<
                 section.key !== "network" && section.key !== "collections"
             )
             .map((section) => (
-              <li
-                key={section.key}
-                className={isCollapsed ? "tw-relative" : undefined}
-              >
-                <WebSidebarExpandable
-                  section={section}
-                  expanded={expandedKeys.includes(section.key)}
-                  onToggle={(event) => handleSectionToggle(section.key, event)}
-                  collapsed={isCollapsed}
-                  pathname={pathname}
-                  data-section={section.key}
-                />
-                {renderCollapsedSubmenu(section.key)}
-              </li>
+              <React.Fragment key={section.key}>
+                <li className={isCollapsed ? "tw-relative" : undefined}>
+                  <WebSidebarExpandable
+                    section={section}
+                    expanded={expandedKeys.includes(section.key)}
+                    onToggle={(event) =>
+                      handleSectionToggle(section.key, event)
+                    }
+                    collapsed={isCollapsed}
+                    pathname={pathname}
+                    data-section={section.key}
+                  />
+                  {renderCollapsedSubmenu(section.key)}
+                </li>
+                {section.key === "about" && showDropForge && (
+                  <li>
+                    <WebSidebarNavItem
+                      href={DROP_FORGE_PATH}
+                      icon={DropForgeIcon}
+                      active={
+                        pathname === DROP_FORGE_PATH ||
+                        pathname?.startsWith(`${DROP_FORGE_PATH}/`)
+                      }
+                      collapsed={isCollapsed}
+                      label={DROP_FORGE_TITLE}
+                    />
+                  </li>
+                )}
+              </React.Fragment>
             ))}
+
         </ul>
       </nav>
 

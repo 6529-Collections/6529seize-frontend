@@ -71,6 +71,7 @@ export interface BaseFieldDefinition {
   readonly type: FieldType;
   readonly field: keyof TraitsData;
   readonly label: string;
+  readonly readOnly?: boolean | undefined;
 }
 
 /**
@@ -473,23 +474,26 @@ function validateSchema(schema: readonly SectionDefinition[]): void {
 // Validate the schema on load (development only)
 validateSchema(traitDefinitions);
 
-// Generate form sections (with dynamic user profile)
 export function getFormSections(
-  userProfile: string | null | undefined
+  userProfile: string | null | undefined,
+  readOnlyOverrides?: Partial<Record<keyof TraitsData, boolean>>
 ): readonly SectionDefinition[] {
   const profile = userProfile ?? "User's Profile Name";
 
   return traitDefinitions.map((section) => ({
     ...section,
     fields: section.fields.map((field) => {
-      // Handle special case for userProfile placeholder
-      if (field.field === "artist" || field.field === "seizeArtistProfile") {
+      const withPlaceholder =
+        field.field === "artist" || field.field === "seizeArtistProfile"
+          ? { ...field, placeholder: profile }
+          : field;
+      if (readOnlyOverrides?.[field.field] !== undefined) {
         return {
-          ...field,
-          placeholder: profile,
-        };
+          ...withPlaceholder,
+          readOnly: readOnlyOverrides[field.field],
+        } as FieldDefinition;
       }
-      return field;
+      return withPlaceholder;
     }),
   }));
 }

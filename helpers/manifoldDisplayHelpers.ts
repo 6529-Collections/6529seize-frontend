@@ -1,9 +1,9 @@
-import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import {
-  numberWithCommas,
-  fromGWEI,
   capitalizeEveryWord,
+  fromGWEI,
+  numberWithCommas,
 } from "@/helpers/Helpers";
+import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 export function formatEditionSize(manifoldClaim: ManifoldClaim): string {
   if (manifoldClaim.isFinalized) {
@@ -22,9 +22,10 @@ export function formatClaimStatus(manifoldClaim: ManifoldClaim): string {
 }
 
 export function formatClaimCost(manifoldClaim: ManifoldClaim): string {
-  if (manifoldClaim.cost > 0) {
+  const costWei = manifoldClaim.costWei ?? 0n;
+  if (costWei > 0n) {
     return `${numberWithCommas(
-      Math.round(fromGWEI(manifoldClaim.cost) * 100000) / 100000
+      Math.round(fromGWEI(Number(costWei)) * 100000) / 100000
     )} ETH`;
   } else {
     return `N/A`;

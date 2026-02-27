@@ -1,0 +1,42 @@
+import { DROP_FORGE_TITLE } from "@/components/drop-forge/drop-forge.constants";
+import DropForgeLaunchClaimPageClient from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient";
+import { getAppMetadata } from "@/components/providers/metadata";
+import styles from "@/styles/Home.module.scss";
+import type { Metadata } from "next";
+
+interface Props {
+  params: Promise<{ id: string }>;
+}
+
+export default async function DropForgeLaunchClaimPage({
+  params,
+}: Readonly<Props>) {
+  const { id } = await params;
+  const isNumericId = /^\d+$/.test(id);
+  const claimId = isNumericId ? Number(id) : Number.NaN;
+  if (!Number.isSafeInteger(claimId) || claimId < 0) {
+    return (
+      <main className={`${styles["main"]} tailwind-scope`}>
+        <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
+          <p className="tw-text-red-400">Invalid Claim ID</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className={`${styles["main"]} tailwind-scope`}>
+      <DropForgeLaunchClaimPageClient claimId={claimId} />
+    </main>
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: Readonly<Props>): Promise<Metadata> {
+  const { id } = await params;
+  return getAppMetadata({
+    title: `Claim #${id} | Launch Claims`,
+    description: DROP_FORGE_TITLE,
+  });
+}

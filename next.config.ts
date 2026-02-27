@@ -30,6 +30,13 @@ const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 const schemaMod = require("./config/env.schema.runtime.cjs");
 const { publicEnvSchema } = schemaMod;
 
+function getAssetPrefix(assetsFromS3: boolean, version: string): string {
+  if (!assetsFromS3) {
+    return "";
+  }
+  return `https://dnclu2fna0b2b.cloudfront.net/web_build/${version}`;
+}
+
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);
@@ -58,9 +65,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
     persistBakedArtifacts(publicEnv, ASSETS_FROM_S3);
 
     // Compose config
-    const assetPrefix = ASSETS_FROM_S3
-      ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
-      : "";
+    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
@@ -92,6 +97,10 @@ const nextConfigFactory = (phase: string): NextConfig => {
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
         ENABLE_SECURITY_LOGGING: publicEnv.ENABLE_SECURITY_LOGGING,
+        DROP_FORGE_TESTNET:
+          publicEnv.DROP_FORGE_TESTNET === undefined
+            ? undefined
+            : String(publicEnv.DROP_FORGE_TESTNET),
         VITE_FEATURE_AB_CARD: publicEnv.VITE_FEATURE_AB_CARD,
         FEATURE_AB_CARD: publicEnv.FEATURE_AB_CARD,
         PEPE_CACHE_TTL_MINUTES: publicEnv.PEPE_CACHE_TTL_MINUTES,
@@ -114,9 +123,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
     const ASSETS_FROM_S3 = loadAssetsFlagAtRuntime();
     logOnceConfig("ASSETS_FROM_S3", ASSETS_FROM_S3.toString());
 
-    const assetPrefix = ASSETS_FROM_S3
-      ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
-      : "";
+    const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
 
     return sharedConfig(publicEnv, assetPrefix);
   }

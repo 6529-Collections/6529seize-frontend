@@ -749,6 +749,68 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /distributions/{contract}/{id}/airdrops_artist:
+    get:
+      tags:
+        - Distributions
+      summary: Get artist airdrops for a specific contract and card
+      operationId: getDistributionAirdropsArtist
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid request
+  /distributions/{contract}/{id}/airdrops_team:
+    get:
+      tags:
+        - Distributions
+      summary: Get team airdrops for a specific contract and card
+      operationId: getDistributionAirdropsTeam
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid request
   /light-drops:
     get:
       tags:
@@ -2035,6 +2097,370 @@ paths:
                 $ref: "#/components/schemas/ApiMemesMintStat"
         "404":
           description: Memes mint stats for id not found
+  /minting-claims/{contract}/{card_id}/{merkle_root}/proofs:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get all merkle proofs for a card root
+      description: >
+        Returns allowlist merkle proofs for all addresses for the given
+        contract, card and merkle root. Listing all addresses requires
+        DISTRIBUTION_ADMIN_WALLETS.
+      operationId: getMintingClaimsProofs
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: merkle_root
+          in: path
+          required: true
+          description: 0x-prefixed 66-character hex merkle root
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaimsProofsByAddressResponse"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+        "403":
+          description: >
+            Forbidden - only distribution admins can list all proofs for a
+            merkle_root
+        "404":
+          description: No proofs found for the given contract/card/merkle_root
+  /minting-claims/{contract}/{card_id}/{merkle_root}/proofs/{address}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get merkle proofs for an address in a card root
+      description: >
+        Returns allowlist merkle proofs for one address for the given contract,
+        card and merkle root.
+      operationId: getMintingClaimsProofsByAddress
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: merkle_root
+          in: path
+          required: true
+          description: 0x-prefixed 66-character hex merkle root
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{64}$
+        - name: address
+          in: path
+          required: true
+          description: Wallet address
+          schema:
+            $ref: "#/components/schemas/ApiEthereumAddress"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaimsProofsResponse"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+        "404":
+          description: No merkle root found for the given contract/card/merkle_root
+  /minting-claims/{contract}/{card_id}/roots:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get merkle roots for a token
+      description: Returns merkle roots (one per phase) for the given contract and card.
+      operationId: getMintingClaimsRoots
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MintingClaimsRootItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /minting-claims/{contract}/{card_id}/airdrops:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get per-phase airdrop totals for a token
+      description: |
+        Returns per-phase airdrop totals for the given contract and card.
+      operationId: getMintingClaimsAirdrops
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMintingClaimsPhaseTotalItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /minting-claims/{contract}/{card_id}/allowlists:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get per-phase allowlist totals for a token
+      description: |
+        Returns per-phase allowlist totals for the given contract and card.
+      operationId: getMintingClaimsAllowlists
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: card_id
+          in: path
+          required: true
+          description: Card (token) ID
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiMintingClaimsPhaseTotalItem"
+        "400":
+          description: Invalid request (missing or invalid parameters)
+  /minting-claims/{contract}/claims:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claims (paginated, admin only)
+      description: >
+        Returns a page of minting claims for the given contract, ordered by
+        claim_id descending. Default page_size 10, max 20. Only
+        DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: getMintingClaims
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaimsPageResponse"
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+  /minting-claims/{contract}/claims/{claim_id}:
+    get:
+      tags:
+        - Minting Claims
+      summary: Get minting claim by claim_id (admin only)
+      description: >
+        Returns the minting claim for the given contract and claim_id. Only
+        DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: getMintingClaimById
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "202":
+          description: Accepted; work queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaim"
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+        "404":
+          description: Claim not found
+        "409":
+          description: Conflict - claim media upload already in progress
+    patch:
+      tags:
+        - Minting Claims
+      summary: Update minting claim (admin only)
+      description: >
+        Partial update by contract and claim_id. Any field can be provided; only
+        provided fields are updated. Only DISTRIBUTION_ADMIN_WALLETS can call
+        this.
+      operationId: patchMintingClaim
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MintingClaimUpdateRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaim"
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+        "404":
+          description: Claim not found
+  /minting-claims/{contract}/claims/{claim_id}/arweave-upload:
+    post:
+      tags:
+        - Minting Claims
+      summary: Upload minting claim metadata and media to Arweave (admin only)
+      description: >
+        Uploads claim metadata and media (image, and animation if not HTML) to
+        Arweave asynchronously via background queue. Requires claim to have an
+        image URL and valid metadata fields. If already synced or already
+        uploading returns 409. Only DISTRIBUTION_ADMIN_WALLETS can call this.
+      operationId: postMintingClaimArweaveUpload
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MintingClaim"
+        "400":
+          description: Bad Request - claim data or media URL/content-type is invalid
+        "401":
+          description: Unauthorized - authentication required
+        "403":
+          description: Forbidden - only distribution admins can access
+        "404":
+          description: Claim not found
+        "409":
+          description: Conflict - claim already synced or upload already in progress
   /nft-link:
     get:
       tags:
@@ -3517,6 +3943,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AirdropAddressResponse"
+  /subscriptions/final/{contract}/{token_id}/phases/{phase_name}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get final subscription airdrops for a token phase
+      operationId: getFinalSubscriptionsByPhase
+      parameters:
+        - name: contract
+          in: path
+          description: Contract address
+          required: true
+          schema:
+            type: string
+        - name: token_id
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: phase_name
+          in: path
+          description: Phase name (URL encoded)
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhaseAirdrop"
+        "400":
+          description: Invalid token ID
   /subscriptions/consolidation/final/{consolidation_key}/{contract}/{token_id}:
     get:
       tags:
@@ -7636,6 +8099,9 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiEthereumAddress:
+      type: string
+      pattern: ^0x[a-fA-F0-9]{40}$
     ApiFeedItem:
       type: object
       required:
@@ -8214,6 +8680,24 @@ components:
           type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
+    ApiMintingClaimsPhaseTotalItem:
+      type: object
+      required:
+        - phase
+        - addresses
+        - total
+      properties:
+        phase:
+          type: string
+          description: Phase name
+        addresses:
+          type: integer
+          format: int64
+          description: Number of unique addresses in this phase
+        total:
+          type: integer
+          format: int64
+          description: Sum of spots for this phase
     ApiMintMetrics:
       type: object
       required:
@@ -9330,6 +9814,8 @@ components:
         - all_drops_notifications_subscribers_limit
         - memes_wave_id
         - curation_wave_id
+        - distribution_admin_wallets
+        - claims_admin_wallets
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -9343,6 +9829,14 @@ components:
         curation_wave_id:
           type: string
           nullable: true
+        distribution_admin_wallets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiEthereumAddress"
+        claims_admin_wallets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiEthereumAddress"
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id
@@ -10982,6 +11476,288 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DistributionPhoto"
+    MintingClaim:
+      type: object
+      required:
+        - drop_id
+        - contract
+        - claim_id
+        - description
+        - name
+        - attributes
+      properties:
+        drop_id:
+          type: string
+        contract:
+          type: string
+        claim_id:
+          type: integer
+          format: int64
+        image_location:
+          type: string
+          nullable: true
+        animation_location:
+          type: string
+          nullable: true
+        metadata_location:
+          type: string
+          nullable: true
+        media_uploading:
+          type: boolean
+        edition_size:
+          type: integer
+          format: int32
+          description: Maximum signed 32-bit integer.
+          maximum: 2147483647
+          nullable: true
+        description:
+          type: string
+        name:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        external_url:
+          type: string
+          nullable: true
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimAttribute"
+        image_details:
+          $ref: "#/components/schemas/MintingClaimImageDetails"
+          nullable: true
+        animation_url:
+          type: string
+          nullable: true
+        animation_details:
+          oneOf:
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsVideo"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsHtml"
+            - $ref: "#/components/schemas/MintingClaimAnimationDetailsGlb"
+          nullable: true
+    MintingClaimAnimationDetailsGlb:
+      type: object
+      required:
+        - bytes
+        - format
+        - sha256
+      properties:
+        bytes:
+          type: integer
+          format: int64
+        format:
+          type: string
+          enum:
+            - GLB
+        sha256:
+          type: string
+    MintingClaimAnimationDetailsHtml:
+      type: object
+      required:
+        - format
+      properties:
+        format:
+          type: string
+          enum:
+            - HTML
+    MintingClaimAnimationDetailsVideo:
+      type: object
+      required:
+        - bytes
+        - format
+        - duration
+        - sha256
+        - width
+        - height
+        - codecs
+      properties:
+        bytes:
+          type: integer
+          format: int64
+        format:
+          type: string
+        duration:
+          type: number
+        sha256:
+          type: string
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+          format: int32
+        codecs:
+          type: array
+          items:
+            type: string
+    MintingClaimAttribute:
+      type: object
+      required:
+        - trait_type
+        - value
+      properties:
+        trait_type:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: number
+        display_type:
+          type: string
+        max_value:
+          type: number
+    MintingClaimImageDetails:
+      type: object
+      required:
+        - bytes
+        - format
+        - sha256
+        - width
+        - height
+      properties:
+        bytes:
+          type: integer
+          format: int64
+        format:
+          type: string
+        sha256:
+          type: string
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+          format: int32
+    MintingClaimsPageResponse:
+      type: object
+      required:
+        - claims
+        - count
+        - page
+        - page_size
+        - next
+      properties:
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaim"
+        count:
+          type: integer
+          format: int64
+          description: Total number of claims
+        page:
+          type: integer
+          format: int64
+        page_size:
+          type: integer
+          format: int64
+        next:
+          type: boolean
+          description: True if there is a next page
+    MintingClaimsProofItem:
+      type: object
+      required:
+        - merkle_proof
+        - value
+      properties:
+        merkle_proof:
+          type: array
+          items:
+            type: string
+          description: Hex merkle proof hashes
+        value:
+          type: integer
+          format: int64
+          description: Spot index (value) for this proof
+    MintingClaimsProofsByAddressEntry:
+      type: object
+      required:
+        - address
+        - proofs
+      properties:
+        address:
+          type: string
+          description: Wallet address
+        proofs:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimsProofItem"
+    MintingClaimsProofsByAddressResponse:
+      type: object
+      required:
+        - proofs_by_address
+      properties:
+        proofs_by_address:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimsProofsByAddressEntry"
+    MintingClaimsProofsResponse:
+      type: object
+      required:
+        - proofs
+      properties:
+        proofs:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimsProofItem"
+    MintingClaimsResponse:
+      type: object
+      required:
+        - claims
+      properties:
+        claims:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaim"
+    MintingClaimsRootItem:
+      type: object
+      required:
+        - phase
+        - merkle_root
+        - addresses_count
+        - total_spots
+      properties:
+        phase:
+          type: string
+          description: Phase name
+        merkle_root:
+          type: string
+          description: 0x-prefixed hex merkle root
+        addresses_count:
+          type: integer
+          format: int64
+          description: Number of unique addresses in this phase
+        total_spots:
+          type: integer
+          format: int64
+          description: Sum of mint spots for this phase
+    MintingClaimUpdateRequest:
+      type: object
+      properties:
+        edition_size:
+          type: integer
+          format: int32
+          description: Maximum signed 32-bit integer.
+          maximum: 2147483647
+          nullable: true
+        description:
+          type: string
+        name:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        external_url:
+          type: string
+          nullable: true
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/MintingClaimAttribute"
+        animation_url:
+          type: string
+          nullable: true
     NFTFinalSubscription:
       type: object
       required:
@@ -11081,6 +11857,17 @@ components:
         subscribed:
           type: boolean
         subscribed_count:
+          type: integer
+          format: int64
+    PhaseAirdrop:
+      type: object
+      required:
+        - wallet
+        - amount
+      properties:
+        wallet:
+          type: string
+        amount:
           type: integer
           format: int64
     RedeemedSubscription:
