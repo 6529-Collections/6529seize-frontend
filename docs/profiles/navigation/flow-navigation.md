@@ -2,71 +2,62 @@
 
 ## Overview
 
-This flow covers how users move across profile tabs, how links stay shareable,
-and what happens when the current route is not canonical.
+This flow explains how profile URLs under `/{user}` resolve, redirect, and stay
+valid across tabs and contexts.
 
-## Location in the Site
+## Routes in Scope
 
-- Starts anywhere under `/{user}`
-- Uses the profile tab bar to move across profile sections
+- Supported routes:
+  - `/{user}`
+  - `/{user}/brain`
+  - `/{user}/collected`
+  - `/{user}/xtdh`
+  - `/{user}/stats`
+  - `/{user}/subscriptions`
+  - `/{user}/proxy`
+- Legacy aliases:
+  - `/{user}/identity`
+  - `/{user}/waves`
+  - `/{user}/groups`
+  - `/{user}/followers`
 
-## Entry Points
+## Flow
 
-- Paste a direct profile link in the browser.
-- Open a shared profile URL from chat or another page.
-- Click a tab from an already-open profile.
+1. Open a profile route, shared profile link, or profile stat shortcut.
+2. If the URL is a legacy alias:
+   - `/{user}/identity` permanently redirects to `/{user}` and keeps query parameters.
+   - `/{user}/waves`, `/{user}/groups`, and `/{user}/followers` redirect to `/{user}` and drop query parameters.
+3. The app resolves the profile. If `{user}` is not the canonical handle, it redirects to the canonical handle and keeps the current tab route.
+4. During canonical-handle redirect, repeated query keys can be normalized into one comma-separated value per key.
+5. Tab visibility is resolved from current context:
+   - `Brain` only when Waves is enabled.
+   - `Subscriptions` hidden on iOS when consent country is not `US`.
+   - `Proxy` only on your own profile.
+6. If the current tab is hidden, the app replaces the URL with the first visible tab and keeps the full query string.
+7. When you click a profile tab, the URL keeps only `?address=...` and drops other query keys.
 
-## User Journey
+## Route Outcomes
 
-1. Open a URL like `/{user}` or `/{user}/stats`.
-2. If `{user}` is not the canonical handle, the app redirects to the canonical
-   handle while keeping tab context and query parameters.
-3. Use the tab bar to move between profile sections.
-4. Share the resulting URL to return to the same tab later.
+- Profile stat shortcuts:
+  - `TDH` -> `/{user}/collected`
+  - `xTDH` -> `/{user}/xtdh`
+  - `NIC` and `Rep` -> `/{user}`
+  - `Followers` opens a modal and does not change route
+- Renaming your handle keeps you on the same tab path under the new handle URL.
+- Unknown `/{user}/<subroute>` paths (including `/{user}/rep`) do not resolve to a tab route.
+- Missing users and unsupported subroutes show the shared not-found screen.
 
-## Common Scenarios
+## Recovery
 
-- Open a user by wallet address, then continue browsing on the resolved handle.
-- Keep the wallet address filter (`?address=...`) while switching tabs.
-- Use profile-header quick stats:
-  - `NIC` and `Rep` route to `/{user}`
-  - `TDH` routes to `/{user}/collected`
-  - `xTDH` routes to `/{user}/xtdh`
-- Rename your profile handle and continue on the same tab under the new handle
-  URL.
-
-## Edge Cases
-
-- If a tab becomes unavailable (feature/device/country conditions), the app
-  navigates to the first visible tab for that profile.
-- Tab-bar links preserve `address` when switching tabs.
-- During canonical-handle redirects, repeated query keys can be normalized into
-  single comma-separated values.
-- Unknown tab routes do not resolve to a profile tab page.
-- `/{user}/identity`, `/{user}/waves`, `/{user}/groups`, and `/{user}/followers`
-  are legacy aliases that redirect to `/{user}`:
-  [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
-- Legacy `/{user}/rep` links are treated as unknown tab routes; the supported
-  destination is `/{user}`.
-
-## Failure and Recovery
-
-- Missing users or invalid profile routes show the shared not-found screen:
+- Replace saved `/{user}/rep` links with `/{user}` or another supported tab route.
+- If profile loading or redirects fail unexpectedly, refresh and retry.
+- If a profile URL returns not-found, verify handle/wallet and subroute:
   [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
-- If a redirect target cannot be resolved due to a transient error, reloading
-  retries profile resolution.
-- If a saved `/{user}/rep` URL fails, replace it with `/{user}` and retry.
-
-## Limitations / Notes
-
-- Visibility rules are evaluated at runtime, so the same profile can expose
-  different tab sets on different devices or contexts.
-- Deep links are stable for the supported tab routes listed in
-  [Profile Routes and Tab Visibility](feature-tabs.md).
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
+- [Profiles Navigation Index](README.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Routes and Tab Visibility](feature-tabs.md)
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
