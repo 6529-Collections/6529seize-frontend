@@ -2,74 +2,91 @@
 
 ## Overview
 
-Signed-in users can update their own profile picture from the profile header by
-choosing either one of their memes or an uploaded image file.
+On your own profile, you can update the header profile picture.
+The editor supports one source at a time:
 
-Profile picture editing is separate from banner cover editing.
+- one selected meme
+- one uploaded image file
+
+This flow is separate from banner editing.
 
 ## Location in the Site
 
-- Profile header avatar area on profile routes under `/{user}` and
-  `/{user}/<tab>`
+- Profile header avatar on:
+  - `/{user}`
+  - `/{user}/<tab>`
 
 ## Entry Points
 
-- Open your own profile route while signed in to a profile handle.
-- Select the profile picture edit control on the header avatar.
+- Open your own profile route.
+- The profile is editable only when:
+  - the profile has a handle
+  - you are viewing your own profile
+  - no active profile proxy context
+- Click the avatar edit control (`Edit profile picture`).
 
 ## User Journey
 
-1. Open your own profile and select the avatar edit control.
-2. In the modal, choose one source:
-   - search and select a meme, or
-   - upload an image file by click or drag-and-drop.
-3. Review the preview shown in the upload panel.
-4. Select `Save PFP`.
-5. A success toast (`Profile updated`) appears and the modal closes.
+1. Open your own profile and click the avatar edit control.
+2. The modal opens. If you already have a profile picture, the upload panel shows its preview.
+3. Choose one source:
+   - `Select Meme`: search and click a meme row.
+   - `Upload`: click to choose a file or drag and drop a file.
+4. Click `Save PFP`.
+5. On success, a `Profile updated` toast appears, the modal closes, and the
+   header image refreshes.
 
 ## Common Scenarios
 
-- Meme selection uses a search field that matches meme ID/name text.
+- Meme search matches case-insensitive `#<id> <name>` text.
+- Selecting a meme clears any selected file.
+- Selecting a file clears any selected meme.
+- `Save PFP` is disabled until at least one valid source is selected.
 - Upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP`.
-- Selecting a meme clears a previously selected file.
-- Selecting a file clears a previously selected meme.
-- `Save PFP` stays disabled until at least one valid selection is made.
-- Selecting `Cancel`, clicking outside the modal, or pressing `Escape` closes
-  the modal without saving.
+- While dragging a file over the upload area, the drop target highlights.
+- `Cancel` closes the modal when save is not in progress.
 
 ## Edge Cases
 
-- If the meme search has no matches, no meme rows are shown until the query is
-  changed.
-- If a local file exceeds 2MB, the upload panel shows an inline size error.
-- If an unsupported file type is chosen, users see an `Invalid file type` toast.
-- The file picker allows selecting the same file again after a failed attempt.
+- If meme search has no matches, the dropdown opens with no rows.
+- If the meme list request is unavailable, `Select Meme` opens with no rows.
+- If an unsupported file type is chosen, users see `Invalid file type`.
+- If a local file exceeds 2MB, the upload panel shows:
+  `File size must be less than 2MB`.
+- The file picker resets after each attempt, so users can select the same file
+  again.
+- While save is running, `Cancel` is disabled and `Save PFP` shows a spinner.
+- While save is running, backdrop click, outside-click, and `Escape` can still
+  close the modal while the request continues.
 
 ## Failure and Recovery
 
-- If the user is not authenticated at save time, the flow stops with:
+- If authentication fails at save time, users see:
   `You must be logged in to save settings`.
-- If no image source is selected at save time, users see:
+- If no source is selected at save time, users see:
   `You must select an image`.
 - If the app cannot reach the upload server, users see:
   `Can't reach image upload server. Please try again.`
-- If the upload is blocked by server policy (`403`), users see:
+- If upload is blocked by server policy (`403`), users see:
   `Upload was blocked by the server (403). Please try again later.`
 - If the server rejects file size (`413`), users see:
   `Image is too large; max 2MB.`
-- For other upload failures, users see either the returned server error or:
+- For other upload/save failures, users see either the returned error or:
   `Upload failed. Please try again.`
+- After a failed save, the modal stays open so users can retry (unless they
+  already closed it with backdrop click or `Escape`).
 
 ## Limitations / Notes
 
-- Profile picture editing is available only for your own profile and is not
-  available while acting through an active profile proxy.
-- The modal does not include in-place crop/edit controls; saved output reflects
-  the selected meme image or uploaded file.
+- Editing is available only on your own profile when the profile has a handle
+  and no active profile proxy context.
+- The editor supports one source at a time (meme or uploaded file).
+- The modal does not include crop or transform controls.
 - Maximum upload size is 2MB.
 
 ## Related Pages
 
+- [Profiles Index](../README.md)
 - [Profiles Navigation Index](README.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Routes and Tab Visibility](feature-tabs.md)
