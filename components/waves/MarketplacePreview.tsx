@@ -63,5 +63,5 @@ export default function MarketplacePreview({
       break;
   }
 
-  return <div>{content}</div>;
+  return <div onClick={(event) => event.stopPropagation()}>{content}</div>;
 }
