@@ -2,81 +2,74 @@
 
 ## Overview
 
-This flow covers opening `/notifications`, filtering the feed, reviewing rows
-including grouped reactions and priority alerts, and loading older pages while
-keeping current content visible.
+Use this flow to open `/notifications`, clear access gates, browse rows, and
+load older notifications.
 
 ## Location in the Site
 
 - Route: `/notifications` in My Stream.
-- Opened from app navigation or direct URL.
-- Works across desktop and small-screen layouts that render My Stream.
+- Variant: `/notifications?reload=true` runs one refresh + read pass.
+- Open from app navigation or direct URL.
 
 ## Entry Points
 
-- Open `Notifications` from the sidebar.
-- Navigate directly to `/notifications`.
-- Return to `/notifications` after wallet/profile recovery prompts.
+- Open `Notifications` in app navigation.
+- Open `/notifications` directly.
+- Open `/notifications?reload=true` when feed data looks stale.
+- Retry from state actions: `Reconnect wallet`, `Switch to primary profile`,
+  `Try again`.
 
-## User Journey
+## Main Flow
 
 1. Open `/notifications`.
-2. Resolve prerequisites if shown:
-   `Loading profile...`, wallet connect prompt, handle recovery, or proxy
-   profile block.
-3. Wait for initial feed load (`Loading notifications...`).
-4. Review newest rows at the current scroll position.
-5. Optionally narrow rows with cause chips:
+2. Resolve access gates if shown:
+   `Loading profile...`, `Reconnect wallet`, `Switch to primary profile`.
+3. Wait for `Loading notifications...`.
+4. When the feed opens, notifications are marked read for the active profile.
+5. Browse newest rows.
+6. Filter with chips:
    `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
-6. For grouped reaction activity, open a `New reactions` row to inspect
-   reactors, reaction badges, and the associated drop preview.
-7. Use `Follow All` when present to follow non-followed grouped actors, or see
+7. If chips overflow, use the left/right chip scroll controls.
+8. Open rows to inspect drop context or actor activity.
+9. For grouped `New reactions` rows, review
+   reactors, reaction badges, and the related drop preview.
+10. Use `Follow All` when present, or see
    `Following All` when everyone in the group is already followed.
-8. For long drop previews, use `Show full drop` to expand content inline.
-9. For priority alert rows (`sent a priority alert 🚨`), review the text header
-   and open linked drop context when available.
-10. Scroll upward to load older pages; keep reading while
-    `Loading older notifications...` appears.
-11. Continue into wave/DM context from selected notification rows when deeper
-    context is needed.
-
-## Common Scenarios
-
-- Filter to `Mentions` or `Replies` after opening the feed, then return to
-  `All`.
-- Expand a compact preview (`Show full drop`) before deciding to open the wave.
-- Open a grouped reaction row and batch-follow involved actors from one action.
-- Review a priority alert with no linked drop and continue in-feed without
-  navigation.
-- Reach the top sentinel and continue browsing older rows as they append.
+11. Open drop content to route into wave or DM context with serial context.
+12. For grouped reactions, opening the related drop marks grouped
+    notification IDs as read.
+13. Use `Show full drop` for long inline previews.
+14. Priority alerts (`sent a priority alert 🚨`) can be:
+    text-only, or text plus one drop preview.
+15. Scroll upward to load older pages. `Loading older notifications...` and a
+    top progress bar appear while current rows stay visible.
+16. If no rows are available, use `Explore Waves` or `Create a Wave` from the
+    empty state.
 
 ## Edge Cases
 
-- Filter chips can overflow horizontally; directional controls appear so users
-  can continue accessing hidden chips.
-- If `/notifications` opens with `?reload=true`, a one-time refresh is issued
-  and the query parameter is removed after handling.
-- Unknown/unclassified causes still render with generic row formatting so feed
-  browsing remains usable.
-- Priority alerts without related drops remain readable as text-only rows.
+- If authenticated, `/notifications?reload=true` runs one refetch + mark-read
+  pass, then removes `reload` from the URL.
+- If unauthenticated, `/notifications?reload=true` removes `reload` without
+  running that pass.
+- Unknown causes render with a generic row so feed browsing continues.
+- Priority alerts without related drops stay text-only.
 
 ## Failure and Recovery
 
-- If first load fails before any rows render, the page switches to error state
-  and offers `Try again`.
-- If notifications auth is unauthorized, the page can trigger wallet re-auth
-  once, then keeps `Try again` available if loading still fails.
-- If loading stalls, timeout copy appears with retry action.
-- If fetching older pages fails after rows are visible, visible rows remain and
-  failure is surfaced without replacing feed content.
-- If follow-all calls partially fail, successful follows remain and failure
-  details are surfaced in toast feedback.
+- First-load failure with no rows: error state with `Try again`.
+- First-load timeout with no rows: timeout copy with `Try again`.
+- Unauthorized notifications error can trigger one automatic re-auth attempt.
+- If older-page fetch fails after rows are visible, current rows stay visible
+  and failure feedback is shown.
+- If `Follow All` partially fails, successful follows stay applied and failed
+  requests surface error feedback.
 
 ## Limitations / Notes
 
-- Browsing behavior depends on authenticated profile readiness.
-- Notifications unavailable in proxy mode cannot be bypassed from the feed.
-- Filter scopes are notification-only and do not alter other route content.
+- Feed access requires wallet + profile readiness.
+- Notifications are blocked in proxy profile mode until you switch back.
+- Filters only change `/notifications` results.
 
 ## Related Pages
 
