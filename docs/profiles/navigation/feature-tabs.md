@@ -2,77 +2,64 @@
 
 ## Overview
 
-Profiles use tab routes under `/{user}`.
+Profile tab routes live under `/{user}`.
 `/{user}` is the default `Identity` tab (`Rep` + `NIC`).
 
-## Location in the Site
+## Supported Tab Routes
 
-- Profile root and default tab:
-  - `/{user}` (`Identity`)
-- Additional tab routes:
-  - `/{user}/brain`
-  - `/{user}/collected`
-  - `/{user}/xtdh` (Beta)
-  - `/{user}/stats`
-  - `/{user}/subscriptions`
-  - `/{user}/proxy`
+- `/{user}`: Identity
+- `/{user}/brain`: Brain
+- `/{user}/collected`: Collected
+- `/{user}/xtdh`: xTDH (Beta label in the tab UI)
+- `/{user}/stats`: Stats
+- `/{user}/subscriptions`: Subscriptions
+- `/{user}/proxy`: Proxy
 
-## Entry Points
+## Route Resolution (Supported Routes)
 
-- Open a profile URL directly by handle or wallet.
-- Click profile tabs in the header area.
-- Open a shared deep link for a tab route.
+1. Open a profile route by handle or wallet.
+2. The app loads the profile.
+3. If the route uses a non-canonical handle, the app redirects to the canonical handle and keeps the tab route.
+4. The header and tab bar render for that profile.
 
-## User Journey
+## Tab Visibility Rules
 
-1. Open a profile URL.
-2. The app loads the profile and normalizes the URL to the canonical handle when needed.
-3. The profile header and tab bar render.
-4. If the current tab is hidden in the current context, the app moves to the first visible tab.
-5. Switch tabs or share the current URL.
+- `Brain` is shown only when Waves is enabled.
+- `Subscriptions` is hidden on iOS unless consent country is `US`.
+- `Proxy` is shown only when you are on your own profile (matched by connected handle or connected wallet).
+- If the current tab route is hidden in the current context, the app replaces the URL with the first visible tab and keeps the current query string.
 
-## Common Scenarios
+## Query-String Behavior
 
-- `/{user}` opens the Identity tab (`Rep` + `NIC`).
-- `/{user}/stats` opens Stats directly.
-- Visiting by wallet or non-canonical handle redirects to canonical handle URL.
-- Tab clicks preserve only `?address=...` from the query string.
-- Canonical-handle redirects keep query params, but repeated keys are normalized into comma-separated values.
+- Clicking a profile tab keeps only `?address=...` and drops other query keys.
+- Canonical-handle redirects keep query params, remove `user`, and normalize repeated query keys into comma-separated values (for example `?x=a&x=b` becomes `?x=a,b`).
 
-## Edge Cases
+## Legacy and Unsupported Routes
 
-- `Brain` is hidden when Waves is disabled.
-- `Subscriptions` is hidden on iOS when country is not `US`.
-- `Proxy` is hidden when viewing another profile.
-- If a user opens a hidden tab route, the app redirects to the first visible tab.
-- Unknown tab routes return not-found.
-- Legacy aliases `/{user}/identity`, `/{user}/waves`, `/{user}/groups`, and
-  `/{user}/followers` redirect to `/{user}`:
-  [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
-- `/{user}/rep` is unsupported and should be replaced with `/{user}`.
+- `/{user}/identity` redirects to `/{user}` and preserves query params.
+- `/{user}/waves`, `/{user}/groups`, and `/{user}/followers` redirect to `/{user}` without query params.
+- `/{user}/rep` is unsupported and does not redirect.
+- Unknown `/{user}/<subroute>` routes show not-found.
+- Full legacy details: [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
 
 ## Failure and Recovery
 
-- If the profile or route is not found, users see the shared not-found surface:
-  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
-- If profile loading fails for a non-404 reason, reload the route to retry.
-
-## Limitations / Notes
-
-- Tab availability changes by device and context.
-- Profile quick stats for both `NIC` and `Rep` land on `/{user}`.
-- The `xTDH` tab is labeled Beta.
+- Missing user or invalid profile route: [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
+- If profile loading fails with a transient error, reload the page.
+- Replace saved `/{user}/rep` links with `/{user}` or another supported tab route.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
+- [Profiles Navigation Index](README.md)
+- [Profile Navigation Flow](flow-navigation.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
-- [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
-- [Profile Identity Statements](../tabs/feature-identity-statements.md)
+- [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Collected Tab and Transfer Controls](../tabs/feature-collected-tab.md)
+- [Profile xTDH Tab](../tabs/feature-xtdh-tab.md)
 - [Profile Stats Tab](../tabs/feature-stats-tab.md)
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
-- [Profile Navigation Flow](flow-navigation.md)
+- [Profile Proxy Tab](../tabs/feature-proxy-tab.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
-- [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
