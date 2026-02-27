@@ -2,70 +2,100 @@
 
 ## Overview
 
-Wallet/account controls cover connect/disconnect actions, account switching, and
-session actions exposed in web sidebar user menus and app sidebar account
-section. Proxy-profile switching is a web-sidebar dropdown behavior.
+Wallet and account controls cover connect, disconnect, switch account, logout,
+and proxy identity switching. Web and app surfaces reach the same session
+outcomes, but they expose different controls.
 
 ## Location in the Site
 
-- Web sidebar user area (expanded or collapsed desktop, plus small-screen web
-  overlay).
-- App sidebar account section (opened from app header menu).
-- Web connected-user dropdown for proxy selection.
+- Web sidebar account area (expanded rail, collapsed rail, and small-screen
+  overlay sidebar).
+- Web user dropdown opened from the connected user row.
+- App sidebar footer opened from the app header menu/avatar button.
 
 ## Entry Points
 
-- Disconnected web sidebar: select `Connect`.
-- Connected web sidebar: select user row to open account menu.
-- App layout: open header menu and use account controls in account footer.
+- Web disconnected: select `Connect` in the sidebar account area.
+- Web connected: select the user row to open the account dropdown.
+- App layout: open the menu/avatar button, then use footer account actions.
+- Web proxy switching: select an identity row in the web dropdown.
+
+## Control Surfaces
+
+### Web Sidebar Account Area
+
+- Disconnected:
+  - expanded sidebar button: `Connect`
+  - collapsed sidebar icon button tooltip: `Connect Wallet`
+- Connected: user row opens the account dropdown.
+
+### Web Account Dropdown
+
+- Identity rows:
+  - base identity row is always present
+  - received proxy rows appear when available
+- Session actions:
+  - wallet connected: `Disconnect Wallet`, `Switch Account`,
+    `Disconnect & Logout`
+  - wallet disconnected: `Connect Wallet`, `Switch Account`, `Logout`
+
+### App Sidebar Footer
+
+- Disconnected: `Connect`
+- Connected: `Push Notifications`, `Switch Account`, `Disconnect & Logout`
+- `Scan QR Code` appears only in Capacitor runtime with scanner support.
 
 ## User Journey
 
-1. User opens a connect action from web/app sidebar.
-2. After wallet connection, connected account controls replace `Connect`.
-3. User manages session actions:
-   - `Disconnect Wallet` (web dropdown),
-   - `Switch Account`,
-   - `Disconnect & Logout`.
-4. On web, user can switch active proxy identity from proxy dropdown entries.
-5. User continues routing with updated identity/session state.
+1. Open account controls from web sidebar or app sidebar footer.
+2. Connect wallet if needed.
+3. Use session actions:
+   - `Switch Account`: disconnect wallet, clear session auth, reopen connect.
+   - `Disconnect Wallet` (web only): disconnect wallet without full logout.
+   - `Disconnect & Logout` / `Logout`: full sign-out.
+4. Optional web proxy switch:
+   - select base identity to act as yourself,
+   - select proxy identity to act as that profile,
+   - select the active row again to return to base identity.
+5. Continue navigation with updated account/proxy state.
 
 ## Common Scenarios
 
-- Connect from web sidebar and continue with connected `Profile` + user menu.
-- Connect from app sidebar account section.
-- Switch account to reopen wallet selection flow.
-- Disconnect/logout to clear active session.
-- Web-only proxy selection: choose a proxy profile to change active identity.
-- App-only account actions: open `Push Notifications` settings or use `Scan QR
-  Code`.
+- Connect from web sidebar, then open dropdown actions.
+- Connect from app footer and continue on the same route.
+- Use `Switch Account` to reconnect with a different wallet.
+- Use `Disconnect & Logout` (or `Logout`) to fully sign out.
+- Use web `Disconnect Wallet` when you need wallet disconnect without full
+  logout.
+- Open app `Push Notifications` settings from the account footer.
+- Switch between base identity and a received proxy in web dropdown.
 
 ## Edge Cases
 
-- While identity data loads, account surfaces render placeholders.
-- If handle data is missing, labels fall back to wallet-based display.
-- In collapsed desktop sidebar, account controls become icon-first with
-  tooltips.
-- Sidebar `Profile` shortcut appears only when connected.
-- Proxy controls appear only on web dropdown when proxy entries exist.
-- App QR scanner action appears only when scanner support exists in the app
-  runtime.
+- Web sidebar account area shows loading placeholders while identity data loads.
+- Name label fallback order is handle -> wallet display name -> wallet prefix.
+- `Profile` shortcuts in web/app navigation appear only when an address is
+  present.
+- Web dropdown always includes the base identity row.
+- Proxy rows appear only when active received proxies exist.
+- Proxy switching is not available in app footer.
+- After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
+  and `Logout`.
 
 ## Failure and Recovery
 
-- If wallet connection is canceled/declined, state stays disconnected; retry
-  from same surface.
-- If wallet runtime fails, wallet error boundary exposes `Try Again` and
-  `Clear Storage & Reload`.
-- If account context looks stale after switch/disconnect, use `Disconnect &
-  Logout`, then reconnect.
+- If wallet connect is canceled, stay on the same surface and retry `Connect`.
+- If account state looks stale after proxy/account changes, run
+  `Disconnect & Logout`, then reconnect.
+- If wallet controls crash, use wallet error-boundary actions: `Try Again`,
+  then `Clear Storage & Reload`.
 
 ## Limitations / Notes
 
-- Wallet-provider availability depends on platform/device runtime.
-- Web and app account menus expose different action sets.
-- Proxy switching depends on authenticated proxy permissions and available proxy
-  data.
+- Account action sets intentionally differ between web dropdown and app footer.
+- Proxy switching is available only in the web dropdown.
+- `Disconnect Wallet` exists only in web dropdown; app footer uses full logout
+  actions.
 
 ## Related Pages
 
@@ -73,4 +103,5 @@ section. Proxy-profile switching is a web-sidebar dropdown behavior.
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
+- [Mobile Push Notifications](../notifications/feature-mobile-push-notifications.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
