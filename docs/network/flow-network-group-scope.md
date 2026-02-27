@@ -4,69 +4,78 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network` and `/network/activity` can use one active group scope.
-`/network` is the control surface (URL + filter controls).
-`/network/activity` consumes active scope but does not expose scope controls.
+`/network` and `/network/activity` share one active group scope.
+`/network` owns scope controls (`Filter`).
+`/network/activity` can use active scope, but has no scope controls.
+
+`/network/groups` owns group browsing and creation.
+This page owns only the scope handoff into network routes and cross-route scope behavior.
 
 ## Location in the Site
 
 - Routes: `/network`, `/network/activity`
-- Filtered entry links:
+- Scoped handoff links:
   - `/network?page=1&group={groupId}`
+  - `/network?group={groupId}`
   - `/network/activity?group={groupId}`
-- Scope controls live on `/network`:
-  - Group cards on `/network/groups`
-  - `Filter` drawer (`Groups` list)
+- Scope controls: `/network` -> `Filter` -> groups list
 
 ## Entry Points
 
-- Open `/network/groups`, activate a group card to jump directly to `/network?page=1&group={groupId}`.
-- Open a deep link that already includes `group={groupId}`.
-- Open `/network`, then `Filter`, and pick a group from the list.
-- Open `/network/activity` after scope is already active to inspect scoped logs.
+- Open a group card on `/network/groups`.
+- Open `/network` and choose a group in `Filter`.
+- Open a deep link with `group={groupId}`.
+- Open `/network/activity` after scope is already active.
+
+## State and URL Rules
+
+- Only one group can be active at a time.
+- First mount on `/network` or `/network/activity` reads `group` from the URL and applies scope.
+- After first mount on `/network`, active scope is the source of truth and syncs back to the URL.
+- On `/network`, changing scope rewrites `page` to `1`.
+- `/network/activity` can stay scoped even when its URL has no `group`.
+- Changing `group` in the URL after first mount does not reliably switch scope. Use `/network` `Filter`.
 
 ## User Journey
 
 1. Open `/network/groups`.
-2. Open a group card while it is in an idle state.
-3. The app navigates to `/network?page=1&group={groupId}`.
-4. `NetworkPageLayout` copies `group` into active group state on first load.
-5. `/network` syncs active scope back into URL query.
-6. Open `/network/activity` to review activity under the same active scope.
-7. Clear scope from `/network` filter controls to return to global results.
+2. Open a group card while it is in idle state.
+3. The app opens `/network?page=1&group={groupId}` (or `/network?group={groupId}` from chat links).
+4. `/network` applies scope and shows scoped leaderboard results.
+5. Open `/network/activity` to view activity under the same scope.
+6. Return to `/network`, open `Filter`, then switch or clear scope.
 
 ## Common Scenarios
 
-- Jump directly from a group card to a scoped identity leaderboard.
-- Validate the same group scope across `/network` and `/network/activity`.
-- Return to a scoped view by re-opening a saved deep link with `group=...`.
+- Jump from a group card to a scoped identities leaderboard.
+- Keep one scope while moving between `/network` and `/network/activity`.
+- Reopen a saved deep link with `group=...` to restore a scoped view on first load.
+
+## Loading and Consistency
+
+- `/network/activity` first server fetch is unscoped, then client refetch applies `group_id` when scope is active.
+- Right after load, `/network/activity` can briefly look unscoped before scoped data arrives.
+- `/network/activity` does not show an active-group badge. Verify scope on `/network` `Filter`.
 
 ## Edge Cases
 
-- Group card activation is unavailable while a group card is in `Rep all`/`NIC all`.
-- `/network/activity` has no inline scope controls or scope badge.
-- `/network/activity` can still be scoped when URL has no `group` query, if active
-  scope already exists in app state.
-- Changing scope resets pagination to page `1`.
-- The UI keeps one group filter in scope at a time.
+- Group-card open navigation is unavailable while that card is in `Rep all` or `NIC all`.
+- A stale `group` id deep link can load empty or unexpected results.
+- `/network/activity` has no inline control to clear/switch scope.
 
 ## Failure and Recovery
 
-- If `/network/activity` looks unexpectedly scoped, open `/network`, clear group
-  scope in `Filter`, then retry.
-- If a stale `group` ID is in URL, reselect or remove scope from `/network`
-  filter controls.
-- If a card link is inaccessible, apply the same group through `/network`
-  `Filter`.
+- If `/network/activity` looks unexpectedly scoped, open `/network`, clear scope in `Filter`, then reopen `/network/activity`.
+- If a deep link scope is stale, open `/network` and reselect or clear scope.
+- If URL edits do not change scope, apply scope through `/network` `Filter`.
+- If a group card is not openable, exit `Rep all`/`NIC all` first.
+- If `/network/activity` looks briefly unscoped, wait for scoped refetch to finish.
 
 ## Limitations / Notes
 
-- Scope is not URL-only; active group state can persist across Network routes in
-  the same session.
-- `/network` is the canonical route for changing scope.
-- `/network/activity` consumes active scope and does not manage it.
-- Filter membership counts in the network sidebar can refresh asynchronously after
-  scope changes.
+- Scope persists in current app session/tab state, not as URL-only state.
+- `/network/activity` consumes scope but does not manage scope.
+- Membership counts in `/network` filter can refresh asynchronously after scope changes.
 
 ## Related Pages
 
