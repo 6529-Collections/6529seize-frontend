@@ -27,7 +27,8 @@
 - [NextGen Token Media Rendering](feature-token-media-rendering.md):
   token media views, token-route tabs, and media fallback behavior.
 - [NextGen Admin Console Access and Actions](feature-nextgen-admin-console.md):
-  connect, permissions, and admin action groups on `/nextgen/manager`.
+  wallet connect state, `focus` workspace routing, and permission-based action
+  visibility on `/nextgen/manager`.
 
 ## Flows
 

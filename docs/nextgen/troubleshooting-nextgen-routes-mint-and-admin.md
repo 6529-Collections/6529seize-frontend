@@ -19,6 +19,7 @@ views, or admin-console access do not behave as expected.
 - `/art` or `/trait-sets` appears empty.
 - Mint button stays disabled or shows proof/network errors.
 - Admin route shows role-restriction messaging.
+- Admin route opens with a blank right-side panel.
 
 ## User Journey
 
@@ -43,6 +44,8 @@ views, or admin-console access do not behave as expected.
   selected wallet/proof has no eligible spots.
 - Admin route shows role restriction text:
   connected wallet lacks required permissions.
+- Admin route shows no workspace content:
+  `focus` query value is unsupported (`global|collection|artist` are valid).
 
 ## Edge Cases
 
@@ -57,6 +60,7 @@ views, or admin-console access do not behave as expected.
 - Clear `/art` filters or listing constraints, then reload results.
 - Reconnect wallet and switch to the configured NextGen network before minting.
 - For admin actions, switch to a wallet with matching admin/artist role.
+- For blank admin workspace content, set `focus` to a valid value or remove it.
 - Refresh the route to retry allowlist, proof, and mint-count reads.
 
 ## Limitations / Notes
