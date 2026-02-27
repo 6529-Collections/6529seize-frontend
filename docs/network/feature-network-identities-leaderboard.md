@@ -4,78 +4,93 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-The /network route is the community identity leaderboard for Network section users. It shows ranked identities with score columns and supports group filtering and metric sorting.
+`/network` is the main Network identities leaderboard.
+It is a read-only ranking route with sorting, group scope filtering, pagination, and profile links.
 
 ## Location in the Site
 
-- Route: /network
+- Route: `/network`
 - Sidebar path: `Network -> Identities`
-- Deep links are supported with these query params:
-  - `page` (for pagination)
-  - `sort-by` (`level`, `tdh`, `xtdh`, `rep`, `cic`)
+- Query params:
+  - `page` (page number)
+  - `sort-by` (UI options: `level`, `tdh`, `xtdh`, `rep`, `cic`)
   - `sort-direction` (`asc`, `desc`)
   - `group` (group id)
+- URL-only advanced `sort-by` values are also accepted:
+  - `display`, `tdh_rate`, `xtdh_rate`, `xtdh_outgoing`, `xtdh_incoming`,
+    `combined_tdh`, `combined_tdh_rate`
 
 ## Entry Points
 
 - Open `Network -> Identities` from the sidebar.
-- Open /network directly.
-- Open a group-scoped network link, for example:
-  /network?page=1&group={groupId}.
-- Open a group card in /network/groups and select it if available.
+- Open `/network` directly.
+- Open a deep link, for example `/network?page=1&group={groupId}`.
+- Open a group card from `/network/groups` to land on `/network?page=1&group={groupId}`.
+
+## Controls and URL State
+
+- `Filter` opens the group filter panel.
+- `Sort` button is shown on small screens; desktop sorting is done by clicking table headers.
+- Clicking the same sort field toggles direction; switching to a different field starts at descending.
+- Changing sort or group scope resets `page` to `1`.
+- `Nerd view` opens `/network/nerd`.
+- URL/state sync rules:
+  - First mount: `group` in the URL is copied into active Network group scope.
+  - After first mount: active group scope is the source of truth and syncs back into the URL.
+  - Shared URLs preserve sort and scope query values.
 
 ## User Journey
 
-1. Open /network.
-2. Use the header controls:
-   - Sort by clicking the metric header in desktop tables.
-   - Open `Sort` on small screens for mobile sort options.
-   - Open `Filter` to apply a group filter.
-3. Use row sorting in this order:
-   - `Level`, `TDH`, `xTDH`, `REP`, `NIC`.
-4. Use pagination controls to move through result pages.
-5. Open a row card/profile link to jump to that identity profile.
-6. Open `Nerd view` for the alternate detailed route.
+1. Open `/network`.
+2. (Optional) open `Filter` and pick a group scope.
+3. Sort by `Level`, `TDH`, `xTDH`, `REP`, or `NIC`.
+4. Move through pages with pagination when more than one page exists.
+5. Open a profile from a row/card.
+6. Open `Nerd view` when you need the alternate leaderboard.
 
-## Common Scenarios
+## Data and Display Behavior
 
-- Compare identities with `sort-by` set to `xtdh` to surface top xTDH holders.
-- Filter to a group by opening the `Filter` panel and choosing a group.
-- Read quick metrics:
-  - `TDH` row value plus `TDH Rate` tooltip
-  - `xTDH` row value plus `xTDH Rate` tooltip
-  - `Last Seen` activity timestamp
-- Open profile routes from identity names or avatars.
-- Share a stable filter state by copying a /network?... URL with query params.
+- Desktop uses a table; small screens use cards.
+- Table/card rank is continuous across pages.
+- Profile links use `detail_view_key` and can point to handle routes or address routes.
+- `TDH` and `xTDH` show compact values; desktop cells include hover tooltips with value and rate.
+- `Last Seen` is shown only when activity timestamp is available.
 
 ## Edge Cases
 
-- Invalid `sort-by`, `sort-direction`, or `page` values in the URL fall back to defaults.
-- Sorting a different column resets to page `1`.
-- When group filtering changes, pagination resets to page `1`.
-- Values are shown as rounded display values; detailed rate values are shown in hover tooltips.
-- `Last Seen` is blank when the backend does not provide an activity timestamp.
-- Empty result pages render without rows; when there are no extra pages, pagination controls stay hidden.
+- Missing/invalid `sort-by` falls back to `level`.
+- Missing/invalid `sort-direction` falls back to descending.
+- Missing/non-numeric `page` falls back to `1`.
+- Changing `group` in the URL after first mount does not reapply scope automatically.
+- If `page` is higher than the available page count, the UI rewrites it to the last page.
+- When total results are `0`, the UI resets to page `1`.
 
-## Failure and Recovery
+## Loading, Empty, Error, Recovery
 
-- If the network leaderboard request returns no rows for the selected filter/sort combination, users can clear or change `sort-by`, `page`, or `group` values and reopen /network.
-- Query changes are reflected in URL state, so users can reload or re-open the same URL to retry the same filtered and sorted view.
-- If the app page-level network route encounters a load failure, users can return using `Network -> Identities` and retry from a clean state.
+- Initial load shows the leaderboard skeleton.
+- Query changes keep previous rows visible while new data fetches.
+- If a fetch returns an empty result, the table/card container stays visible with no row items.
+- Pagination is hidden when only one page exists.
+- There is no route-level inline error banner or retry button on `/network`.
+- Recovery path:
+  - Refresh `/network`.
+  - Clear or change `group`, `sort-by`, and `page`.
+  - Reopen from `Network -> Identities`.
 
-## Limitations / Notes
+## Constraints / Notes
 
 - The community leaderboard query size is fixed to `50` rows per page.
-- Group filter scope is identity-group based and managed by the active group context.
-- /network remains read-only; it does not include grant creation or mutation actions.
+- `/network` is read-only; no mutation actions are available on this route.
+- Group-scope lifecycle across Network routes is documented here:
+  [Network Group Scope Flow](flow-network-group-scope.md).
+- `Create A Group` in the filter panel requires a connected wallet with a profile handle.
 
 ## Related Pages
 
 - [Network Index](README.md)
-- [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
-- [xTDH Network Overview](feature-xtdh-network-overview.md)
-- [TDH Boost Rules](feature-tdh-boost-rules.md)
-- [Network Definitions](feature-network-definitions.md)
+- [Network Group Scope Flow](flow-network-group-scope.md)
+- [Network Nerd Leaderboard](feature-network-nerd-leaderboard.md)
+- [Network Activity Feed](feature-network-activity-feed.md)
+- [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
 - [Groups List Filters](../groups/feature-groups-list-filters.md)
-- [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Group Card Keyboard Navigation and Actions](../groups/feature-group-card-keyboard-navigation-and-actions.md)
