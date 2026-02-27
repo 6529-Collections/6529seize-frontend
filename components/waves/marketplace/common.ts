@@ -16,6 +16,13 @@ type MediaCandidate =
   | null
   | undefined;
 
+type WsMediaPreviewCandidate = {
+  readonly card_url?: string | null | undefined;
+  readonly small_url?: string | null | undefined;
+  readonly thumb_url?: string | null | undefined;
+  readonly mime_type?: string | null | undefined;
+};
+
 export interface MarketplaceTypePreviewProps {
   readonly href: string;
   readonly compact?: boolean | undefined;
@@ -169,6 +176,57 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
     mimeType: inferMimeTypeFromUrl(url) ?? "image/*",
   };
 };
+
+const asWsMediaPreviewCandidate = (
+  value: unknown
+): WsMediaPreviewCandidate | undefined => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as WsMediaPreviewCandidate;
+};
+
+const pickWsMediaPreview = (
+  update: WsMediaLinkUpdatedData
+): PickedMedia | undefined => {
+  const preview = asWsMediaPreviewCandidate(update.media_preview);
+  const url =
+    asNonEmptyString(preview?.card_url) ??
+    asNonEmptyString(preview?.small_url) ??
+    asNonEmptyString(preview?.thumb_url) ??
+    asNonEmptyString(update.card_url) ??
+    asNonEmptyString(update.small_url) ??
+    asNonEmptyString(update.thumb_url) ??
+    asNonEmptyString(update.media_preview_card_url) ??
+    asNonEmptyString(update.media_preview_small_url) ??
+    asNonEmptyString(update.media_preview_thumb_url);
+
+  if (!url) {
+    return undefined;
+  }
+
+  return {
+    url,
+    mimeType:
+      asNonEmptyString(preview?.mime_type) ??
+      asNonEmptyString(update.media_preview_mime_type) ??
+      inferMimeTypeFromUrl(url) ??
+      "image/*",
+  };
+};
+
+const pickWsMediaLinkUpdatedMedia = ({
+  current,
+  update,
+}: {
+  readonly current: MarketplacePreviewData;
+  readonly update: WsMediaLinkUpdatedData;
+}): PickedMedia | null =>
+  pickWsMediaPreview(update) ??
+  current.media ??
+  pickMediaFromUrl(update.media_uri) ??
+  null;
 
 const pickMedia = (data: LinkPreviewResponse): PickedMedia | undefined => {
   const primary = toPickedMedia(data.image);
@@ -397,7 +455,7 @@ export const patchFromMediaLinkUpdate = ({
   const nextDescription = asNonEmptyString(update.description);
   const nextPrice = asNonEmptyString(update.price);
   const nextPriceCurrency = asNonEmptyString(update.price_currency);
-  const nextMedia = pickMediaFromUrl(update.media_uri) ?? current.media;
+  const nextMedia = pickWsMediaLinkUpdatedMedia({ current, update });
 
   const patched: MarketplacePreviewData = {
     ...current,
