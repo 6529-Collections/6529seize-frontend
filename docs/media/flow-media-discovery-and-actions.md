@@ -2,104 +2,125 @@
 
 ## Overview
 
-This flow covers a common media journey: discover the active Memes drop, open
-minting, inspect card-level media details, and move to adjacent tools like
-distribution plans, marketplace links, calendar scheduling, and Gradient views.
+This flow covers cross-route media tasks:
+
+- Find the current drop on `/`.
+- Mint on `/the-memes/mint` when minting is active.
+- Move through The Memes card, distribution, and calendar routes.
+- Continue into Meme Lab, ReMemes, and 6529 Gradient list/detail routes.
 
 ## Location in the Site
 
-- Home latest-drop surface: `/`
-- Memes mint route: `/the-memes/mint`
-- Memes card and distribution routes: `/the-memes/{id}`,
+- Home entry surface: `/` (`Latest Drop` or `Next Drop`)
+- The Memes routes: `/the-memes`, `/the-memes/mint`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`
-- Meme Lab routes: `/meme-lab`, `/meme-lab/{id}`,
-  `/meme-lab/{id}/distribution`, `/meme-lab/collection/{collection}`
+- Memes calendar route: `/meme-calendar`
+- Meme Lab routes: `/meme-lab`, `/meme-lab/collection/{collection}`,
+  `/meme-lab/{id}`, `/meme-lab/{id}/distribution`
 - ReMemes routes: `/rememes`, `/rememes/{contract}/{id}`, `/rememes/add`
-- Memes schedule route: `/meme-calendar`
 - Gradient routes: `/6529-gradient`, `/6529-gradient/{id}`
 
 ## Entry Points
 
-- Start from the home latest-drop countdown card and select `Mint`.
-- Open `/the-memes/mint` directly.
-- Open a direct card URL and switch tabs with `focus=...`.
-- Open `/meme-calendar` from navigation.
-- Open `/6529-gradient` from search/sidebar.
-- Open `/meme-lab` or `/rememes` from search/sidebar collection links.
+- Start on `/`:
+  - `Latest Drop` can open `Mint` (`/the-memes/mint`).
+  - `Next Drop` opens a Wave link (`/waves?wave=...&drop=...`), then users can
+    return to media routes.
+- Open `Network -> Memes Calendar` from the sidebar.
+- Open shared URLs directly.
+- Use header search (`The Memes`, `Meme Lab`, `ReMemes`, `6529 Gradient`).
+- Use in-route handoffs:
+  - `Distribution Plan` from card routes.
+  - `References` links between ReMemes and The Memes cards.
+  - ReMeme `Replicas` chips for sibling token routes.
 
 ## User Journey
 
-1. Open `/` and locate the latest-drop panel with countdown and stats.
-2. Continue to `/the-memes/mint` from the countdown `Mint` action (or open the
-   route directly).
-3. Wait for mint data to resolve, then choose recipient mode (`Mint for me` or
-   `Mint for fren`) and destination wallet.
-4. Submit minting from the action module and monitor in-page transaction status.
-5. Open `/the-memes/{id}` to inspect live card details, tabbed media views, and
-   related actions such as `Distribution Plan`.
-6. Use `/meme-calendar` (or next-mint fallback panels on upcoming numeric card
-   URLs) to confirm schedule and export event timing.
-7. Use `/meme-lab` sort/group controls to find collection pages and specific
-   cards.
-8. Use `/rememes` filters to find token references, then open
-   `/rememes/{contract}/{id}` detail tabs or `/rememes/add` for submissions.
-9. Use NFT detail pages (Memes, Meme Lab, ReMemes, Gradient) for outbound
-   marketplace links where available.
-10. Use `/6529-gradient` list sorting controls (`sort`, `sort_dir`) to find and
-    open specific Gradient tokens.
+1. Open `/` and review the current top card (`Latest Drop` or `Next Drop`).
+2. If `Mint` is available, open `/the-memes/mint`.
+3. On `/the-memes/mint`, wait for mint data, select `Mint for me` or
+   `Mint for fren`, choose a destination wallet, set mint count, and submit.
+4. Track transaction state (`Transaction Submitted - SEIZING ...`, then
+   `SEIZED!`) on the same page.
+5. Open `/the-memes` or `/the-memes/{id}` to browse cards and tabs.
+6. Use `Distribution Plan` from card views:
+  - Opens `/the-memes/{id}/distribution` when distribution is published.
+  - Opens the external card repository path when distribution is not published.
+7. Use `/meme-calendar` for timeline and calendar exports.
+8. Browse `/meme-lab`, open collection pages, then open `/meme-lab/{id}` and
+   optional `/meme-lab/{id}/distribution`.
+9. Browse `/rememes`, filter results, open `/rememes/{contract}/{id}` tabs
+   (`Live`, `Metadata`, `References`), or submit at `/rememes/add`.
+10. Browse `/6529-gradient`, use `sort` and `sort_dir`, open
+    `/6529-gradient/{id}`, and use token-level actions.
 
 ## Common Scenarios
 
-- Start on home, open `Mint`, complete minting, then review card tabs on
-  `/the-memes/{id}`.
-- Open a shared card deep link such as `/the-memes/{id}?focus=activity` and
-  move back to `Live` or `Your Cards`.
-- Start on `/meme-lab`, switch to `Collections`, open a collection page, then
-  open a card.
-- Filter `/rememes` by meme reference, open a token detail route, then switch to
-  `Metadata` or `References` tabs.
-- Open `Distribution Plan` from latest-drop details or card detail pages to
-  check phase and allocation context.
-- Check `/meme-calendar` for upcoming timing, then export to Google Calendar or
-  ICS.
-- Sort `/6529-gradient` by `TDH` and open token detail routes from the list.
+- Home to mint to card deep-link:
+  open `/`, mint at `/the-memes/mint`, then share/open
+  `/the-memes/{id}?focus=...`.
+- Card to distribution to schedule:
+  open `/the-memes/{id}`, open `Distribution Plan`, then check timing on
+  `/meme-calendar`.
+- Meme Lab to distribution:
+  open `/meme-lab`, open a card, then open `Distribution Plan` when present.
+- ReMemes reference review:
+  filter `/rememes` by `Meme Reference`, inspect detail tabs, then open linked
+  The Memes cards from `References`.
+- Gradient detail check:
+  sort `/6529-gradient` by `ID` or `TDH`, open a token, then use marketplace
+  shortcuts when shown.
 
 ## Edge Cases
 
-- `/the-memes/{id}` falls back to `Live` when `focus` is missing or unsupported.
-- Upcoming numeric card routes can render the shared next-mint panel instead of
-  full card tabs.
-- Mint controls vary by platform and eligibility (for example iOS country
-  gating and recipient-wallet requirements).
-- `/6529-gradient` normalizes unsupported query values to default sort settings.
-- Marketplace shortcut icons are hidden on iOS when detected country is not
+- `/` switches from `Latest Drop` to `Next Drop` when minting is ended and a
+  next drop exists.
+- On iOS outside `US`, mint controls are hidden. On iOS in `US`, minting uses
+  `Mint on 6529.io`.
+- `/the-memes/{id}` ignores unsupported `focus` values and falls back to
+  `Live`.
+- Upcoming numeric `/the-memes/{id}` routes can show the next-mint fallback
+  panel instead of full card data.
+- `/the-memes/{id}/distribution` with no published distribution shows
+  next-mint fallback plus `The Distribution Plan will be made available soon!`.
+- Invalid or non-positive distribution IDs show the `DISTRIBUTION` not-found
+  view.
+- `/rememes` keeps only `meme_id` in the URL. Sort, token type, and page reset
+  on reload.
+- `/6529-gradient` normalizes unsupported `sort` to `id` and `sort_dir` to
+  `asc`.
+- Marketplace shortcut icons are hidden on iOS unless detected country is
   `US`.
 
 ## Failure and Recovery
 
-- If mint or countdown data fetch fails, refresh the route to retry claim/data
-  resolution.
-- If recipient selection blocks minting, switch recipient mode and explicitly
-  choose a valid destination wallet.
-- If a calendar handoff is blocked (popup restrictions), retry with allowed
-  popups or use ICS export.
-- If a marketplace destination fails in a new tab, retry later or use another
-  marketplace link while the source page remains open.
-- If Gradient loading ends with no rows, refresh `/6529-gradient` to retry
-  collection fetch.
+- If `/the-memes/mint` shows `Error fetching mint information` or
+  `No mint information found`, refresh and retry.
+- If `Mint for fren` is selected but mint actions stay unavailable, choose a
+  recipient wallet first.
+- If calendar handoff is blocked, allow popups or use ICS export.
+- If Meme Lab, ReMemes, or Gradient pages stay empty after fetch failures,
+  refresh from canonical list routes (`/meme-lab`, `/rememes`,
+  `/6529-gradient`).
+- If an external marketplace page fails, retry later or use another available
+  marketplace shortcut.
 
 ## Limitations / Notes
 
-- Media and mint state are informational snapshots that can lag live chain/API
-  updates by a few seconds.
-- Marketplace shortcuts are external links only and depend on third-party
-  availability.
-- Flow details for each surface remain canonical in feature pages for Memes,
-  collections, NFT, and rendering subareas.
+- `/the-memes/mint` always targets the current latest Memes mint.
+- Media list/detail state is API-backed and can lag briefly behind chain/API
+  changes.
+- Some route state is URL-backed (`focus`, `sort`, `sort_dir`), but some
+  controls remain in-memory only (for example, several ReMemes filters).
+- Marketplace and repository links are external destinations and depend on
+  third-party availability.
+- Canonical route behavior remains owned by the linked feature pages.
 
 ## Related Pages
 
 - [Media Index](README.md)
+- [Now Minting Countdown](memes/feature-now-minting-countdown.md)
+- [Latest Drop Stats Grid](memes/feature-latest-drop-stats-grid.md)
 - [The Memes Mint Flow](memes/feature-mint-flow.md)
 - [The Memes Card Tabs and Focus Links](memes/feature-card-tabs-and-focus-links.md)
 - [Memes Minting Calendar](memes/feature-minting-calendar.md)
