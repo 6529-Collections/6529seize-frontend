@@ -11,6 +11,7 @@ controls do not behave as expected across web and app layouts.
 - App header, app sidebar menu, and app bottom-navigation controls.
 - Search modal and header back button flows.
 - Sidebar account/user controls.
+- `/open-mobile` app-handoff landing actions.
 
 ## Entry Points
 
@@ -20,6 +21,7 @@ controls do not behave as expected across web and app layouts.
 - Bottom navigation is hidden in app layout.
 - App sidebar menu route is missing or disabled.
 - Account controls or proxy actions look unavailable.
+- `/open-mobile` does not open the app or returns to the wrong web route.
 
 ## User Journey
 
@@ -58,6 +60,10 @@ controls do not behave as expected across web and app layouts.
   it appears only when app-wallet support is enabled.
 - Pull-to-refresh does not trigger:
   start gesture from header area while page is at top.
+- `/open-mobile` only shows one store action:
+  this is expected on detected Apple mobile or Android user agents.
+- `Back to 6529.io` on `/open-mobile` returns to `/`:
+  this happens when `path` is missing or not decoded yet.
 
 ## Edge Cases
 
@@ -85,6 +91,8 @@ controls do not behave as expected across web and app layouts.
   Again`, then `Clear Storage & Reload` if needed).
 - If overlay/menu state stays inconsistent after retries, refresh the current
   route.
+- If `/open-mobile` does not hand off to app, reopen it with a valid URL-encoded
+  `path` and use a store action as fallback.
 
 ## Limitations / Notes
 
@@ -99,5 +107,6 @@ controls do not behave as expected across web and app layouts.
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Back Button Behavior](feature-back-button.md)
+- [Mobile App Landing Page](feature-mobile-app-landing.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)

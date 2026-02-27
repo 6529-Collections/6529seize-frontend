@@ -2,72 +2,66 @@
 
 ## Overview
 
-`/open-mobile` is the handoff page used to bridge between web links and the 6529
-mobile app. When a target path is provided, it attempts to open the mobile app
-first, then keeps app-store actions visible as a fallback.
+`/open-mobile` is a web handoff page for the 6529 mobile app.
+When `path` is provided, it tries an app deep link first and keeps store and
+return actions visible.
 
 ## Location in the Site
 
-- Route: `/open-mobile?path=<encoded-path>`
+- Route: `/open-mobile` (optional `path` query).
+- Query format: `path=<url-encoded-route>`, for example `%2Fwaves%2F123`.
 - Visible UI:
-  - An app-opening loading message.
-  - One or both mobile store actions.
-  - A `Back to 6529.io` fallback button.
+  - `Opening 6529 Mobile...`
+  - `Get 6529 Mobile` with platform store actions
+  - `Back to 6529.io`
 
 ## Entry Points
 
-- Shared deep links that resolve to the mobile app deep-link scheme.
-- Manual navigation to `/open-mobile` with an encoded `path` query value.
+- A shared web URL that points to `/open-mobile?path=...`.
+- Manual navigation to `/open-mobile` with or without `path`.
 
 ## User Journey
 
-1. Open `/open-mobile` with a `path` value, for example
-   `/open-mobile?path=%2Fwaves%2F123`.
-2. The page attempts a deep-link redirect to the 6529 mobile scheme with the
-   decoded path.
-3. The page stores that decoded path for fallback navigation.
-4. If needed, use the store buttons to open the app from the store.
-5. If app handoff is skipped or canceled, tap `Back to 6529.io` to return to
-   the decoded path on the web site.
+1. Open `/open-mobile`.
+2. If `path` exists, the page decodes it and builds
+   `<MOBILE_APP_SCHEME>://navigate<decoded-path>`.
+3. The browser attempts to open that deep link.
+4. If the app does not open, use the iOS/Android store action.
+5. Use `Back to 6529.io` to return to `<origin><decoded-path>`, or `/` when no
+   decoded path is available.
 
 ## Common Scenarios
 
-- Apple mobile clients (including iPad with touch context):
-  - show only the iOS app action.
-- Android clients:
-  - show only the Android app action.
-- Desktop and unclassified environments:
-  - show both iOS and Android store actions so users can choose.
-- If `path` is missing:
-  - `Back to 6529.io` returns to site root.
+- Apple mobile clients (including iPad touch-desktop UA): show only iOS action.
+- Android clients: show only Android action.
+- Desktop and unclassified environments: show both store actions.
+- Missing `path`: no deep-link attempt; `Back to 6529.io` returns to `/`.
 
 ## Edge Cases
 
-- The deep link is initiated in an effect after first render, so users may briefly
-  see the fallback screen before the app receives the URL.
-- Store actions are rendered with direct links and full-page redirects, so app-store
-  failures still provide a manual path to continue.
-- `Back to 6529.io` always returns to the path captured from `path` (or `/` if
-  not provided).
+- The page is client-only; users can see a brief blank state before content mounts.
+- Deep-link redirect runs after first client render, so the landing UI can flash
+  briefly before app handoff.
+- Store actions force top-level full-page redirects to app-store URLs.
+- `path` must be valid URL encoding and should decode to an app/web route.
 
 ## Failure and Recovery
 
-- If app scheme handoff does not start or is declined, users can still choose
-  store actions without losing context.
-- If a store action is not suitable for the user’s device, they can still use the
-  provided fallback path back to web.
-- If the `path` value cannot be used by the app, users can still navigate web
-  route recovery from the fallback button.
+- If app handoff is blocked or canceled, use store actions to install/open app.
+- If store actions are not useful for the current device, use `Back to 6529.io`.
+- To retry handoff, reopen `/open-mobile` with a valid encoded `path`.
 
 ## Limitations / Notes
 
-- The page relies on app scheme handling support in the browser/device.
-- iOS/Android detection uses client-side device signals and can be conservative on
-  ambiguous user agents.
+- App handoff depends on browser/device support for custom URL schemes.
+- The page does not show explicit in-page error or retry UI for failed
+  deep-link handoff.
+- Route validation is limited to URL decoding; invalid route shapes are not
+  corrected on this page.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Internal Link Navigation](feature-internal-link-navigation.md)
-- [Wave Chat Scroll Behavior](../waves/chat/feature-scroll-behavior.md)
 - [Docs Home](../README.md)
