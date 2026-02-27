@@ -43,7 +43,7 @@ and mobile app layouts.
 - [Wallet and Account Controls](feature-wallet-account-controls.md):
   connect, disconnect, switch account, and proxy/account actions.
 - [Internal Link Navigation](feature-internal-link-navigation.md): internal
-  route and hash-link behavior.
+  route links, hash anchors, and drop-content link behavior.
 
 ### Mobile-Specific Behavior
 
