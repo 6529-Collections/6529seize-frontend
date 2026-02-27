@@ -104,6 +104,7 @@ distribution plans, marketplace links, calendar scheduling, and Gradient views.
 - [The Memes Card Tabs and Focus Links](memes/feature-card-tabs-and-focus-links.md)
 - [Memes Minting Calendar](memes/feature-minting-calendar.md)
 - [Meme Lab List and Collection Browsing](collections/feature-meme-lab-list-and-collection-browsing.md)
+- [Meme Lab Card Route Tabs and Navigation](collections/feature-meme-lab-card-route-tabs-and-navigation.md)
 - [ReMemes Browse and Detail](collections/feature-rememes-browse-and-detail.md)
 - [ReMemes Add Submission](collections/feature-rememes-add-submission.md)
 - [NFT Marketplace Shortcut Links](nft/feature-marketplace-links.md)
