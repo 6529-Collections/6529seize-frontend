@@ -86,9 +86,9 @@ describe("NextMintCard", () => {
   it("renders subscribed button state", () => {
     render(<NextMintCard drop={drop} />);
 
-    expect(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    ).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Subscribed" });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Subscribed")).toBeInTheDocument();
     expect(useNextMintSubscriptionMock).toHaveBeenCalledWith();
   });
@@ -97,9 +97,7 @@ describe("NextMintCard", () => {
     const user = userEvent.setup();
     render(<NextMintCard drop={drop} />);
 
-    await user.click(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    );
+    await user.click(screen.getByRole("button", { name: "Subscribed" }));
 
     expect(toggleSubscriptionMock).toHaveBeenCalledTimes(1);
   });
@@ -116,9 +114,9 @@ describe("NextMintCard", () => {
 
     render(<NextMintCard drop={drop} />);
 
-    expect(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    ).toBeDisabled();
+    const button = screen.getByRole("button", { name: "Subscribe" });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("Subscribe")).toBeInTheDocument();
   });
 

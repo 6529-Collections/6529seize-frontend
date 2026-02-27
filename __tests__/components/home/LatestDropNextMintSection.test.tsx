@@ -92,9 +92,9 @@ describe("LatestDropNextMintSection", () => {
   it("renders subscribed button state", () => {
     render(<LatestDropNextMintSection drop={drop} />);
 
-    expect(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    ).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Subscribed" });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Subscribed")).toBeInTheDocument();
     expect(useNextMintSubscriptionMock).toHaveBeenCalledWith();
   });
@@ -103,9 +103,7 @@ describe("LatestDropNextMintSection", () => {
     const user = userEvent.setup();
     render(<LatestDropNextMintSection drop={drop} />);
 
-    await user.click(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    );
+    await user.click(screen.getByRole("button", { name: "Subscribed" }));
 
     expect(toggleSubscriptionMock).toHaveBeenCalledTimes(1);
   });
@@ -125,7 +123,9 @@ describe("LatestDropNextMintSection", () => {
 
     render(<LatestDropNextMintSection drop={drop} />);
 
-    expect(screen.getByText("Subscribe")).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Subscribe" });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute("aria-pressed", "false");
   });
 
   it("shows updating label while mutation is in progress", () => {
@@ -143,7 +143,9 @@ describe("LatestDropNextMintSection", () => {
 
     render(<LatestDropNextMintSection drop={drop} />);
 
-    expect(screen.getByText("Updating...")).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Updating..." });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute("aria-pressed", "true");
   });
 
   it("disables button when toggling is not allowed", () => {
@@ -161,9 +163,7 @@ describe("LatestDropNextMintSection", () => {
 
     render(<LatestDropNextMintSection drop={drop} />);
 
-    expect(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Subscribe" })).toBeDisabled();
   });
 
   it("disables button when no target subscription is available", () => {
@@ -178,8 +178,6 @@ describe("LatestDropNextMintSection", () => {
 
     render(<LatestDropNextMintSection drop={drop} />);
 
-    expect(
-      screen.getByRole("button", { name: "Toggle next mint subscription" })
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Subscribe" })).toBeDisabled();
   });
 });

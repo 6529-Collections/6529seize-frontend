@@ -5,7 +5,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionResponse } from "@/generated/models/SubscriptionResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const NEXT_MINT_SUBSCRIPTION_QUERY_KEY = "next-mint-subscription";
@@ -46,6 +46,7 @@ export function useNextMintSubscription(): {
     useAuth();
   const queryClient = useQueryClient();
   const [isMutating, setIsMutating] = useState(false);
+  const isMutatingRef = useRef(false);
 
   const profileKey = useMemo(
     () => getSubscriptionProfileKey(connectedProfile),
@@ -69,10 +70,11 @@ export function useNextMintSubscription(): {
   });
 
   const toggleSubscription = useCallback(async (): Promise<void> => {
-    if (isMutating || activeProfileProxy) {
+    if (isMutatingRef.current || activeProfileProxy) {
       return;
     }
 
+    isMutatingRef.current = true;
     setIsMutating(true);
     try {
       const { success } = await requestAuth();
@@ -131,13 +133,13 @@ export function useNextMintSubscription(): {
         type: "error",
       });
     } finally {
+      isMutatingRef.current = false;
       setIsMutating(false);
     }
   }, [
     activeProfileProxy,
     connectedProfile,
     data,
-    isMutating,
     queryClient,
     requestAuth,
     setToast,

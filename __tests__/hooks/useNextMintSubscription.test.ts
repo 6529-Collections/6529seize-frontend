@@ -147,6 +147,43 @@ describe("useNextMintSubscription", () => {
     });
   });
 
+  it("ignores concurrent toggles while a mutation is in flight", async () => {
+    let resolveAuth: (value: { success: boolean }) => void = () => {};
+    requestAuthMock.mockReturnValue(
+      new Promise<{ success: boolean }>((resolve) => {
+        resolveAuth = resolve;
+      })
+    );
+    commonApiPostMock.mockResolvedValue({
+      consolidation_key: "test-key",
+      contract: "0x123",
+      token_id: 101,
+      subscribed: false,
+      subscribed_count: 1,
+    });
+
+    const { result } = renderHook(() => useNextMintSubscription());
+
+    let firstTogglePromise = Promise.resolve();
+    let secondTogglePromise = Promise.resolve();
+
+    act(() => {
+      firstTogglePromise = result.current.toggleSubscription();
+      secondTogglePromise = result.current.toggleSubscription();
+    });
+
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+
+    resolveAuth({ success: true });
+
+    await act(async () => {
+      await Promise.all([firstTogglePromise, secondTogglePromise]);
+    });
+
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+    expect(invalidateQueriesMock).toHaveBeenCalledTimes(1);
+  });
+
   it("does not mutate when authentication fails", async () => {
     requestAuthMock.mockResolvedValue({ success: false });
 
