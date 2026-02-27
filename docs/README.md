@@ -67,6 +67,7 @@ Use this when a route is blocked, data is missing, or an action fails.
 - [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)
 - [EMMA Access and Plan Operations](emma/troubleshooting-emma-access-and-plan-operations.md)
 - [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)
+- [NextGen Routes, Mint, and Admin](nextgen/troubleshooting-nextgen-routes-mint-and-admin.md)
 - [NextGen Slideshow and Token Media](nextgen/troubleshooting-nextgen-slideshow-and-token-media.md)
 - [Realtime Connectivity](realtime/troubleshooting-realtime-connectivity.md)
 - [Route Error and Not Found](shared/feature-route-error-and-not-found.md)
