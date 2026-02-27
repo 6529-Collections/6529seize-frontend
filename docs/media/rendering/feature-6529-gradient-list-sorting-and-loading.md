@@ -2,71 +2,75 @@
 
 ## Overview
 
-The `6529 Gradient` collection list (`/6529-gradient`) shows token cards and
-supports URL-driven sorting controls. The page keeps sort state in query
-parameters and normalizes unsupported query values to defaults.
+The `6529 Gradient` list route (`/6529-gradient`) renders collection cards with
+query-backed sorting. The page normalizes unsupported query values and rewrites
+the URL to the active normalized state.
 
 ## Location in the Site
 
 - Collection list route: `/6529-gradient`
-- Sidebar path: `About -> Gradient`
-- Search result entry: `6529 Gradient`
+- Gradient detail handoff route: `/6529-gradient/{id}`
+- Collections dropdown entry: `Gradient` (where the dropdown is available)
+- Header search result entry: `6529 Gradient`
 
 ## Entry Points
 
 - Open `/6529-gradient` directly.
-- Open `About -> Gradient` from the sidebar.
-- Use header search and select `6529 Gradient`.
+- Use header search and choose `6529 Gradient`.
+- Open `Gradient` from the collections dropdown.
+- Open a gradient token card from related app surfaces and land on
+  `/6529-gradient/{id}`.
 
 ## User Journey
 
-1. Open `/6529-gradient`.
-2. The page shows `Fetching ...` while collection data is loading.
-3. After loading, token cards render in the active sort order.
-4. Use `ID` or `TDH` plus sort-direction arrows to change ordering.
-5. The URL is rewritten to normalized query params (`sort`, `sort_dir`)
-   without scrolling the page.
+1. Open `/6529-gradient` (with or without `sort` and `sort_dir`).
+2. The page header renders `6529 Gradient` with `LFG: Start the Show!` and sort
+   controls.
+3. While data is loading, the page shows `Fetching ...`.
+4. After load, cards render with token name, owner row, `TDH`, and rank.
+5. Use `ID` or `TDH` plus sort-direction arrows to change ordering.
+6. The route rewrites to normalized query values (`sort`, `sort_dir`) without
+   scroll reset.
+7. Open any card to continue to `/6529-gradient/{id}`.
 
 ## Common Scenarios
 
-- Open `/6529-gradient` with no query params and browse the default
-  `ID` + ascending direction.
-- Open with query params (for example `?sort=tdh&sort_dir=desc`) to land
-  directly on a preferred ordering.
-- Switch between `ID` and `TDH` while browsing cards and keep the list on the
-  same route.
-- Signed-in users see `You own this NFT` badges on cards where token owner
-  matches one of the connected profile wallets.
+- Open `/6529-gradient` with no query params and browse default `id + asc`.
+- Deep-link to a preferred order, for example `?sort=tdh&sort_dir=desc`.
+- Signed-in users see `You own this NFT` when the token owner matches a
+  connected wallet.
+- Select `LFG: Start the Show!` to open the collection slideshow overlay.
 
 ## Edge Cases
 
-- Unsupported `sort` values are coerced to `id`.
-- Unsupported `sort_dir` values are coerced to `asc`.
-- Query parsing is case-insensitive (`TDH`, `tdh`, `DESC`, `desc` are accepted).
-- The `TDH` sort direction differs from ID-style numeric ordering:
-  - `asc` shows higher TDH values first.
-  - `desc` shows lower TDH values first.
-- If the fetched list is empty, the grid renders with no cards and no dedicated
-  empty-state message.
+- Unsupported `sort` values normalize to `id`.
+- Unsupported `sort_dir` values normalize to `asc`.
+- Query parsing is case-insensitive (`TDH`, `tdh`, `DESC`, `desc` all map).
+- `TDH` ordering is intentionally inverted versus ID ordering:
+  - `asc` shows higher TDH first.
+  - `desc` shows lower TDH first.
+- If the fetch returns no items, the grid renders with no dedicated empty-state
+  message.
 
 ## Failure and Recovery
 
-- While requests are in-flight, users see `Fetching ...`.
-- If collection fetch fails, loading stops and the page renders an empty card
-  grid (no inline error banner).
-- Refreshing the route retries the collection request.
+- While requests are in flight, users see `Fetching ...`.
+- If the collection request fails, loading ends and the page renders an empty
+  grid without an inline error banner.
+- Refreshing `/6529-gradient` retries the collection request.
 
 ## Limitations / Notes
 
-- Only two sort keys are supported: `id` and `tdh`.
-- Only two directions are supported: `asc` and `desc`.
-- The route always rewrites query params to normalized values after state is
-  applied.
-- The page does not show a dedicated error panel for failed collection loads.
+- Only `id` and `tdh` sort keys are supported.
+- Only `asc` and `desc` directions are supported.
+- Query params are always rewritten to normalized lowercase values.
+- Sort controls are click/tap targets and do not expose dedicated keyboard
+  button semantics.
 
 ## Related Pages
 
-- [Media Index](../README.md)
+- [Media Rendering Index](README.md)
 - [NFT Balance Indicators](../nft/feature-balance-indicators.md)
 - [NFT Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)
-- [Docs Home](../../README.md)
+- [NFT Transfer](../nft/feature-transfer.md)
+- [Media Discovery and Actions Flow](../flow-media-discovery-and-actions.md)

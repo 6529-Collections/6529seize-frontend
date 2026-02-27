@@ -18,8 +18,9 @@
 - [NFT](nft/README.md): shared ownership indicators, source fallbacks,
   marketplace shortcuts, and transfer actions across media routes plus adjacent
   collected and NextGen token routes.
-- [Rendering](rendering/README.md): interactive HTML sandbox behavior and
-  `/6529-gradient` list/detail loading.
+- [Rendering](rendering/README.md): interactive HTML rendering rules (including
+  sandboxed and non-sandboxed paths) plus `/6529-gradient` list sorting and
+  loading.
 
 ## Flows
 

@@ -2,87 +2,98 @@
 
 ## Overview
 
-Some artwork entries can be interactive HTML (`text/html`). These renders are kept
-inside a sandboxed iframe so external HTML can display without getting full access
-to the host page.
+- `text/html` media uses two render paths:
+  - Sandboxed iframe path on shared drop/card renderers and submission preview.
+  - NFT animation iframe path on home `Latest Drop` (`Now Minting`) artwork.
+- Touch-first contexts can require `Tap to load` before HTML starts.
 
 ## Location in the Site
 
-- Drop list and card surfaces that render media where MIME type is `text/html`.
-- Submission preview when interactive URL mode is used in Memes workflows.
-- Shared media surfaces that render third-party media URLs in a non-editable view.
+- Shared drop/card media surfaces that use common media renderers, including
+  home `Next Drop` and `Coming up` cards.
+- `Submit Work to The Memes` modal (`/waves/{waveId}`), Artwork step,
+  `Interactive HTML` tab preview.
+- Home latest-drop artwork (`/`) when panel is in `Latest Drop`
+  (`Now Minting`) and the NFT animation format is HTML.
 
 ## Entry Points
 
-- Open a supported media card/list item with an interactive entry.
-- Select interactive media in the Memes submission flow and move to preview.
+- Open a drop/card whose media MIME type is `text/html`.
+- On `/`, open `Next Drop` or `Coming up` cards that contain HTML media.
+- In The Memes submission flow:
+  - choose `Interactive HTML`
+  - choose `IPFS` or `Arweave`
+  - enter a root CID/transaction ID and wait for validation.
+- On `/`, open `Latest Drop` (`Now Minting`) when the current NFT animation is
+  HTML.
 
 ## User Journey
 
-1. A media URL arrives for a drop/preview context.
-2. The renderer normalizes known protocol shortcuts (for example `ipfs://`) to an
-   HTTPS gateway URL and applies canonicalization checks.
-3. If canonicalization succeeds, the component renders an iframe with:
-   - `sandbox="allow-scripts"`
-   - `allow=""`
-   - `referrerPolicy="no-referrer"`
-   - `credentialless`
-4. A host banner is shown above the frame with the safe resolved origin.
-5. In list/card contexts where autoplay is disabled (including several touch-first
-   home surfaces), interactive cards show `Tap to load` first; loading starts
-   only after interaction.
+1. HTML media is detected for the current surface.
+2. Shared renderer path:
+   - `ipfs://` values are converted to `https://ipfs.io/ipfs/...`
+   - URL is canonicalized and checked against allowed host/path rules.
+3. If accepted, the surface renders:
+   - host banner (`Untrusted interactive content` + host link)
+   - iframe with `sandbox="allow-scripts"`, empty `allow`,
+     `referrerPolicy="no-referrer"`, and `credentialless`.
+4. Shared renderer iframes mount only after the surface enters the viewport.
+5. Touch-gated shared contexts require `Tap to load`.
+6. Submission preview validates the gateway response and keeps `Continue`
+   blocked until status is `valid`.
+7. Latest-drop (`Now Minting`) HTML uses the NFT animation iframe path: touch
+   devices still get `Tap to load`, then the raw animation URL is loaded.
 
 ## Common Scenarios
 
-- Standard HTML card:
-  - `media_mime_type === "text/html"` switches from normal image/video behavior to
-    iframe rendering.
-- Home and latest-drop surfaces:
-  - On touch devices, leading cards and latest-drop hero cards keep interactive
-    HTML paused until users tap the overlay control.
-- Lazy loading:
-  - The frame waits for viewport visibility before loading.
-- Safe interaction:
-  - The sandbox keeps the embedded document isolated and strips referrer
-    context.
-- Trusted host checks:
-  - The renderer keeps interactive URLs to trusted gateway hosts only (`ipfs.io`,
-    `www.ipfs.io`, `arweave.net`, `www.arweave.net`, and valid Arweave
-    subdomains).
+- Wave/drop cards with HTML media render the host banner plus sandboxed iframe.
+- Touch devices on home `Next Drop` and `Coming up` cards show `Tap to load`.
+- Submission preview shows:
+  - `Validating preview...` while checks run
+  - sandboxed preview when valid
+  - inline error guidance when invalid.
+- Home `Latest Drop` (`Now Minting`) HTML artwork can show `Tap to load` on
+  touch devices, then load without the sandbox host banner.
 
 ## Edge Cases
 
-- Canonicalization rejects:
-  - non-HTTPS URLs
-  - user credentials in the URL
-  - port values other than default HTTPS (443)
-  - queries, fragments, and unsupported host/path shapes
-  - credentials or malformed hostnames
-- IPFS paths must be `https://ipfs.io/ipfs/<CID>`-style after normalization.
-- Arweave paths must use `https://arweave.net/<TX>` or a matching Arweave
-  subdomain form.
-- The URL is rejected if the response redirects to an unapproved host.
+- Canonicalization rejects non-HTTPS URLs, credentialed URLs, unsupported ports,
+  query/fragment values, unapproved hosts, and invalid provider path formats.
+- Allowed hosts include `ipfs.io`/`www.ipfs.io`, `arweave.net`/
+  `www.arweave.net`, and valid `*.arweave.net` transaction subdomains.
+- Submission validation only accepts root CID/transaction IDs (no subpaths).
+- Submission validation uses `HEAD` first and falls back to `GET` for `405`,
+  `403`, or `501` responses.
+- Submission validation rejects redirects that resolve to unapproved hosts.
+- Latest-drop NFT animation path does not use the same canonicalization and
+  host-banner flow as shared sandboxed renderers.
 
 ## Failure and Recovery
 
-- If canonicalization fails, no frame is rendered; callers usually show no media
-  preview in that state.
-- If the content request does not return an HTML response type, the submission
-  flow reports validation failure before allowing submission.
-- If network checks fail, validation remains in an error state and users can edit
-  the hash and retry.
+- If canonicalization fails, no iframe is rendered on that surface.
+- If gateway validation fails in submission flow, preview stays in an invalid
+  state with an inline reason.
+- If gateway requests fail, users see an `Unable to reach/verify` style error;
+  editing the hash and retrying re-runs validation.
+- If gateway content type is not HTML, submission validation fails and
+  submission stays blocked.
+- Latest-drop NFT animation failures have no interactive-specific inline retry
+  message; reload or reopen the drop to retry loading.
 
 ## Limitations / Notes
 
-- The sandbox does not grant same-origin or popup/advanced pointer capabilities.
-- The frame is intentionally minimal for safety; interactive behavior depends on
-  what HTML can run under the enforced sandbox and allowlist constraints.
-- `interactive URL` mode in submission still requires a separately validated path and
-  then re-validates resulting gateway URLs on server before submission is accepted.
+- Interactive iframe handling applies only to `text/html` media.
+- The sandbox allows scripts but intentionally does not grant same-origin,
+  popup, or broader permission-policy capabilities.
+- Submission interactive mode currently keeps media type fixed to
+  `text/html`.
+- Latest-drop NFT animation HTML uses a different renderer path and does not
+  show `Untrusted interactive content` host banners.
 
 ## Related Pages
 
-- [Media Index](../README.md)
+- [Media Rendering Index](README.md)
 - [NFT Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)
+- [Now Minting Countdown](../memes/feature-now-minting-countdown.md)
 - [Memes Submission Workflows](../../waves/memes/feature-memes-submission.md)
-- [Docs Home](../../README.md)
+- [Media Routes and Minting Troubleshooting](../troubleshooting-media-routes-and-minting.md)
