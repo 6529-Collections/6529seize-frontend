@@ -4,83 +4,96 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-/xtdh is a network-wide dashboard for live xTDH metrics and ecosystem-wide
-recipient allocation views.
+`/xtdh` is the live xTDH allocations dashboard.
+It shows network-wide xTDH stats, then lets users drill down:
+`Collections -> Tokens -> Contributors -> Grant details`.
 
 ## Location in the Site
 
-- Route: /xtdh
-- Sidebar path: `Collections -> xTDH`
-- Query parameters:
-  - `xtdh_received_sort=xtdh|xtdh_rate`
-  - `xtdh_received_dir=asc|desc`
-  - `xtdh_received_contract=<contract>`
-  - `xtdh_received_tokens_sort=xtdh|xtdh_rate`
-  - `xtdh_received_tokens_dir=asc|desc`
-  - `xtdh_token_contrib_sort=xtdh|xtdh_rate`
-  - `xtdh_token_contrib_dir=asc|desc`
-  - `xtdh_token_contrib_group=grant|grantor`
+- Route: `/xtdh`
+- Collections dropdown entry: `xTDH` (available on collection routes such as
+  `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`)
+- Mobile navigation treats `/xtdh` as part of `Collections`
+
+## URL State
+
+The route reads these query params:
+
+- `xtdh_received_sort=xtdh|xtdh_rate` (default `xtdh`)
+- `xtdh_received_dir=asc|desc` (default `desc`)
+- `xtdh_received_contract=<contract>`
+- `xtdh_received_tokens_sort=xtdh|xtdh_rate` (default `xtdh`)
+- `xtdh_received_tokens_dir=asc|desc` (default `desc`)
+- `xtdh_token_contrib_sort=xtdh|xtdh_rate` (default `xtdh`)
+- `xtdh_token_contrib_dir=asc|desc` (default `desc`)
+- `xtdh_token_contrib_group=grant|grantor` (default `grant`)
+
+Notes:
+
+- Invalid sort/direction/group values fall back to defaults.
+- Default values are usually omitted from the URL.
+- `xtdh_received_contract` is normalized to lowercase.
 
 ## Entry Points
 
-- Open /xtdh directly.
-- Open the `xTDH` link in the Collections sidebar.
-- Open links from xTDH metric cards and docs routes that summarize received
-  xTDH behavior.
+- Open `/xtdh` directly.
+- Open any collection route and choose `xTDH` in the collections dropdown.
+- Open a saved deep link with `xtdh_received_contract` and sort/group params.
 
 ## User Journey
 
-1. Open /xtdh.
-2. Review global metrics:
-   - `Multiplier`
-   - `xTDH Rate`
-   - `Granted`
-3. In `xTDH Collections`, search for a collection and sort by `xTDH` or
-   `xTDH Rate`.
-4. Open a collection to view token-level allocations.
-5. Open a token to review contributor rows for grants and grantors.
-6. Use breadcrumbs in the token view to return to collections.
+1. Open `/xtdh`.
+2. Review top cards: `Multiplier`, `xTDH Rate`, and `Granted`.
+3. In `xTDH Collections`, search or sort collections.
+4. Select a collection card to open `xTDH Tokens` for that contract.
+5. Select a token to open contributor rows.
+6. Switch contributor sort and `Group by` (`By Grant` or `By Grantor`).
+7. Select a contributor row with a grant ID to open grant details.
+8. Use `Back` controls to return to contributors, tokens, or collections.
 
-## Common Scenarios
+## Page States
 
-- Use /xtdh for a cross-identity snapshot of active xTDH flow.
-- Open a link directly to a token list using
-  `xtdh_received_contract=<contract>`.
-- Switch contributor grouping between `grant` and `grantor` to check different
-  attribution views.
-
-## Edge Cases
-
-- /xtdh is separate from /network/xtdh:
-  - /xtdh = live allocations dashboard
-  - /network/xtdh = rules and formulas reference
-- The route does not require an identity and always renders ecosystem-wide results.
-- Sorting defaults are applied when params are missing or malformed:
-  - collections and tokens: `xtdh`, descending
-  - contributors: `xtdh`, descending, grouped by `grant`
-- Empty ecosystem data states show “No collections found”.
-- `Load More` appears only when additional pages are available.
-- If contract metadata is missing, collection cards still render fallback identities
-  and value rows where possible.
+- Stats loading: top cards render skeleton placeholders.
+- Collections loading: collections list renders skeleton rows.
+- Collections empty: `No collections found`.
+- Tokens empty: `No individual token allocations were returned for this collection.`
+- Contributors empty: `No by grant data was returned for this token.` or
+  `No by grantor data was returned for this token.`
+- If a selected contract is not found in loaded collection metadata, the token
+  view still opens and shows `Collection summary unavailable.`
 
 ## Failure and Recovery
 
-- If global stats fail to load, users see:
-  - `Unable to load xTDH stats`
-  - `Retry` button
-- If collection, token, or contributor queries fail, each surface has inline retry
-  controls.
+- Stats failure: `Unable to load xTDH stats` with `Retry`.
+- Collections first-load failure: `Failed to load received collections.` with `Retry`.
+- Tokens first-load failure: `Failed to load received tokens.` with `Retry`.
+- Contributors first-load failure: `Failed to load contributors.` with `Retry`.
+- Grant details failure: `Failed to load grant details.` with `Retry`.
+- Load-more failure keeps current rows and shows inline retry.
+
+## Edge Cases
+
+- `/xtdh` is a live dashboard. `/network/xtdh` is a static rules page.
+- Wallet/identity is not required on `/xtdh`; it always runs in ecosystem scope.
+- Search text is local UI state and is not stored in URL.
+- Selected token and selected grant are local UI state and reset on refresh.
+- Deep links persist collection and sort/group state, but not token/grant
+  selection.
 
 ## Limitations / Notes
 
-- /xtdh is read-only; grant creation is available only on profile routes.
-- Global cards and allocation lists reflect backend-calculated totals and can
-  fluctuate over time.
+- `/xtdh` is read-only. Grant creation/editing is handled on profile xTDH
+  routes.
+- Metrics and lists come from live backend calculations and can change between
+  refreshes.
+- Deep links support collection + sort/group state, not token/grant detail
+  state.
 
 ## Related Pages
 
 - [Network Index](README.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
+- [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)

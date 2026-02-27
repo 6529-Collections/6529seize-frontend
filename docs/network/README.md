@@ -9,8 +9,9 @@ reference routes.
   `/network/health`, `/network/health/network-tdh`, `/network/tdh`,
   `/network/tdh/historic-boosts`, `/network/definitions`, and
   `/network/levels`.
-- Adjacent reference routes owned here: `/network/xtdh`, `/xtdh`, and
-  `/network/prenodes`.
+- Adjacent xTDH routes owned here: `/network/xtdh` (rules reference) and
+  `/xtdh` (live allocations dashboard).
+- Utility route: `/network/prenodes`.
 - Group scope behavior: `/network` owns scope controls; `/network/activity`
   has no scope controls but can consume active group scope.
 - `/network/groups` behavior is owned by the Groups docs area. This area owns
@@ -32,12 +33,12 @@ reference routes.
 - [Network Levels](feature-network-levels.md)
 - [Prenodes Status](feature-prenodes-status.md)
 
-### TDH and xTDH Rules
+### TDH and xTDH
 
-- [TDH Boost Rules](feature-tdh-boost-rules.md)
-- [TDH Historic Boosts](feature-tdh-historic-boosts.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
+- [TDH Boost Rules](feature-tdh-boost-rules.md)
+- [TDH Historic Boosts](feature-tdh-historic-boosts.md)
 
 ## Flows
 

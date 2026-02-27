@@ -45,7 +45,7 @@ Use this when you need the shortest route to the right page.
 - Wave thread flow: [Wave Chat Index](waves/chat/README.md)
 - Wave creation flow: [Wave Creation Index](waves/create/README.md)
 - Meme submission flow: [Memes Submission Flow](waves/memes/feature-memes-submission.md)
-- TDH/xTDH terms and math: [Network Definitions](network/feature-network-definitions.md), [TDH Boost Rules](network/feature-tdh-boost-rules.md), [xTDH Network Overview](network/feature-xtdh-network-overview.md), [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md)
+- xTDH dashboard plus TDH/xTDH rules: [xTDH Network Overview](network/feature-xtdh-network-overview.md), [xTDH Rules and Distribution Formula](network/feature-xtdh-formulas.md), [Network Definitions](network/feature-network-definitions.md), [TDH Boost Rules](network/feature-tdh-boost-rules.md)
 - Search from any route: [Header Search Modal](navigation/feature-header-search-modal.md)
 - Navigate instantly between app areas: [Navigation Entry and Switching Flow](navigation/flow-navigation-entry-and-switching.md)
 - Read notifications feed flow: [Notifications Feed Browsing Flow](notifications/flow-notifications-feed-browsing.md)
