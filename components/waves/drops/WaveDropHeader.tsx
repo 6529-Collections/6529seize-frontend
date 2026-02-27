@@ -13,11 +13,15 @@ import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { WaveCreatorBadge } from "./WaveCreatorBadge";
 import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
-import { useMemo, useCallback } from "react";
+import { useCallback } from "react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import {
+  getSubmissionCount,
+  getTrophyArtworkCount,
+} from "@/helpers/artist-activity.helpers";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -56,21 +60,14 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     handleModalClose: handleWaveCreatorModalClose,
   } = useWaveCreatorPreviewModal();
 
-  const submissionCount = useMemo(
-    () => drop.author.active_main_stage_submission_ids.length || 0,
-    [drop.author.active_main_stage_submission_ids]
-  );
+  const submissionCount = getSubmissionCount(drop.author);
 
   const hasSubmissions = submissionCount > 0;
 
-  // Check if this drop author has any main stage winner drop IDs
-  const winnerCount = useMemo(
-    () => drop.author.winner_main_stage_drop_ids.length || 0,
-    [drop.author.winner_main_stage_drop_ids]
-  );
+  const trophyCount = getTrophyArtworkCount(drop.author);
 
-  const isWinner = winnerCount > 0;
-  const hasActivityBadge = hasSubmissions || isWinner;
+  const hasTrophyArtworks = trophyCount > 0;
+  const hasActivityBadge = hasSubmissions || hasTrophyArtworks;
 
   const isWaveCreator = drop.author.is_wave_creator;
 
@@ -116,7 +113,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             {hasActivityBadge && (
               <ArtistActivityBadge
                 submissionCount={submissionCount}
-                winCount={winnerCount}
+                trophyCount={trophyCount}
                 onBadgeClick={handleArtistBadgeClick}
                 tooltipId={`header-activity-badge-${drop.id}`}
               />

@@ -31,13 +31,16 @@ const BOTH_STATE_DOT_CLASS =
 
 type BadgeState = "none" | "active" | "winners" | "both";
 
-function getBadgeState(submissionCount: number, winCount: number): BadgeState {
+function getBadgeState(
+  submissionCount: number,
+  trophyCount: number
+): BadgeState {
   const hasSubmissions = submissionCount > 0;
-  const hasWins = winCount > 0;
+  const hasTrophyArtworks = trophyCount > 0;
 
-  if (hasSubmissions && hasWins) return "both";
+  if (hasSubmissions && hasTrophyArtworks) return "both";
   if (hasSubmissions) return "active";
-  if (hasWins) return "winners";
+  if (hasTrophyArtworks) return "winners";
   return "none";
 }
 
@@ -73,34 +76,36 @@ const BADGE_CONFIG: Record<
 function getTooltipContent(
   state: BadgeState,
   submissionCount: number,
-  winCount: number
+  trophyCount: number
 ): string {
   const submissionsLabel = `${submissionCount} art submission${
     submissionCount === 1 ? "" : "s"
   }`;
-  const winsLabel = `${winCount} winning artwork${winCount === 1 ? "" : "s"}`;
+  const trophyLabel = `${trophyCount} minted meme${
+    trophyCount === 1 ? "" : "s"
+  }`;
 
   if (state === "both") {
-    return `View ${submissionsLabel} and ${winsLabel}`;
+    return `View ${submissionsLabel} and ${trophyLabel}`;
   }
 
   if (state === "active") {
     return `View ${submissionsLabel}`;
   }
 
-  return `View ${winsLabel}`;
+  return `View ${trophyLabel}`;
 }
 
 interface ArtistActivityBadgeProps {
   readonly submissionCount: number;
-  readonly winCount: number;
+  readonly trophyCount: number;
   readonly onBadgeClick: (tab: ArtistPreviewTab) => void;
   readonly tooltipId?: string | undefined;
 }
 
 export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   submissionCount,
-  winCount,
+  trophyCount,
   onBadgeClick,
   tooltipId = "artist-activity-badge",
 }) => {
@@ -110,7 +115,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
   const uniqueTooltipId = `${tooltipId}-${id}`;
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
 
-  const state = getBadgeState(submissionCount, winCount);
+  const state = getBadgeState(submissionCount, trophyCount);
   if (state === "none") return null;
 
   const showTooltip = !isMobile && !hasTouchScreen;
@@ -118,7 +123,7 @@ export const ArtistActivityBadge: React.FC<ArtistActivityBadgeProps> = ({
 
   const config = BADGE_CONFIG[state];
   const initialTab = config.initialTab;
-  const tooltipContent = getTooltipContent(state, submissionCount, winCount);
+  const tooltipContent = getTooltipContent(state, submissionCount, trophyCount);
   const ariaLabel = tooltipContent;
   const isPaletteIcon = config.icon === faPalette;
   const iconClassName = isPaletteIcon ? PALETTE_ICON_CLASS : TROPHY_ICON_CLASS;
