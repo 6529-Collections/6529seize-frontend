@@ -370,6 +370,7 @@ export interface WsMediaLinkUpdatedData {
   readonly media_uri: string | null;
   readonly last_error_message: string | null;
   readonly price: string | null;
+  readonly price_currency: string | null;
   readonly last_successfully_updated: string | number | null;
   readonly failed_since: string | number | null;
 }

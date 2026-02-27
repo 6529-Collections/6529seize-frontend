@@ -30,6 +30,7 @@ export type MarketplacePreviewState =
       readonly href: string;
       readonly resolvedMedia?: PickedMedia | undefined;
       readonly resolvedPrice?: string | undefined;
+      readonly resolvedPriceCurrency?: string | undefined;
       readonly resolvedTitle?: string | undefined;
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
@@ -47,6 +48,7 @@ export interface MarketplacePreviewData {
   readonly description: string | null;
   readonly media: PickedMedia | null;
   readonly price: string | null;
+  readonly priceCurrency: string | null;
 }
 
 const OPENSEA_HOST = "opensea.io";
@@ -225,6 +227,10 @@ const pickNftLinkPrice = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.price);
 
+const pickNftLinkPriceCurrency = (
+  response: ApiNftLinkResponse | undefined
+): string | undefined => asNonEmptyString(response?.data?.price_currency);
+
 const pickNftLinkTitle = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.name);
@@ -247,6 +253,7 @@ export const fromNftLink = ({
   description: pickNftLinkDescription(response) ?? null,
   media: pickNftLinkMedia(response) ?? null,
   price: pickNftLinkPrice(response) ?? null,
+  priceCurrency: pickNftLinkPriceCurrency(response) ?? null,
 });
 
 const fromApiDropNftLink = ({
@@ -284,6 +291,7 @@ const mergeSeededMarketplacePreviewData = ({
     description: current.description ?? seeded.description,
     media: current.media ?? seeded.media,
     price: current.price ?? seeded.price,
+    priceCurrency: current.priceCurrency ?? seeded.priceCurrency,
   };
 };
 
@@ -388,6 +396,7 @@ export const patchFromMediaLinkUpdate = ({
   const nextTitle = asNonEmptyString(update.name);
   const nextDescription = asNonEmptyString(update.description);
   const nextPrice = asNonEmptyString(update.price);
+  const nextPriceCurrency = asNonEmptyString(update.price_currency);
   const nextMedia = pickMediaFromUrl(update.media_uri) ?? current.media;
 
   const patched: MarketplacePreviewData = {
@@ -398,6 +407,7 @@ export const patchFromMediaLinkUpdate = ({
     description: nextDescription ?? current.description,
     media: nextMedia,
     price: nextPrice ?? current.price,
+    priceCurrency: nextPriceCurrency ?? current.priceCurrency,
   };
 
   const didChange =
@@ -406,6 +416,7 @@ export const patchFromMediaLinkUpdate = ({
     patched.title !== current.title ||
     patched.description !== current.description ||
     patched.price !== current.price ||
+    patched.priceCurrency !== current.priceCurrency ||
     !isSameMedia(patched.media, current.media);
 
   return didChange ? patched : current;
