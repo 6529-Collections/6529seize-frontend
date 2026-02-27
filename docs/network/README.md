@@ -1,20 +1,39 @@
 # Network
 
+Network docs cover network scoring, leaderboards, health, and TDH/xTDH
+reference routes.
+
 ## Overview
 
-Network docs cover the scoring and metrics pages reachable from the Network
-section of the sidebar, including identities, TDH/xTDH rules, and metrics
-dashboards.
+- Main route family: `/network`, `/network/activity`, `/network/nerd`,
+  `/network/health`, `/network/health/network-tdh`, `/network/tdh`,
+  `/network/tdh/historic-boosts`, `/network/definitions`, and
+  `/network/levels`.
+- Adjacent reference routes owned here: `/network/xtdh`, `/xtdh`, and
+  `/network/prenodes`.
+- `/network/groups` behavior is owned by the Groups docs area. This area owns
+  the handoff into network-scoped views.
 
 ## Features
 
+### Leaderboards and Activity
+
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
 - [Network Nerd Leaderboard](feature-network-nerd-leaderboard.md)
+- [Network Activity Feed](feature-network-activity-feed.md)
+
+### Health and Metrics
+
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
+- [Prenodes Status](feature-prenodes-status.md)
+
+### TDH and xTDH Rules
+
 - [Network Definitions](feature-network-definitions.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
+- [Network Levels](feature-network-levels.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 
@@ -24,7 +43,7 @@ dashboards.
 
 ## Troubleshooting
 
-- [Network Troubleshooting](troubleshooting-network-routes-and-health.md)
+- [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
 
 ## Stubs
 
@@ -33,6 +52,8 @@ dashboards.
 ## Related Areas
 
 - [Docs Home](../README.md)
+- [Groups Index](../groups/README.md)
+- [Groups List, Create, and Network Scope Flow](../groups/flow-groups-list-create-and-network-scope.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Profiles Index](../profiles/README.md)
-- [Groups Index](../groups/README.md)
+- [NFT Activity Feed](../realtime/feature-authenticated-live-updates.md)

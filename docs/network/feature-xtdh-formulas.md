@@ -2,23 +2,23 @@
 
 ## Overview
 
-`/network/xtdh` explains how xTDH is produced, how grants distribute it, and how
+/network/xtdh explains how xTDH is produced, how grants distribute it, and how
 grants are consumed over time.
 
 ## Location in the Site
 
-- Route: `/network/xtdh`
+- Route: /network/xtdh
 - Sidebar path: `Network -> xTDH`
 
 ## Entry Points
 
-- Open `/network/xtdh` directly.
+- Open /network/xtdh directly.
 - Open `Network -> xTDH` from the sidebar.
 - Open xTDH links from profile routes for context.
 
 ## User Journey
 
-1. Open `/network/xtdh`.
+1. Open /network/xtdh.
 2. Confirm what xTDH tracks:
    - xTDH produced from held eligible NFTs.
    - xTDH received through grants on held tokens.
@@ -57,8 +57,8 @@ grants are consumed over time.
 
 - This route is informational and does not submit or mutate state.
 - If page content is unavailable, users can continue with:
-  - `/xtdh` for live network overview
-  - `/network/tdh` for current TDH rule context.
+  - /xtdh for live network overview
+  - /network/tdh for current TDH rule context.
 
 ## Limitations / Notes
 

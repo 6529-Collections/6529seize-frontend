@@ -4,11 +4,11 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network` is the community identity leaderboard for Network section users. It shows ranked identities with score columns and supports group filtering and metric sorting.
+The /network route is the community identity leaderboard for Network section users. It shows ranked identities with score columns and supports group filtering and metric sorting.
 
 ## Location in the Site
 
-- Route: `/network`
+- Route: /network
 - Sidebar path: `Network -> Identities`
 - Deep links are supported with these query params:
   - `page` (for pagination)
@@ -19,14 +19,14 @@ Parent: [Network Index](README.md)
 ## Entry Points
 
 - Open `Network -> Identities` from the sidebar.
-- Open `/network` directly.
+- Open /network directly.
 - Open a group-scoped network link, for example:
-  `/network?page=1&group={groupId}`.
-- Open a group card in `/network/groups` and select it if available.
+  /network?page=1&group={groupId}.
+- Open a group card in /network/groups and select it if available.
 
 ## User Journey
 
-1. Open `/network`.
+1. Open /network.
 2. Use the header controls:
    - Sort by clicking the metric header in desktop tables.
    - Open `Sort` on small screens for mobile sort options.
@@ -46,7 +46,7 @@ Parent: [Network Index](README.md)
   - `xTDH` row value plus `xTDH Rate` tooltip
   - `Last Seen` activity timestamp
 - Open profile routes from identity names or avatars.
-- Share a stable filter state by copying a `/network?...` URL with query params.
+- Share a stable filter state by copying a /network?... URL with query params.
 
 ## Edge Cases
 
@@ -59,7 +59,7 @@ Parent: [Network Index](README.md)
 
 ## Failure and Recovery
 
-- If the network leaderboard request returns no rows for the selected filter/sort combination, users can clear or change `sort-by`, `page`, or `group` values and reopen `/network`.
+- If the network leaderboard request returns no rows for the selected filter/sort combination, users can clear or change `sort-by`, `page`, or `group` values and reopen /network.
 - Query changes are reflected in URL state, so users can reload or re-open the same URL to retry the same filtered and sorted view.
 - If the app page-level network route encounters a load failure, users can return using `Network -> Identities` and retry from a clean state.
 
@@ -67,7 +67,7 @@ Parent: [Network Index](README.md)
 
 - The community leaderboard query size is fixed to `50` rows per page.
 - Group filter scope is identity-group based and managed by the active group context.
-- `/network` remains read-only; it does not include grant creation or mutation actions.
+- /network remains read-only; it does not include grant creation or mutation actions.
 
 ## Related Pages
 

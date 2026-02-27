@@ -2,68 +2,78 @@
 
 ## Overview
 
-Use this page for common issues in the `/network` section, including health
-dashboards, TDH routes, and leaderboard surfaces.
+Use this page for common failures in Network routes: leaderboards, metrics,
+activity feeds, and rule/reference pages.
 
 ## Location in the Site
 
-- Route family: `/network/{section}`  
-- Network health routes: `/network/health`, `/network/health/network-tdh`
-- Network metrics: `/network/tdh`, `/network/tdh/historic-boosts`
-- Network leaderboard routes: `/network`, `/network/levels`, `/network/nerd/{focus}`,
-  `/network/definitions`, and `/network/xtdh`
+- Primary route family: `/network/*`
+- Leaderboards and feeds: `/network`, `/network/nerd/{focus}`,
+  `/network/activity`
+- Metrics and references: `/network/health`, `/network/health/network-tdh`,
+  `/network/tdh`, `/network/tdh/historic-boosts`, `/network/definitions`,
+  `/network/levels`, `/network/xtdh`
+- Utility route: `/network/prenodes`
+- Related allocations dashboard: `/xtdh`
 
 ## Entry Points
 
-- Open `/network` for the default network summary.
-- Open `/network/health` to confirm live service-state rendering.
-- Open `/network/tdh` for current TDH/xTDH displays.
-- Open `/network/definitions` for metric terminology.
-- Open `/network/nerd/{focus}` and `/network/nerd/interactions` to inspect
-  leaderboard variants.
+- Open `/network` from `Network -> Identities` first.
+- Open `/network/health` when checking metrics freshness.
+- Open `/network/activity` for network-wide event feed checks.
+- Open `/network/tdh` or `/network/xtdh` for rule reference checks.
+- Open `/network/levels` and `/network/definitions` for static reference checks.
 
 ## User Journey
 
-1. If the network section appears to be stale, open `/network`.
-2. Confirm backend status from `/network/health`.
-3. Revisit `/network/tdh` if xTDH/boost calculations appear inconsistent.
-4. Use `/network/nerd/{focus}` to confirm leaderboard sorting/focus for identity
-   scoring.
+1. Reproduce the issue on its exact route.
+2. Open `/network/health` and confirm metrics load.
+3. Reopen the failing route from sidebar navigation (not only browser back).
+4. If the issue is scope-related, clear group filter and retest.
+5. If the issue is rule-interpretation, confirm on `/network/tdh` or
+   `/network/xtdh`.
 
 ## Common Scenarios
 
-- Health metrics fail to load on first visit: reopen after a short network retry.
-- Network group scoring displays cached values: refresh after returning from another
-  route.
-- `/network/xtdh` and `/network/levels` load slowly in heavy sessions: retry after
-  reducing tab activity.
-- Identity lists appear empty after a state transition: open `/network/health` and
-  return to the relevant network surface.
+- `/network` list looks wrong after scope changes:
+  clear and reapply group filter from the filter panel.
+- `/network/activity` appears unscoped:
+  this route intentionally ignores active group scope.
+- `/network/health` shows `Failed to load metrics. Please try again later.`:
+  refresh the route to trigger a new fetch.
+- `/network/health/network-tdh` shows no charts:
+  upstream history payload may be empty; retry later.
+- `/network/prenodes` shows only header text:
+  upstream prenode feed may be empty or unavailable.
+- `/xtdh` shows `Unable to load xTDH stats`:
+  use its `Retry` button.
 
 ## Edge Cases
 
-- `/network/nerd` uses the optional `{focus}` segment, but missing segments still
-  render a default leaderboard focus.
-- Health data can remain stale until the background fetch cycle completes.
+- `/network/nerd/*` treats unknown focus segments as `Cards Collected`.
+- `/network` normalizes invalid `page`, `sort-by`, and `sort-direction` values.
+- `/network/activity` and `/network/prenodes` do not expose inline filter controls.
+- `/network/levels` and `/network/definitions` are static references, not live
+  metrics views.
 
 ## Failure and Recovery
 
-- If a specific route fails to render, go directly to `/network` and relaunch the
-  intended route from there.
-- If network health widgets fail repeatedly, wait briefly and refresh `/network/health`.
-- If leaderboard routes return incomplete totals, refresh and switch focus once in
-  `/network/nerd`.
+- If a route fails, reopen from `Network` sidebar navigation.
+- If `/network/activity` returns not-found, reload `/network/activity` directly.
+- If `/network` leaderboard is empty, remove `group` scope and retry.
+- If `/network/prenodes` is empty, retry later; no route-level retry control exists.
 
 ## Limitations / Notes
 
-- Stale network data can temporarily diverge from latest chain state during heavy
-  index refresh windows.
-- Route recovery is page-local; long-lived stale network sessions generally recover
-  on route refresh.
+- Some routes rely on live APIs (`/network`, `/network/health`, `/xtdh`,
+  `/network/prenodes`) while others are static references
+  (`/network/definitions`, `/network/levels`, `/network/tdh`, `/network/xtdh`).
+- Retry controls differ by route; some pages only support browser refresh.
 
 ## Related Pages
 
 - [Network Index](README.md)
-- [Feature Network Health and Stats](feature-health-dashboard.md)
-- [Feature Network Stats](feature-network-stats.md)
-- [Feature TDH Boost Rules](feature-tdh-boost-rules.md)
+- [Health Dashboard](feature-health-dashboard.md)
+- [Network Stats](feature-network-stats.md)
+- [Network Activity Feed](feature-network-activity-feed.md)
+- [Prenodes Status](feature-prenodes-status.md)

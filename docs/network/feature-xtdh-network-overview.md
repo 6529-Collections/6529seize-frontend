@@ -1,14 +1,16 @@
 # xTDH Network Overview
 
+Parent: [Network Index](README.md)
+
 ## Overview
 
-`/xtdh` is a network-wide dashboard for live xTDH metrics and ecosystem-wide
+/xtdh is a network-wide dashboard for live xTDH metrics and ecosystem-wide
 recipient allocation views.
 
 ## Location in the Site
 
-- Route: `/xtdh`
-- Sidebar path: `Network -> xTDH`
+- Route: /xtdh
+- Sidebar path: `Collections -> xTDH`
 - Query parameters:
   - `xtdh_received_sort=xtdh|xtdh_rate`
   - `xtdh_received_dir=asc|desc`
@@ -21,14 +23,14 @@ recipient allocation views.
 
 ## Entry Points
 
-- Open `/xtdh` directly.
-- Open the `xTDH` link in the Network sidebar.
+- Open /xtdh directly.
+- Open the `xTDH` link in the Collections sidebar.
 - Open links from xTDH metric cards and docs routes that summarize received
   xTDH behavior.
 
 ## User Journey
 
-1. Open `/xtdh`.
+1. Open /xtdh.
 2. Review global metrics:
    - `Multiplier`
    - `xTDH Rate`
@@ -41,7 +43,7 @@ recipient allocation views.
 
 ## Common Scenarios
 
-- Use `/xtdh` for a cross-identity snapshot of active xTDH flow.
+- Use /xtdh for a cross-identity snapshot of active xTDH flow.
 - Open a link directly to a token list using
   `xtdh_received_contract=<contract>`.
 - Switch contributor grouping between `grant` and `grantor` to check different
@@ -49,6 +51,9 @@ recipient allocation views.
 
 ## Edge Cases
 
+- /xtdh is separate from /network/xtdh:
+  - /xtdh = live allocations dashboard
+  - /network/xtdh = rules and formulas reference
 - The route does not require an identity and always renders ecosystem-wide results.
 - Sorting defaults are applied when params are missing or malformed:
   - collections and tokens: `xtdh`, descending
@@ -68,7 +73,7 @@ recipient allocation views.
 
 ## Limitations / Notes
 
-- `/xtdh` is read-only; grant creation is available only on profile routes.
+- /xtdh is read-only; grant creation is available only on profile routes.
 - Global cards and allocation lists reflect backend-calculated totals and can
   fluctuate over time.
 
