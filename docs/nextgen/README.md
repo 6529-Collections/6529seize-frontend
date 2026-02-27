@@ -5,10 +5,8 @@
 - Use this area for the `/nextgen` route family.
 - Core browsing routes: `/nextgen` and `/nextgen/{collections|artists|about}`.
 - Collection routes: `/nextgen/collection/{collection}`,
-  `/nextgen/collection/{collection}/{overview|about|provenance|trait-sets}`,
-  `/nextgen/collection/{collection}/art`,
-  `/nextgen/collection/{collection}/mint`, and
-  `/nextgen/collection/{collection}/distribution-plan`.
+  `/nextgen/collection/{collection}/{overview|about|provenance|top-trait-sets}`,
+  `/nextgen/collection/{collection}/{art|trait-sets|mint|distribution-plan}`.
 - Token routes: `/nextgen/token/{token}` and
   `/nextgen/token/{token}/{provenance|display-center|rarity}`.
 - Admin route: `/nextgen/manager` (wallet and role-gated actions).
@@ -19,7 +17,8 @@
 - [NextGen Home Views and Navigation](feature-nextgen-home-views-and-navigation.md):
   `/nextgen` featured view, tab views, and fallback behavior for unknown views.
 - [NextGen Collection Routes and Art Browser](feature-nextgen-collection-routes-and-art-browser.md):
-  collection overview tabs, `/art`, and `/trait-sets` route behavior.
+  collection tab routing, `/art` filter/query behavior, and `/trait-sets`
+  preview/full browsing states.
 - [NextGen Collection Slideshow](feature-collection-slideshow.md):
   slideshow behavior on featured and collection surfaces.
 - [NextGen Mint and Distribution Plan](feature-nextgen-mint-and-distribution-plan.md):
