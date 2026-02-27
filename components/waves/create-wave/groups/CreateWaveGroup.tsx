@@ -1,10 +1,7 @@
 "use client";
 
-import type {
-  WaveGroupsConfig} from "@/types/waves.types";
-import {
-  CreateWaveGroupConfigType
-} from "@/types/waves.types";
+import type { WaveGroupsConfig } from "@/types/waves.types";
+import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
@@ -68,7 +65,7 @@ export default function CreateWaveGroup({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <h3 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50 tw-tracking-tight tw-mb-0">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-xl">
           {CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType]}
         </h3>
         {isNotChatWave && groupType === CreateWaveGroupConfigType.CAN_CHAT && (
@@ -76,25 +73,18 @@ export default function CreateWaveGroup({
             enabled={chatEnabled}
             onChange={setChatEnabled}
             label="Enable chat"
+            displayLabel={true}
           />
         )}
-        {isNotChatWave && groupType === CreateWaveGroupConfigType.ADMIN && (
+        {groupType === CreateWaveGroupConfigType.ADMIN && (
           <CreateWaveToggle
             enabled={adminCanDeleteDrops}
             onChange={setDropsAdminCanDelete}
-            label="Allow admins to delete drops"
+            label="Allow admins to delete posts"
             displayLabel={true}
           />
         )}
       </div>
-
-      {isNotChatWave &&
-        groupType === CreateWaveGroupConfigType.ADMIN &&
-        adminCanDeleteDrops && (
-          <p className="tw-mt-2 tw-text-sm tw-text-iron-400">
-            Admins will be able to delete drops after they've been submitted.
-          </p>
-        )}
 
       <CreateWaveGroupSearchField
         label="Search groups…"
