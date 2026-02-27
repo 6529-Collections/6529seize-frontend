@@ -2,19 +2,33 @@
 
 ## Overview
 
-This subarea covers profile-adjacent informational routes in the About section.
+This subarea owns `/about/primary-address`.
+
+Use this area when the `Primary Address` page content, row links, or data
+states look wrong.
+
+This route is public and read-only. No wallet connection is required.
+
+## Location in the Site
+
+- Route: `/about/primary-address` (inside `/about/{section}`)
+- Global sidebar: `About -> Primary Address`
+- About page menu: `Primary Address`
 
 ## Features
 
-- [Primary Address Reference Table](feature-primary-address-reference-table.md)
+- [Primary Address Reference Table](feature-primary-address-reference-table.md):
+  page content, data states, and row-link behavior.
 
 ## Flows
 
-- [Primary Address Reference Table Flow](flow-primary-address-reference-table.md)
+- [Primary Address Reference Table Flow](flow-primary-address-reference-table.md):
+  route entry and profile-link navigation flow.
 
 ## Troubleshooting
 
-- [Primary Address Reference Table Troubleshooting](troubleshooting-primary-address-reference-table.md)
+- [Primary Address Reference Table Troubleshooting](troubleshooting-primary-address-reference-table.md):
+  fetch, parse, and table-data recovery paths.
 
 ## Stubs
 
@@ -23,5 +37,6 @@ This subarea covers profile-adjacent informational routes in the About section.
 ## Related Areas
 
 - [Profiles Index](../README.md)
+- [Navigation Index](../../navigation/README.md)
 - [Delegation Index](../../delegation/README.md)
 - [Docs Home](../../README.md)

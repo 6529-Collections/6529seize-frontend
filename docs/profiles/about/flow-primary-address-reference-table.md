@@ -2,33 +2,42 @@
 
 ## Overview
 
-This flow documents how users reach and read the `/about/primary-address` route.
+This flow covers how users reach `/about/primary-address`, review the table,
+and jump to a profile route from a table row.
 
 ## Location in the Site
 
 - Route: `/about/primary-address`
-- Sidebar path: `About -> Primary Address`
-- Route family: `/about/{section}`
+- Global sidebar path: `About -> Primary Address`
+- In-page menu path: `About -> Primary Address` inside `/about/{section}`
+
+## Preconditions
+
+- None. The route is public.
 
 ## Entry Points
 
 - Open `/about/primary-address` directly.
-- Open `About -> Primary Address` from the About menu or sidebar.
-- Open a deep link to `/about/primary-address`.
+- Open `About -> Primary Address` from the global sidebar.
+- Open any `/about/*` page and choose `Primary Address`.
 
-## User Journey
+## Flow Steps
 
 1. Open `/about/primary-address`.
-2. The app renders `Loading...` while `"/primary_address.csv"` is fetched.
-3. The UI transitions to a table containing:
-   - `Profile Handle`
-   - `Current Selected Primary Address`
-   - `Primary Address Changed to`
-4. The table rows are sorted alphabetically by profile handle.
-5. Click a row’s profile handle link to open `/{current_primary}`.
+2. Wait through `Loading...` while `"/primary_address.csv"` loads.
+3. Review the rule summary and table rows.
+4. Use `Profile Handle` links to open `/{current_primary}` profile routes.
+5. If loading or parsing fails, the flow stops on an error message until
+   refresh.
+
+## Exit Points
+
+- Stay on `/about/primary-address` to continue reading rows.
+- Move to `/{current_primary}` from any table row.
 
 ## Related Pages
 
 - [Primary Address Reference Table](feature-primary-address-reference-table.md)
+- [Primary Address Reference Table Troubleshooting](troubleshooting-primary-address-reference-table.md)
+- [Profiles About Index](README.md)
 - [Profiles Navigation Flow](../navigation/flow-navigation.md)
-- [Profile Navigation and Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
