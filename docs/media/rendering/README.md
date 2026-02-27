@@ -18,7 +18,8 @@
   sandboxed iframe behavior, trusted-host checks, touch `Tap to load` gating,
   submission-preview validation, and non-sandboxed latest-drop exceptions.
 - [6529 Gradient List Sorting and Loading](feature-6529-gradient-list-sorting-and-loading.md):
-  `/6529-gradient` sorting, URL normalization, and list-loading behavior.
+  `/6529-gradient` sorting, query-key normalization (`sort`, `sort_dir`), and
+  full-list loading behavior.
 
 ## Flows
 
