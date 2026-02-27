@@ -45,7 +45,7 @@ function AppSidebarConnectedAccountAvatar({
         {avatarSrc && (
           <img
             src={avatarSrc}
-            alt={`${label} profile picture`}
+            alt={label}
             className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-full tw-bg-iron-900 ${
               resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
             }`}

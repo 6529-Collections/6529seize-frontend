@@ -57,7 +57,7 @@ function ConnectedAccountRow({
         {avatarSrc && (
           <img
             src={avatarSrc}
-            alt={`${label} profile picture`}
+            alt={label}
             className={`tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out ${
               resolvedPfp ? "tw-object-contain" : "tw-object-cover tw-grayscale"
             }`}

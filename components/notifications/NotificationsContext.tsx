@@ -155,6 +155,67 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     [isIos]
   );
 
+  const resolveAddressForNotificationProfile = useCallback(
+    async (notificationProfileId: string): Promise<string | null> => {
+      if (
+        connectedProfileRef.current?.id === notificationProfileId &&
+        activeAddressRef.current
+      ) {
+        return activeAddressRef.current;
+      }
+
+      const roleMatchedAccount = connectedAccountsRef.current.find(
+        (account) => account.role === notificationProfileId
+      );
+      if (roleMatchedAccount) {
+        return roleMatchedAccount.address;
+      }
+
+      const lookupResults = await Promise.all(
+        connectedAccountsRef.current.map(async (account) => {
+          try {
+            const identity = await commonApiFetch<ApiIdentity>({
+              endpoint: `identities/${account.address.toLowerCase()}`,
+            });
+            return identity.id === notificationProfileId ? account.address : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      return (
+        lookupResults.find((resolved): resolved is string => !!resolved) ?? null
+      );
+    },
+    []
+  );
+
+  const switchToMatchedAddress = useCallback(
+    async (
+      notificationProfileId: string,
+      matchedAddress: string
+    ): Promise<boolean> => {
+      if (
+        activeAddressRef.current?.toLowerCase() === matchedAddress.toLowerCase()
+      ) {
+        return true;
+      }
+
+      try {
+        await Promise.resolve(seizeSwitchConnectedAccount(matchedAddress));
+        return true;
+      } catch (error) {
+        console.warn(
+          "Ignoring notification: failed to switch to matched connected profile",
+          { notificationProfileId, matchedAddress, error }
+        );
+        return false;
+      }
+    },
+    [seizeSwitchConnectedAccount]
+  );
+
   const handlePushNotificationAction = useCallback(
     async (
       routerInstance: ReturnType<typeof useRouter>,
@@ -167,41 +228,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           : null;
 
       if (notificationProfileId) {
-        let matchedAddress: string | null = null;
-
-        if (
-          connectedProfileRef.current?.id === notificationProfileId &&
-          activeAddressRef.current
-        ) {
-          matchedAddress = activeAddressRef.current;
-        } else {
-          const roleMatchedAccount = connectedAccountsRef.current.find(
-            (account) => account.role === notificationProfileId
-          );
-          if (roleMatchedAccount) {
-            matchedAddress = roleMatchedAccount.address;
-          }
-        }
-
-        if (!matchedAddress) {
-          const lookupResults = await Promise.all(
-            connectedAccountsRef.current.map(async (account) => {
-              try {
-                const identity = await commonApiFetch<ApiIdentity>({
-                  endpoint: `identities/${account.address.toLowerCase()}`,
-                });
-                return identity.id === notificationProfileId
-                  ? account.address
-                  : null;
-              } catch {
-                return null;
-              }
-            })
-          );
-          matchedAddress =
-            lookupResults.find((resolved): resolved is string => !!resolved) ??
-            null;
-        }
+        const matchedAddress =
+          await resolveAddressForNotificationProfile(notificationProfileId);
 
         if (!matchedAddress) {
           console.warn(
@@ -211,20 +239,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        const activeAddress = activeAddressRef.current;
-        if (
-          !activeAddress ||
-          activeAddress.toLowerCase() !== matchedAddress.toLowerCase()
-        ) {
-          try {
-            await Promise.resolve(seizeSwitchConnectedAccount(matchedAddress));
-          } catch (error) {
-            console.warn(
-              "Ignoring notification: failed to switch to matched connected profile",
-              { notificationProfileId, matchedAddress, error }
-            );
-            return;
-          }
+        const didSwitch = await switchToMatchedAddress(
+          notificationProfileId,
+          matchedAddress
+        );
+        if (!didSwitch) {
+          return;
         }
       }
 
@@ -240,7 +260,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         );
       }
     },
-    [removeDeliveredNotifications, seizeSwitchConnectedAccount]
+    [
+      removeDeliveredNotifications,
+      resolveAddressForNotificationProfile,
+      switchToMatchedAddress,
+    ]
   );
 
   const initializePushNotifications = useCallback(

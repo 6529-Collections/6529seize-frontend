@@ -39,8 +39,8 @@ const getAddressRoleStorageKey = (address: string): string => {
 const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const emitWalletAccountsUpdated = (): void => {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
+  if (typeof globalThis.window !== "undefined") {
+    globalThis.dispatchEvent(new CustomEvent(WALLET_ACCOUNTS_UPDATED_EVENT));
   }
 };
 

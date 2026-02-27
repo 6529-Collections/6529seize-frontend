@@ -444,18 +444,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     refreshStoredConnectedAccounts();
 
-    if (typeof window === "undefined") return;
+    if (typeof globalThis.window === "undefined") return;
 
     const handleAccountsUpdated = () => {
       refreshStoredConnectedAccounts();
     };
 
-    window.addEventListener(
+    globalThis.addEventListener(
       WALLET_ACCOUNTS_UPDATED_EVENT,
       handleAccountsUpdated
     );
     return () => {
-      window.removeEventListener(
+      globalThis.removeEventListener(
         WALLET_ACCOUNTS_UPDATED_EVENT,
         handleAccountsUpdated
       );
@@ -587,7 +587,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!isAlreadyConnected) {
           setConnected(checksummedAddress);
         }
-        return;
       } else if (account.isConnected === false) {
         if (walletState.status !== "disconnected") {
           setDisconnected();
@@ -932,7 +931,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         retryConnectTimeoutRef.current = null;
       }
 
-      void disconnect()
+      disconnect()
         .then(() => {
           retryConnectTimeoutRef.current = setTimeout(() => {
             retryConnectTimeoutRef.current = null;

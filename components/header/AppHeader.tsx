@@ -171,7 +171,7 @@ export default function AppHeader() {
     const activeIndex = connectedAccounts.findIndex(
       (account) => account.isActive
     );
-    const currentIndex = activeIndex >= 0 ? activeIndex : 0;
+    const currentIndex = Math.max(activeIndex, 0);
     const nextAccount =
       connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
     if (!nextAccount) {

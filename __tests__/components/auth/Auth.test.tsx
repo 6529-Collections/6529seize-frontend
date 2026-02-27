@@ -189,11 +189,6 @@ describe("Auth component", () => {
     jest.restoreAllMocks();
   });
 
-  // Test wrapper component to access the Auth context
-  const TestWrapper: React.FC<{ children: React.ReactNode }> = ({
-    children,
-  }) => <Auth>{children}</Auth>;
-
   describe("Basic functionality", () => {
     // Title management moved to TitleContext - test removed as obsolete
 

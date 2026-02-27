@@ -149,7 +149,7 @@ function WebSidebarUser({
     const activeIndex = connectedAccounts.findIndex(
       (account) => account.isActive
     );
-    const currentIndex = activeIndex >= 0 ? activeIndex : 0;
+    const currentIndex = Math.max(activeIndex, 0);
     const nextAccount =
       connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
     if (!nextAccount) {
@@ -206,7 +206,7 @@ function WebSidebarUser({
           >
             <img
               src={avatarSrc}
-              alt={`${displayHandle}'s profile picture`}
+              alt={displayHandle || "Connected account"}
               onError={(event) => {
                 if (
                   event.currentTarget.src.endsWith(
