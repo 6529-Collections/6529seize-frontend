@@ -23,7 +23,7 @@ export default function GrantRepDialog({
       onClose={onClose}
       tabletModal
     >
-      <div className="tw-px-4 sm:tw-px-6">
+      <div>
         <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
           <UserPageRepNewRep
             profile={profile}
@@ -31,7 +31,7 @@ export default function GrantRepDialog({
             onSuccess={onClose}
           />
         </UserPageRateWrapper>
-        <div className="tw-mt-3">
+        <div className="tw-mt-4 tw-px-4 sm:tw-px-6">
           <button
             onClick={onClose}
             type="button"

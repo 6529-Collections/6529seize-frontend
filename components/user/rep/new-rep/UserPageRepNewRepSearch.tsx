@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -222,10 +222,7 @@ export default function UserPageRepNewRepSearch({
     }
 
     setCategoriesToDisplay(items);
-    if (debouncedValue.length && repSearch.length && !selectedCategory) {
-      setIsOpen(true);
-    }
-  }, [debouncedValue, repSearch, categories, matchingSearchLength, selectedCategory]);
+  }, [debouncedValue, categories, matchingSearchLength]);
 
   const [repSearchState, setRepSearchState] = useState<RepSearchState>(
     RepSearchState.MIN_LENGTH_ERROR
@@ -264,7 +261,7 @@ export default function UserPageRepNewRepSearch({
           <div ref={listRef} className="tw-w-full">
             <div className="tw-w-full tw-relative tw-bg-iron-950">
               <div
-                className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-y-1.5 tw-gap-x-4">
+                className="tw-px-4 sm:tw-px-6 tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-y-1.5 tw-gap-x-4">
                 <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-500 tw-font-medium">
                   <span>
                     <span>Your available Rep:</span>
@@ -286,7 +283,7 @@ export default function UserPageRepNewRepSearch({
                   </span>
                 </div>
               </div>
-              <div className="tw-flex tw-flex-col tw-items-stretch tw-gap-3 tw-mt-3">
+              <div className="tw-px-4 sm:tw-px-6 tw-flex tw-flex-col tw-items-stretch tw-gap-3 tw-mt-3">
                 <form
                   onSubmit={onSearchSubmit}
                   className="tw-w-full tw-relative">
@@ -320,36 +317,42 @@ export default function UserPageRepNewRepSearch({
                       </div>
                     )}
                   </div>
-                  <AnimatePresence mode="wait" initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        className="tw-origin-top tw-absolute tw-left-0 tw-top-full tw-z-10 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-950 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.2 }}
-                        onClick={(e) => e.stopPropagation()}>
-                        <UserPageRepNewRepSearchDropdown
-                          categories={categoriesToDisplay}
-                          state={repSearchState}
-                          minSearchLength={SEARCH_LENGTH.MIN}
-                          maxSearchLength={SEARCH_LENGTH.MAX}
-                          onRepSelect={onRepSelect}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isOpen && !selectedCategory && (
+                    <div
+                      className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-10 tw-mt-1 tw-p-2 tw-rounded-lg tw-bg-iron-900 tw-shadow-xl tw-ring-1 tw-ring-white/10"
+                      onClick={(e) => e.stopPropagation()}>
+                      <UserPageRepNewRepSearchDropdown
+                        categories={categoriesToDisplay}
+                        state={repSearchState}
+                        minSearchLength={SEARCH_LENGTH.MIN}
+                        maxSearchLength={SEARCH_LENGTH.MAX}
+                        onRepSelect={onRepSelect}
+                      />
+                    </div>
+                  )}
                 </form>
-                <div className="tw-relative tw-flex tw-w-full">
-                  <UserPageRateInput
-                    value={amountStr}
-                    onChange={setAmountStr}
-                    minMax={minMaxValues}
-                    isProxy={!!activeProfileProxy}
-                    spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-px-3"
-                    inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/10 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
-                  />
+                <div>
+                  <div className="tw-relative tw-flex tw-w-full">
+                    <UserPageRateInput
+                      value={amountStr}
+                      onChange={setAmountStr}
+                      minMax={minMaxValues}
+                      isProxy={!!activeProfileProxy}
+                      spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-px-3"
+                      inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/10 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
+                    />
+                  </div>
+                  {selectedCategory && (
+                    <UserRateAdjustmentHelper
+                      inLineValues={true}
+                      originalValue={repState?.rater_contribution ?? 0}
+                      adjustedValue={newRating}
+                      adjustmentType="Rep"
+                    />
+                  )}
                 </div>
+              </div>
+              <div className="tw-border-t tw-border-solid tw-border-iron-800/60 tw-border-b-0 tw-pt-4 tw-mt-4 tw-px-4 sm:tw-px-6">
                 <button
                   type="button"
                   disabled={isGrantDisabled}
@@ -358,7 +361,7 @@ export default function UserPageRepNewRepSearch({
                     isGrantDisabled
                       ? "tw-cursor-not-allowed tw-opacity-50"
                       : "tw-cursor-pointer hover:tw-bg-primary-600 hover:tw-border-primary-600"
-                  } tw-flex-shrink-0 tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
+                  } tw-w-full tw-flex-shrink-0 tw-bg-primary-500 tw-border-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
                   {mutating ? (
                     <div className="tw-w-12">
                       <CircleLoader />
@@ -368,14 +371,6 @@ export default function UserPageRepNewRepSearch({
                   )}
                 </button>
               </div>
-              {selectedCategory && (
-                <UserRateAdjustmentHelper
-                  inLineValues={true}
-                  originalValue={repState?.rater_contribution ?? 0}
-                  adjustedValue={newRating}
-                  adjustmentType="Rep"
-                />
-              )}
             </div>
           </div>
         </div>
