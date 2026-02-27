@@ -2,96 +2,94 @@
 
 ## Overview
 
-Some NFT media surfaces show signed-in users a balance indicator tied to their
-connected profile. The indicator reflects whether the connected profile holds
-the NFT (`SEIZED xN`) or does not (`UNSEIZED`). Surfaces that do not show
-balance text can still show a badge-based ownership marker.
+- Signed-in profiles get ownership indicators on selected media routes.
+- Image/media surfaces use a text indicator.
+- Gradient owner rows use a certificate badge (`You own this NFT`) instead.
+- Home `Latest Drop` uses a compact numeric chip in the `Edition` row.
 
 ## Location in the Site
 
-- The Memes list: `/the-memes`
-- The Memes card page: `/the-memes/{id}` in `Live`, `Your Cards`, and
-  `Collectors`
-- Meme Lab list: `/meme-lab`
-- Meme Lab collection pages: `/meme-lab/collection/{collection}`
-- Meme Lab card page: `/meme-lab/{id}` in `Live` and `Your Cards`
-- Home latest-drop stats: `/` (`Edition` row shows a compact balance chip with
-  tooltip text)
-- 6529 Gradient list and card pages: `/6529-gradient`, `/6529-gradient/{id}`
-  (ownership badge marker only)
+- `/the-memes` list cards
+- `/the-memes/{id}` main artwork in `Live`, `Your Cards`, and `Collectors`
+- `/meme-lab` list cards
+- `/meme-lab/collection/{collection}` list cards
+- `/meme-lab/{id}` main artwork in `Live` and `Your Cards`
+- `/` home `Latest Drop` stats grid (`Edition` row chip + tooltip)
+- `/6529-gradient` and `/6529-gradient/{id}` owner rows (badge only)
 
 ## Entry Points
 
-- Connect a wallet/profile and open supported routes above.
-- Open a direct card URL and switch tabs with `focus=...` query params.
-- Browse list/grid pages where NFT cards are rendered.
+- Sign in with a profile.
+- Open any supported route above.
+- On card routes, switch tabs with `focus=...` query params.
 
-## User Journey
+## Indicator States
 
-1. User opens a supported page with NFT artwork.
-2. On The Memes and Meme Lab image surfaces, signed-in users see `...` while
-   balance data loads.
-3. The image-surface indicator resolves to:
-   - `SEIZED xN` when the connected profile holds one or more editions.
-   - `UNSEIZED` when the connected profile holds none.
-4. On home latest-drop stats, the compact chip stays hidden during loading,
-   then appears with the numeric balance and tooltip text (`SEIZED xN` or
-   `UNSEIZED`).
-5. On Gradient list/detail pages, users who own the NFT see a certificate badge
-   next to the owner address with tooltip text `You own this NFT`.
-6. If the user is not signed in, balance indicators and ownership badges stay
-   hidden.
+### Text indicator (`SEIZED xN` / `UNSEIZED` / `N/A`)
+
+- Hidden when no signed-in profile exists.
+- Shows `...` while the balance request is loading.
+- Shows `SEIZED xN` when balance is greater than `0`.
+- Shows `UNSEIZED` when balance is `0`.
+- Shows `N/A` when the balance request fails.
+
+### Home `Edition` chip (`/`)
+
+- Chip stays hidden while balance is loading.
+- When loaded, chip shows numeric balance and tooltip text:
+  - `SEIZED xN` for positive balance
+  - `UNSEIZED` for `0`
+
+### Gradient owner badge (`You own this NFT`)
+
+- Shows next to owner identity when token owner matches one wallet in the
+  signed-in profile.
+- Hidden for signed-out users or non-owner wallets.
 
 ## Common Scenarios
 
-- Browsing `/the-memes` or `/meme-lab` while signed in shows per-card balance
-  state under artwork.
-- Opening `/the-memes/{id}` or `/meme-lab/{id}` in main trading/collector tabs
-  shows balance state on the primary large artwork panel.
-- On home latest drop, the balance appears as a small numeric chip in the
-  `Edition` stat row beside the edition count, with tooltip text
-  (`SEIZED xN` or `UNSEIZED`).
-- On Gradient list/detail pages, owned NFTs show a certificate badge next to
-  owner identity instead of a `SEIZED` / `UNSEIZED` text chip.
+- Signed-in user browsing `/the-memes` or `/meme-lab`: each card shows a text
+  ownership state under artwork.
+- Signed-in user on `/the-memes/{id}` or `/meme-lab/{id}` supported tabs: main
+  artwork shows a text ownership state.
+- Signed-in user on `/`: `Edition` row can show a compact balance chip.
+- Signed-in owner on Gradient list/detail: owner row shows `You own this NFT`
+  badge instead of text indicator.
 
 ## Edge Cases
 
-- If a connected session exists but profile consolidation data is missing, the
-  image indicator can resolve to `UNSEIZED`, and home stats can show `0` with
-  an `UNSEIZED` tooltip.
-- Some media views intentionally disable this indicator:
-  - `The Art` tabs in The Memes and Meme Lab
-  - 6529 Gradient list/detail artwork
-  - Rememe reference thumbnails
-  - Manifold mint artwork panels
-  - Home latest-drop artwork image itself (indicator is in stats instead)
-- On meme list pages, signed-in users get extra card spacing so the indicator
-  does not overlap surrounding content.
+- Signed-in profile without a consolidation key: text surfaces resolve to
+  `UNSEIZED`; home chip resolves to `0` + `UNSEIZED` tooltip.
+- Home can switch from `Latest Drop` to `Next Drop` when current mint is ended
+  and next-drop data exists; no `Edition` balance chip in `Next Drop`.
+- Indicator is intentionally disabled on:
+  - `The Art` tabs on The Memes and Meme Lab card pages
+  - 6529 Gradient artwork panels
+  - ReMemes reference thumbnails
+  - `/the-memes/mint` artwork panel
+  - home latest-drop artwork media (chip is in stats row, not on artwork)
+- Signed-in list cards use extra spacing to avoid text indicator overlap.
 
 ## Failure and Recovery
 
-- If the balance fetch fails on image surfaces, the indicator shows `N/A`.
-  Refreshing or reconnecting retries.
-- On home latest-drop stats, the balance chip is hidden while loading and then
-  appears once data resolves.
-- Ownership badges on Gradient pages do not rely on balance-fetch responses.
-- Signing out removes all balance indicators immediately.
+- Text indicator request failure: surface shows `N/A`. Reloading the page or
+  reconnecting profile context retries.
+- Home balance request failure: chip still shows `0` with `UNSEIZED` tooltip
+  (no separate error label).
+- Gradient ownership badge is independent of balance request success/failure.
+- Signing out hides text indicators and ownership badges.
 
 ## Limitations / Notes
 
-- Indicator values are scoped to the currently connected profile
-  consolidation key.
-- Badge-based ownership markers are scoped to the connected profile wallet
-  list and token owner match.
-- These indicators are informational and do not by themselves grant transfer or
-  claim actions.
-- Different site areas can show different ownership affordances; for example,
-  Gradient pages use separate ownership badges.
+- Text indicator values are scoped to the connected profile consolidation key.
+- Badge visibility is scoped to connected profile wallets matching token owner.
+- These indicators are informational only; they do not grant transfer, mint, or
+  claim rights.
 
 ## Related Pages
 
 - [Media Index](../README.md)
 - [Latest Drop Stats Grid](../memes/feature-latest-drop-stats-grid.md)
-- [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
+- [6529 Gradient List Sorting and Loading](../rendering/feature-6529-gradient-list-sorting-and-loading.md)
 - [NFT Media Source Fallbacks](feature-media-source-fallbacks.md)
 - [Docs Home](../../README.md)
