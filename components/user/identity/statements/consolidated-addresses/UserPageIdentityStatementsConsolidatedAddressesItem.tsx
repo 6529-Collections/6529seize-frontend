@@ -206,13 +206,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           </div>
           <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5">
             <button
+              type="button"
               onClick={goToEtherscan}
               aria-label="Go to Etherscan"
               className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200"
               data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
-              {...(!isTouchScreen
-                ? { "data-tooltip-content": "Etherscan" }
-                : null)}
+              data-tooltip-content={isTouchScreen ? null : "Etherscan"}
             >
               <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
                 <EtherscanIcon />
@@ -229,13 +228,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               />
             )}
             <button
+              type="button"
               onClick={goToOpensea}
               aria-label="Go to Opensea"
               className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200"
               data-tooltip-id={`opensea-tooltip-${address.wallet}`}
-              {...(isTouchScreen
-                ? null
-                : { "data-tooltip-content": "Opensea" })}
+              data-tooltip-content={isTouchScreen ? null : "Opensea"}
             >
               <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
                 <OpenseaIcon />
