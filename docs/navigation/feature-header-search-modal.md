@@ -31,11 +31,13 @@ and category tabs filter the already-running results for that query.
    - Site-wide pages/profiles/waves search starts at 3 characters.
    - Site-wide NFT search can still return results for short numeric token IDs.
    - In wave contexts, users can switch between `In this Wave` and `Site-wide`.
-   - Site-wide mode debounces each query for ~500ms, while in-wave mode debounces for ~250ms before issuing search requests.
+   - Site-wide `Pages` results update immediately from the local route catalog.
+   - Site-wide `Profiles`/`NFTs`/`Waves` requests debounce for ~500ms.
+   - In-wave message search requests debounce for ~250ms.
    - `In this Wave` message search starts at 2 characters.
-4. In site-wide mode, use category tabs (`All`, `Pages`, `Profiles`, `NFTs`,
-   `Waves`) to narrow visible results. In `All`, each category shows a preview
-   subset and can expand into a full list with `View all`.
+4. In site-wide mode, use category tabs to narrow visible results. Tabs show
+   `All` plus categories that currently have matches. In `All`, each category
+   shows a preview subset and can expand into a full list with `View all`.
 5. Move through results with pointer hover or keyboard arrows, then select with
    click or `Enter`.
 6. Close search with `Go back`, `Close search`, `Escape`, or outside click.
@@ -111,7 +113,8 @@ and category tabs filter the already-running results for that query.
 - Search is modal-first and does not have a dedicated `/search` route.
 - `Meta + K` depends on platform/browser keyboard handling.
 - `Pages` results reflect navigable app destinations exposed by the navigation
-  model, not arbitrary free-text page content.
+  model (primary routes plus currently visible sidebar pages), not arbitrary
+  free-text page content.
 - Category tabs appear only in site-wide mode when there are category-grouped
   results (or a previously selected category filter is active).
 

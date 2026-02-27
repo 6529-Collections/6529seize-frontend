@@ -2,20 +2,18 @@
 
 ## Overview
 
-Internal links across content-heavy pages use in-app route navigation and hash
-section jumps. Users normally stay in the same browser tab and move directly to
-the destination route or section.
+Internal links across product pages use in-app route navigation and hash section
+jumps. Users normally stay in the same tab and move directly to the destination
+route or section.
 
 ## Location in the Site
 
-This behavior appears in multiple areas, including:
+This behavior appears across product routes, including:
 
-- Editorial and archive-style pages such as `/about/*`, `/author/*`,
-  `/category/*`, `/education/*`, `/museum/*`, `/news/*`, and `/om/*`.
-- About and policy content modules that link to internal routes.
-- Community and open-data entry points.
-- Delegation and collection navigation links.
-- Activity, leaderboard, Meme Lab, and rememe entry links.
+- Network pages that cross-link to related network routes.
+- Delegation and open-data pages that link into collections and tools routes.
+- Activity and collection surfaces that open detail routes.
+- In-page hash links on long-form route content.
 
 ## Entry Points
 
@@ -32,11 +30,9 @@ This behavior appears in multiple areas, including:
 
 ## Common Scenarios
 
-- Open linked posts from author and category pages.
-- Open linked collection pages from museum index pages.
 - Open open-data destinations from community download surfaces.
 - Open `All Collections` from delegation views.
-- Open full activity from the `View all` action in activity panels.
+- Open full activity from `View all` actions in activity panels.
 - Open Meme Lab cards or rememe detail routes from list views.
 - Jump to an on-page section such as `view requirements`.
 

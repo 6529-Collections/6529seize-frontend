@@ -1,41 +1,57 @@
 # Navigation
 
-Navigation docs cover how users move across web and mobile app shells.
+Navigation docs explain how users switch routes and use shell controls on web
+and mobile app layouts.
 
 ## Overview
 
-- Primary section switching includes `/`, `/discover`, `/waves`, `/messages`,
-  `/network`, `/notifications`, and `/the-memes`.
-- Web shell uses the left sidebar (fixed desktop rail or small-screen overlay).
-- Mobile app shell uses bottom tabs for primary sections and the header menu for
-  deeper routes and account actions.
-- Shared controls include header search, back behavior, pull-to-refresh, and
-  wallet/account actions.
+- Web shell navigation: desktop left rail and small-screen overlay menu.
+- App shell navigation: header controls, bottom tabs, and app sidebar menu.
+- Shared controls: search modal, context-aware back, wallet/account actions,
+  and internal links.
+- Mobile-specific behavior: pull-to-refresh, keyboard-aware bottom-nav
+  visibility, and `/open-mobile` app handoff.
+
+## Route Coverage
+
+- Primary section switching: `/`, `/discover`, `/waves`, `/messages`,
+  `/network`, `/the-memes`, `/notifications`.
+- Secondary jumps: `/network/*`, `/nft-activity`, `/meme-calendar`,
+  collections routes, tools routes, and about routes.
 
 ## Features
 
-- [Web Sidebar Navigation](feature-sidebar-navigation.md): primary web route
-  switching, grouped routes, and unread indicators.
-- [App Sidebar Menu](feature-app-sidebar-menu.md): app menu panel for secondary
-  routes and account actions.
-- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): fixed app
-  tabs for main sections.
-- [App Header Context](feature-app-header-context.md): route-based header title
-  plus menu/back control state.
+### Route Switching Surfaces
+
+- [Web Sidebar Navigation](feature-sidebar-navigation.md): web route switching
+  from the desktop rail and small-screen overlay.
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
+  tabs for `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
+  and `Notifications`.
+- [App Sidebar Menu](feature-app-sidebar-menu.md): app secondary route groups
+  (`Profile`, `Network`, `Tools`, `About`) and account actions.
+
+### Shared Shell Controls
+
+- [App Header Context](feature-app-header-context.md): header title rules and
+  menu-vs-back switching.
 - [Header Search Modal](feature-header-search-modal.md): modal search for pages,
   profiles, NFTs, waves, and in-wave messages.
-- [Back Button Behavior](feature-back-button.md): context-aware back rules for
-  create, wave, and profile contexts.
+- [Back Button Behavior](feature-back-button.md): create-route, wave/drop, and
+  history-aware back behavior.
 - [Wallet and Account Controls](feature-wallet-account-controls.md):
-  connect/switch/disconnect and proxy/account actions.
+  connect, disconnect, switch account, and proxy/account actions.
+- [Internal Link Navigation](feature-internal-link-navigation.md): internal
+  route and hash-link behavior.
+
+### Mobile-Specific Behavior
+
 - [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md):
-  app-shell refresh gesture and cache refresh path.
+  header-triggered refresh that invalidates cached queries.
 - [Mobile Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md):
-  keyboard-aware bottom spacing and bottom-nav visibility.
+  keyboard-driven bottom-nav visibility and spacing adjustments.
 - [Mobile App Landing Page](feature-mobile-app-landing.md): `/open-mobile`
-  deep-link handoff and store fallback.
-- [Internal Link Navigation](feature-internal-link-navigation.md): in-app route
-  and hash navigation from internal content links.
+  deep-link handoff with store fallback and return-to-web action.
 
 ## Flows
 
