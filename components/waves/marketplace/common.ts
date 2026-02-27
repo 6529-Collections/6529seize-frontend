@@ -16,6 +16,13 @@ type MediaCandidate =
   | null
   | undefined;
 
+type WsMediaPreviewCandidate = {
+  readonly card_url?: string | null | undefined;
+  readonly small_url?: string | null | undefined;
+  readonly thumb_url?: string | null | undefined;
+  readonly mime_type?: string | null | undefined;
+};
+
 export interface MarketplaceTypePreviewProps {
   readonly href: string;
   readonly compact?: boolean | undefined;
@@ -30,6 +37,7 @@ export type MarketplacePreviewState =
       readonly href: string;
       readonly resolvedMedia?: PickedMedia | undefined;
       readonly resolvedPrice?: string | undefined;
+      readonly resolvedPriceCurrency?: string | undefined;
       readonly resolvedTitle?: string | undefined;
     }
   | { readonly type: "error"; readonly href: string; readonly error: Error };
@@ -47,6 +55,7 @@ export interface MarketplacePreviewData {
   readonly description: string | null;
   readonly media: PickedMedia | null;
   readonly price: string | null;
+  readonly priceCurrency: string | null;
 }
 
 const OPENSEA_HOST = "opensea.io";
@@ -168,6 +177,57 @@ const pickMediaFromUrl = (value: unknown): PickedMedia | undefined => {
   };
 };
 
+const asWsMediaPreviewCandidate = (
+  value: unknown
+): WsMediaPreviewCandidate | undefined => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as WsMediaPreviewCandidate;
+};
+
+const pickWsMediaPreview = (
+  update: WsMediaLinkUpdatedData
+): PickedMedia | undefined => {
+  const preview = asWsMediaPreviewCandidate(update.media_preview);
+  const url =
+    asNonEmptyString(preview?.card_url) ??
+    asNonEmptyString(preview?.small_url) ??
+    asNonEmptyString(preview?.thumb_url) ??
+    asNonEmptyString(update.card_url) ??
+    asNonEmptyString(update.small_url) ??
+    asNonEmptyString(update.thumb_url) ??
+    asNonEmptyString(update.media_preview_card_url) ??
+    asNonEmptyString(update.media_preview_small_url) ??
+    asNonEmptyString(update.media_preview_thumb_url);
+
+  if (!url) {
+    return undefined;
+  }
+
+  return {
+    url,
+    mimeType:
+      asNonEmptyString(preview?.mime_type) ??
+      asNonEmptyString(update.media_preview_mime_type) ??
+      inferMimeTypeFromUrl(url) ??
+      "image/*",
+  };
+};
+
+const pickWsMediaLinkUpdatedMedia = ({
+  current,
+  update,
+}: {
+  readonly current: MarketplacePreviewData;
+  readonly update: WsMediaLinkUpdatedData;
+}): PickedMedia | null =>
+  pickWsMediaPreview(update) ??
+  current.media ??
+  pickMediaFromUrl(update.media_uri) ??
+  null;
+
 const pickMedia = (data: LinkPreviewResponse): PickedMedia | undefined => {
   const primary = toPickedMedia(data.image);
   if (primary) {
@@ -225,6 +285,10 @@ const pickNftLinkPrice = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.price);
 
+const pickNftLinkPriceCurrency = (
+  response: ApiNftLinkResponse | undefined
+): string | undefined => asNonEmptyString(response?.data?.price_currency);
+
 const pickNftLinkTitle = (
   response: ApiNftLinkResponse | undefined
 ): string | undefined => asNonEmptyString(response?.data?.name);
@@ -247,6 +311,7 @@ export const fromNftLink = ({
   description: pickNftLinkDescription(response) ?? null,
   media: pickNftLinkMedia(response) ?? null,
   price: pickNftLinkPrice(response) ?? null,
+  priceCurrency: pickNftLinkPriceCurrency(response) ?? null,
 });
 
 const fromApiDropNftLink = ({
@@ -284,6 +349,7 @@ const mergeSeededMarketplacePreviewData = ({
     description: current.description ?? seeded.description,
     media: current.media ?? seeded.media,
     price: current.price ?? seeded.price,
+    priceCurrency: current.priceCurrency ?? seeded.priceCurrency,
   };
 };
 
@@ -388,7 +454,8 @@ export const patchFromMediaLinkUpdate = ({
   const nextTitle = asNonEmptyString(update.name);
   const nextDescription = asNonEmptyString(update.description);
   const nextPrice = asNonEmptyString(update.price);
-  const nextMedia = pickMediaFromUrl(update.media_uri) ?? current.media;
+  const nextPriceCurrency = asNonEmptyString(update.price_currency);
+  const nextMedia = pickWsMediaLinkUpdatedMedia({ current, update });
 
   const patched: MarketplacePreviewData = {
     ...current,
@@ -398,6 +465,7 @@ export const patchFromMediaLinkUpdate = ({
     description: nextDescription ?? current.description,
     media: nextMedia,
     price: nextPrice ?? current.price,
+    priceCurrency: nextPriceCurrency ?? current.priceCurrency,
   };
 
   const didChange =
@@ -406,6 +474,7 @@ export const patchFromMediaLinkUpdate = ({
     patched.title !== current.title ||
     patched.description !== current.description ||
     patched.price !== current.price ||
+    patched.priceCurrency !== current.priceCurrency ||
     !isSameMedia(patched.media, current.media);
 
   return didChange ? patched : current;

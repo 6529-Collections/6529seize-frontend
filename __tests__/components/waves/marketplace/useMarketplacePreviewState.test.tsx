@@ -55,6 +55,7 @@ describe("useMarketplacePreviewState", () => {
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "1.25 ETH",
+        price_currency: "ETH",
         last_successfully_updated: 1735689600,
         failed_since: null,
       },
@@ -71,6 +72,7 @@ describe("useMarketplacePreviewState", () => {
           href,
           resolvedTitle: "Wave Artifact",
           resolvedPrice: "1.25 ETH",
+          resolvedPriceCurrency: "ETH",
           resolvedMedia: {
             url: "https://cdn.example.com/nft-image.png",
             mimeType: "image/png",
@@ -97,6 +99,7 @@ describe("useMarketplacePreviewState", () => {
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "0.42 ETH",
+        price_currency: "ETH",
         last_successfully_updated: 1735689600,
         failed_since: null,
       },
@@ -125,6 +128,7 @@ describe("useMarketplacePreviewState", () => {
             mimeType: "image/png",
           },
           resolvedPrice: "0.42 ETH",
+          resolvedPriceCurrency: "ETH",
         })
       )
     );
@@ -147,6 +151,7 @@ describe("useMarketplacePreviewState", () => {
         media_uri: "https://cdn.example.com/nft-image.png",
         last_error_message: null,
         price: "0.42 ETH",
+        price_currency: "ETH",
         last_successfully_updated: 1735689600,
         failed_since: null,
       },
@@ -169,6 +174,7 @@ describe("useMarketplacePreviewState", () => {
             mimeType: "image/png",
           },
           resolvedPrice: "0.42 ETH",
+          resolvedPriceCurrency: "ETH",
         })
       )
     );
