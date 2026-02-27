@@ -48,13 +48,24 @@ Use this page when an Open Data route is missing, blank, or not loading as expec
 
 ## Pagination controls are not visible
 
-- Cause: pagination only appears when total results are greater than 25.
+- Cause:
+  - API-backed routes show pagination only when total results are greater than
+    25.
+  - `/open-data/team` never shows pagination because it uses a fixed static
+    links table.
 - Recovery: this is expected behavior for smaller result sets.
 
 ## Download link does not open
 
 - Cause: links open in a new tab and can be blocked by browser settings.
 - Recovery: allow new tabs/popups for the site and retry the link.
+
+## `/open-data/team` has no loading or API error banner
+
+- Cause: the Team route uses a hard-coded links list, not an API request.
+- Recovery:
+  1. If links are visible, this is expected behavior.
+  2. If a link does not open, allow new tabs/popups and retry.
 
 ## Related Pages
 

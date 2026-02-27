@@ -21,8 +21,12 @@ This flow covers opening `/open-data` and moving into one dataset route.
    - `Rememes`
    - `Team`
    - `Royalties`
-3. Open the selected route and wait for the table to load.
-4. Open a row link in a new tab, or move through pages when pagination is shown.
+3. Open the selected route.
+4. API-backed routes (`Network Metrics`, `Meme Subscriptions`, `Rememes`,
+   `Royalties`) load table rows from API data; pagination appears only when
+   more than 25 rows exist.
+5. `Team` shows a fixed links table (no API fetch and no pagination).
+6. Open a row link in a new tab.
 
 ## Route Variants
 

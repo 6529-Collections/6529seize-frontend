@@ -4,46 +4,49 @@ Parent: [Open Data Index](README.md)
 
 ## Overview
 
-`/open-data/team` shows a static list of team export links.
+`/open-data/team` shows fixed team export links.
+The page heading is `Team Downloads`.
 
 ## Location in the Site
 
 - Route: `/open-data/team`
 - Hub route: `/open-data`
-- Sidebar path: `Tools -> Open Data -> Team`
+- Desktop sidebar path: `Tools -> Open Data -> Team`
+- Mobile sidebar path: `Tools -> Open Data`, then open the `Team` card.
+- Direct route: `/open-data/team`
 
-## Entry Points
+## What You See
 
-- Open the `Team` card on `/open-data`.
-- Open `/open-data/team` directly.
+- Table columns:
+  - `Date`
+  - `Link`
+- `Date` renders as a calendar date.
+- `Link` shows the file URL and opens it in a new tab.
+- The route uses a hard-coded list (no dataset API request).
+- The route currently renders three fixed rows.
+- Row order follows the hard-coded list (no automatic date sorting).
 
-## User Journey
+## User Flow
 
 1. Open `/open-data/team`.
-2. Review the `Team Downloads` heading and table.
-3. Each row includes:
-   - `Date`
-   - `Link`
-4. Open a link to open the file URL in a new tab.
+2. Review the table rows.
+3. Open a `Link` value to open the file URL in a new tab.
 
-## Data Source and Shape
+## States and Recovery
 
-- Source: static list in the route component.
-- Current fields: `created_at` and `url`.
-- There are currently three static rows.
-
-## Load, Empty, and Error Behavior
-
-- Loading state: none.
+- Loading banner: none.
 - API error banner: none.
-- Empty state: `Nothing here yet` appears only if the static list becomes empty.
+- Empty state: `Nothing here yet` appears only if the hard-coded list becomes
+  empty.
+- If a link does not open, allow new tabs/popups and retry.
 
-## Limitations / Notes
+## Limits
 
 - No pagination, sorting, or filtering is available.
-- Updating links requires a client-code change.
+- Updating links requires a code change and deploy.
 
 ## Related Pages
 
 - [Open Data Hub](feature-open-data-hub.md)
+- [Open Data Hub to Dataset Routes](flow-open-data-hub-to-download-routes.md)
 - [Open Data Routes and Download States](troubleshooting-open-data-routes-and-downloads.md)
