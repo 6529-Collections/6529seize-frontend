@@ -58,28 +58,32 @@ export default function WaveMentionsTypeaheadMenu({
           })();
 
     win.addEventListener("resize", updatePosition);
+    win.addEventListener("scroll", updatePosition, { passive: true });
 
     if (typeof ResizeObserver === "undefined") {
       return () => {
         cancelInitialUpdate();
         win.removeEventListener("resize", updatePosition);
+        win.removeEventListener("scroll", updatePosition);
       };
     }
 
     const resizeObserver = new ResizeObserver(() => {
       updatePosition();
     });
-    const element = menuRef.current;
-    if (element) {
-      resizeObserver.observe(element);
+    const menuElement = menuRef.current;
+    if (menuElement) {
+      resizeObserver.observe(menuElement);
     }
+    resizeObserver.observe(anchorElement);
 
     return () => {
       cancelInitialUpdate();
       win.removeEventListener("resize", updatePosition);
+      win.removeEventListener("scroll", updatePosition);
       resizeObserver.disconnect();
     };
-  }, [updatePosition]);
+  }, [anchorElement, updatePosition]);
 
   return (
     <div
