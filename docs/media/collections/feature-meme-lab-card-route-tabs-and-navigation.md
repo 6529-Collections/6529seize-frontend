@@ -2,9 +2,14 @@
 
 ## Overview
 
-`/meme-lab/{id}` is the card route for one Meme Lab token.
-It supports tab deep links with `focus`, card-to-card navigation, and a
-distribution handoff to `/meme-lab/{id}/distribution`.
+This page owns two connected routes:
+
+- Card detail route: `/meme-lab/{id}`
+- Distribution route: `/meme-lab/{id}/distribution`
+
+Card detail uses `focus` tab deep links and previous/next card navigation.
+Distribution route shows wallet-level distribution rows, wallet filters, and
+pagination.
 
 ## Location in the Site
 
@@ -15,64 +20,91 @@ distribution handoff to `/meme-lab/{id}/distribution`.
 
 - Open a card from `/meme-lab` or `/meme-lab/collection/{collection}`.
 - Open a direct card URL such as `/meme-lab/123`.
-- Open a direct tab deep link such as `/meme-lab/123?focus=activity`.
-- On `Live`, use `Distribution Plan` when shown.
+- Open a direct tab URL such as `/meme-lab/123?focus=activity`.
+- On card `Live`, use `Distribution Plan` when shown.
+- Open `/meme-lab/{id}/distribution` directly.
 
 ## User Journey
 
+### Card Route `/meme-lab/{id}`
+
 1. Open `/meme-lab/{id}`.
-2. If `focus` matches a supported tab key, that tab opens; otherwise the route
-   opens on `Live`.
-3. Use tabs to switch between `Live`, `Your Cards`, `The Art`, `Collectors`,
-   `Activity`, and `Timeline`.
-4. Each tab switch updates `focus` in the URL.
-5. Use previous/next card arrows to move to adjacent card IDs while keeping the
-   current query state.
+2. The route reads `focus` and resolves one tab:
+   `Live`, `Your Cards`, `The Art`, `Collectors`, `Activity`, or `Timeline`.
+3. If `focus` is missing or unsupported, the page opens `Live` and rewrites the
+   query to `?focus=live`.
+4. Switch tabs from the tab row; each switch rewrites `focus` in place.
+5. Use previous/next arrows to move to adjacent card IDs while keeping the
+   current query string.
 6. On `Live`, review card stats, collection links, references, and marketplace
    shortcuts (when available).
-7. On `Your Cards`, connect wallet to view ownership summaries, transfer
-   actions, and wallet-specific transaction history.
-8. On `The Art`, inspect original media views, fullscreen controls, Arweave
-   links, and download actions.
-9. Open `/meme-lab/{id}/distribution` to inspect distribution rows, wallet
-   filtering, and pagination.
+7. On `Your Cards`, connect wallet to review ownership summary, transfer
+   actions, and wallet transaction history.
+8. On `The Art`, review original media, fullscreen controls, Arweave links, and
+   downloads.
+9. On `Collectors`, review the holder leaderboard.
+10. On `Activity`, filter transaction types, review rows, and paginate.
+11. On `Timeline`, review card history milestones.
+
+### Distribution Route `/meme-lab/{id}/distribution`
+
+1. Open this route from `Distribution Plan` on `Live`, or open the route
+   directly.
+2. The route validates `{id}` as a positive integer.
+3. Review the page header, optional distribution photos, and wallet table.
+4. Use wallet search filters to narrow rows; changing filters resets pagination
+   to page 1.
+5. Review allowlist-phase columns, minted/total columns, and pagination when
+   enough rows are available.
 
 ## Common Scenarios
 
-- Share a direct tab URL such as `/meme-lab/123?focus=timeline`.
-- Open `Your Cards` to confirm owned editions and transfer availability.
-- Open `Distribution Plan`, filter by wallet, then return to the card route.
+- Share a deep link such as `/meme-lab/123?focus=timeline`.
+- Stay on the same tab while moving card-to-card with navigation arrows.
+- Open `Distribution Plan`, filter for one or more wallets, then clear filters
+  and return to the card route.
 
 ## Edge Cases
 
-- Unknown `focus` values fall back to `Live`.
-- If card metadata does not resolve for `{id}`, the route can show only the
-  page heading with no inline not-found panel.
-- Previous/next arrows are disabled at route bounds.
+- Unsupported `focus` values fall back to `Live`.
+- If card metadata does not resolve for `{id}`, the route can render only the
+  page heading, with no inline not-found panel.
+- Previous/next arrows are disabled at the first and last available card index.
+- `Activity` can show a loading spinner first, then an empty-state panel when
+  no rows are available.
 - `/meme-lab/{id}/distribution` with non-positive or invalid IDs shows the
   distribution not-found screen.
-- Distribution routes can show an empty "made available soon" state when no
-  distribution rows exist yet.
-- Distribution wallet search can return a no-results row even when the card has
-  distribution data.
+- Distribution routes with valid IDs can show an empty
+  `The Distribution Plan will be made available soon!` state.
+- Distribution wallet filters can show `No results found for the search
+  criteria.` even when unfiltered distribution data exists.
+- Distribution fetch failures fall back to the same empty-state view (no
+  dedicated inline error panel).
 
 ## Failure and Recovery
 
-- If card content does not load, refresh `/meme-lab/{id}` or reopen the card
-  from `/meme-lab`.
+- If card content does not appear, reopen the card from `/meme-lab` or refresh
+  `/meme-lab/{id}`.
 - If a deep link opens the wrong tab, replace `focus` with a supported key or
   remove it.
-- If distribution search returns no rows, clear wallet filters and retry.
-- If distribution data is not available yet, retry later from the same route.
+- If card detail stays on heading-only state, open a nearby card ID or reopen
+  from `/meme-lab`.
+- If distribution filters return no rows, clear wallet filters and retry.
+- If distribution remains empty without filters, retry later from the same
+  route.
 
 ## Limitations / Notes
 
-- `focus` supports only the six card tab keys.
+- `focus` supports only the six tab keys listed above.
 - Tab switches use in-place URL replacement, so browser Back does not step
-  through each tab change.
-- Card and distribution data are live API-backed snapshots and can lag briefly.
-- Card-level ownership chips, marketplace gating, media fallback, and transfer
-  details are owned by NFT feature pages.
+  through prior tab changes.
+- Tab switches preserve `focus`; other query keys are not preserved.
+- `Distribution Plan` link on card `Live` is shown only when distribution is
+  available for that card.
+- Marketplace shortcuts are hidden on iOS unless detected country is `US`.
+- Card and distribution data are API-backed snapshots and can lag briefly.
+- Card-level ownership chips, marketplace details, media fallback, and transfer
+  behavior are owned by media NFT feature pages.
 
 ## Related Pages
 
