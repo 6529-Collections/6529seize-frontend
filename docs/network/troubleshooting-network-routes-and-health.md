@@ -2,8 +2,8 @@
 
 ## Overview
 
-Use this page for common failures in Network routes: leaderboards, metrics,
-activity feeds, and rule/reference pages.
+Use this page when a Network route is empty, unexpectedly scoped, or missing
+metrics.
 
 ## Location in the Site
 
@@ -14,71 +14,75 @@ activity feeds, and rule/reference pages.
   `/network/tdh`, `/network/tdh/historic-boosts`, `/network/definitions`,
   `/network/levels`, `/network/xtdh`
 - Utility route: `/network/prenodes`
-- Related allocations dashboard: `/xtdh`
+- Related live dashboard: `/xtdh`
 
 ## Entry Points
 
-- Open `/network` from `Network -> Identities` first.
-- Open `/network/health` when checking metrics freshness.
-- Open `/network/activity` for network-wide event feed checks.
-- Open `/network/tdh` or `/network/xtdh` for rule reference checks.
-- Open `/network/levels` and `/network/definitions` for static reference checks.
+- Sidebar: `Network -> Identities`, `Network -> Activity`, `Network -> TDH`,
+  `Network -> xTDH`
+- Sidebar metrics subsection: `Network -> Metrics -> Health`,
+  `Network -> Metrics -> Definitions`, `Network -> Metrics -> Levels`,
+  `Network -> Metrics -> Network Stats`
+- `/network` header button: `Nerd view` opens `/network/nerd/*`
+- Collections area: `Collections -> xTDH` opens `/xtdh`
 
-## User Journey
+## Fast Recovery Flow
 
-1. Reproduce the issue on its exact route.
-2. Open `/network/health` and confirm metrics load.
-3. Reopen the failing route from sidebar navigation (not only browser back).
-4. If the issue is scope-related, clear group filter and retest.
-5. If the issue is rule-interpretation, confirm on `/network/tdh` or
-   `/network/xtdh`.
+1. Reopen the failing route from sidebar navigation.
+2. If the issue is on `/network` or `/network/activity`, clear or change active
+   group scope on `/network`.
+3. Refresh the failing route.
+4. If `/xtdh` fails, use its `Retry` button, then refresh if needed.
+5. If the route is still empty or header-only, retry later (upstream API may be
+   unavailable).
 
-## Common Scenarios
+## Route Checks
 
-- `/network` list looks wrong after scope changes:
-  clear and reapply group filter from the filter panel.
+- `/network` shows wrong rows/sort/page:
+  this route normalizes invalid `page`, `sort-by`, and `sort-direction` values.
+  If results still look wrong, clear active group scope.
 - `/network/activity` looks unexpectedly scoped:
   this route can inherit active group scope from `/network` state.
+- `/network/activity` opens a Not Found page:
+  initial server-side activity fetch failed. Reopen from `Network -> Activity`
+  and refresh.
 - `/network/health` shows `Failed to load metrics. Please try again later.`:
-  refresh the route to trigger a new fetch.
-- `/network/health/network-tdh` shows no charts:
-  upstream history payload may be empty; retry later.
-- `/network/prenodes` shows only header text:
-  upstream prenode feed may be empty or unavailable.
+  refresh the route. There is no inline retry button on this page.
+- `/network/health/network-tdh` shows only heading content:
+  TDH history data is empty or unavailable. Refresh or retry later.
+- `/network/prenodes` shows only title and UTC note:
+  prenodes payload is empty or failed. Refresh or retry later.
 - `/xtdh` shows `Unable to load xTDH stats`:
-  use its `Retry` button.
+  use `Retry`. If it keeps failing, refresh the route.
 
 ## Edge Cases
 
-- `/network/nerd/*` treats unknown focus segments as `Cards Collected`.
-- `/network` normalizes invalid `page`, `sort-by`, and `sort-direction` values.
-- `/network/activity` does not expose inline filter/scope controls but can still
-  use active group scope.
-- `/network/prenodes` does not expose inline filter controls.
-- `/network/levels` and `/network/definitions` are static references, not live
-  metrics views.
-
-## Failure and Recovery
-
-- If a route fails, reopen from `Network` sidebar navigation.
-- If `/network/activity` data is unexpectedly scoped, clear group scope on
-  `/network`, then reopen `/network/activity`.
-- If `/network/activity` looks stale or empty, refresh `/network/activity`
-  directly.
-- If `/network` leaderboard is empty, remove `group` scope and retry.
-- If `/network/prenodes` is empty, retry later; no route-level retry control exists.
+- `/network/nerd/{focus?}` reads only the first focus segment.
+- Unknown focus values fall back to `Cards Collected`.
+- Extra segments after `/network/nerd/{focus}` are ignored.
+- `group` in URL initializes Network scope on first route mount only.
+  Later URL-only edits do not re-apply scope unless you reload or change scope
+  in the UI.
+- `/network/levels`, `/network/definitions`, `/network/tdh`, and
+  `/network/xtdh` are reference pages, not live health dashboards.
 
 ## Limitations / Notes
 
-- Some routes rely on live APIs (`/network`, `/network/health`, `/xtdh`,
-  `/network/prenodes`) while others are static references
-  (`/network/definitions`, `/network/levels`, `/network/tdh`, `/network/xtdh`).
-- Retry controls differ by route; some pages only support browser refresh.
+- Live API-dependent routes include `/network`, `/network/activity`,
+  `/network/health`, `/network/health/network-tdh`, `/network/prenodes`,
+  and `/xtdh`.
+- Retry controls are route-specific.
+  `/xtdh` has inline retry for top stats; most Network routes recover by refresh
+  or reopen.
+- `/network/groups` troubleshooting is owned by Groups docs.
 
 ## Related Pages
 
 - [Network Index](README.md)
+- [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
+- [Network Activity Feed](feature-network-activity-feed.md)
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
-- [Network Activity Feed](feature-network-activity-feed.md)
 - [Prenodes Status](feature-prenodes-status.md)
+- [xTDH Network Overview](feature-xtdh-network-overview.md)
+- [Groups Troubleshooting](../groups/troubleshooting-groups-list-and-create-actions.md)
