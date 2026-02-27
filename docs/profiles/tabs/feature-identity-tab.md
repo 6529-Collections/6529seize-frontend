@@ -2,104 +2,113 @@
 
 ## Overview
 
-The `Identity` tab is the combined profile route for `Rep` and `NIC`.
-On desktop, both surfaces are visible at once.
-On mobile, the same route provides an in-tab toggle between `Rep` and
-`Identity` sections.
+`Identity` is the default profile tab at `/{user}`.
+It combines `Rep` and `NIC` on one route.
+
+- Desktop shows both surfaces at the same time.
+- Mobile switches between `Rep` and `Identity` subviews inside the same URL.
 
 ## Location in the Site
 
 - Canonical route: `/{user}`
-- Legacy alias: `/{user}/identity` (redirects to `/{user}`)
-- Desktop (`>= lg`):
-  - left column: `Rep` summary, top categories, grant/edit controls, and activity log
-  - right column: `Network Identity Check (NIC)`, identity statements, and NIC rating action
-- Mobile (`< lg`):
-  - top score cards: `Total Rep` and `NIC`
-  - `Rep` section: grant CTA, rep table, REP-focused activity log
-  - `Identity` section: NIC CTA, identity statements, NIC-focused activity log
+- Legacy alias: `/{user}/identity` (permanent redirect to `/{user}` and keeps
+  query params)
+- Unsupported legacy route: `/{user}/rep` (not found)
+
+Desktop (`>= lg`):
+- Left: Rep summary, rep categories, grant/edit actions, activity log
+- Right: NIC summary, ID statements, NIC rating panel
+
+Mobile (`< lg`):
+- Top cards: `Total Rep` and `NIC`
+- `Rep` subview: rep categories, `Grant Rep`, REP activity log
+- `Identity` subview: `Rate NIC`, ID statements, NIC activity log
 
 ## Entry Points
 
 - Open `/{user}` directly.
 - Switch to `Identity` from another profile tab.
-- Click profile-header quick stats for `NIC` or `Rep`.
-- Open a profile from global header search (profile results default to this
-  route).
-- Follow a shared profile URL that lands on the profile root.
+- Click `NIC` or `Rep` in profile header stats.
+- Open a profile from header search (lands on default profile tab).
 
 ## User Journey
 
-1. Open `/{user}`.
-2. Review current `Rep` and `NIC` summary values.
-3. On desktop, review/edit rep categories and open the combined activity log.
-4. On desktop, review NIC status and statement sections in the side card.
-5. On mobile, switch between `Rep` and `Identity` sections from the top score cards.
-6. If eligible, open `Grant Rep` or `Rate NIC` actions and submit updates.
-7. Share the same URL to return to this combined tab.
+1. Open a profile at `/{user}`.
+2. Read rep and NIC summaries.
+3. If actions are available, open `Grant Rep` or `Rate NIC`.
+4. Review activity logs and apply filters.
+5. On mobile, switch between `Rep` and `NIC` cards as needed.
 
-## Common Scenarios
+## Rep Behavior
 
-- View both rep and NIC context without leaving `/{user}`.
-- Use the rep table to sort by `Rep`, `Raters`, or `My Rates` (when editable).
-- Expand long rep lists with `See all <count>` and collapse with `Show less`.
-- Click top-rep chips or rep table rows to adjust an existing category (eligible viewers).
-- Grant a new rep category by searching/selecting a category, setting a value, and saving.
-- Rate NIC from the identity surface when rating permissions are available.
-- On mobile, run rep actions and NIC actions in separate bottom sheets.
-- Open activity logs:
-  - desktop: matter selector (`All`, `REP`, `NIC`) plus direction filtering
-  - mobile rep section: REP-only log context
-  - mobile identity section: NIC-only log context with NIC log-type filter options
+- Rep categories are sorted by rating, then by contributor count.
+- Each category pill shows category, score, top-rater avatars, and rater count.
+- `My Rate` shows when your contribution for that category is non-zero.
+- Category list starts at 5 items and expands in `+N more` batches.
+- If editing is allowed:
+  - category pill opens edit for that category
+  - `Add new` (desktop) or `Grant Rep` (mobile) opens grant dialog
 
-## Grant Rep Input Behavior
+### Grant Rep Dialog
 
-- The `Grant Rep` category field is live-search with a 500ms debounce:
-  - It requires at least 3 and at most 100 characters.
-  - While it is below/above that range, the dropdown explains the length constraint.
-- While searching, a category dropdown opens on focus/typing and closes via outside click or `Esc`.
-- Dropdown options include:
-  - The current typed term first (when in range), then matching backend categories.
-  - Duplicate entries are removed from backend matches if they match the typed term.
-- Clicking a dropdown item (or pressing Enter in the search form) triggers a category availability check before selection.
-- If a category is selected and the user edits the category text, the component clears the selection and amount so a fresh choose+check is required.
-- The `Grant Rep` button is blocked when:
-  - no category is selected,
-  - amount is empty,
-  - amount is unchanged from current contribution,
-  - value is outside min/max rules (unless a proxy is active),
-  - or submit/mutation is already in progress.
+- Category search accepts 3-100 characters.
+- Results appear after a short debounce.
+- Dropdown order is typed value first, then matching categories.
+- Selecting a category validates availability before selection.
+- If availability fails, inline error is shown.
+- Editing text after category selection clears selected category and amount.
+- Amount accepts integers.
+- In non-proxy mode, amount clamps to allowed min/max on blur.
+- `Grant Rep` stays disabled until category is selected, amount changed, amount
+  is valid, and submit is idle.
 
-## Edge Cases
+## NIC and Statements Behavior
 
-- If a profile has no rep categories, the rep table can be hidden while summary and log areas still load.
-- If rating context disallows an action (for example proxy allowance limits), rating controls are replaced with context guidance.
-- On your own profile, action controls that use the hidden-own-profile mode can disappear instead of showing a warning box.
-- Mobile section switching (`Rep` vs `Identity`) does not change the URL.
-- `/{user}/identity` redirects to `/{user}`.
-- `/{user}/rep` is not a supported profile route; use `/{user}`.
+- NIC panel shows NIC value, NIC status, top-rater avatars, and rater count.
+- Desktop keeps NIC rating UI in the right column.
+- Mobile shows `Rate NIC` only in the `Identity` subview and only when rating
+  is allowed.
+- `Rate` is enabled only when the value changed and is valid.
+
+Statement ownership in this tab:
+- [Profile Identity Statements](feature-identity-statements.md)
+
+## Activity Log Behavior
+
+- Desktop combined log includes:
+  - matter tabs: `All`, `REP`, `NIC`
+  - direction tabs: `All`, `Incoming`, `Outgoing`
+  - NIC-only log-type filter when matter is `NIC`
+- Mobile:
+  - `Rep` subview uses REP log with direction tabs
+  - `Identity` subview uses NIC log with direction tabs and NIC log-type filter
+- Empty results show `No Activity Log`.
+
+## Permissions and Visibility Rules
+
+- Rep/NIC actions require a connected account with a profile handle.
+- Outside proxy mode, you cannot rate your own profile.
+- In proxy mode:
+  - Rep actions require `AllocateRep`
+  - NIC actions require `AllocateCic`
+  - proxy grantor profile cannot be the target
+- Mobile `Rep`/`Identity` switching does not change URL state.
 
 ## Failure and Recovery
 
-- If rep or NIC submit actions fail, a toast error is shown and values stay unchanged.
-- If statement or rating data requests fail, parts of the tab can appear empty or partially loaded; refresh to retry.
-- Activity logs can show `No Activity Log` when filters produce no results or data is unavailable; change filters or refresh.
-- If a legacy `/{user}/rep` bookmark returns not-found, replace it with `/{user}`.
-
-## Limitations / Notes
-
-- `Rep` and `NIC` share one canonical profile route: `/{user}`.
-- Desktop and mobile layouts differ significantly while representing the same tab.
-- Mobile subview choice (`Rep` or `Identity`) is local UI state and is not shareable in the URL.
-- Edit/rating controls depend on wallet connection, profile ownership, and proxy permissions.
+- Rep submit failures show an error toast and keep dialog values.
+- NIC submit failures show an error toast and keep entered value.
+- Statement or rating fetch failures can leave empty/partial sections; refresh
+  to retry.
+- Replace old `/{user}/rep` bookmarks with `/{user}`.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
+- [Profiles Tabs Index](README.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Identity Statements](feature-identity-statements.md)
-- [Profiles Tabs Index](README.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
