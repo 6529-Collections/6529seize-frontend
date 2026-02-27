@@ -85,6 +85,7 @@ export const getOptimisticDrop = (
       archived: false,
       primary_address: connectedProfile.primary_wallet,
       is_wave_creator: connectedProfile.is_wave_creator,
+      artist_of_prevote_cards: connectedProfile.artist_of_prevote_cards,
     },
     created_at: Date.now(),
     updated_at: null,
