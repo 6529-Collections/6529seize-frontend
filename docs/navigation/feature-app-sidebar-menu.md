@@ -2,69 +2,97 @@
 
 ## Overview
 
-In the mobile app layout, the header menu opens a left-side panel for
-secondary route navigation and account actions. It complements bottom-tab
-navigation.
+In app layout, the top-left menu/avatar button opens a left drawer for
+secondary route jumps and account actions. Primary section switching stays in
+bottom navigation.
 
 ## Location in the Site
 
-- App header menu/avatar button (shown when back is not shown).
-- App-shell routes rendered with `AppLayout`.
-- Route sections: `Profile` (connected only), `Discover`, `Network`, `Tools`,
-  `About`.
-- Account section: `Scan QR Code`, `Connect`/`Disconnect`, `Switch Account`,
-  and push-notification settings.
+- App routes rendered with `AppLayout`, when header left control is menu/avatar
+  (not `Back`).
+- Direct rows: `Discover`, plus connected-only `Profile`.
+- Collapsible groups: `Network`, `Tools`, `About`.
+- Footer actions: `Scan QR Code` (Capacitor + scanner support), then either
+  `Connect` (disconnected) or connected actions (`Push Notifications`,
+  `Switch Account`, `Disconnect & Logout`).
 
 ## Entry Points
 
-- Open the mobile app on a route where the header shows the menu/avatar button.
-- Tap the menu/avatar button in the top-left header area.
-- Close without navigating using close icon, backdrop tap, or right-to-left
-  swipe.
+- Open an app-layout route where the top-left control is menu/avatar.
+- Tap the menu/avatar button.
+- Close with close button, backdrop tap, right-to-left swipe, or route
+  selection.
 
 ## User Journey
 
-1. User opens the menu/avatar button.
-2. Sidebar panel slides in over the current route.
-3. Panel header shows connected profile summary, or the 6529 logo when
-   disconnected.
-4. User opens `Network`, `Tools`, or `About` groups, then selects a route.
-5. Sidebar closes and the selected route opens.
-6. User can also run account actions from the footer section.
+1. Open the menu/avatar button from the app header.
+2. Drawer opens from the left over the current route.
+3. Header shows:
+   - connected: profile card (avatar, handle/wallet label, level, stats)
+   - disconnected: `6529` logo linking to `/`
+4. Choose `Discover` or connected `Profile`, or expand `Network`, `Tools`, or
+   `About` and choose a nested route.
+5. Drawer closes and route navigation runs.
+6. Use footer actions for QR scan, connect/session actions, or push settings.
 
 ## Common Scenarios
 
-- Open network destinations (for example `Groups`, `TDH`, `Health`) without
-  leaving app layout.
-- Open tools destinations (`Delegation Center`, `API`, `EMMA`, `Block Finder`,
-  `Open Data`).
-- Open connected profile route directly from the `Profile` row.
-- Use `Scan QR Code` to open supported 6529 web/deep links.
-- Open `Push Notifications` settings and save per-device notification toggles.
+- Open network routes:
+  `/network`, `/network/activity`, `/network/groups`, `/nft-activity`,
+  `/meme-calendar`, `/network/tdh`, `/network/health`, `/network/definitions`,
+  `/network/levels`, `/network/health/network-tdh`.
+- Open tools routes:
+  `/delegation/delegation-center`, `/delegation/wallet-architecture`,
+  `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
+  `/delegation/wallet-checker`, `/tools/subscriptions-report`,
+  `/meme-accounting?focus=the-memes`, `/meme-gas?focus=the-memes`,
+  `/tools/api`, `/emma`, `/tools/block-finder`, `/open-data`.
+- Open about routes:
+  `/about/the-memes`, `/about/subscriptions`, `/about/meme-lab`,
+  `/about/6529-gradient`, `/about/gdrc1`, `/about/nft-delegation`,
+  `/about/primary-address`, `/capital`, `/capital/company-portfolio`,
+  `/capital/fund`, `/about/faq`, `/about/apply`, `/about/contact-us`,
+  `/about/data-decentralization`, `/about/ens`, `/about/license`,
+  `/about/release-notes`.
+- Open connected profile shortcut:
+  profile route resolves handle-first, then wallet-address fallback.
+- Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
+  links (`navigate/*` and `share-connection` scopes).
+- Open `Push Notifications`, review per-device toggles, then save changes.
 
 ## Edge Cases
 
-- The menu button is replaced by `Back` on create routes, active-wave contexts,
-  and profile routes with valid in-app back history.
+- Menu/avatar is replaced by `Back` on create routes, active-wave contexts, and
+  profile routes with valid in-app history.
 - `Profile` row is hidden when disconnected.
-- `App Wallets` appears only when app-wallet support is enabled.
-- `Scan QR Code` appears only when running inside the mobile app with scanner
-  support.
-- Selecting a route closes the panel immediately.
+- `Network`, `Tools`, and `About` are collapsible; section headers inside them
+  are labels, not links.
+- `App Wallets` is prepended inside `Tools` only when app-wallet support is
+  available.
+- `Scan QR Code` appears only when running in Capacitor with scanner support.
+- `Push Notifications` appears only when connected and opens an in-app modal.
+- Invalid or unsupported QR content shows `Invalid QR code`.
+- Push settings save is disabled until at least one toggle changes.
 
 ## Failure and Recovery
 
-- If the panel appears stuck, close via backdrop/close icon/swipe and reopen.
-- If route navigation does not apply, reopen menu and select the destination
-  again.
-- If QR scan fails, retry scan or navigate manually with bottom tabs/menu links.
+- If drawer state looks stuck, close with backdrop/icon/swipe and reopen.
+- If route change does not apply, reopen the drawer and select the route again.
+- If QR scan fails or shows `Invalid QR code`, rescan, update app build if
+  needed, or navigate manually.
+- If push settings fail to load/save, close and reopen `Push Notifications`, then
+  retry save.
 
 ## Limitations / Notes
 
-- This behavior is app-layout specific.
-- Primary section switching still uses
+- App-sidebar behavior is app-layout only.
+- Primary section switching stays in
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
-- Search entry remains in the header search control, not inside this menu.
+- Search stays in the header search control, not in this drawer.
+- Session/proxy details are owned by
+  [Wallet and Account Controls](feature-wallet-account-controls.md).
+- Web shell route groups are owned by
+  [Web Sidebar Navigation](feature-sidebar-navigation.md).
 
 ## Related Pages
 
@@ -73,3 +101,4 @@ navigation.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)

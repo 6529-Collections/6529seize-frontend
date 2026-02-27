@@ -28,8 +28,9 @@ and mobile app layouts.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
   tabs for `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
   and `Notifications`.
-- [App Sidebar Menu](feature-app-sidebar-menu.md): app secondary route groups
-  (`Profile`, `Network`, `Tools`, `About`) and account actions.
+- [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with direct rows
+  (`Discover`, connected `Profile`), grouped links (`Network`, `Tools`,
+  `About`), and footer account actions.
 
 ### Shared Shell Controls
 
