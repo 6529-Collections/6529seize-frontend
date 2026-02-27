@@ -38,21 +38,11 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 jest.mock("@/components/waves/CreateDropStormParts", () => () => (
   <div data-testid="storm" />
 ));
+const PREFILL_URL =
+  "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/123";
+
 jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
-  <button
-    onClick={() =>
-      props.submitDrop({
-        drop: { wave_id: "1" },
-        dropId: null,
-      } as DropMutationBody)
-    }
-  >
-    submit
-  </button>
-));
-jest.mock("@/components/waves/CreateCurationDropContent", () => ({
-  __esModule: true,
-  default: (props: any) => (
+  <div>
     <button
       onClick={() =>
         props.submitDrop({
@@ -61,8 +51,35 @@ jest.mock("@/components/waves/CreateCurationDropContent", () => ({
         } as DropMutationBody)
       }
     >
-      submit curation
+      submit
     </button>
+    <button
+      onClick={() =>
+        props.onSwitchToDropModeWithUrl(
+          "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/123"
+        )
+      }
+    >
+      switch to drop
+    </button>
+  </div>
+));
+jest.mock("@/components/waves/CreateCurationDropContent", () => ({
+  __esModule: true,
+  default: (props: any) => (
+    <div>
+      <button
+        onClick={() =>
+          props.submitDrop({
+            drop: { wave_id: "1" },
+            dropId: null,
+          } as DropMutationBody)
+        }
+      >
+        submit curation
+      </button>
+      <div data-testid="initial-url">{props.initialUrl ?? ""}</div>
+    </div>
   ),
 }));
 
@@ -171,5 +188,83 @@ describe("CreateDrop", () => {
       message: "Drop submitted successfully",
       type: "success",
     });
+  });
+
+  it("switches to curation mode with a prefilled url seed", async () => {
+    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{} as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("switch to drop"));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("initial-url")).toHaveTextContent(PREFILL_URL)
+    );
+  });
+
+  it("resets to default mode when wave scope changes", async () => {
+    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+    const nextWave = { ...wave, id: "2" };
+
+    const { rerender } = render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{} as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("switch to drop"));
+    await waitFor(() =>
+      expect(screen.getByText("submit curation")).toBeInTheDocument()
+    );
+
+    rerender(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={nextWave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{} as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText("switch to drop")).toBeInTheDocument()
+    );
   });
 });
