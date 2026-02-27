@@ -4834,8 +4834,15 @@ paths:
               - REALTIME_VOTE
               - MY_REALTIME_VOTE
               - CREATED_AT
+              - PRICE
               - RATING_PREDICTION
               - TREND
+        - name: price_currency
+          in: query
+          description: Optional currency filter used when sorting by PRICE
+          required: false
+          schema:
+            type: string
         - name: curated_by_group
           in: query
           required: false
@@ -7885,6 +7892,7 @@ components:
         - banner2
         - active_main_stage_submission_ids
         - winner_main_stage_drop_ids
+        - artist_of_prevote_cards
         - is_wave_creator
       properties:
         id:
@@ -7952,6 +7960,11 @@ components:
           type: array
           items:
             type: string
+        artist_of_prevote_cards:
+          type: array
+          items:
+            type: integer
+            format: int64
         is_wave_creator:
           type: boolean
     ApiIdentityAndSubscriptionActions:
@@ -8391,6 +8404,7 @@ components:
         - media_uri
         - last_error_message
         - price
+        - price_currency
         - last_successfully_updated
         - failed_since
         - media_preview
@@ -8421,6 +8435,9 @@ components:
           type: string
           nullable: true
         price:
+          type: string
+          nullable: true
+        price_currency:
           type: string
           nullable: true
         last_successfully_updated:
@@ -8902,6 +8919,7 @@ components:
         - archived
         - active_main_stage_submission_ids
         - winner_main_stage_drop_ids
+        - artist_of_prevote_cards
         - is_wave_creator
       properties:
         id:
@@ -8956,6 +8974,11 @@ components:
           type: array
           items:
             type: string
+        artist_of_prevote_cards:
+          type: array
+          items:
+            type: integer
+            format: int64
         is_wave_creator:
           type: boolean
     ApiProfileMinsPage:
