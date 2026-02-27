@@ -2,22 +2,30 @@
 
 Parent: [Open Data Index](README.md)
 
-## Overview
+## When to Use This Page
 
-Use this page when an Open Data route is missing, blank, or not loading as expected.
+Use this page when an Open Data route is missing, looks blank, shows an error,
+or a download link does not open.
 
-## `Meme Subscriptions` is missing on the native iOS hub
+## Quick Route Map
 
-- Causes:
-  - In the native iOS app, the hub card is hidden when cookie-country is not
-    `US`.
-  - In the native iOS app, the hub card can be temporarily hidden while
-    cookie-country is still loading.
-  - On web sidebar navigation, this iOS country rule does not apply.
-- Recovery:
+- Hub route (cards only): `/open-data`
+- API routes with inline loading and error banners:
+  `/open-data/network-metrics`, `/open-data/rememes`, `/open-data/royalties`
+- API route without inline loading/error banners:
+  `/open-data/meme-subscriptions`
+- Static links route (no API fetch): `/open-data/team`
+
+## `Meme Subscriptions` card is missing on `/open-data` (native iOS)
+
+- Meaning: this is a visibility rule on the hub card, not a route outage.
+- Why it happens:
+  - The card is hidden on native iOS when cookie-country is not `US`.
+  - The card can stay hidden briefly while country-check is still loading.
+- What to do:
   1. Open `/open-data/meme-subscriptions` directly.
-  2. If needed, confirm whether you are on native iOS and whether country check
-     has finished.
+  2. Wait for country-check to finish, then reopen `/open-data`.
+  3. On web, open `Tools -> Open Data -> Meme Subscriptions` from the sidebar.
 
 ## `Failed to load community downloads. Please try again.`
 
@@ -25,47 +33,52 @@ Use this page when an Open Data route is missing, blank, or not loading as expec
   - `/open-data/network-metrics`
   - `/open-data/rememes`
   - `/open-data/royalties`
-- Note: if the failure happens after a page change, previously loaded rows stay
-  visible under the error banner.
-- Recovery:
-  1. Reload the current route.
-  2. If the issue continues, open a different Open Data dataset route to confirm
-     whether the problem is route-specific.
+- Meaning: the dataset request failed on that route.
+- Note: if this happens after changing pages, older rows can stay visible under
+  the error banner.
+- What to do:
+  1. Reload the same route.
+  2. Open another Open Data dataset route to check if the failure is route-specific.
 
-## Route shows heading but no table or error
+## Route shows heading only (no table, no loading banner, no error banner)
 
-- Most common route: `/open-data/meme-subscriptions`.
-- Cause: that route has no inline loading or error banner, so initial loading
-  and initial-load failure can look the same.
-- Recovery:
+- Most common route: `/open-data/meme-subscriptions`
+- Meaning: this route does not render inline loading or inline error banners.
+- What this usually means:
+  - First load is still in progress, or
+  - First request failed and nothing has rendered yet.
+- Later page-request failures keep the previously loaded rows visible and show
+  no inline error.
+- What to do:
   1. Reload `/open-data/meme-subscriptions`.
-  2. Re-open the route directly instead of from the hub.
+  2. Reopen `/open-data/meme-subscriptions` directly.
 
 ## `Nothing here yet` is shown
 
-- Meaning: the route responded with zero rows.
-- Recovery:
+- Meaning: the request succeeded with zero rows.
+- This is an empty success state, not a route failure.
+- What to do:
   1. Try another dataset route.
-  2. Return later when new exports are published.
+  2. Return later when new export files are published.
 
 ## Pagination controls are not visible
 
-- Cause:
-  - API-backed routes show pagination only when total results are greater than
-    25.
-  - `/open-data/team` never shows pagination because it uses a fixed static
-    links table.
-- Recovery: this is expected behavior for smaller result sets.
+- Meaning:
+  - API routes show pagination only when total results are greater than `25`.
+  - `/open-data/team` never shows pagination because it uses a static links table.
+- What to do: treat this as expected behavior for small result sets.
 
 ## Download link does not open
 
-- Cause: links open in a new tab and can be blocked by browser settings.
-- Recovery: allow new tabs/popups for the site and retry the link.
+- Meaning: Open Data links open in a new tab and may be blocked by browser
+  popup settings.
+- What to do: allow new tabs/popups for the site and retry the link.
 
 ## `/open-data/team` has no loading or API error banner
 
-- Cause: the Team route uses a hard-coded links list, not an API request.
-- Recovery:
+- Meaning: expected behavior. The Team route is a fixed links table and does
+  not call a dataset API.
+- What to do:
   1. If links are visible, this is expected behavior.
   2. If a link does not open, allow new tabs/popups and retry.
 
@@ -74,3 +87,5 @@ Use this page when an Open Data route is missing, blank, or not loading as expec
 - [Open Data Index](README.md)
 - [Open Data Hub](feature-open-data-hub.md)
 - [Open Data Hub to Dataset Routes](flow-open-data-hub-to-download-routes.md)
+- [Meme Subscriptions](feature-meme-subscriptions.md)
+- [Team Downloads](feature-team-downloads.md)
