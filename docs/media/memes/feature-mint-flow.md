@@ -2,9 +2,11 @@
 
 ## Overview
 
-The Memes mint flow is the interactive mint surface at `/the-memes/mint`. It
-combines recipient selection, phase-aware mint controls, wallet confirmation,
-and on-chain transaction status updates for the current drop.
+- `/the-memes/mint` is the mint route for the current latest The Memes drop.
+- The page combines artwork, drop details, countdown status, recipient
+  selection, phase-aware mint controls, and transaction status.
+- Submit is enabled only when the claim is active, a destination wallet is
+  selected, and mint count is set.
 
 ## Location in the Site
 
@@ -15,35 +17,35 @@ and on-chain transaction status updates for the current drop.
 
 - Open `/the-memes/mint` directly.
 - Open a supported countdown card and select `Mint`.
-- On iOS in the US, open the `Mint on 6529.io` handoff button to continue in a
-  browser context that supports minting.
+- On iOS with country `US`, use `Mint on 6529.io` to open the same mint route
+  in a browser tab.
 
 ## User Journey
 
 1. User opens `/the-memes/mint`.
-2. The page loads the latest Memes mint and shows `Retrieving Mint information`
-   while claim/instance data is fetched.
-3. After load, users see drop details, countdown context, and the mint action
-   module.
-4. The lower phase cards show `Phase 0`, `Phase 1`, `Phase 2`, and
-   `Public Phase` with expected start/end windows and status badges.
-5. User connects a wallet (if not already connected), then chooses either
+2. The page loads latest mint claim/instance data and shows
+   `Retrieving Mint information`.
+3. After load, users see artwork, drop details (`Distribution Plan`, edition
+   size, mint price, status), countdown context, and mint controls.
+4. User connects a wallet (if not already connected), then chooses either
    `Mint for me` or `Mint for fren`.
-6. For `Mint for me`:
-   - The connected profile is shown as the recipient.
-   - The currently connected wallet is preselected by default.
-   - If multiple wallets are attached to the profile, users can switch the
-     destination wallet before minting.
-   - If only one wallet exists for the profile, that wallet is shown in a locked
-     (non-switchable) state.
-7. For `Mint for fren`:
-   - User search by handle, ENS, or wallet appears.
-   - After selecting a profile, users choose the destination wallet.
-8. User selects mint count.
-9. User selects `SEIZE xN` and confirms in wallet.
-10. While the transaction is in-flight, the page shows
-    `Transaction Submitted - SEIZING ...` with a `view trx` link.
-11. After confirmation, the status updates to `SEIZED!` with the same
+5. For `Mint for me`:
+   - Recipient is the connected profile.
+   - Connected wallet is selected by default.
+   - If multiple profile wallets exist, user can pick a different destination
+     wallet.
+   - If only one profile wallet exists, wallet selection is fixed.
+6. For `Mint for fren`:
+   - Search by handle, ENS, or wallet.
+   - Select recipient profile, then destination wallet.
+7. User selects mint count.
+   - Public phase: numeric input.
+   - Allowlist phases: selectable up to available unminted spots.
+8. User selects `SEIZE xN` and confirms in wallet.
+9. While the transaction is in-flight, the page shows
+   `Confirm in your wallet ...`, then
+   `Transaction Submitted - SEIZING ...` with a `view trx` link.
+10. After confirmation, the status updates to `SEIZED!` with the same
    transaction link.
 
 ## Common Scenarios
@@ -51,17 +53,21 @@ and on-chain transaction status updates for the current drop.
 - Active public phase:
   - Mint controls appear after recipient selection.
   - Users can set mint count and see total ETH cost before submitting.
-- Project description panel:
-  - The mint NFT description initially shows as a 3-line preview.
-  - The `+ SHOW MORE` button appears only when the description exceeds that preview.
-  - Expanding with `+ SHOW MORE` reveals the full description and changes the label to `- SHOW LESS`.
-  - Collapsing again reuses `- SHOW LESS`/`+ SHOW MORE` to return to the preview.
 - Active allowlist phase:
   - The panel shows `Allowlist Spots`, plus `Minted` and `Available Mints`.
   - Mint count is selected from available spots.
+- Project description panel:
+  - The mint NFT description initially shows as a 3-line preview.
+  - The `+ SHOW MORE` button appears only when the description exceeds that
+    preview.
+  - Expanding with `+ SHOW MORE` reveals the full description and changes the
+    label to `- SHOW LESS`.
+  - Collapsing again reuses `- SHOW LESS`/`+ SHOW MORE` to return to the preview.
 - Reviewing phase windows:
   - Phase cards show `UPCOMING`, `ACTIVE`, or `COMPLETED` for each phase.
   - Time display can be switched between local timezone and UTC.
+- Airdrops summary:
+  - If selected destination has airdrops, the phase area shows `Airdrops: xN`.
 - Minting for another wallet:
   - `Mint for fren` enables recipient search by handle, ENS, or wallet.
   - Mint executes for the selected destination wallet.
@@ -71,29 +77,29 @@ and on-chain transaction status updates for the current drop.
     destination wallet.
   - If the profile has one wallet, wallet switching is not available and mint
     uses that wallet directly.
-  - Returning from `Mint for fren` to `Mint for me` resets the destination to
-    the currently connected wallet.
+  - Switching from `Mint for fren` back to `Mint for me` clears fren selection
+    and resets destination to the currently connected wallet.
 - Not-yet-active phase:
   - Action button is disabled and shows `DROPS ... UTC`.
+- Mint diagnostics:
+  - Add `?mintdebug=1` to show `Mint diagnostics`.
+  - `Copy` copies the diagnostics JSON payload.
 
 ## Edge Cases
 
 - If no wallet is connected, mint actions are replaced with wallet connect UI.
-- On iOS outside the US, mint controls are not shown.
-- On iOS in the US, minting is routed through the `Mint on 6529.io` button.
+- On iOS:
+  - Country `US`: shows `Mint on 6529.io` handoff button.
+  - Non-`US` or unknown country: mint controls are hidden.
+- `Mint for fren` search starts after 3 typed characters.
 - If `Mint for fren` is selected without a recipient wallet, mint controls stay
   hidden until a wallet is selected.
 - If no allowlist spots exist for the selected address, the panel shows
   `No spots in current phase for this address`.
-- If you leave `Mint for fren` with an active recipient search selection and switch
-  to `Mint for me`, the recipient selection resets to your connected profile and
-  the currently connected wallet.
-- Add `?mintdebug=1` to the mint URL to display a read-only diagnostics panel that
-  shows mint payload, proof counts, and chain/request context for support/debugging.
 - If allowlist proofs are not available for enough entries, minting stops with
   `No allowlist spots in current phase for this address`.
-- If the minted asset description is short enough to fit in the preview, the expand/collapse
-  button is not shown.
+- If the minted asset description is short enough to fit in the preview, the
+  expand/collapse button is not shown.
 - Once claim status is ended/finalized, mint-connect and mint-action controls
   no longer render.
 - Mint action buttons become active at the exact phase start timestamp and stop
@@ -104,9 +110,9 @@ and on-chain transaction status updates for the current drop.
 
 ## Failure and Recovery
 
-- If mint claim/instance data fetch fails, the page shows
+- If mint-claim fetch fails, the page shows
   `Error fetching mint information`.
-- If claim/instance data cannot be resolved, the page shows
+- If claim/instance data cannot be resolved after loading, the page shows
   `No mint information found`.
 - If allowlist lookup fails, the panel shows `Error fetching allowlist data`.
 - If wallet signature/transaction submission fails, the mint error message is
@@ -122,9 +128,12 @@ and on-chain transaction status updates for the current drop.
 - Displayed mint status and phase timing follow on-chain/Manifold data and can
   lag by a few seconds.
 - The default phase windows are anchored to Europe/Athens wall-clock times:
-  `17:40`, `18:30`, `19:00`, `19:20`, then `17:00` next day for public-phase
-  end; phase boundaries are computed from the active claim window and rendered
-  as local time or UTC based on the toggle.
+  - Phase 0: `17:40-18:20`
+  - Phase 1: `18:30-18:50`
+  - Phase 2: `19:00-19:20`
+  - Public phase: `19:20-17:00` next day
+- UTC/local rendering can shift by one hour across DST changes while Athens
+  wall-clock windows remain fixed.
 - Transaction success is shown after receipt confirmation, not immediately after
   wallet submission.
 - Debug diagnostics are only exposed when the `mintdebug=1` query parameter is
