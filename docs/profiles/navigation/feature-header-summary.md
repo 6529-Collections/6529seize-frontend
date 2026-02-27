@@ -2,114 +2,106 @@
 
 ## Overview
 
-The profile header appears at the top of every profile tab route and provides
-identity context, cover/avatar visuals, quick stats links, submission/winning
-activity visibility, and profile actions.
+The profile header appears on profile routes under `/{user}` and shows:
+
+- identity and profile metadata
+- profile actions (edit, follow, direct message)
+- quick stats links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
+- artist activity entry when available
 
 ## Location in the Site
 
-- All profile routes under `/{user}` and `/{user}/<tab>`
+- `/{user}`
+- `/{user}/brain`
+- `/{user}/collected`
+- `/{user}/xtdh`
+- `/{user}/stats`
+- `/{user}/subscriptions`
+- `/{user}/proxy`
 
 ## Entry Points
 
-- Open any profile tab route directly.
-- Switch to any profile tab from the tab bar.
-- Open profile pages from links outside the profile section.
-- Click the artist activity badge when it appears.
+- Open a profile URL directly.
+- Open a profile link from another area.
+- Switch profile tabs.
 
 ## User Journey
 
 1. Open a profile route.
-2. The app resolves the profile and normalizes the route to the canonical
-   handle when needed.
-3. The header renders profile identity details:
-   - cover image or gradient
-   - avatar
-   - name and metadata
-   - About text when applicable
-4. Use quick stat links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`) to move to
-   related profile surfaces:
+2. If needed, the route redirects to the canonical handle and keeps the tab and
+   query context.
+3. The header renders:
+   - banner (image or gradient fallback)
+   - profile picture (image or gradient fallback)
+   - title row (display name, CIC icon, level, optional artist badge)
+   - metadata row (classification and `Profile enabled: <Month Year>` when data
+     exists)
+   - About panel (when a BIO exists, or when the viewer can edit)
+   - stats row (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
+4. Use quick stats:
    - `TDH` -> `/{user}/collected`
    - `xTDH` -> `/{user}/xtdh`
    - `NIC` and `Rep` -> `/{user}`
-   - `Followers` -> opens the followers modal in-place (no route change)
-5. If the profile has main-stage activity, an artist activity badge appears next
-   to the name line:
-   - palette style for active submissions
-   - trophy style for winning artworks
-   - trophy with accent marker when both are present
-6. Open the Artist Activity modal from the badge.
-7. Use available actions (follow, direct message, edit controls) based on who is
-   viewing the profile.
+   - `Followers` -> opens the followers modal (no route change)
+5. If artist activity exists, a badge appears:
+   - palette icon: active submissions only
+   - trophy icon: winning artworks only
+   - trophy icon plus blue dot: both
+6. Click the artist badge to open Artist Activity:
+   - active-only: opens `Active Submissions`
+   - winners-only: opens `Winning Artworks`
+   - both: opens `Active Submissions` first
+7. Actions depend on viewer context:
+   - own profile with handle and no active proxy: edit banner, profile picture,
+     name, classification, and About
+   - other profile, signed-in viewer with handle, and target profile with
+     handle: follow button
+   - after follow, if target has a primary wallet: direct-message button
 
 ## Common Scenarios
 
-- Display name priority is handle first, then display name, then wallet-based
-  fallback text.
-- The metadata row can show:
-  - classification
-  - `Profile enabled: <Month Year>` when available
-- About area is visible when at least one of these is true:
-  - a BIO statement is present in loaded profile data
-  - the viewer can edit the profile, which keeps an empty About panel visible for
-    adding content
-- Long About statements collapse to six lines and show `See more`/`See less`
-  on mobile screens.
-- On desktop, About content is shown in full.
-- The banner editor supports Gradient and Image modes for your own editable
-  profile.
-- Viewing someone else's profile while signed in with a handle can show `Follow`
-  and direct-message actions.
-- Viewing your own profile with a handle and no active proxy context enables
-  profile editing controls in the header.
-- The `NIC` and `Rep` quick stat links both route to `/{user}`.
-- The `Followers` quick stat opens a modal list and does not navigate to a
-  dedicated followers tab route.
-- The artist activity badge appears only when at least one of these is true:
-  - `active_main_stage_submission_ids` is non-empty
-  - `winner_main_stage_drop_ids` is non-empty
-- If one count type exists, the modal opens that view first; if both exist, it
-  opens `Active Submissions` by default.
-- On desktop and mouse-based devices, a tooltip shows the current submission and
-  win totals for the badge.
+- Display name fallback order: `handle` -> `display` -> primary wallet -> route
+  value.
+- Long About text (`>240` chars) is clamped on mobile with `See more` /
+  `See less`; desktop stays expanded.
+- `Followers` opens a modal list; it does not navigate to a followers tab.
+- On non-touch desktop devices, the artist badge shows a tooltip with activity
+  counts.
 
 ## Edge Cases
 
-- Canonical-handle redirects preserve current tab path and existing query
-  parameters.
-- Stats-link rendering requires a route-safe handle or wallet segment.
-- The profile can show only a gradient background when no banner image is stored.
-- Profiles without stored banner colors still use a random fallback gradient pair.
+- Quick stats links render only when the resolved route segment is route-safe
+  (`a-z`, `A-Z`, `0-9`, `.`, `_`, `-`).
+- If no banner image is set, the header uses a gradient banner.
+- If banner colors are missing, random fallback colors are used.
+- If both artist counts are `0` or missing, no artist badge is shown.
 
 ## Failure and Recovery
 
-- If header-side data requests fail, the profile page still loads:
-  - Profile-enabled date can be omitted.
-  - About text can reflect the latest successful data request; refresh the route
-    to retry when expected details are missing.
-  - Followers count can fall back to `0`.
-- If direct-message creation fails, an error toast is shown and users can retry
-  the action.
-- If the artist activity modal fails to surface available items, users can reopen
-  it to retry.
-- If the profile cannot be resolved, users see the `USER OR PAGE` not-found
-  screen:
+- If header-side fetches fail (BIO statement, profile-enabled date, followers
+  count), the profile route still loads and missing header fields are omitted.
+- Followers count falls back to `0` if the count request fails.
+- If direct-message creation fails, users get an error toast and can retry.
+- If profile header edits fail, users get a toast or inline error and can retry.
+- If the profile cannot be resolved, users see the shared not-found screen:
   - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
 
 ## Limitations / Notes
 
-- Header follower counts are load-time values and are not guaranteed to update
-  live while staying on the same route.
-- Artist activity badges are derived from loaded profile payload fields and are
-  not shown if payload values are missing.
+- Followers count in the header is a load-time snapshot.
+- Direct-message action requires existing follow state and a target primary
+  wallet.
+- Artist badge and modal tabs depend on loaded
+  `active_main_stage_submission_ids` and `winner_main_stage_drop_ids`.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Picture Editing](feature-profile-picture-editing.md)
-- [Profile Banner Editing](feature-banner-editing.md)
+- [Profiles Navigation Index](README.md)
 - [Profile Routes and Tab Visibility](feature-tabs.md)
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
+- [Profile Banner Editing](feature-banner-editing.md)
+- [Profile Picture Editing](feature-profile-picture-editing.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Wave Drop Artist Preview Modal](../../waves/drop-actions/feature-artist-preview-modal.md)
