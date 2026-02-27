@@ -12,7 +12,7 @@
 
 - [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
-- [Collections](collections/README.md): `/meme-lab`,
+- [Collections](collections/README.md): `/meme-lab`, `/meme-lab/{id}`,
   `/meme-lab/collection/{collection}`, `/rememes`, `/rememes/{contract}/{id}`,
   and `/rememes/add`.
 - [NFT](nft/README.md): ownership indicators, source fallbacks, marketplace
