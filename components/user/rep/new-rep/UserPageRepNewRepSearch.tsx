@@ -319,8 +319,10 @@ export default function UserPageRepNewRepSearch({
                   </div>
                   {isOpen && !selectedCategory && (
                     <div
+                      role="listbox"
                       className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-10 tw-mt-1 tw-p-2 tw-rounded-lg tw-bg-iron-900 tw-shadow-xl tw-ring-1 tw-ring-white/10"
-                      onClick={(e) => e.stopPropagation()}>
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}>
                       <UserPageRepNewRepSearchDropdown
                         categories={categoriesToDisplay}
                         state={repSearchState}

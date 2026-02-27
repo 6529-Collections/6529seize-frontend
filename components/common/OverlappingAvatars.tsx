@@ -41,10 +41,10 @@ function AvatarContent({
   fallback,
   avatarRing,
 }: {
-  pfpUrl: string | null;
-  ariaLabel?: string | undefined;
-  fallback?: string | undefined;
-  avatarRing: string;
+  readonly pfpUrl: string | null;
+  readonly ariaLabel?: string | undefined;
+  readonly fallback?: string | undefined;
+  readonly avatarRing: string;
 }) {
   const [imgError, setImgError] = useState(false);
 
