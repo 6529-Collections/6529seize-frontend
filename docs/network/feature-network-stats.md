@@ -4,77 +4,79 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`Network Stats` is the detailed network TDH and community stats route linked
-from the Health dashboard.
+`/network/health/network-tdh` shows global TDH history in a fixed 10-row view.
+It includes summary values, checkpoint estimates, and four TDH charts.
 
 ## Location in the Site
 
 - Route: `/network/health/network-tdh`
 - Sidebar path: `Network -> Metrics -> Network Stats`
+- Linked from `/network/health` through the `Network TDH` card.
+- Linked from `/network/tdh` through `View Network Stats`.
+- Linked from `/network/tdh/historic-boosts` through `Network Stats`.
+- Linked from `/network/definitions` through `Network Stats`.
 
 ## Entry Points
 
 - Open `Network -> Metrics -> Network Stats` in the sidebar.
-- Open `Network Stats` CTA buttons from `/network/tdh`,
-  `/network/tdh/historic-boosts`, or `/network/definitions`.
-- On Health, open the `Network TDH` card.
+- Open the `Network TDH` card on `/network/health`.
+- Open `View Network Stats` on `/network/tdh`.
+- Open `Network Stats` on `/network/tdh/historic-boosts`.
+- Open `Network Stats` on `/network/definitions`.
 
-## Known Behavior
+## What You See
 
-- The page hosts the Community Stats surface used for detailed network TDH and
-  related stats.
-- The Health dashboard `Network TDH` card links to this route.
-- CTA buttons labeled `Network Stats` across Network pages resolve to this
-  route.
-
-## Sections and Metrics
-
-- The route renders the `Network Stats` overview from the shared `CommunityStats`
-  component.
-- Network TDH summary table: total, daily change, and daily percentage change from
-  `total_boosted_tdh` history.
-- Estimated TDH checkpoint table from the latest `total_boosted_tdh` based on
-  `250_000_000` increments.
+- `Network Stats` heading (always visible).
+- Summary table with `Network TDH`, `Daily Change`, and `Daily % Change`.
+- Checkpoint table with 3 rows for next `250,000,000` TDH checkpoints.
 - `Total TDH` bar chart.
 - `Net TDH Daily Change` bar chart.
 - `Created TDH Daily Change` bar chart.
 - `Destroyed TDH Change` bar chart.
+- Every chart has boosted, unboosted, and unweighted series.
 
-## Metric Sources
+## Route Behavior
 
-- The summary table reads `total_boosted_tdh`, `net_boosted_tdh`, and derived
-  percentage values from the same `tdh_global_history` payload.
-- Each chart always renders three series: the boosted value, the base/total value,
-  and the raw value.
-- The checkpoint table is driven by `total_boosted_tdh` and extrapolated using the
-  current rate (`net_boosted_tdh`).
+- No query params, filters, sorting, pagination, or group-scope controls.
+- One request per load: `/api/tdh_global_history?page_size=10&page=1`.
+- Response rows are reversed client-side so charts render oldest to newest.
+- Browser title context is `Stats | Network` (`Stats` metadata title).
+- No route-level skeleton, spinner, retry button, or inline error banner.
+- Tables and charts render only when at least one history row is returned.
 
-## Route State and Data Source
+## Access and Permissions
 
-- This route has no query params, filters, or sorting controls.
-- The request is fixed to `page=1` and `page_size=10` against
-  `/api/tdh_global_history`.
-- The API payload is reversed client-side so charts and labels render oldest
-  sample first.
-- There is no visible pagination or "load more" behavior on this route.
+- Same route behavior for signed-in and signed-out users.
+- No wallet action, write action, or permission-gated control on this page.
 
-## Empty/Failure Behavior
+## Edge Cases
 
-- If the API returns no rows, the page shows only the title/header and no
-  summary or chart sections.
-- The UI does not expose a dedicated empty-state or inline retry control for this
-  dataset.
+- Empty API response: header only.
+- Request failure/non-OK response: header only (no visible error message).
+- `Network TDH` and `Daily Change` can show `-` when latest values are `0` or invalid.
+- `Daily % Change` can display `NaN%` or `Infinity%`.
+- Checkpoint estimates can display `In,fin,ity` when daily change is `0`.
+- Checkpoint estimates can become negative when daily change is negative.
+
+## Failure and Recovery
+
+- Refresh `/network/health/network-tdh` to send a new request.
+- Reopen from sidebar or from the `Network TDH` card on `/network/health`.
+- Reopen from `/network/tdh`, `/network/tdh/historic-boosts`, or `/network/definitions`.
+- If the route stays header-only, retry later (upstream history may be empty or unavailable).
+
+## Limitations
+
+- Fixed to the latest 10 rows.
+- No date-range selector.
+- No historical pagination.
 
 ## Cross-Route Behavior
 
-- `/network/health` links directly to this route from the `Network TDH` card.
-- `/network/tdh`, `/network/tdh/historic-boosts`, and
-  `/network/definitions` all link to `/network/health/network-tdh` via
-  `Network Stats` CTAs.
-- Route state is static; sharing the deep link always opens the same fixed view.
-- `Levels` is a separate route and does not receive route-level filter state from this
-  page.
-
+- Sharing `/network/health/network-tdh` always opens the same fixed view.
+- `/network/health`, `/network/tdh`, `/network/tdh/historic-boosts`, and
+  `/network/definitions` all link to this route.
+- `Levels` is a separate route and does not inherit any state from this page.
 
 ## Related Pages
 
@@ -82,4 +84,6 @@ from the Health dashboard.
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Definitions](feature-network-definitions.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
+- [TDH Historic Boosts](feature-tdh-historic-boosts.md)
+- [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
