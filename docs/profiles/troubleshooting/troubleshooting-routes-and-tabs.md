@@ -29,15 +29,22 @@ profile link lands somewhere unexpected.
   - The tab path is unsupported.
 - This is the shared not-found surface:
   - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
+- Legacy `/{user}/identity`, `/{user}/waves`, `/{user}/groups`, or
+  `/{user}/followers` links land on `/{user}`:
+  - these are redirect aliases, not dedicated tab routes
+  - see [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 - Legacy `/{user}/rep` links return not-found:
-  - the separate rep route is not supported
-  - use `/{user}/identity` for both rep and NIC profile behavior
+  - the separate `rep` route is not supported
+  - use `/{user}` for combined Rep and NIC behavior
 - Tab missing:
-  - `Brain`/`Waves` are hidden when Waves is disabled.
+  - `Brain` is hidden when Waves is disabled.
   - `Subscriptions` is hidden on iOS outside the US.
+  - `Proxy` is shown only on your own profile.
 - Identity tab content differs by screen size:
   - mobile starts with the rep subview
   - switch to the `NIC` score card to reach statements and NIC actions
+- Followers quick stat does not open a route:
+  - it opens an in-page modal list
 - Stats view shows mostly `-` values or empty activity panels:
   - The selected wallet has no activity/holdings for those rows.
   - Stats API requests failed and the UI fell back to empty placeholders.
@@ -69,6 +76,11 @@ profile link lands somewhere unexpected.
 - Entering a hidden-tab URL can redirect to the first visible tab.
 - Entering `/{user}/subscriptions` on iOS outside the US redirects to the
   first visible profile tab.
+- Entering `/{user}/proxy` on another user's profile redirects to `/{user}`.
+- Entering `/{user}/identity` keeps query parameters while redirecting to
+  `/{user}`.
+- Entering `/{user}/waves`, `/{user}/groups`, or `/{user}/followers` redirects
+  to `/{user}` without preserving query parameters.
 - Entering `/{user}/rep` is treated as an unsupported profile route.
 - Query parameters other than `address` can be dropped when switching tabs from
   tab links.
@@ -93,7 +105,7 @@ profile link lands somewhere unexpected.
     a BIO statement and refresh the route if a recent profile update should be
     visible.
 - Identity tab:
-  - If `/{user}/rep` bookmarks fail, replace them with `/{user}/identity`.
+  - If `/{user}/rep` bookmarks fail, replace them with `/{user}`.
   - If statements or NIC actions are not visible on mobile, switch from the rep
     card to the `NIC` card inside the tab.
 - Subscriptions tab:
@@ -115,5 +127,6 @@ profile link lands somewhere unexpected.
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
+- [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)

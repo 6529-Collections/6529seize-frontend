@@ -7,7 +7,8 @@ how statement sections are displayed, added, and edited.
 
 ## Location in the Site
 
-- Route: `/{user}/identity`
+- Canonical route: `/{user}`
+- Legacy alias: `/{user}/identity` (redirects to `/{user}`)
 - Desktop location: `NIC` side card in the combined Identity tab layout.
 - Mobile location: `Identity` subview inside the same route.
 - Primary sections:
@@ -19,14 +20,14 @@ how statement sections are displayed, added, and edited.
 
 ## Entry Points
 
-- Open `/{user}/identity` directly.
+- Open `/{user}` directly.
 - Switch to `Identity` from another profile tab.
 - On mobile, switch to the `Identity` subview from the `NIC` score card.
 - Follow a shared profile link that lands on the identity route.
 
 ## User Journey
 
-1. Open a profile on `/{user}/identity`.
+1. Open a profile on `/{user}`.
 2. Review consolidated addresses and existing statements grouped by category.
 3. If you are editing your own eligible profile, select `Add`.
 4. Choose a statement group, then choose the specific statement type.
@@ -96,6 +97,7 @@ how statement sections are displayed, added, and edited.
 - [Profiles Index](../README.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
 - [Profile Identity Tab](feature-identity-tab.md)
-- [Profile Tab Content](feature-tab-content.md)
+- [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
+- [Profiles Tabs Index](README.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

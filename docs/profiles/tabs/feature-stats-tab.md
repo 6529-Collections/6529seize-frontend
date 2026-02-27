@@ -115,7 +115,7 @@ Gradient.
 - [Profiles Index](../README.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
-- [Profile Tab Content](feature-tab-content.md)
+- [Profiles Tabs Index](README.md)
 - [TDH Boost Rules](../../network/feature-tdh-boost-rules.md)
 - [Network Definitions](../../network/feature-network-definitions.md)
 - [Pagination Controls](../../shared/feature-pagination-controls.md)

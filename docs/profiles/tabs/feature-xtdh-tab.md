@@ -36,7 +36,7 @@ viewing their own profile.
 
 ## User Journey
 
-1. Open `/[user]/xtdh`. If `tab` is missing, the route defaults to `granted`.
+1. Open `/{user}/xtdh`. If `tab` is missing, the route defaults to `granted`.
 2. Review the summary card (generated xTDH, received xTDH, and unused rate).
 3. Use `Granted` and `Received` tabs:
    - `Granted` shows grants this profile has created.

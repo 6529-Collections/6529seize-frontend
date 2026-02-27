@@ -18,7 +18,7 @@ and what happens when the current route is not canonical.
 
 ## User Journey
 
-1. Open a URL like `/{user}/identity` or `/{user}/stats`.
+1. Open a URL like `/{user}` or `/{user}/stats`.
 2. If `{user}` is not the canonical handle, the app redirects to the canonical
    handle while keeping tab context and query parameters.
 3. Use the tab bar to move between profile sections.
@@ -28,8 +28,10 @@ and what happens when the current route is not canonical.
 
 - Open a user by wallet address, then continue browsing on the resolved handle.
 - Keep the wallet address filter (`?address=...`) while switching tabs.
-- Use profile-header quick stats: `NIC` and `Rep` both route to
-  `/{user}/identity`.
+- Use profile-header quick stats:
+  - `NIC` and `Rep` route to `/{user}`
+  - `TDH` routes to `/{user}/collected`
+  - `xTDH` routes to `/{user}/xtdh`
 - Rename your profile handle and continue on the same tab under the new handle
   URL.
 - When a profile has no handle (or only emoji-style display text), the browser
@@ -44,8 +46,11 @@ and what happens when the current route is not canonical.
 - During canonical-handle redirects, repeated query keys can be normalized into
   single comma-separated values.
 - Unknown tab routes do not resolve to a profile tab page.
+- `/{user}/identity`, `/{user}/waves`, `/{user}/groups`, and `/{user}/followers`
+  are legacy aliases that redirect to `/{user}`:
+  [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
 - Legacy `/{user}/rep` links are treated as unknown tab routes; the supported
-  destination is `/{user}/identity`.
+  destination is `/{user}`.
 - Profiles without a handle (or with emoji-only display text) still render a
   user-specific browser title by falling back to a shortened wallet identifier.
 
@@ -55,8 +60,7 @@ and what happens when the current route is not canonical.
   [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
 - If a redirect target cannot be resolved due to a transient error, reloading
   retries profile resolution.
-- If a saved `/{user}/rep` URL fails, replace it with `/{user}/identity` and
-  retry navigation.
+- If a saved `/{user}/rep` URL fails, replace it with `/{user}` and retry.
 
 ## Limitations / Notes
 
@@ -70,5 +74,6 @@ and what happens when the current route is not canonical.
 - [Profiles Index](../README.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Tabs](feature-tabs.md)
+- [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

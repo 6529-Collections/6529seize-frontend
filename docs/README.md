@@ -21,7 +21,7 @@ Profile `about/*` behavior is documented under [Profiles](profiles/README.md).
 - [Home](home/README.md): first-run and landing flow at `/`.
 - [Navigation](navigation/README.md): route switching, app-shell controls, and search at `/discover`, `/waves`, `/messages`, and `/network`.
 - [Waves](waves/README.md): discover, create, chat, and interact with drops at `/discover`, `/waves`, `/waves/{id}`, and `/messages`.
-- [Profiles](profiles/README.md): profile routes and tab behavior at `/[user]` and `/username/waves`.
+- [Profiles](profiles/README.md): profile routes and tabs at `/{user}` plus `About -> Primary Address` at `/about/primary-address`.
 - [Media](media/README.md): NFT/media surfaces, minting, and rendering at `/6529-gradient`, `/the-memes`, `/meme-lab`, `/rememes`, and `/meme-calendar`.
 - [Notifications](notifications/README.md): `/notifications` feed behavior, filtering, and push settings.
 - [Network](network/README.md): scoring, leaderboards, health, and TDH/xTDH rules.

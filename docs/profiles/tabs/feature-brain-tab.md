@@ -2,33 +2,32 @@
 
 ## Overview
 
-The `Brain` tab shows a profile's drop feed on the profile root route. It lets
-users read that profile's recent drops and open each drop in a profile-local
-drop surface, then move to the related wave or direct-message thread as needed.
+The `Brain` tab shows a profile's drop feed.
+It lets users read recent drops and open a profile-local single-drop surface.
 
 ## Location in the Site
 
-- Route: `/{user}`
+- Route: `/{user}/brain`
 - Visible as the `Brain` tab when Waves features are enabled for the current
   runtime context.
 
 ## Entry Points
 
-- Open `/{user}` directly.
+- Open `/{user}/brain` directly.
 - Switch to `Brain` from another profile tab.
-- Follow a shared profile root URL.
+- Follow a shared Brain-tab URL.
 
 ## User Journey
 
-1. Open a profile root URL.
+1. Open `/{user}/brain`.
 2. The page resolves the profile and loads the first set of drops.
 3. Scroll to load older drops as needed.
 4. Select a drop to open a profile-local single-drop surface.
 
 ## Common Scenarios
 
-- Visit someone else's profile root to read their latest drops.
-- Visit your own profile root to review your recent drops.
+- Visit someone else's profile Brain tab to read latest drops.
+- Visit your own profile Brain tab to review recent drops.
 - While the first page is loading, the tab shows `Loading drops...` with a
   centered spinner.
 - If no drops are available, the page shows `No Drops to show`.
@@ -67,7 +66,7 @@ drop surface, then move to the related wave or direct-message thread as needed.
 
 - [Profiles Index](../README.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
-- [Profile Tab Content](feature-tab-content.md)
+- [Profiles Tabs Index](README.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

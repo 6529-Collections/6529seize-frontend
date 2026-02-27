@@ -6,18 +6,14 @@ This subarea documents user-visible behavior inside profile tabs.
 
 ## Features
 
-- [Profile Brain Tab](feature-brain-tab.md)
 - [Profile Identity Tab](feature-identity-tab.md)
 - [Profile Identity Statements](feature-identity-statements.md)
-- [Profile Proxy Tab](feature-proxy-tab.md)
-- [Profile Groups Tab](feature-groups-tab.md)
+- [Profile Brain Tab](feature-brain-tab.md)
 - [Collected Tab and Transfer Controls](feature-collected-tab.md)
-- [Profile Followers Tab](feature-followers-tab.md)
-- [Profile Waves Tab](feature-waves-tab.md)
+- [Profile xTDH Tab](feature-xtdh-tab.md)
 - [Profile Stats Tab](feature-stats-tab.md)
 - [Profile Subscriptions Tab](feature-subscriptions-tab.md)
-- [Profile xTDH Tab](feature-xtdh-tab.md)
-- [Profile Tab Content](feature-tab-content.md)
+- [Profile Proxy Tab](feature-proxy-tab.md)
 
 ## Flows
 

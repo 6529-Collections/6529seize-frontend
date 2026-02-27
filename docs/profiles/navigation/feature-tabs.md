@@ -2,24 +2,20 @@
 
 ## Overview
 
-User profiles are tabbed pages under `/{user}`. Each tab has a stable URL, so
-users can deep-link to a specific profile section. The `Identity` tab is the
-single route for both `Rep` and `NIC` profile behavior.
+Profiles use tab routes under `/{user}`.
+`Identity` (`Rep` + `NIC`) is the default tab and canonical profile route.
 
 ## Location in the Site
 
-- Profile root: `/{user}`
-- Tab routes:
-  - `/{user}` (Brain)
-  - `/{user}/identity`
+- Profile root and default tab:
+  - `/{user}` (`Identity`)
+- Additional tab routes:
+  - `/{user}/brain`
   - `/{user}/collected`
   - `/{user}/xtdh` (Beta)
   - `/{user}/stats`
   - `/{user}/subscriptions`
   - `/{user}/proxy`
-  - `/{user}/groups`
-  - `/{user}/waves`
-  - `/{user}/followers`
 
 ## Entry Points
 
@@ -36,9 +32,8 @@ single route for both `Rep` and `NIC` profile behavior.
 
 ## Common Scenarios
 
-- Visiting `/{user}` opens the Brain feed for that profile.
-- Visiting `/{user}/identity` opens the combined Identity tab (`Rep` + `NIC`)
-  directly.
+- Visiting `/{user}` opens the Identity tab (`Rep` + `NIC`).
+- Visiting `/{user}/brain` opens the Brain feed when Waves are enabled.
 - Visiting `/{user}/stats` opens Stats directly.
 - Visiting with `?address=<wallet>` keeps that wallet filter when switching tabs.
 - Visiting by wallet or old handle can redirect to the canonical handle URL.
@@ -47,13 +42,17 @@ single route for both `Rep` and `NIC` profile behavior.
 
 ## Edge Cases
 
-- `Brain` and `Waves` tabs are hidden when the Waves feature is disabled.
+- `Brain` is hidden when Waves are disabled.
 - `Subscriptions` is hidden on iOS when the country is not `US`.
+- `Proxy` is hidden when viewing another profile.
 - If a user lands on a tab that is currently hidden, the app redirects to the
   first visible tab for that profile.
 - Canonical-handle redirects keep existing query parameters.
-- Legacy `/{user}/rep` links are unsupported and should be updated to
-  `/{user}/identity`.
+- Profile tab links preserve only `address` from the query string.
+- Legacy aliases `/{user}/identity`, `/{user}/waves`, `/{user}/groups`, and
+  `/{user}/followers` redirect to `/{user}`:
+  [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
+- Legacy `/{user}/rep` links are unsupported and should be updated to `/{user}`.
 
 ## Failure and Recovery
 
@@ -65,21 +64,17 @@ single route for both `Rep` and `NIC` profile behavior.
 ## Limitations / Notes
 
 - Tab availability can change by device and feature context.
-- `/{user}` only resolves the Brain tab when Waves is currently visible in the
-  tab set.
-- Tab links preserve the `address` query parameter but may drop unrelated query
-  parameters.
-- Profile quick stats for both `NIC` and `Rep` land on `/{user}/identity`.
+- Profile quick stats for both `NIC` and `Rep` land on `/{user}`.
 - The `xTDH` tab is labeled Beta.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
 - [Profile Header Summary](feature-header-summary.md)
+- [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Identity Statements](../tabs/feature-identity-statements.md)
-- [Profile Tab Content](../tabs/feature-tab-content.md)
 - [Profile Stats Tab](../tabs/feature-stats-tab.md)
 - [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
 - [Profile Navigation Flow](flow-navigation.md)

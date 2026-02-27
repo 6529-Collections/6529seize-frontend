@@ -8,6 +8,7 @@ normalization, and the shared profile header behavior.
 ## Features
 
 - [Profile Tabs](feature-tabs.md)
+- [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Picture Editing](feature-profile-picture-editing.md)
 - [Profile Banner Editing](feature-banner-editing.md)

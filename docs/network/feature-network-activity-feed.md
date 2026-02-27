@@ -69,4 +69,4 @@ It covers profile edits, proxy updates, and REP/NIC rating updates.
 - [Network Group Scope Flow](flow-network-group-scope.md)
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
 - [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
-- [Profiles Activity and Tabs](../profiles/tabs/feature-tab-content.md)
+- [Profiles Tabs Index](../profiles/tabs/README.md)

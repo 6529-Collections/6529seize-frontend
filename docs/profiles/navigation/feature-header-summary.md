@@ -28,11 +28,11 @@ activity visibility, and profile actions.
    - name and metadata
    - About text when applicable
 4. Use quick stat links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`) to move to
-   related profile routes:
+   related profile surfaces:
    - `TDH` -> `/{user}/collected`
    - `xTDH` -> `/{user}/xtdh`
-   - `NIC` and `Rep` -> `/{user}/identity`
-   - `Followers` -> `/{user}/followers`
+   - `NIC` and `Rep` -> `/{user}`
+   - `Followers` -> opens the followers modal in-place (no route change)
 5. If the profile has main-stage activity, an artist activity badge appears next
    to the name line:
    - palette style for active submissions
@@ -62,8 +62,9 @@ activity visibility, and profile actions.
   and direct-message actions.
 - Viewing your own profile with no active proxy context enables profile editing
   controls in the header.
-- The `NIC` and `Rep` quick stat links both route to the same combined identity
-  tab (`/{user}/identity`).
+- The `NIC` and `Rep` quick stat links both route to `/{user}`.
+- The `Followers` quick stat opens a modal list and does not navigate to a
+  dedicated followers tab route.
 - The artist activity badge appears only when at least one of these is true:
   - `active_main_stage_submission_ids` is non-empty
   - `winner_main_stage_drop_ids` is non-empty
@@ -110,8 +111,8 @@ activity visibility, and profile actions.
 - [Profile Picture Editing](feature-profile-picture-editing.md)
 - [Profile Banner Editing](feature-banner-editing.md)
 - [Profile Tabs](feature-tabs.md)
+- [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Navigation Flow](flow-navigation.md)
-- [Profile Tab Content](../tabs/feature-tab-content.md)
 - [Wave Drop Artist Preview Modal](../../waves/drop-actions/feature-artist-preview-modal.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

@@ -72,7 +72,7 @@ proxy lists in one surface.
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Tab Content](feature-tab-content.md)
+- [Profiles Tabs Index](README.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

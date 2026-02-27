@@ -109,7 +109,7 @@ set edition preference, and manage per-drop upcoming subscription counts.
 
 - [Profiles Index](../README.md)
 - [Profile Tabs](../navigation/feature-tabs.md)
-- [Profile Tab Content](feature-tab-content.md)
+- [Profiles Tabs Index](README.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Memes Subscriptions Report](../../api-tool/feature-memes-subscriptions-report.md)
