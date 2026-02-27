@@ -4,21 +4,16 @@ import { useEffect, useState } from "react";
 import type {
   CreateWaveConfig,
   CreateWaveOutcomeType,
-  TimeWeightedVotingSettings} from "@/types/waves.types";
-import {
-  CreateWaveGroupConfigType,
-  CreateWaveStep
+  TimeWeightedVotingSettings,
 } from "@/types/waves.types";
+import { CreateWaveGroupConfigType, CreateWaveStep } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { Period } from "../types/period";
-import type {
-  CREATE_WAVE_VALIDATION_ERROR} from "@/helpers/waves/create-wave.validation";
-import {
-  getCreateWaveValidationErrors
-} from "@/helpers/waves/create-wave.validation";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 interface EndDateConfig {
@@ -67,7 +62,7 @@ export function useWaveConfig() {
         requiredMetadata: [],
         terms: null,
         signatureRequired: false,
-        adminCanDeleteDrops: false,
+        adminCanDeleteDrops: true,
       },
       voting: {
         type: ApiWaveCreditType.TdhPlusXtdh,
