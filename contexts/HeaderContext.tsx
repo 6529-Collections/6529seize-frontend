@@ -1,16 +1,14 @@
 "use client";
 
-import type {
-  ReactNode,
-  RefObject} from "react";
 import React, {
   createContext,
-  useState,
-  useContext,
-  useRef,
   useCallback,
+  useContext,
   useMemo,
+  useRef,
+  useState,
 } from "react";
+import type { ReactNode, RefObject } from "react";
 
 interface HeaderContextType {
   headerRef: RefObject<HTMLDivElement | null>;

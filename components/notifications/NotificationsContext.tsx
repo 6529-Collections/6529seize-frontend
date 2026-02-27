@@ -1,16 +1,12 @@
 "use client";
 
-import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useCapacitor from "@/hooks/useCapacitor";
-import { commonApiPost } from "@/services/api/common-api";
-import type { DeviceInfo } from "@capacitor/device";
-import { Device } from "@capacitor/device";
-import type { PushNotificationSchema } from "@capacitor/push-notifications";
-import { PushNotifications } from "@capacitor/push-notifications";
+import { Device, type DeviceInfo } from "@capacitor/device";
+import {
+  PushNotifications,
+  type PushNotificationSchema,
+} from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import React, {
   createContext,
   useCallback,
@@ -19,7 +15,13 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
+import { type ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useAuth } from "../auth/Auth";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { getStableDeviceId } from "./stable-device-id";
 
 const MAX_REGISTRATION_RETRIES = 3;
@@ -117,9 +119,26 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
   const { connectedProfile } = useAuth();
+  const { address, connectedAccounts, seizeSwitchConnectedAccount } =
+    useSeizeConnectContext();
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
   const isRegisteredRef = useRef(false);
+  const connectedProfileRef = useRef<ApiIdentity | null>(connectedProfile);
+  const connectedAccountsRef = useRef(connectedAccounts);
+  const activeAddressRef = useRef(address);
+
+  useEffect(() => {
+    connectedProfileRef.current = connectedProfile;
+  }, [connectedProfile]);
+
+  useEffect(() => {
+    connectedAccountsRef.current = connectedAccounts;
+  }, [connectedAccounts]);
+
+  useEffect(() => {
+    activeAddressRef.current = address;
+  }, [address]);
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
@@ -139,21 +158,74 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const handlePushNotificationAction = useCallback(
     async (
       routerInstance: ReturnType<typeof useRouter>,
-      notification: PushNotificationSchema,
-      profileInstance?: ApiIdentity
+      notification: PushNotificationSchema
     ) => {
       const notificationData = notification.data ?? {};
-      const notificationProfileId = notificationData.profile_id;
+      const notificationProfileId =
+        typeof notificationData.profile_id === "string"
+          ? notificationData.profile_id
+          : null;
 
-      if (
-        profileInstance &&
-        notificationProfileId &&
-        notificationProfileId !== profileInstance.id
-      ) {
-        console.warn(
-          "Notification profile id does not match connected profile"
-        );
-        return;
+      if (notificationProfileId) {
+        let matchedAddress: string | null = null;
+
+        if (
+          connectedProfileRef.current?.id === notificationProfileId &&
+          activeAddressRef.current
+        ) {
+          matchedAddress = activeAddressRef.current;
+        } else {
+          const roleMatchedAccount = connectedAccountsRef.current.find(
+            (account) => account.role === notificationProfileId
+          );
+          if (roleMatchedAccount) {
+            matchedAddress = roleMatchedAccount.address;
+          }
+        }
+
+        if (!matchedAddress) {
+          const lookupResults = await Promise.all(
+            connectedAccountsRef.current.map(async (account) => {
+              try {
+                const identity = await commonApiFetch<ApiIdentity>({
+                  endpoint: `identities/${account.address.toLowerCase()}`,
+                });
+                return identity.id === notificationProfileId
+                  ? account.address
+                  : null;
+              } catch {
+                return null;
+              }
+            })
+          );
+          matchedAddress =
+            lookupResults.find((resolved): resolved is string => !!resolved) ??
+            null;
+        }
+
+        if (!matchedAddress) {
+          console.warn(
+            "Ignoring notification: profile is not one of connected accounts",
+            { notificationProfileId }
+          );
+          return;
+        }
+
+        const activeAddress = activeAddressRef.current;
+        if (
+          !activeAddress ||
+          activeAddress.toLowerCase() !== matchedAddress.toLowerCase()
+        ) {
+          try {
+            await Promise.resolve(seizeSwitchConnectedAccount(matchedAddress));
+          } catch (error) {
+            console.warn(
+              "Ignoring notification: failed to switch to matched connected profile",
+              { notificationProfileId, matchedAddress, error }
+            );
+            return;
+          }
+        }
       }
 
       await removeDeliveredNotifications([notification]);
@@ -168,7 +240,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         );
       }
     },
-    [removeDeliveredNotifications]
+    [removeDeliveredNotifications, seizeSwitchConnectedAccount]
   );
 
   const initializePushNotifications = useCallback(
@@ -212,11 +284,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         await PushNotifications.addListener(
           "pushNotificationActionPerformed",
           async (action) => {
-            await handlePushNotificationAction(
-              router,
-              action.notification,
-              profile
-            );
+            await handlePushNotificationAction(router, action.notification);
           }
         );
 

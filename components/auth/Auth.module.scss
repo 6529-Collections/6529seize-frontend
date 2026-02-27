@@ -1,19 +1,154 @@
 @use "../../styles/variables.scss";
 
-.signModalHeader {
-  padding: 1rem;
-  background-color: variables.$bg-color-2 !important;
-  color: variables.$font-color !important;
-  border: 1px solid variables.$lighter-grey !important;
-  border-radius: 0 !important;
+.signModalDialog {
+  max-width: min(32rem, calc(100vw - 2rem));
+  margin: 0.75rem auto;
 }
 
-.signModalContent {
-  background-color: variables.$bg-color-2 !important;
+.signModalSurface {
+  background: linear-gradient(
+    180deg,
+    rgba(38, 39, 43, 0.98) 0%,
+    rgba(19, 19, 22, 0.98) 100%
+  ) !important;
   color: variables.$font-color !important;
-  border-top: 0 !important;
-  border-bottom: 1px solid variables.$lighter-grey !important;
-  border-left: 1px solid variables.$lighter-grey !important;
-  border-right: 1px solid variables.$lighter-grey !important;
-  border-radius: 0 !important;
+  border: 1px solid rgba(147, 147, 159, 0.35) !important;
+  border-radius: 0.9rem !important;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.signModalHeader {
+  padding: 1.15rem 1.25rem 1.05rem !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(147, 147, 159, 0.22) !important;
+}
+
+.signModalTitle {
+  margin: 0;
+  color: #f5f5f5;
+  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.signModalBody {
+  padding: 1rem 1.25rem !important;
+  background: transparent !important;
+  color: #ececee !important;
+}
+
+.signModalLead {
+  margin: 0 0 0.8rem;
+  color: #ececee;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.signModalList {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #cecfd4;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+}
+
+.signModalList li {
+  line-height: 1.5;
+}
+
+.signModalFooter {
+  display: flex;
+  justify-content: flex-end !important;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem 1rem !important;
+  background: transparent !important;
+  border-top: 1px solid rgba(147, 147, 159, 0.22) !important;
+}
+
+.signModalCancelButton,
+.signModalConfirmButton {
+  min-width: 8rem;
+  height: 2.55rem;
+  border-radius: 0.7rem !important;
+  border: 1px solid transparent !important;
+  padding: 0 1rem !important;
+  font-weight: 600 !important;
+  font-size: 0.98rem !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.signModalCancelButton {
+  background: #1c1c21 !important;
+  border-color: #37373e !important;
+  color: #f5f5f5 !important;
+}
+
+.signModalCancelButton:hover:not(:disabled),
+.signModalCancelButton:focus-visible:not(:disabled) {
+  background: #26272b !important;
+  color: #ffffff !important;
+}
+
+.signModalConfirmButton {
+  background: #406afe !important;
+  border-color: #406afe !important;
+  color: #ffffff !important;
+}
+
+.signModalConfirmButton:hover:not(:disabled),
+.signModalConfirmButton:focus-visible:not(:disabled) {
+  background: #395fe4 !important;
+  border-color: #395fe4 !important;
+  color: #ffffff !important;
+}
+
+.signModalCancelButton:disabled,
+.signModalConfirmButton:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+
+.signModalButtonContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+  .signModalDialog {
+    max-width: calc(100vw - 1rem);
+    margin: 0.5rem auto;
+  }
+
+  .signModalHeader,
+  .signModalBody,
+  .signModalFooter {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .signModalFooter {
+    justify-content: space-between !important;
+  }
+
+  .signModalCancelButton,
+  .signModalConfirmButton {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.95rem !important;
+  }
+
+  .signModalLead {
+    font-size: 0.95rem;
+  }
 }
