@@ -11,19 +11,26 @@ The page heading is `Meme Subscriptions Downloads`.
 
 - Route: `/open-data/meme-subscriptions`
 - Hub route: `/open-data`
-- Desktop sidebar path: `Tools -> Open Data -> Meme Subscriptions`
+- Web sidebar path: `Tools -> Open Data -> Meme Subscriptions`
+- Native app menu path: `Tools -> Open Data`, then open the hub card or direct
+  URL.
 
 ## Entry Points
 
 - Open the `Meme Subscriptions` card on `/open-data`.
-- Open `Tools -> Open Data -> Meme Subscriptions` in the desktop sidebar.
+- Open `Tools -> Open Data -> Meme Subscriptions` in the web sidebar.
 - Open `/open-data/meme-subscriptions` directly.
 
 ## Visibility Rules
 
-- The hub card and desktop-sidebar link are hidden when both are true:
+- The hub card is hidden when both are true:
   - The user is in the native iOS app.
   - Cookie-country is not `US`.
+- On native iOS, the hub card can be temporarily hidden while cookie-country is
+  still loading.
+- The iOS country rule affects hub-card visibility only.
+- The web sidebar route link remains available.
+- The native app menu does not list per-dataset Open Data routes.
 - Direct navigation to `/open-data/meme-subscriptions` still works.
 
 ## Data Source

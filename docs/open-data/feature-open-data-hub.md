@@ -11,13 +11,13 @@ dataset routes.
 ## Location in the Site
 
 - Route: `/open-data`
-- Desktop sidebar path: `Tools -> Open Data -> Open Data`
-- Mobile sidebar path: `Tools -> Open Data`
+- Web sidebar path: `Tools -> Open Data -> Open Data`
+- Native app menu path: `Tools -> Open Data`
 
 ## Entry Points
 
-- Open `Tools -> Open Data -> Open Data` from the desktop sidebar.
-- Open `Tools -> Open Data` from the mobile sidebar.
+- Open `Tools -> Open Data -> Open Data` from the web sidebar.
+- Open `Tools -> Open Data` from the native app menu.
 - Open `/open-data` directly.
 - Open the `/open-data` links from `/about/minting` and
   `/about/data-decentralization`.
@@ -33,8 +33,8 @@ dataset routes.
    - Royalties
 3. The selected card opens its dataset route under `/open-data/*`.
 
-Desktop sidebar navigation also includes direct links to each dataset route.
-Mobile sidebar navigation links only to `/open-data`.
+Web sidebar navigation also includes direct links to each dataset route.
+Native app menu navigation links only to `/open-data`.
 
 ## Visibility Rules
 
@@ -44,6 +44,7 @@ Mobile sidebar navigation links only to `/open-data`.
 - `Meme Subscriptions` is hidden on native iOS when cookie-country is not `US`.
 - On native iOS, the card can be temporarily hidden while cookie-country is
   still loading.
+- The iOS country rule affects the hub card only.
 - Direct navigation to `/open-data/meme-subscriptions` still works when the
   card is hidden.
 
