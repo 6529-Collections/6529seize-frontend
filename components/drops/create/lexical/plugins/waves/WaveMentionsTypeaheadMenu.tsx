@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { WaveMentionTypeaheadOption } from "./WaveMentionsPlugin";
 import WaveMentionsTypeaheadMenuItem from "./WaveMentionsTypeaheadMenuItem";
 
@@ -16,45 +16,70 @@ export default function WaveMentionsTypeaheadMenu({
   readonly selectOptionAndCleanUp: (option: WaveMentionTypeaheadOption) => void;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<"top" | "bottom">("bottom");
 
-  const getPositionSnapshot = useCallback(() => {
-    if (globalThis.window === undefined) return "bottom";
+  const updatePosition = useCallback(() => {
+    if (globalThis.window === undefined) return;
     const win = globalThis.window;
     const element = menuRef.current;
-    if (!element) return "bottom";
+    if (!element) return;
     const rect = element.getBoundingClientRect();
     const spaceAbove = rect.top;
     const spaceBelow = win.innerHeight - rect.bottom;
-    return spaceBelow >= spaceAbove ? "bottom" : "top";
+    const nextPosition: "top" | "bottom" =
+      spaceBelow >= spaceAbove ? "bottom" : "top";
+
+    setPosition((current) =>
+      current === nextPosition ? current : nextPosition
+    );
   }, []);
 
-  const subscribeToPosition = useCallback((onStoreChange: () => void) => {
-    if (globalThis.window === undefined) {
-      return () => {};
-    }
+  useEffect(() => {
+    if (globalThis.window === undefined) return;
+
     const win = globalThis.window;
-    const handleChange = () => onStoreChange();
-    win.addEventListener("resize", handleChange);
+    const cancelInitialUpdate =
+      typeof win.requestAnimationFrame === "function"
+        ? (() => {
+            const frame = win.requestAnimationFrame(() => {
+              updatePosition();
+            });
+            return () => {
+              win.cancelAnimationFrame(frame);
+            };
+          })()
+        : (() => {
+            const timeout = win.setTimeout(() => {
+              updatePosition();
+            }, 0);
+            return () => {
+              win.clearTimeout(timeout);
+            };
+          })();
 
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && menuRef.current) {
-      resizeObserver = new ResizeObserver(handleChange);
-      resizeObserver.observe(menuRef.current);
+    win.addEventListener("resize", updatePosition);
+
+    if (typeof ResizeObserver === "undefined") {
+      return () => {
+        cancelInitialUpdate();
+        win.removeEventListener("resize", updatePosition);
+      };
     }
 
-    handleChange();
+    const resizeObserver = new ResizeObserver(() => {
+      updatePosition();
+    });
+    const element = menuRef.current;
+    if (element) {
+      resizeObserver.observe(element);
+    }
 
     return () => {
-      win.removeEventListener("resize", handleChange);
-      resizeObserver?.disconnect();
+      cancelInitialUpdate();
+      win.removeEventListener("resize", updatePosition);
+      resizeObserver.disconnect();
     };
-  }, []);
-
-  const position = useSyncExternalStore(
-    subscribeToPosition,
-    getPositionSnapshot,
-    () => "bottom"
-  );
+  }, [updatePosition]);
 
   return (
     <div
@@ -78,7 +103,9 @@ export default function WaveMentionsTypeaheadMenu({
             }}
             name={option.name}
             picture={option.picture}
-            setRefElement={(element) => option.setRefElement(element)}
+            setRefElement={(element) => {
+              option.setRefElement(element);
+            }}
           />
         ))}
       </ul>
