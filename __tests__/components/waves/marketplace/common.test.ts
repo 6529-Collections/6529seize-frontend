@@ -26,6 +26,7 @@ const DEFAULT_NFT_LINK_DATA: NonNullable<ApiDropNftLink["data"]> = {
   media_uri: "https://cdn.example.com/nft.png",
   last_error_message: null,
   price: "0.5 ETH",
+  price_currency: "ETH",
   last_successfully_updated: 1735689600,
   failed_since: null,
   media_preview: null,
@@ -104,6 +105,7 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
         platform: "opensea",
         title: "Seeded NFT",
         price: "0.5 ETH",
+        priceCurrency: "ETH",
         media: {
           url: "https://cdn.example.com/nft.png",
           mimeType: "image/png",
@@ -290,6 +292,7 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
         description: null,
         media: null,
         price: null,
+        priceCurrency: null,
       }
     );
 
@@ -310,6 +313,7 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
         title: "Existing title",
         description: "Seeded from drop nft_links",
         price: "0.5 ETH",
+        priceCurrency: "ETH",
         media: {
           url: "https://cdn.example.com/nft.png",
           mimeType: "image/png",

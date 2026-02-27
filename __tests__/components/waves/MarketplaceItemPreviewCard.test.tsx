@@ -46,7 +46,8 @@ describe("MarketplaceItemPreviewCard", () => {
           mediaUrl="https://arweave.net/test-image"
           mediaMimeType="image/*"
           title="  Wave Artifact  "
-          price=" 1.25 ETH "
+          price=" 1.25 "
+          priceCurrency=" ETH "
         />
       </LinkPreviewProvider>
     );
@@ -73,9 +74,10 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.getByTestId("marketplace-item-title")).toHaveTextContent(
       "Wave Artifact"
     );
-    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
-      "1.25 ETH"
-    );
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent("1.25");
+    expect(
+      screen.getByTestId("marketplace-item-price-currency")
+    ).toHaveTextContent("ETH");
     expect(
       screen.getByTestId("marketplace-item-copy-button")
     ).toBeInTheDocument();
@@ -103,16 +105,18 @@ describe("MarketplaceItemPreviewCard", () => {
           href={href}
           mediaUrl="https://arweave.net/test-image"
           mediaMimeType="image/*"
-          price=" 0.77 ETH "
+          price=" 0.77 "
+          priceCurrency=" ETH "
         />
       </LinkPreviewProvider>
     );
 
     const foundationLogo = screen.getByAltText("Foundation logo");
-    expect(foundationLogo).toHaveAttribute("src", "/foundation-icon.jpg");
-    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
-      "0.77 ETH"
-    );
+    expect(foundationLogo).toHaveAttribute("src", "/foundation.png");
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent("0.77");
+    expect(
+      screen.getByTestId("marketplace-item-price-currency")
+    ).toHaveTextContent("ETH");
     expect(screen.getByTestId("marketplace-item-cta-link")).toHaveAttribute(
       "aria-label",
       "Open on Foundation - 0.77 ETH"
@@ -158,7 +162,8 @@ describe("MarketplaceItemPreviewCard", () => {
           href="https://example.com/item/3"
           mediaUrl="https://arweave.net/test-image"
           mediaMimeType="image/*"
-          price=" 0.42 ETH "
+          price=" 0.42 "
+          priceCurrency=" USDC "
         />
       </LinkPreviewProvider>
     );
@@ -167,12 +172,34 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
     expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
     expect(ctaLink.className).toContain("tw-border-white");
-    expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 0.42 ETH");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 0.42 USDC");
     expect(screen.queryByTestId("marketplace-item-cta-open-icon")).toBeNull();
-    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
-      "0.42 ETH"
-    );
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent("0.42");
+    expect(
+      screen.getByTestId("marketplace-item-price-currency")
+    ).toHaveTextContent("USDC");
     expect(screen.queryByAltText(/logo$/i)).toBeNull();
+  });
+
+  it("strips trailing currency token from price when price_currency matches", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://example.com/item/eth-cleanup"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          price=" 1.25 ETH "
+          priceCurrency=" ETH "
+        />
+      </LinkPreviewProvider>
+    );
+
+    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    expect(ctaLink).toHaveAttribute("aria-label", "Open listing - 1.25 ETH");
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent("1.25");
+    expect(
+      screen.getByTestId("marketplace-item-price-currency")
+    ).toHaveTextContent("ETH");
   });
 
   it("renders full-mode light brand CTA when price is missing but marketplace is known", () => {
@@ -186,7 +213,9 @@ describe("MarketplaceItemPreviewCard", () => {
       </LinkPreviewProvider>
     );
 
-    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    const ctaLink = screen.getByRole("link", {
+      name: "Open on Manifold",
+    });
     expect(ctaLink).toHaveAttribute("aria-label", "Open on Manifold");
     expect(ctaLink.className).toContain("tw-bg-[#E5E5E5]");
     expect(ctaLink.className).toContain("tw-text-[#0A0A0A]");
@@ -238,23 +267,27 @@ describe("MarketplaceItemPreviewCard", () => {
           mediaUrl="https://arweave.net/test-image"
           mediaMimeType="image/*"
           compact={true}
-          price=" 1.25 ETH "
+          price=" 1.25 "
+          priceCurrency=" ETH "
         />
       </LinkPreviewProvider>
     );
 
     expect(screen.queryByTestId("marketplace-item-footer")).toBeNull();
 
-    const ctaLink = screen.getByTestId("marketplace-item-cta-link");
+    const ctaLink = screen.getByRole("link", {
+      name: "Open on Manifold - 1.25 ETH",
+    });
     expect(ctaLink).toHaveClass("tw-absolute", "tw-right-3", "tw-top-[5.5rem]");
     expect(ctaLink).toHaveAttribute(
       "aria-label",
       "Open on Manifold - 1.25 ETH"
     );
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
-    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
-      "1.25 ETH"
-    );
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent("1.25");
+    expect(
+      screen.getByTestId("marketplace-item-price-currency")
+    ).toHaveTextContent("ETH");
     expect(
       screen.getByTestId("marketplace-item-overlay-copy-button")
     ).toBeInTheDocument();
@@ -282,7 +315,7 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.queryByTestId("marketplace-item-overlay-open-link")
     ).toBeNull();
-    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveClass(
+    expect(screen.getByRole("link", { name: "Open on Manifold" })).toHaveClass(
       "tw-top-3"
     );
   });
@@ -295,7 +328,8 @@ describe("MarketplaceItemPreviewCard", () => {
           mediaUrl="https://arweave.net/test-image"
           mediaMimeType="image/*"
           compact={true}
-          price=" 0.42 ETH "
+          price=" 0.42 "
+          priceCurrency=" ETH "
         />
       </LinkPreviewProvider>
     );
@@ -303,13 +337,13 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(
       screen.getByTestId("marketplace-item-cta-fallback-icon")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveAttribute(
-      "aria-label",
-      "Open listing - 0.42 ETH"
-    );
-    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent(
-      "0.42 ETH"
-    );
+    expect(
+      screen.getByRole("link", { name: "Open listing - 0.42 ETH" })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("manifold-item-price")).toHaveTextContent("0.42");
+    expect(
+      screen.getByTestId("marketplace-item-price-currency")
+    ).toHaveTextContent("ETH");
     expect(screen.queryByAltText(/logo$/i)).toBeNull();
   });
 });

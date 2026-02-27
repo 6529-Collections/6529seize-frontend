@@ -15,7 +15,8 @@ interface MarketplaceFullFooterProps {
   readonly ctaAriaLabel: string;
   readonly hideActions: boolean;
   readonly hasPrice: boolean;
-  readonly normalizedPrice: string;
+  readonly priceValueText: string;
+  readonly priceCurrencyText?: string | undefined;
   readonly marketplaceBrand: MarketplaceBrand | null;
 }
 
@@ -26,7 +27,8 @@ export default function MarketplaceFullFooter({
   ctaAriaLabel,
   hideActions,
   hasPrice,
-  normalizedPrice,
+  priceValueText,
+  priceCurrencyText,
   marketplaceBrand,
 }: MarketplaceFullFooterProps) {
   const { href: resolvedHref, target, rel } = resolvedPreviewHref;
@@ -71,7 +73,15 @@ export default function MarketplaceFullFooter({
                 className="tw-max-w-[8rem] tw-truncate"
                 data-testid="manifold-item-price"
               >
-                {normalizedPrice}
+                {priceValueText}
+              </span>
+            )}
+            {hasPrice && priceCurrencyText && (
+              <span
+                className="tw-max-w-[6rem] tw-truncate"
+                data-testid="marketplace-item-price-currency"
+              >
+                {priceCurrencyText}
               </span>
             )}
           </Link>

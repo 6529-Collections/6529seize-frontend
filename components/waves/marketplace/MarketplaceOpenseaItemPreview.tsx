@@ -32,6 +32,7 @@ export default function MarketplaceOpenseaItemPreview({
         mediaUrl={media.url}
         mediaMimeType={media.mimeType}
         price={state.resolvedPrice}
+        priceCurrency={state.resolvedPriceCurrency}
         title={state.resolvedTitle}
         compact={compact}
         hideActions={compact}
