@@ -1,75 +1,91 @@
 # Web Sidebar Navigation
 
+Parent: [Navigation Index](README.md)
+
 ## Overview
 
-On web layouts, primary route switching is sidebar-first. Desktop keeps a fixed
-left rail, while small-screen web opens the same navigation in an off-canvas
-overlay. Messages and notifications rows can show unread indicators.
+On web layouts, route switching is sidebar-first.
+
+- Desktop: fixed left rail with collapse/expand toggle.
+- Narrow desktop web: collapsed icon rail that can open as an overlay panel.
+- Touch small-screen web: header menu button opens the same sidebar as overlay.
+- `Messages` and `Notifications` can show unread dots for connected profiles.
 
 ## Location in the Site
 
-- Desktop web layout: fixed left sidebar rail.
-- Small-screen web layout: header menu button opens sidebar overlay.
+- Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Direct rows: `Home`, `Waves`, `Messages`, `Discover`, `Notifications`.
 - Expandable groups: `Network`, `Collections`, `Tools`, `About`.
-- Utility rows: `Search`, `Share`, and connected `Profile`.
+- Utility rows: `Search`, optional `Share`, and connected-only `Profile`.
+- Bottom account area: connect action, loading placeholders, and user menu.
 
 ## Entry Points
 
-- Use the fixed left sidebar on desktop.
-- Open the small-screen header menu on narrow web layouts.
-- Select a direct row or expand a group to choose a nested route.
-- Open `Search` from the sidebar without leaving the current route.
+- Desktop and narrow desktop web: use sidebar chevron toggle.
+- Touch small-screen web: use header menu button.
+- Select direct rows or expand groups for nested routes.
+- Open `Search` from sidebar row.
+- Press `⌘K` when sidebar navigation is mounted.
 
 ## User Journey
 
-1. User opens any web-layout route.
-2. User switches sections through direct rows.
-3. User opens expandable groups for nested routes.
-4. In collapsed desktop mode, group rows open anchored flyout submenus.
-5. User selects a destination and active-route highlighting updates.
-6. On small-screen web, overlay sidebar closes after route selection.
+1. Open a web route.
+2. Switch primary sections with direct rows.
+3. Open `Network`, `Collections`, `Tools`, or `About` for nested routes.
+4. In collapsed mode, group rows open anchored flyout submenus.
+5. Select a destination and watch active state update.
+6. In overlay mode, sidebar closes after route change.
 
 ## Common Scenarios
 
-- Open `Network` routes such as `Identities`, `Activity`, `Groups`, `TDH`,
-  `xTDH`, and `Metrics` pages.
-- Open `Collections` routes (`The Memes`, `6529 Gradient`, `NextGen`,
-  `Meme Lab`, `ReMemes`, `xTDH`).
-- Open `Tools` routes for delegation, API, EMMA, Block Finder, and open data.
-- Open `Search` to jump directly to pages, profiles, NFTs, and waves.
-- Open `Share` to generate QR/deep links for the current route.
-- Use `Profile` shortcut when connected (handle-first, wallet fallback).
+- Open `Network` and `Metrics` routes:
+  `/network`, `/network/activity`, `/network/groups`, `/nft-activity`,
+  `/meme-calendar`, `/network/tdh`, `/network/xtdh`, `/network/health`,
+  `/network/definitions`, `/network/levels`, `/network/health/network-tdh`.
+- Open `Collections` routes:
+  `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
+  `/xtdh`.
+- Open `Tools` routes:
+  delegation pages, `/meme-accounting`, `/meme-gas`,
+  optional `/tools/subscriptions-report`, optional `/tools/app-wallets`,
+  `/tools/api`, `/emma`, `/tools/block-finder`,
+  `/open-data`, `/open-data/network-metrics`,
+  optional `/open-data/meme-subscriptions`, `/open-data/rememes`,
+  `/open-data/team`, `/open-data/royalties`.
+- Open `About` and `6529 Capital` routes from grouped links.
+- Open `Share` to generate QR/deep links for current route.
+- Use connected `Profile` shortcut (handle route first, wallet fallback).
 
 ## Edge Cases
 
-- `App Wallets` row appears only when app-wallet support is enabled.
+- `Messages` and `Notifications` unread dots require connected profile handle
+  plus unread state.
+- Active grouped route auto-expands its section on route load/change.
+- In collapsed mode, selecting the same group toggles flyout open/closed.
+- Flyouts close on outside click, `Escape`, or when rail exits collapsed mode.
+- Flyouts reposition on sidebar scroll and window resize.
 - `Profile` row appears only when wallet connection is active.
-- `Share` row is desktop-web focused and does not appear on mobile/native app
-  shells.
-- Subscription-related rows are hidden on iOS outside the US in sections that
-  gate those routes (for example `Subscriptions Report`, `Meme Subscriptions`,
-  and `About > Subscriptions`).
-- In collapsed desktop mode, selecting the same group toggles its flyout open
-  and closed.
-- Open flyouts track scroll/resize so they stay anchored to trigger rows.
+- `Share` row is hidden in Capacitor/native context and mobile-device web.
+- `App Wallets` appears only when app-wallet support is enabled.
+- On iOS, subscription-related rows show only when country resolves to `US`:
+  `Subscriptions Report`, `Open Data > Meme Subscriptions`,
+  and `About > Subscriptions`.
 
 ## Failure and Recovery
 
-- While connected profile data loads, account areas show placeholders.
-- If handle data is missing, `Profile` routing falls back to wallet-address
-  route.
-- If small-screen overlay appears stuck, close with backdrop, `Escape`, or
-  route change.
-- If submenu state looks stale after collapse/expand changes, toggle the group
-  again to reset submenu state.
+- While identity data loads, account area shows placeholders.
+- If profile handle is missing, `Profile` route falls back to wallet address.
+- If overlay looks stuck, close with backdrop, `Escape`, or route change.
+- If submenu state looks stale, toggle the group or rail again.
+- If a row is missing, verify auth/device/country/app-wallet gating.
 
 ## Limitations / Notes
 
-- Search opens a modal and does not have a dedicated route.
-- Sidebar row availability changes with auth state, app-wallet support, and
-  route-visibility gating rules.
-- Native app primary switching is documented in
+- Search is modal-only; there is no `/search` route.
+- Shortcut is `⌘K`; `Ctrl+K` is not wired.
+- Sidebar rows change with auth, device context, country gate, and runtime
+  feature gates.
+- Native app primary switching is owned by
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
 
 ## Related Pages

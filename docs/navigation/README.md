@@ -5,7 +5,8 @@ and mobile app layouts.
 
 ## Overview
 
-- Web shell navigation: desktop left rail and small-screen overlay menu.
+- Web shell navigation: desktop left rail plus overlay behavior on small-screen
+  or narrow web viewports.
 - App shell navigation: header controls, bottom tabs, and app sidebar menu.
 - Shared controls: search modal, context-aware back, wallet/account actions,
   and internal links.
@@ -24,7 +25,7 @@ and mobile app layouts.
 ### Route Switching Surfaces
 
 - [Web Sidebar Navigation](feature-sidebar-navigation.md): web route switching
-  from the desktop rail and small-screen overlay.
+  from the desktop rail and overlay sidebar modes on narrow web layouts.
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md): app primary
   tabs for `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
   and `Notifications`.
