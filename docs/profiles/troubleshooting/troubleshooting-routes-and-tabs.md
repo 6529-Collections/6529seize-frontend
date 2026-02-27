@@ -59,10 +59,6 @@ profile link lands somewhere unexpected.
   - No valid top-up option is currently selected.
 - Redirected to a different handle:
   - The app normalized the URL to the profile's canonical handle.
-- Browser tab title shows a shortened wallet value:
-  - The profile does not currently have a handle.
-  - The display text is emoji-based, so the title falls back to a wallet-based
-    identifier for readability.
 - Header shows `0 Followers` unexpectedly:
   - Followers summary data failed to load on route render.
   - Refreshing can repopulate the header count.
@@ -82,8 +78,7 @@ profile link lands somewhere unexpected.
 - Entering `/{user}/waves`, `/{user}/groups`, or `/{user}/followers` redirects
   to `/{user}` without preserving query parameters.
 - Entering `/{user}/rep` is treated as an unsupported profile route.
-- Query parameters other than `address` can be dropped when switching tabs from
-  tab links.
+- Tab links preserve `address` and drop other query parameters.
 - In `Subscriptions`, first upcoming-drop controls can be disabled on minting
   day.
 
@@ -126,7 +121,7 @@ profile link lands somewhere unexpected.
 - [Profiles Index](../README.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
-- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)

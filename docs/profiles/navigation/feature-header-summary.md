@@ -60,8 +60,8 @@ activity visibility, and profile actions.
   profile.
 - Viewing someone else's profile while signed in with a handle can show `Follow`
   and direct-message actions.
-- Viewing your own profile with no active proxy context enables profile editing
-  controls in the header.
+- Viewing your own profile with a handle and no active proxy context enables
+  profile editing controls in the header.
 - The `NIC` and `Rep` quick stat links both route to `/{user}`.
 - The `Followers` quick stat opens a modal list and does not navigate to a
   dedicated followers tab route.
@@ -75,8 +75,6 @@ activity visibility, and profile actions.
 
 ## Edge Cases
 
-- If no handle exists or display text is emoji-based, the browser tab title can
-  fall back to a shortened wallet identifier.
 - Canonical-handle redirects preserve current tab path and existing query
   parameters.
 - Stats-link rendering requires a route-safe handle or wallet segment.
@@ -110,7 +108,7 @@ activity visibility, and profile actions.
 - [Profiles Index](../README.md)
 - [Profile Picture Editing](feature-profile-picture-editing.md)
 - [Profile Banner Editing](feature-banner-editing.md)
-- [Profile Tabs](feature-tabs.md)
+- [Profile Routes and Tab Visibility](feature-tabs.md)
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Navigation Flow](flow-navigation.md)

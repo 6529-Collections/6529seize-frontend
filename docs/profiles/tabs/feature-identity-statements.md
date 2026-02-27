@@ -95,7 +95,7 @@ how statement sections are displayed, added, and edited.
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profile Identity Tab](feature-identity-tab.md)
 - [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 - [Profiles Tabs Index](README.md)

@@ -34,15 +34,12 @@ and what happens when the current route is not canonical.
   - `xTDH` routes to `/{user}/xtdh`
 - Rename your profile handle and continue on the same tab under the new handle
   URL.
-- When a profile has no handle (or only emoji-style display text), the browser
-  tab title uses a shortened wallet identifier so tabs stay readable.
 
 ## Edge Cases
 
 - If a tab becomes unavailable (feature/device/country conditions), the app
   navigates to the first visible tab for that profile.
-- Profile links preserve `address` when switching tabs, but not every other
-  query parameter is guaranteed to carry over.
+- Tab-bar links preserve `address` when switching tabs.
 - During canonical-handle redirects, repeated query keys can be normalized into
   single comma-separated values.
 - Unknown tab routes do not resolve to a profile tab page.
@@ -51,8 +48,6 @@ and what happens when the current route is not canonical.
   [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md).
 - Legacy `/{user}/rep` links are treated as unknown tab routes; the supported
   destination is `/{user}`.
-- Profiles without a handle (or with emoji-only display text) still render a
-  user-specific browser title by falling back to a shortened wallet identifier.
 
 ## Failure and Recovery
 
@@ -67,13 +62,13 @@ and what happens when the current route is not canonical.
 - Visibility rules are evaluated at runtime, so the same profile can expose
   different tab sets on different devices or contexts.
 - Deep links are stable for the supported tab routes listed in
-  [Profile Tabs](feature-tabs.md).
+  [Profile Routes and Tab Visibility](feature-tabs.md).
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
 - [Profile Header Summary](feature-header-summary.md)
-- [Profile Tabs](feature-tabs.md)
+- [Profile Routes and Tab Visibility](feature-tabs.md)
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

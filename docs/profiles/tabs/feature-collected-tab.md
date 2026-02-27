@@ -95,7 +95,7 @@ separate route and does not alter the tab's sort/filter/pagination behavior.
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profiles Tabs Index](README.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [NFT Transfer](../../media/nft/feature-transfer.md)

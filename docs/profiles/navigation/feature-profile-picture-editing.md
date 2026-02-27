@@ -72,7 +72,7 @@ Profile picture editing is separate from banner cover editing.
 
 - [Profiles Navigation Index](README.md)
 - [Profile Header Summary](feature-header-summary.md)
-- [Profile Tabs](feature-tabs.md)
+- [Profile Routes and Tab Visibility](feature-tabs.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Profile Banner Editing](feature-banner-editing.md)

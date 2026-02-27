@@ -108,7 +108,7 @@ set edition preference, and manage per-drop upcoming subscription counts.
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profiles Tabs Index](README.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)

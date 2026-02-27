@@ -96,7 +96,7 @@ On mobile, the same route provides an in-tab toggle between `Rep` and
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Identity Statements](feature-identity-statements.md)

@@ -63,4 +63,4 @@ The editor supports two modes:
 - [Profile Header Summary](feature-header-summary.md)
 - [Profile Picture Editing](feature-profile-picture-editing.md)
 - [Profile Navigation Flow](flow-navigation.md)
-- [Profile Tabs](feature-tabs.md)
+- [Profile Routes and Tab Visibility](feature-tabs.md)

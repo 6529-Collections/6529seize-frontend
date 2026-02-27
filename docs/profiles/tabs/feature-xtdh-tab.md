@@ -103,7 +103,7 @@ viewing their own profile.
 
 ## Related Pages
 
-- [Profile Tabs](../navigation/feature-tabs.md)
+- [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [xTDH Network Overview](../../network/feature-xtdh-network-overview.md)

@@ -52,6 +52,6 @@ These routes redirect to the canonical profile root route.
 ## Related Pages
 
 - [Profiles Index](../README.md)
-- [Profile Tabs](feature-tabs.md)
+- [Profile Routes and Tab Visibility](feature-tabs.md)
 - [Profile Navigation Flow](flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
