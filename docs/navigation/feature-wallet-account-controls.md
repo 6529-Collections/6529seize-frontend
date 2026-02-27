@@ -2,87 +2,75 @@
 
 ## Overview
 
-Wallet and account controls cover connect/disconnect actions, account switching,
-proxy-profile selection, and session-level actions exposed from sidebar user
-menus in web and app layouts.
+Wallet/account controls cover connect/disconnect actions, account switching, and
+session actions exposed in web sidebar user menus and app sidebar account
+section. Proxy-profile switching is a web-sidebar dropdown behavior.
 
 ## Location in the Site
 
-- Desktop/small-screen web sidebar user area.
+- Web sidebar user area (expanded or collapsed desktop, plus small-screen web
+  overlay).
 - App sidebar account section (opened from app header menu).
-- Connected-user dropdown actions (including proxy selection) in sidebar user
-  menus.
+- Web connected-user dropdown for proxy selection.
 
 ## Entry Points
 
-- Disconnected web sidebar:
-  select `Connect` from the user area.
-- Connected web sidebar:
-  select the user row to open account/proxy actions.
-- App layout:
-  open the header menu and use account controls in the bottom account section.
+- Disconnected web sidebar: select `Connect`.
+- Connected web sidebar: select user row to open account menu.
+- App layout: open header menu and use account controls in account footer.
 
 ## User Journey
 
-1. Start disconnected and open a connect action.
-2. Complete wallet connection and return to navigation with connected state.
-3. Open account controls to manage session actions:
-   - connect/disconnect,
-   - switch account,
-   - disconnect and logout,
-   - select active proxy profile when available.
-4. Continue routing with updated profile/account context.
+1. User opens a connect action from web/app sidebar.
+2. After wallet connection, connected account controls replace `Connect`.
+3. User manages session actions:
+   - `Disconnect Wallet` (web dropdown),
+   - `Switch Account`,
+   - `Disconnect & Logout`.
+4. On web, user can switch active proxy identity from proxy dropdown entries.
+5. User continues routing with updated identity/session state.
 
 ## Common Scenarios
 
-- Connect from web sidebar:
-  select `Connect`; connected state replaces the connect action with user menu
-  controls.
-- Connect from app sidebar:
-  select `Connect` in the account section.
-- Switch account:
-  select `Switch Account` to disconnect current session and reopen connect flow.
-- Disconnect/logout:
-  select `Disconnect Wallet` (desktop dropdown) or `Disconnect & Logout`
-  (desktop/app controls) to end active session state.
-- Proxy selection:
-  choose a proxy profile from the user dropdown to switch active identity
-  context.
-- App-only account actions:
-  use `Push Notifications` settings and QR-scanner account flows in app sidebar.
+- Connect from web sidebar and continue with connected `Profile` + user menu.
+- Connect from app sidebar account section.
+- Switch account to reopen wallet selection flow.
+- Disconnect/logout to clear active session.
+- Web-only proxy selection: choose a proxy profile to change active identity.
+- App-only account actions: open `Push Notifications` settings or use `Scan QR
+  Code`.
 
 ## Edge Cases
 
-- While identity data is loading, sidebar account surfaces show placeholder
-  skeletons.
-- If handle data is unavailable, account labels fall back to wallet/address-based
-  text.
-- In collapsed desktop mode, account controls are icon-first and rely on
-  tooltips for quick affordance hints.
-- `Profile` shortcut routing in sidebar is shown only when connected and uses
-  handle-first fallback-to-wallet resolution.
-- Proxy actions appear only when proxy profiles are available for the session.
+- While identity data loads, account surfaces render placeholders.
+- If handle data is missing, labels fall back to wallet-based display.
+- In collapsed desktop sidebar, account controls become icon-first with
+  tooltips.
+- Sidebar `Profile` shortcut appears only when connected.
+- Proxy controls appear only on web dropdown when proxy entries exist.
+- App QR scanner action appears only when scanner support exists in the app
+  runtime.
 
 ## Failure and Recovery
 
-- If connect flow is canceled or wallet handoff is declined, account state
-  stays disconnected; retry from the same connect surface.
-- If wallet UI fails at runtime, the wallet error boundary shows `Connection
-  Problem` with `Try Again` and `Clear Storage & Reload`.
-- If account state looks stale after switching/disconnecting, run
-  `Disconnect & Logout`, then reconnect.
+- If wallet connection is canceled/declined, state stays disconnected; retry
+  from same surface.
+- If wallet runtime fails, wallet error boundary exposes `Try Again` and
+  `Clear Storage & Reload`.
+- If account context looks stale after switch/disconnect, use `Disconnect &
+  Logout`, then reconnect.
 
 ## Limitations / Notes
 
-- Available wallet providers and connection UX depend on platform and wallet-app
-  availability.
-- Some account actions differ by layout (desktop dropdown vs app sidebar).
-- Proxy behavior depends on current authenticated profile-proxy permissions.
+- Wallet-provider availability depends on platform/device runtime.
+- Web and app account menus expose different action sets.
+- Proxy switching depends on authenticated proxy permissions and available proxy
+  data.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Web Sidebar Navigation](feature-sidebar-navigation.md)
+- [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
-- [Docs Home](../README.md)

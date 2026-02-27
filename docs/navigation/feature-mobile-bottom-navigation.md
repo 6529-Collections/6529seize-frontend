@@ -4,81 +4,78 @@ Parent: [Navigation Index](README.md)
 
 ## Overview
 
-On the mobile app shell, core destination switching uses a fixed bottom bar.
-This bar is separate from the small-screen web sidebar and includes dedicated
-tabs for `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`, and
-`Notifications`.
+In mobile app layout, primary section switching uses a fixed bottom bar with
+tabs for `Discover`, `Waves`, `Messages`, `Home`, `Network`, `Collections`,
+and `Notifications`. Messages/notifications tabs can show unread dots.
 
 ## Location in the Site
 
-- App routes rendered with `AppLayout` (mobile app context).
-- Not shown in browser web on small-screen fallback layout, which uses the
-  sidebar header flow.
+- App routes rendered through `AppLayout` (`isApp` context).
+- Not used on small-screen web fallback layout (that layout uses web sidebar
+  navigation).
 
 ## Entry Points
 
-- Open the app shell in a mobile-capable context (`isApp` mode).
-- Be on any route that supports app-shell rendering.
+- Open the app in native/app-shell mode.
+- Stay on any route that keeps bottom navigation available.
 
 ## User Journey
 
-1. Open a route in app mode.
-2. A fixed bar renders at the bottom of the viewport.
-3. Tap:
-   - `Discover` to open `/discover`.
-   - `Home` to open `/`.
-   - `Waves` to open the waves section.
-   - `Messages` to open the messages section.
-   - `Network` to open `/network`.
-   - `Collections` to open `/the-memes`.
-   - `Notifications` to open `/notifications` in app mode.
-4. The active destination updates with route context and stays readable while
-   navigating between route families.
-5. The bar remains available during normal route transitions, including wave and
-   notification flows.
+1. User opens an app-shell route.
+2. Bottom bar appears with seven section tabs.
+3. User taps a tab to switch sections:
+   - `Discover` -> `/discover`
+   - `Home` -> `/`
+   - `Waves` -> waves list/thread context
+   - `Messages` -> messages list/thread context
+   - `Network` -> `/network`
+   - `Collections` -> `/the-memes`
+   - `Notifications` -> `/notifications`
+4. Active tab indicator updates with route, `view`, and active-wave state.
+5. User keeps switching between sections without opening side menus.
 
 ## Common Scenarios
 
-- Starting from `/discover`, using `Home` returns to the homepage surface at `/`.
-- Returning to the `Waves` tab from `/waves/{waveId}` returns to the waves list
-  rather than reopening the same in-page thread.
-- Returning to the `Messages` tab from `/messages?wave={id}` returns to the message
-  section home rather than forcing that same thread.
-- When browsing a wave route and opening `Home`, active-wave route context is
-  cleared so the app returns to a global section root.
-- In app mode, `Notifications` opens the authenticated notification surface.
+- From `/discover`, tap `Home` to return to `/`.
+- From `/waves/{waveId}`, tap `Waves` to clear active thread and return to
+  waves root.
+- From `/messages?wave={id}`, tap `Messages` to clear active DM thread and
+  return to messages root.
+- When already on section roots, `Waves`/`Messages` can reopen the last visited
+  thread in that category when one is cached.
+- `Network` stays active for network-context routes such as `/network/*` and
+  `/nft-activity`.
+- Tap `Notifications` to open notification feed with unread badge awareness.
 
 ## Edge Cases
 
-- On mobile app clients with an active keyboard, the bar is hidden so composer and
-  input-first surfaces are not blocked.
-- On web small-screen layout (not app mode), the bar is not rendered; use the
-  header/sidebar layout instead.
-- `Home` is only shown as active on `/` without an active wave/view override; other
-  wave-focused routes use their dedicated active-section logic.
-- On desktop-style or non-app navigation contexts, this bar does not render and
-  bottom-space reservation is handled by different layouts.
+- While mobile keyboard is open, the bar stays mounted but slides out of view
+  and is non-interactive.
+- While a single drop is opened (`?drop=...`) or an inline drop edit is active,
+  the bar is not rendered.
+- On web small-screen layout (not app mode), this bar does not render.
+- `Home` is active only on `/` when no wave/view override is active.
 
 ## Failure and Recovery
 
-- If route switching does not happen after tapping a tab, wait for any in-flight
-  route transition state to settle and tap again.
-- If bar visibility is lost due to an invalid app shell state, reopen the route from
-  any sidebar or deep link so the app shell rehydrates the current bottom bar.
+- If tab switch does not apply, wait for in-flight transition and tap again.
+- If a tab keeps reopening stale thread state, tap the same section tab from a
+  thread first to clear cached last-visited state, then retry.
+- If the bar is hidden, dismiss keyboard and close drop/edit overlays first.
 
 ## Limitations / Notes
 
 - This page documents app-shell behavior only.
-- The side menu and header still provide additional navigation paths in small-screen
-  non-app contexts.
-- On web desktop, route navigation still uses the sidebar as the primary route
-  surface.
+- Secondary destinations (network/tools/about/profile/account actions) are in
+  [App Sidebar Menu](feature-app-sidebar-menu.md).
+- Web desktop/small-screen routing is documented in
+  [Web Sidebar Navigation](feature-sidebar-navigation.md).
 
 ## Related Pages
 
 - [Navigation Index](README.md)
-- [Mobile Pull-to-Refresh](feature-mobile-pull-to-refresh.md)
+- [App Sidebar Menu](feature-app-sidebar-menu.md)
+- [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md)
 - [Mobile Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Discover Cards](../waves/discovery/feature-discover-cards.md)
-- [Docs Home](../README.md)

@@ -118,7 +118,7 @@ and category tabs filter the already-running results for that query.
 ## Related Pages
 
 - [Navigation Index](README.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Docs Home](../README.md)

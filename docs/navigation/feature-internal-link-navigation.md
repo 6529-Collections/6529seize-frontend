@@ -69,7 +69,7 @@ This behavior appears in multiple areas, including:
 ## Related Pages
 
 - [Navigation Index](README.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Legacy Route Redirects](../shared/feature-legacy-route-redirects.md)
 - [Docs Home](../README.md)

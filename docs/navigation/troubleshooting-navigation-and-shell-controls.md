@@ -8,7 +8,7 @@ controls do not behave as expected across web and app layouts.
 ## Location in the Site
 
 - Web sidebar and small-screen web overlay navigation.
-- App header and app bottom-navigation controls.
+- App header, app sidebar menu, and app bottom-navigation controls.
 - Search modal and header back button flows.
 - Sidebar account/user controls.
 
@@ -18,6 +18,7 @@ controls do not behave as expected across web and app layouts.
 - Sidebar/menu appears stuck open or closed.
 - Back button is missing when expected.
 - Bottom navigation is hidden in app layout.
+- App sidebar menu route is missing or disabled.
 - Account controls or proxy actions look unavailable.
 
 ## User Journey
@@ -32,8 +33,9 @@ controls do not behave as expected across web and app layouts.
 ## Common Scenarios
 
 - `Back` button is missing:
-  it only appears for active wave contexts, create routes, or profile routes
-  with valid in-app back history.
+  it appears only for active wave contexts (`/waves/{waveId}` or
+  `/messages?wave={waveId}`), create routes, or profile routes with valid
+  in-app back history.
 - Sidebar link seems missing:
   expand the relevant section (`Network`, `Collections`, `Tools`, `About`) or
   open the collapsed flyout first.
@@ -45,8 +47,15 @@ controls do not behave as expected across web and app layouts.
 - Sidebar `Profile` shortcut is missing:
   connect wallet first; profile shortcut is hidden for disconnected state.
 - App bottom navigation is hidden:
-  dismiss on-screen keyboard and confirm no focused composer/edit state is
-  suppressing bottom-nav visibility.
+  dismiss on-screen keyboard and confirm no active single-drop (`?drop`) or
+  inline drop edit state is suppressing bottom-nav rendering.
+- `Waves` or `Messages` tab highlight looks wrong:
+  verify whether a `wave` query or `view` query is present, since both affect
+  active-tab state.
+- App sidebar `Profile` route is missing:
+  this row appears only when wallet connection is active.
+- `App Wallets` route is missing:
+  it appears only when app-wallet support is enabled.
 - Pull-to-refresh does not trigger:
   start gesture from header area while page is at top.
 
@@ -58,13 +67,20 @@ controls do not behave as expected across web and app layouts.
 - Account actions vary by surface:
   desktop dropdown includes `Disconnect Wallet`; app sidebar exposes account
   actions in its footer section.
+- Some sidebar links are conditionally hidden by runtime availability or
+  route-visibility rules (for example app-wallet support and selected
+  subscription-gated links).
 
 ## Failure and Recovery
 
 - If a route switch stalls, navigate to a known section root (`/`, `/discover`,
   `/waves`, `/messages`, `/notifications`, `/network`) and retry.
+- If wave or drop state looks stuck in URL, clear `?wave=`/`?drop=` by using
+  `Back` once, then retry section navigation.
 - If search panel enters error state, use `Try Again`; if persistent, close and
   reopen search.
+- If app route link is unavailable from bottom tabs, open app sidebar menu and
+  use grouped route links (`Network`, `Tools`, `About`).
 - If wallet controls fail, use wallet error-boundary recovery actions (`Try
   Again`, then `Clear Storage & Reload` if needed).
 - If overlay/menu state stays inconsistent after retries, refresh the current
@@ -80,8 +96,8 @@ controls do not behave as expected across web and app layouts.
 
 - [Navigation Index](README.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Back Button](feature-back-button.md)
+- [Back Button Behavior](feature-back-button.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)

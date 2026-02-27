@@ -14,9 +14,10 @@ collection routes.
 
 ## Entry Points
 
-- Open a route in `/waves`, `/messages`, a profile route like `/{user}`,
-  or a collection route such as `/the-memes/*`, `/6529-gradient/*`,
-  `/meme-lab/*`, `/nextgen/*`, `/rememes/*`.
+- Open a route in `/waves`, `/waves/{waveId}`, `/messages`,
+  `/messages?wave={waveId}`, a profile route like `/{user}`, or a collection
+  route such as `/the-memes/*`, `/6529-gradient/*`, `/meme-lab/*`,
+  `/nextgen/*`, `/rememes/*`.
 - Open a wave from the list/sidebars while another context is already open.
 - Start or return from wave/message create flows.
 
@@ -36,7 +37,11 @@ collection routes.
      display.
 3. The left header control switches between menu and back affordances based on
    route context and navigation state.
+   - Back mode appears for active-wave contexts, create routes, and profile
+     routes with valid in-app back history.
+   - Menu mode appears otherwise and opens the app sidebar navigation panel.
 4. Connected users can rely on identity avatar rendering in the same header area.
+5. On `/`, a network-health shortcut appears next to header actions.
 
 ## Common Scenarios
 
@@ -46,6 +51,9 @@ collection routes.
   title.
 - Profile routes use route-derived labels and fallback text where the display name is
   short or missing.
+- On routes without back affordance, the left control opens the app sidebar menu
+  with grouped route links and account actions.
+- Opening `/` shows a quick network-health shortcut in the header actions.
 - Header title strings longer than the header width are shortened with
   middle-elision.
 
@@ -78,7 +86,8 @@ collection routes.
 ## Related Pages
 
 - [Navigation Index](README.md)
-- [Back Button](feature-back-button.md)
+- [App Sidebar Menu](feature-app-sidebar-menu.md)
+- [Back Button Behavior](feature-back-button.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
-- [Sidebar Navigation](feature-sidebar-navigation.md)
+- [Web Sidebar Navigation](feature-sidebar-navigation.md)

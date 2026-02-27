@@ -10,12 +10,14 @@ back to navigation-history behavior.
 
 - App header on wave/detail contexts.
 - Create routes: `/waves/create` and `/messages/create`.
-- Wave/message thread contexts that include an active wave.
+- Wave thread route context (`/waves/{waveId}`).
+- Message thread query context (`/messages?wave={waveId}`).
 - Profile routes (`/{user}`) when in-app history provides a valid back target.
 
 ## Entry Points
 
 - Open a wave thread.
+- Open a message thread (`/messages?wave={waveId}`).
 - Open a create route.
 - Open a route with an active `drop` query parameter.
 - Open a profile route after navigating from another in-app route.
@@ -23,7 +25,8 @@ back to navigation-history behavior.
 ## User Journey
 
 1. Header shows `Back` when one of these conditions is true:
-   - active wave context is present,
+   - active wave context is present (`/waves/{waveId}` or
+     `/messages?wave={waveId}`),
    - current route is `/waves/create` or `/messages/create`,
    - current route is a profile route and history can go back.
 2. User selects `Back`.
@@ -31,6 +34,7 @@ back to navigation-history behavior.
    - `/waves/create` -> `/waves`
    - `/messages/create` -> `/messages`
    - active `drop` query -> remove `drop` while keeping current thread context
+     and other query state
    - active wave context -> clear active wave and return to section home
      (`/waves` or `/messages`)
 4. If no route-specific rule matches, the app falls back to navigation-history
@@ -43,7 +47,7 @@ back to navigation-history behavior.
   section list.
 - Close a focused drop:
   when `?drop=` is present, `Back` removes that query state and stays in the
-  same route context.
+  same route context with remaining query params preserved.
 - Leave active wave/thread:
   `Back` clears the active thread and returns to `/waves` or `/messages`
   depending on wave type.
@@ -56,7 +60,8 @@ back to navigation-history behavior.
 - Profile routes do not show `Back` when in-app history has no valid prior
   target.
 - If active wave metadata disappears while viewing a thread, wave state is
-  cleared and routing falls back to section-home behavior.
+  cleared and routing falls back to section-home behavior (`/waves` or
+  `/messages`).
 
 ## Failure and Recovery
 
