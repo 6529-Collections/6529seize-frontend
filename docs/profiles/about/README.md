@@ -2,18 +2,14 @@
 
 ## Overview
 
-This subarea owns `/about/primary-address`.
+This subarea owns `/about/primary-address`, available from the global sidebar
+(`About -> Primary Address`) and the in-page About menu (`Primary Address`) on
+`/about/{section}` routes.
 
 Use this area when the `Primary Address` page content, row links, or data
 states look wrong.
 
 This route is public and read-only. No wallet connection is required.
-
-## Location in the Site
-
-- Route: `/about/primary-address` (inside `/about/{section}`)
-- Global sidebar: `About -> Primary Address`
-- About page menu: `Primary Address`
 
 ## Features
 

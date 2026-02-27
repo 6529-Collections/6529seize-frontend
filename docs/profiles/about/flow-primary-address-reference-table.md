@@ -2,14 +2,14 @@
 
 ## Overview
 
-This flow covers how users reach `/about/primary-address`, review the table,
-and jump to a profile route from a table row.
+This flow covers how users open `/about/primary-address`, review the page
+content, and open a profile route from a table row.
 
 ## Location in the Site
 
 - Route: `/about/primary-address`
 - Global sidebar path: `About -> Primary Address`
-- In-page menu path: `About -> Primary Address` inside `/about/{section}`
+- In-page About menu path: `Primary Address` on `/about/{section}`
 
 ## Preconditions
 
@@ -24,20 +24,31 @@ and jump to a profile route from a table row.
 ## Flow Steps
 
 1. Open `/about/primary-address`.
-2. On first load without cached data, wait through `Loading...` while
-   `"/primary_address.csv"` loads.
-3. Review the rule summary and table rows.
-4. Use `Profile Handle` links to open `/{current_primary}` profile routes.
-5. If loading fails, the query retries automatically before the error message
-   is shown.
-6. Reopening the route can render cached rows immediately and skip `Loading...`.
-   After about 10 seconds, revisit can also trigger a background refresh.
+2. If no cached rows exist, the page shows `Loading...` while it fetches
+   `"/primary_address.csv"`.
+3. On success, review the heading, rule notes, dated summary text, and table
+   columns:
+   `Profile Handle`, `Current Selected Primary Address`, and
+   `Primary Address Changed to`.
+4. Table rows are sorted alphabetically by `Profile Handle`.
+5. Every CSV row is rendered as table data, including a CSV header row if one
+   exists.
+6. Select a `Profile Handle` link to open `/{current_primary}`.
+   Links do not use the handle value.
+7. If loading fails, the query retries automatically before it shows a final
+   error message:
+   - `Error: Failed to fetch primary address data (<status>)`
+   - `Error: Failed to fetch`
+   - `Error: Failed to parse primary address data`
+8. Reopening the route can reuse cached rows and skip `Loading...`.
+   After about 10 seconds, revisiting can keep visible rows and refresh in the
+   background.
 
 ## Exit Points
 
 - Stay on `/about/primary-address` to continue reading rows.
 - Move to `/{current_primary}` from any table row.
-- Refresh the route to force a new CSV fetch immediately.
+- Refresh the page to force a new CSV fetch now.
 
 ## Related Pages
 
