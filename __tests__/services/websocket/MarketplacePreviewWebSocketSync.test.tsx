@@ -26,7 +26,8 @@ const createMediaLinkUpdatedEvent = (
   token: null,
   name: "Updated title",
   description: "Updated description",
-  media_uri: "https://cdn.example.com/updated-image.jpg",
+  media_uri: "https://cdn.example.com/updated-full-image.jpg",
+  media_preview_card_url: "https://cdn.example.com/updated-preview-image.webp",
   last_error_message: null,
   price: "1.5",
   price_currency: "ETH",
@@ -113,8 +114,8 @@ describe("MarketplacePreviewWebSocketSync", () => {
       title: "Updated title",
       description: "Updated description",
       media: {
-        url: "https://cdn.example.com/updated-image.jpg",
-        mimeType: "image/jpeg",
+        url: "https://cdn.example.com/updated-preview-image.webp",
+        mimeType: "image/webp",
       },
       price: "1.5",
       priceCurrency: "ETH",
@@ -176,5 +177,58 @@ describe("MarketplacePreviewWebSocketSync", () => {
 
     const after = queryClient.getQueryData<MarketplacePreviewData>(queryKey);
     expect(after).toBe(before);
+  });
+
+  it("keeps existing preview media when websocket update only contains media_uri", () => {
+    const queryClient = createTestQueryClient();
+    const queryKey = [
+      QueryKey.MARKETPLACE_PREVIEW,
+      { href: "https://example.com/1", mode: "default" },
+    ];
+
+    queryClient.setQueryData<MarketplacePreviewData>(queryKey, {
+      href: "https://example.com/1",
+      canonicalId: "manifold:claim:1",
+      platform: "MANIFOLD",
+      title: "Old title",
+      description: "Old description",
+      media: {
+        url: "https://cdn.example.com/existing-preview.webp",
+        mimeType: "image/webp",
+      },
+      price: "1.0",
+      priceCurrency: "ETH",
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MarketplacePreviewWebSocketSync />
+      </QueryClientProvider>
+    );
+
+    expect(mediaLinkUpdatedCallback).toBeDefined();
+
+    act(() => {
+      mediaLinkUpdatedCallback?.(
+        createMediaLinkUpdatedEvent({
+          media_preview_card_url: null,
+          media_uri: "https://cdn.example.com/new-full-image.jpg",
+        })
+      );
+    });
+
+    expect(queryClient.getQueryData<MarketplacePreviewData>(queryKey)).toEqual({
+      href: "https://example.com/1",
+      canonicalId: "MANIFOLD:claim:1",
+      platform: "MANIFOLD",
+      title: "Updated title",
+      description: "Updated description",
+      media: {
+        url: "https://cdn.example.com/existing-preview.webp",
+        mimeType: "image/webp",
+      },
+      price: "1.5",
+      priceCurrency: "ETH",
+    });
   });
 });

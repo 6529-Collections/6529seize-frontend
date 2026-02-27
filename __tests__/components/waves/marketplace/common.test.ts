@@ -1,9 +1,11 @@
 import { createTestQueryClient } from "../../../utils/reactQuery";
 import {
+  patchFromMediaLinkUpdate,
   primeMarketplacePreviewCacheFromNftLinks,
   type MarketplacePreviewData,
 } from "@/components/waves/marketplace/common";
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
+import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 
 const getMarketplacePreviewQueryKey = (href: string, mode: string) =>
   ["MARKETPLACE_PREVIEW", { href, mode }] as const;
@@ -74,6 +76,106 @@ const createNftLinkWithMediaPreview = ({
       media_preview: mediaPreview,
     },
   });
+
+const createMediaLinkUpdatedPayload = (
+  overrides: Partial<WsMediaLinkUpdatedData> = {}
+): WsMediaLinkUpdatedData => ({
+  canonical_id: "MANIFOLD:claim:1",
+  platform: "MANIFOLD",
+  chain: null,
+  contract: null,
+  token: null,
+  name: null,
+  description: null,
+  media_uri: null,
+  last_error_message: null,
+  price: null,
+  price_currency: null,
+  last_successfully_updated: null,
+  failed_since: null,
+  ...overrides,
+});
+
+describe("patchFromMediaLinkUpdate", () => {
+  const createCurrentData = (
+    overrides: Partial<MarketplacePreviewData> = {}
+  ): MarketplacePreviewData => ({
+    href: "https://example.com/1",
+    canonicalId: "manifold:claim:1",
+    platform: "MANIFOLD",
+    title: "Old title",
+    description: "Old description",
+    media: {
+      url: "https://cdn.example.com/current-preview.webp",
+      mimeType: "image/webp",
+    },
+    price: "1.0",
+    priceCurrency: "ETH",
+    ...overrides,
+  });
+
+  it("prefers preview urls from websocket payload over media_uri", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData(),
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+        media_preview: {
+          card_url: "https://cdn.example.com/card-preview.avif",
+          small_url: "https://cdn.example.com/small-preview.jpg",
+          thumb_url: "https://cdn.example.com/thumb-preview.jpg",
+          mime_type: "image/avif",
+        },
+      }),
+    });
+
+    expect(patched.media).toEqual({
+      url: "https://cdn.example.com/card-preview.avif",
+      mimeType: "image/avif",
+    });
+  });
+
+  it("keeps existing cached preview media when websocket has only media_uri", () => {
+    const current = createCurrentData();
+
+    const patched = patchFromMediaLinkUpdate({
+      current,
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+      }),
+    });
+
+    expect(patched.media).toEqual(current.media);
+  });
+
+  it("falls back to media_uri when cache has no media and websocket has no preview", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData({ media: null }),
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+      }),
+    });
+
+    expect(patched.media).toEqual({
+      url: "https://cdn.example.com/full.jpg",
+      mimeType: "image/jpeg",
+    });
+  });
+
+  it("supports flat preview fields in websocket payload", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData(),
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+        media_preview_small_url: "https://cdn.example.com/small-preview.png",
+      }),
+    });
+
+    expect(patched.media).toEqual({
+      url: "https://cdn.example.com/small-preview.png",
+      mimeType: "image/png",
+    });
+  });
+});
 
 describe("primeMarketplacePreviewCacheFromNftLinks", () => {
   it("seeds marketplace preview cache for both preview modes", () => {
