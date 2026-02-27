@@ -16,7 +16,7 @@ owned by:
 - [Profile Identity Statements](feature-identity-statements.md): add/edit/delete
   statement rows inside Identity.
 - [Profile Brain Tab](feature-brain-tab.md): profile feed behavior at
-  `/{user}/brain`.
+  `/{user}/brain`, including drop-open routing to Waves or Messages.
 - [Collected Tab and Transfer Controls](feature-collected-tab.md): collected NFT
   browsing and owner transfer mode at `/{user}/collected`.
 - [Profile xTDH Tab](feature-xtdh-tab.md): granted and received xTDH lists plus

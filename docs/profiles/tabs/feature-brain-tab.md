@@ -2,14 +2,14 @@
 
 ## Overview
 
-The `Brain` tab shows a profile's drop feed.
-It lets users read recent drops and open a profile-local single-drop surface.
+The `Brain` tab shows a profile's drop feed, including replies.
+Clicking a drop body or quote preview opens that thread in Waves or Messages.
 
 ## Location in the Site
 
 - Route: `/{user}/brain`
-- Visible as the `Brain` tab when Waves features are enabled for the current
-  runtime context.
+- Tab visibility: `Brain` is shown only when Waves is available for the current
+  viewer context.
 
 ## Entry Points
 
@@ -20,47 +20,52 @@ It lets users read recent drops and open a profile-local single-drop surface.
 ## User Journey
 
 1. Open `/{user}/brain`.
-2. The page resolves the profile and loads the first set of drops.
-3. Scroll to load older drops as needed.
-4. Select a drop to open a profile-local single-drop surface.
+2. Profile route resolution runs first (canonical-handle redirects and
+   not-found behavior follow shared profile route rules).
+3. If `Brain` is visible and the route resolves to a profile handle, the tab
+   loads the first drop page.
+4. Select a drop or quote preview to open its thread:
+   - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
+   - direct-message drop: `/messages?wave={waveId}&serialNo={serialNo}`
+5. Scroll to load older drops.
 
 ## Common Scenarios
 
 - Visit someone else's profile Brain tab to read latest drops.
 - Visit your own profile Brain tab to review recent drops.
-- While the first page is loading, the tab shows `Loading drops...` with a
-  centered spinner.
-- If no drops are available, the page shows `No Drops to show`.
-- While older drops are loading during scroll, the page shows `Loading more drops...`.
-- On touch-capable devices, profile feeds use standard page scrolling so older drops can
-  be reached with normal upward swipes.
+- Initial load shows `Loading drops...`.
+- Empty feeds show `No Drops to show`.
+- Loading older pages shows `Loading more drops...`.
 
 ## Edge Cases
 
-- `Brain` is hidden when Waves is disabled; profile routing falls back to the
-  first visible tab.
-- Direct-message drops open in the messages route instead of a public wave
-  route.
-- If profile resolution is still in progress, the drop list can remain
-  unavailable until profile data is ready.
+- `Brain` is hidden when Waves is unavailable in the current context.
+- If the active tab route becomes hidden, profile tab navigation replaces the
+  URL with the first visible tab and keeps the current query string.
+- Opening `/{user}/brain` while `Brain` is hidden redirects to `/{user}` when
+  no wallet is connected, or when a connected profile exists but Waves is still
+  unavailable.
+- If a wallet is connected but no connected profile handle exists, the hidden
+  `/{user}/brain` route can remain on a blank shell until context changes.
+- Feed content renders only after profile resolution returns a handle.
 
 ## Failure and Recovery
 
 - If the profile route cannot be resolved, users see the shared not-found screen:
   [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
-- If the drop feed request fails, users can still see `No Drops to show`;
+- If the initial drop-feed request fails, users still see `No Drops to show`;
   refreshing retries the request.
 - If loading additional pages fails while scrolling, already loaded drops stay
   visible; refresh and retry.
-- On touch devices, users can also continue to scroll after interruptions once the
-  route has re-rendered.
 
 ## Limitations / Notes
 
-- The feed is scoped to the profile in the URL path (`/{user}`); adding a
-  separate `user` query parameter does not switch the feed owner.
-- The profile feed focuses on reading and opening drops; direct inline
-  reply/quote actions are not shown in this tab.
+- The profile feed focuses on reading and opening drops; inline
+  reply/quote action controls are not shown in this tab.
+- Feed pagination requests 10 drops per page and loads older pages on bottom
+  scroll intersection.
+- Feed scope comes from the `/{user}` route path; unrelated query parameters do
+  not switch the feed owner.
 
 ## Related Pages
 
