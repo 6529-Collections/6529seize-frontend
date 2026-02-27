@@ -1,77 +1,73 @@
 # Mobile Keyboard and Bottom Navigation Layout
 
+Parent: [Navigation Index](README.md)
+
 ## Overview
 
-On mobile app clients (Android and iOS), the shared app shell adjusts bottom
-spacing and hides bottom navigation when the on-screen keyboard is visible. This
-removes dead space so composers, create-flow inputs, and chat fields stay near
-the keyboard.
+In native app mode on iOS and Android, opening the on-screen keyboard hides
+the fixed bottom navigation and removes bottom-nav reserve space. This keeps
+inputs and composers close to the keyboard and avoids blank space.
 
 ## Location in the Site
 
-- Mobile app shell routes using the shared `AppLayout` wrapper
-- Wave and message flows that expose chat or composer inputs
-- Create-flow pages that use the shared composer container
-- Any mobile app route where an input is focused
+- Native app routes rendered through `AppLayout` (`isApp` context).
+- Wave/message stream surfaces that use mobile nav-space calculations.
+- Single-drop reply composer in app mode (Android padding change).
+- Create-wave flow in app mode (iOS margin change).
 
 ## Entry Points
 
-- Open the mobile app and navigate to a route with a message, composer, or create
-  flow input.
-- Focus a text input in a chat or drop-composer field.
-- Tap outside the input or dismiss the keyboard.
+- Open the native app (not small-screen web fallback layout).
+- Navigate to a route with a text input.
+- Focus the input to open the keyboard.
+- Dismiss the keyboard to return to normal layout.
 
 ## User Journey
 
-1. Keyboard is hidden.
-2. The user focuses an input in the mobile app shell.
-3. The app detects keyboard visibility using native keyboard listeners.
-4. The bottom navigation hides and layout spacing removes fixed keyboard reserves.
-5. The content area recalculates with reduced bottom spacing.
-6. The user can compose without a large dead zone between input and the keyboard.
-7. When the keyboard dismisses, spacing and bottom navigation return to normal.
+1. User focuses an input on an app-shell route.
+2. Keyboard visibility updates from native keyboard events.
+3. Bottom navigation slides out and ignores taps.
+4. Layout height recalculates without bottom-nav reserve space.
+5. User types with composer/input controls kept in the visible area.
+6. User closes keyboard; bottom navigation and normal spacing return unless
+   another hide condition is active.
 
 ## Common Scenarios
 
-- While typing in wave chat:
-  - The composer remains visible and reachable.
-  - The dead space between composer input and keyboard is reduced.
-- While typing in create-flow fields on iOS:
-  - The composer container no longer leaves an extra bottom margin.
-  - Input areas remain usable throughout keyboard transitions.
-- While typing in other mobile app composer surfaces:
-  - Layout contracts to the available space before the keyboard area.
-  - Controls stay within the usable region of the screen.
-- While the keyboard is closed:
-  - Bottom navigation remains visible.
-  - Existing safe-area spacing behavior remains in place.
+- Wave or message composing: bottom navigation hides while typing and returns
+  after keyboard close.
+- Single-drop reply on Android: composer bottom safe-area padding becomes `0`
+  while keyboard is open.
+- Create Wave flow on iOS: extra bottom margin used in non-keyboard state is
+  removed while typing.
 
 ## Edge Cases
 
-- If the native keyboard listener is unavailable, app behavior falls back to static
-  spacing.
-- On Android, rapid show/hide keyboard events are debounced before layout updates.
-- On routes without active inputs, behavior stays in the non-keyboard state.
-- Web and non-keyboard app routes do not trigger this mobile keyboard layout mode.
+- Android keyboard show/hide updates are debounced to reduce rapid flicker.
+- If keyboard listeners are unavailable or fail, layout stays in non-keyboard
+  state.
+- This behavior does not apply to desktop web or small-screen web sidebar layout.
 
 ## Failure and Recovery
 
-- If a keyboard event is delayed or missed, the app keeps the last valid layout and
-  remains interactive.
-- When route or component state changes and listeners are cleaned up, layout state
-  is reset to the non-keyboard variant.
+- If bottom navigation appears stuck hidden, close the keyboard first
+  (`Done`/back key or blur input).
+- If spacing looks stale after keyboard close, change route once and return.
+- If stale spacing persists, refresh the current route.
 
 ## Limitations / Notes
 
-- The documented behavior is mobile-app specific.
-- Visual timing depends on native keyboard event delivery and device animation
-  characteristics.
-- Safe-area inset spacing is restored after the keyboard closes.
+- This page only covers keyboard-driven layout changes.
+- Other bottom-nav hide conditions (`?drop` open, inline drop edit) are covered in
+  [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
+- Behavior depends on native keyboard event delivery timing.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
+- [Wave Creation Index](../waves/create/README.md)
 - [Wave Chat Scroll Behavior](../waves/chat/feature-scroll-behavior.md)
-- [Wave Chat Typing Indicator](../waves/chat/feature-typing-indicator.md)
 - [Wave Chat Index](../waves/chat/README.md)
 - [Docs Home](../README.md)
