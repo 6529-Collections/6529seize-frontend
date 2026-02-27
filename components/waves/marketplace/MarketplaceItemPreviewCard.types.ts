@@ -3,6 +3,7 @@ export interface MarketplaceItemPreviewCardProps {
   readonly mediaUrl: string;
   readonly mediaMimeType: string;
   readonly price?: string | undefined;
+  readonly priceCurrency?: string | undefined;
   readonly title?: string | undefined;
   readonly compact?: boolean | undefined;
   readonly hideActions?: boolean | undefined;
