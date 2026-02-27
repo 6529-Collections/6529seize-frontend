@@ -33,8 +33,8 @@ and mobile app layouts.
 
 ### Shared Shell Controls
 
-- [App Header Context](feature-app-header-context.md): header title rules and
-  menu-vs-back switching.
+- [App Header Context](feature-app-header-context.md): app-header title
+  precedence, left-control switching, and contextual action-row behavior.
 - [Header Search Modal](feature-header-search-modal.md): modal search for pages,
   profiles, NFTs, waves, and in-wave messages.
 - [Back Button Behavior](feature-back-button.md): create-route, wave/drop, and

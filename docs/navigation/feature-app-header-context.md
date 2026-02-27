@@ -2,92 +2,103 @@
 
 ## Overview
 
-The top header reflects the current route context and keeps key identity and
-navigation controls visible as users move across waves, messages, profile, and
-collection routes.
+In the app layout, the header adapts to route and thread state. It controls:
+
+- left control (`Back` or `Open menu`)
+- title
+- right action row (`Create Wave`/`Create DM`, home health shortcut, `Search`)
 
 ## Location in the Site
 
-- Any route rendered with the shared app shell.
-- Especially visible on wave/message routes, profile routes, and `/`-scope
-  pages that use the common header layout.
+- App routes rendered through `AppLayout` (native app shell).
+- Common route families: `/`, `/discover`, `/waves*`, `/messages*`,
+  `/network*`, collection routes, tool routes, and profile routes.
+- Excluded routes: `/access*` and `/restricted*` (no layout wrapper).
 
 ## Entry Points
 
-- Open a route in `/waves`, `/waves/{waveId}`, `/messages`,
-  `/messages?wave={waveId}`, a profile route like `/{user}`, or a collection
-  route such as `/the-memes/*`, `/6529-gradient/*`, `/meme-lab/*`,
-  `/nextgen/*`, `/rememes/*`.
-- Open a wave from the list/sidebars while another context is already open.
-- Start or return from wave/message create flows.
+- Open any app-shell route.
+- Open a thread (`/waves/{waveId}` or `?wave={waveId}`).
+- Open create routes (`/waves/create`, `/messages/create`).
+- Return to `/` to access the home-only health shortcut.
 
 ## User Journey
 
-1. User opens a route in the app shell.
-2. Header computes a title from route state:
-   - `/waves/create` and `/messages/create` both show section names (`Waves`,
-     `Messages`).
-   - `/waves` and `/messages` with no active wave show section names.
-   - `/waves/{id}` and `/messages?wave={id}` show the wave name for the active
-     wave.
-   - Collection routes like `/the-memes/{id}` become `The Memes #{id}`.
-   - Rememe routes like `/rememes/{contract}/{tokenId}` become
-     `Rememes {contract} #{tokenId}`, with abbreviated values.
-   - Other routes use the last path segment, capitalized and formatted for
-     display.
-3. The left header control switches between menu and back affordances based on
-   route context and navigation state.
-   - Back mode appears for active-wave contexts, create routes, and profile
-     routes with valid in-app back history.
-   - Menu mode appears otherwise and opens the app sidebar navigation panel.
-4. Connected users can rely on identity avatar rendering in the same header area.
-5. On `/`, a network-health shortcut appears next to header actions.
+1. Header renders for the current app route.
+2. Left control resolves:
+   - `Back` appears when an active wave exists, on `/waves/create` or
+     `/messages/create`, or on profile routes with valid in-app history.
+   - Otherwise a menu/avatar button appears.
+3. Menu/avatar button state:
+   - Disconnected: menu icon.
+   - Connected: profile avatar when available, otherwise a circle placeholder.
+   - Tap opens [App Sidebar Menu](feature-app-sidebar-menu.md).
+4. Title resolves in this order:
+   - `/waves/create` -> `Waves`
+   - `/messages/create` -> `Messages`
+   - `/waves*` with no active wave -> `Waves`
+   - `/messages*` with no active wave -> `Messages`
+   - active wave -> loading spinner, then wave name
+   - `/the-memes|6529-gradient|meme-lab|nextgen/{numericId}` ->
+     `{Collection} #{id}`
+   - `/rememes/{contract}/{tokenId}` ->
+     `Rememes {shortContract} #{shortToken}`
+   - fallback -> last path segment (normalized and center-truncated)
+5. Center action:
+   - In active-wave context, chat/gallery toggle appears unless the wave is
+     rank, memes, or DM.
+6. Right action row:
+   - `Create Wave` appears in waves list context with no active wave (including
+     `?view=waves`).
+   - `Create DM` appears in messages list context with no active wave
+     (including `?view=messages`).
+   - On `/`, network-health heart shortcut appears.
+   - `Search` is always available.
 
 ## Common Scenarios
 
-- Wave list entry opens a wave: header title becomes the wave name.
-- Navigating to collection routes shows numeric collection suffixes in the title.
-- Returning to `/waves` or `/messages` removes wave-level title and shows section
-  title.
-- Profile routes use route-derived labels and fallback text where the display name is
-  short or missing.
-- On routes without back affordance, the left control opens the app sidebar menu
-  with grouped route links and account actions.
-- Opening `/` shows a quick network-health shortcut in the header actions.
-- Header title strings longer than the header width are shortened with
-  middle-elision.
+- Open `/waves/{waveId}`: left control switches to `Back`; title moves from
+  spinner to wave name.
+- Return to `/waves` or `/messages`: title resets to section name and
+  menu/avatar button returns.
+- Open `/the-memes/123`: title is `The Memes #123`.
+- Open `/rememes/{contract}/{tokenId}`: title uses shortened contract/token.
+- Open `/`: health heart shortcut appears in the action row.
 
 ## Edge Cases
 
-- While wave metadata is loading or refreshing, the header shows a loading
-  indicator in place of the wave title.
-- If a route has no matching collection token pattern, only the last path segment
-  is used.
-- Rememe and collection identifiers are shortened for readability; full values are
-  not fully expanded in the header label.
-- If the connected profile avatar uses an IPFS URL, the header resolves it to a
-  gateway-backed URL before rendering.
-- If no avatar image exists, the app keeps a shaped placeholder in that space.
+- If active-wave metadata is still loading (or does not match active wave ID),
+  title remains a spinner.
+- Profile routes show `Back` only when in-app history can resolve a target.
+- Rememes formatting applies only when both `contract` and `tokenId` are
+  present.
+- Fallback title uses the last segment only and truncates long values.
 
 ## Failure and Recovery
 
-- If active-wave metadata temporarily fails to resolve, the header reverts to
-  fallback title logic and continues rendering the route context.
-- If the page state is in flux while a title source updates, the header updates
-  as route state stabilizes.
+- If title stays in loading state, use `Back` or open menu and go to `/waves`
+  or `/messages`.
+- If create action is missing, verify you are in waves/messages list context
+  and not inside an active thread.
+- If menu does not open, retry from the same top-left control.
+- If search closes unexpectedly, reopen it from the header search button.
 
 ## Limitations / Notes
 
-- Header title logic is visible behavior; exact internal routing details are
-  implementation-only.
-- Avatar rendering and resolved labels can vary by connection state and available
-  profile data.
+- This page covers app-layout header behavior only (not web/small-screen web
+  header).
+- Back execution order is documented in
+  [Back Button Behavior](feature-back-button.md).
+- Sidebar route groups and account actions are documented in
+  [App Sidebar Menu](feature-app-sidebar-menu.md).
 
 ## Related Pages
 
 - [Navigation Index](README.md)
+- [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Back Button Behavior](feature-back-button.md)
-- [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
+- [Header Search Modal](feature-header-search-modal.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
-- [Web Sidebar Navigation](feature-sidebar-navigation.md)
+- [Chat and Gallery View Toggle](../waves/header/feature-chat-gallery-toggle.md)
