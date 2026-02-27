@@ -15,7 +15,7 @@ import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -54,6 +54,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   const [copiedItem, setCopiedItem] = useState<"full-address" | "ens" | null>(
     null
   );
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [_, copyToClipboard] = useCopyToClipboard();
 
   const handleCopyAddress = (
@@ -62,8 +63,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     event.stopPropagation();
     copyToClipboard(address.wallet);
     setCopiedItem("full-address");
-    setTimeout(() => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = setTimeout(() => {
       setCopiedItem((current) => (current === "full-address" ? null : current));
+      resetTimerRef.current = null;
     }, 1000);
   };
 
@@ -77,10 +82,22 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     event.stopPropagation();
     copyToClipboard(address.display);
     setCopiedItem("ens");
-    setTimeout(() => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = setTimeout(() => {
       setCopiedItem((current) => (current === "ens" ? null : current));
+      resetTimerRef.current = null;
     }, 1000);
   };
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
 
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
