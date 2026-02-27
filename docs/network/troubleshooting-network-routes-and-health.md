@@ -8,7 +8,7 @@ activity feeds, and rule/reference pages.
 ## Location in the Site
 
 - Primary route family: `/network/*`
-- Leaderboards and feeds: `/network`, `/network/nerd/{focus}`,
+- Leaderboards and feeds: `/network`, `/network/nerd/{focus?}`,
   `/network/activity`
 - Metrics and references: `/network/health`, `/network/health/network-tdh`,
   `/network/tdh`, `/network/tdh/historic-boosts`, `/network/definitions`,

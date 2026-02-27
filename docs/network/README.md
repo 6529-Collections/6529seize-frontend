@@ -5,7 +5,7 @@ reference routes.
 
 ## Overview
 
-- Main route family: `/network`, `/network/activity`, `/network/nerd`,
+- Main route family: `/network`, `/network/activity`, `/network/nerd/{focus?}`,
   `/network/health`, `/network/health/network-tdh`, `/network/tdh`,
   `/network/tdh/historic-boosts`, `/network/definitions`, and
   `/network/levels`.
