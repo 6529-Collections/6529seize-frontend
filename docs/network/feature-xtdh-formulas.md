@@ -1,75 +1,82 @@
 # xTDH Rules and Distribution Formula
 
+Parent: [Network Index](README.md)
+
 ## Overview
 
-/network/xtdh explains how xTDH is produced, how grants distribute it, and how
-grants are consumed over time.
+`/network/xtdh` is a static rules page. It explains how xTDH is produced,
+received from grants, granted out, and added to your total.
 
 ## Location in the Site
 
-- Route: /network/xtdh
-- Sidebar path: `Network -> xTDH`
+- Route: `/network/xtdh`
+- Sidebar path (web and app): `Network -> xTDH`
 
 ## Entry Points
 
-- Open /network/xtdh directly.
+- Open `/network/xtdh` directly.
 - Open `Network -> xTDH` from the sidebar.
-- Open xTDH links from profile routes for context.
 
-## User Journey
+## What Users Read on This Page
 
-1. Open /network/xtdh.
-2. Confirm what xTDH tracks:
-   - xTDH produced from held eligible NFTs.
-   - xTDH received through grants on held tokens.
-   - xTDH already given away through active or pending grants.
-3. Read production, received, granted, and delta formula sections.
-4. Use the example section to sanity check expected outcomes.
-5. Use the conservation section to confirm whether xTDH was retained or returned.
+1. A short xTDH intro with a `TDH` link to `/network/tdh`.
+2. Produced xTDH rules and formula.
+3. Received xTDH grant rules, including denominator behavior.
+4. Ownership timing rules for when grant accrual starts.
+5. Granted-out xTDH rules for future production.
+6. Daily rate and total formulas plus a worked example.
+7. Conservation rule: produced xTDH is reassigned, not lost.
 
-## Common Scenarios
+## Key Formulas Shown
 
-- Compute daily production from base TDH:
-  - `produced_xTDH_today = (TDH gained today) × xTDH_coefficient`
-- Estimate per-token grant impact:
-  - `grant_amount_per_token = rate / denominator`
-  - full collection grants use total supply as the denominator
-  - partial token grants use selected token count as the denominator
-- Derive daily wallet delta:
-  - `xtdh_rate = produced_today - granted_out_today + received_today`
-  - `xtdh_total = xtdh_total_previous + xtdh_rate`
-- Validate lifecycle behavior:
-  - a token receives grant reward only while it is held during an active grant
-  - grant start and ownership timing can delay first reward until an ownership
-    window is active
+- Produced xTDH:
+  `produced_xTDH_today = (TDH gained today) × xTDH_coefficient`
+- Per-token grant amount:
+  `grant_amount_per_token = rate / denominator`
+- Daily rate:
+  `xtdh_rate = produced_today - granted_out_today + received_today`
+- Running total:
+  `xtdh_total = xtdh_total_previous + xtdh_rate`
 
-## Edge Cases
+## Rules That Affect Outcomes
 
-- Grant contribution can skip or reduce daily accrual when ownership changes inside a
-  grant cycle.
-- Ownership inside the same consolidation group does not reset the grant window.
-- Cross-group transfers are treated as a new holder context.
-- If a token is sold, xTDH gained from that token returns to the grantor by rule.
-- `Never expires` is a grant creation UI option; it does not alter formula shape.
-- Coefficient can change over time; new values affect future production.
+- Full collection grant: denominator is collection total supply.
+- Partial grant: denominator is selected token count.
+- First grant increment requires both windows to pass:
+  - at least 24h since grant start
+  - at least 24h since token acquisition
+- Transfers inside the same consolidation group keep the ownership window.
+- Cross-group transfers reset holder context.
+- Selling a granted token sends that token's granted xTDH flow back to grantor.
+- Already pinned xTDH cannot be granted; only future production can be granted.
+- `xTDH_coefficient` is shown as `0.1` on this page and can change later.
+
+## Page Behavior and States
+
+- Static reference route with no API calls.
+- No filters, sorting, or query params.
+- No route-level submit actions.
+- No wallet gating; same content for signed-in and signed-out users.
+- No route-specific loading, empty, or retry states.
 
 ## Failure and Recovery
 
-- This route is informational and does not submit or mutate state.
-- If page content is unavailable, users can continue with:
-  - /xtdh for live network overview
-  - /network/tdh for current TDH rule context.
+- If `/network/xtdh` fails, retry from `Network -> xTDH` or open the URL directly.
+- For TDH baseline rules, open `/network/tdh`.
+- For live network-wide xTDH data, open `/xtdh`.
 
-## Limitations / Notes
+## Limitations
 
-- This page is rule documentation; it does not replace API contract pages or grant
-  action flows.
-- Formula text and coefficient values are user-visible content from the route.
+- This page is reference-only.
+- It does not show live stats.
+- It does not create or edit grants.
+- Use `/xtdh` and profile xTDH routes for live balances and grant actions.
 
 ## Related Pages
 
+- [Network Index](README.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Profile Tab](../profiles/tabs/feature-xtdh-tab.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [Network Definitions](feature-network-definitions.md)
-- [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
+- [Network Routes and Health Troubleshooting](troubleshooting-network-routes-and-health.md)
