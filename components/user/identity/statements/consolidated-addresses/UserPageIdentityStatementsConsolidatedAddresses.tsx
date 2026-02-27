@@ -82,6 +82,8 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     setSortedByPrimary(sortByPrimary(profile.wallets ?? []));
   }, [profile, primaryAddress]);
 
+  const [expandedWallet, setExpandedWallet] = useState<string | null>(null);
+
   const walletConsolidations = useQueries({
     queries: (profile.wallets ?? []).map((wallet) => ({
       queryKey: [
@@ -153,6 +155,13 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             address={wallet}
             primaryAddress={primaryAddress}
             canEdit={canEdit}
+            isOpen={expandedWallet === wallet.wallet.toLowerCase()}
+            onToggleOpen={() => {
+              const normalizedWallet = wallet.wallet.toLowerCase();
+              setExpandedWallet((current) =>
+                current === normalizedWallet ? null : normalizedWallet
+              );
+            }}
           />
         ))}
       </ul>
