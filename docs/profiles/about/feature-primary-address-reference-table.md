@@ -2,8 +2,10 @@
 
 ## Overview
 
-`/about/primary-address` explains on-chain primary-address rules and shows a
-read-only table sourced from `"/primary_address.csv"`.
+`/about/primary-address` is a public, read-only page.
+
+It shows on-chain primary-address rules and a table loaded from
+`"/primary_address.csv"`.
 
 No wallet connection is required.
 
@@ -17,7 +19,7 @@ No wallet connection is required.
 
 - Open `/about/primary-address` directly.
 - Open `About -> Primary Address` from the global sidebar.
-- Open any `/about/*` page, then choose `Primary Address`.
+- Open any `/about/{section}` page, then choose `Primary Address`.
 
 ## Access and Permissions
 
@@ -27,27 +29,33 @@ No wallet connection is required.
 ## User Journey
 
 1. Open `/about/primary-address`.
-2. The page shows `Loading...` while it requests `"/primary_address.csv"`.
+2. If no cached data exists, the page shows `Loading...` while it requests
+   `"/primary_address.csv"`.
 3. On success, the page shows:
    - heading `On-Chain Primary Address`
    - rule notes for `Single Address` and `Consolidations`
+   - static dated sentence ending with `Monday 29th April 2024`
    - table columns `Profile Handle`, `Current Selected Primary Address`, and
      `Primary Address Changed to`
 4. Rows are sorted alphabetically by `Profile Handle`.
 5. Selecting a `Profile Handle` link opens `/{current_primary}`.
+6. If loading fails, the query retries automatically before an error message is
+   shown.
 
 ## Common Scenarios
 
-- Read the rule summary first, then inspect specific rows.
+- Read the rule summary, then inspect table rows.
 - Compare `Current Selected Primary Address` and
   `Primary Address Changed to`.
-- Open a handle row to jump to its linked profile route.
+- Open a handle row to jump to the linked profile route.
 
 ## Visible States
 
-- Loading: `Loading...`
+- Loading: `Loading...` on first load without cached data.
+- Cached revisit: revisiting can reuse cached rows and skip `Loading...`; once
+  cache is older than about 10 seconds, a background refresh can run on revisit.
 - HTTP error: `Error: Failed to fetch primary address data (<status>)`
-- Network failure: browser fetch error text (commonly `Error: Failed to fetch`)
+- Network failure: `Error: Failed to fetch`
 - CSV parse error: `Error: Failed to parse primary address data`
 - Empty-data success: table headers render with no rows and no empty-state copy
 
@@ -55,13 +63,16 @@ No wallet connection is required.
 
 - Row links always use `current_primary`, not the handle value.
 - If the CSV includes a header row, that row is rendered as normal table data.
-- The page includes static dated copy: `Monday 29th April 2024`.
+- If a CSV row is missing columns, table cells can render blank.
+- The page keeps static dated copy: `Monday 29th April 2024`.
 - The table container scrolls horizontally on narrow screens.
 
 ## Failure and Recovery
 
-- Refresh the page to retry loading.
-- Reopen `/about/primary-address` to trigger a new fetch on this route.
+- Wait for automatic retries to finish when requests fail.
+- Refresh the page to force a new fetch immediately.
+- If revisit navigation still shows stale rows, wait about 10 seconds and
+  revisit, or hard-refresh now.
 
 ## Limitations / Notes
 

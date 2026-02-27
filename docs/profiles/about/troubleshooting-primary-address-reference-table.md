@@ -13,37 +13,47 @@ opens an unexpected profile route.
 
 ## Failure and Recovery Cases
 
-1. HTTP request returns non-2xx
+1. Error does not appear immediately after a failed request
+   - Cause: the query retries automatically before failing.
+   - Recovery: wait for retries to finish, then use the final error text to
+     pick the right recovery path below.
+
+2. HTTP request returns non-2xx
    - Message: `Error: Failed to fetch primary address data (<status>)`
    - Recovery: refresh to retry `"/primary_address.csv"`.
 
-2. Network request fails before an HTTP response
-   - Message: browser fetch error text (commonly `Error: Failed to fetch`)
+3. Network request fails before an HTTP response
+   - Message: `Error: Failed to fetch`
    - Recovery: verify connection, disable blocking extensions if needed, then
      refresh.
 
-3. CSV parsing fails
+4. CSV parsing fails
    - Message: `Error: Failed to parse primary address data`
    - Recovery: refresh. If it persists, the CSV payload likely needs
      correction.
 
-4. Table headers show but no data rows
+5. Table headers show but no data rows
    - Message: none (successful empty-data render)
    - Recovery: verify whether `"/primary_address.csv"` currently has data rows.
 
-5. First data row looks like CSV headers
+6. First data row looks like CSV headers
    - Symptom: row values appear as `handle`, `current_primary`, `new_primary`.
    - Recovery: expected when the CSV includes a header row; this page renders
      it as data.
 
-6. Row link opens an unexpected profile path
+7. Row link opens an unexpected profile path
    - Cause: each `Profile Handle` link always targets `/{current_primary}`.
    - Recovery: compare `Profile Handle` and `Current Selected Primary Address`
      before selecting a row link.
 
-7. Dated sentence appears stale
+8. Dated sentence appears stale
    - Symptom: text still references `Monday 29th April 2024`.
    - Recovery: expected current behavior; this is static page copy.
+
+9. Reopening the route still shows old data
+   - Cause: cached query data is reused on revisit; freshness is about
+     10 seconds.
+   - Recovery: hard-refresh to fetch now, or wait about 10 seconds and revisit.
 
 ## Limits of Recovery
 

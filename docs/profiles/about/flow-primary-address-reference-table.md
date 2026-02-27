@@ -19,21 +19,25 @@ and jump to a profile route from a table row.
 
 - Open `/about/primary-address` directly.
 - Open `About -> Primary Address` from the global sidebar.
-- Open any `/about/*` page and choose `Primary Address`.
+- Open any `/about/{section}` page and choose `Primary Address`.
 
 ## Flow Steps
 
 1. Open `/about/primary-address`.
-2. Wait through `Loading...` while `"/primary_address.csv"` loads.
+2. On first load without cached data, wait through `Loading...` while
+   `"/primary_address.csv"` loads.
 3. Review the rule summary and table rows.
 4. Use `Profile Handle` links to open `/{current_primary}` profile routes.
-5. If loading or parsing fails, the flow stops on an error message until
-   refresh.
+5. If loading fails, the query retries automatically before the error message
+   is shown.
+6. Reopening the route can render cached rows immediately and skip `Loading...`.
+   After about 10 seconds, revisit can also trigger a background refresh.
 
 ## Exit Points
 
 - Stay on `/about/primary-address` to continue reading rows.
 - Move to `/{current_primary}` from any table row.
+- Refresh the route to force a new CSV fetch immediately.
 
 ## Related Pages
 
