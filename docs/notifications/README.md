@@ -17,8 +17,8 @@ the `/notifications` feed and app-only push notification controls.
 - Opening `/notifications` marks the feed read; opening grouped `New reactions`
   rows marks those grouped notification IDs read.
 - In Capacitor app builds, `Push Notifications` opens device-level toggles and
-  push tap routing that only navigates when `profile_id` matches the connected
-  profile.
+  push tap routing that ignores payloads whose `profile_id` conflicts with the
+  connected profile.
 - Use this area when notifications fail to load, rows appear stale, or mobile
   push settings/tap routing fail.
 
