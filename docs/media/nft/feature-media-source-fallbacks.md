@@ -2,90 +2,109 @@
 
 ## Overview
 
-NFT artwork surfaces use ordered media-source fallbacks when an image or video
-URL fails to load. This keeps cards and detail panels usable when a preferred
-asset URL is unavailable.
+- Supported media surfaces auto-try backup URLs when the current image or video
+  URL fails.
+- Fallback order depends on renderer mode: thumbnail, default image, original
+  image, default video, original video, or ReMeme-specific media.
+- No sign-in or wallet connection is required.
+- Fallback state is local to each rendered card/panel and resets on remount.
 
 ## Location in the Site
 
-- The Memes list: `/the-memes`
-- The Memes card page: `/the-memes/{id}` (`Live`, `Your Cards`, `Collectors`,
-  and `The Art`)
-- Meme Lab list: `/meme-lab`
-- Meme Lab collection page: `/meme-lab/collection/{collection}`
-- Meme Lab card page: `/meme-lab/{id}` (`Live`, `Your Cards`, and `The Art`)
-- ReMeme card page: `/rememes/{contract}/{id}` (`Live`)
-- 6529 Gradient list and card pages: `/6529-gradient`, `/6529-gradient/{id}`
-- Home latest-drop artwork: `/`
-- The Memes mint artwork panel: `/the-memes/mint`
+- `/the-memes` list cards
+- `/the-memes/{id}` artwork on `Live`, `Your Cards`, and `Collectors`
+- `/the-memes/{id}` artwork on `The Art`
+- `/the-memes/{id}` `Live` reference grids (`Meme Lab` and `ReMemes`)
+- `/meme-lab` list cards
+- `/meme-lab/collection/{collection}` list cards
+- `/meme-lab/{id}` artwork on `Live` and `Your Cards`
+- `/meme-lab/{id}` artwork on `The Art`
+- `/meme-lab/{id}` `Live` The Memes references grid
+- `/rememes` list cards
+- `/rememes/{contract}/{id}` artwork on `Live`
+- `/rememes/{contract}/{id}` `References` The Memes grid cards
+- `/6529-gradient` list cards
+- `/6529-gradient/{id}` detail artwork
+- `/` home `Latest Drop` artwork when the home panel is in `Now Minting` mode
+- `/the-memes/mint` artwork panel
 
 ## Entry Points
 
-- Browse NFT list/grid pages where artwork appears on cards.
-- Open a direct card route (`/the-memes/{id}`, `/meme-lab/{id}`,
-  `/6529-gradient/{id}`).
-- Open a ReMeme detail route (`/rememes/{contract}/{id}`).
-- Open home latest-drop or The Memes mint pages.
+- Open any supported route above.
+- On tabbed card routes, switch with `focus=live`, `focus=your-cards`,
+  `focus=collectors`, or `focus=the-art` where available.
+- On `/`, this behavior runs only when `Latest Drop` (`Now Minting`) is shown.
+  If `Next Drop` is shown, a different media renderer is used.
 
-## User Journey
+## Fallback Order
 
-1. A supported page renders NFT artwork using the preferred source URL.
-2. If that source loads, media stays on screen and no fallback is needed.
-3. If that source fails, the renderer switches to the next source
-   automatically.
-4. If a fallback source succeeds, media appears without needing a page-level
-   refresh.
-5. If every candidate source fails, the browser shows a failed media state.
+### Standard NFT image surfaces (`NFTImageRenderer`)
 
-## Common Scenarios
+- Thumbnail mode (`showThumbnail=true`, list/grid cards):
+  `thumbnail -> scaled (if present) -> image -> metadata.image`.
+- Default image mode (`showThumbnail=false`, `showOriginal=false`):
+  `scaled (if present) -> image -> metadata.image`.
+- Original image mode (`showOriginal=true`, used on `The Art`):
+  `image -> metadata.image`.
 
-- List/card image surfaces (thumbnail mode) try sources in this order:
-  `thumbnail -> scaled (if present) -> image -> metadata.image (if present)`.
-- Large image surfaces that are not original-first try:
-  `scaled (if present) -> image -> metadata.image (if present)`.
-- Original image surfaces (for example, `The Art`) try:
-  `image -> metadata.image (if present)`.
-- Video surfaces try:
-  `compressed_animation (if present) -> animation -> metadata.animation (if present)`.
-- ReMeme image surfaces try:
-  `s3_thumbnail (height 300 only) -> s3_scaled -> s3_original -> image (gateway and direct IPFS forms) -> metadata.image (gateway and direct IPFS forms) -> OpenSea collection image`.
-- ReMeme video surfaces try:
-  `image (when mp4) in direct and gateway forms -> metadata.animation in direct and gateway forms`.
-- Grid/thumbnail-style image surfaces load lazily; larger detail-image surfaces
-  load eagerly so hero artwork is ready sooner.
+### Standard NFT video surfaces (`NFTVideoRenderer`)
 
-## Edge Cases
+- Default video mode (`showOriginal=false`):
+  `compressed_animation (if present) -> animation -> metadata.animation`.
+- Original video mode (`showOriginal=true`, used on `The Art`):
+  `animation -> metadata.animation`.
 
-- The final metadata fallback is only available when metadata fields are present
-  in the NFT payload.
-- Video fallback applies only to video-rendered animation formats; non-video
-  animation formats use separate renderers.
-- ReMeme fallback sequence can include both direct IPFS URLs and normalized
-  gateway URLs in one attempt chain.
-- Fallback behavior is local to each rendered media component; opening another
-  page or tab starts a fresh attempt sequence for that view.
+### ReMeme image surfaces (`RememeImage`)
+
+- Height `300`:
+  `s3_image_thumbnail (if present) -> s3_image_scaled (if present) -> s3_image_original (if present) -> image (cf-ipfs gateway) -> image (ipfs.io form) -> metadata.image (cf-ipfs gateway, if present) -> metadata.image (ipfs.io form, if present) -> OpenSea collection image`.
+- Height `650`:
+  same order without `s3_image_thumbnail`.
+- If the ReMeme `image` is a `data:` URL, S3 fallbacks still run, but
+  IPFS/OpenSea URL fallbacks are skipped.
+
+### ReMeme video surfaces (`RememeImage`)
+
+- Video mode is used when the renderer is in animation mode with MP4 metadata,
+  or when `image` ends with `.mp4`.
+- If `image` ends with `.mp4`, fallback order is:
+  `image (ipfs.io form) -> image (cf-ipfs gateway) -> metadata.animation (ipfs.io form, if present) -> metadata.animation (cf-ipfs gateway, if present)`.
+- If video mode comes from MP4 metadata but `image` is not `.mp4`, fallback
+  order is:
+  `metadata.animation (ipfs.io form, if present) -> metadata.animation (cf-ipfs gateway, if present)`.
+
+## Loading Behavior
+
+- Standard NFT image renderer uses lazy loading only for thumbnail/`300`-height
+  surfaces; larger surfaces are eager with high fetch priority.
+- ReMeme image renderer is eager on both `300` and `650` surfaces.
+- Standard NFT video renderer preloads media (`preload="auto"`).
+- ReMeme video renderer does not set a specific preload mode.
 
 ## Failure and Recovery
 
-- If all fallback sources fail, images stay broken and videos remain
-  unplayable on that rendered view.
-- There is no per-media retry control on these card/detail renderers.
-- Refreshing the page, reopening the route, or revisiting the tab retries the
-  source order from the beginning.
+- If all candidates fail, the surface stays broken/unplayable.
+- There is no per-media retry button on these renderers.
+- Reloading the route or re-opening the page starts the fallback order again.
 
 ## Limitations / Notes
 
 - Source order is fixed and not user-configurable.
-- Loading priority is route/surface driven and not user-configurable.
-- Fallback logic swaps media URLs only; it does not guarantee successful decode
-  for corrupted assets.
-- If metadata fallback fields are empty or invalid, the renderer has no further
-  source to try.
+- Fallback only swaps URLs; it does not guarantee decode success for corrupted
+  assets.
+- HTML and GLB animation formats use dedicated iframe/model renderers and do
+  not run this image/video fallback chain.
+- Metadata fallback works only when the metadata field exists and has a usable
+  URL.
 
 ## Related Pages
 
 - [Media Index](../README.md)
+- [Media NFT Index](README.md)
 - [NFT Balance Indicators](feature-balance-indicators.md)
 - [The Memes Card Tabs and Focus Links](../memes/feature-card-tabs-and-focus-links.md)
+- [Meme Lab Card Route Tabs and Navigation](../collections/feature-meme-lab-card-route-tabs-and-navigation.md)
+- [6529 Gradient List Sorting and Loading](../rendering/feature-6529-gradient-list-sorting-and-loading.md)
 - [Now Minting Countdown](../memes/feature-now-minting-countdown.md)
+- [Media Routes and Minting Troubleshooting](../troubleshooting-media-routes-and-minting.md)
 - [Docs Home](../../README.md)

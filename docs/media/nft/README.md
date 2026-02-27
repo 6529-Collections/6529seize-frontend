@@ -8,7 +8,7 @@
 - Route families covered here:
   - `/`, `/the-memes`, `/the-memes/{id}`, `/the-memes/mint`
   - `/meme-lab`, `/meme-lab/{id}`, `/meme-lab/collection/{collection}`
-  - `/rememes/{contract}/{id}`
+  - `/rememes`, `/rememes/{contract}/{id}`
   - `/6529-gradient`, `/6529-gradient/{id}`
   - `/{user}/collected`, `/nextgen/token/{token}[/{view}]` (transfer entry
     points)
@@ -25,8 +25,9 @@
   The Memes, Meme Lab, ReMemes (`Live` tab) and 6529 Gradient detail routes,
   with iOS country gating.
 - [NFT Media Source Fallbacks](feature-media-source-fallbacks.md):
-  image/video source order on list/detail routes, home latest-drop artwork, and
-  The Memes mint artwork.
+  image/video source order on list/detail artwork, references grids, ReMeme
+  media, home latest-drop artwork (`Now Minting` mode), and The Memes mint
+  artwork.
 - [NFT Transfer](feature-transfer.md):
   collected-tab batch transfer and single-token transfer on Memes, Meme Lab,
   Gradient, and NextGen token pages.
