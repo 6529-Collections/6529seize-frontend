@@ -2,12 +2,14 @@
 
 ## Overview
 
-`/rememes/add` is a signed submission flow:
-validate contract/token inputs, confirm eligibility, sign, and submit.
+- `/rememes/add` is the ReMeme submission route.
+- Flow: validate contract and token inputs, pass eligibility checks, sign, then
+  submit.
 
 ## Location in the Site
 
-- ReMeme add route: `/rememes/add`
+- Submission route: `/rememes/add`
+- Browse route with add entry: `/rememes`
 
 ## Entry Points
 
@@ -21,35 +23,45 @@ validate contract/token inputs, confirm eligibility, sign, and submit.
    - comma list: `1,2,3`
    - range: `1-3`
    - mixed: `1-3,5`
-3. Add one or more `Meme References`.
+3. Add one or more `Meme References` from the `+` picker.
 4. Select `Validate`.
-5. Review verification output:
-   - contract metadata
-   - token checks and token-level errors
-   - `Verification Failed` rows when validation fails
-6. After `Verified`, connect wallet (if needed).
-7. Confirm checklist eligibility (contract deployer or TDH threshold pass).
-8. Select `Add Rememe`, sign the message, and wait for submission result.
-9. On success, use `view` links or `Add Another` to reload the form.
+5. Review validation output:
+   - `Contract` section (name, deployer, collection name when available)
+   - `Tokens` section (token names and per-token errors)
+   - `Verification Failed - Fix errors and revalidate` when validation fails
+6. After `Verified`, use `Edit` to change inputs and revalidate.
+7. Connect wallet if needed.
+8. Confirm checklist eligibility:
+   - contract deployer passes
+   - non-deployer must meet the current runtime TDH threshold
+9. Select `Add Rememe`, sign the message, and wait for submit status.
+10. On success, use `view` links or `Add Another` to reload a fresh form.
 
-## Common Scenarios
-
-- Add a single token with one Meme reference.
-- Add a short token range with multiple Meme references.
-- Validate first, then switch to `Edit` before signing.
-
-## Edge Cases
+## Status and Blocking States
 
 - `Validate` stays disabled until contract, token IDs, and at least one Meme
   reference are present.
-- Range parsing rejects large spans (`start-end` where span is `>= 1000`).
+- `Add Rememe` stays disabled until all are true:
+  - submission is `Verified`
+  - wallet is connected
+  - checklist has no failing item
+- While signing, status shows `Signing Message`.
+- While submitting, status shows `Adding Rememe`.
+- Submit result shows `Status: Success` or `Status: Fail`.
+- After success, `Add Rememe` stays disabled until reload (`Add Another`
+  reloads the route).
+
+## Edge Cases
+
+- Range parsing rejects oversized spans (`start-end` where span is `>= 1000`,
+  which is 1001+ token IDs).
 - Validation can fail per token even when contract-level checks pass.
 - Submission checklist can block when eligibility data is unavailable (for
   example missing threshold settings or missing TDH profile data).
 - The requirements text section hardcodes `TDH > 6,942`, while runtime
   checklist eligibility uses current settings threshold.
 - If the final add request fails before response handling, the route can stay
-  in submitting state until refresh.
+  in `Adding Rememe` state until refresh.
 
 ## Failure and Recovery
 
@@ -65,11 +77,11 @@ validate contract/token inputs, confirm eligibility, sign, and submit.
 ## Limitations / Notes
 
 - Final acceptance is server-validated after signature submission.
-- The flow depends on wallet connectivity and user eligibility context.
+- The flow depends on wallet connectivity and eligibility context.
+- Non-deployer submissions depend on TDH lookup for the connected profile.
 - Route state is not persisted after reload; `Add Another` performs a full page
   reload.
-- `Add Rememe` stays disabled after a successful submission until the page is
-  reloaded.
+- `Edit` clears verified state and requires revalidation before signing again.
 
 ## Related Pages
 
