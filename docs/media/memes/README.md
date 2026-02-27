@@ -17,7 +17,8 @@
 - [The Memes List Browsing and Sorting](feature-the-memes-list-browsing-and-sorting.md):
   `/the-memes` sort, filter, and list-loading behavior.
 - [The Memes Card Tabs and Focus Links](feature-card-tabs-and-focus-links.md):
-  `/the-memes/{id}` tab deep links, URL `focus` state, and card fallback.
+  `/the-memes/{id}` tab deep links, in-place `focus` rewrites, adjacent card
+  navigation, and unresolved-card fallback behavior.
 - [The Memes Mint Flow](feature-mint-flow.md):
   `/the-memes/mint` recipient selection, phase-aware actions, and transaction
   states.
