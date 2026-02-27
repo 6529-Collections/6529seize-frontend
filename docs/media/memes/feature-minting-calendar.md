@@ -2,135 +2,126 @@
 
 ## Overview
 
-The Memes minting calendar gives users a single place to track upcoming mints,
-browse historical and future mint windows, and export mint events to personal
-calendar tools. The same next-mint card is also reused as a fallback panel on
-The Memes card/distribution routes when full card or distribution data is not
-available yet.
+`/meme-calendar` is the main schedule view for upcoming and past The Memes mint
+windows. It combines:
+
+- A top `Next Mint` panel with countdown/status states, timeline labels, and
+  calendar export links.
+- A lower calendar with zoom levels (`SZN`, `Year`, `Epoch`, `Period`, `Era`,
+  `Eon`) and jump controls.
+
+The same top panel is reused as a compact fallback on unresolved card and
+distribution routes.
 
 ## Location in the Site
 
 - Full route: `/meme-calendar`
-- Navigation path: `Network -> Memes Calendar` in both desktop and small-screen
-  sidebar navigation.
-- Shared next-mint panel: rendered on `/the-memes/{id}` when card data cannot
-  be resolved for a numeric `{id}`.
-- Shared next-mint panel: rendered on `/the-memes/{id}/distribution` when
-  distribution data is not yet available for a valid numeric card id.
+- Navigation path: `Network -> Memes Calendar` in desktop and small-screen
+  sidebars.
+- Shared fallback panel on `/the-memes/{id}` when `{id}` is an integer but no
+  published card data resolves.
+- Shared fallback panel on `/the-memes/{id}/distribution` when `{id}` is a
+  valid positive integer and distribution data is still empty/unpublished.
 
 ## Entry Points
 
-- Open `Network` in sidebar navigation, then select `Memes Calendar`.
+- Open `Network -> Memes Calendar`.
 - Open `/meme-calendar` directly.
-- Open a numeric `/the-memes/{id}` route for a card that is not yet available.
-- Open a numeric `/the-memes/{id}/distribution` route before distribution data
-  is published.
+- Open an unresolved integer `/the-memes/{id}` route.
+- Open a valid positive integer `/the-memes/{id}/distribution` route before
+  distribution rows are available.
 
 ## User Journey
 
 1. Open `/meme-calendar`.
-2. Choose `Local` or `UTC` to control how times are displayed.
-3. Read the top `Next Mint` card for mint number, date/time, division labels,
-   and live countdown.
-4. Use `Next Mint` or `Meme #` input to jump to a specific mint in the top
-   card.
-5. Use calendar icons to add mint events to ICS or Google Calendar.
-6. Use the full calendar controls to switch zoom (`SZN`, `Year`, `Epoch`,
-   `Period`, `Era`, `Eon`), move forward/back, jump to today, jump by mint
-   number, or jump by month.
-7. Hover/tap mint days to open details, event-link controls, and schedule
-   override notes when a mint uses a non-standard date.
-8. On fallback routes (`/the-memes/{id}` and `/the-memes/{id}/distribution`),
-   the shared panel preselects the mint/card number from the URL.
-9. On fallback routes, the shared panel is read-only: no `Next Mint` jump
-   button, no `Meme #` input, and no full upcoming-mints table.
+2. Switch between `Local` and `UTC`.
+3. Read the top panel:
+   - Heading changes by state: `Next Mint`, `Upcoming Mint`, `Mint Live`, or
+     `Past Mint`.
+   - Card shows mint number, datetime, full SZN/Year/Epoch/Period/Era/Eon
+     labels, and a live countdown.
+4. Use top controls to jump:
+   - `Next Mint` button.
+   - `Meme #` input (submit with Enter).
+5. Export the selected mint using ICS or Google Calendar icons.
+6. Use the lower calendar controls:
+   - Change zoom (`SZN`, `Year`, `Epoch`, `Period`, `Era`, `Eon`).
+   - Move backward/forward.
+   - `Jump to Today`.
+   - `Meme #` jump.
+   - `Date` month jump (`Date` input is hidden on small screens).
+7. Open mint-day cells to view details, export links, and any override note.
+8. On fallback routes, the compact panel auto-selects the URL id and stays
+   local-time read-only (no timezone toggle, no `Next Mint` button, no `Meme #`
+   input, no upcoming table).
 
 ## Common Scenarios
 
-- Check whether the next mint is upcoming, live, or past.
-- Review remaining mints for the current season (or auto-forwarded next season
-  when needed).
-- Jump directly to a mint number and inspect its SZN/Year/Epoch/Period/Era/Eon
-  placement.
-- Export a mint event to ICS or Google Calendar from either the top card or day
-  tooltip.
-- Compare `Local` and `UTC` views for the same mint when coordinating across
-  time zones.
-- Check tooltip notes on override dates to understand why a mint appears on an
-  off-schedule day.
-- Open a future numeric `/the-memes/{id}` URL and read schedule/timer details
-  for that specific card number.
-- Open `/the-memes/{id}/distribution` before distribution data exists and still
-  check the mint timing panel.
-- Inspect upcoming mint timeline details programmatically from
-  `/api/meme-calendar/{id}`.
+- Check whether the canonical next mint is upcoming, live, or already past.
+- Jump to a specific mint number and inspect its full timeline placement.
+- Export any upcoming mint to calendar from the top panel or day tooltip.
+- Compare `Local` vs `UTC` renderings for cross-time-zone coordination.
+- Open unresolved future card URLs and still see timing details in the fallback
+  panel.
+- Open early distribution URLs and still see the same fallback timing panel
+  above the "Distribution Plan will be made available soon!" message.
+- Query `/api/meme-calendar/{id}` for a mint timeline summary.
 
 ## Edge Cases
 
-- The upcoming-mints table omits the canonical next mint when it is already
-  shown in the left `Next Mint` card.
-- If the upcoming list only contains the canonical next mint already shown in the
-  left card, the season table rolls forward to the next season and shows
-  `Upcoming SZN`.
-- If there are no remaining upcoming mints in the selected season, the section
-  shows `No upcoming mints in this season.`.
-- Historical launch period (SZN1 / Year 0) is grouped as `Memes #1 - #47`
-  across calendar views.
-- The month jump field is hidden on small screens.
-- Day-tooltips auto-position near calendar edges (`top`, `right`, or `bottom`)
-  and wrap text to keep notes and invite links readable on smaller screens.
-- In native app/Capacitor sessions, screenshot controls are hidden in the full
+- Upcoming table removes the canonical next mint when that mint is already shown
+  in the left panel.
+- If that removal empties the current-season table, the table rolls forward and
+  header changes to `Upcoming SZN`.
+- If a season table has no upcoming rows, it shows
+  `No upcoming mints in this season.`.
+- Year 0 launch period is grouped as `Memes #1 - #47` in higher-level views.
+- Day tooltips auto-place (`top`, `right`, `bottom`) near viewport edges.
+- In Capacitor/native sessions, screenshot control is hidden on full
   `/meme-calendar` top controls.
-- In shared fallback panels, a screenshot icon remains visible beside the panel
+- In compact fallback panels, screenshot control remains visible next to the
   heading.
-- During Europe/Athens daylight-saving transitions, UTC/local renderings for
-  mint windows can shift by one hour even when the underlying Athens
-  wall-clock mint schedule does not change.
-- Non-positive or invalid mint-number input is ignored.
-- Non-integer `/the-memes/{id}` routes show a `MEME` not-found screen.
-- Non-positive or non-integer `/the-memes/{id}/distribution` routes show a
-  `DISTRIBUTION` not-found screen.
-- `/about/memes-calendar` is not a supported route; use `/meme-calendar`.
+- DST transitions for Europe/Athens can move rendered UTC/local times by one
+  hour while wall-clock mint windows stay on Athens schedule.
+- Invalid or non-positive top-panel/calendar `Meme #` input is ignored.
+- `/the-memes/{id}` behavior:
+  - Non-integer ids show `MEME` not-found.
+  - Integer ids that do not resolve (including `0` or negative integers) show
+    the fallback panel.
+- `/the-memes/{id}/distribution` behavior:
+  - Non-positive or non-integer ids show `DISTRIBUTION` not-found.
+- `/about/memes-calendar` is unsupported; use `/meme-calendar`.
 
 ## Failure and Recovery
 
-- If Google Calendar popups are blocked, allow popups for the site or use the
-  downloadable ICS file instead.
-- If screenshot export fails, no inline recovery message is shown; retry the
-  action or capture the panel with OS screenshot tools.
-- If a fallback route opens a not-found screen, replace `{id}` with a valid
-  numeric card id or open `/meme-calendar` directly.
-- If timezone output is unclear, switch between `Local` and `UTC` to compare
-  rendered times.
-- `/api/meme-calendar/{id}` returns:
-  - `200` with resolved details when the mint id is a valid positive integer
-    and timeline lookup succeeds:
-    - `mint_date` (`ISO UTC` timestamp, e.g.
-      `2025-03-18T13:00:00.000Z`)
-    - `season`
-    - `year`
-    - `epoch`
-    - `period`
-    - `era`
-    - `eon`
-  - `400` for invalid ids (`"abc"`, `"0"`, `"1.5"`, negative ids, and ids above
-    JavaScript `MAX_SAFE_INTEGER`), with
-    `{"error":"Invalid id. Use a positive integer in /api/meme-calendar/<id>."}`.
-  - `422` when the id is valid but timeline data cannot be resolved, with
-    `{"error":"Unable to resolve calendar details for this mint id. The id may be out of range."}`.
+- If Google Calendar is blocked, allow popups for the site or use ICS download.
+- If screenshot export fails, the UI shows no inline error; retry or use OS
+  capture.
+- If a route shows not-found, correct `{id}` format:
+  - `/the-memes/{id}` requires an integer for fallback mode.
+  - `/the-memes/{id}/distribution` requires a positive integer.
+- If timing looks wrong, switch `Local`/`UTC` to compare output.
+- `/api/meme-calendar/{id}` responses:
+  - `200` for valid ids, with:
+    - `mint_date` as `YYYY-MM-DD` (UTC day string, for example
+      `2025-03-18`)
+    - `season`, `year`, `epoch`, `period`, `era`, `eon`
+  - `400` for invalid ids (non-numeric, `0`, decimals, negatives, or above
+    JavaScript `MAX_SAFE_INTEGER`):
+    - `{"error":"Invalid id. Use a positive integer in /api/meme-calendar/<id>."}`
+  - `422` when the id parses but timeline resolution fails:
+    - `{"error":"Unable to resolve calendar details for this mint id. The id may be out of range."}`
 
 ## Limitations / Notes
 
-- Mint scheduling follows Monday/Wednesday/Friday cadence with explicit
-  skip/extra/reschedule override days.
-- Mint start/end instants are anchored to Europe/Athens wall-clock schedule
-  before conversion to `Local`/`UTC` display, including regular DST offset
-  changes.
-- Calendar and API outputs are informational schedule views, not wallet
-  eligibility checks.
-- Date jump is month-level only, not exact day-level input.
-- Shared fallback panels always use `Local` time and the URL-provided card id;
-  they do not expose timezone toggles or mint-picker controls.
+- Schedule is based on Monday/Wednesday/Friday cadence plus explicit
+  skip/extra/reschedule overrides.
+- Mint start/end are anchored to Europe/Athens wall-clock timing before
+  rendering in local or UTC display modes.
+- Calendar/API output is schedule information, not wallet eligibility.
+- `Date` jump is month-level only.
+- Compact fallback panels are intentionally limited to local-time next-mint
+  context.
 
 ## Related Pages
 

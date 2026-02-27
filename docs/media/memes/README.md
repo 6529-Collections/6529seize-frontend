@@ -8,9 +8,10 @@
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
 - Home route `/` owns the latest-drop countdown and stats surfaces that link
   into The Memes mint and distribution routes.
-- When card or distribution data is not published yet, numeric
-  `/the-memes/{id}` and `/the-memes/{id}/distribution` routes show the shared
-  next-mint fallback panel.
+- When card data is not published yet, unresolved integer `/the-memes/{id}`
+  routes show the shared next-mint fallback panel.
+- When distribution data is not published yet, valid positive-integer
+  `/the-memes/{id}/distribution` routes show the same fallback panel.
 
 ## Features
 
