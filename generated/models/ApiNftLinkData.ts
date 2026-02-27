@@ -25,6 +25,7 @@ export class ApiNftLinkData {
     'media_uri': string | null;
     'last_error_message': string | null;
     'price': string | null;
+    'price_currency': string | null;
     'last_successfully_updated': number | null;
     'failed_since': number | null;
     'media_preview': ApiNftLinkMediaPreview | null;
@@ -91,6 +92,12 @@ export class ApiNftLinkData {
         {
             "name": "price",
             "baseName": "price",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "price_currency",
+            "baseName": "price_currency",
             "type": "string",
             "format": ""
         },
