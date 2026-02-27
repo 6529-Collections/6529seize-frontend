@@ -315,8 +315,8 @@ export default function UserPageRepNewRepSearch({
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="tw-will-change-transform md:tw-absolute md:tw-left-0 md:tw-right-0 md:tw-top-full md:tw-z-10 md:tw-mt-1"
                       >
+                        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
                         <div
-                          role="presentation"
                           className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
