@@ -2,117 +2,105 @@
 
 ## Overview
 
-Users can move owned NFTs to another wallet from two contexts:
+Users can transfer NFTs from:
 
-- The profile collected tab (`/{user}/collected`) supports batch selection and
-  a persistent transfer panel.
-- Single-card detail pages for The Memes, Meme Lab, 6529 Gradient, and NextGen
-  expose one-card transfer controls.
+- `/{user}/collected` with batch selection and a sticky transfer panel.
+- Single-token detail pages for The Memes, Meme Lab, 6529 Gradient, and NextGen.
 
-The flow uses a recipient search first (handle, ENS, or wallet), then wallet
-confirmation and on-chain execution.
+Both paths use the same recipient picker and on-chain submission modal.
 
 ## Location in the Site
 
-- Collected tab bulk transfer: `/{user}/collected`
-- The Memes detail card: `/the-memes/{id}`
-- Meme Lab detail card: `/meme-lab/{id}`
-- 6529 Gradient detail card: `/6529-gradient/{id}`
-- NextGen token detail: `/nextgen/token/{token}` (optional `/{view}`)
+- Collected batch transfer: `/{user}/collected`
+- The Memes detail (`Your Cards`): `/the-memes/{id}`
+- Meme Lab detail (`Your Cards`): `/meme-lab/{id}`
+- 6529 Gradient detail: `/6529-gradient/{id}`
+- NextGen token detail: `/nextgen/token/{token}` and `/nextgen/token/{token}/{view}`
 
 ## Entry Points
 
-- Open a collected profile tab and choose `Transfer`.
-- Open a supported card detail page, then use the local `Transfer` action block.
-- Open transfer modal with a prepared selection from the collected tab sticky panel.
+- In `/{user}/collected`, click `Transfer` in the filter row.
+- On supported detail pages, use the local `Transfer` block.
+- In collected transfer mode, click `Continue` in the sticky panel to open modal review.
+
+## Availability Rules
+
+- Collected transfer mode shows only when all are true:
+  - desktop view,
+  - connected wallet matches one wallet on the viewed profile,
+  - current collected view has cards.
+- Collected `Network` mode does not expose transfer mode.
+- Single-token transfer controls show only for owner context:
+  - The Memes and Meme Lab: `Your Cards` with connected-wallet balance.
+  - 6529 Gradient and NextGen: connected wallet is the current token owner.
+- Single-token transfer controls are hidden on mobile devices.
 
 ## User Journey
 
-1. In the collected tab, open transfer mode by clicking `Transfer` in the tab
-   controls (desktop only).
-2. In transfer mode, each transferable card can be selected:
-   - The selection control is unavailable for cards with zero transfer balance in
-     the connected wallet.
-   - ERC-1155 cards allow quantity selection up to the connected-wallet balance.
-3. Review selections in the sticky bottom transfer panel:
-   - Expand the panel for per-item counts and thumbnails.
-   - Cancel removes all selections and exits transfer mode.
-4. Press `Continue` to open the transfer modal.
-5. In the modal:
-   - Select a recipient profile or wallet.
-   - If a recipient profile has only one wallet, that wallet can be selected
-     automatically.
-   - You can change the recipient before confirming.
-6. Press `Transfer` to submit transactions:
-   - Recipient eligibility and destination wallet are validated first.
-   - Each transfer is listed with status as it moves from pending to
-     approval, submission, and final result.
-7. Keep the tab open while approvals/signatures and on-chain confirmations
-   complete.
+### Batch Transfer (`/{user}/collected`)
 
-For single-token pages, users usually transfer one card/asset at a time with:
+1. Click `Transfer` to enter transfer mode.
+2. Card links switch to selection mode.
+  - Selectable cards show a plus control.
+  - Non-transferable cards show `Not owned by your connected wallet`.
+  - While wallet-scoped balances load, those cards can show `Loading`.
+3. For ERC-1155 cards, adjust quantity up to connected-wallet balance.
+4. Use the sticky bottom panel:
+  - Review item count.
+  - Expand for per-item quantity changes and removal.
+  - Click `Continue` to open modal review.
+5. In modal review:
+  - Left side shows selected NFTs and quantities.
+  - Recipient search supports handle, ENS, or wallet.
+  - Search starts at 3+ characters.
+  - Single-wallet recipient profiles can auto-select that wallet.
+  - `Transfer` stays disabled until a destination wallet is selected.
+6. Click `Transfer` to submit.
+  - Status rows progress through `Pending`, `Approve in your wallet`,
+    `Submitted`, and `Successful`/`Error`.
+  - `View Tx` links appear when chain explorer data is available.
+7. Keep the modal open during approvals/confirmation.
+  - While transactions are pending, close actions are disabled.
+8. After all rows settle, close the modal:
+  - At least one success: selections are cleared and transfer mode exits.
+  - All errors: selections remain so you can retry.
 
-- A quantity control when ERC-1155 copy-count applies.
-- The same recipient picker and modal transaction path used by bulk mode.
+### Single-Token Transfer (Detail Pages)
+
+1. Open a supported detail page and use the local `Transfer` block.
+2. For ERC-1155 detail pages, set quantity before submission.
+3. Continue through the same modal recipient and transaction flow.
 
 ## Common Scenarios
 
-- Transfer a full collection of cards from `/{user}/collected` in one action.
-- Select multiple ERC-1155 cards and transfer mixed quantities with a single modal
-  confirmation.
-- Use profile/ENS/wallet search to find recipients:
-  - Search text shorter than 3 characters shows a prompt to continue typing.
-  - Exact wallet or `.eth` query can auto-select matching identity and jump to that
-    profile's wallet list.
-- Transfer from a card detail page:
-  - On The Memes and Meme Lab, transfer controls appear in the “Your Cards” area
-    when the connected profile owns editions.
-  - On 6529 Gradient detail pages, transfer control appears only for the
-    connected address that owns the current token.
-  - On NextGen pages, transfer control appears for owner-owned tokens.
+- Move multiple NFTs from one collected profile view to one destination wallet.
+- Send partial ERC-1155 quantities from The Memes or Meme Lab detail pages.
+- Find recipient by handle/ENS/wallet, then choose one destination wallet.
+- Enter an exact wallet or `.eth`; when there is one match, profile/wallet selection can auto-fill.
+- Retry quickly after a fully failed batch without rebuilding selection.
 
 ## Edge Cases
 
-- Transfer mode is not shown on mobile in the collected tab and not shown for
-  users who are not connected to a wallet.
-- Single-card transfer controls are also hidden on mobile detail views.
-- Transfer mode is hidden unless the viewed profile includes the connected wallet
-  and the page has transferable cards.
-- A card can show an explicit “not owned” indicator in transfer mode if the
-  connected-wallet balance is zero.
-- If connected wallet data is still loading, some cards can display a transient
-  loading marker while transferable balances are resolving.
-- The collected page loads transfer eligibility from a separate wallet-scoped query,
-  so there can be a short delay before selections become fully usable.
+- Collected transfer mode can show cards that are not transferable by the connected wallet.
+- Connected-profile counts and connected-wallet transferable counts can differ.
+- If connected wallet disconnects during collected transfer mode, transfer mode and selections are cleared.
+- `Continue` is unavailable until at least one item is selected.
+- Recipient search with fewer than 3 characters shows a typing prompt instead of results.
 
 ## Failure and Recovery
 
-- If no valid recipient wallet is chosen, transfer submission fails with a clear
-  destination-wallet error before signing.
-- If a wallet connector is unavailable, modal submission fails with client-ready
-  messaging and users can retry after reconnecting.
-- If a transaction is rejected or fails on-chain, status is shown per item as
-  `error` with the specific failure reason text available from the wallet/API
-  layer (for example revert details for batched ERC-1155 transfers).
-- For in-flight transfers, users can:
-  - Keep the modal open while waiting for signatures and confirmations.
-  - Note that the page warns transfers are irreversible before signing.
-  - Close and reopen transfer mode to prepare another transfer after resolving
-    blockers.
+- Missing or invalid destination wallet returns `Invalid destination wallet` before signing.
+- Missing client/wallet readiness returns `Client not ready` or `Wallet not ready`; reconnect and retry.
+- Rejected/simulated/on-chain failures mark row status as `Error` with failure text.
+- For partial success, close and start a new transfer for remaining items.
 
 ## Limitations / Notes
 
-- NextGen and detail-page transfer controls are only shown to owners of the current
-  asset in connected-wallet context.
-- Bulk transfer supports:
-  - ERC-721 one-by-one transfer entries.
-  - ERC-1155 batching by origin group where possible, while still preserving one
-    status row per grouped submission.
-- Recipient search uses server-side profile lookup and wallet profile resolution to
-  support profile/ENS/wallet discovery in one flow.
-- Destination wallet identifiers are validated before signing, and wallet
-  signature prompts are controlled by the wallet provider.
-- Transaction links are available after submission when network explorer info exists.
+- Transfers are signed by the connected wallet only.
+- ERC-721 transfers submit one transaction per token.
+- ERC-1155 transfers batch by contract/origin group where possible.
+- Recipient search resolves profile first, then destination wallet selection.
+- Transfers are irreversible once submitted on-chain.
 
 ## Related Pages
 
