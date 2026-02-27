@@ -9,11 +9,11 @@ import MediaDisplay from "@/components/drops/view/item/content/media/MediaDispla
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { type ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
@@ -36,15 +36,8 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
     : ImageScale.AUTOx600;
   const isHtml = media?.mime_type === "text/html";
   const shouldGate = hasTouchScreen && isHtml;
-  const [interactiveEnabled, setInteractiveEnabled] = useState(!shouldGate);
-
-  useEffect(() => {
-    if (shouldGate) {
-      setInteractiveEnabled(false);
-      return;
-    }
-    setInteractiveEnabled(true);
-  }, [drop.id, shouldGate]);
+  const [manuallyEnabled, setManuallyEnabled] = useState(false);
+  const interactiveEnabled = !shouldGate || manuallyEnabled;
 
   const title =
     drop.title ??
@@ -66,7 +59,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
         <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-950/30">
           <button
             type="button"
-            onClick={() => setInteractiveEnabled(true)}
+            onClick={() => setManuallyEnabled(true)}
             className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-transparent"
             aria-label="Load interactive media"
           >
@@ -90,7 +83,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
   })();
 
   return (
-    <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-500 desktop-hover:tw-opacity-70 desktop-hover:tw-grayscale desktop-hover:hover:tw-opacity-100 desktop-hover:hover:tw-grayscale-0">
+    <div className="tw-group tw-flex tw-flex-col tw-text-left tw-transition-all tw-duration-500">
       <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-transition-colors group-hover:tw-border-white/10">
         <div className="tw-flex tw-flex-col tw-items-start tw-gap-1 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 @sm:tw-flex-row @sm:tw-items-center @sm:tw-justify-between sm:tw-px-3 sm:tw-py-2">
           <span
