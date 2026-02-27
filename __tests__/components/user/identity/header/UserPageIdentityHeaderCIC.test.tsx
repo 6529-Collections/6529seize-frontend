@@ -2,9 +2,18 @@ import { render, screen } from '@testing-library/react';
 import UserPageIdentityHeaderCIC from '@/components/user/identity/header/UserPageIdentityHeaderCIC';
 import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
+jest.mock('@tanstack/react-query', () => ({
+  useQuery: jest.fn(() => ({ data: { count: 2 } })),
+}));
+
 jest.mock('@/components/user/utils/user-cic-type/UserCICTypeIconWrapper', () => ({
   __esModule: true,
   default: () => <div data-testid="icon" />,
+}));
+
+jest.mock('@/components/user/rep/header/TopRaterAvatars', () => ({
+  __esModule: true,
+  default: () => <div data-testid="raters-avatars" />,
 }));
 
 jest.mock('@/components/user/utils/user-cic-status/UserCICStatus', () => ({
@@ -13,19 +22,21 @@ jest.mock('@/components/user/utils/user-cic-status/UserCICStatus', () => ({
 }));
 
 describe('UserPageIdentityHeaderCIC', () => {
-  const baseProfile: ApiIdentity = { cic: 1000 } as ApiIdentity;
+  const baseProfile: ApiIdentity = { cic: 1000, handle: 'alice' } as ApiIdentity;
 
   it('displays NIC and status info', () => {
     render(<UserPageIdentityHeaderCIC profile={baseProfile} />);
-    expect(screen.getByText('NIC:')).toBeInTheDocument();
+    expect(screen.getByText('NIC')).toBeInTheDocument();
     expect(screen.getByText('1,000')).toBeInTheDocument();
+    expect(screen.getByTestId('raters-avatars')).toBeInTheDocument();
+    expect(screen.getByText('2 raters')).toBeInTheDocument();
     expect(screen.getByTestId('icon')).toBeInTheDocument();
     expect(screen.getByTestId('status')).toHaveTextContent('1000');
   });
 
   it('updates when profile prop changes', () => {
     const { rerender } = render(<UserPageIdentityHeaderCIC profile={baseProfile} />);
-    rerender(<UserPageIdentityHeaderCIC profile={{ cic: 2000 } as ApiIdentity} />);
+    rerender(<UserPageIdentityHeaderCIC profile={{ cic: 2000, handle: 'alice' } as ApiIdentity} />);
     expect(screen.getByText('2,000')).toBeInTheDocument();
     expect(screen.getByTestId('status')).toHaveTextContent('2000');
   });

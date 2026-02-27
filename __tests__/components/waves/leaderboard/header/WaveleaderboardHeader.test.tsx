@@ -58,7 +58,11 @@ jest.mock("@/hooks/useWave", () => ({
 }));
 
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
-  <button data-testid="create" onClick={props.onClicked}>
+  <button
+    data-testid="create"
+    onClick={props.onClicked}
+    disabled={props.disabled}
+  >
     {props.children}
   </button>
 ));
@@ -81,7 +85,13 @@ beforeEach(() => {
 
   useWave.mockReturnValue({
     isMemesWave: true,
-    participation: { isEligible: true },
+    isCurationWave: false,
+    participation: {
+      isEligible: true,
+      canSubmitNow: true,
+      hasReachedLimit: false,
+      status: "ACTIVE",
+    },
   });
 });
 
@@ -91,7 +101,14 @@ it("renders meme controls and handles actions", async () => {
   const onViewModeChange = jest.fn();
   const onSortChange = jest.fn();
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={onCreate}
@@ -120,6 +137,7 @@ it("renders meme controls and handles actions", async () => {
 it("renders three view toggles and sort for non-meme waves", async () => {
   useWave.mockReturnValue({
     isMemesWave: false,
+    isCurationWave: false,
     participation: { isEligible: true },
   });
   const user = userEvent.setup();
@@ -127,7 +145,14 @@ it("renders three view toggles and sort for non-meme waves", async () => {
   const onSortChange = jest.fn();
 
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={jest.fn()}
@@ -155,7 +180,14 @@ it("renders curation selector and handles curation filter changes", async () => 
   const onCurationGroupChange = jest.fn();
 
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={jest.fn()}
@@ -190,7 +222,14 @@ it("renders curation selector and handles curation filter changes", async () => 
 
 it("does not render curation selector when curation controls are unavailable", () => {
   render(
-    <AuthContext.Provider value={{ connectedProfile: {} } as any}>
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
       <WaveLeaderboardHeader
         wave={wave}
         onCreateDrop={jest.fn()}

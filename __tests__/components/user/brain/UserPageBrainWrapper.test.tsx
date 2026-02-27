@@ -52,7 +52,7 @@ describe("UserPageBrainWrapper", () => {
       },
       identity: { id: "1" },
     });
-    expect(routerPush).toHaveBeenCalledWith("/alice/rep");
+    expect(routerPush).toHaveBeenCalledWith("/alice");
   });
 
   it("shows drops when waves enabled", () => {

@@ -8,7 +8,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 
 export default function ProfileActivityLogsFilter({
-  user,
+  user: _user,
   selected,
   options,
   setSelected,
@@ -49,26 +49,24 @@ export default function ProfileActivityLogsFilter({
       <div className="tw-w-full">
         <div
           ref={listRef}
-          className={`${
-            user ? "tw-px-4 sm:tw-px-6" : ""
-          } tw-w-full sm:tw-max-w-xs`}
+          className="tw-w-full"
         >
           <div className="tw-relative">
             <button
               type="button"
-              className="tw-flex tw-w-full tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3.5 tw-py-2.5 tw-text-base tw-font-light tw-text-iron-50 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
+              className="tw-flex tw-w-full tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3.5 tw-py-2.5 tw-font-normal tw-text-iron-50 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleOpen();
               }}
             >
-              <span className="tw-block tw-truncate tw-text-base tw-font-normal tw-text-iron-400">
+              <span className="tw-block tw-truncate tw-text-sm tw-font-normal tw-text-iron-400">
                 {title}
               </span>
               <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
                 <svg
                   ref={iconScope}
-                  className="tw-h-5 tw-w-5 tw-text-iron-200"
+                  className="tw-h-4 tw-w-4 tw-text-iron-200"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"

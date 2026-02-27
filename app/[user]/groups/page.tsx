@@ -1,17 +1,14 @@
-import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
-import UserPageGroups from "@/components/user/groups/UserPageGroups";
-import {
-  USER_PAGE_TAB_IDS,
-  USER_PAGE_TAB_MAP,
-} from "@/components/user/layout/userTabs.config";
+import { notFound, redirect } from "next/navigation";
 
-const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.GROUPS];
-
-const { Page, generateMetadata } = createUserTabPage({
-  subroute: TAB_CONFIG.route,
-  metaLabel: TAB_CONFIG.metaLabel,
-  Tab: UserPageGroups,
-});
-
-export default Page;
-export { generateMetadata };
+export default async function GroupsPage({
+  params,
+}: {
+  readonly params?: Promise<{ user: string }> | undefined;
+}) {
+  const resolvedParams = params ? await params : undefined;
+  const user = resolvedParams?.user;
+  if (!user) {
+    notFound();
+  }
+  redirect(`/${user}`);
+}

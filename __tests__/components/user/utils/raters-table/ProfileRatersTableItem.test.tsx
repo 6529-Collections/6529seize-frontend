@@ -1,5 +1,4 @@
 import ProfileRatersTableItem from "@/components/user/utils/raters-table/ProfileRatersTableItem";
-import { ProfileRatersTableType } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 let cicProps: any;
@@ -23,13 +22,12 @@ describe("ProfileRatersTableItem", () => {
         <tbody>
           <ProfileRatersTableItem
             rating={baseRating}
-            type={ProfileRatersTableType.REP_RECEIVED}
           />
         </tbody>
       </table>
     );
     const link = screen.getByText("bob").closest("a")!;
-    expect(link).toHaveAttribute("href", "/bob/rep");
+    expect(link).toHaveAttribute("href", "/bob");
     expect(screen.getByText("+5")).toBeInTheDocument();
     expect(cicProps.level).toBe(3);
   });
@@ -41,7 +39,6 @@ describe("ProfileRatersTableItem", () => {
         <tbody>
           <ProfileRatersTableItem
             rating={rating}
-            type={ProfileRatersTableType.CIC_GIVEN}
           />
         </tbody>
       </table>

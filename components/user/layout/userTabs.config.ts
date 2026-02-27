@@ -1,6 +1,7 @@
 export type UserPageVisibilityContext = {
   readonly showWaves: boolean;
   readonly hideSubscriptions: boolean;
+  readonly isOwnProfile: boolean;
 };
 
 type UserPageTabDefinition = {
@@ -11,26 +12,20 @@ type UserPageTabDefinition = {
   readonly badge?: string | undefined;
   readonly isVisible?:
     | ((context: UserPageVisibilityContext) => boolean)
-    | undefined
     | undefined;
 };
 
 const TAB_DEFINITIONS = [
   {
+    id: "rep",
+    title: "Identity",
+    route: "",
+  },
+  {
     id: "brain",
     title: "Brain",
-    route: "",
+    route: "brain",
     isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
-  },
-  {
-    id: "rep",
-    title: "Rep",
-    route: "rep",
-  },
-  {
-    id: "identity",
-    title: "Identity",
-    route: "identity",
   },
   {
     id: "collected",
@@ -59,22 +54,7 @@ const TAB_DEFINITIONS = [
     id: "proxy",
     title: "Proxy",
     route: "proxy",
-  },
-  {
-    id: "groups",
-    title: "Groups",
-    route: "groups",
-  },
-  {
-    id: "waves",
-    title: "Waves",
-    route: "waves",
-    isVisible: ({ showWaves }: UserPageVisibilityContext) => showWaves,
-  },
-  {
-    id: "followers",
-    title: "Followers",
-    route: "followers",
+    isVisible: ({ isOwnProfile }: UserPageVisibilityContext) => isOwnProfile,
   },
 ] as const satisfies readonly UserPageTabDefinition[];
 
@@ -97,17 +77,23 @@ export const USER_PAGE_TABS = USER_PAGE_TAB_DEFINITIONS.map((tab) => ({
 })) as readonly UserPageTabConfig[];
 
 export const USER_PAGE_TAB_MAP: Record<UserPageTabKey, UserPageTabConfig> =
-  USER_PAGE_TABS.reduce((acc, tab) => {
-    acc[tab.id] = tab;
+  USER_PAGE_TABS.reduce(
+    (acc, tab) => {
+      acc[tab.id] = tab;
+      return acc;
+    },
+    {} as Record<UserPageTabKey, UserPageTabConfig>
+  );
+
+export const USER_PAGE_TAB_IDS = USER_PAGE_TABS.reduce(
+  (acc, tab) => {
+    acc[tab.id.toUpperCase() as Uppercase<UserPageTabKey>] = tab.id;
     return acc;
-  }, {} as Record<UserPageTabKey, UserPageTabConfig>);
+  },
+  {} as { [K in Uppercase<UserPageTabKey>]: UserPageTabKey }
+);
 
-export const USER_PAGE_TAB_IDS = USER_PAGE_TABS.reduce((acc, tab) => {
-  acc[tab.id.toUpperCase() as Uppercase<UserPageTabKey>] = tab.id;
-  return acc;
-}, {} as { [K in Uppercase<UserPageTabKey>]: UserPageTabKey });
-
-export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "collected";
+export const DEFAULT_USER_PAGE_TAB: UserPageTabKey = "rep";
 
 export function getUserPageTabByRoute(route: string) {
   return USER_PAGE_TABS.find(

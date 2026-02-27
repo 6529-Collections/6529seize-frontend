@@ -2,7 +2,7 @@
 export default function UserCICHighlyAccurateIcon() {
   return (
     <svg
-      className="tw-w-full tw-h-full tw-flex-shrink-0"
+      className="tw-w-full tw-h-full tw-flex-shrink-0 tw-align-top"
       viewBox="0 0 183 183"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

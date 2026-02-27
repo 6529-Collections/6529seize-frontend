@@ -99,12 +99,17 @@ export function getDelegationsFromData(data: any) {
       const delegationsArray = d.result as any[];
       delegationsArray[0].map((wallet: string, i: number) => {
         const myDate = delegationsArray[1][i];
-        const myDateDisplay =
-          new Date().getTime() / 1000 > myDate
-            ? `expired`
-            : myDate >= NEVER_DATE
-              ? `active - non-expiring`
+        let myDateDisplay = "";
+        if (useCase.use_case >= PRIMARY_ADDRESS_USE_CASE.use_case) {
+          myDateDisplay = `active - non-expiring`;
+        } else {
+          const isNonExpiring = myDate == 0 || myDate >= NEVER_DATE;
+          myDateDisplay = isNonExpiring
+            ? `active - non-expiring`
+            : new Date().getTime() / 1000 > myDate
+              ? `expired`
               : `active - expires ${formatExpiry(myDate)}`;
+        }
         walletDelegations.push({
           wallet: wallet,
           expiry: myDateDisplay,

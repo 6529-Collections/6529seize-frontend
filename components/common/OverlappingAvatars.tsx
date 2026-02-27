@@ -4,7 +4,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import Link from "next/link";
-import type { MouseEvent } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useId } from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -15,6 +15,7 @@ interface OverlappingAvatarItem {
   readonly ariaLabel?: string;
   readonly fallback?: string;
   readonly title?: string;
+  readonly tooltipContent?: ReactNode;
 }
 
 interface OverlappingAvatarsProps {
@@ -45,7 +46,7 @@ export default function OverlappingAvatars({
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
   const avatarRing =
-    "tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black tw-object-cover";
+    "tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black tw-object-cover";
   const wrapperHover =
     "tw-transition-transform tw-duration-200 tw-ease-out hover:tw-scale-110 hover:!tw-z-[100]";
 
@@ -65,10 +66,10 @@ export default function OverlappingAvatars({
             alt={item.ariaLabel ?? "Profile"}
             loading="lazy"
             decoding="async"
-            className={`tw-h-full tw-w-full tw-flex-shrink-0 tw-rounded-md ${avatarRing}`}
+            className={`tw-h-full tw-w-full tw-flex-shrink-0 tw-rounded-full ${avatarRing}`}
           />
         ) : (
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
             <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
               {item.fallback ?? "?"}
             </span>
@@ -116,7 +117,7 @@ export default function OverlappingAvatars({
                 delayShow={250}
                 style={TOOLTIP_STYLES}
               >
-                {item.title}
+                {item.tooltipContent ?? item.title}
               </Tooltip>
             </span>
           );

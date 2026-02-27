@@ -1,11 +1,7 @@
 import type { ActivityLogParamsConverted } from "@/components/profile-activity/ProfileActivityLogs";
-import type { ProfileRatersParams } from "@/components/user/utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import type { ProfileActivityLog } from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import type { RateMatter } from "@/types/enums";
-import { ProfileRatersParamsOrderBy } from "@/types/enums";
 import type { Page } from "./Types";
 
 export const getUserProfile = async ({
@@ -121,21 +117,3 @@ export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
     };
   }
 };
-
-export const getInitialRatersParams = ({
-  handleOrWallet,
-  given,
-  matter,
-}: {
-  handleOrWallet: string;
-  given: boolean;
-  matter: RateMatter;
-}): ProfileRatersParams => ({
-  page: 1,
-  pageSize: 7,
-  given,
-  matter,
-  order: SortDirection.DESC,
-  orderBy: ProfileRatersParamsOrderBy.RATING,
-  handleOrWallet,
-});

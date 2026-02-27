@@ -27,7 +27,7 @@ export const CIC_META: Record<CICType, { title: string; class: string }> = {
   },
   [CICType.HIGHLY_ACCURATE]: {
     title: CIC_TO_TEXT[CICType.HIGHLY_ACCURATE],
-    class: "tw-text-[#3CCB7F]",
+    class: "tw-text-emerald-400",
   },
 };
 

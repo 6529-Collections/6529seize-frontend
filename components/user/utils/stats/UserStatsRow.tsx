@@ -33,6 +33,7 @@ interface UserStatsRowProps {
   readonly followersCount: number | null;
   readonly className?: string | undefined;
   readonly size?: UserStatsRowSize | undefined;
+  readonly onFollowersClick?: (() => void) | undefined;
 }
 
 export default function UserStatsRow({
@@ -46,6 +47,7 @@ export default function UserStatsRow({
   followersCount,
   className = "",
   size = UserStatsRowSize.MEDIUM,
+  onFollowersClick,
 }: UserStatsRowProps) {
   const routeHandle = encodeURIComponent(handle.toLowerCase());
   const count = followersCount ?? 0;
@@ -59,10 +61,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/collected`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(tdh)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             TDH
           </span>
           {tdh_rate > 0 && (
@@ -81,10 +83,10 @@ export default function UserStatsRow({
           href={`/${routeHandle}/xtdh`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(xtdh)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             xTDH
           </span>
           {xtdh_rate > 0 && (
@@ -100,40 +102,55 @@ export default function UserStatsRow({
         </Link>
 
         <Link
-          href={`/${routeHandle}/identity`}
+          href={`/${routeHandle}`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(cic)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             NIC
           </span>
         </Link>
 
         <Link
-          href={`/${routeHandle}/rep`}
+          href={`/${routeHandle}`}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
             {formatStatFloor(rep)}
           </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
+          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
             Rep
           </span>
         </Link>
 
-        <Link
-          href={`/${routeHandle}/followers`}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
-        >
-          <span className={`${classes.text} tw-font-semibold tw-text-zinc-300`}>
-            {formatNumberWithCommas(count)}
-          </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-zinc-500`}>
-            {followerLabel}
-          </span>
-        </Link>
+        {onFollowersClick ? (
+          <button
+            type="button"
+            onClick={onFollowersClick}
+            className="tw-bg-transparent tw-border-none tw-p-0 tw-cursor-pointer tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          >
+            <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+              {formatNumberWithCommas(count)}
+            </span>{" "}
+            <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
+              {followerLabel}
+            </span>
+          </button>
+        ) : (
+          <Link
+            href={`/${routeHandle}`}
+            className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          >
+            <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+              {formatNumberWithCommas(count)}
+            </span>{" "}
+            <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
+              {followerLabel}
+            </span>
+          </Link>
+        )}
       </div>
     </div>
   );

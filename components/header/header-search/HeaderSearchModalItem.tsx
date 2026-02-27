@@ -158,7 +158,7 @@ export default function HeaderSearchModalItem({
       return getProfileTargetRoute({
         handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
         pathname: pathname ?? "",
-        defaultPath: USER_PAGE_TAB_IDS.IDENTITY,
+        defaultPath: USER_PAGE_TAB_IDS.REP,
       });
     } else if (isNft()) {
       const nft = getNft();

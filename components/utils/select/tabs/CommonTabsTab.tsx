@@ -19,7 +19,7 @@ export default function CommonTabsTab<T, U = unknown>(
         | undefined;
       readonly disabled?: boolean | undefined;
       readonly fill?: boolean | undefined;
-      readonly size?: "md" | "tabs" | undefined;
+      readonly size?: "sm" | "md" | "tabs" | undefined;
     }
   >
 ) {
@@ -32,6 +32,7 @@ export default function CommonTabsTab<T, U = unknown>(
     buttonRef,
     disabled = false,
     fill = true,
+    size = "md",
   } = props;
 
   const getIsActive = (): boolean => item.value === activeItem;
@@ -101,7 +102,7 @@ export default function CommonTabsTab<T, U = unknown>(
         } ${
           fill ? "tw-flex-1" : ""
         } ${
-          "tw-px-3 tw-py-1.5 tw-text-sm"
+          size === "sm" ? "tw-px-2 tw-py-1 tw-text-xs" : "tw-px-3 tw-py-1.5 tw-text-sm"
         } tw-whitespace-nowrap tw-leading-5 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2`}
       >
         {item.label}

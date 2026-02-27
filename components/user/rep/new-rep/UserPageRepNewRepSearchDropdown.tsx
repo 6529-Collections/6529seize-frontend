@@ -28,7 +28,7 @@ export default function UserPageRepNewRepSearchDropdown({
             </li>
           )}
           {state === RepSearchState.LOADING && (
-            <li className="tw-group tw-text-iron-200 tw-text-sm tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
+            <li className="tw-group tw-text-iron-200 tw-text-sm tw-font-normal tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
               Loading...
             </li>
           )}

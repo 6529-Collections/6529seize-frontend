@@ -120,6 +120,38 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.queryByText("My Votes")).toBeNull();
   });
 
+  it("shows My Votes for curation waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.LEADERBOARD,
+    ];
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("keeps FAQ hidden outside memes waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isMemesWave: false,
+      isCurationWave: true,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.FAQ];
+    renderComponent(MyStreamWaveTab.FAQ);
+
+    expect(screen.queryByText("FAQ")).toBeNull();
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT);
+  });
+
   it("does not render countdown; parent header handles it", () => {
     const spy = jest.spyOn(Time, "currentMillis").mockReturnValue(0);
     mockWaveInfo = {
@@ -147,7 +179,6 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     expect(updateAvailableTabs).toHaveBeenCalledWith(
       expect.objectContaining({
-        waveId: expect.anything(),
         isChatWave: false,
         isMemesWave: false,
         isCurationWave: true,
