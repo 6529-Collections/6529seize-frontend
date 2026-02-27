@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
@@ -98,16 +98,11 @@ export default function UserPageRepNewRepSearch({
     category: selectedCategory,
   });
 
-  // Pre-fill amountStr when repState changes (e.g. after category selection).
-  // Uses the React "adjust state during render" pattern so the user can still
-  // freely edit the value after pre-fill.
-  const [prevRepState, setPrevRepState] = useState(repState);
-  if (repState !== prevRepState) {
-    setPrevRepState(repState);
+  useEffect(() => {
     if (repState) {
       setAmountStr(`${repState.rater_contribution}`);
     }
-  }
+  }, [repState]);
 
   const amountNum = getStringAsNumberOrZero(amountStr);
   const isValidValue =
