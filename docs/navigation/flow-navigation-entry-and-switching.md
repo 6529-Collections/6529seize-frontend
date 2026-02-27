@@ -2,97 +2,107 @@
 
 ## Overview
 
-This flow covers how users move between primary sections and deeper destinations
-using web sidebar, app bottom tabs, app sidebar menu, search modal, and
-context-aware back behavior.
+This flow covers how users switch routes across web sidebar navigation, small-
+screen overlay menus, and app-shell controls (bottom tabs, sidebar drawer, and
+context-aware `Back`).
 
 ## Location in the Site
 
-- Web layout routes using sidebar navigation.
-- Small-screen web routes using off-canvas sidebar overlay.
-- Native app routes using app header, app sidebar menu, and fixed bottom
-  navigation.
+- Desktop web: fixed left sidebar with direct rows and expandable groups.
+- Narrow desktop web: collapsed icon rail with flyout submenus.
+- Small-screen web: header menu opens the same sidebar as an overlay.
+- App layout: bottom tabs for primary sections plus header menu/avatar drawer
+  for secondary routes.
 
 ## Entry Points
 
-- Open route navigation from sidebar/menu controls.
-- Use app bottom navigation (`Discover`, `Waves`, `Messages`, `Home`,
+- Web sidebar rows (`Home`, `Waves`, `Messages`, `Discover`, `Notifications`)
+  and section groups (`Network`, `Collections`, `Tools`, `About`).
+- Small-screen header menu button (opens the sidebar in overlay mode).
+- App bottom navigation tabs (`Discover`, `Waves`, `Messages`, `Home`,
   `Network`, `Collections`, `Notifications`).
-- Open app sidebar menu from header menu/avatar button for secondary routes.
-- Open search modal from header/sidebar search actions.
-- Use header `Back` from create, wave, or profile-with-history contexts.
+- App header menu/avatar button for drawer routes and account actions (when
+  `Back` is not active).
+- Search entry points: sidebar `Search`, app header search button, and `⌘K` on
+  desktop sidebar.
+- App header `Back` in create routes, active wave/message contexts, and
+  profiles with history.
 
 ## User Journey
 
-1. Open an app route and identify layout context (web sidebar vs app layout).
-2. Use primary section navigation:
-   - web: sidebar direct route rows or expanded section links
-   - app: fixed bottom-navigation tabs
-3. Use deeper route navigation:
-   - web: expand sidebar groups (`Network`, `Collections`, `Tools`, `About`) or
-     open `Search`
-   - app: open app sidebar menu for `Profile`, grouped routes, and account
-     actions
-4. Continue switching routes with active indicators and unread badges.
-5. Use `Back` where available to exit create routes, close `drop` query state,
-   or leave active wave contexts.
+1. Open a route and use the active shell for your layout: web sidebar, web
+   overlay sidebar, or app shell.
+2. Switch primary sections:
+   - web: direct sidebar rows
+   - app: fixed bottom tabs
+3. Open secondary destinations:
+   - web: expand sidebar groups or open search
+   - app: open sidebar drawer for `Profile`, grouped routes, and account actions
+4. Confirm route change via active states and unread indicators.
+5. In app wave/message threads:
+   - tap `Waves` or `Messages` once to return to section root
+   - tap again from root to reopen last visited thread (when cached)
 
 ## Common Scenarios
 
-- Desktop web:
-  open `Network`, expand `Metrics`, then move between `Health`,
-  `Definitions`, `Levels`, and `Network Stats`.
-- Collapsed desktop sidebar:
-  open section flyout, choose a nested route, and continue without fully
+- Desktop web metrics jump: open `Network` -> `Metrics`, then move between
+  `Health`, `Definitions`, `Levels`, and `Network Stats`.
+- Collapsed desktop rail: open a flyout submenu and pick a nested route without
   expanding the rail.
-- Small-screen web:
-  open the overlay menu, select destination, and continue after overlay
-  auto-closes.
-- Native app:
-  tap `Waves` or `Messages` while inside a thread to return to the section
-  list; from section roots, those tabs can reopen last-visited thread context
-  when available.
-- Native app secondary jump:
-  open app sidebar menu to reach `Tools` or `About` routes that are outside
-  bottom-tab primary sections.
-- Cross-surface jump:
-  use search to reach a route that is nested under a collapsed section.
+- Small-screen web: open overlay menu, pick a route, and continue after
+  auto-close on navigation.
+- App secondary route jump: open app drawer and choose grouped `Tools` or
+  `About` routes.
+- Site-wide search jump: type at least 3 characters, then open a
+  page/profile/NFT/wave result.
+- In-wave search jump: switch to `In this Wave`, type at least 2 characters,
+  then jump to a matching message.
 
 ## Edge Cases
 
-- Profile shortcut appears only when connected and resolves handle-first with
-  wallet fallback.
-- Share button is available from web sidebar; `Share Connection` appears only
-  when authenticated connection state is available.
-- Bottom navigation is hidden/disabled while mobile keyboard is open, when a
-  single drop is open, or while inline drop edit mode is active.
-- In collapsed desktop mode, open flyout positioning tracks trigger movement on
-  sidebar scroll/resize.
+- App top-left control switches between menu/avatar and `Back`; when `Back` is
+  shown, sidebar drawer entry is not available.
+- `Profile` shortcuts are connected-only and resolve handle-first, then wallet
+  fallback.
+- Web sidebar and search-page catalogs can vary by runtime constraints:
+  iOS non-US hides subscription-related entries, and `App Wallets` appears only
+  when app-wallet support is enabled.
+- Sidebar `Share` row is web-only and hidden in Capacitor/native app context and
+  mobile-device web context.
+- `Messages` and `Notifications` unread dots require a connected profile with
+  unread state.
+- Bottom navigation is not rendered during single-drop open or inline mobile
+  edit mode, and is hidden/non-interactive while the mobile keyboard is open.
+- In collapsed desktop mode, flyout submenu anchor position tracks trigger
+  movement during sidebar scroll and resize.
 
 ## Failure and Recovery
 
-- If sidebar overlay appears stuck, close via backdrop, `Escape`, or route
-  change.
-- If a section looks stale in collapsed/expanded state, toggle the section
-  again to reset open state.
-- If search is in error state, use `Try Again` or refine query text.
-- If app route is not reachable from bottom tabs, open app sidebar menu and use
-  grouped route links.
-- If back behavior is unavailable in the current context, use sidebar or bottom
+- If a sidebar overlay or drawer appears stuck:
+  - web overlay: close with backdrop click, `Escape`, or route change
+  - app drawer: close with backdrop tap, close button, swipe, or route change
+- If a route row is missing, verify auth/country/device/feature-gate constraints.
+- If search is still loading, wait for debounce/fetch; if no results, refine
+  query; if error appears, use `Try Again`.
+- If `Waves`/`Messages` keeps reopening an outdated thread, open the active
+  thread and tap that tab once to clear cached last-visited target.
+- If app `Back` is unavailable in current context, use sidebar or bottom
   navigation to return to a section root route.
 
 ## Limitations / Notes
 
-- Page search results are route-catalog based (navigable destinations), not
+- Page search is route-catalog based (sidebar/main destinations), not
   full-document text search.
-- Primary navigation surface changes by layout: web sidebar vs app bottom bar.
-- App sidebar menu is app-layout only and is for secondary route navigation plus
+- Primary switching surface depends on layout: web sidebar vs app bottom tabs.
+- App sidebar menu is app-layout only and is intended for secondary routes plus
   account actions.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
+- [App Header Context](feature-app-header-context.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
+- [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Back Button](feature-back-button.md)
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
