@@ -13,6 +13,10 @@ import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal"
 import { ArtistActivityBadge } from "@/components/waves/drops/ArtistActivityBadge";
 import { useArtistPreviewModal } from "@/hooks/useArtistPreviewModal";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import {
+  getSubmissionCount,
+  getTrophyArtworkCount,
+} from "@/helpers/artist-activity.helpers";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -22,13 +26,12 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
   const { isModalOpen, modalInitialTab, handleBadgeClick, handleModalClose } =
     useArtistPreviewModal();
 
-  const submissionCount =
-    drop.author.active_main_stage_submission_ids?.length || 0;
+  const submissionCount = getSubmissionCount(drop.author);
   const hasSubmissions = submissionCount > 0;
 
-  const winnerCount = drop.author.winner_main_stage_drop_ids?.length || 0;
-  const isWinner = winnerCount > 0;
-  const hasActivityBadge = hasSubmissions || isWinner;
+  const trophyCount = getTrophyArtworkCount(drop.author);
+  const hasTrophyArtworks = trophyCount > 0;
+  const hasActivityBadge = hasSubmissions || hasTrophyArtworks;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -63,7 +66,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
           {hasActivityBadge && (
             <ArtistActivityBadge
               submissionCount={submissionCount}
-              winCount={winnerCount}
+              trophyCount={trophyCount}
               onBadgeClick={handleBadgeClick}
               tooltipId={`meme-activity-badge-${drop.id}`}
             />
