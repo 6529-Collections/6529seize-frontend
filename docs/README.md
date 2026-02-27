@@ -30,7 +30,7 @@ Profile `about/*` behavior is documented under [Profiles](profiles/README.md).
 
 - [Groups](groups/README.md): `/network/groups` listing, creation, and edits.
 - [Delegation](delegation/README.md): `/delegation/*` routing, onchain action flows, and wallet diagnostics.
-- [NextGen](nextgen/README.md): `/nextgen` collection and token-media workflows.
+- [NextGen](nextgen/README.md): `/nextgen` browsing, collection routes, mint/distribution operations, token media, and admin access.
 - [Realtime](realtime/README.md): `/nft-activity` websocket updates and event-driven feed behavior.
 - [API Tool](api-tool/README.md): `/tools/*` API access, block finder, and subscription reports.
 - [EMMA](emma/README.md): `/emma/*` distribution-plan operations.

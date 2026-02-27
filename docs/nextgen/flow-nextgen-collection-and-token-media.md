@@ -2,16 +2,14 @@
 
 ## Overview
 
-This flow covers browsing the featured NextGen slideshow, moving into a
-collection art route, and opening a token route to use image/live/high-res
-media controls.
+This flow covers the most common NextGen path: featured route to collection
+exploration to token-media usage.
 
 ## Location in the Site
 
 - Featured NextGen route: `/nextgen`
-- Collection slideshow routes: `/nextgen/collection/{collection}/{view}`
-- Collection art route: `/nextgen/collection/{collection}/art`
-- Token routes: `/nextgen/token/{token}/{view}`
+- Collection routes: `/nextgen/collection/{collection}/*`
+- Token routes: `/nextgen/token/{token}/*`
 
 ## Entry Points
 
@@ -21,51 +19,43 @@ media controls.
 
 ## User Journey
 
-1. Open `/nextgen` and browse the featured collection slideshow.
-2. Use carousel arrows (and play/pause when shown) to preview tokens.
-3. Open `View All` to move into `/nextgen/collection/{collection}/art`.
-4. Use the collection art list to open a token route.
-5. On the token route, review default `2K` media.
-6. Switch to `8K`/`16K` high-res mode, wait for load completion, then zoom/pan.
-7. Optionally switch to `Live`, open media in a new tab, download assets, or
-   enter fullscreen.
+1. Open `/nextgen` and browse the featured collection.
+2. Preview tokens in the collection slideshow.
+3. Open collection routes (`Overview`, `About`, `Provenance`, `Trait Sets`).
+4. Open `View All` to move into collection art browsing.
+5. Open a token route from a slideshow or art card.
+6. Use token media modes (`2K`, high-res, `Live`) and media actions.
+7. Optionally switch token subviews (`About`, `Provenance`, `Display Center`,
+   `Rarity`) for details and downloads.
+8. Optionally branch into collection operations routes (`/mint`,
+   `/distribution-plan`) when those controls are available.
 
 ## Common Scenarios
 
-- Start from `/nextgen`, then use `View All` and open a token from the art list.
-- Open a token URL directly and only use media controls (`2K`, high-res,
-  `Live`) without returning to collection routes.
-- Navigate across token subviews (`provenance`, `display-center`, `rarity`)
-  while keeping the token media panel available at the top.
+- Discovery path: `/nextgen` -> collection -> `/art` -> token route.
+- Direct token path: shared `/nextgen/token/{token}` URL to media controls.
+- Mint operations path: collection route -> `/mint` for wallet-driven minting.
 
 ## Edge Cases
 
-- Collection routes render the slideshow only when the collection has minted
-  tokens.
-- The slideshow play/pause control appears only when more than one token is
-  available.
-- `Live` mode keeps static image output when a token has no animation URL.
+- Collection routes only show slideshow when the collection has minted tokens.
+- Unknown collection view segments resolve to `Overview`.
+- Token `Live` mode can remain static when no animation URL exists.
 
 ## Failure and Recovery
 
-- If slideshow token loading fails, the slideshow section can stay empty and
-  does not expose an inline retry button.
-- If token image/high-res sources fail, fallback placeholders are used
-  (`/pebbles-loading.jpeg` and `/fallback-image.jpeg`).
-- If fullscreen is blocked by browser policy, users stay in normal mode and see
-  a browser alert.
-- Refreshing or reopening the route retries slideshow and token-media fetches.
+- Empty slideshow or art lists usually require route refresh/reload.
+- Media-source failures use placeholder fallbacks.
+- Mint/admin branches require wallet role and network prerequisites.
 
 ## Limitations / Notes
 
-- Slideshow order is randomized and cannot be user-sorted.
-- On-screen token media mode choices are fixed (`2K`, high-res, `Live`).
-- Token routes with unavailable token payloads can switch to an on-chain
-  fallback panel instead of the token media renderer.
+- Slideshow order is randomized and not user-sortable.
+- Token media modes and collection-art sort options are fixed lists.
 
 ## Related Pages
 
-- [NextGen Index](README.md)
-- [NextGen Collection Slideshow](feature-collection-slideshow.md)
+- [NextGen Home Views and Navigation](feature-nextgen-home-views-and-navigation.md)
+- [NextGen Collection Routes and Art Browser](feature-nextgen-collection-routes-and-art-browser.md)
+- [NextGen Mint and Distribution Plan](feature-nextgen-mint-and-distribution-plan.md)
 - [NextGen Token Media Rendering](feature-token-media-rendering.md)
-- [NextGen Slideshow and Token Media Troubleshooting](troubleshooting-nextgen-slideshow-and-token-media.md)
