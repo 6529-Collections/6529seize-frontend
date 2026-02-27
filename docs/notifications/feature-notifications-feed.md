@@ -30,6 +30,14 @@ and in-place drop previews.
 - After prerequisites resolve, first load shows `Loading notifications...`.
 - Cause filters are available as horizontal chips:
   `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
+- Feed rows render by cause:
+  - `Mentions` includes direct mentions and quoted-drop mentions.
+  - `Replies` includes reply rows with inline drop preview.
+  - `Identity` includes new followers plus REP/NIC total updates.
+  - `Reactions` includes reacted/rated/boosted rows, plus grouped
+    `New reactions` batches for repeated reactions on one drop.
+  - `Invites` includes wave-invite rows with direct wave open action.
+  - Unknown causes fall back to a generic row so the feed stays readable.
 - Reaction notifications for the same drop are grouped into one
   `New reactions` row with reactor avatars, reaction badges, and one batch
   action (`Follow All` or `Following All`).
@@ -62,6 +70,8 @@ and in-place drop previews.
   the `All` scope (no dedicated priority-alert cause chip).
 - Cause filters change only notification-list results; they do not affect other
   My Stream surfaces.
+- If auth expires, the page can trigger one re-auth request automatically after
+  an unauthorized notifications error.
 - Server prefetch warmup for `/notifications` can reduce first-load waiting
   after recent visits, but a full loading state can still appear after longer
   idle gaps.

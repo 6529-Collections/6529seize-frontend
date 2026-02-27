@@ -42,6 +42,8 @@ refresh, or follow/read behavior appears inconsistent.
   use `Switch to primary profile`.
 - Initial fetch error appears with `Try again`:
   retry from the error state without leaving the route.
+- Unauthorized error/toast appears:
+  complete wallet re-auth when prompted, then retry with `Try again`.
 - Timeout message appears:
   retry from timeout state; if still failing, refresh route session.
 - Older-page load fails after rows are already visible:

@@ -50,8 +50,9 @@ toggles that control what arrives on a specific device.
     - `/path` routes
     - /the-memes, /6529-gradient, /meme-lab deep links
     - wave route by `wave_id` + optional `drop_id`
-  - Delivered notification rows are removed from tray on open.
-- Delivered notification cleanup also runs when:
+  - On iOS devices with completed push registration, delivered notifications
+    are removed from the device tray on open.
+- iOS tray cleanup also runs when:
   - a notifications list item is handled as read in feed flow, and
   - the Notifications tab has no unread count in navigation state.
 
@@ -65,6 +66,8 @@ toggles that control what arrives on a specific device.
 ## Limitations / Notes
 
 - Not surfaced in web browser flows; mobile app shell behavior only.
+- Android push flow does not run the same delivered-tray cleanup path used on
+  iOS.
 - Unsupported events are silently ignored rather than surfaced as global failure
   banners.
 

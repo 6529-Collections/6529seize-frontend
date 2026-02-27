@@ -64,6 +64,8 @@ keeping current content visible.
 
 - If first load fails before any rows render, the page switches to error state
   and offers `Try again`.
+- If notifications auth is unauthorized, the page can trigger wallet re-auth
+  once, then keeps `Try again` available if loading still fails.
 - If loading stalls, timeout copy appears with retry action.
 - If fetching older pages fails after rows are visible, visible rows remain and
   failure is surfaced without replacing feed content.

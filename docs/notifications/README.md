@@ -1,16 +1,26 @@
 # Notifications
 
-Notifications docs cover the `/notifications` feed, including cause filters,
-grouped reaction rows, reverse-scroll older-page loading, profile/auth readiness
-states, active-thread live read behavior, and retry/reconnect recovery actions.
+Notifications docs cover two user-facing surfaces:
+the `/notifications` feed and app-only push notification controls.
 
 ## Overview
 
-- `/notifications` is the authenticated activity feed in My Stream.
-- Users can filter activity causes, open drop context, and load older pages
-  while keeping the newest rows anchored.
-- On native app builds, users can manage push-notification preferences and
-  tap-to-open behavior with profile-safe routing.
+- `/notifications` is an authenticated My Stream feed.
+- Feed rows cover follows, mentions/quotes/replies, identity score updates,
+  reactions/votes/boosts, wave invites, priority alerts, and unknown-cause
+  fallback rows.
+- Users can filter by cause (`All`, `Mentions`, `Replies`, `Identity`,
+  `Reactions`, `Invites`), open drop context, and load older pages from the top
+  edge.
+- Feed recovery states include profile loading, wallet/handle reconnect prompts,
+  proxy-profile blocking, and retry states (`Try again`).
+- Opening `/notifications` marks the feed read; opening grouped `New reactions`
+  rows marks those grouped notification IDs read.
+- In Capacitor app builds, `Push Notifications` opens device-level toggles and
+  push tap routing that only navigates when `profile_id` matches the connected
+  profile.
+- Use this area when notifications fail to load, rows appear stale, or mobile
+  push settings/tap routing fail.
 
 ## Features
 
@@ -35,3 +45,4 @@ states, active-thread live read behavior, and retry/reconnect recovery actions.
 - [Navigation Index](../navigation/README.md)
 - [Shared Index](../shared/README.md)
 - [Waves Index](../waves/README.md)
+- [Realtime Index](../realtime/README.md)
