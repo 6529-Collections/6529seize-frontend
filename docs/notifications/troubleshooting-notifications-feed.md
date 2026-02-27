@@ -1,84 +1,61 @@
 # Notifications Feed Troubleshooting
 
-## Overview
-
-Use this page when `/notifications` does not load as expected, rows fail to
-refresh, or follow/read behavior appears inconsistent.
+Use this page when `/notifications` is blocked, rows look missing, or read/follow state looks wrong.
 
 ## Location in the Site
 
 - Route: `/notifications`.
-- Notification rows that open wave or DM context.
-- Live read-state updates connected to active thread sessions.
+- Route variant: `/notifications?reload=true`.
+- Rows can open wave or DM thread context.
 
-## Entry Points
+## Quick Checks
 
-- Feed never leaves loading or prerequisite state.
-- Error or timeout messaging appears on first load.
-- Older-page loading fails while scrolling.
-- `Follow All` or row follow actions do not fully apply.
-- Read indicators look stale after opening notifications or thread context.
+1. Confirm prerequisites: connected wallet, resolved profile handle, and no active profile proxy.
+2. Reopen `/notifications` and wait for `Loading profile...` then `Loading notifications...`.
+3. Use the in-page recovery action if shown: `Reconnect wallet`, `Switch to primary profile`, or `Try again`.
+4. Switch filter to `All` before treating rows as missing.
+5. If you opened `/notifications?reload=true`, wait for the one-time refetch + mark-read pass.
 
-## User Journey
+## Blocked Access and Load Errors
 
-1. Confirm account prerequisites:
-   wallet connected, profile handle resolvable, and profile proxy disabled.
-2. Reopen `/notifications` and wait through profile + feed loading states.
-3. If blocked, use the provided recovery action:
-   `Reconnect wallet`, `Switch to primary profile`, or `Try again`.
-4. If opened via `?reload=true`, allow the one-time refresh pass to complete.
-5. Retry the specific action (filter switch, row open, follow action, or older
-   pagination).
-
-## Common Scenarios
-
-- `Connect your wallet to view notifications.` appears:
-  reconnect wallet, then retry route entry.
-- Handle-resolution prompt appears (`We couldn't determine your profile
-  handle...`):
+- `Connect your wallet to view notifications.`:
+  use `Reconnect wallet`.
+- `We couldn't determine your profile handle. Please reconnect to continue.`:
   use `Reconnect wallet` to refresh account/profile resolution.
-- Proxy block appears (`Notifications are not available while you are using a
-  profile proxy.`):
+- `Notifications are not available while you are using a profile proxy.`:
   use `Switch to primary profile`.
-- Initial fetch error appears with `Try again`:
-  retry from the error state without leaving the route.
-- Unauthorized error/toast appears:
-  complete wallet re-auth when prompted, then retry with `Try again`.
-- Timeout message appears:
-  retry from timeout state; if still failing, refresh route session.
-- Older-page load fails after rows are already visible:
-  keep browsing visible rows and retry loading older pages from top edge.
+- `Failed to load notifications. Please try again.`:
+  use `Try again` on the page.
+- `Loading notifications is taking longer than expected. Please try again.`:
+  use `Try again`; if it repeats, reload the route.
+- Unauthorized toast/error:
+  let re-auth finish, then retry with `Try again`.
+- `reload=true` behavior:
+  if authenticated, it runs one refetch + mark-read pass and removes `reload`;
+  if unauthenticated, it removes `reload` immediately.
 
-## Edge Cases
+## Missing or Stale Rows
 
-- Partial follow success can occur when some profile follow calls fail; successful
-  follows still persist.
-- Grouped reactions and priority alerts can be present together on the same
-  result page.
-- Text-only priority alerts (no related drop) are expected behavior, not a data
-  loss state.
+- Filter chips only change `/notifications` results.
+- `Priority Alert` and `All Drops` rows appear under `All` only.
+- Repeated reactions on one drop can merge into one `New reactions` row.
+- Unknown causes can show as a generic fallback row so feed rendering continues.
+- Text-only priority alerts (no related drop) are expected.
+- A `DROP_REACTED` row can be hidden if its emoji cannot be resolved.
 
-## Failure and Recovery
+## Follow and Read Behavior
 
-- No rows + fetch failure:
-  page-level error copy is shown with retry action (`Try again`).
-- No rows + long load duration:
-  timeout copy is shown with retry action.
-- Rows already visible + subsequent fetch failure:
-  feed content stays in place and failure is surfaced via toast messaging.
-- Batch follow partial failure:
-  completed follows remain, with error feedback for failed requests.
-- Read state confusion:
-  reopen `/notifications` to trigger feed read pass; open the specific wave/DM
-  thread to mark that thread's notifications as read when needed.
+- `Follow All` can partially succeed: successful follows stay applied, failures show error feedback.
+- Opening `/notifications` marks notifications read for the active profile.
+- Opening a grouped `New reactions` drop marks that group’s notification IDs read.
+- Opening a wave/DM thread marks read for that wave/thread context only.
+- If older-page loading fails after rows are visible, visible rows stay in place and failure appears as toast feedback.
 
 ## Limitations / Notes
 
 - Notifications cannot be accessed while profile proxy mode is active.
-- Full-page error and timeout states are only used when no rows are currently
-  visible.
-- Active-thread auto-read applies only to the currently open thread; it does not
-  globally mark unrelated thread notifications as read.
+- Full-page error and timeout states appear only when no rows are currently visible.
+- Wave/thread read actions do not globally mark unrelated notifications as read.
 
 ## Related Pages
 
