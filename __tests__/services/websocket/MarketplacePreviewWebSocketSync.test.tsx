@@ -29,6 +29,7 @@ const createMediaLinkUpdatedEvent = (
   media_uri: "https://cdn.example.com/updated-image.jpg",
   last_error_message: null,
   price: "1.5",
+  price_currency: "ETH",
   last_successfully_updated: "1771516351724",
   failed_since: null,
   ...overrides,
@@ -75,6 +76,7 @@ describe("MarketplacePreviewWebSocketSync", () => {
         mimeType: "image/jpeg",
       },
       price: "1.0",
+      priceCurrency: "ETH",
     });
     queryClient.setQueryData<MarketplacePreviewData>(nonMatchingQueryKey, {
       href: "https://example.com/2",
@@ -87,6 +89,7 @@ describe("MarketplacePreviewWebSocketSync", () => {
         mimeType: "image/jpeg",
       },
       price: "3.0",
+      priceCurrency: "USDC",
     });
 
     render(
@@ -114,6 +117,7 @@ describe("MarketplacePreviewWebSocketSync", () => {
         mimeType: "image/jpeg",
       },
       price: "1.5",
+      priceCurrency: "ETH",
     });
 
     expect(
@@ -129,6 +133,7 @@ describe("MarketplacePreviewWebSocketSync", () => {
         mimeType: "image/jpeg",
       },
       price: "3.0",
+      priceCurrency: "USDC",
     });
   });
 
@@ -150,6 +155,7 @@ describe("MarketplacePreviewWebSocketSync", () => {
         mimeType: "image/jpeg",
       },
       price: "2.0",
+      priceCurrency: "ETH",
     });
 
     render(
