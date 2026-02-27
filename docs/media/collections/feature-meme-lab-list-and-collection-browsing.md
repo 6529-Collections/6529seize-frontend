@@ -36,7 +36,9 @@ Both routes show the same card grid style and sort controls, then link to
    `/meme-lab/collection/{collection}`.
 6. On collection routes, keep browsing with the same controls except
    `Artists` and `Collections` group modes.
-7. Open any card for `/meme-lab/{id}`.
+7. If the selected collection has website metadata, use the external website
+   links shown under the collection name.
+8. Open any card for `/meme-lab/{id}`.
 
 ## Common Scenarios
 

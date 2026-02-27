@@ -2,32 +2,28 @@
 
 ## Overview
 
-Use this subarea for Meme Lab browsing and card routes, plus ReMemes browse and
-submission flows.
-
+- Use this subarea for collection browsing and detail routes in Meme Lab and
+  ReMemes.
 - Meme Lab routes: `/meme-lab`, `/meme-lab/collection/{collection}`,
-  `/meme-lab/{id}`, `/meme-lab/{id}/distribution`
-- ReMemes routes: `/rememes`, `/rememes/{contract}/{id}`, `/rememes/add`
-- Route ownership:
-  - `/meme-lab`, `/meme-lab/collection/{collection}`:
-    [Meme Lab List and Collection Browsing](feature-meme-lab-list-and-collection-browsing.md)
-  - `/meme-lab/{id}`, `/meme-lab/{id}/distribution`:
-    [Meme Lab Card Route Tabs and Navigation](feature-meme-lab-card-route-tabs-and-navigation.md)
-  - `/rememes`, `/rememes/{contract}/{id}`:
-    [ReMemes Browse and Detail](feature-rememes-browse-and-detail.md)
-  - `/rememes/add`:
-    [ReMemes Add Submission](feature-rememes-add-submission.md)
+  `/meme-lab/{id}`, `/meme-lab/{id}/distribution`.
+- ReMemes routes: `/rememes`, `/rememes/{contract}/{id}`, `/rememes/add`.
+- Shared NFT behavior (balances, marketplace links, media fallbacks, transfer)
+  is owned by the media NFT docs.
 
 ## Features
 
 - [Meme Lab List and Collection Browsing](feature-meme-lab-list-and-collection-browsing.md):
-  list/collection sorting, grouped browsing, and collection-route entry points
+  `/meme-lab` and `/meme-lab/collection/{collection}` sort controls, grouping,
+  and card-entry handoff.
 - [Meme Lab Card Route Tabs and Navigation](feature-meme-lab-card-route-tabs-and-navigation.md):
-  card tabs, `focus` deep links, card navigation, and distribution handoff
+  `/meme-lab/{id}` and `/meme-lab/{id}/distribution` tab deep links, adjacent
+  card navigation, and distribution view.
 - [ReMemes Browse and Detail](feature-rememes-browse-and-detail.md):
-  catalog filters, detail tabs, and replica navigation
+  `/rememes` and `/rememes/{contract}/{id}` browse filters, detail tabs, and
+  replica links.
 - [ReMemes Add Submission](feature-rememes-add-submission.md):
-  contract/token validation, eligibility checks, and signed submission
+  `/rememes/add` validation, eligibility checks, wallet signing, and submit
+  result states.
 
 ## Flows
 

@@ -47,10 +47,14 @@ detail tabs.
   reload.
 - If browse fetch fails, the route can render the empty-state panel with no
   inline error banner.
+- Before detail data resolves, the route can show only the ReMemes banner
+  image with no dedicated loading indicator.
 - Detail route has no dedicated not-found/retry panel when contract or token
   data does not resolve.
 - `References` does not show a dedicated loading state and can briefly render
   an empty-state panel before references load.
+- If referenced Meme fetch fails for detail, `References` can stay on
+  empty-state with no inline error panel.
 - Marketplace shortcuts are hidden on iOS when detected country is not `US`.
 
 ## Failure and Recovery

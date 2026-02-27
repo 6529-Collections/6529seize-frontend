@@ -59,6 +59,8 @@ validate contract/token inputs, confirm eligibility, sign, and submit.
   checklist status.
 - If submission appears stuck on `Signing Message` or `Adding Rememe`, refresh
   `/rememes/add` and retry.
+- After a successful submission, use `Add Another` (or refresh `/rememes/add`)
+  before starting a new submission.
 
 ## Limitations / Notes
 
@@ -66,6 +68,8 @@ validate contract/token inputs, confirm eligibility, sign, and submit.
 - The flow depends on wallet connectivity and user eligibility context.
 - Route state is not persisted after reload; `Add Another` performs a full page
   reload.
+- `Add Rememe` stays disabled after a successful submission until the page is
+  reloaded.
 
 ## Related Pages
 
