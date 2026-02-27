@@ -1,9 +1,13 @@
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
+  canStoreAnotherWalletAccount,
+  getConnectedWalletAccounts,
   getAuthJwt,
+  getRefreshToken,
   getStagingAuth,
   getWalletAddress,
   removeAuthJwt,
+  setActiveWalletAccount,
   setAuthJwt,
   syncWalletRoleWithServer,
 } from "@/services/auth/auth.utils";
@@ -25,8 +29,30 @@ jest.mock("@/helpers/safeLocalStorage", () => ({
 }));
 
 describe("auth.utils", () => {
+  const setupStorageMocks = () => {
+    const storage = new Map<string, string>();
+    (safeLocalStorage.getItem as jest.Mock).mockImplementation((key: string) =>
+      storage.has(key) ? storage.get(key)! : null
+    );
+    (safeLocalStorage.setItem as jest.Mock).mockImplementation(
+      (key: string, value: string) => {
+        storage.set(key, value);
+      }
+    );
+    (safeLocalStorage.removeItem as jest.Mock).mockImplementation(
+      (key: string) => {
+        storage.delete(key);
+      }
+    );
+    return storage;
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
+    const { publicEnv } = require("@/config/env");
+    publicEnv.USE_DEV_AUTH = "false";
+    publicEnv.DEV_MODE_AUTH_JWT = null;
+    publicEnv.DEV_MODE_WALLET_ADDRESS = null;
   });
 
   it("setAuthJwt stores tokens and cookie", () => {
@@ -132,5 +158,85 @@ describe("auth.utils", () => {
       "6529-wallet-role"
     );
     expect(safeLocalStorage.removeItem).toHaveBeenCalledWith("auth-role-addr");
+  });
+
+  it("stores and switches multiple wallet accounts", () => {
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", "refresh-a", "role-a");
+    setAuthJwt("0xBbB", "jwt-b", "refresh-b", "role-b");
+
+    const accounts = getConnectedWalletAccounts();
+    expect(accounts).toHaveLength(2);
+    expect(accounts[0]?.address).toBe("0xAaA");
+    expect(accounts[0]?.refreshToken).toBe("refresh-a");
+    expect(accounts[1]?.address).toBe("0xBbB");
+    expect(storage.get("6529-wallet-active-address")).toBe("0xBbB");
+    expect(getWalletAddress()).toBe("0xBbB");
+    expect(getRefreshToken()).toBe("refresh-b");
+
+    const switched = setActiveWalletAccount("0xAaA");
+    expect(switched).toBe(true);
+    expect(storage.get("6529-wallet-active-address")).toBe("0xAaA");
+    expect(getWalletAddress()).toBe("0xAaA");
+    expect(getRefreshToken()).toBe("refresh-a");
+    expect(Cookies.set).toHaveBeenLastCalledWith("wallet-auth", "jwt-a", {
+      secure: true,
+      sameSite: "strict",
+      expires: 2,
+    });
+    expect(
+      getConnectedWalletAccounts().map((account) => account.address)
+    ).toEqual(["0xAaA", "0xBbB"]);
+  });
+
+  it("removeAuthJwt promotes next connected account", () => {
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
+    setAuthJwt("0x222", "jwt-2", "refresh-2", "role-2");
+
+    removeAuthJwt();
+
+    expect(getWalletAddress()).toBe("0x111");
+    expect(getRefreshToken()).toBe("refresh-1");
+    expect(storage.get("6529-wallet-active-address")).toBe("0x111");
+    const remainingAccounts = getConnectedWalletAccounts();
+    expect(remainingAccounts).toHaveLength(1);
+    expect(remainingAccounts[0]?.address).toBe("0x111");
+  });
+
+  it("enforces max connected profiles when adding new addresses", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0x001", "jwt-1", "refresh-1", "role-1");
+    setAuthJwt("0x002", "jwt-2", "refresh-2", "role-2");
+    setAuthJwt("0x003", "jwt-3", "refresh-3", "role-3");
+
+    expect(canStoreAnotherWalletAccount()).toBe(false);
+    expect(canStoreAnotherWalletAccount("0x004")).toBe(false);
+    expect(canStoreAnotherWalletAccount("0x003")).toBe(true);
+  });
+
+  it("does not add a new account when already at max profiles", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0x001", "jwt-1", "refresh-1", "role-1");
+    setAuthJwt("0x002", "jwt-2", "refresh-2", "role-2");
+    setAuthJwt("0x003", "jwt-3", "refresh-3", "role-3");
+
+    const didStore = setAuthJwt("0x004", "jwt-4", "refresh-4", "role-4");
+    expect(didStore).toBe(false);
+    expect(
+      getConnectedWalletAccounts().map((account) => account.address)
+    ).toEqual(["0x001", "0x002", "0x003"]);
   });
 });

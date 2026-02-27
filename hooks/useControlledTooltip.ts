@@ -1,5 +1,5 @@
-import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
+import type { KeyboardEvent } from "react";
 
 export function useControlledTooltip() {
   const [isOpen, setIsOpen] = useState(false);

@@ -45,8 +45,12 @@ jest.mock("viem", () => ({
 
 // Mock auth utils
 jest.mock("@/services/auth/auth.utils", () => ({
+  canStoreAnotherWalletAccount: jest.fn(() => true),
+  getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  setActiveWalletAccount: jest.fn(() => true),
   removeAuthJwt: jest.fn(),
+  WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
 }));
 
 // Don't mock security logger - we want to test actual logging behavior
@@ -1262,7 +1266,6 @@ describe("SeizeConnectContext Security Vulnerability Fix", () => {
       );
     });
   });
-
 });
 
 describe("Regression Tests: Original Functionality with Secure Implementation", () => {
@@ -1368,6 +1371,12 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     mockGetWalletAddress.mockReturnValue(validAddress);
     mockIsAddress.mockReturnValue(true);
     mockGetAddress.mockReturnValue(validAddress);
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: "connected",
+    });
 
     const DisconnectTestComponent: React.FC = () => {
       const { seizeDisconnect } = useSeizeConnectContext();
@@ -1392,11 +1401,19 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     expect(mockDisconnect).toHaveBeenCalled();
   });
 
-  it("should handle disconnect and logout with reconnect", async () => {
+  it("should handle disconnect and logout", async () => {
     const validAddress = "0x1234567890abcdef1234567890abcdef12345678";
-    mockGetWalletAddress.mockReturnValue(validAddress);
+    mockGetWalletAddress
+      .mockReturnValueOnce(validAddress)
+      .mockReturnValue(null);
     mockIsAddress.mockReturnValue(true);
     mockGetAddress.mockReturnValue(validAddress);
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: "connected",
+    });
 
     // Ensure removeAuthJwt doesn't throw for this test
     (
@@ -1409,8 +1426,9 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
       const { seizeDisconnectAndLogout } = useSeizeConnectContext();
       return (
         <button
-          onClick={() => seizeDisconnectAndLogout(true)}
-          data-testid="logout-btn">
+          onClick={() => seizeDisconnectAndLogout()}
+          data-testid="logout-btn"
+        >
           Logout
         </button>
       );
@@ -1438,7 +1456,6 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     expect(mockDisconnect).toHaveBeenCalled();
     expect(authUtils.removeAuthJwt).toHaveBeenCalled();
-    expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" });
   });
 });
 
@@ -1479,6 +1496,12 @@ describe("Fail-Fast Security Tests", () => {
     mockGetWalletAddress.mockReturnValue(validAddress);
     require("viem").isAddress.mockReturnValue(true);
     require("viem").getAddress.mockReturnValue(validAddress);
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: "connected",
+    });
 
     const disconnectError = new Error("Wallet disconnect failed");
     mockDisconnect.mockRejectedValueOnce(disconnectError);
@@ -1541,6 +1564,12 @@ describe("Fail-Fast Security Tests", () => {
     mockGetWalletAddress.mockReturnValue(validAddress);
     require("viem").isAddress.mockReturnValue(true);
     require("viem").getAddress.mockReturnValue(validAddress);
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: validAddress,
+      isConnected: true,
+      status: "connected",
+    });
 
     const authError = new Error("Auth cleanup failed");
     mockRemoveAuthJwt.mockImplementationOnce(() => {
