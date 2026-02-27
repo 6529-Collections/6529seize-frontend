@@ -4,77 +4,90 @@ Parent: [Notifications Index](README.md)
 
 ## Overview
 
-The `/notifications` route shows authenticated account activity inside My
-Stream. The page resolves profile/auth prerequisites first, then renders a
-reverse-scroll feed with cause filters, grouped reaction rows, priority alerts,
-and in-place drop previews.
+`/notifications` is the My Stream activity feed for the connected profile.
+It resolves auth/profile prerequisites first, then shows a reverse-scroll list
+with cause filters, grouped reactions, and inline drop previews.
 
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached from the sidebar `Notifications` destination.
-- Opened directly from the browser URL, including `?reload=true` refresh
-  requests.
+- Reached from sidebar `Notifications`.
+- Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
 
 - Select `Notifications` in app navigation.
 - Open `/notifications` directly.
-- Return after reconnecting wallet/auth when prompted by the page.
+- Open `/notifications?reload=true` to force one refetch/read pass.
 
-## Feature Details
+## Before Rows Render
 
-- Profile and auth gating comes first:
-  `Loading profile...`, wallet-connect prompt, handle-resolution recovery, and
-  proxy-profile block (`Switch to primary profile`) can appear before feed rows.
-- After prerequisites resolve, first load shows `Loading notifications...`.
-- Cause filters are available as horizontal chips:
+- Wallet missing: `Connect your wallet to view notifications.` with
+  `Reconnect wallet`.
+- Profile loading: `Loading profile...`.
+- Handle resolution failure:
+  `We couldn't determine your profile handle. Please reconnect to continue.`
+  with `Reconnect wallet`.
+- Proxy profile active:
+  `Notifications are not available while you are using a profile proxy.` with
+  `Switch to primary profile`.
+- Initial feed load: `Loading notifications...`.
+- First-load failure: error copy with `Try again`.
+- First-load timeout:
+  `Loading notifications is taking longer than expected. Please try again.`
+  with `Try again`.
+- Empty state: `No notifications found` with `Explore Waves` and
+  `Create a Wave`.
+
+## Feed Filters
+
+- Cause filters are horizontal chips:
   `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
-- Feed rows render by cause:
-  - `Mentions` includes direct mentions and quoted-drop mentions.
-  - `Replies` includes reply rows with inline drop preview.
-  - `Identity` includes new followers plus REP/NIC total updates.
-  - `Reactions` includes reacted/rated/boosted rows, plus grouped
-    `New reactions` batches for repeated reactions on one drop.
-  - `Invites` includes wave-invite rows with direct wave open action.
-  - Unknown causes fall back to a generic row so the feed stays readable.
-- Reaction notifications for the same drop are grouped into one
-  `New reactions` row with reactor avatars, reaction badges, and one batch
-  action (`Follow All` or `Following All`).
-- Priority alerts render as `sent a priority alert 🚨` and can include either:
-  - text-only header content, or
-  - the first linked drop preview with the row action surface.
-- Long notification drops can start compact with `Show full drop` for inline
-  expansion.
-- Older pages load from the top edge while preserving current rows in view, with
-  `Loading older notifications...` feedback and a thin top loading bar.
-- Empty results show `No notifications found` with `Explore Waves` and
-  `Create a Wave` calls to action.
+- Filter mapping:
+  - `All`: all notification causes, including priority alerts, all-drops rows,
+    and unknown causes.
+  - `Mentions`: mention and quote (`quoted you`) rows.
+  - `Replies`: reply notifications.
+  - `Identity`: new followers and REP/NIC updates.
+  - `Reactions`: voted, reacted, and boosted drop notifications.
+  - `Invites`: wave invite notifications.
 
-## Read and Navigation Behavior
+## Row and Action Behavior
 
-- Opening `/notifications` marks the feed as read for the active authenticated
+- Drop-linked rows show inline drop context with reply/quote actions.
+- Long drop previews can collapse and show `Show full drop`.
+- Repeated `DROP_REACTED` notifications on one drop are grouped into one
+  `New reactions` row with grouped avatars and reaction badges.
+- Grouped reactions rows include batch follow action:
+  `Follow All` or `Following All`.
+- Priority alerts show `sent a priority alert 🚨` as:
+  - header-only rows (no related drop), or
+  - header plus first related drop preview.
+- Invite rows can include both identity follow and wave follow controls.
+- Unknown causes render a generic row (formatted cause/context) instead of
+  failing feed render.
+
+## Read, Paging, and Navigation
+
+- Opening `/notifications` marks notifications read for the active authenticated
   profile.
-- Opening a grouped reaction row drop marks grouped notification entries in that
-  row as read.
-- When users are active inside a wave/DM thread, only that active thread is
-  auto-marked read; notifications for other threads remain unread until opened
-  in thread context or reviewed in `/notifications`.
-- Notification rows with linked drop context open the corresponding wave route
-  at the selected serial context.
+- Opening a grouped `New reactions` row drop marks that row's grouped
+  notification IDs as read.
+- Opening a drop context routes to the matching wave/DM thread with serial
+  context.
+- Opening a wave/DM thread marks notifications read for that wave only.
+- Older pages load from the top edge with `Loading older notifications...` and
+  a top progress bar.
+- `/notifications?reload=true` triggers one refetch/read pass, then removes the
+  `reload` query parameter.
 
-## Limitations / Notes
+## Limits and Notes
 
 - Notifications are unavailable while users are in profile-proxy mode.
-- Priority alerts currently appear inside the default feed and are included in
-  the `All` scope (no dedicated priority-alert cause chip).
-- Cause filters change only notification-list results; they do not affect other
-  My Stream surfaces.
+- `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated chip).
+- Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.
-- Server prefetch warmup for `/notifications` can reduce first-load waiting
-  after recent visits, but a full loading state can still appear after longer
-  idle gaps.
 
 ## Related Pages
 

@@ -7,8 +7,8 @@ the `/notifications` feed and app-only push notification controls.
 
 - `/notifications` is an authenticated My Stream feed.
 - Feed rows cover follows, mentions/quotes/replies, identity score updates,
-  reactions/votes/boosts, wave invites, priority alerts, and unknown-cause
-  fallback rows.
+  reactions/votes/boosts, all-drops activity rows, wave invites, priority
+  alerts, and unknown-cause fallback rows.
 - Users can filter by cause (`All`, `Mentions`, `Replies`, `Identity`,
   `Reactions`, `Invites`), open drop context, and load older pages from the top
   edge.
