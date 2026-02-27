@@ -20,6 +20,8 @@ Use this page when an Open Data route is missing, blank, or not loading as expec
   - `/open-data/network-metrics`
   - `/open-data/rememes`
   - `/open-data/royalties`
+- Note: if the failure happens after a page change, previously loaded rows stay
+  visible under the error banner.
 - Recovery:
   1. Reload the current route.
   2. If the issue continues, open a different Open Data dataset route to confirm

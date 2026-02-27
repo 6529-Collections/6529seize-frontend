@@ -22,7 +22,7 @@ Open Data docs cover dataset download routes under `/open-data/*`.
 ## Features
 
 - [Open Data Hub](feature-open-data-hub.md)
-- [Network Metrics Downloads](feature-network-metrics-downloads.md)
+- [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
 - [Rememes Downloads](feature-rememes-uploads.md)
 - [Team Downloads](feature-team-downloads.md)

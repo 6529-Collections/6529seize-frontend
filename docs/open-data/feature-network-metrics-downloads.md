@@ -1,4 +1,4 @@
-# Network Metrics Downloads
+# Consolidated Network Metrics Downloads
 
 Parent: [Open Data Index](README.md)
 
@@ -16,39 +16,49 @@ The page heading is `Consolidated Network Metrics Downloads`.
 ## Entry Points
 
 - Open the `Network Metrics` card on `/open-data`.
+- Open `Tools -> Open Data -> Network Metrics` in the sidebar.
 - Open `/open-data/network-metrics` directly.
+
+## Data Source and Table Content
+
+- Endpoint: `/api/consolidated_uploads`
+- Request params: `page_size=25` and `page=<current page>`
+- Table columns:
+  - `Date`
+  - `Link`
+- `Date` renders as a calendar date string.
+- `Link` opens the export URL in a new tab.
 
 ## User Journey
 
 1. Open `/open-data/network-metrics`.
-2. Wait for the first dataset request to return.
-3. Review the table:
-   - `Date`
-   - `Link`
-4. Open a `Link` value to open the file URL in a new tab.
-5. Use pagination when more than 25 rows are available.
+2. Wait for the first request to complete.
+3. Review the `Date` and `Link` table rows.
+4. Open a link in a new tab.
+5. Use pagination when total results are greater than 25.
 
-## Data Source
+## Loading, Error, Empty, and Recovery States
 
-- Endpoint: `/api/consolidated_uploads`
-- Request params: `page_size=25` and `page=<current page>`
+- Initial load: `Loading downloads...`.
+- First-request failure: `Failed to load community downloads. Please try again.`
+- Later page-request failure: the same error message appears and previous rows
+  stay visible.
+- Empty successful response: `Nothing here yet`.
+- Recovery: reload `/open-data/network-metrics` (there is no inline retry
+  button).
 
-## Failure and Recovery
+## Pagination Behavior
 
-- First load shows `Loading downloads...`.
-- If the request fails, the page shows:
-  `Failed to load community downloads. Please try again.`
-- Retry by reloading the route.
-
-## Empty and Pagination States
-
-- If the response has zero rows, the page shows `Nothing here yet`.
 - Pagination appears only when `count > 25`.
-- Page changes keep prior rows visible until the next page response arrives.
+- Page changes request `page=<current page>` and scroll to top.
+- While the next page request is in flight, previous rows stay visible.
+- Controls support previous/next, page-number input (press `Enter`), and
+  jump-to-last-page.
 
 ## Limitations / Notes
 
-- No in-page search or sorting controls are available.
+- No in-page search, filtering, or sorting controls are available.
+- The route exposes only the consolidated metrics view.
 
 ## Related Pages
 
