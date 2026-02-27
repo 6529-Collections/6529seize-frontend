@@ -43,12 +43,15 @@ jest.mock("wagmi", () => ({
 
 function renderComponent(props: any = {}) {
   const wallet = { wallet: "0x1234567890abcdef", display: "Disp", tdh: 0 };
+  const onToggleOpen = jest.fn();
   return render(
     <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
       <UserPageIdentityStatementsConsolidatedAddressesItem
         address={wallet}
         primaryAddress={null}
         canEdit={false}
+        isOpen={false}
+        onToggleOpen={onToggleOpen}
         {...props}
       />
     </AuthContext.Provider>
@@ -80,21 +83,55 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
     );
   });
 
-  it("copies address and resets title", () => {
+  it("is collapsed by default", () => {
     renderComponent();
-    fireEvent.click(screen.getByRole("button", { name: "Copy address" }));
-    expect(mockCopy).toHaveBeenCalledWith("0x1234567890abcdef");
-    expect(screen.getByText("Copied!")).toBeInTheDocument();
+    expect(screen.queryByText("Full Address")).not.toBeInTheDocument();
+  });
+
+  it("calls toggle callback from header and chevron", () => {
+    const onToggleOpen = jest.fn();
+    renderComponent({ onToggleOpen });
+
+    fireEvent.click(screen.getByRole("button", { name: "0x1234" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Expand consolidated address details",
+      })
+    );
+
+    expect(onToggleOpen).toHaveBeenCalledTimes(2);
+  });
+
+  it("copies full address and ens from expanded panel", () => {
+    renderComponent({ isOpen: true });
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy full address" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy ens name" }));
+
+    expect(mockCopy).toHaveBeenNthCalledWith(1, "0x1234567890abcdef");
+    expect(mockCopy).toHaveBeenNthCalledWith(2, "Disp");
+
     act(() => {
       jest.advanceTimersByTime(1000);
     });
-    expect(screen.queryByText("Copied!")).not.toBeInTheDocument();
-    expect(screen.getByText("0x1234")).toBeInTheDocument();
+  });
+
+  it("hides ens block when display is missing", () => {
+    renderComponent({
+      isOpen: true,
+      address: { wallet: "0x1234567890abcdef", display: "", tdh: 0 },
+    });
+
+    expect(screen.queryByText("ENS Name")).not.toBeInTheDocument();
   });
 
   it("assigns primary address when clicked", () => {
-    renderComponent({ canEdit: true });
+    const onToggleOpen = jest.fn();
+    renderComponent({ canEdit: true, onToggleOpen });
+
     fireEvent.click(screen.getByText("Set Primary"));
+
+    expect(onToggleOpen).not.toHaveBeenCalled();
     expect(mockWrite).toHaveBeenCalledWith({
       address: DELEGATION_CONTRACT.contract,
       abi: DELEGATION_ABI,
