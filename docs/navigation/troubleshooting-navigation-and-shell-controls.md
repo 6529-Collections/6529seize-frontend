@@ -2,112 +2,124 @@
 
 ## Overview
 
-Use this page when navigation surfaces, search entry, back actions, or account
-controls do not behave as expected across web and app layouts.
+Use this page when route switching, shell controls, search, or `/open-mobile`
+handoff does not behave as expected.
 
 ## Location in the Site
 
-- Web sidebar and small-screen web overlay navigation.
-- App header, app sidebar menu, and app bottom-navigation controls.
-- Search modal and header back button flows.
-- Sidebar account/user controls.
-- `/open-mobile` app-handoff landing actions.
+- Web shell: desktop sidebar and small-screen web overlay sidebar.
+- App shell: header back/menu, app sidebar drawer, bottom navigation,
+  pull-to-refresh.
+- Search modal from sidebar/header entry points.
+- `/open-mobile` handoff route.
 
 ## Entry Points
 
-- A navigation item is missing or not opening expected route.
-- Sidebar/menu appears stuck open or closed.
-- Back button is missing when expected.
-- Bottom navigation is hidden in app layout.
-- App sidebar menu route is missing or disabled.
-- Account controls or proxy actions look unavailable.
-- `/open-mobile` does not open the app or returns to the wrong web route.
+- A sidebar/menu row is missing, wrong, or not clickable.
+- `Back` is missing or returns to an unexpected destination.
+- Search does not open, errors, or returns unexpected states.
+- App bottom navigation is hidden or highlights the wrong tab.
+- Pull-to-refresh does not trigger.
+- `/open-mobile` does not open the app or returns to an unexpected web route.
 
 ## User Journey
 
-1. Confirm layout context first:
-   - desktop/small-screen web layout, or
-   - native app layout.
-2. Confirm expected navigation surface for that context.
-3. Check route/state prerequisites for the specific control.
-4. Retry from canonical section roots if state appears stale.
+1. Confirm surface first: web sidebar, app header/sidebar/bottom nav, search,
+   or `/open-mobile`.
+2. Check gating for that surface: wallet state, app-wallet support, country
+   gate, and app-vs-web context.
+3. Clear stale UI state (open menu/search/drop), then retry from a section
+   root.
+4. If still failing, use the symptom checks below.
 
 ## Common Scenarios
 
-- `Back` button is missing:
-  it appears only for active wave contexts (`/waves/{waveId}`,
-  `/waves?wave={waveId}`, or `/messages?wave={waveId}`), create routes, or
-  profile routes with valid in-app back history.
-- Sidebar link seems missing:
-  expand the relevant section (`Network`, `Collections`, `Tools`, `About`) or
-  open the collapsed flyout first.
+- `Back` is missing in app header:
+  it appears only when one of these is true: active wave context, create route
+  (`/waves/create` or `/messages/create`), or profile route with valid in-app
+  back history.
+- Sidebar rows are missing on web:
+  expand `Network`, `Collections`, `Tools`, or `About`; in collapsed rail,
+  open the flyout first.
+- `Profile` shortcut is missing:
+  connect wallet first; profile rows in web/app sidebars are hidden while
+  disconnected.
+- `App Wallets` row is missing:
+  it appears only when app-wallet support is available.
+- Subscription rows are missing on iOS web:
+  `Subscriptions Report`, `Open Data > Meme Subscriptions`, and
+  `About > Subscriptions` are shown only for `US` country context.
+- Search shortcut does nothing:
+  only `⌘K` is wired where search triggers are mounted; `Ctrl+K` is not wired.
 - Search returns nothing too early:
-  site-wide search requires at least 3 characters;
-  in-wave search requires at least 2.
-- `Share Connection` is missing in share modal:
-  verify authenticated connection state is active.
-- Sidebar `Profile` shortcut is missing:
-  connect wallet first; profile shortcut is hidden for disconnected state.
+  site-wide search starts at 3+ characters; in-wave search starts at 2+.
+- `Try Again` is missing in search errors:
+  `Try Again` exists only for site-wide search errors; in-wave search retries
+  by query change or reopen.
+- `In this Wave` tab is missing:
+  it appears only when search opens with active wave context.
+- Share modal `Share Connection` is missing or empty:
+  it depends on authenticated session state; share payload requires refresh
+  token plus wallet address.
 - App bottom navigation is hidden:
-  dismiss on-screen keyboard and confirm no active single-drop (`?drop`) or
-  inline drop edit state is suppressing bottom-nav rendering.
+  dismiss keyboard, close single-drop view (`?drop=...`), and finish inline
+  drop edit mode.
 - `Waves` or `Messages` tab highlight looks wrong:
-  verify whether a `wave` query or `view` query is present, since both affect
-  active-tab state.
-- App sidebar `Profile` route is missing:
-  this row appears only when wallet connection is active.
-- `App Wallets` route is missing:
-  it appears only when app-wallet support is enabled.
+  verify both route and query state (`wave` and `view`).
 - Pull-to-refresh does not trigger:
-  confirm you are in native app-shell context, return to top of page, then
-  start the gesture from the header area (not page content).
+  use app-shell context, scroll to top, and start the gesture from the header
+  area.
 - `/open-mobile` only shows one store action:
-  this is expected on detected Apple mobile or Android user agents.
+  expected on detected iOS (App Store only) or Android (Play Store only).
 - `Back to 6529.io` on `/open-mobile` returns to `/`:
-  this happens when `path` is missing or not decoded yet.
+  happens when no decoded `path` is available.
 
 ## Edge Cases
 
-- In collapsed desktop mode, section flyouts are separate overlays and can close
-  on outside click or `Escape`.
-- In small-screen web overlay mode, route changes auto-close the menu.
-- Account actions vary by surface:
-  desktop dropdown includes `Disconnect Wallet`; app sidebar exposes account
-  actions in its footer section.
-- Some sidebar links are conditionally hidden by runtime availability or
-  route-visibility rules (for example app-wallet support and selected
-  subscription-gated links).
+- In collapsed desktop mode, section flyouts close on outside click, `Escape`,
+  or when sidebar exits collapsed mode.
+- In small-screen web overlay mode, route changes close the menu automatically.
+- Web and app account surfaces expose different action sets (for example web
+  `Disconnect Wallet`).
+- `/open-mobile` deep-link attempt runs after client render, so landing UI can
+  flash briefly before handoff.
 
 ## Failure and Recovery
 
-- If a route switch stalls, navigate to a known section root (`/`, `/discover`,
-  `/waves`, `/messages`, `/notifications`, `/network`) and retry.
-- If wave or drop state looks stuck in URL, clear `?wave=`/`?drop=` by using
-  `Back` once, then retry section navigation.
-- If search panel enters error state, use `Try Again`; if persistent, close and
-  reopen search.
-- If app route link is unavailable from bottom tabs, open app sidebar menu and
-  use grouped route links (`Network`, `Tools`, `About`).
-- If wallet controls fail, use wallet error-boundary recovery actions (`Try
-  Again`, then `Clear Storage & Reload` if needed).
-- If overlay/menu state stays inconsistent after retries, refresh the current
-  route.
-- If `/open-mobile` does not hand off to app, reopen it with a valid URL-encoded
-  `path` and use a store action as fallback.
+- If route switching stalls, jump to a stable root and retry:
+  `/`, `/discover`, `/waves`, `/messages`, `/notifications`, or `/network`.
+- If a drop stays stuck open, use app-header `Back` once to clear `drop` state.
+- If wave/message context looks stale, go to `/waves` or `/messages` root, then
+  reopen the target thread.
+- If site-wide search errors persist, use `Try Again`; if still failing, close
+  and reopen search.
+- If a row is missing, re-check auth, device/runtime context, country gating,
+  and app-wallet support.
+- If wallet/session controls fail, use wallet recovery actions (`Try Again`,
+  then `Clear Storage & Reload` if needed).
+- If overlay/search state remains inconsistent, reload the current route.
+- If `/open-mobile` handoff fails, reopen it with a valid URL-encoded `path`
+  and use store actions as fallback.
 
 ## Limitations / Notes
 
-- Navigation behavior is intentionally context-dependent by layout and route
-  state.
-- Search page results are constrained to cataloged navigation destinations.
+- Navigation and shell behavior is intentionally context-dependent by layout,
+  route state, and auth/device gating.
+- Search `Pages` results are limited to cataloged navigation destinations, not
+  full-text site indexing.
+- `/open-mobile` has no in-page retry flow beyond store actions and
+  `Back to 6529.io`.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
+- [App Sidebar Menu](feature-app-sidebar-menu.md)
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Back Button Behavior](feature-back-button.md)
+- [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
