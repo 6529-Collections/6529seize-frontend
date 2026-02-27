@@ -1,10 +1,11 @@
 "use client";
 
-import React, { type ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import WebSidebar from "./sidebar/WebSidebar";
+import type { CSSProperties, ReactNode } from "react";
 
 const DESKTOP_MAX_WIDTH = 1324;
 
@@ -32,19 +33,20 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
         "--collapsed-width": SIDEBAR_WIDTHS.COLLAPSED,
         "--expanded-width": SIDEBAR_WIDTHS.EXPANDED,
         "--layout-max": `${DESKTOP_MAX_WIDTH}px`,
-      } as React.CSSProperties),
+      }) as CSSProperties,
     [sidebarWidth]
   );
 
   return (
     <div
-      className="layout-root tw-flex tw-justify-between tw-relative tw-w-full"
+      className="layout-root tw-relative tw-flex tw-w-full tw-justify-between"
       style={cssVars}
       data-mobile={isMobile}
       data-narrow={isNarrow}
       data-offcanvas={isOffcanvasOpen}
       data-right-open={isRightSidebarOpen}
-      data-small={isSmall ? "true" : "false"}>
+      data-small={isSmall ? "true" : "false"}
+    >
       <div className="tailwind-scope">
         <WebSidebar
           isCollapsed={isCollapsed}
@@ -57,11 +59,12 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
         />
       </div>
       <main
-        className="layout-main tw-flex-1 tw-min-w-0"
+        className="layout-main tw-min-w-0 tw-flex-1"
         data-mobile={isMobile}
         data-narrow={isNarrow}
         data-offcanvas={isOffcanvasOpen}
-        data-right-open={isRightSidebarOpen}>
+        data-right-open={isRightSidebarOpen}
+      >
         {children}
       </main>
     </div>

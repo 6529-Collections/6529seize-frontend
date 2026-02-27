@@ -1,5 +1,15 @@
 "use client";
 
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { createPortal } from "react-dom";
+import { Tooltip } from "react-tooltip";
+import { parseEther } from "viem";
+import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
@@ -29,16 +39,6 @@ import {
   numberWithCommasFromString,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
-import { parseEther } from "viem";
-import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import styles from "./UserPageSubscriptions.module.scss";
 
 function getEthForCards(count: number): number {

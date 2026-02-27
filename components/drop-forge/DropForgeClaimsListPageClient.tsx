@@ -1,5 +1,8 @@
 "use client";
 
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
@@ -22,9 +25,6 @@ import { isVideoUrl } from "@/helpers/video.helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { getClaimsPage } from "@/services/api/memes-minting-claims-api";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 const CARD_CLASS =
   "tw-flex tw-flex-col tw-min-h-[7rem] tw-overflow-hidden tw-rounded-xl tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-800 hover:tw-ring-iron-600 tw-p-4 sm:tw-p-5 tw-no-underline tw-transition-all tw-duration-300";

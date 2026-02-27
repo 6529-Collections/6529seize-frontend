@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useCallback } from "react";
-import type { TraitsData } from "./submission/types/TraitsData";
+import { useAuth } from "@/components/auth/Auth";
 import { Section, TraitField } from "./traits";
 import { getFormSections } from "./traits/schema";
-import { useAuth } from "@/components/auth/Auth";
+import type { TraitsData } from "./submission/types/TraitsData";
 
 interface MemesArtSubmissionTraitsProps {
   readonly traits: TraitsData;

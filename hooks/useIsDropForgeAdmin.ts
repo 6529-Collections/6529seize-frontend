@@ -1,10 +1,10 @@
 "use client";
 
+import { useReadContract } from "wagmi";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { useReadContract } from "wagmi";
 
 export function useIsDropForgeAdmin(): {
   isDropForgeAdmin: boolean;

@@ -1,9 +1,9 @@
 "use client";
 
-import type { TraitsData } from "../submission/types/TraitsData";
-import React, { useRef, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useDebounce } from "react-use";
 import { TraitWrapper } from "./TraitWrapper";
+import type { TraitsData } from "../submission/types/TraitsData";
 
 type TextTraitProps = {
   readonly label: string;

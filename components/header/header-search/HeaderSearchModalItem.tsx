@@ -1,5 +1,10 @@
 "use client";
 
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { type ComponentType, useEffect, useRef } from "react";
+import { useHoverDirty } from "react-use";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import {
@@ -21,11 +26,6 @@ import {
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, type ComponentType } from "react";
-import { useHoverDirty } from "react-use";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 import HeaderSearchModalPfp from "./HeaderSearchModalPfp";
 

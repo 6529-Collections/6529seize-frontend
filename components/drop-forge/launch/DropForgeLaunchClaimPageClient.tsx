@@ -1,14 +1,13 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isAddress, parseEther } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useAuth } from "@/components/auth/Auth";
-import ClaimTransactionModal from "@/components/drop-forge/launch/ClaimTransactionModal";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { getClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
-import {
-  DropForgeLaunchClaimPageView,
-  DropForgeLaunchClaimPermissionFallbackView,
-} from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient.view";
+import ClaimTransactionModal from "@/components/drop-forge/launch/ClaimTransactionModal";
 import {
   buildSubscriptionAirdropSelection,
   formatDateTimeLocalInput,
@@ -24,6 +23,10 @@ import {
   parseLocalDateTimeToUnixSeconds,
   summarizeAirdrops,
 } from "@/components/drop-forge/launch/dropForgeLaunchClaimPageClient.helpers";
+import {
+  DropForgeLaunchClaimPageView,
+  DropForgeLaunchClaimPermissionFallbackView,
+} from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient.view";
 import { isMissingRequiredLaunchInfo } from "@/components/drop-forge/launch/launchClaimHelpers";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
@@ -48,9 +51,6 @@ import {
   getDistributionAirdropsTeam,
   getFinalSubscriptionsByPhase,
 } from "@/services/api/memes-minting-claims-api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isAddress, parseEther } from "viem";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 interface DropForgeLaunchClaimPageClientProps {
   claimId: number;

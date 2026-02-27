@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 const SECTION_CARD_CLASS =
   "tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-5";

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useCallback, useMemo, useState } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
@@ -9,7 +10,6 @@ import {
   ManifoldPhase,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import { useCallback, useMemo, useState } from "react";
 import type { Abi } from "viem";
 
 export interface CountdownData {

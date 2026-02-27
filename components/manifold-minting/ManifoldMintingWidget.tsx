@@ -1,5 +1,14 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { type JSX, useEffect, useState } from "react";
+import { Col, Container, Form, Row, Table } from "react-bootstrap";
+import {
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import {
@@ -11,20 +20,11 @@ import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState, type JSX } from "react";
-import { Col, Container, Form, Row, Table } from "react-bootstrap";
-import type { Chain } from "viem";
-import {
-  useReadContract,
-  useReadContracts,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import styles from "./ManifoldMinting.module.scss";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
+import type { Chain } from "viem";
 
 const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 

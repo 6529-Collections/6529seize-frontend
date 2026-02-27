@@ -1,5 +1,9 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { mainnet, sepolia } from "viem/chains";
+import { WagmiProvider } from "wagmi";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
@@ -17,12 +21,8 @@ import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
-import { Capacitor } from "@capacitor/core";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Chain } from "viem";
-import { mainnet, sepolia } from "viem/chains";
-import { WagmiProvider } from "wagmi";
 
 /**
  * Installs a defensive wrapper around `window.ethereum` (EIP-1193 provider).

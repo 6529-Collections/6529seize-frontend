@@ -1,9 +1,9 @@
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import clsx from "clsx";
 import { useId } from "react";
 import { Tooltip } from "react-tooltip";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function DropForgeStatusPill({
   className,

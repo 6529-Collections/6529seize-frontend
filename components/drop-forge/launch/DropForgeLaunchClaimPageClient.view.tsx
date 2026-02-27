@@ -1,22 +1,29 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowLeftIcon,
+  ArrowTopRightOnSquareIcon,
+  DocumentDuplicateIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { getClaimSeason } from "@/components/drop-forge/claimTraitsData";
 import {
+  type ClaimPrimaryStatus,
   getClaimArweaveSectionStatus,
   getPrimaryStatusPillClassName,
-  type ClaimPrimaryStatus,
 } from "@/components/drop-forge/drop-forge-status.helpers";
+import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeExplorerLink from "@/components/drop-forge/DropForgeExplorerLink";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
-import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import {
   formatLocalDateTime,
   formatScheduledLabel,
@@ -32,13 +39,6 @@ import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import { capitalizeEveryWord, fromGWEI } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import {
-  ArrowLeftIcon,
-  ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
 
 type LaunchPhaseKey =
   | "phase0"

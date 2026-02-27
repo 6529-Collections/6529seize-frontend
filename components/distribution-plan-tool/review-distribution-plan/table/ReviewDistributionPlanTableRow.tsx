@@ -1,5 +1,6 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
 import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
@@ -9,17 +10,16 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatCount } from "@/helpers/format.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
-import type {
-  FullResultWallet,
-  ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
 import {
   FetchResultsType,
   ReviewDistributionPlanTableItemType
 } from "./ReviewDistributionPlanTable";
 import { SubscriptionLinks } from "./ReviewDistributionPlanTableSubscription";
+import type {
+  FullResultWallet,
+  ReviewDistributionPlanTableItem,
+  ReviewDistributionPlanTablePhase} from "./ReviewDistributionPlanTable";
 
 export default function ReviewDistributionPlanTableRow({
   item,

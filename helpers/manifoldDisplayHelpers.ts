@@ -1,9 +1,9 @@
-import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import {
-  numberWithCommas,
-  fromGWEI,
   capitalizeEveryWord,
+  fromGWEI,
+  numberWithCommas,
 } from "@/helpers/Helpers";
+import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 export function formatEditionSize(manifoldClaim: ManifoldClaim): string {
   if (manifoldClaim.isFinalized) {
