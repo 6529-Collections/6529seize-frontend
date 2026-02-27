@@ -128,7 +128,8 @@ export default function UserPageRepNewRepSearch({
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const onRepSelect = async (rep: string) => {
-    if (!matchingSearchLength) return;
+    if (rep.length < SEARCH_LENGTH.MIN || rep.length > SEARCH_LENGTH.MAX)
+      return;
     if (checkingAvailability) return;
     setCheckingAvailability(true);
     try {
@@ -180,7 +181,7 @@ export default function UserPageRepNewRepSearch({
   });
 
   const onGrantRep = async () => {
-    if (mutating || !selectedCategory || !amountStr) return;
+    if (mutating || !selectedCategory || !amountStr || !profile.query) return;
     const amount = Number.parseInt(amountStr, 10);
     if (Number.isNaN(amount)) return;
     if (!haveChanged) return;
@@ -199,8 +200,8 @@ export default function UserPageRepNewRepSearch({
 
   const onSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!debouncedValue) return;
-    void onRepSelect(debouncedValue);
+    if (!repSearch) return;
+    void onRepSelect(repSearch);
   };
 
   const categoriesToDisplay = useMemo(() => {
@@ -317,6 +318,7 @@ export default function UserPageRepNewRepSearch({
                         <div
                           className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/10"
                           onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
                         >
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
