@@ -4,12 +4,8 @@ Parent: [Open Data Index](README.md)
 
 ## Overview
 
-`/open-data/meme-subscriptions` is a data-export page that renders a paginated
-download list from the `subscriptions/uploads` API. The page shows rows from the API response with:
-
-- Date
-- Token ID
-- Download link
+`/open-data/meme-subscriptions` lists meme-subscription export files with token
+IDs and download links.
 
 ## Location in the Site
 
@@ -19,52 +15,46 @@ download list from the `subscriptions/uploads` API. The page shows rows from the
 
 ## Data Source
 
-- Endpoint: `/subscriptions/uploads`
-- The page always requests the endpoint with:
+- Endpoint: `/api/subscriptions/uploads`
+- Fixed request params:
   - `contract=0x33FD426905F149f8376e227d0C9D3340AaD17aF1`
   - `page_size=25`
   - `page=<current page>`
-- Because the contract is fixed, only uploads for the memedrop NFTs from that
-  contract family are returned.
-- The backend returns at least:
-  - `count` (total row count)
-  - `data` (rows containing `date`, `token_id`, and `upload_url`)
+- The route always uses the fixed contract; users cannot switch it in the UI.
 
 ## User Journey
 
 1. Open `/open-data/meme-subscriptions` or use the Hub card.
-2. The page requests a page of results from the API endpoint using the fixed
-   contract.
-3. Rows appear in a three-column table:
+2. Wait for the dataset request to return.
+3. Review rows in a three-column table:
    - `Date`: formatted for display
    - `Token ID`: rendered as `#<token_id>`
    - `Link`: downloadable file URL (opens in a new tab)
-4. If the total result count exceeds 25, use pagination controls to move between
-   pages.
+4. Use pagination when total results exceed 25.
 
-## API and State Behavior
+## Pagination Behavior
 
-- `page_size=25` means each page shows up to 25 entries.
-- Pagination controls are not shown when `count <= 25`.
-- Page changes update the request and reset scroll to the top.
+- Each page shows up to 25 rows.
+- Pagination is hidden when `count <= 25`.
+- Page changes request the next page and scroll the window to top.
 
 ## Load / Error / Empty States
 
-- Loading: there is no explicit loading message in this page shell.
-- Error: API failures are not surfaced as a dedicated page-level error banner.
-- Empty: when the API returns zero rows for a valid request, the shared
-  `Nothing here yet` empty-state UI appears.
+- Loading: no explicit loading indicator is shown.
+- Error: no inline error banner is shown.
+- Initial-load failure: the page stays at the heading with no rows.
+- Later-page failure: previously loaded rows remain visible.
+- Empty success response: `Nothing here yet`.
 
 ## Edge Cases
 
-- On iOS outside the U.S., the Hub card may be hidden by regional logic; direct URL
-  navigation still opens the page.
-- The open route remains available even if the Hub card is hidden.
+- The Hub/desktop-sidebar `Meme Subscriptions` link can be hidden for native iOS
+  app users outside the US.
+- Direct navigation to `/open-data/meme-subscriptions` still opens the route.
 
 ## Related Pages
 
 - [Open Data Hub](feature-open-data-hub.md)
-- [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
-- [Network API Endpoint Docs (`/subscriptions/uploads`)](../api-tool/feature-memes-subscriptions-report.md)
-- [Open Data Index](README.md)
-- [Docs Home](../README.md)
+- [Open Data Hub to Dataset Routes](flow-open-data-hub-to-download-routes.md)
+- [Open Data Routes and Download States](troubleshooting-open-data-routes-and-downloads.md)
+- [Subscriptions Report Tool](../api-tool/feature-memes-subscriptions-report.md)

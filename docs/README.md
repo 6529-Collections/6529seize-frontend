@@ -69,6 +69,7 @@ Use this when a route is blocked, data is missing, or an action fails.
 - [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)
 - [NextGen Routes, Mint, and Admin](nextgen/troubleshooting-nextgen-routes-mint-and-admin.md)
 - [NextGen Slideshow and Token Media](nextgen/troubleshooting-nextgen-slideshow-and-token-media.md)
+- [Open Data Routes and Download States](open-data/troubleshooting-open-data-routes-and-downloads.md)
 - [Realtime Connectivity](realtime/troubleshooting-realtime-connectivity.md)
 - [Route Error and Not Found](shared/feature-route-error-and-not-found.md)
 - [Legacy Route Redirects](shared/feature-legacy-route-redirects.md)

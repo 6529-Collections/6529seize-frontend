@@ -1,11 +1,10 @@
-# Royalties Uploads
+# Royalties Downloads
 
 Parent: [Open Data Index](README.md)
 
 ## Overview
 
-`/open-data/royalties` is an open-data export page for community royalties upload files.
-It uses the shared community download shell with a paginated, date-based listing.
+`/open-data/royalties` lists royalties export files with date and link rows.
 
 ## Location in the Site
 
@@ -21,33 +20,32 @@ It uses the shared community download shell with a paginated, date-based listing
 ## Data Source
 
 - Endpoint: `/api/royalties/uploads`
-- Request pattern:
-  - `page_size=25`
-  - `page=<current page>`
-- Response shape follows the shared `ApiUploadsPage` format with `count` and `data`.
-- Data rows are shown as a two-column `Date` / `Link` table.
+- Request params: `page_size=25` and `page=<current page>`
+- Table columns: `Date` and `Link`
 
 ## User Journey
 
 1. Open `/open-data/royalties`.
-2. The first page request loads royalty upload links and dates.
-3. Click a row link to open the exported file in a new tab.
-4. Use pagination when total results exceed 25 to access older export files.
+2. Wait for the first request to return.
+3. Review date and link rows.
+4. Open a link to open the file URL in a new tab.
+5. Use pagination when more than 25 rows are available.
 
 ## Load / Error / Empty States
 
 - Loading: the page shows `Loading downloads...` while data is initially fetching.
 - Error: the page shows `Failed to load community downloads. Please try again.`
-- Empty: the shared `Nothing here yet` component appears when no uploads are available.
+- Empty: `Nothing here yet` appears when there are no rows.
 
 ## Navigation Behavior
 
-- Page changes update the list request and reset scroll to the top.
-- Pagination controls render only when `count > 25`.
+- Pagination is shown only when `count > 25`.
+- Page changes request the next page and scroll to top.
+- While a new page is loading, previous rows stay visible.
 
 ## Related Route Behavior
 
 - [Open Data Hub](feature-open-data-hub.md)
 - [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
-- [Rememes Data Uploads](feature-rememes-uploads.md)
-- [Open Data Index](README.md)
+- [Rememes Downloads](feature-rememes-uploads.md)
+- [Open Data Routes and Download States](troubleshooting-open-data-routes-and-downloads.md)

@@ -4,7 +4,7 @@ Parent: [Open Data Index](README.md)
 
 ## Overview
 
-The `/open-data` hub is a card-based entry page for community data exports.
+`/open-data` is the card-based hub for all Open Data dataset routes.
 
 ## Location in the Site
 
@@ -13,61 +13,51 @@ The `/open-data` hub is a card-based entry page for community data exports.
 
 ## Entry Points
 
-- Open the `Open Data` destination in the sidebar.
+- Open `Tools -> Open Data -> Open Data` in the desktop sidebar.
+- Open `Tools -> Open Data` in the mobile sidebar.
 - Open `/open-data` directly.
-- Follow any shared link pointing to `/open-data`.
 
 ## User Journey
 
 1. Open `/open-data`.
-2. Review the card list:
+2. Review the card list.
+3. Open the route you need:
    - Network Metrics
-   - Meme Subscriptions (hidden on iOS unless region is `US`)
+   - Meme Subscriptions
    - Rememes
    - Team
    - Royalties
-3. Select the card to open the matching export list page.
+4. The selected card opens a dataset table route under `/open-data/*`.
 
-## Related Route Behavior
+## Visibility Rules
 
-- [Meme Subscriptions](feature-meme-subscriptions.md) documents `/open-data/meme-subscriptions`
-  specifically.
-- [Royalties](feature-royalties-uploads.md) documents `/open-data/royalties` specifically.
-- [Team](feature-team-downloads.md) documents `/open-data/team` specifically.
+- `Meme Subscriptions` is shown unless both conditions are true:
+  - The user is in the native iOS app.
+  - Cookie-country is not `US`.
+- If the card is hidden, direct navigation to `/open-data/meme-subscriptions`
+  still works.
 
-## Common Scenarios
+## Load, Error, and Empty States
 
-- Open a specific dataset page quickly from one place.
-- Find all available current open-data routes without searching.
-- Access data from mobile and desktop through the same card list.
-- Open the `Rememes` card to reach upload archives for Rememes data files.
-
-## Edge Cases
-
-- On iOS outside the `US`, the `Meme Subscriptions` card is not shown.
-- The visible card set changes for users on iOS where regional restrictions apply.
-- A direct visit to `/open-data/network-metrics` takes users to the consolidated
-  metric exports page.
-
-## Failure and Recovery
-
-- If sidebar navigation is unavailable, open `/open-data` directly and use the
-  cards.
-- If a target route fails after navigation, return to `/open-data` and pick a
-  different dataset route.
+- This hub page is static and does not show dataset loading, empty, or error
+  states.
+- Download-state behavior is handled on each dataset route.
 
 ## Limitations / Notes
 
-- The cards are direct links only; this page does not include search, filtering, or
-  per-route sorting.
-- The list reflects the routes shipped in the current release.
+- The hub has no search, filtering, or sorting controls.
+- Cards are route links only.
 
 ## Related Route Behavior
 
-- [Rememes Data Uploads](feature-rememes-uploads.md) documents `/open-data/rememes`.
+- [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
+- [Meme Subscriptions](feature-meme-subscriptions.md)
+- [Rememes Downloads](feature-rememes-uploads.md)
+- [Team Downloads](feature-team-downloads.md)
+- [Royalties Downloads](feature-royalties-uploads.md)
 
 ## Related Pages
 
-- [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
+- [Open Data Hub to Dataset Routes](flow-open-data-hub-to-download-routes.md)
+- [Open Data Routes and Download States](troubleshooting-open-data-routes-and-downloads.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Network Index](../network/README.md)

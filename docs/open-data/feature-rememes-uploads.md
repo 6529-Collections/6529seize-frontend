@@ -1,10 +1,10 @@
-# Rememes Data Uploads
+# Rememes Downloads
 
 Parent: [Open Data Index](README.md)
 
 ## Overview
 
-`/open-data/rememes` is an open-data export page for Rememes upload files. It renders a paginated, server-provided list of date/link pairs through the shared community-download shell.
+`/open-data/rememes` lists ReMemes export files with date and link rows.
 
 ## Location in the Site
 
@@ -20,38 +20,36 @@ Parent: [Open Data Index](README.md)
 ## Data Source
 
 - Endpoint: `/api/rememes_uploads`
-- The page requests:
-  - `page_size=25`
-  - `page=<current page>`
-- Rows are rendered as two columns: `Date`, `Link`.
+- Request params: `page_size=25` and `page=<current page>`
+- Table columns: `Date` and `Link`
 
 ## User Journey
 
 1. Open `/open-data/rememes`.
-2. The page requests the first data page from the endpoint.
-3. The table shows converted date values and links for each upload.
-4. Click a link to open the file in a new browser tab.
-5. Use pagination when the total result count exceeds 25.
+2. Wait for the first request to return.
+3. Review date and link rows.
+4. Open a link to open the file URL in a new tab.
+5. Use pagination when more than 25 rows are available.
 
 ## Load / Error / Empty States
 
 - Loading: `Loading downloads...` appears while the first request is in flight.
 - Error: an inline red banner reads `Failed to load community downloads. Please try again.`
-- Empty: the shared `Nothing here yet` state is shown.
+- Empty: `Nothing here yet` is shown.
 
 ## Navigation Behavior
 
-- Changing pages triggers a new request and resets page scroll to the top.
-- Pagination controls are hidden when total results are `<= 25`.
+- Pagination is shown only when `count > 25`.
+- Changing pages requests the next page and scrolls to the top.
+- While a new page is loading, the previous page rows stay visible.
 
 ## Limitations / Notes
 
-- Results are displayed in API order; no custom sorting/search is provided.
-- Link targets open in a new tab and are not fetched in-app.
+- No in-page sort or search controls are available.
 
 ## Related Pages
 
 - [Open Data Hub](feature-open-data-hub.md)
-- [Open Data Index](README.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
 - [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
+- [Royalties Downloads](feature-royalties-uploads.md)
