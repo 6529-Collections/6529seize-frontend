@@ -81,7 +81,7 @@ function getTooltipContent(
   const submissionsLabel = `${submissionCount} art submission${
     submissionCount === 1 ? "" : "s"
   }`;
-  const trophyLabel = `${trophyCount} trophy artwork${
+  const trophyLabel = `${trophyCount} minted meme${
     trophyCount === 1 ? "" : "s"
   }`;
 

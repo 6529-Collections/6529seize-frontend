@@ -68,7 +68,7 @@ describe("ArtistActivityBadge", () => {
     );
 
     const button = screen.getByRole("button");
-    expect(button).toHaveAttribute("aria-label", "View 3 trophy artworks");
+    expect(button).toHaveAttribute("aria-label", "View 3 minted memes");
 
     const trophyIcon = container.querySelector('svg[data-icon="trophy"]');
     expect(trophyIcon).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe("ArtistActivityBadge", () => {
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute(
       "aria-label",
-      "View 1 art submission and 1 trophy artwork"
+      "View 1 art submission and 1 minted meme"
     );
 
     const trophyIcon = container.querySelector('svg[data-icon="trophy"]');

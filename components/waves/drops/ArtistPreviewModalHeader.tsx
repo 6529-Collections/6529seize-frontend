@@ -24,7 +24,7 @@ export const ArtistPreviewModalHeader: React.FC<
   const getTitle = () => {
     const artistName = user.handle || "Unknown Artist";
     return currentContentType === "winners"
-      ? `${artistName}'s Trophy Artworks`
+      ? `${artistName}'s Minted to Memes`
       : `${artistName}'s Submissions`;
   };
 

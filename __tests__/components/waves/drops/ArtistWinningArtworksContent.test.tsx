@@ -125,8 +125,10 @@ describe("ArtistWinningArtworksContent", () => {
   it("renders a mixed grid with winners first and prevote cards after", () => {
     render(<ArtistWinningArtworksContent {...defaultProps} />);
 
-    expect(screen.getByText("Main Stage Winners: 1")).toBeInTheDocument();
-    expect(screen.getByText("Artist of Prevote Cards: 1")).toBeInTheDocument();
+    expect(screen.queryByText(/Main Stage Winners:/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Artist of Prevote Cards:/)
+    ).not.toBeInTheDocument();
 
     const trophyItems = screen.getAllByTestId(/trophy-item-/);
     expect(trophyItems).toHaveLength(2);
@@ -136,8 +138,8 @@ describe("ArtistWinningArtworksContent", () => {
       "trophy-item-prevote"
     );
 
-    expect(screen.getByText("Main Stage Winner")).toBeInTheDocument();
-    expect(screen.getByText("Artist of Prevote")).toBeInTheDocument();
+    expect(screen.queryByText("Main Stage Winner")).not.toBeInTheDocument();
+    expect(screen.queryByText("Artist of Prevote")).not.toBeInTheDocument();
     expect(screen.getByTestId("artist-prevote-card")).toBeInTheDocument();
   });
 
@@ -158,11 +160,11 @@ describe("ArtistWinningArtworksContent", () => {
     render(<ArtistWinningArtworksContent {...defaultProps} />);
 
     expect(
-      screen.getByText("Loading trophy artworks...", { selector: "span" })
+      screen.getByText("Loading minted memes...", { selector: "span" })
     ).toBeInTheDocument();
   });
 
-  it("shows empty state when there are no trophy artworks", () => {
+  it("shows empty state when there are no minted memes", () => {
     mockUseUserWinningArtworks.mockReturnValue({
       winningDrops: [],
       isLoading: false,
@@ -178,10 +180,10 @@ describe("ArtistWinningArtworksContent", () => {
 
     render(<ArtistWinningArtworksContent {...defaultProps} />);
 
-    expect(screen.getByText("No trophy artworks found.")).toBeInTheDocument();
-    expect(screen.queryByText("Main Stage Winners: 0")).not.toBeInTheDocument();
+    expect(screen.getByText("No minted memes found.")).toBeInTheDocument();
+    expect(screen.queryByText(/Main Stage Winners:/)).not.toBeInTheDocument();
     expect(
-      screen.queryByText("Artist of Prevote Cards: 0")
+      screen.queryByText(/Artist of Prevote Cards:/)
     ).not.toBeInTheDocument();
   });
 });

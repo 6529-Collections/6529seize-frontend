@@ -32,9 +32,6 @@ type TrophyItem =
       readonly card: CollectedCard;
     };
 
-const TROPHY_LABEL_BASE_CLASS =
-  "tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-z-10 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide";
-
 const WinnerTrophyCard: React.FC<{
   readonly drop: ApiDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -51,12 +48,6 @@ const WinnerTrophyCard: React.FC<{
         className="tw-group tw-relative tw-flex tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
         onClick={() => onDropClick(extendedDrop)}
       >
-        <span
-          className={`${TROPHY_LABEL_BASE_CLASS} tw-border-amber-300/40 tw-bg-amber-900/65 tw-text-amber-100`}
-        >
-          Main Stage Winner
-        </span>
-
         <div className="tw-relative tw-aspect-square tw-overflow-hidden tw-bg-iron-950/50">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
             {drop.parts[0]?.media && drop.parts[0].media.length > 0 ? (
@@ -223,7 +214,7 @@ export const ArtistWinningArtworksContent: React.FC<
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
           <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-amber-400"></div>
           <span className="tw-animate-fade-in-out tw-text-sm tw-text-iron-400">
-            Loading trophy artworks...
+            Loading minted memes...
           </span>
         </div>
       </div>
@@ -233,47 +224,31 @@ export const ArtistWinningArtworksContent: React.FC<
   return (
     <div className="tw-relative tw-z-[100] tw-max-h-[calc(75vh-120px)] tw-overflow-y-auto tw-p-6 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-max-h-[calc(90vh-140px)]">
       {trophyItems.length > 0 && (
-        <>
-          <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-            <span className="tw-rounded-full tw-border tw-border-solid tw-border-amber-300/30 tw-bg-amber-900/25 tw-px-2.5 tw-py-1 tw-text-amber-100/90">
-              Main Stage Winners: {winningDrops.length}
-            </span>
-            <span className="tw-rounded-full tw-border tw-border-solid tw-border-blue-300/30 tw-bg-blue-900/20 tw-px-2.5 tw-py-1 tw-text-blue-100/90">
-              Artist of Prevote Cards: {prevoteCards.length}
-            </span>
-          </div>
-
-          <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-            {trophyItems.map((item) =>
-              item.type === "winner" ? (
-                <WinnerTrophyCard
-                  key={item.key}
-                  drop={item.drop}
-                  onDropClick={onDropClick}
-                />
-              ) : (
-                <div
-                  key={item.key}
-                  data-testid="trophy-item-prevote"
-                  className="tw-relative tw-flex tw-h-full tw-flex-col"
-                >
-                  <span
-                    className={`${TROPHY_LABEL_BASE_CLASS} tw-border-blue-300/40 tw-bg-blue-900/65 tw-text-blue-100`}
-                  >
-                    Artist of Prevote
-                  </span>
-                  <ArtistPrevoteCollectedCard card={item.card} />
-                </div>
-              )
-            )}
-          </div>
-        </>
+        <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+          {trophyItems.map((item) =>
+            item.type === "winner" ? (
+              <WinnerTrophyCard
+                key={item.key}
+                drop={item.drop}
+                onDropClick={onDropClick}
+              />
+            ) : (
+              <div
+                key={item.key}
+                data-testid="trophy-item-prevote"
+                className="tw-relative tw-flex tw-h-full tw-flex-col"
+              >
+                <ArtistPrevoteCollectedCard card={item.card} />
+              </div>
+            )
+          )}
+        </div>
       )}
 
       {trophyItems.length === 0 && (
         <div className="tw-flex tw-h-72 tw-items-center tw-justify-center">
           <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-            No trophy artworks found.
+            No minted memes found.
           </p>
         </div>
       )}

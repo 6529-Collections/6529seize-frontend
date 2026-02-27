@@ -46,11 +46,6 @@ export function ArtistPrevoteCollectedCard({
         onIncQty={() => {}}
         onDecQty={() => {}}
       />
-      {connectedProfile && !isViewerBalanceLoading && (
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
-          You own {viewerBalance}
-        </p>
-      )}
     </div>
   );
 }

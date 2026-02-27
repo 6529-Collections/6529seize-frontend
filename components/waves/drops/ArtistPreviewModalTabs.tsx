@@ -32,7 +32,7 @@ export const ArtistPreviewModalTabs: React.FC<ArtistPreviewModalTabsProps> = ({
               : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-300"
           }`}
         >
-          Trophy Artworks
+          Minted to Memes
         </button>
       </div>
     </div>
