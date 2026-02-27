@@ -24,18 +24,18 @@ reference routes.
 - [Network Nerd Leaderboard](feature-network-nerd-leaderboard.md)
 - [Network Activity Feed](feature-network-activity-feed.md)
 
-### Health and Metrics
+### Metrics and Reference
 
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
+- [Network Definitions](feature-network-definitions.md)
+- [Network Levels](feature-network-levels.md)
 - [Prenodes Status](feature-prenodes-status.md)
 
 ### TDH and xTDH Rules
 
-- [Network Definitions](feature-network-definitions.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
-- [Network Levels](feature-network-levels.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 

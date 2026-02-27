@@ -4,59 +4,56 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-The `Definitions` page is a glossary for network metrics used across profile
-stats and network pages.
+`Definitions` is a static glossary for core network metric labels.
+Use it when a metric name needs clarification before comparing stats.
 
 ## Location in the Site
 
 - Route: `/network/definitions`
-- Sidebar path: `Network -> Metrics -> Definitions`
+- Sidebar path (web and app): `Network -> Metrics -> Definitions`
 
 ## Entry Points
 
 - Open `/network/definitions` directly.
 - Open `Network -> Metrics -> Definitions` from the sidebar.
-- Follow metric-reference links from supporting content where available.
+- Open `Definitions` from `/network/tdh` or `/network/tdh/historic-boosts`.
+- Use header search (3+ characters) and open `Definitions`.
 
-## User Journey
+## Definitions Shown
 
-1. Open `/network/definitions`.
-2. Review metric definitions (for example, card counts, set counts,
-   purchase/sale totals, transfer counts, and TDH variants).
-3. Use in-page navigation buttons to move to `TDH`, `TDH Historic Boosts`,
-   `Network Stats`, or `Levels`.
+- `Cards Collected`: total The Memes NFTs owned.
+- `Unique Memes`: total unique Meme NFTs owned.
+- `Meme Sets`: number of complete sets of The Memes (all SZNs or a specific SZN).
+- `Meme Sets -1 / -2`: complete sets missing 1 or 2 cards.
+- `Genesis Sets`: complete set of the first three Meme NFTs.
+- `Purchases / Sales`: count of bought/sold NFTs (Memes or Gradients).
+- `Purchases (ETH) / Sales (ETH)`: ETH spent/received for those NFTs.
+- `Transfers In / Out`: NFTs moved into/out of an address.
+- `TDH (unweighted)`: "Total Days Held" summed daily at `00:00 UTC`.
+- `TDH (unboosted)`: TDH weighted by edition size (`FirstGM 3,941 = 1.0` baseline).
+- `TDH`: TDH (unboosted) multiplied by boosters, with an inline link to `/network/tdh`.
 
-## Common Scenarios
+## Route Behavior
 
-- Check what a metric label means before comparing addresses in profile stats.
-- Distinguish `TDH (unweighted)`, `TDH (unboosted)`, and final `TDH`.
-- Use the inline `TDH` link to jump from glossary terms to current boost rules.
-
-## Edge Cases
-
-- The glossary provides shared definitions and does not show wallet-specific
-  computed values.
-- Definitions are route-level reference text and remain the same for signed-in
-  and signed-out browsing contexts.
+- Static reference route: no API request, loading state, empty state, or retry action.
+- No query params, sorting, filtering, or group-scope controls.
+- Same content for signed-in and signed-out users.
+- Bottom navigation buttons always link to:
+  `/network/tdh`, `/network/tdh/historic-boosts`,
+  `/network/health/network-tdh`, and `/network/levels`.
 
 ## Failure and Recovery
 
-- If users follow an outdated route reference and do not land on this page, use
-  `Network -> Metrics -> Definitions` in the sidebar.
-- If the `TDH` link fails to resolve due temporary route issues, users can open
-  `/network/tdh` directly.
-
-## Limitations / Notes
-
-- Definitions describe terms only; they do not explain every downstream UI that
-  consumes each metric.
-- Some related routes (for example, `Levels`) are linked for navigation but are
-  documented separately.
+- If navigation fails, reopen from `Network -> Metrics -> Definitions` or open `/network/definitions` directly.
+- If a bottom-link target fails, open the route directly:
+  `/network/tdh`, `/network/tdh/historic-boosts`, `/network/health/network-tdh`, or `/network/levels`.
 
 ## Related Pages
 
 - [Network Index](README.md)
+- [Network Stats](feature-network-stats.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
-- [Health Dashboard](feature-health-dashboard.md)
+- [Network Levels](feature-network-levels.md)
+- [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 - [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
