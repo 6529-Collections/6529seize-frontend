@@ -6,6 +6,7 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { getNextMintStart } from "@/components/meme-calendar/meme-calendar.helpers";
+import { NextMintSubscribeButton } from "@/components/home/next-mint/NextMintSubscribeButton";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -13,7 +14,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
 
 interface NextMintCardProps {
-  readonly drop: ApiDrop;
+  readonly drop: ApiDrop | null;
 }
 
 const formatNextMintDateTime = (date: Date): string => {
@@ -33,12 +34,25 @@ const formatNextMintDateTime = (date: Date): string => {
 
 export const NextMintCard = ({ drop }: NextMintCardProps) => {
   const { hasTouchScreen } = useDeviceInfo();
+
+  if (!drop) {
+    return null;
+  }
+
   const media = drop.parts[0]?.media[0];
   const title =
     drop.title ??
     drop.metadata.find((m) => m.data_key === "title")?.data_value ??
     "Untitled";
   const author = drop.author;
+  const authorHandle = author.handle ?? author.primary_address;
+  const authorName = author.handle ?? "Anonymous";
+  const dropHref = getWaveRoute({
+    waveId: drop.wave.id,
+    extraParams: { drop: drop.id },
+    isDirectMessage: false,
+    isApp: false,
+  });
   const nextMintDate = getNextMintStart();
   const timestamp = formatNextMintDateTime(nextMintDate);
 
@@ -82,30 +96,41 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               size="sm"
             />
             <Link
-              href={getWaveRoute({
-                waveId: drop.wave.id,
-                extraParams: { drop: drop.id },
-                isDirectMessage: false,
-                isApp: false,
-              })}
+              href={dropHref}
               className="tw-m-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-text-base tw-font-semibold tw-leading-tight tw-text-white tw-no-underline tw-transition-colors group-hover:tw-text-white/80 @lg:tw-line-clamp-1"
             >
               {title}
             </Link>
           </div>
-          <Link
-            href={`/${author.handle ?? author.primary_address}`}
-            className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
-          >
-            <ProfileAvatar
-              pfpUrl={author.pfp}
-              alt={author.handle ?? "Artist"}
-              size={ProfileBadgeSize.SMALL}
-            />
-            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50 desktop-hover:hover:tw-text-white">
-              {author.handle ?? "Anonymous"}
-            </span>
-          </Link>
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-2">
+            {authorHandle ? (
+              <Link
+                href={`/${authorHandle}`}
+                className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-no-underline"
+              >
+                <ProfileAvatar
+                  pfpUrl={author.pfp}
+                  alt={authorHandle}
+                  size={ProfileBadgeSize.SMALL}
+                />
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50 desktop-hover:hover:tw-text-white">
+                  {authorName}
+                </span>
+              </Link>
+            ) : (
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
+                <ProfileAvatar
+                  pfpUrl={author.pfp}
+                  alt={authorName}
+                  size={ProfileBadgeSize.SMALL}
+                />
+                <span className="tw-min-w-0 tw-truncate tw-text-xs tw-text-white/50">
+                  {authorName}
+                </span>
+              </div>
+            )}
+            <NextMintSubscribeButton />
+          </div>
         </div>
       </div>
     </div>
