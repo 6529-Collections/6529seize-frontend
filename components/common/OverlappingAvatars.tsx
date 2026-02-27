@@ -3,6 +3,7 @@
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
 import { useId, useState } from "react";
@@ -41,8 +42,8 @@ function AvatarContent({
   avatarRing,
 }: {
   pfpUrl: string | null;
-  ariaLabel?: string;
-  fallback?: string;
+  ariaLabel?: string | undefined;
+  fallback?: string | undefined;
   avatarRing: string;
 }) {
   const [imgError, setImgError] = useState(false);
@@ -58,13 +59,14 @@ function AvatarContent({
   }
 
   return (
-    <img
+    <Image
       src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
       alt={ariaLabel ?? "Profile"}
-      loading="lazy"
-      decoding="async"
+      fill
+      sizes="28px"
+      unoptimized
       onError={() => setImgError(true)}
-      className={`tw-h-full tw-w-full tw-flex-shrink-0 tw-rounded-full ${avatarRing}`}
+      className={`tw-object-cover tw-rounded-full ${avatarRing}`}
     />
   );
 }
