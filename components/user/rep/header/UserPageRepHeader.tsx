@@ -96,7 +96,7 @@ export default function UserPageRepHeader({
                   <button
                     type="button"
                     onClick={() => setIsGrantRepOpen(true)}
-                    className="tw-group tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-white/15 tw-bg-white/[0.03] tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/30 hover:tw-bg-white/10 hover:tw-text-white"
+                    className="tw-group tw-inline-flex tw-h-11 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-dashed tw-border-white/15 tw-bg-white/[0.03] tw-px-4 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/[0.05] hover:tw-text-iron-300"
                   >
                     <svg
                       className="-tw-ml-1 tw-h-4 tw-w-4 tw-text-iron-400 tw-transition-colors group-hover:tw-text-white"
