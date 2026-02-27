@@ -28,7 +28,8 @@ Use this page when an Open Data route is missing, blank, or not loading as expec
 ## Route shows heading but no table or error
 
 - Most common route: `/open-data/meme-subscriptions`.
-- Cause: that route has no inline loading or error banner.
+- Cause: that route has no inline loading or error banner, so initial loading
+  and initial-load failure can look the same.
 - Recovery:
   1. Reload `/open-data/meme-subscriptions`.
   2. Re-open the route directly instead of from the hub.

@@ -4,14 +4,27 @@ Parent: [Open Data Index](README.md)
 
 ## Overview
 
-`/open-data/meme-subscriptions` lists meme-subscription export files with token
-IDs and download links.
+`/open-data/meme-subscriptions` lists The Memes subscription export files.
+The page heading is `Meme Subscriptions Downloads`.
 
 ## Location in the Site
 
 - Route: `/open-data/meme-subscriptions`
-- Sidebar path: `Tools -> Open Data -> Meme Subscriptions`
-- Hub entry: `Meme Subscriptions` card on `/open-data`
+- Hub route: `/open-data`
+- Desktop sidebar path: `Tools -> Open Data -> Meme Subscriptions`
+
+## Entry Points
+
+- Open the `Meme Subscriptions` card on `/open-data`.
+- Open `Tools -> Open Data -> Meme Subscriptions` in the desktop sidebar.
+- Open `/open-data/meme-subscriptions` directly.
+
+## Visibility Rules
+
+- The hub card and desktop-sidebar link are hidden when both are true:
+  - The user is in the native iOS app.
+  - Cookie-country is not `US`.
+- Direct navigation to `/open-data/meme-subscriptions` still works.
 
 ## Data Source
 
@@ -22,35 +35,41 @@ IDs and download links.
   - `page=<current page>`
 - The route always uses the fixed contract; users cannot switch it in the UI.
 
+## Table Content
+
+- `Date` is rendered as a calendar date.
+- `Token ID` is rendered as `#<token_id>`.
+- `Link` shows the file URL and opens it in a new tab.
+
 ## User Journey
 
-1. Open `/open-data/meme-subscriptions` or use the Hub card.
-2. Wait for the dataset request to return.
-3. Review rows in a three-column table:
-   - `Date`: formatted for display
-   - `Token ID`: rendered as `#<token_id>`
-   - `Link`: downloadable file URL (opens in a new tab)
-4. Use pagination when total results exceed 25.
+1. Open `/open-data/meme-subscriptions` or use the hub card.
+2. Wait for the dataset request.
+3. Review the `Date`, `Token ID`, and `Link` columns.
+4. Open a `Link` value to open the file URL in a new tab.
+5. Use pagination when total results exceed 25.
+
+## Loading, Error, Empty, and Recovery
+
+- Initial request in flight: the page shows only the heading. There is no
+  loading banner.
+- Initial request failure: the page still shows only the heading. There is no
+  inline error banner.
+- Later page-request failure: previously loaded rows remain visible.
+- Empty success response: `Nothing here yet`.
+- Recovery: reload `/open-data/meme-subscriptions`.
 
 ## Pagination Behavior
 
 - Each page shows up to 25 rows.
-- Pagination is hidden when `count <= 25`.
-- Page changes request the next page and scroll the window to top.
+- Pagination controls appear only when `count > 25`.
+- Page changes request `page=<current page>` and scroll to top.
+- There is no in-page retry button.
 
-## Load / Error / Empty States
+## Limitations
 
-- Loading: no explicit loading indicator is shown.
-- Error: no inline error banner is shown.
-- Initial-load failure: the page stays at the heading with no rows.
-- Later-page failure: previously loaded rows remain visible.
-- Empty success response: `Nothing here yet`.
-
-## Edge Cases
-
-- The Hub/desktop-sidebar `Meme Subscriptions` link can be hidden for native iOS
-  app users outside the US.
-- Direct navigation to `/open-data/meme-subscriptions` still opens the route.
+- No contract switcher is available.
+- No in-page sorting or filtering controls are available.
 
 ## Related Pages
 

@@ -15,17 +15,18 @@ Open Data docs cover dataset download routes under `/open-data/*`.
   hidden.
 - Route behavior families:
   - API + pagination + loading/error banners: Network Metrics, Rememes, Royalties.
-  - API + pagination without inline loading/error banners: Meme Subscriptions.
+  - API + pagination without inline loading/error banners: Meme Subscriptions
+    (heading-only while first request is loading or fails).
   - Static links table: Team.
 
 ## Features
 
 - [Open Data Hub](feature-open-data-hub.md)
 - [Network Metrics Downloads](feature-network-metrics-downloads.md)
-- [Team Downloads](feature-team-downloads.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
-- [Royalties Downloads](feature-royalties-uploads.md)
 - [Rememes Downloads](feature-rememes-uploads.md)
+- [Team Downloads](feature-team-downloads.md)
+- [Royalties Downloads](feature-royalties-uploads.md)
 
 ## Flows
 
