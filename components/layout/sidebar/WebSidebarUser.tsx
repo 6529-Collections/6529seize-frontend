@@ -156,8 +156,13 @@ function WebSidebarUser({
       return false;
     }
 
-    seizeSwitchConnectedAccount(nextAccount.address);
-    return true;
+    try {
+      seizeSwitchConnectedAccount(nextAccount.address);
+      return true;
+    } catch (error) {
+      console.error("Failed to switch connected account", error);
+      return false;
+    }
   };
 
   const toggleUserMenu = () => {

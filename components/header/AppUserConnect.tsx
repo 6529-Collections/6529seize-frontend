@@ -30,6 +30,22 @@ export default function AppUserConnect({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const availableConnectedAccounts = connectedAccounts ?? [];
 
+  const runAsyncAndNavigate = async ({
+    action,
+    errorMessage,
+  }: {
+    readonly action: () => void | Promise<void>;
+    readonly errorMessage: string;
+  }) => {
+    try {
+      await Promise.resolve(action());
+    } catch (error) {
+      console.error(errorMessage, error);
+    } finally {
+      onNavigate();
+    }
+  };
+
   const qrScanner = <HeaderQRScanner onScanSuccess={onNavigate} appSidebar />;
 
   const connectButton = (
@@ -48,15 +64,10 @@ export default function AppUserConnect({
   const walletConnectionButton = isConnected ? (
     <button
       onClick={() => {
-        void (async () => {
-          try {
-            await seizeDisconnect();
-          } catch (error) {
-            console.error("Failed to disconnect wallet", error);
-          } finally {
-            onNavigate();
-          }
-        })();
+        void runAsyncAndNavigate({
+          action: seizeDisconnect,
+          errorMessage: "Failed to disconnect wallet",
+        });
       }}
       className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
       aria-label="Disconnect Wallet"
@@ -97,11 +108,13 @@ export default function AppUserConnect({
       {walletConnectionButton}
       <button
         onClick={() => {
-          seizeDisconnectAndLogout();
-          onNavigate();
+          void runAsyncAndNavigate({
+            action: seizeDisconnectAndLogout,
+            errorMessage: "Failed to disconnect and logout",
+          });
         }}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-        aria-label="Disconnect & Logout"
+        aria-label={isConnected ? "Disconnect & Logout" : "Logout"}
       >
         <ArrowRightEndOnRectangleIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
         <span>{isConnected ? "Disconnect & Logout" : "Logout"}</span>
@@ -109,15 +122,10 @@ export default function AppUserConnect({
       {availableConnectedAccounts.length > 1 && (
         <button
           onClick={() => {
-            void (async () => {
-              try {
-                await seizeDisconnectAndLogoutAll();
-              } catch (error) {
-                console.error("Failed to sign out all profiles", error);
-              } finally {
-                onNavigate();
-              }
-            })();
+            void runAsyncAndNavigate({
+              action: seizeDisconnectAndLogoutAll,
+              errorMessage: "Failed to sign out all profiles",
+            });
           }}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
           aria-label="Sign Out All Profiles"

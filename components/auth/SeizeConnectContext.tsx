@@ -758,24 +758,22 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [disconnect, isActiveWalletConnected]);
 
   const seizeDisconnectAndLogout = useCallback(async (): Promise<void> => {
-    if (isActiveWalletConnected) {
-      // CRITICAL: Current-profile wallet disconnect MUST succeed before auth cleanup
-      try {
-        await disconnect();
-      } catch (error: unknown) {
-        const walletError = createWalletError(
-          WalletDisconnectionError,
-          "disconnect wallet during logout",
-          error
-        );
-        logError("seizeDisconnectAndLogout", walletError);
+    // CRITICAL: Wallet disconnect MUST succeed before auth cleanup
+    try {
+      await disconnect();
+    } catch (error: unknown) {
+      const walletError = createWalletError(
+        WalletDisconnectionError,
+        "disconnect wallet during logout",
+        error
+      );
+      logError("seizeDisconnectAndLogout", walletError);
 
-        // SECURITY: Throw AuthenticationError to prevent auth bypass
-        throw new AuthenticationError(
-          "Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.",
-          walletError
-        );
-      }
+      // SECURITY: Throw AuthenticationError to prevent auth bypass
+      throw new AuthenticationError(
+        "Cannot complete logout: wallet disconnection failed. User may still have active wallet connection.",
+        walletError
+      );
     }
 
     try {
@@ -798,29 +796,26 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [
     disconnect,
-    isActiveWalletConnected,
     refreshStoredConnectedAccounts,
     setConnected,
     setDisconnected,
   ]);
 
   const seizeDisconnectAndLogoutAll = useCallback(async (): Promise<void> => {
-    if (isActiveWalletConnected) {
-      try {
-        await disconnect();
-      } catch (error: unknown) {
-        const walletError = createWalletError(
-          WalletDisconnectionError,
-          "disconnect wallet during logout all profiles",
-          error
-        );
-        logError("seizeDisconnectAndLogoutAll", walletError);
+    try {
+      await disconnect();
+    } catch (error: unknown) {
+      const walletError = createWalletError(
+        WalletDisconnectionError,
+        "disconnect wallet during logout all profiles",
+        error
+      );
+      logError("seizeDisconnectAndLogoutAll", walletError);
 
-        throw new AuthenticationError(
-          "Cannot complete sign out: wallet disconnection failed. User may still have active wallet connection.",
-          walletError
-        );
-      }
+      throw new AuthenticationError(
+        "Cannot complete sign out: wallet disconnection failed. User may still have active wallet connection.",
+        walletError
+      );
     }
 
     try {
@@ -846,7 +841,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [
     disconnect,
-    isActiveWalletConnected,
     refreshStoredConnectedAccounts,
     setDisconnected,
   ]);

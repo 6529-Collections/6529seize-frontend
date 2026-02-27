@@ -33,6 +33,7 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
+const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
 
 const sliceString = (str: string, length: number): string => {
   if (str.length <= length) return str;
@@ -62,7 +63,6 @@ const getRememesTitle = (pathSegments: string[]): string | null => {
 };
 
 export default function AppHeader() {
-  const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const {

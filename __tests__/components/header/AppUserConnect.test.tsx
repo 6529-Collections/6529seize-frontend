@@ -108,11 +108,13 @@ describe("AppUserConnect", () => {
     });
 
     fireEvent.click(disconnectBtn);
-    expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
-    expect(onNavigate).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
+      expect(onNavigate).toHaveBeenCalledTimes(2);
+    });
   });
 
-  it("renders connect wallet + logout when authorized-only", () => {
+  it("renders connect wallet + logout when authorized-only", async () => {
     const { seizeConnect, seizeDisconnectAndLogout, onNavigate } = setup(
       "0xabc",
       false
@@ -129,8 +131,10 @@ describe("AppUserConnect", () => {
     expect(onNavigate).toHaveBeenCalled();
 
     fireEvent.click(logoutBtn);
-    expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
-    expect(onNavigate).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
+      expect(onNavigate).toHaveBeenCalledTimes(2);
+    });
   });
 
   it("shows sign out all profiles only when multiple profiles exist", () => {

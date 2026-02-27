@@ -48,29 +48,42 @@ function AcceptConnectionSharing(
           token,
         },
       });
-      if (
-        redeemResponse.address &&
-        redeemResponse.token &&
-        areEqualAddresses(redeemResponse.address, address)
-      ) {
-        if (!canStoreAnotherWalletAccount(redeemResponse.address)) {
-          setToast({
-            message: "Maximum connected profiles reached",
-            type: "error",
-          });
-          setAcceptingConnection(false);
-          return;
-        }
-
-        setAuthJwt(
-          redeemResponse.address,
-          redeemResponse.token,
-          token,
-          role ?? undefined
-        );
-        seizeAcceptConnection(redeemResponse.address);
-        router.push("/");
+      const hasValidRedeemResponse =
+        !!redeemResponse.address &&
+        !!redeemResponse.token &&
+        areEqualAddresses(redeemResponse.address, address);
+      if (!hasValidRedeemResponse) {
+        setToast({ message: "Invalid connection response", type: "error" });
+        setAcceptingConnection(false);
+        return;
       }
+
+      if (!canStoreAnotherWalletAccount(redeemResponse.address)) {
+        setToast({
+          message: "Maximum connected profiles reached",
+          type: "error",
+        });
+        setAcceptingConnection(false);
+        return;
+      }
+
+      const didPersistJwt = setAuthJwt(
+        redeemResponse.address,
+        redeemResponse.token,
+        token,
+        role ?? undefined
+      );
+      if (!didPersistJwt) {
+        setToast({
+          message: "Failed to store connected profile",
+          type: "error",
+        });
+        setAcceptingConnection(false);
+        return;
+      }
+
+      seizeAcceptConnection(redeemResponse.address);
+      router.push("/");
     } catch (error) {
       console.error(error);
       setToast({ message: "Failed to accept connection", type: "error" });

@@ -72,15 +72,50 @@ export default function HeaderUserProxyDropdown({
   };
 
   const [label, setLabel] = useState(getLabel());
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
-  const onSelectConnectedAccount = (nextAddress: string) => {
+  const runMenuAction = async ({
+    action,
+    pendingKey,
+    errorMessage,
+  }: {
+    readonly action: () => void | Promise<void>;
+    readonly pendingKey: string;
+    readonly errorMessage: string;
+  }) => {
+    if (pendingAction) {
+      return;
+    }
+
+    setPendingAction(pendingKey);
+    try {
+      await Promise.resolve(action());
+      onClose();
+    } catch (error) {
+      console.error(errorMessage, error);
+      setToast({ message: errorMessage, type: "error" });
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const onSelectConnectedAccount = async (nextAddress: string) => {
     if (nextAddress.toLowerCase() === address?.toLowerCase()) {
       onClose();
       return;
     }
-    seizeSwitchConnectedAccount(nextAddress);
-    onClose();
+    try {
+      await Promise.resolve(seizeSwitchConnectedAccount(nextAddress));
+    } catch (error) {
+      console.error("Failed to switch connected account", error);
+      setToast({
+        message: "Failed to switch connected account. Please try again.",
+        type: "error",
+      });
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -195,9 +230,14 @@ export default function HeaderUserProxyDropdown({
                     {isConnected ? (
                       <button
                         onClick={() => {
-                          seizeDisconnect();
-                          onClose();
+                          void runMenuAction({
+                            action: seizeDisconnect,
+                            pendingKey: "disconnect",
+                            errorMessage:
+                              "Failed to disconnect wallet. Please try again.",
+                          });
                         }}
+                        disabled={pendingAction !== null}
                         type="button"
                         aria-label="Disconnect"
                         title="Disconnect"
@@ -213,9 +253,14 @@ export default function HeaderUserProxyDropdown({
                     ) : (
                       <button
                         onClick={() => {
-                          seizeConnect();
-                          onClose();
+                          void runMenuAction({
+                            action: seizeConnect,
+                            pendingKey: "connect",
+                            errorMessage:
+                              "Failed to open wallet connection. Please try again.",
+                          });
                         }}
+                        disabled={pendingAction !== null}
                         type="button"
                         aria-label="Connect"
                         title="Connect"
@@ -232,7 +277,14 @@ export default function HeaderUserProxyDropdown({
                   </div>
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     <button
-                      onClick={() => seizeDisconnectAndLogout()}
+                      onClick={() => {
+                        void runMenuAction({
+                          action: seizeDisconnectAndLogout,
+                          pendingKey: "logout",
+                          errorMessage: "Failed to sign out. Please try again.",
+                        });
+                      }}
+                      disabled={pendingAction !== null}
                       type="button"
                       aria-label="Disconnect & Logout"
                       title="Disconnect & Logout"
@@ -248,23 +300,14 @@ export default function HeaderUserProxyDropdown({
                     {availableConnectedAccounts.length > 1 && (
                       <button
                         onClick={() => {
-                          void (async () => {
-                            try {
-                              await seizeDisconnectAndLogoutAll();
-                              onClose();
-                            } catch (error) {
-                              console.error(
-                                "Failed to sign out all profiles",
-                                error
-                              );
-                              setToast({
-                                message:
-                                  "Failed to sign out all profiles. Please try again.",
-                                type: "error",
-                              });
-                            }
-                          })();
+                          void runMenuAction({
+                            action: seizeDisconnectAndLogoutAll,
+                            pendingKey: "logout-all",
+                            errorMessage:
+                              "Failed to sign out all profiles. Please try again.",
+                          });
                         }}
+                        disabled={pendingAction !== null}
                         type="button"
                         aria-label="Sign Out All Profiles"
                         title="Sign Out All Profiles"

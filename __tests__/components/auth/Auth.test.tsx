@@ -133,7 +133,6 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<
   typeof commonApiFetch
 >;
-const { commonApiPost } = require("@/services/api/common-api");
 const mockCommonApiPost = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;

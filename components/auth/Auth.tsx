@@ -496,6 +496,14 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
+      if (!canStoreAnotherWalletAccount(signerAddress)) {
+        setToast({
+          message: "Maximum connected profiles reached",
+          type: "error",
+        });
+        return { success: false };
+      }
+
       const nonceResponse = await getNonce({ signerAddress });
       const { nonce, server_signature } = nonceResponse;
 
@@ -529,12 +537,20 @@ export default function Auth({
           ...(role != null && { role }),
         },
       });
-      setAuthJwt(
+      const isPersisted = setAuthJwt(
         signerAddress,
         tokenResponse.token,
         tokenResponse.refresh_token,
         role ?? undefined
       );
+      if (!isPersisted) {
+        setToast({
+          message: "Failed to persist connected profile",
+          type: "error",
+        });
+        return { success: false };
+      }
+
       return { success: true };
     } catch (error) {
       // Handle specific authentication nonce errors with detailed messages

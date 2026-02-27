@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import HeaderUserProxyDropdown from "@/components/header/user/proxy/HeaderUserProxyDropdown";
 import { AuthContext } from "@/components/auth/Auth";
 
@@ -45,6 +45,7 @@ function renderDropdown(options: any) {
     activeProfileProxy: null,
     setActiveProfileProxy: jest.fn(),
     receivedProfileProxies: [{ id: "proxy-1" }],
+    setToast: jest.fn(),
   } as any;
   const onClose = jest.fn();
   render(
@@ -71,7 +72,7 @@ describe("HeaderUserProxyDropdown", () => {
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
 
-  it("connects wallet when not connected", () => {
+  it("connects wallet when not connected", async () => {
     const seizeConnect = jest.fn();
     const { onClose } = renderDropdown({
       profile: profileBase,
@@ -80,8 +81,10 @@ describe("HeaderUserProxyDropdown", () => {
       seizeConnect,
     });
     fireEvent.click(screen.getAllByRole("button", { name: /connect/i })[0]);
-    expect(seizeConnect).toHaveBeenCalled();
-    expect(onClose).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(seizeConnect).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 
   it("disconnects wallet when connected", async () => {
@@ -93,8 +96,10 @@ describe("HeaderUserProxyDropdown", () => {
       seizeDisconnect,
     });
     fireEvent.click(screen.getAllByRole("button", { name: /disconnect/i })[0]);
-    expect(seizeDisconnect).toHaveBeenCalled();
-    expect(onClose).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(seizeDisconnect).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 
   it("falls back to wallet display when no handle", () => {
