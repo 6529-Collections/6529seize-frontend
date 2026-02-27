@@ -48,7 +48,7 @@ and mobile app layouts.
 ### Mobile-Specific Behavior
 
 - [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md):
-  header-triggered refresh that invalidates cached queries.
+  app-shell header swipe refresh at top-of-page with in-place data/state refresh.
 - [Mobile Keyboard and Bottom Navigation Layout](feature-android-keyboard-layout.md):
   keyboard-driven bottom-nav visibility and spacing adjustments.
 - [Mobile App Landing Page](feature-mobile-app-landing.md): `/open-mobile`

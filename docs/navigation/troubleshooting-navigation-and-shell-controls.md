@@ -59,7 +59,8 @@ controls do not behave as expected across web and app layouts.
 - `App Wallets` route is missing:
   it appears only when app-wallet support is enabled.
 - Pull-to-refresh does not trigger:
-  start gesture from header area while page is at top.
+  confirm you are in native app-shell context, return to top of page, then
+  start the gesture from the header area (not page content).
 - `/open-mobile` only shows one store action:
   this is expected on detected Apple mobile or Android user agents.
 - `Back to 6529.io` on `/open-mobile` returns to `/`:

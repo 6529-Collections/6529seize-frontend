@@ -1,71 +1,70 @@
 # Mobile Pull-to-Refresh Behavior
 
+Parent: [Navigation Index](README.md)
+
 ## Overview
 
-On mobile app routes, pull-to-refresh is enabled inside the app shell and
-uses the shared query cache refresh path instead of forcing a hard page reload.
-A short pull-down gesture on eligible headers invalidates in-memory data and
-starts a lightweight refresh cycle.
+In native app layout, you can pull down from the header to refresh data
+without leaving the current route.
+
+This refresh invalidates cached query data and triggers an in-app refresh
+cycle. It is not a full browser reload.
 
 ## Location in the Site
 
-- App-shell routes using `AppLayout` (`isApp` mode), especially list- and feed-style
-  pages where users need quick freshness recovery.
-- The gesture is anchored to the header area in that layout, so it starts from the
-  shared header region rather than from arbitrary content.
+- Native app routes rendered through `AppLayout`.
+- Available on app-shell routes that show the app header.
+- Not available on desktop web or small-screen web layouts.
+- Not available on access/restricted route families that bypass layout wrappers.
 
 ## Entry Points
 
-- Open the app from a mobile device.
-- Browse any `AppLayout`-driven screen.
-- At the top of the page, pull down from the header area (including the search
-  and navigation controls).
+- Open the app in native app-shell context.
+- Open an app-shell route and scroll to the top.
+- Start the gesture from the header area.
 
 ## User Journey
 
-1. A user opens a screen in the app layout.
-2. With the page already at the top, the user swipes down in the header area.
-3. A pull indicator appears and moves with the gesture.
-4. Passing the threshold triggers app-wide query/data invalidation.
-5. The spinner/indicator animates briefly while fresh data is requested, then
-   settles back.
+1. At top-of-page, pull down from the header.
+2. The pull indicator appears and rotates with pull distance.
+3. Release after the trigger threshold (about `80px`) to start refresh.
+4. The indicator switches to a spinner while app/query refresh runs.
+5. The spinner clears after a short hold (about 1 second), and the route stays
+   in place.
+
+## Trigger Rules
+
+- Gesture must begin inside the app header trigger zone.
+- Window must be at top (`scrollY <= 0`).
+- If the gesture starts in nested scrollable content, that scroll container
+  must also be at top.
+- Short pulls or upward movement do not trigger refresh.
+- While one refresh is running, new pulls are ignored.
 
 ## Common Scenarios
 
-- While scrolling dense lists:
-  - Users can recover freshness without navigating away.
-  - Cached route content refreshes in place rather than fully reloading the route.
-- When returning from another app and feeling out-of-date data:
-  - Pull from the header to refresh in-app state quickly.
-- When network errors are already visible in local retry controls:
-  - Use pull-to-refresh before reopening the same route.
-
-## Edge Cases
-
-- The gesture is scoped to app-shell header touches; pulls that start lower in
-  content do not trigger refresh.
-- If the page is scrolled away from the top, pull-to-refresh does not trigger.
-- In browser-based web contexts (non-app shell), behavior follows platform/browser
-  defaults instead of this flow.
+- Refresh list-heavy app routes (Discover, Waves, Messages, Notifications,
+  Network) without leaving the route.
+- Refresh deeper app routes (collections/tools/profile) in place.
+- If indicator appears but refresh does not run, pull farther before release.
 
 ## Failure and Recovery
 
-- If fresh data does not appear after one gesture, use the page's retry controls or
-  reopen the route from navigation.
-- If pull gesture starts repeatedly without visual change, wait a short moment for
-  the refresh timeout to complete, then retry.
+- If refresh does not trigger, return to top and restart from header.
+- If data still looks stale, use in-route retry actions first, then pull again.
+- If stale state persists, switch routes and return, then retry.
 
 ## Limitations / Notes
 
-- Pull-to-refresh updates shared app data state; it does not force an unconditional
-  hard reload.
-- It is only available in the mobile app shell header context.
-- Recovery can still rely on explicit in-route retry controls and route changes when
-  needed.
+- Native app layout only.
+- Keeps current URL and route context.
+- Refreshes app/query state; does not force a full page reload.
 
 ## Related Pages
 
 - [Navigation Index](README.md)
-- [Profile Troubleshooting](../profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
-- [Route Error and Not-Found Screens](../shared/feature-route-error-and-not-found.md)
+- [App Header Context](feature-app-header-context.md)
+- [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
+- [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
+- [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Docs Home](../README.md)
