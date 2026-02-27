@@ -14,6 +14,7 @@ import {
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
@@ -24,10 +25,14 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
   primaryAddress,
   canEdit,
+  isOpen,
+  onToggleOpen,
 }: {
   readonly address: ApiWallet;
   readonly primaryAddress: string | null;
   readonly canEdit: boolean;
+  readonly isOpen: boolean;
+  readonly onToggleOpen: () => void;
 }) {
   const { setToast } = useAuth();
 
@@ -36,23 +41,47 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     window.open(`https://opensea.io/${address.wallet}`, "_blank");
   };
 
-  const goToEtherscan = () => {
+  const goToEtherscan = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
     window.open(`https://etherscan.io/address/${address.wallet}`, "_blank");
   };
 
   const isPrimary =
     address.wallet.toLowerCase() === primaryAddress?.toLowerCase();
 
-  const [title, setTitle] = useState(address.wallet.slice(0, 6));
+  const [copiedItem, setCopiedItem] = useState<"full-address" | "ens" | null>(
+    null
+  );
   const [_, copyToClipboard] = useCopyToClipboard();
 
-  const handleCopy = () => {
+  const handleCopyAddress = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
     copyToClipboard(address.wallet);
-    setTitle("Copied!");
+    setCopiedItem("full-address");
     setTimeout(() => {
-      setTitle(address.wallet.slice(0, 6));
+      setCopiedItem((current) => (current === "full-address" ? null : current));
     }, 1000);
   };
+
+  const handleCopyEns = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    if (!address.display) {
+      return;
+    }
+
+    event.stopPropagation();
+    copyToClipboard(address.display);
+    setCopiedItem("ens");
+    setTimeout(() => {
+      setCopiedItem((current) => (current === "ens" ? null : current));
+    }, 1000);
+  };
+
   const [isTouchScreen, setIsTouchScreen] = useState(false);
   useEffect(() => {
     setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
@@ -143,94 +172,167 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-group tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-py-1">
-        <div className="tw-flex-1 tw-min-w-0">
-          <div className="tw-flex tw-items-center tw-gap-2 tw-mb-0.5">
-            <span className="tw-text-xs tw-font-normal tw-text-iron-400 tw-font-mono">
-              {title === "Copied!" ? (
-                <span className="tw-text-primary-400">{title}</span>
-              ) : (
-                title
-              )}
-            </span>
-            <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
-              isPrimary={isPrimary}
-              canEdit={canEdit}
-              assignPrimary={assignPrimary}
-              isAssigningPrimary={assigningPrimary}
-            />
+      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/40">
+        <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-px-3 tw-py-2">
+          <div className="tw-min-w-0 tw-flex-1">
+            <div className="tw-flex tw-items-center tw-gap-1">
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`consolidated-address-panel-${address.wallet}`}
+                onClick={onToggleOpen}
+                className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-mono tw-text-xs tw-font-normal tw-leading-none tw-text-iron-100 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+              >
+                {address.wallet.slice(0, 6)}
+              </button>
+              <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
+                isPrimary={isPrimary}
+                canEdit={canEdit}
+                assignPrimary={assignPrimary}
+                isAssigningPrimary={assigningPrimary}
+              />
+            </div>
+            {address.display && (
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`consolidated-address-panel-${address.wallet}`}
+                onClick={onToggleOpen}
+                className="tw-mt-1 tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-mono tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+              >
+                {address.display}
+              </button>
+            )}
           </div>
-          {address.display && (
-            <div className="tw-text-xs tw-font-semibold tw-font-mono tw-text-iron-200 tw-truncate tw-max-w-[130px]">
-              {address.display}
-            </div>
-          )}
+          <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5">
+            <button
+              onClick={goToEtherscan}
+              aria-label="Go to Etherscan"
+              className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200"
+              data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
+              {...(!isTouchScreen
+                ? { "data-tooltip-content": "Etherscan" }
+                : null)}
+            >
+              <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
+                <EtherscanIcon />
+              </div>
+            </button>
+            {!isTouchScreen && (
+              <Tooltip
+                id={`etherscan-tooltip-${address.wallet}`}
+                place="top"
+                positionStrategy="fixed"
+                offset={8}
+                opacity={1}
+                style={TOOLTIP_STYLES}
+              />
+            )}
+            <button
+              onClick={goToOpensea}
+              aria-label="Go to Opensea"
+              className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200"
+              data-tooltip-id={`opensea-tooltip-${address.wallet}`}
+              {...(isTouchScreen
+                ? null
+                : { "data-tooltip-content": "Opensea" })}
+            >
+              <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
+                <OpenseaIcon />
+              </div>
+            </button>
+            {!isTouchScreen && (
+              <Tooltip
+                id={`opensea-tooltip-${address.wallet}`}
+                place="top"
+                positionStrategy="fixed"
+                offset={8}
+                opacity={1}
+                style={TOOLTIP_STYLES}
+              />
+            )}
+            <button
+              type="button"
+              aria-label={
+                isOpen
+                  ? "Collapse consolidated address details"
+                  : "Expand consolidated address details"
+              }
+              aria-expanded={isOpen}
+              aria-controls={`consolidated-address-panel-${address.wallet}`}
+              onClick={onToggleOpen}
+              className="tw-border-0 tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+            >
+              <ChevronDownIcon
+                className={`tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-ease-out ${
+                  isOpen ? "tw-rotate-180" : ""
+                }`}
+                aria-hidden="true"
+              />
+            </button>
+          </div>
         </div>
-        <div className="tw-flex tw-items-center tw-gap-3 lg:tw-gap-2 tw-ml-auto tw-flex-shrink-0">
-          <button
-            onClick={goToEtherscan}
-            aria-label="Go to Etherscan"
-            className="tw-border-none tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
-            data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
-            {...(!isTouchScreen ? { "data-tooltip-content": "Etherscan" } : null)}
+
+        {isOpen && (
+          <div
+            id={`consolidated-address-panel-${address.wallet}`}
+            className="tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-pb-3 tw-pt-2"
           >
-            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
-              <EtherscanIcon />
+            <div className="tw-space-y-2.5">
+              <div>
+                <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+                  Full Address
+                </div>
+                <div className="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1.5">
+                  <span className="tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+                    {address.wallet}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Copy full address"
+                    onClick={handleCopyAddress}
+                    className={`tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400 ${
+                      copiedItem === "full-address"
+                        ? "tw-text-primary-400"
+                        : "tw-text-iron-400 hover:tw-text-iron-200"
+                    }`}
+                  >
+                    <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
+                      <CopyIcon />
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {address.display && (
+                <div>
+                  <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+                    ENS Name
+                  </div>
+                  <div className="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1.5">
+                    <span className="tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+                      {address.display}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Copy ens name"
+                      onClick={handleCopyEns}
+                      className={`tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400 ${
+                        copiedItem === "ens"
+                          ? "tw-text-primary-400"
+                          : "tw-text-iron-400 hover:tw-text-iron-200"
+                      }`}
+                    >
+                      <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
+                        <CopyIcon />
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          </button>
-          {!isTouchScreen && (
-            <Tooltip
-              id={`etherscan-tooltip-${address.wallet}`}
-              place="top"
-              positionStrategy="fixed"
-              offset={8}
-              opacity={1}
-              style={TOOLTIP_STYLES}
-            />
-          )}
-          <button
-            onClick={goToOpensea}
-            aria-label="Go to Opensea"
-            className="tw-border-none tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-cursor-pointer tw-text-iron-500 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
-            data-tooltip-id={`opensea-tooltip-${address.wallet}`}
-            {...(isTouchScreen ? null : { "data-tooltip-content": "Opensea" })}
-          >
-            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
-              <OpenseaIcon />
-            </div>
-          </button>
-          {!isTouchScreen && (
-            <Tooltip
-              id={`opensea-tooltip-${address.wallet}`}
-              place="top"
-              positionStrategy="fixed"
-              offset={8}
-              opacity={1}
-              style={TOOLTIP_STYLES}
-            />
-          )}
-          <button
-            aria-label="Copy address"
-            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-1.5 lg:tw-p-0 tw-text-iron-600 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none"
-            onClick={handleCopy}
-            data-tooltip-id={`copy-tooltip-${address.wallet}`}
-            {...(!isTouchScreen ? { "data-tooltip-content": "Copy" } : null)}
-          >
-            <div className="tw-h-5 tw-w-5 lg:tw-h-4 lg:tw-w-4 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center [&>svg]:tw-w-full [&>svg]:tw-h-full">
-              <CopyIcon />
-            </div>
-          </button>
-          {!isTouchScreen && (
-            <Tooltip
-              id={`copy-tooltip-${address.wallet}`}
-              place="top"
-              positionStrategy="fixed"
-              offset={8}
-              opacity={1}
-              style={TOOLTIP_STYLES}
-            />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       {statusMessage && (
         <div className="tw-pt-2 tw-text-xs tw-font-medium tw-text-iron-200">
