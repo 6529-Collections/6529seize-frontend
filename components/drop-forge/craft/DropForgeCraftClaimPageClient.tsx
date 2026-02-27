@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  ArrowLeftIcon,
+  ArrowTopRightOnSquareIcon,
+  DocumentDuplicateIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/components/auth/Auth";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import CircleLoader, {
@@ -34,24 +44,14 @@ import type { MintingClaimUpdateRequest } from "@/generated/models/MintingClaimU
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { fetchAllPages } from "@/services/6529api";
 import {
+  type MemesMintingAirdropSummaryItem as ClaimPhaseSummaryItem,
   getClaim,
   getMemesMintingAirdrops as getClaimAirdropSummaries,
   getMemesMintingAllowlists as getClaimAllowlistSummaries,
-  type MemesMintingAirdropSummaryItem as ClaimPhaseSummaryItem,
   patchClaim,
   postArweaveUpload,
   uploadClaimMedia,
 } from "@/services/api/memes-minting-claims-api";
-import {
-  ArrowLeftIcon,
-  ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon,
-  PlusIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 const BTN_PRIMARY =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-opacity-50";

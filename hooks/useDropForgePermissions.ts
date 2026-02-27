@@ -1,10 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useIsDropForgeAdmin } from "@/hooks/useIsDropForgeAdmin";
-import { useMemo } from "react";
 
 export function useDropForgePermissions() {
   const { address, connectionState } = useSeizeConnectContext();

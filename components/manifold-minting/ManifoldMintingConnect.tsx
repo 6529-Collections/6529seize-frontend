@@ -1,11 +1,11 @@
 "use client";
 
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { areEqualAddresses } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import Link from "next/link";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { areEqualAddresses } from "@/helpers/Helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import RecipientSelector from "../common/RecipientSelector";

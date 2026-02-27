@@ -1,10 +1,10 @@
+import { mainnet } from "viem/chains";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import {
   getDimensionsFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
-import { MEMES_CONTRACT } from "@/constants/constants";
-import { mainnet } from "viem/chains";
 import NowMintingCountdown from "./NowMintingCountdown";
 import NowMintingDetailsAccordion from "./NowMintingDetailsAccordion";
 import NowMintingHeader from "./NowMintingHeader";

@@ -1,15 +1,15 @@
 "use client";
 
+import Link from "next/link";
+import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
+import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import {
   DROP_FORGE_SECTIONS,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
-import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
-import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
-import Link from "next/link";
 
 export default function DropForgePageClient() {
   const {

@@ -1,9 +1,9 @@
 "use client";
 
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import "@google/model-viewer";
 import React, { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 /**
  * 3D model display component with custom 3D cube toggle icon.

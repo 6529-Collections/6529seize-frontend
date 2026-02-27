@@ -1,16 +1,16 @@
 "use client";
 
-import { useTitle } from "@/contexts/TitleContext";
-import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
-import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { useTitle } from "@/contexts/TitleContext";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "../auth/Auth";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
-import { useViewContext } from "./ViewContext";
 import { isNavItemActive } from "./isNavItemActive";
+import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 
 interface Props {

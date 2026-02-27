@@ -1,7 +1,7 @@
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
-import { useNowMinting } from "@/hooks/useNowMinting";
 import type { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
+import { useNowMinting } from "@/hooks/useNowMinting";
 
 type NowMintingStatus = {
   readonly nft: NFTWithMemesExtendedData | undefined;

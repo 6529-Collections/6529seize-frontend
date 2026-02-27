@@ -1,18 +1,18 @@
 "use client";
 
+import { useContext, useState } from "react";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useContext, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
-import type { ReviewDistributionPlanTableItem } from "./ReviewDistributionPlanTable";
 import { ReviewDistributionPlanTableItemType } from "./ReviewDistributionPlanTable";
+import type { ReviewDistributionPlanTableItem } from "./ReviewDistributionPlanTable";
 
 interface WalletResult {
   wallet: string;

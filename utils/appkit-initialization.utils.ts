@@ -1,13 +1,13 @@
+import { createAppKit } from "@reown/appkit/react";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { publicEnv } from "@/config/env";
 import { CW_PROJECT_ID } from "@/constants/constants";
 import { AdapterCacheError, AdapterError } from "@/src/errors/adapter";
 import { isIndexedDBError, logErrorSecurely } from "@/utils/error-sanitizer";
+import type { ChainAdapter } from "@reown/appkit/react";
 import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";
-import type { ChainAdapter } from "@reown/appkit/react";
-import { createAppKit } from "@reown/appkit/react";
 import type { Chain } from "viem";
 
 // Configuration interface for AppKit initialization

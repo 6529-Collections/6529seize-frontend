@@ -1,11 +1,11 @@
 "use client";
 
+import { useContext, useEffect, useState } from "react";
 import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
-import { useContext, useEffect, useState } from "react";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";
 import ReviewDistributionPlanTableHeader from "./ReviewDistributionPlanTableHeader";

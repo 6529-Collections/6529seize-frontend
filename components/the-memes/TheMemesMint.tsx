@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { useEffect, useMemo } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import type {
@@ -9,8 +11,6 @@ import type {
 import { useTitle } from "@/contexts/TitleContext";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { Time } from "@/helpers/time";
-import dynamic from "next/dynamic";
-import { useEffect, useMemo } from "react";
 
 const ManifoldMinting = dynamic(
   () => import("../manifold-minting/ManifoldMinting"),

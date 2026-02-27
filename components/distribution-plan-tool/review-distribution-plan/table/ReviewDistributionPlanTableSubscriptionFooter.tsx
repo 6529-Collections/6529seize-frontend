@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
@@ -9,9 +12,6 @@ import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { formatAddress } from "@/helpers/Helpers";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
-import Image from "next/image";
-import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import { AutomaticAirdropsModal } from "./ReviewDistributionPlanTableSubscriptionFooterAutomaticAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";

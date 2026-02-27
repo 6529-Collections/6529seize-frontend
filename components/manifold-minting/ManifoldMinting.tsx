@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
@@ -27,17 +30,14 @@ import {
   ManifoldClaimStatus,
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import type { Chain } from "viem";
+import styles from "./ManifoldMinting.module.scss";
+import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import type {
   ArweaveAttribute,
   ArweaveMetadata,
   ManifoldMintMetadata,
 } from "./manifold-mint-metadata";
-import styles from "./ManifoldMinting.module.scss";
-import ManifoldMintingWidget from "./ManifoldMintingWidget";
+import type { Chain } from "viem";
 
 interface Props {
   title: string;

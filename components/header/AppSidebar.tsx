@@ -15,11 +15,11 @@ import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
+import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import DiscoverIcon from "../common/icons/DiscoverIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
 import UsersIcon from "../common/icons/UsersIcon";
-import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
