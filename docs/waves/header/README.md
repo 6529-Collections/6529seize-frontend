@@ -2,11 +2,13 @@
 
 ## Overview
 
-Wave header docs describe edits and controls tied to the wave header image area.
-The newly added picture update flow lets eligible users replace a wave picture without leaving the current wave view.
+Wave header docs describe wave-level controls shown in the header surface:
+join/follow actions, owner edit actions, picture updates, and mobile
+chat/gallery view switching.
 
 ## Features
 
+- [Wave Header Membership and Owner Controls](feature-wave-header-controls.md)
 - [Update Wave Picture](feature-wave-picture-edit.md)
 - [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md)
 

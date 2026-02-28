@@ -2,22 +2,42 @@
 
 ## Overview
 
-Waves docs are organized into focused subareas so high-volume wave behavior is
-browsable without one oversized index page.
+Use this area when users need to find waves, open a wave thread, post or
+interact with drops, and recover from wave-route failures.
+
+## Route Coverage
+
+- Discovery and list routes: `/discover`, `/waves`, `/messages`.
+- Thread routes: `/waves/{waveId}`, `/messages?wave={waveId}`.
+- Wave creation route: `/waves/create`.
+- Legacy wave links: `/waves?wave={waveId}` normalize to `/waves/{waveId}`.
+- Legacy profile wave alias: `/{user}/waves` redirects to `/{user}`.
+- Direct-message creation route `/messages/create` is owned by the Navigation
+  docs area.
 
 ## Features
 
-- [Discovery](discovery/README.md): discover cards and wave content-tab switching.
-- [Header](header/README.md): edit wave images from header controls.
-- [Create](create/README.md): create modal entry points and `Groups`/`Dates`/`Drops` steps.
-- [Chat](chat/README.md): chat timeline scroll and typing-indicator behavior.
-- [Composer](composer/README.md): compose/edit markdown, emoji shortcodes, metadata-only submits.
-- [Drop Actions](drop-actions/README.md): voting, reactions, content display, links, copy, media download.
-- [Link Previews](link-previews/README.md): preview-card behavior for external domains/providers.
-- [Leaderboard](leaderboard/README.md): leaderboard states, timeline context, and top-voter lists.
-- [Sidebars](sidebars/README.md): right-sidebar tabs/group management plus Brain/DM sidebar metadata.
-- [Memes](memes/README.md): Memes flow metadata, submission workflow, and leaderboard-related posting behavior.
-- [Outcomes](feature-outcome-lists.md): outcome cards, winner rows, and outcome distribution loading.
+- [Discovery](discovery/README.md): find and open waves from discover/list
+  surfaces, including `My Votes`.
+- [Create](create/README.md): wave creation entry points and create-step
+  behavior.
+- [Chat](chat/README.md): timeline scroll, serial jumps, unread controls, and
+  typing state.
+- [Composer](composer/README.md): compose/edit drops with markdown, mentions,
+  emoji, uploads, and metadata submissions.
+- [Drop Actions](drop-actions/README.md): vote, react, open/copy links, curation,
+  and media actions.
+- [Header](header/README.md): wave header controls, picture editing, and mobile
+  chat/gallery toggle.
+- [Sidebars](sidebars/README.md): wave/direct-message list navigation and
+  right-sidebar controls.
+- [Link Previews](link-previews/README.md): external/social/web3 preview-card
+  rendering in thread content.
+- [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
+  and top-voter views.
+- [Memes](memes/README.md): memes submission flow and submission-state behavior.
+- [Outcomes](feature-outcome-lists.md): outcome cards, winner rows, and
+  distribution loading states.
 
 ## Flows
 
@@ -36,6 +56,7 @@ browsable without one oversized index page.
 ## Related Areas
 
 - [Docs Home](../README.md)
+- [Navigation Index](../navigation/README.md)
 - [Profiles Index](../profiles/README.md)
 - [Media Index](../media/README.md)
 - [Shared Index](../shared/README.md)

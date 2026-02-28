@@ -2,22 +2,20 @@
 
 ## Overview
 
-The `Dates` step in wave creation schedules when submissions open, when voting
-starts, when winners are announced, and (for recurring schedules) when the
-wave ends.
+The `Dates` step schedules when submissions open, when voting starts, when
+winners are announced, and (for recurring schedules) when the wave ends.
 
 ## Location in the Site
 
 - Full-page wave creation flow: `/waves/create`
 - Step label: `Dates`
-- Available for non-chat wave types (`Rank` and `Approve`)
+- Available in `Rank` wave creation
 
 ## Entry Points
 
-- Start creating a `Rank` or `Approve` wave and continue from `Groups` to
-  `Dates`.
+- Start creating a `Rank` wave and continue from `Groups` to `Dates`.
 - Select `Dates` from the create-wave step rail to revisit timing.
-- Return to `Dates` from later steps to adjust scheduling before finishing.
+- Return to `Dates` from later steps to adjust schedule before finishing.
 
 ## User Journey
 
@@ -27,9 +25,7 @@ wave ends.
    - `Winners Announcements`
    - `Wave End Date` (shown only when recurring announcements are enabled)
 3. Set `Drops Submission Opens`.
-4. Set voting start timing:
-   - `Rank`: choose `Drops Voting Begins` (not earlier than submission start).
-   - `Approve`: voting timing follows submission start timing.
+4. Set `Drops Voting Begins` (must be at or after submission start).
 5. Set `First Winners Announcement` date and time.
 6. Add or remove additional winner-announcement intervals.
 7. Optionally enable `Repeating Announcement Cycles` once at least one
@@ -40,49 +36,49 @@ wave ends.
 ## Common Scenarios
 
 - Single-announcement wave:
-  - Set first winners announcement and leave additional intervals empty.
+  - Set the first winners announcement and leave additional intervals empty.
 - Fixed multi-announcement schedule:
-  - Add one or more additional intervals; the wave end aligns to the last
-    scheduled announcement.
+  - Add one or more intervals; wave end aligns to the last scheduled
+    announcement.
 - Recurring schedule:
   - Add intervals, enable recurring cycles, and set an explicit end date.
 - Keyboard-driven scheduling:
-  - Toggle section headers by keyboard and continue editing calendars/time
-    pickers without using pointer-only controls.
+  - Toggle section headers by keyboard and continue editing time controls.
 
 ## Edge Cases
 
-- For `Rank` waves, voting start is constrained to submission start or later.
-- For `Approve` waves, submission and voting start are treated as one timing.
+- Voting start is constrained to submission start or later.
 - Recurring mode cannot be enabled until at least one additional interval is
   configured.
 - `Wave End Date` controls appear only when recurring mode is active and
   additional intervals exist.
-- On the first interaction with winner-announcement controls, the timeline
-  section can auto-collapse to keep focus on announcement setup.
+- On first interaction with winner-announcement controls, the timeline section
+  can auto-collapse to keep focus on announcement setup.
 - Section headers expose expanded/collapsed state and linked content regions
   for assistive technologies.
 
 ## Failure and Recovery
 
-- If recurring mode is toggled without additional intervals, users are prompted
-  to add an interval first.
+- If recurring mode is toggled without additional intervals, add an interval
+  first and retry.
 - If timeline ordering becomes invalid, adjust submission/voting/announcement
-  times until chronological order is restored.
-- If recurring end timing is too early, move the end date forward so expected
-  announcements fit within the schedule.
+  times until chronological order is valid.
+- If recurring end timing is too early, move end date forward so expected
+  announcements fit in the schedule.
 
 ## Limitations / Notes
 
-- Chat waves skip this `Dates` step entirely.
-- Additional winner announcements are configured as intervals, not as arbitrary
+- Chat waves skip the `Dates` step entirely.
+- Additional winner announcements are configured as intervals, not arbitrary
   standalone timestamps.
-- Expanded/collapsed section state is session UI state and resets on page
-  reload.
+- Expanded/collapsed section state is session UI state and resets on reload.
+- The `Approve` type is currently shown as disabled in `Overview`, so users do
+  not reach an approve-specific `Dates` path.
 
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
