@@ -4,59 +4,67 @@ Parent: [Realtime Index](README.md)
 
 ## Overview
 
-The NFT Activity feed shows recent on-chain transactions across supported
-collections in one paginated stream.
+The `/nft-activity` route shows recent NFT transactions in a paginated table.
+It is request-driven: data refreshes when the page loads, when filters change,
+or when page controls change.
 
 ## Location in the Site
 
-- Network activity page: `/nft-activity`
-- Sidebar route label: `NFT Activity`.
+- Route: `/nft-activity`
+- Navigation label: `NFT Activity` in the `Network` section.
 
 ## Entry Points
 
+- Open `Network -> NFT Activity` from navigation.
 - Open `/nft-activity` directly.
-- Use browser history/deep links to reopen a previously visited page URL.
 
 ## User Journey
 
 1. Open `/nft-activity`.
-2. Review the newest rows in the activity table.
-3. Filter with the `Collection` and `Transaction Type` dropdowns
-   (`The Memes`, `NextGen`, `Gradients`, `All Collections`, etc.).
-4. Pagination controls change result pages when more rows are available.
-5. Open NFT/token links or the transaction icon for deeper details.
+2. Wait for the header loader while transactions are fetched.
+3. Filter with `Collection` (`All Collections`, `The Memes`, `NextGen`,
+   `Gradients`) and `Transaction Type` (`All Transactions`, `Sales`, `Mints`,
+   `Transfers`, `Airdrops`, `Burns`).
+4. After each filter change, page resets to `1`.
+5. Use pagination controls when results exceed one page (`50` rows per page):
+   previous/next buttons, page-number input, and last-page shortcut.
+6. Open row links for details:
+   collection token links, NextGen provenance links, and Etherscan transaction
+   links.
 
 ## Common Scenarios
 
-- Filter to `The Memes`, `NextGen`, or `Gradients` in `Collection`
-  (use `All Collections` to clear collection scope).
-- Filter to `All Transactions`, `Sales`, `Mints`, `Transfers`, `Airdrops`, or
-  `Burns` in `Transaction Type`.
-- Open a NextGen row to its provenance route:
-  `/nextgen/token/{tokenId}/provenance`.
-- Open the transaction icon to view the tx on Etherscan.
+- Compare activity by collection while keeping one transaction type.
+- Filter for one transaction type (for example `Sales` or `Burns`) across all
+  collections.
+- Jump from a NextGen row to `/nextgen/token/{tokenId}/provenance`.
+- Open the transaction icon to inspect on-chain details in Etherscan.
 
 ## Edge Cases
 
 - If NFT metadata is not available for a row, the feed falls back to token text
   labels such as `Meme #{id}`, `Gradient #{id}`, `MemeLab #{id}`, or
   `NextGen #{id}`.
+- If NextGen collection metadata is missing, rows fall back to
+  `NextGen #{collectionId}` naming.
 - Rows without a token count are omitted from the table.
-- Some filter combinations can return zero rows; the table is empty with no
-  dedicated empty-state copy.
-- Filter/page state is kept in-session and not encoded in query parameters.
+- Filter/page state is local state only and is not encoded in the URL.
+- Some filter combinations return zero rows; the table is empty with no
+  dedicated empty-state message.
+- This route does not stream websocket push updates.
 
 ## Failure and Recovery
 
-- If loading fails, the feed clears current rows and stops loading indicators.
-- Refreshing the page or changing a filter triggers a new fetch.
-- While data is loading, the route header shows a loading indicator.
+- If transaction loading fails, rows are cleared and pagination is hidden.
+- There is no dedicated inline error banner for load failures.
+- Retry by refreshing the route or changing filters/page.
 
 ## Limitations / Notes
 
 - There is no date-range picker.
 - Sorting is not user-configurable.
-- The page does not show a dedicated inline error banner for failed requests.
+- Filter and page choices are not persisted in URL query parameters.
+- Wallet authentication is not required to browse this route.
 
 ## Related Pages
 

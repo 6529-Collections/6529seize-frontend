@@ -59,4 +59,5 @@ reference routes.
 - [Groups List, Create, and Network Scope Flow](../groups/flow-groups-list-create-and-network-scope.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Profiles Index](../profiles/README.md)
-- [NFT Activity Feed](../realtime/feature-authenticated-live-updates.md)
+- [NFT Activity Feed](../realtime/feature-nft-activity-feed.md)
+- [Authenticated Live Updates](../realtime/feature-authenticated-live-updates.md)

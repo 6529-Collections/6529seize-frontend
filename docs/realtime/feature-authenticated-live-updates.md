@@ -4,15 +4,15 @@ Parent: [Realtime Index](README.md)
 
 ## Overview
 
-Authenticated live updates keep websocket-powered features in sync with the current
-login state so users do not need a full page refresh after login, logout, or token
-changes.
+Authenticated live updates keep the app-level websocket session aligned with
+current wallet auth state. Users can keep receiving supported push updates
+across auth changes without a full page refresh.
 
 ## Location in the Site
 
 - App-wide provider layer mounted in `components/providers/Providers.tsx`.
-- User-visible impact is most noticeable where wave/store contexts and marketplace
-  preview sync consume websocket events.
+- User-visible impact is strongest on wave live updates (drop inserts, reaction
+  updates, rating updates, unread counters) and marketplace preview sync.
 
 ## Entry Points
 
@@ -72,8 +72,8 @@ changes.
 - This behavior governs authenticated websocket connectivity, not guaranteed
   delivery of every individual realtime event.
 - The app maintains authenticated live updates while a valid auth token is present.
-- Routes that do not render websocket-backed UI may not show obvious visual
-  change even when connection state changes.
+- Routes that do not consume websocket data may show no visible change even when
+  connection state changes.
 - Clients with limited event APIs or noisy browser scheduling can show slower token
   convergence.
 - Deterministic reconnect timing can make multiple tabs recover in near-lockstep
@@ -82,8 +82,8 @@ changes.
 ## Related Pages
 
 - [Realtime Index](README.md)
-- [NFT Activity Browsing Flow](flow-nft-activity-browsing.md)
 - [Realtime Connectivity Troubleshooting](troubleshooting-realtime-connectivity.md)
-- [Wave Chat Scroll Behavior](../waves/chat/feature-scroll-behavior.md)
+- [Wave Participation Flow](../waves/flow-wave-participation.md)
+- [Web3 Preview Cards](../waves/link-previews/feature-web3-preview-cards.md)
 - [Wallet and Account Controls](../navigation/feature-wallet-account-controls.md)
 - [Docs Home](../README.md)

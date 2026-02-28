@@ -4,53 +4,53 @@ Parent: [Realtime Index](README.md)
 
 ## Overview
 
-This flow covers opening the `/nft-activity` route, applying collection/transaction
-filters, paging through results, and opening row-level details.
+This flow covers opening `/nft-activity`, filtering transactions, paging
+results, and opening row-level links.
 
 ## Location in the Site
 
-- Route: `/nft-activity`
-- Sidebar navigation label: `NFT Activity`.
+- Route: `/nft-activity` under `Network`.
 
 ## Entry Points
 
-- Open `NFT Activity` from app navigation.
+- Open `Network -> NFT Activity`.
 - Open `/nft-activity` directly.
-- Return via browser history to a previously loaded activity state.
 
 ## User Journey
 
 1. Open `/nft-activity`.
-2. Wait for initial table data fetch; loading is surfaced in the header area.
+2. Wait for the header loader while the first fetch runs.
 3. Adjust `Collection` and/or `Transaction Type` filters.
-4. Observe the filter state reset to page `1` after each filter change.
-5. Use pagination controls to move between pages.
+4. Confirm each filter change resets the table to page `1`.
+5. Use pagination controls when available:
+   previous/next, page input, or last-page shortcut.
 6. Open token links (`The Memes`, `Gradients`, `MemeLab`, `NextGen`) or the
    transaction icon in the row for contextual details.
 
 ## Common Scenarios
 
-- Compare collection activity across `The Memes`, `NextGen`, and `Gradients`.
+- Compare activity across `The Memes`, `NextGen`, and `Gradients`.
 - View only transfers, sales, burns, airdrops, or mints.
 - Open a NextGen row and jump to `/nextgen/token/{tokenId}/provenance`.
-- Jump between rows and pagination pages while staying on a single route.
+- Inspect a transaction in Etherscan from the same row.
 
 ## Edge Cases
 
-- Filter changes do not alter the URL; filter state is local to the page session.
+- Filter and page state are local and do not update the URL.
 - Some transactions without token metadata will render with fallback text labels.
-- Very large query sets can require multiple page loads.
+- Rows with no token count are omitted.
+- This route is request-driven and does not subscribe to websocket events.
 
 ## Failure and Recovery
 
-- If a fetch fails, the table becomes empty and the existing rows are replaced by
-  the empty state.
-- Retry by changing a filter or refreshing the route.
+- If a fetch fails, the table clears and the loader stops.
+- Retry by changing filters/page or refreshing `/nft-activity`.
 
 ## Limitations / Notes
 
 - No dedicated date-range picker.
 - No dedicated empty-state copy when filters return no rows.
+- No inline route-level error banner for failed loads.
 
 ## Related Pages
 
