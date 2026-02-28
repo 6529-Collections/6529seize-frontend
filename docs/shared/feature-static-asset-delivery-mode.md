@@ -4,69 +4,78 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-The site can load its static app bundle (JavaScript, CSS, and related build
-assets) from either the main site origin or a CloudFront static host. Users see
-the same product features in both modes, but network paths and failure behavior
-can differ.
+The app shell bundle (`/_next/static/*` JavaScript and CSS) loads from one of
+two deployment modes:
+
+- Site origin (`ASSETS_FROM_S3=false`, default).
+- CloudFront static host (`ASSETS_FROM_S3=true`).
+
+Users get the same product behavior in both modes. The request host and failure
+pattern can differ.
 
 ## Location in the Site
 
-- All routed pages that require the app shell bundle to render and hydrate.
-- First page load, hard refresh, and any route transition that needs unloaded
-  chunks.
+- Any app-shell route that hydrates in the browser (signed-in or signed-out).
+- First load in a tab, hard refresh, and route transitions that need an
+  uncached chunk.
 
 ## Entry Points
 
-- Open any route in a new browser tab or window.
-- Refresh an already open route.
-- Follow a direct link into a deep route that needs code-split chunks.
+- Open an app route in a new tab/window.
+- Hard refresh an app route.
+- Open a deep link that needs uncached code-split chunks.
 
 ## User Journey
 
-1. User opens a route and receives the page HTML.
-2. The page head provides connection hints for core backends, and may include a
-   preconnect hint for the static CloudFront host.
-3. The browser requests app bundle files from one of two sources:
-   - Site origin (default mode).
-   - `https://dnclu2fna0b2b.cloudfront.net/web_build/{build-id}/` (CloudFront
-     mode).
-4. When static files load successfully, the page hydrates and interactive UI
-   becomes available.
+1. User opens a route and receives HTML.
+2. Deployment config picks the app-shell host:
+   - `ASSETS_FROM_S3=false`: bundle requests stay on the page origin.
+   - `ASSETS_FROM_S3=true`: bundle requests use `assetPrefix`
+     `https://dnclu2fna0b2b.cloudfront.net/web_build/{build-id}`.
+3. The root layout always preconnects to media host
+   `https://d3lqz0a4bldqgf.cloudfront.net`.
+4. In CloudFront mode, the root layout also preconnects to
+   `https://dnclu2fna0b2b.cloudfront.net`.
+5. If bundle files load, hydration completes and interactive controls work.
 
 ## Common Scenarios
 
-- In origin mode, static files are requested from the same domain as the page.
-- In CloudFront mode, static files are requested from the static host path for
-  the current build ID.
-- After files are cached, subsequent navigations usually need fewer network
-  round-trips before interactivity is ready.
+- Origin mode requests `/_next/static/*` from the same hostname as the page.
+- CloudFront mode requests `/_next/static/*` from
+  `https://dnclu2fna0b2b.cloudfront.net/web_build/{build-id}/...`.
+- If needed chunks are already cached, many route transitions fetch no new
+  static files.
+- Static-asset mode does not change auth rules, route access, or API endpoint
+  behavior.
 
 ## Edge Cases
 
-- If a user opens the app during deploy propagation, chunk requests can briefly
-  reference paths that are not yet available at every edge.
-- If a browser extension, firewall, or enterprise policy blocks the CloudFront
-  host while CloudFront mode is active, routes may not hydrate correctly.
-- Users cannot switch delivery mode from the UI.
+- During deploy rollout, HTML can reference a build ID before that static path
+  is available on all edges.
+- If network policy, firewall, or extensions block
+  `dnclu2fna0b2b.cloudfront.net` while CloudFront mode is active, hydration can
+  fail.
+- Users cannot switch delivery mode in the UI.
 
 ## Failure and Recovery
 
-- If static chunk or stylesheet requests fail, users may see a blank page,
-  unstyled content, or non-interactive controls.
-- A refresh after a short delay can recover once static files become reachable.
-- If the static host is blocked on the current network, switching network
-  context (or temporarily disabling the blocking rule) can restore normal load.
+- Failed static bundle requests can leave a blank page, partially styled page,
+  or non-interactive UI.
+- Retry with a hard refresh after a short wait, especially right after deploy.
+- If CloudFront is blocked in the current network, use a different network or
+  remove the blocking rule.
 - In origin mode, recovery depends on the main app origin being reachable.
 
 ## Limitations / Notes
 
-- Delivery mode is deployment-configured and not user-configurable.
-- This behavior covers app shell assets; media URLs rendered inside content have
-  separate handling rules.
+- Delivery mode is deployment-configured, not user-configurable.
+- This page covers app-shell bundle delivery only.
+- Content/media URLs use separate media-delivery rules.
 
 ## Related Pages
 
 - [Docs Home](../README.md)
 - [Shared Index](README.md)
 - [Loading Status Indicators](feature-loading-status-indicators.md)
+- [Route Errors and Not-Found Screens](feature-route-error-and-not-found.md)
 - [NFT Media Source Fallbacks](../media/nft/feature-media-source-fallbacks.md)
