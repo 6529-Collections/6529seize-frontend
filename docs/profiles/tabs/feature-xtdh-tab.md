@@ -1,108 +1,150 @@
-# xTDH Profile Tab
+# Profile xTDH Tab
 
 ## Overview
 
-The `xTDH` profile tab shows outgoing grant activity created by the profile and
-incoming xTDH generated from held tokens.
-It is in Beta and also lets identity owners create new grants when they are
-viewing their own profile.
+The `xTDH` tab at `/{user}/xtdh` has two views:
+
+- `Granted`: grants created by the viewed profile.
+- `Received`: collections, tokens, and contributors sending xTDH to the viewed profile.
+
+The tab is marked `Beta` and always shows a test-mode banner.
 
 ## Location in the Site
 
 - Route: `/{user}/xtdh`
-- Profile tab filter:
-  - `tab=granted` (default): grants this profile has created
-  - `tab=received`: received xTDH from held tokens
-- Grants-list filters on the `Granted` view:
-  - `tab=active|pending|revoked|failed`
-  - `sub=all|active|ended|not_started` (on Active)
-  - `sort=created_at|valid_from|valid_to|tdh_rate`
-  - `dir=asc|desc`
-- Received-view filters on the identity-scoped receiver surface:
-  - `xtdh_received_sort=xtdh|xtdh_rate`
-  - `xtdh_received_dir=asc|desc`
-  - `xtdh_received_tokens_sort=xtdh|xtdh_rate`
-  - `xtdh_received_tokens_dir=asc|desc`
-  - `xtdh_token_contrib_sort=xtdh|xtdh_rate`
-  - `xtdh_token_contrib_dir=asc|desc`
-  - `xtdh_token_contrib_group=grant|grantor`
+- Parent route: `/{user}`
+
+## URL State and Deep Links
+
+`xTDH` uses URL query params for view state and sorting.
+
+Top-level view:
+
+- `tab=received` opens `Received`.
+- Any other `tab` value opens `Granted`.
+- If `tab` is missing, the page normalizes the URL to `tab=granted`.
+
+Granted status tabs use the same `tab` param:
+
+- `tab=pending|revoked|failed` opens those status views.
+- `Active` resolves to `tab=granted` (shared links with `tab=active` also open `Active`).
+
+Granted filters:
+
+- `sub=all|ended|active|not_started` (only for `Active`)
+- `sort=created_at|valid_from|valid_to|tdh_rate`
+- `dir=asc|desc`
+
+Received filters:
+
+- `xtdh_received_sort=xtdh|xtdh_rate`
+- `xtdh_received_dir=asc|desc`
+- `xtdh_received_contract=<contract>`
+- `xtdh_received_tokens_sort=xtdh|xtdh_rate`
+- `xtdh_received_tokens_dir=asc|desc`
+- `xtdh_token_contrib_sort=xtdh|xtdh_rate`
+- `xtdh_token_contrib_dir=asc|desc`
+- `xtdh_token_contrib_group=grant|grantor`
 
 ## Entry Points
 
 - Open `/{user}/xtdh` directly.
-- Open any profile route and switch to the `xTDH` tab.
-- Click the `xTDH` quick stat from the profile header.
-- Open a share link that contains `?tab=granted` or `?tab=received`.
+- Switch to `xTDH` from any profile tab.
+- Click the `xTDH` stat in profile header stats.
+- Open a shared link containing xTDH query params.
 
-## User Journey
+## Access and Mode Rules
 
-1. Open `/{user}/xtdh`. If `tab` is missing, the route defaults to `granted`.
-2. Review the summary card (generated xTDH, received xTDH, and unused rate).
-3. Use `Granted` and `Received` tabs:
-   - `Granted` shows grants this profile has created.
-   - `Received` shows collections and tokens that are currently contributing
-     xTDH to the viewed profile.
-4. On `Granted`, switch between:
-   - `Active`, `Pending`, `Revoked`, `Failed`
-   - for `Active`, optionally filter `All`, `Ended`, `Active`, `Not Started`
-5. On your own non-proxy profile, use **Create New Grant**:
-   1. Select collection and token targets.
-   2. Enter total daily grant amount.
-   3. Review grant summary and set validity (or mark `Never expires`).
-   4. Submit after wallet authentication.
-6. Use list and sort controls in both granted and received workflows.
+- The page is readable for any visible profile.
+- Create/revoke/stop actions are available only when a connected profile exists, no active profile proxy is set, and the connected profile matches the viewed profile.
+- Outside that owner mode, the tab is read-only.
 
-## Common Scenarios
+## Stats Header
 
-- While on `tab=granted`, users can stop grants that are `Pending` or currently
-  active:
-  - **Stop Grant** ends a grant immediately at the current time.
-  - **Revoke Grant** resets grant validity to the original start.
-- Users can create:
-  - full-collection grants
-  - partial token grants
-- `Never expires` grants keep accrual open until manually stopped/revoked.
-- `tab=received` is useful for holders checking incoming xTDH by collection and
-  token.
-- On granted flows, the default sort is `created_at` descending; sort toggles and
-  active status filtering are preserved in the URL for sharing.
-- `Profile Header` links and tab transitions can preserve additional query state.
+The header shows:
 
-## Edge Cases
+- `Generating`
+- `Inbound`
+- `Outbound`
+- `Net`
+- `Granted rate` progress (`outbound / generating`)
 
-- The tab shows a Beta banner that explains test/demo behavior.
-- Grant creation is hidden when:
-  - no wallet is connected
-  - the profile is a proxy view
-  - the viewed profile is not your connected identity
-- `Create New Grant` is blocked if:
-  - no collection selected
-  - tokens are not selected
-  - amount is zero or exceeds available rate
-  - validity date is in the past
-- Validity controls require a future date/time unless `Never expires` is checked.
-- The grants query can return partial result pages; `Load More` fetches additional
-  grants and contributors.
+In owner mode, `Outbound` includes an action button that switches to `Granted` and scrolls to `Create New Grant`.
 
-## Failure and Recovery
+## Granted View
 
-- If grant stats fail to load, the page shows an error row with a retry action.
-- Grant form validation failures are shown inline before submit.
-- If wallet authentication is rejected, submit is blocked and an error message is
-  shown.
-- If grant submission fails after auth, users can correct values and retry.
-- If list fetches fail, dedicated error states offer retry actions and do not clear
-  the entire panel.
+Available controls:
 
-## Limitations / Notes
+- Status tabs: `Active`, `Pending`, `Revoked`, `Failed`
+- Pending tab badge: live pending count
+- Active sub-filters: `All`, `Ended`, `Active`, `Not Started`
+- Sort: `Created At`, `Valid From`, `Valid To`, `TDH Rate`
+- Pagination: `Load More`
 
-- This tab is Beta and may evolve separately from other profile tabs.
-- xTDH grant actions are only available for the connected profile owner.
-- Grants are persisted in backend systems and can be updated only by API actions or
-  query state in the URL for sorting/filtering/pagination.
+Grant row actions (owner mode only):
+
+- `Stop Grant`: ends the grant immediately.
+- `Revoke Grant`: rewinds validity to grant start time (treats it as never granted).
+
+Empty states:
+
+- Filtered result: `No grants found`
+- Your profile with no grants: `You haven't granted any xTDH yet`
+- Other profile with no grants: `This identity hasn't granted any xTDH yet`
+
+## Create New Grant
+
+`Create New Grant` is shown only in owner mode and only inside `Granted`.
+
+Flow:
+
+1. Select a collection and token scope (`all` tokens or selected tokens).
+2. Enter total xTDH/day amount.
+3. Review validity (`Never expires` or future date/time) and submit.
+
+Submit is blocked when:
+
+- no collection is selected,
+- token scope is invalid,
+- amount is missing, zero, or above available grant rate,
+- expiration is in the past.
+
+Submit requires wallet authentication. Success message:
+`Grant submitted. You will see it once processed.`
+
+## Received View
+
+Received is a drill-down:
+
+1. Collections list.
+2. Select collection to open token allocations.
+3. Select token to open contributors.
+4. Select a contributor row with a grant to open grant details.
+
+Controls:
+
+- Collections: search + sort (`xTDH`, `xTDH Rate`)
+- Tokens: sort (`xTDH`, `xTDH Rate`)
+- Contributors: sort (`xTDH`, `xTDH Rate`) + grouping (`By Grant`, `By Grantor`)
+- `Load More` for collections, tokens, and contributors
+
+State persistence:
+
+- Collection selection and sort/group controls are URL-backed.
+- Selected token and selected grant details are local UI state (not URL-backed).
+
+## Loading, Error, and Recovery
+
+- Stats header shows inline error + `Retry` on failure.
+- Granted/collections/tokens/contributors have loading states and retryable initial errors.
+- Pagination failures keep loaded rows and show inline `Retry`.
+- Received grant-detail fetch failures show `Retry`.
+- Grant auth/submit failures show inline errors and allow retry.
 
 ## Related Pages
 
+- [Profiles Index](../README.md)
+- [Profiles Tabs Index](README.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
