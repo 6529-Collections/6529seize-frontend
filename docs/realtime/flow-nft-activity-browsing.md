@@ -24,8 +24,8 @@ results, and opening row-level links.
 4. Confirm each filter change resets the table to page `1`.
 5. Use pagination controls when available:
    previous/next, page input, or last-page shortcut.
-6. Open token links (`The Memes`, `Gradients`, `MemeLab`, `NextGen`) or the
-   transaction icon in the row for contextual details.
+6. Open row links for details:
+   The Memes/Gradients token links, NextGen provenance links, and Etherscan.
 
 ## Common Scenarios
 
@@ -37,6 +37,7 @@ results, and opening row-level links.
 ## Edge Cases
 
 - Filter and page state are local and do not update the URL.
+- `MemeLab` rows render text labels (`MemeLab #{id}`), not token image links.
 - Some transactions without token metadata will render with fallback text labels.
 - Rows with no token count are omitted.
 - This route is request-driven and does not subscribe to websocket events.
