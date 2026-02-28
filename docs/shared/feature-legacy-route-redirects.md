@@ -4,14 +4,17 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-Some historical URLs and retired My Stream routes are kept as compatibility
-entry points. Opening one of these URLs immediately sends the browser to the
-current destination page or asset, without showing an intermediate
-"redirecting" screen.
+Legacy and retired URLs are kept as compatibility entry points. Opening one of
+these routes sends the browser directly to the current route or asset.
 
 ## Location in the Site
 
-These redirects apply to the following legacy routes:
+- Middleware redirect map (`proxy.ts`) for legacy aliases and old campaign
+  routes.
+- Route-level redirect pages (`app/.../page.tsx`) for legacy published URLs.
+- Desktop-only compatibility redirects for `/my-stream*`.
+
+## Route-Level Redirect Pages
 
 - `/city/6529-museum-district` -> `/om/6529-museum-district/`
 - `/element_category/columns` -> `/`
@@ -23,13 +26,54 @@ These redirects apply to the following legacy routes:
 - `/om/partnership-request` -> `/om/join-om/`
 - `/slide-page/6529-initiatives` -> `/`
 - `/slide-page/homepage-slider` -> `/`
-- `/my-stream/notifications` -> `/notifications` (desktop-class browsers)
-- `/my-stream` -> canonical Brain routes (desktop-class browsers):
-  - `?view=messages` routes to `/messages` (and keeps `wave`, `drop`, and
-    `serialNo` when present)
-  - `?view=waves` or `?wave=...` routes to `/waves` or `/waves/{waveId}`
-  - `?drop=...` without `wave` routes to `/waves?drop=...`
-  - no supported query parameters routes to `/`
+
+## Middleware Redirect Map
+
+- `/6529-dubai/` -> `/`
+- `/6529-puerto-rico/` -> `/`
+- `/abc1/` -> `/`
+- `/abc2/` -> `/`
+- `/about/contact/` -> `/about/contact-us`
+- `/about/jobs/` -> `/about/contact-us`
+- `/about/news/` -> `/`
+- `/bridge/` -> Waves route home
+- `/collections/` -> `/the-memes`
+- `/collections/6529gradient/` -> `/6529-gradient`
+- `/collections/brand/` -> `/the-memes`
+- `/collections/collections-form/` -> `/about/apply`
+- `/collections/memelab/` -> `/meme-lab`
+- `/collections/memelab/pepiano-allowlist/` -> `/meme-lab/8`
+- `/collections/memelab/the-great-restoration/` -> `/meme-lab/12`
+- `/collections/memelab/the-nftimes-issue-1-allowlist/` -> `/meme-lab/7`
+- `/collections/memelab/wen-summer-allowlist/` -> `/meme-lab/10`
+- `/collections/the-memes/` -> `/the-memes`
+- `/collections/the-memes/evolution-allowlist/` -> `/the-memes/73`
+- `/collections/the-memes/faces-of-freedom-allowlist/` -> `/the-memes/72`
+- `/collections/the-memes/freedom-fighter-allowlist/` -> `/the-memes/77`
+- `/collections/the-memes/meme4-season2-card6/gm-or-die-allowlist/` ->
+  `/the-memes/71`
+- `/collections/the-memes/metaverse-starter-pack-allowlist/` -> `/the-memes/78`
+- `/collections/the-memes/no-meme-no-life-allowlist/` -> `/the-memes/75`
+- `/collections/the-memes/staying-alive-allowlist/` -> `/the-memes/76`
+- `/collections/the-memes/the-memes-season2/` -> `/the-memes?szn=2`
+- `/education/something-else/` -> `/`
+- `/om/bug/report/` -> `/about/contact-us`
+- `/om/om/` -> `/om`
+- `/privacy-policy/` -> `/about/privacy-policy`
+- `/studio/` -> `/`
+- `/the-hamily-wagmi-allowlist/` -> `/the-memes/74`
+
+## Desktop-Only `/my-stream` Compatibility
+
+`/my-stream` redirects run only for desktop-class user agents.
+
+- `/my-stream/notifications` -> `/notifications`
+- `/my-stream?view=messages` -> Messages route home
+- `/my-stream?view=messages&wave=<id>` -> `/messages?wave=<id>`
+- `/my-stream?view=waves&wave=<id>` or `/my-stream?wave=<id>` -> `/waves/<id>`
+- `/my-stream?drop=<id>` (without `wave`) -> `/waves?drop=<id>`
+- No supported query params -> `/`
+- `drop` and `serialNo` trailing slashes are normalized before redirecting.
 
 ## Entry Points
 
@@ -54,6 +98,8 @@ These redirects apply to the following legacy routes:
   desktop-class browsers.
 - A user opens `/my-stream?view=messages&wave=<id>` and lands on
   `/messages?wave=<id>` in desktop-class browsers.
+- A user opens `/collections/the-memes/freedom-fighter-allowlist/` and lands
+  on `/the-memes/77`.
 
 ## Edge Cases
 
@@ -76,7 +122,7 @@ These redirects apply to the following legacy routes:
   - [Route Error and Not-Found Screens](feature-route-error-and-not-found.md)
 - If `/my-stream` is opened from a non-desktop browser and no compatibility
   redirect is applied, users can open canonical routes directly (`/`,
-  `/waves`, `/messages`, `/notifications`).
+  Waves route home, Messages route home, `/notifications`).
 - If the external video host is blocked or unavailable, users can retry later
   or open the destination URL in a different network/browser context.
 - If `/index.xml` is unavailable, feed readers or direct visitors can retry
@@ -86,7 +132,8 @@ These redirects apply to the following legacy routes:
 
 - Legacy routes are compatibility entry points, not canonical navigation paths.
 - `/my-stream` compatibility redirects are limited to desktop-class browsers.
-- No manual fallback link or inline redirect message is shown on these routes.
+- No inline "redirecting" message is shown on these routes.
+- Redirect coverage can change as retired URLs are added or removed.
 
 ## Related Pages
 
