@@ -17,6 +17,8 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 
 - [Legacy Route Redirects](feature-legacy-route-redirects.md): retired URLs and
   legacy query aliases that forward to current routes or assets.
+- [Legacy Exact-Path Redirect Map](feature-legacy-route-exact-path-map.md):
+  full middleware exact-path redirect list used by non-profile legacy URLs.
 - [Route Errors and Not-Found Screens](feature-route-error-and-not-found.md):
   shared `404` and route-error fallback surfaces.
 
