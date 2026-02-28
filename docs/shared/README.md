@@ -15,8 +15,8 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 
 ### Routing and Recovery
 
-- [Legacy Route Redirects](feature-legacy-route-redirects.md): retired URLs
-  that forward to current routes or assets.
+- [Legacy Route Redirects](feature-legacy-route-redirects.md): retired URLs and
+  legacy query aliases that forward to current routes or assets.
 - [Route Errors and Not-Found Screens](feature-route-error-and-not-found.md):
   shared `404` and route-error fallback surfaces.
 
