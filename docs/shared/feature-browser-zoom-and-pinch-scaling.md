@@ -4,68 +4,71 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-The site supports browser zoom for readability and accessibility in standard web
-contexts. In native mobile wrappers, editor and form fields are sized to avoid
-unwanted zoom triggers while editing text.
+Browser sessions keep page zoom enabled. Capacitor native sessions lock page
+scale to `1`. Shared form styles in native sessions and
+`mobile-wrapper-dialog` keep text-entry controls readable and reduce
+focus-triggered zoom jumps.
 
 ## Location in the Site
 
-- All standard app routes that use the shared app shell
-- Mobile browser sessions and desktop browser sessions
-- Native app wrapper edit surfaces such as drop and profile content editors
+- Any app-shell route rendered by the shared root layout in web browsers.
+- Any app-shell route opened in the native Capacitor app wrapper (iOS/Android).
+- Bottom-sheet or dialog flows using the shared `mobile-wrapper-dialog` class.
 
 ## Entry Points
 
-- Open any page in a browser.
-- Use pinch gestures on touch devices.
-- Use browser zoom controls (`Cmd/Ctrl` + `+`, `-`, or reset to default).
-- Open a native app wrapper route and edit content in a text field.
+- Open a route in a desktop or mobile browser and use browser zoom controls.
+- On touch browsers, use pinch gestures.
+- Open the same route in the native app wrapper.
+- Focus text fields (`input`, `textarea`, `select`, `[contenteditable="true"]`)
+  while editing.
 
 ## User Journey
 
-1. Open a page at normal scale.
-2. Zoom in or out using browser/device controls.
-3. Continue navigating; page content remains zoomable on subsequent routes.
-4. Reset zoom from browser/device controls when finished.
-5. In native app edit flows, inputs stay stable while editing so zoom is not
-   forced by form focus sizing.
+1. In a web browser, open any route at default scale.
+2. Zoom in/out with `Cmd/Ctrl + +/-`, browser menu controls, or pinch.
+3. Keep navigating; the app does not override browser-managed zoom level.
+4. In the native wrapper, viewport is forced to
+   `initial/minimum/maximum scale = 1` with `user-scalable=no`, so page
+   zoom and pinch zoom are disabled.
+5. While editing in native sessions and shared mobile dialogs, form fields keep
+   at least `16px` text sizing plus `touch-action: manipulation` for more
+   stable tap and focus behavior.
 
 ## Common Scenarios
 
-- Increase zoom on mobile to inspect dense tables, timelines, and metadata.
-- Increase desktop zoom for readability in long-form pages and complex
-  sidebars.
-- Keep a preferred browser zoom level while navigating between routes.
+- Increase web zoom for readability on dense feeds or long-form pages.
+- Keep a preferred browser zoom level while moving between routes.
+- Edit form content in native sessions without automatic page zoom on focus.
+- Use bottom-sheet dialog forms on mobile with stable tap/edit behavior.
 
 ## Edge Cases
 
-- At very high zoom levels, some wide layouts can require horizontal scrolling.
-- Third-party embeds and external media iframes can have their own internal
-  scaling behavior.
-- Native app wrappers or embedded web views can apply additional zoom
-  constraints outside browser defaults.
-- In native wrappers, form behavior is tuned for stable editing rather than always
-  preserving page zoom state while typing.
+- Very high web zoom can require horizontal scrolling in wide layouts.
+- Third-party embeds/iframes can apply their own internal zoom behavior.
+- Native wrapper sessions intentionally disable browser-style pinch/page zoom.
 
 ## Failure and Recovery
 
-- If a page looks clipped after aggressive zoom, reduce zoom level or reset to
-  default browser scale.
-- If pinch-to-zoom is unavailable on a device, verify browser and OS zoom
-  settings, then retry.
-- Refreshing the route preserves browser-managed zoom behavior.
+- If layout looks clipped after heavy web zoom, reduce zoom or reset with
+  `Cmd/Ctrl + 0`.
+- If pinch-to-zoom is unavailable in the native app wrapper, this is expected;
+  open the route in a browser session when pinch zoom is required.
+- If browser zoom behaves unexpectedly after device/browser setting changes,
+  reload the route.
 
 ## Limitations / Notes
 
-- Mobile viewport scaling is capped at a high maximum zoom level, not unlimited.
-- Native editing surfaces prioritize predictable text-entry behavior over
-  browser-style zoom-in on focus.
-- Zoom changes visual scale only; it does not alter ranking, filtering, or data
-  returned by APIs.
+- Web viewport zoom is capped at `maximumScale: 10`.
+- Native wrapper viewport uses
+  `width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no`.
+- This page covers browser/page zoom behavior, not media-viewer-specific zoom
+  controls.
 
 ## Related Pages
 
 - [Shared Index](README.md)
-- [Loading Status Indicators](feature-loading-status-indicators.md)
+- [Wave Image Viewer and Scaling](../waves/drop-actions/feature-image-viewer-and-scaling.md)
 - [Static Asset Delivery Mode](feature-static-asset-delivery-mode.md)
+- [Mobile App Landing Page](../navigation/feature-mobile-app-landing.md)
 - [Docs Home](../README.md)

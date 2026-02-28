@@ -29,7 +29,7 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 - [Hover Cards and Tooltip Positioning](feature-hover-cards-and-tooltips.md):
   hover/focus cards with viewport-aware placement.
 - [Browser Zoom and Pinch Scaling](feature-browser-zoom-and-pinch-scaling.md):
-  browser zoom plus native-wrapper text-entry scaling safeguards.
+  web zoom defaults plus native-wrapper zoom lock and text-entry safeguards.
 
 ### App Delivery
 
