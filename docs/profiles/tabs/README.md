@@ -19,9 +19,12 @@ owned by:
   `/{user}/brain`, including drop-open routing to Waves or Messages.
 - [Collected Tab and Transfer Mode](feature-collected-tab.md): native and
   network holdings browsing plus owner transfer mode at `/{user}/collected`.
-- [Profile xTDH Tab](feature-xtdh-tab.md): granted-list management plus
-  received collection/token/contributor drill-down and grant creation at
-  `/{user}/xtdh`.
+- [Profile xTDH Tab](feature-xtdh-tab.md): shared xTDH tab routing, owner-mode,
+  and view switching at `/{user}/xtdh`.
+- [Profile xTDH Granted View](feature-xtdh-granted-view.md): granted-list
+  status filtering, owner grant actions, and grant creation flow.
+- [Profile xTDH Received View](feature-xtdh-received-view.md): received
+  collection/token/contributor drill-down and grant-details entry.
 - [Profile Stats Tab](feature-stats-tab.md): profile metrics, wallet activity,
   and activity subviews at `/{user}/stats`.
 - [Profile Subscriptions Tab](feature-subscriptions-tab.md): subscription
