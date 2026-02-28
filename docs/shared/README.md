@@ -27,7 +27,8 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 - [Pagination Controls](feature-pagination-controls.md): shared page-jump and
   next/previous controls across paginated lists.
 - [Hover Cards and Tooltip Positioning](feature-hover-cards-and-tooltips.md):
-  hover/focus cards with viewport-aware placement.
+  `CustomTooltip`-based profile/wave hover cards and helper tooltips with
+  viewport-aware placement.
 - [Browser Zoom and Pinch Scaling](feature-browser-zoom-and-pinch-scaling.md):
   web zoom defaults plus native-wrapper zoom lock and text-entry safeguards.
 

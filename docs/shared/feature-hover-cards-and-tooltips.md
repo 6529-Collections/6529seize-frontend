@@ -4,85 +4,88 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-Shared hover cards and tooltips stay anchored to their trigger during desktop
-hover and keyboard-focus interactions. Placement is adjusted to keep content
-readable when viewport bounds, scroll position, or card content changes while a
-card is open. Profile hover cards can additionally surface top rep context when
-that category data is available.
+`CustomTooltip` powers shared hover cards and helper tooltips in multiple areas.
+It opens on hover and on keyboard focus (when the trigger is focusable), renders
+in a portal, and repositions to stay visible in the viewport.
 
 ## Location in the Site
 
-- Hoverable identity handles and avatars that open profile cards across wave
-  feeds, leaderboard rows, mentions, and notification rows.
-- Wave mention labels that open wave summary cards.
-- Metric and stat labels that open compact helper tooltips.
+- Profile hover cards on identity triggers in wave feeds, leaderboard/winner
+  rows, and notifications across routes such as `/discover`,
+  `/waves/{waveId}`, `/messages?wave={waveId}`, and `/notifications`.
+- Wave mention hover cards on `#wave` links inside drop content on
+  `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Helper tooltips in xTDH stat and grant-action surfaces (for example
+  `/{user}/xtdh` and group xTDH grant setup screens).
+- Helper tooltips in network health metric cards in the Network area.
 
 ## Entry Points
 
-- Move the pointer over a supported hover target on a hover-capable device.
-- Focus a supported trigger with keyboard navigation.
-- Move pointer away or blur the trigger to close the card.
+- Hover a supported trigger.
+- Focus a supported link or button.
+- Move the pointer into the open tooltip card to keep it open.
+- Leave both trigger/card, or blur the trigger, to close.
 
 ## User Journey
 
-1. Hover or focus a tooltip trigger.
-2. After the feature-specific show delay, a hover card/tooltip opens near the
-   trigger.
-3. The card chooses a placement that fits current viewport space.
-4. While open, position updates when users scroll, resize the viewport, or when
-   card content size changes.
-5. Pointer leave or blur hides the card.
+1. Hover or focus a supported trigger.
+2. After the show delay, the tooltip card opens near the trigger.
+3. Placement is chosen (`top`, `bottom`, `left`, `right`) and can flip to stay
+   on-screen.
+4. While open, position updates on scroll, resize, and trigger/content resize.
+5. Leaving the trigger/card (or blurring) closes the tooltip shortly after.
 
 ## Common Scenarios
 
-- Hovering an author handle opens a compact profile card with identity details,
-  follower summary, and quick actions when available.
-- In profile cards that include rep breakdown data, users can see up to three top
-  rep categories, ordered by rating and then contributor count.
-- Each Top Rep entry shows a compact category label and a signed rating value.
-- Hovering a wave mention opens a wave summary card with name, author, and
-  drop/joined metrics.
-- Tooltips near viewport edges can flip to another side to remain visible.
-- Scrolling long pages while a card is open keeps the card aligned to the same
-  trigger.
+- Profile hover cards show avatar, handle/display name, CIC/level, profile
+  descriptor, bio snippet (when present), summary stats, and follow/unfollow
+  when the viewed profile is not the signed-in user.
+- `Top Rep` appears only when rep-category data exists. It shows up to 3
+  categories, sorted by rating then contributor count.
+- `Top Rep` rating color is green for positive values and red for zero/negative
+  values.
+- Wave mention hover cards show wave name, picture, author handle/address,
+  drops count, joined count, and last-drop recency.
+- If wave data is partial, the card falls back to mention name, then
+  `Wave {waveId}`; author falls back to primary address; image falls back to
+  contributor collage, then gradient art.
+- xTDH and network helper tooltips show short explanatory labels.
 
 ## Edge Cases
 
-- Non-hover-capable layouts that disable hover wrappers show the trigger without a
-  hover card.
-- Cards whose content expands after opening (for example, delayed profile/wave
-  data) are repositioned after the size change.
-- If trigger layout shifts while a card is open, the card position is
-  recalculated against the updated trigger location.
-- Small viewports clamp card position to viewport padding when full ideal
-  placement is not possible.
-- If a profile has no rep categories yet, the card renders without the Top Rep
-  section.
+- Touch-capable devices skip profile/wave hover wrappers and render trigger
+  content without the hover card.
+- If the preferred side does not fit, placement flips and then clamps to
+  viewport padding.
+- If pointer leaves before the show delay completes, no tooltip opens.
+- Keyboard opening depends on the trigger being focusable.
 
 ## Failure and Recovery
 
-- If profile or wave details are unavailable, cards still open with available
-  fallback content and can be retried by hovering/focusing again later.
-- If pointer leaves before show delay completes, no card opens; users can
-  re-hover to retry.
-- If scrolling or viewport changes move content while a card is open, placement
-  is recalculated without requiring manual close/reopen.
+- Tooltip triggers remain usable even when profile/wave fetch data is missing.
+- Wave mention cards show a compact loading placeholder until wave metrics are
+  ready.
+- Follow/unfollow errors in profile cards show an error toast; users can retry
+  from the same card.
+- Reopening the tooltip uses normal query re-fetch behavior for stale or
+  missing data.
 
 ## Limitations / Notes
 
-- Hover-card behavior depends on hover/focus input and is not a replacement for
-  inline labels on touch-first interactions.
-- Top Rep data is optional; absence of this data does not affect other profile
-  card behavior or contents.
-- Placement prioritizes viewport fit; the final side may differ from a preferred
-  side when space is constrained.
-- Show/hide timing can vary by feature using the shared tooltip wrapper.
+- This is a hover/focus model, not a tap-first model.
+- Profile/wave wrappers use `delayShow=500ms`; other `CustomTooltip` adopters
+  use component defaults unless overridden.
+- Only `CustomTooltip` adopters follow this behavior; tooltips built with other
+  components may differ.
 
 ## Related Pages
 
 - [Docs Home](../README.md)
 - [Shared Index](README.md)
-- [Wave Discover Cards](../waves/discovery/feature-discover-cards.md)
+- [Wave Mentions and NFT Hashtag Syntax](../waves/composer/feature-wave-mentions.md)
+- [Wave Drop Content Display](../waves/drop-actions/feature-content-display.md)
 - [Brain Wave List Name Tooltips](../waves/sidebars/feature-brain-list-name-tooltips.md)
-- [Health Dashboard](../network/feature-health-dashboard.md)
-- [Profile Stats Tab](../profiles/tabs/feature-stats-tab.md)
+- [Notifications Feed](../notifications/feature-notifications-feed.md)
+- [Profile xTDH Tab](../profiles/tabs/feature-xtdh-tab.md)
+- [Profile xTDH Granted View](../profiles/tabs/feature-xtdh-granted-view.md)
+- [Network Health Dashboard](../network/feature-health-dashboard.md)
