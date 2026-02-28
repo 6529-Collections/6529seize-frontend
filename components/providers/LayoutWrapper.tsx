@@ -1,5 +1,8 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import FooterWrapper from "@/components/footer/FooterWrapper";
 import MobileLayout from "@/components/layout/MobileLayout";
 import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
@@ -9,9 +12,7 @@ import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { usePathname } from "next/navigation";
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
-import { ErrorBoundary } from "react-error-boundary";
+import type { ComponentType, ReactNode } from "react";
 
 export default function LayoutWrapper({
   children,
