@@ -4,67 +4,71 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-Loading status indicators show users that a request is still in progress and
-provide an announcement that screen readers can read without interrupting
-current speech.
+Shared loading indicators show when list data is still loading.
+The shared spinner pattern shows loading copy and a polite screen-reader status.
 
 ## Location in the Site
 
-- Profile drop feeds while data is loading or paginating.
-- Notifications and wave-outcome lists while requests are pending.
-- Other list and panel routes that show the shared spinner loader.
+- `/{user}/brain` profile drop feed.
+- `/notifications` feed prerequisites and initial feed load.
+- `Outcome` tabs in wave contexts that expose them, including
+  `/waves/{waveId}` and `/messages?wave={waveId}`.
 
 ## Entry Points
 
-- Open a route that fetches list content from the server.
-- Scroll a paginated list that requests older/newer data.
-- Trigger a refresh that temporarily clears or replaces list content.
+- Open one of the routes above when its data is not cached yet.
+- Scroll paginated lists to trigger next-page fetches.
+- In notifications, change filters or reload feed data.
 
 ## User Journey
 
-1. User opens a page or action that needs async data.
-2. A spinner appears, usually with context text such as `Loading drops...`.
-3. Screen readers receive a polite status announcement for the same loading
-   state.
-4. When data resolves, the spinner disappears and content/empty/error state
-   takes over.
+1. Open a route or tab that still needs server data.
+2. A spinner appears with context text (for example `Loading drops...`).
+3. Screen readers hear a polite status update for the same loading state.
+4. After data resolves, the loading indicator is replaced by content, empty
+   state, or an error state from that feature.
 
 ## Common Scenarios
 
-- Initial page hydration shows a centered loading spinner and text.
-- Infinite-scroll fetches show loading text such as `Loading more drops...`.
-- Notifications initial load uses centered `Loading notifications...` when no
-  recent rows are available yet.
-- Notifications can keep existing rows visible during background refreshes,
-  including cause-filter transitions, without replacing the list with a
-  full-page spinner.
-- Notifications older-page fetch uses inline
-  `Loading older notifications...` near the top of the list.
+- Profile Brain tab initial load shows `Loading drops...`.
+- Profile Brain tab pagination shows `Loading more drops...`.
+- Notifications can show `Loading profile...` before profile prerequisites are
+  resolved.
+- Notifications initial feed load shows `Loading notifications...` when no rows
+  are rendered yet.
+- Notifications background refetches and cause-filter changes keep existing rows
+  visible when possible instead of replacing the list with a full spinner.
+- Notifications older-page fetch shows inline `Loading older notifications...`
+  near the top of the list, plus a thin top loading bar.
+- Outcome tab initial load shows `Loading outcomes...`; pagination shows
+  `Loading more outcomes...`.
 
 ## Edge Cases
 
-- If visible loading text is intentionally blank, the spinner can render without
-  a caption while still keeping a screen-reader loading announcement.
-- If a feature provides separate screen-reader copy, assistive technology hears
-  that copy even when the visible caption is different.
+- If loading text is blank, the spinner can render without a visible caption.
+- In that case, screen readers still hear fallback text: `Loading...`.
+- Current route callers pass non-empty loading text.
 
 ## Failure and Recovery
 
-- The shared loading indicator does not display failure reason text by itself.
-- If a request fails, each owning feature decides whether to show empty state,
-  retry behavior, or a feature-specific error view.
-- Users can typically retry by refreshing the route or re-triggering the action
-  that started the request.
+- Shared indicators do not show failure reasons or retry controls.
+- Each owning feature controls failure copy and retry behavior (for example
+  notifications `Try again`).
+- Users can retry by using that feature's retry action, refreshing, or
+  re-triggering the load action.
 
 ## Limitations / Notes
 
 - Spinner indicators are indeterminate; they do not show percent completion.
-- Announcements are polite status updates, not assertive alerts.
+- Spinner status announcements are polite (`aria-live="polite"`), not
+  assertive alerts.
+- The inline `Loading older notifications...` row and top loading bar are visual
+  indicators; they are separate from the shared spinner live-region pattern.
 
 ## Related Pages
 
 - [Docs Home](../README.md)
+- [Shared Index](README.md)
 - [Profile Brain Tab](../profiles/tabs/feature-brain-tab.md)
 - [Notifications Feed](../notifications/feature-notifications-feed.md)
-- [Wave Chat Scroll Behavior](../waves/chat/feature-scroll-behavior.md)
-- [NFT Activity Feed](../realtime/feature-nft-activity-feed.md)
+- [Wave Outcome Lists](../waves/feature-outcome-lists.md)
