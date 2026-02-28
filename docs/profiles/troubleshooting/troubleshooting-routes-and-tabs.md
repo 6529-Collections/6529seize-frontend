@@ -1,129 +1,117 @@
-# Profile Troubleshooting
+# Profile Routes and Tabs Troubleshooting
 
 ## Overview
 
-Use this page when a profile does not load as expected, a tab is missing, or a
-profile link lands somewhere unexpected.
+Use this page when:
 
-## Location in the Site
+- a profile URL does not load
+- a tab disappears or auto-redirects
+- tab content looks blank or partial
 
-- All profile routes under `/{user}` and `/{user}/<tab>`
+Scope:
 
-## Entry Points
+- profile routes: `/{user}`, `/{user}/brain`, `/{user}/collected`,
+  `/{user}/xtdh`, `/{user}/stats`, `/{user}/subscriptions`, `/{user}/proxy`
+- legacy aliases: `/{user}/identity`, `/{user}/waves`, `/{user}/groups`,
+  `/{user}/followers`
+- unsupported route: `/{user}/rep`
 
-- A profile URL returns a not-found page.
-- A visible tab in one session is missing in another.
-- A direct tab URL redirects to a different tab or profile URL.
+## Quick Checks
 
-## User Journey
+1. Open `/{user}` first, then retry the tab route.
+2. Confirm `{user}` resolves to a real profile (handle or wallet).
+3. Confirm tab visibility rules for your current context.
+4. Refresh once for transient request failures.
 
-1. Confirm the URL is one of the supported profile routes.
-2. Confirm the profile handle or wallet is valid.
-3. Check whether tab visibility rules apply to your device/context.
-4. Retry after refresh if loading failed unexpectedly.
+## Route Issues
 
-## Common Scenarios
+- Symptom: `USER OR PAGE` is shown.
+  - Meaning: unresolved profile, unsupported route (`/{user}/rep`), or unknown
+    `/{user}/<subroute>`.
+  - Action: correct the URL and use a supported route.
+  - Shared behavior: [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
 
-- `USER OR PAGE` appears:
-  - The user handle/wallet does not resolve.
-  - The tab path is unsupported.
-- This is the shared not-found surface:
-  - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md)
-- Legacy `/{user}/identity`, `/{user}/waves`, `/{user}/groups`, or
-  `/{user}/followers` links land on `/{user}`:
-  - these are redirect aliases, not dedicated tab routes
-  - see [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
-- Legacy `/{user}/rep` links return not-found:
-  - the separate `rep` route is not supported
-  - use `/{user}` for combined Rep and NIC behavior
-- Tab missing:
-  - `Brain` is hidden when Waves is disabled.
-  - `Subscriptions` is hidden on iOS outside the US.
-  - `Proxy` is shown only on your own profile.
-- Identity tab content differs by screen size:
-  - mobile starts with the rep subview
-  - switch to the `NIC` score card to reach statements and NIC actions
-- Followers quick stat does not open a route:
-  - it opens an in-page modal list
-- Stats view shows mostly `-` values or empty activity panels:
-  - The selected wallet has no activity/holdings for those rows.
-  - Stats API requests failed and the UI fell back to empty placeholders.
-- Brain tab shows `No Drops to show`:
-  - The profile has no drops yet.
-  - The drops request failed and the tab fell back to the same empty state.
-- Subscriptions controls are disabled:
-  - You are viewing another profile.
-- Subscriptions tab content is blank:
-  - A profile proxy context is active.
-- Top-up submit fails immediately:
-  - No active wallet connection is available for signing/sending.
-  - No valid top-up option is currently selected.
-- Redirected to a different handle:
-  - The app normalized the URL to the profile's canonical handle.
-- Header shows `0 Followers` unexpectedly:
-  - Followers summary data failed to load on route render.
-  - Refreshing can repopulate the header count.
-- Header does not show `Profile enabled: ...`:
-  - Profile-created activity logs were unavailable for that route load.
-  - Refreshing can restore the date label when logs are reachable.
+- Symptom: URL redirects to another handle.
+  - Meaning: canonical-handle normalization.
+  - Action: save the canonical URL.
 
-## Edge Cases
+- Symptom: legacy route redirects look inconsistent.
+  - Meaning:
+    - `/{user}/identity` redirects to `/{user}` and keeps query params.
+    - `/{user}/waves`, `/{user}/groups`, `/{user}/followers` redirect to
+      `/{user}` and drop query params.
+  - Action: replace old links with `/{user}` or a supported tab route.
+  - Details: [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
 
-- Entering a profile by wallet can redirect to handle-based URLs.
-- Entering a hidden-tab URL can redirect to the first visible tab.
-- Entering `/{user}/subscriptions` on iOS outside the US redirects to the
-  first visible profile tab.
-- Entering `/{user}/proxy` on another user's profile redirects to `/{user}`.
-- Entering `/{user}/identity` keeps query parameters while redirecting to
-  `/{user}`.
-- Entering `/{user}/waves`, `/{user}/groups`, or `/{user}/followers` redirects
-  to `/{user}` without preserving query parameters.
-- Entering `/{user}/rep` is treated as an unsupported profile route.
-- Tab links preserve `address` and drop other query parameters.
-- In `Subscriptions`, first upcoming-drop controls can be disabled on minting
-  day.
+## Tab Visibility and Redirect Issues
 
-## Failure and Recovery
+- Symptom: tab is missing on one device/session but visible on another.
+  - Meaning:
+    - `Brain` needs Waves enabled.
+    - `Subscriptions` is hidden on iOS when consent country is not `US`.
+    - `Proxy` is visible only on your own profile.
+  - Action: retest with expected account, device, and country context.
 
-- Not found state: verify the handle/wallet and tab path, then retry.
-- Generic load failure: refresh the page to retry the profile request.
-- Brain tab:
-  - If drop loading fails, refresh to retry the feed request.
-  - If pagination stalls while scrolling, refresh to resume loading older drops.
-- Stats tab:
-  - `No transactions`, `No distributions found`, or `No TDH history found`
-    indicates no data for the current filters or a failed fetch; refresh and
-    retry.
-- Header summary data:
-  - If followers count or profile-enabled date looks stale or incomplete, refresh
-    the route to retry header-side data requests.
-  - If About text is missing on a profile you cannot edit, verify the profile has
-    a BIO statement and refresh the route if a recent profile update should be
-    visible.
-- Identity tab:
-  - If `/{user}/rep` bookmarks fail, replace them with `/{user}`.
-  - If statements or NIC actions are not visible on mobile, switch from the rep
-    card to the `NIC` card inside the tab.
-- Subscriptions tab:
-  - If a save action fails, settings remain unchanged and an error toast is
-    shown; re-authenticate and retry.
-  - If top-up returns a wallet-connection error, reconnect wallet and retry the
-    send action.
-- If behavior differs by device, test on a non-iOS device and with a US country
-  context to confirm visibility-rule impact.
+- Symptom: tab URL opens, then moves to another tab.
+  - Meaning: current tab is hidden in current context; app falls back to first
+    visible tab.
+  - Action: switch context or use a visible tab URL.
 
-## Limitations / Notes
+- Symptom: followers stat does not open `/{user}/followers`.
+  - Meaning: expected behavior; followers opens an in-page modal, not a tab
+    route.
+  - Action: use the modal.
 
-- Tab visibility is context-dependent and not identical across all users.
-- `xTDH` is marked Beta and may evolve separately from other tabs.
+## Content and Data Issues
+
+- Symptom: `/{user}/brain` is blank or shows `No Drops to show`.
+  - Meaning: Waves-disabled context, empty feed, or failed drop fetch.
+  - Action: refresh; if Waves is unavailable, use `/{user}`.
+
+- Symptom: Stats shows `-`, `No transactions`, `No distributions found`, or
+  `No TDH history found`.
+  - Meaning: empty data for selected scope/filter, or failed request.
+  - Action: adjust `address`/filters and refresh.
+
+- Symptom: subscriptions controls are disabled.
+  - Meaning: read-only context (not owner mode).
+  - Action: open your own profile without active proxy context.
+
+- Symptom: `/{user}/subscriptions` looks blank.
+  - Meaning: active proxy session suppresses subscriptions content.
+  - Action: exit proxy context and reopen the route.
+
+- Symptom: top-up fails immediately.
+  - Meaning: no valid option selected, or no active wallet connection.
+  - Action: choose a valid top-up option, connect wallet, retry.
+
+- Symptom: header data looks incomplete.
+  - Meaning:
+    - followers can fall back to `0` when count fetch fails
+    - `Profile enabled: ...` can be omitted when profile-created log is missing
+    - about text can be missing when BIO statement is unavailable
+  - Action: refresh and retry.
+
+## Query and Mobile Edge Cases
+
+- Hidden-tab fallback keeps the current query string.
+- Clicking a profile tab keeps only `address` and drops other query keys.
+- Canonical-handle redirects can normalize repeated query keys to one
+  comma-separated value.
+- On mobile Identity, `Rep` opens first; switch to `NIC` for NIC actions and
+  statements.
+- In Subscriptions, first upcoming-drop controls can lock on minting day.
 
 ## Related Pages
 
 - [Profiles Index](../README.md)
 - [Profiles Troubleshooting Index](README.md)
-- [Profile Header Summary](../navigation/feature-header-summary.md)
-- [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
 - [Legacy Profile Route Redirects](../navigation/feature-legacy-profile-route-redirects.md)
+- [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
+- [Profile Brain Tab](../tabs/feature-brain-tab.md)
+- [Profile Stats Tab](../tabs/feature-stats-tab.md)
+- [Profile Subscriptions Tab](../tabs/feature-subscriptions-tab.md)
+- [Profile Proxy Tab](../tabs/feature-proxy-tab.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
