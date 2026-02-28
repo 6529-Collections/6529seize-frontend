@@ -2,24 +2,16 @@
 
 ## Overview
 
-- Browse NFT transactions on `/nft-activity`.
-- Keep authenticated websocket updates healthy on routes that consume live
-  events.
-
-## Route Coverage
-
-- Feed route: `/nft-activity`.
+- Realtime docs cover two behaviors:
+  NFT transaction browsing on `/nft-activity`, and authenticated websocket
+  session health on live-update routes.
+- Feed route: `/nft-activity` (`Network -> NFT Activity`).
 - Live-update consumers: `/waves`, `/waves/{id}`, `/messages`, plus routes that
-  currently render marketplace preview cards from drop content.
-- There is no dedicated websocket status route. Connectivity behavior is
+  render marketplace preview cards from drop content.
+- `/network/activity` is a separate profile-log feed documented in the Network
+  docs area.
+- There is no dedicated websocket status route; connectivity behavior is
   app-level.
-
-## Area Ownership
-
-- This area owns `/nft-activity` browsing behavior and authenticated websocket
-  session health.
-- Wave-specific live-event rendering stays in the Waves docs area.
-- Wallet/session controls stay in the Navigation docs area.
 
 ## Features
 
