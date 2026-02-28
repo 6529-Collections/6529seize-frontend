@@ -9,8 +9,8 @@
 ## Route Coverage
 
 - Feed route: `/nft-activity`.
-- Live-update consumers: `/waves`, `/waves/{id}`, `/messages`, plus marketplace
-  preview surfaces that subscribe to websocket events.
+- Live-update consumers: `/waves`, `/waves/{id}`, `/messages`, plus routes that
+  currently render marketplace preview cards from drop content.
 - There is no dedicated websocket status route. Connectivity behavior is
   app-level.
 

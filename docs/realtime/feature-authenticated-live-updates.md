@@ -4,80 +4,80 @@ Parent: [Realtime Index](README.md)
 
 ## Overview
 
-Authenticated live updates keep the app-level websocket session aligned with
-current wallet auth state. Users can keep receiving supported push updates
-across auth changes without a full page refresh.
+Authenticated live updates keep the app websocket session aligned with wallet
+authentication. When auth is valid, supported surfaces keep receiving push
+updates. When auth is missing, the session disconnects and push updates pause.
 
 ## Location in the Site
 
-- App-wide provider layer mounted in `components/providers/Providers.tsx`.
-- User-visible impact is strongest on wave live updates (drop inserts, reaction
-  updates, rating updates, unread counters) and marketplace preview sync.
+- App-wide provider behavior mounted in `components/providers/Providers.tsx`.
+- No dedicated websocket status route. Session health is global.
+- Most visible on `/waves`, `/waves/{id}`, `/messages`, and routes showing
+  marketplace preview cards from drop content.
+- `/nft-activity` is request-driven and does not consume these websocket
+  updates.
 
 ## Entry Points
 
-- Open the app with an auth token (`wallet-auth` cookie set).
-- Connect wallet, authenticate, or re-authenticate.
-- Switch auth token state while keeping one or more browser tabs open.
+- Open the app while signed in (`wallet-auth` cookie present).
+- Sign in, sign out, or re-authenticate in the current tab.
+- Change auth state in another open tab.
+- Lose websocket transport while auth is still valid.
 
 ## User Journey
 
-1. Open the app and authenticate.
-2. Auth bootstrap runs a websocket health check immediately.
-3. If a token exists and the socket is disconnected, the app connects using that
-   token as a query parameter.
-4. If token state changes (login, logout, re-auth, refresh), health checks rerun
-   and the session disconnects or reconnects to match the new token state.
-5. Connected surfaces consume subscribed websocket events without needing a manual
-   page reload.
+1. On app bootstrap, websocket health checks run immediately.
+2. If a token exists and status is `disconnected`, the app connects with that
+   token.
+3. If no token exists and status is not `disconnected`, the app disconnects.
+4. If token value changes while connected, the app reconnects with the new
+   token.
+5. While connected, subscribers apply `DROP_UPDATE`,
+   `DROP_RATING_UPDATE`, `DROP_REACTION_UPDATE`, and `MEDIA_LINK_UPDATED`
+   messages.
 
 ## Common Scenarios
 
-- Sign in and immediately resume live updates on supported realtime surfaces.
-- Logout or token loss stops authenticated live updates.
-- Re-authentication or token refresh restarts updates without page refresh.
-- Auth changes can propagate to other tabs via cookie-store listeners or fallback
-  broadcast channel messages (`auth-token-updates`).
-- Temporary disconnects retry automatically while authentication is still valid,
-  using deterministic exponential backoff timing (starting at `2s` and capping at
-  `30s`).
+- Sign in and resume live updates on waves and direct-message wave surfaces.
+- Logout or token loss pauses authenticated push updates.
+- Re-authentication or token refresh reconnects the socket with the new token.
+- Auth changes converge across tabs through cookie-store listeners when
+  available, with broadcast-channel fallback (`auth-token-updates`) when not.
+- Temporary disconnects retry automatically while auth is still valid, using
+  deterministic exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`).
 
 ## Edge Cases
 
-- Browser support differs for cookie-change listeners; when available, auth events are
-  observed directly.
-- On clients without cookie-change listeners, auth convergence can rely on the
-  fallback broadcast channel and periodic health checks.
-- Tabs that are backgrounded can appear delayed until the browser schedules
-  queued work.
-- Reconnect delays are deterministic (not randomized): multiple tabs can retry in
-  near lockstep when their attempt counters match.
-- During prolonged instability, retry spacing increases between attempts, so
-  recovery can be noticeably delayed.
+- Browser support differs for cookie-change listeners.
+- If cookie listeners are unavailable, convergence relies on broadcast messages
+  (when supported) plus periodic health checks.
+- If both cookie-listener and broadcast support are missing, convergence relies
+  on periodic checks only (`10s`).
+- Background tabs can apply retries and auth-change handling later due to
+  browser scheduling.
+- Reconnect timing is deterministic (no jitter), so multiple tabs can retry in
+  near lockstep.
 
 ## Failure and Recovery
 
-- If live updates disconnect unexpectedly while auth is still valid, the app retries
-  automatically.
-- A reconnect cycle allows up to `20` attempts by default (`2s`, `3s`, `4.5s`
-  style progression, capped at `30s`).
-- If those attempts fail, periodic health checks (every `10s`) continue to probe the
-  token+status state and can re-open a fresh session.
-- If auth becomes invalid, updates remain unavailable until re-authentication.
-- If updates appear stale or silent, refreshing or revisiting the route triggers a
-  fresh health-check pass and can reinitialize the session.
+- Unexpected closes (non-`1000`) with a valid token trigger automatic retries.
+- Retry scheduling allows up to `20` attempts by default (`2s`, `3s`, `4.5s`,
+  capped at `30s`).
+- After the cap is reached, scheduled reconnect retries stop; periodic health
+  checks (`10s`) still attempt reconnect while token+status require it.
+- If auth is missing or invalid, the session stays disconnected until
+  re-authentication.
+- There is no global websocket status banner or reconnect button. If updates
+  stay stale after re-authentication, refresh the tab to remount providers.
 
 ## Limitations / Notes
 
-- This behavior governs authenticated websocket connectivity, not guaranteed
-  delivery of every individual realtime event.
-- The app maintains authenticated live updates while a valid auth token is present.
-- Routes that do not consume websocket data may show no visible change even when
-  connection state changes.
-- Clients with limited event APIs or noisy browser scheduling can show slower token
-  convergence.
-- Deterministic reconnect timing can make multiple tabs recover in near-lockstep
-  instead of spreading retries randomly.
+- This behavior governs authenticated websocket session health, not guaranteed
+  delivery of every individual event.
+- Subscribers attach only while status is `connected`; missed messages during a
+  disconnect window are not guaranteed to replay.
+- Marketplace preview websocket patches only affect already-cached preview cards
+  with matching canonical IDs.
 
 ## Related Pages
 
