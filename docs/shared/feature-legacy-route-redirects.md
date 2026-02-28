@@ -4,51 +4,41 @@ Parent: [Shared Index](README.md)
 
 ## Overview
 
-Legacy URLs still work as compatibility entry points. Opening one redirects to
-the current route or asset.
+Legacy URLs still resolve as compatibility entry points. They redirect to active
+routes or assets.
 
-Redirect systems covered here:
+This page covers four redirect families:
 
 - Middleware exact-path legacy map (`301`)
-- Middleware `/my-stream` compatibility redirects (`301`, desktop OS only)
-- Redirect-only route pages (`307`)
-- Legacy `/waves?wave={id}` normalization (`307`)
+- Middleware desktop `/my-stream` compatibility (`301`)
+- Route-level legacy aliases (`307`)
+- Legacy `/waves?wave=<id>` normalization (`307`)
 
-## Scope Boundaries
+Profile-only legacy aliases are documented in
+[Legacy Profile Route Redirects](../profiles/navigation/feature-legacy-profile-route-redirects.md).
 
-- Profile legacy aliases are documented in:
-  [Legacy Profile Route Redirects](../profiles/navigation/feature-legacy-profile-route-redirects.md)
+## Redirect Families
 
-## Location in the Site
+| Legacy entry | Status | Destination type | Query behavior |
+| --- | --- | --- | --- |
+| Middleware exact-path map | `301` | fixed target per mapping | preserved unless target has its own query |
+| Middleware `/my-stream` + `/my-stream/notifications` (desktop OS only) | `301` | computed route (`/`, `/waves`, `/waves/<id>`, `/messages`, `/messages?wave=<id>`, `/notifications`) | forwards only supported keys |
+| Route-level legacy aliases | `307` | fixed target route/asset | source query not forwarded |
+| `/waves?wave=<id>` | `307` | `/waves/<id>` | keeps all keys except `wave` |
 
-- Middleware legacy routes:
-  - exact-path map in `proxy.ts`
-  - `/my-stream` and `/my-stream/notifications` compatibility in `proxy.ts`
-- Route alias pages (`redirect()`):
-  - `/city/6529-museum-district`
-  - `/element_category/columns`
-  - `/element_category/sections`
-  - `/feed`
-  - `/gm-or-die-small-mp4`
-  - `/om/OM`
-  - `/om/partnership-request`
-  - `/slide-page/6529-initiatives`
-  - `/slide-page/homepage-slider`
-- Query-based legacy normalization (`redirect()`):
-  - `/waves?wave={id}` in `app/waves/page.tsx`
+## Execution Order
 
-## Redirect Execution Order
+1. Middleware exact-path map redirect.
+2. Middleware `/my-stream` compatibility redirect.
+3. Access control check (`401 -> /access`, `403 -> /restricted`).
+4. Route-level redirects and `/waves?wave=<id>` normalization.
 
-1. Middleware exact-path redirect map (`301`).
-2. Middleware `/my-stream` compatibility redirect (`301`, desktop OS only).
-3. Access-control check (`307` to `/access` on `401`, `/restricted` on `403`).
-4. Route-level `redirect()` pages and `/waves?wave={id}` normalization.
+Middleware redirects run before access control. Route-level redirects run after
+access control.
 
-This order matters: middleware redirects run before access control, while
-route-level redirects run after access control.
+## Route-Level Legacy Aliases (`307`)
 
-## Route-Level Redirect Pages (`307`)
-
+- `/about/tos` -> `/about/terms-of-service`
 - `/city/6529-museum-district` -> `/om/6529-museum-district/`
 - `/element_category/columns` -> `/`
 - `/element_category/sections` -> `/`
@@ -60,17 +50,20 @@ route-level redirects run after access control.
 - `/slide-page/6529-initiatives` -> `/`
 - `/slide-page/homepage-slider` -> `/`
 
+Rules:
+
+- Destination is fixed.
+- Source query is not forwarded.
+
 ## Middleware Exact-Path Legacy Map (`301`)
 
 Rules:
 
-- Matching is case-insensitive.
-- Trailing slash variants still match (for example `/abc1` and `/abc1/`).
-- Mapping is exact-path only; unknown paths are not redirected.
-- Existing query parameters are preserved unless the redirect target defines its
-  own query string (for example `/the-memes?szn=2`).
-
-Mappings:
+- Match is case-insensitive.
+- `/path` and `/path/` both match.
+- Match is exact-path only.
+- Source query is preserved unless target defines its own query
+  (example: `/the-memes?szn=2`).
 
 ### General
 
@@ -114,41 +107,37 @@ Mappings:
 
 - `/the-hamily-wagmi-allowlist/` -> `/the-memes/74`
 
-## Desktop-Only `/my-stream` Compatibility (`301`)
+## Desktop `/my-stream` Compatibility (`301`)
 
-Compatibility redirects apply only for desktop OS user agents and only for:
+Applies only to desktop OS user agents and only to `/my-stream` or
+`/my-stream/notifications` (with or without trailing slash).
 
-- `/my-stream`
-- `/my-stream/notifications`
-
-Outcomes:
+Common outcomes:
 
 - `/my-stream/notifications` -> `/notifications`
 - `/my-stream?view=messages` -> `/messages`
 - `/my-stream?view=messages&wave=<id>` -> `/messages?wave=<id>`
 - `/my-stream?view=messages&wave=<id>&drop=<id>&serialNo=<n>` ->
-  `/messages` with `wave`, `drop`, and `serialNo`
+  `/messages?wave=<id>&drop=<id>&serialNo=<n>`
 - `/my-stream?view=waves` -> `/waves`
 - `/my-stream?view=waves&wave=<id>` -> `/waves/<id>`
-- `/my-stream?wave=<id>` -> `/waves/<id>` (also true when `view` is unsupported)
+- `/my-stream?wave=<id>` -> `/waves/<id>` (also when `view` is unsupported)
 - `/my-stream?wave=<id>&drop=<id>&serialNo=<n>` ->
   `/waves/<id>?drop=<id>&serialNo=<n>`
 - `/my-stream?drop=<id>` -> `/waves?drop=<id>`
-- `/my-stream?view=messages&drop=<id>` -> `/messages` (drop ignored without
+- `/my-stream?view=messages&drop=<id>` -> `/messages` (`drop` ignored without
   `wave`)
-- `/my-stream?view=waves&drop=<id>` -> `/waves` (drop ignored without `wave`)
+- `/my-stream?view=waves&drop=<id>` -> `/waves` (`drop` ignored without `wave`)
 - `/my-stream` (or unsupported params without `wave` or `drop`) -> `/`
 
-Query normalization:
+Normalization:
 
-- `drop` removes all trailing `/`.
-- `serialNo` removes one trailing `/`.
-- `serialNo` is only forwarded when `wave` is present.
-- `/my-stream/notifications` does not forward source query parameters.
+- `drop`: remove all trailing `/`.
+- `serialNo`: remove one trailing `/`.
+- `serialNo` is only forwarded when `wave` exists.
+- `/my-stream/notifications` does not forward source query.
 
-## Legacy `/waves?wave={id}` Normalization (`307`)
-
-`/waves` redirects old query-based wave URLs to canonical wave paths.
+## Legacy `/waves?wave=<id>` Normalization (`307`)
 
 - `/waves?wave=<id>` -> `/waves/<id>`
 - `/waves?wave=<id>&serialNo=<n>&divider=<d>` ->
@@ -156,34 +145,27 @@ Query normalization:
 
 Rules:
 
-- The `wave` query key is removed from the destination.
-- Other query keys are preserved.
-- If `wave` has multiple values, only the first value is used.
+- Remove `wave` from destination query.
+- Preserve other query keys.
+- If multiple `wave` values are present, use the first value.
 
 ## Failure and Recovery
 
-- Middleware map and `/my-stream` redirects run before access-control checks.
-- Route-level redirect pages and `/waves?wave={id}` normalization run only after
-  access-control checks pass.
-- If access is blocked at either source or destination route, user is sent to
-  `/access` or `/restricted`.
-- If destination route data fails, user sees destination route recovery UI.
-  - [Route Error and Not-Found Screens](feature-route-error-and-not-found.md)
-- If external target is unavailable (for example hosted video), retry later or
-  open in another network/browser context.
-- On non-desktop user agents, `/my-stream` compatibility redirects do not run.
-  Open canonical routes directly: `/`, `/waves`, `/messages`, and
-  `/notifications`.
+- Middleware redirects run before access control.
+- Route-level redirects run only after access control passes.
+- Access denied redirects to `/access` (`401`) or `/restricted` (`403`).
+- Middleware failures redirect to `/error`.
+- If a destination route fails, use
+  [Route Error and Not-Found Screens](feature-route-error-and-not-found.md).
+- On non-desktop user agents, `/my-stream` compatibility does not run. Use
+  canonical routes: `/`, `/waves`, `/messages`, `/notifications`.
+- External redirect targets can fail independently; retry from another network
+  or browser context.
 
-## Limits and Notes
+## Notes
 
 - Legacy URLs are compatibility-only, not canonical navigation.
-- Query carry-over is redirect-system specific:
-  - Middleware exact-path map usually preserves source query values.
-  - `/my-stream` forwards only supported keys (`wave`, `drop`, `serialNo`).
-  - `/waves?wave={id}` preserves all keys except `wave`.
-  - Route-level redirect pages send users to fixed destinations.
-- Redirect coverage can change as legacy routes are added or retired.
+- Redirect coverage can change as legacy entries are added or retired.
 
 ## Related Pages
 
