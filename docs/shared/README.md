@@ -26,8 +26,8 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 
 - [Loading Status Indicators](feature-loading-status-indicators.md):
   indeterminate loading feedback and screen-reader status behavior.
-- [Pagination Controls](feature-pagination-controls.md): shared page-jump and
-  next/previous controls across paginated lists.
+- [Pagination Controls](feature-pagination-controls.md): shared numbered
+  page-jump controls plus table-style previous/next controls.
 - [Hover Cards and Tooltip Positioning](feature-hover-cards-and-tooltips.md):
   `CustomTooltip`-based profile/wave hover cards and helper tooltips with
   viewport-aware placement.
