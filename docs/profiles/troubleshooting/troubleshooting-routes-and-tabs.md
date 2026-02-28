@@ -120,6 +120,7 @@ profile link lands somewhere unexpected.
 ## Related Pages
 
 - [Profiles Index](../README.md)
+- [Profiles Troubleshooting Index](README.md)
 - [Profile Header Summary](../navigation/feature-header-summary.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)
