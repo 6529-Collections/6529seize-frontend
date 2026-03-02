@@ -2,8 +2,11 @@
 
 ## Overview
 
-Wave composers and drop rendering support fenced markdown code blocks.
-Code stays literal through compose, post, and edit flows.
+Wave and DM composers support fenced markdown code blocks.
+Posted drops render fenced code in-place in the thread.
+
+`Edit Message` keeps code blocks as fenced markdown text, so code survives
+compose, post, and edit without switching to a separate code-block widget.
 
 ## Location in the Site
 
@@ -11,30 +14,33 @@ Code stays literal through compose, post, and edit flows.
   redirects to this route)
 - Direct-message threads: `/messages?wave={waveId}` (canonical DM route; there is
   no `/messages/{waveId}` thread route)
-- Existing drop edit modal opened from a drop action menu
+- Inline `Edit Message` mode opened from drop actions (shown only on your own
+  non-participatory drops)
+- Wave/DM drop rendering surfaces that use the shared markdown renderer
 
 ## Entry Points
 
 - Type fenced markdown in a composer (triple backticks with an optional
   language hint).
 - Paste code from an editor/IDE into a drop composer.
-- Open a drop that already contains fenced code.
-- Choose `Edit message...` on a drop that contains code.
+- Open `Edit Message` on a drop that already contains fenced code.
 
 ## User Journey
 
-1. Open a wave/DM composer, or open edit mode on an existing drop.
-2. Add code as fenced markdown, optionally including a language label.
-3. Submit a new drop (or save the edited drop).
-4. Read the posted drop with code rendered as a block.
-5. Re-open in edit mode, adjust fenced markdown, and save.
+1. Open a wave or DM thread.
+2. Add fenced markdown in the composer (optionally with a language hint).
+3. Submit the drop.
+4. Read the posted drop with block code rendering.
+5. Open `Edit Message`, update fenced markdown, and save.
+6. Reopen the drop and confirm the updated code renders correctly.
 
 ## Common Scenarios
 
-- Code pasted from rich-text sources is inserted as plain text, which keeps
-  raw characters and spacing without bringing formatting from the source app.
-- Inside fenced code, `@[handle]`, `#[wave_name]`, and `$[name]` stay literal.
-- Fenced blocks with recognized language hints render with syntax highlighting.
+- Pasting from rich-text sources inserts plain text only, so source formatting
+  is not carried into the composer.
+- Inside fenced code, `@[handle]`, `#[wave_name]`, and `$[name]` stay literal
+  instead of becoming interactive mention/NFT links.
+- Fenced blocks with supported language hints render with syntax highlighting.
 - Inline backtick code stays inline and is not converted into a fenced block.
 
 ## Edge Cases
@@ -42,33 +48,34 @@ Code stays literal through compose, post, and edit flows.
 - If no language hint is provided, highlighting uses best-effort auto-detection.
 - Unsupported language hints are ignored and fall back to auto-detection.
 - Empty/whitespace-only code blocks render without syntax-coloring output.
-- In edit mode, code is preserved as fenced markdown text rather than a
-  separate code-block editing widget.
+- Participatory drops do not expose `Edit Message`, so only chat/winner drops
+  follow the edit flow above.
 
 ## Failure and Recovery
 
-- If syntax highlighting cannot be applied, code still renders as readable text.
+- If syntax highlighting fails, code still renders as readable text.
 - If users expected code-fence tokens to become interactive, move outside the
   code block and re-enter `@[...]`, `#[...]`, or `$[...]` in normal text.
-- If pasted content contains formatting users wanted to keep, they can reapply
-  markdown formatting manually after paste.
+- If pasted content loses rich formatting, reapply markdown manually.
+- If edit save fails, the app shows an error toast. Re-open `Edit Message` and
+  retry.
 
 ## Limitations / Notes
 
-- Syntax highlighting is best-effort and only guaranteed for the supported
-  language aliases: `ts`, `tsx`, `typescript`, `js`, `jsx`, `javascript`,
-  `json`, `bash`, `shell`, `py`, `python`, `go`, `golang`, `rust`, `rs`,
-  and `sql`.
-- Highlight appearance follows the site’s current global highlight theme.
-- This page covers markdown code behavior in wave composer and drop rendering
-  surfaces.
-- Create-wave description-step behavior is documented separately in create-area
-  docs.
+- Syntax highlighting registers these language aliases: `ts`, `tsx`,
+  `typescript`, `js`, `jsx`, `javascript`, `json`, `bash`, `shell`, `py`,
+  `python`, `go`, `golang`, `rust`, `rs`, and `sql`.
+- Highlight styling follows the app’s global Highlight.js theme.
+- This page covers wave/DM composer, inline edit, and drop rendering behavior.
+- Create-wave description-step behavior is documented separately in
+  [Wave Creation Description Step](../create/feature-description-step.md).
 
 ## Related Pages
 
+- [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
+- [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
