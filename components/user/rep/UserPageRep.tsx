@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -11,7 +10,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -28,8 +27,6 @@ export default function UserPageRep({
   readonly profile: ApiIdentity;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
-  const { connectedProfile } = useContext(AuthContext);
-
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
 
