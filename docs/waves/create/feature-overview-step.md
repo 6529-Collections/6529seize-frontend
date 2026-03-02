@@ -2,65 +2,72 @@
 
 ## Overview
 
-The `Overview` step sets the base identity for a new wave:
-
-- wave name
-- wave profile picture
-- wave type
-
-This step is required before group, timeline, and posting configuration.
+`Overview` is the first step in wave creation.
+Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Location in the Site
 
-- Full-page wave creation flow: `/waves/create`
-- Create-wave modal flows that reuse the same step sequence
+- Full-page create route: `/waves/create`
+- Desktop create-wave modal mode: `?create=wave` on supported discover, waves,
+  and messages routes
+  - route ownership: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step label: `Overview`
+- Create form renders only when a connected profile is available.
 
-## Entry Points
+## Step Paths
 
-- Start create-wave from `/waves/create`.
-- Start create-wave from desktop entry points that open the create modal.
-- Return to `Overview` from later steps using the step rail.
+- `Chat`: `Overview` -> `Groups` -> `Description`
+- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
+  `Outcomes` -> `Description`
+- `Approve` appears in the picker but is disabled in the current UI.
 
-## User Journey
+## What You Can Set
 
-1. Open `Overview`.
-2. Enter wave `Name` (required).
-3. Optionally add `Wave Profile Picture` by click-upload or drag-drop.
-4. Select `Wave Type`:
-   - `Chat`
-   - `Rank`
-   - `Approve` (shown but disabled)
-5. Continue to `Groups`.
+- `Name` (required)
+- `Wave Profile Picture` (optional)
+  - upload by click
+  - or drag and drop
+- `Wave Type`
+  - `Chat`
+  - `Rank`
+  - `Approve` (shown but disabled)
+- Uploaded image shows a preview; `Delete` removes it.
+- File input and drag-drop both use the first selected file.
 
-## Common Scenarios
+## Navigation Behavior
 
-- Create a chat-only wave by keeping `Chat` selected.
-- Create a ranked-submission wave by switching to `Rank`.
-- Upload a picture to replace the default empty avatar before continuing.
-- Remove a selected image before moving to the next step.
+- `Overview` always opens first.
+- `Next` moves to `Groups` when overview validation passes.
+- `Next` stays enabled; validation runs when clicked.
+- `Previous` is not shown on `Overview`.
+- On large screens, the step rail can reopen completed steps, including
+  `Overview`.
+- On smaller screens, use `Previous` from later steps to return to `Overview`.
 
-## Edge Cases
+## Validation and State Rules
 
-- Missing name blocks forward navigation until filled.
-- Unsupported image formats show `Invalid file type`.
-- Images above 10MB show `File size must be less than 10MB`.
-- Switching wave type from `Rank` back to `Chat` resets later-step values to
-  type defaults.
+- Empty name blocks forward navigation and shows `Name is required`.
+- Name length above `250` characters blocks forward navigation.
+- Image upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` only.
+- Unsupported image formats show toast: `Invalid file type`.
+- Images larger than `10MB` show toast: `File size must be less than 10MB`.
+- Changing wave type resets all non-overview settings to that type's defaults
+  (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`, `approval`).
 
 ## Failure and Recovery
 
-- If upload validation fails, select another file and retry.
-- If you accidentally changed type and lost later-step inputs, reapply settings
-  in those steps after confirming type.
-- If stale create state appears in a modal context, close and reopen create-wave
-  to restart with clean defaults.
+- If `Next` does not advance, confirm name is present and `<= 250` characters.
+- If upload validation fails, pick a supported file under `10MB` and retry.
+- If type changes reset later steps, confirm the final type first, then
+  reconfigure later steps.
+- If stale modal state appears, close create-wave to clear the `create` query,
+  then reopen.
 
 ## Limitations / Notes
 
-- `Approve` exists in the selector UI but is currently disabled.
-- Name length is limited; overly long names fail step validation.
-- Picture upload supports `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` up to 10MB.
+- `Approve` cannot be selected in the current picker UI.
+- This page documents wave-creation `Overview` only.
+- Direct-message creation is documented separately.
 
 ## Related Pages
 
