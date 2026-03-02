@@ -13,9 +13,11 @@ Use this area to create:
 
 ### Route and Mode Coverage
 
-- Desktop create mode uses `create=wave` or `create=dm` on the current route:
+- Desktop wave create mode (`create=wave`) uses the current route:
   `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
   `/messages?wave={waveId}`.
+- Desktop direct-message mode (`create=dm`) is supported on `/discover`,
+  `/messages`, and `/messages?wave={waveId}`.
 - App create routes:
   - wave: `/waves/create`
   - direct message: `/messages/create`

@@ -22,9 +22,11 @@ Use this area for wave and direct-message tasks:
 
 ## Query Coverage
 
-- Web create states use `create=wave` or `create=dm` on the current stream
-  route (for example `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
+- Web wave-create mode (`create=wave`) uses the current stream route
+  (for example `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
   `/messages?wave={waveId}`).
+- Web direct-message mode (`create=dm`) is supported on `/discover`,
+  `/messages`, and `/messages?wave={waveId}`.
 - `drop={dropId}` opens a single-drop overlay in the current thread context.
 - If a URL contains both `drop` and `serialNo`, drop-open behavior is handled
   first.
