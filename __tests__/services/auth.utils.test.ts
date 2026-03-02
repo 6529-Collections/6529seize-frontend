@@ -1,6 +1,7 @@
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
   canStoreAnotherWalletAccount,
+  clearAllWalletAuth,
   getConnectedWalletAccounts,
   getAuthJwt,
   getRefreshToken,
@@ -209,6 +210,29 @@ describe("auth.utils", () => {
     const remainingAccounts = getConnectedWalletAccounts();
     expect(remainingAccounts).toHaveLength(1);
     expect(remainingAccounts[0]?.address).toBe("0x111");
+  });
+
+  it("clearAllWalletAuth clears all accounts and cookie", () => {
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
+    setAuthJwt("0x222", "jwt-2", "refresh-2", "role-2");
+    expect(getConnectedWalletAccounts()).toHaveLength(2);
+    expect(getWalletAddress()).toBe("0x222");
+
+    clearAllWalletAuth();
+
+    expect(getConnectedWalletAccounts()).toHaveLength(0);
+    expect(getWalletAddress()).toBe(null);
+    expect(getRefreshToken()).toBe(null);
+    expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
+      secure: true,
+      sameSite: "strict",
+    });
+    expect(storage.get("6529-wallet-accounts")).toBeUndefined();
+    expect(storage.get("6529-wallet-active-address")).toBeUndefined();
   });
 
   it("enforces max connected profiles when adding new addresses", () => {

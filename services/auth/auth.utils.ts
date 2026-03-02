@@ -364,6 +364,11 @@ export const getWalletRole = () => {
   return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
 };
 
+export const clearAllWalletAuth = (): void => {
+  persistAccountsWithActive([], null);
+  emitWalletAccountsUpdated();
+};
+
 export const removeAuthJwt = () => {
   const accounts = getStoredAccounts();
   const activeAccount = getActiveAccountFromAccounts(accounts);
