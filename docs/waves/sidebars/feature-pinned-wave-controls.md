@@ -2,71 +2,70 @@
 
 ## Overview
 
-Pinned-wave controls let users keep important waves easier to reach across wave
-surfaces. Users can pin and unpin from wave-level controls, and pinned waves are
-grouped ahead of regular waves in sidebar lists.
+Pinned-wave controls keep important waves easy to reach.
+Users can pin or unpin from header and sidebar controls.
+Pinned waves render ahead of regular waves in sidebar lists.
 
-The current cap is **20 pinned waves**.
+The maximum is **20 pinned waves**.
 
 ## Location in the Site
 
-- Wave header pin control in wave About/header surfaces (`/waves/{waveId}` and
-  `/messages?wave={waveId}` contexts where wave header actions are shown).
-- Desktop/web Brain wave list rows in wave-sidebars.
-- App small-screen pinned shortcuts rail shown above wave content.
+- Wave header controls on selected-thread routes:
+  - `/waves/{waveId}` (canonical wave thread route)
+  - `/messages?wave={waveId}` (canonical DM thread route; no
+    `/messages/{waveId}` thread path)
+- Desktop and app left-sidebar wave rows for non-DM waves.
+- App-only small-screen pinned shortcuts rail above thread content.
+- Legacy `/waves?wave={waveId}` links redirect to `/waves/{waveId}`.
 
 ## Entry Points
 
-- Open a wave and use the thumbtack control in the wave header.
-- Use the thumbtack control on a wave row in the left wave list.
-- In app small-screen mode, open waves to add/update entries in the pinned
-  shortcuts rail, then remove with the row `x` control when needed.
+- Open a wave thread and use the header thumbtack (`Pin wave` / `Unpin wave`).
+- Use the thumbtack on a non-DM row in the left wave list.
+- In app small-screen mode, opening a thread adds or refreshes that wave in the
+  pinned shortcuts rail; use `x` to remove an entry.
 
 ## User Journey
 
-1. Open a wave and select `Pin wave` (or select `Unpin wave` if already pinned).
-2. Pinned waves are shown in the pinned list section above regular waves.
-3. If the user reaches 20 pinned waves and tries to pin another one, pinning is
-   blocked and an error message is shown.
-4. Unpin any existing wave to free a slot, then pin the new wave.
-5. In app small-screen mode, opening a wave promotes it to the pinned shortcuts
-   rail and keeps that rail to a maximum of 20 entries.
+1. Open a thread (`/waves/{waveId}` or `/messages?wave={waveId}`).
+2. Select `Pin wave`.
+3. The wave appears in the pinned section above regular waves.
+4. At 20 pins, new pin attempts are blocked and an error message is shown.
+5. Unpin one wave to free a slot, then pin another.
+6. On app small screens, opened threads are kept in the shortcuts rail,
+   newest-first, capped at 20.
 
 ## Common Scenarios
 
-- Keep high-priority waves in the pinned section while browsing `/waves`.
-- Unpin a wave after activity cools down, then pin a different wave.
-- Use app pinned shortcuts to switch among recently opened waves without
-  returning to the full list.
+- Keep active waves pinned while switching across threads.
+- Unpin lower-priority waves, then pin new priorities.
+- Use app shortcuts to switch recent threads without reopening the full list.
 
 ## Edge Cases
 
-- Pin controls switch behavior by current state (`Pin` vs `Unpin`) for the same
-  wave.
-- Pin/unpin controls are temporarily disabled while that same wave operation is
-  still in progress.
-- If app pinned shortcuts are already full (20), opening another wave keeps the
-  newest 20 and drops the oldest shortcut entry.
+- Pin controls switch behavior by state (`Pin wave` vs `Unpin wave`).
+- Pin/unpin controls are disabled while that wave operation is in progress.
+- If app pinned shortcuts are full (20), opening another thread keeps the
+  newest 20 and drops the oldest entry.
 - Direct-message lists do not expose wave-row pin controls.
 
 ## Failure and Recovery
 
 - If pin/unpin fails, users see an error toast and can retry from the same
   control.
-- If the max-pinned limit is reached, users can unpin another wave first and
-  then retry.
-- If a pinned app shortcut points to a wave that is no longer available, that
-  shortcut is removed from the rail.
+- If the max-pinned limit is reached, unpin another wave first, then retry.
+- If an app shortcut points to a wave that is no longer available, that entry
+  is removed from the rail.
 
 ## Limitations / Notes
 
-- Maximum pinned waves: `20`.
-- The header pin action is shown only for connected-profile contexts where wave
-  header actions are available.
+- The header pin action is shown only when a connected profile is active and no
+  profile proxy is active.
 - In collapsed web sidebars, pin controls are hidden on rows; expand the sidebar
   or use the wave header pin action.
 - Pinned and regular sections still follow the standard wave ordering rules
   within each section.
+- App small-screen pinned shortcuts are stored locally on the device.
 
 ## Related Pages
 

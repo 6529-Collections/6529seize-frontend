@@ -2,69 +2,57 @@
 
 ## Overview
 
-The left-side Brain wave list supports fast in-app switching between active waves and
-direct-message conversations. Selecting a wave updates the active wave state and
-renders that wave’s content view in place, while selecting the currently active
-wave again clears the active selection and returns to the section home view.
+Sidebar rows set or clear the active thread in Waves and Messages.
 
-## Location in the Site
+- Click an inactive row to open that thread.
+- Click the active row to clear selection and return to section home.
 
-- Desktop Brain sidebar on `/`, profile pages, and other routes that show the
-  Brain or messages wave list.
-- `/waves` for non-direct-message waves.
-- `/messages` for direct-message conversations.
+## Route Rules
+
+- Wave rows open `/waves/{waveId}`.
+- Direct-message rows open `/messages?wave={waveId}`.
+- Direct-message threads do not use `/messages/{waveId}`.
+- Re-clicking the active row clears selection and returns to `/waves` or
+  `/messages`.
+- If the first unread drop is known, row navigation can append `divider={n}`.
 
 ## Entry Points
 
-- Open any route with the Brain or messages wave sidebar.
-- Click a wave or direct-message row in the sidebar.
-- For performance, hover a non-touch wave row to prefetch the destination.
+- Use the shared left sidebar in `/waves`, `/waves/{waveId}`, `/messages`, or
+  `/messages?wave={waveId}`.
+- On non-touch devices, hovering an inactive row prefetches that wave.
 
 ## User Journey
 
-1. Open a route that renders the Brain wave list.
-2. Click a wave or DM entry.
-3. The list marks that row active and the destination route updates to the selected
-   wave.
-4. Click the same active row again to clear selection and return to `/waves` or
+1. Open the Waves or Messages sidebar list.
+2. Click an inactive row.
+3. The row becomes active and the URL updates to the thread route.
+4. If the first unread drop is known, the URL can include `divider=...`.
+5. Click the same active row again to clear selection and return to `/waves` or
    `/messages`.
-5. Use back/forward browser controls to move through previously selected waves.
-6. When a wave row has unread metadata, selection also carries a `divider` query
-   value so the thread can open near the first unread boundary.
-
-## Common Scenarios
-
-- Switching quickly among several community waves in `/waves`.
-- Navigating among direct messages in `/messages`.
-- Moving between tabs while the route remains in the same section, without a full
-  page refresh.
-- Hovering a wave row on desktop before clicking to warm route data for faster
-  transitions.
-- Opening an unread wave from the list can restore divider context for that thread.
+6. Browser back/forward restores prior selections and keeps active highlight in
+   sync.
 
 ## Edge Cases
 
-- Touch devices do not show hover prefetch behavior.
-- Cmd/Ctrl/Shift/Alt-click and middle-click keep standard browser tab-opening
+- Touch devices skip hover prefetch.
+- Cmd/Ctrl/Shift/Alt-click, middle-click, and right-click keep browser-default
   behavior.
-- Selecting the currently active row always returns to the section home (`/waves`
-  or `/messages`) instead of reloading the same wave.
-- When browser back/forward navigation changes the URL, the wave list reflects the
-  resulting `wave` selection.
+- If navigation starts outside the Waves/Messages shell, row click performs normal
+  route navigation into the target thread.
 
 ## Failure and Recovery
 
-- If a selected wave no longer resolves, the active selection is cleared and the
-  view returns to the home context for that section.
-- If a route target can’t be loaded, users stay in-app and can use the same list
-  entries to choose a valid wave.
+- If a selected wave no longer resolves, the app returns to section home
+  (`/waves` or `/messages`).
+- If a stale `wave` query is present during that recovery, it is removed.
+- Users can immediately pick another row from the same list.
 
 ## Limitations / Notes
 
-- This behavior applies to user-visible wave-list entries in the desktop Brain list.
-- Mobile interaction does not use hover-based prefetch.
-- The list updates are scoped to wave/message navigation; other routes continue to
-  use normal route transitions.
+- This page covers shared left-sidebar row navigation only.
+- Hover-based prefetch is non-touch only.
+- Other route and shell behaviors are documented in navigation and layout pages.
 
 ## Related Pages
 

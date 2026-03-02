@@ -3,11 +3,13 @@
 ## Overview
 
 Leaderboard docs cover ranking, winners, and decision-timing behavior in voting
-surfaces.
+surfaces. For create-entry gating and eligibility messaging, start with
+`Wave Leaderboard Drop Entry and Eligibility`.
 
 ## Features
 
-- [Wave Top Voters Lists](feature-top-voters-lists.md)
+- [Wave Top Voters Lists](feature-top-voters-lists.md): rank-wave sidebar
+  voter rankings and drop-level `Top voters` lists.
 - [Wave Winners Tab](feature-winners-tab.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)

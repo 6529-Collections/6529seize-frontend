@@ -2,46 +2,43 @@
 
 ## Overview
 
-Curation-wave drop submission uses a URL-first composer. Users submit one
-supported NFT marketplace URL as the drop content instead of composing mixed
-text and file content.
+Curation submissions use a URL-only composer. Users submit one supported NFT
+marketplace URL as drop content.
 
-In curation leaderboard layouts, eligible users can get an inline URL composer
-row with direct submit controls and a supported-format reference.
+In curation leaderboard layouts, eligible users get an inline URL composer row
+with direct submit controls and a `Supported URLs` reference.
 
 ## Location in the Site
 
-- My Stream curation leaderboard surfaces: `/waves` (with an active curation
-  wave selected)
-- Wave and DM composer surfaces that post to curation waves:
-  `/waves/{waveId}`, `/messages?wave={waveId}`
-- Participatory drop mode for curation waves
+- Curation wave threads: `/waves/{waveId}`
+- Direct-message thread context with an active wave:
+  `/messages?wave={waveId}` (no `/messages/{waveId}` route)
+- Curation participation (`Drop`) mode in the shared composer
 
 ## Entry Points
 
-- Open a curation wave and focus the drop composer.
-- In curation leaderboard layouts, use the inline URL field above leaderboard
-  results.
+- Open a curation wave and switch to `Drop` mode when chat/drop mode is shown.
+- In curation leaderboards, use the inline URL field above leaderboard results.
 - Paste one supported marketplace URL and submit with `Enter` or `Drop`.
 
 ## User Journey
 
 1. Focus the curation URL input (`Enter supported curation URL`).
-2. Paste or type a single marketplace URL.
-3. The composer validates URL-only requirements and supported URL families.
+2. Paste or type one marketplace URL.
+3. The composer validates URL-only input and supported URL families.
 4. If the value can be normalized (for example missing scheme), the composer
    shows the canonical URL it will submit.
 5. Submit with `Enter` or `Drop`.
-6. The drop is posted and the URL input clears.
-7. In leaderboard composer layouts, a success toast confirms submission.
+6. The composer queues the drop request and clears the URL input.
+7. In leaderboard layouts, a success toast confirms server submission.
 
 ## Common Scenarios
 
 - Scheme-less supported input such as `opensea.io/item/...` is accepted and
   submitted as `https://...`.
 - `www.` host variants for supported marketplaces are accepted.
-- In leaderboard variant, users can open `Supported URLs` to see accepted URL
-  formats before posting.
+- In leaderboard variant, users can open `Supported URLs` to review accepted
+  URL formats before posting.
 - In leaderboard variant, successful submissions show
   `Drop submitted successfully`.
 - Reply and quote context can be preserved while posting a curation URL drop.
@@ -63,8 +60,8 @@ row with direct submit controls and a supported-format reference.
 
 - If authentication or required signature is canceled, submission stops and the
   typed URL remains available to retry.
-- If submission fails, users receive an error and can retry from the same
-  composer state.
+- If submission fails after the request is sent, users receive an error and can
+  retry by entering the URL again.
 - If validation fails, users can correct the URL and resubmit immediately.
 
 ## Limitations / Notes

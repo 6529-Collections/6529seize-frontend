@@ -2,65 +2,67 @@
 
 ## Overview
 
-When a wave or direct-message thread is open with the right sidebar inline, the left
-Brain sidebar is shown in a compact width. A small expand control at the top of the
-collapsed left sidebar restores full left-panel width in one action.
-
-The control closes the inline right sidebar, which is what triggers the layout
-change from compact to full mode.
+On desktop thread views, opening the inline right sidebar collapses the left
+sidebar to a compact rail. The top expand control closes the inline right
+sidebar and restores the full left panel.
 
 ## Location in the Site
 
-- `/waves` and `/messages` desktop layouts that render `WebBrainLeftSidebar`.
-- Any desktop `/waves/{waveId}` or `/messages?wave={waveId}` view that can display an inline
-  right sidebar.
+- Selected-wave thread routes:
+  - `/waves/{waveId}` (canonical wave thread route)
+  - `/messages?wave={waveId}` (canonical DM thread route; no
+    `/messages/{waveId}` thread path)
+- Legacy `/waves?wave={waveId}` links redirect to `/waves/{waveId}`.
+- Only when the right sidebar is open in inline desktop mode.
 
 ## Entry Points
 
-- Open a wave or direct-message thread so the right sidebar appears inline.
-- Confirm the left sidebar is in compact mode.
-- Click the expand button at the top of the collapsed left sidebar.
+- Open `/waves/{waveId}` or `/messages?wave={waveId}` on desktop.
+- Open the right sidebar so the left sidebar collapses.
+- Click the expand button at the top of the collapsed left rail.
 
 ## User Journey
 
-1. Open a wave thread (`/waves/{waveId}` or `/messages?wave={waveId}`) on desktop where the
-   right sidebar is visible inline.
-2. Observe that the left sidebar switches to compact (icon-only) mode.
+1. Open a desktop wave or DM thread with a selected wave.
+2. Open the right sidebar in inline mode.
 3. Click the top expand control:
-   - Labeled `Expand waves panel` on wave routes.
-   - Labeled `Expand messages panel` on message routes.
+   - `Expand messages panel` on `/messages?wave={waveId}`.
+   - `Expand waves panel` on `/waves/{waveId}`.
 4. The inline right sidebar closes and the left sidebar returns to full width.
-5. Continue browsing wave or message lists from the expanded left sidebar.
+5. Continue with the same selected thread.
 
 ## Common Scenarios
 
-- Open a rank wave with right sidebar tabs, then quickly return to a full wave list
-  layout by expanding the left panel.
-- Open a direct-message thread and expand from compact sidebar mode to read pinned and
-  long wave names without tooltips.
-- Move between wave and message sections after enabling focus on the left list.
+- Close the inline right sidebar after checking `About`, `Leaderboard`, or other
+  right-sidebar tabs.
+- Expand the left rail in DM threads to read long conversation names directly.
+- Keep the current thread selected while reclaiming list space.
 
 ## Edge Cases
 
-- The button appears only while the left sidebar is rendered in compact mode.
-- The control is available only when the inline right sidebar is open on desktop layouts.
-- On small-screen/off-canvas layouts and right sidebar overlay mode, left sidebar
-  expansion uses the standard sidebar controls; this control does not render there.
-- If the left sidebar is already full-width, this button is not shown.
+- The control is shown only when the left sidebar is collapsed.
+- It requires a selected wave and an open inline right sidebar.
+- It does not render while a full drop overlay is open.
+- It does not render in small-screen/off-canvas layouts where the right
+  sidebar uses overlay mode.
+- It is not shown when the left sidebar is already full width.
 
 ## Failure and Recovery
 
-- If compact mode should disappear unexpectedly, close and reopen the thread; compact mode
-  should follow the right-sidebar inline state.
-- If the right sidebar remains open after clicking the control, refresh the page as a recovery.
-  The layout should resync to default collapsed/open states for the current route.
+- If the control is missing, confirm you are on `/waves/{waveId}` or
+  `/messages?wave={waveId}`, and that the right sidebar is open inline on
+  desktop.
+- If you open `/waves?wave={waveId}`, wait for redirect to `/waves/{waveId}`
+  and retry.
+- If click does not close the sidebar, close and reopen the right sidebar, then
+  try again.
 
 ## Limitations / Notes
 
-- The control does not toggle right sidebar preferences globally; it only updates the
-  current page right-sidebar state.
-- It is a desktop-only affordance linked to right-sidebar open state; on mobile, use the
-  standard sidebar controls.
+- The control only changes right-sidebar state for the current page view.
+- It is desktop-only and depends on right-sidebar inline state.
+- Label text is route-sensitive: `Expand messages panel` on
+  `/messages?wave={waveId}` and `Expand waves panel` on `/waves/{waveId}`.
 
 ## Related Pages
 

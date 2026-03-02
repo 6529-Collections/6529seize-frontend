@@ -2,91 +2,77 @@
 
 ## Overview
 
-Artists in wave and meme drop lists can open a full-screen artist preview from a
-single unified activity badge. The badge appears when an artist has active
-submissions and/or winner artworks. The modal shows `Active Submissions` and, when
-available, `Winning Artworks` views with tabs for switching between them.
+The artist activity badge opens an artist preview modal from profile and drop
+surfaces. The badge appears when the artist has active main-stage submissions,
+winning artworks, or both. The modal shows `Active Submissions` and
+`Winning Artworks`; tabs appear only when both sections are available.
 
 ## Location in the Site
 
-- Profile headers under `/{user}` and `/{user}/<tab>`.
-- Memes leaderboard and meme participation drop rows that render artist info.
-- Single-wave drop headers in wave streams.
-- Single-wave author blocks in wave item details.
+- Profile headers on `/{user}` and profile tab routes such as
+  `/{user}/brain`, `/{user}/collected`, `/{user}/xtdh`, `/{user}/stats`,
+  `/{user}/subscriptions`, and `/{user}/proxy`.
+- Drop rows in wave and direct-message streams (`/waves/[wave]`,
+  `/messages?wave=<waveId>`).
+- Meme leaderboard and meme participation rows where drop artist info is shown.
+- Single-drop detail surfaces opened in the current route with `?drop=<dropId>`.
 
 ## Entry Points
 
-- Click the artist activity badge in a profile header when submissions and/or win
+- Click the artist activity badge in a profile header when submission or winner
   counts are present.
-- Click the artist activity badge next to an artist name when submissions and/or
-  win counts are present in wave/meme contexts.
-- Open a drop row in one of the above contexts and use those badges in that row.
+- Click the same badge next to artist names in wave/meme drop rows.
 
 ## User Journey
 
-1. Open a context where an artist row is shown (`/waves`, profile pages, or meme
-   lists).
-2. If the artist has main-stage activity, the activity badge is visible.
-3. If only active submissions exist, the badge uses a palette icon and opens
-   `Active Submissions`.
-4. If only winner artwork exists, the badge uses a trophy icon and opens
+1. Open a profile header or drop row that shows artist activity.
+2. If the artist has activity, one badge is shown:
+   - palette icon: active submissions only.
+   - trophy icon: winning artworks only.
+   - trophy icon + blue dot: both types; opens `Active Submissions` first.
+3. If both types exist, switch tabs between `Active Submissions` and
    `Winning Artworks`.
-5. If both exist, the badge uses a trophy icon with a blue marker dot and opens
-   `Active Submissions` by default.
-6. In rows with both content types, use `Active Submissions` and `Winning Artworks`
-   tabs to switch.
-7. Select an item card:
-   - the modal closes and opens the selected drop in the current context.
-8. Close using the close button; desktop also supports backdrop click, and mobile app
-   surfaces support closing with the same control or swipe-to-close behavior.
+4. Select a card to close the modal and open that drop in the current route
+   context (`drop` query param update).
+5. Close with the close button or backdrop click. In app wrapper contexts,
+   swipe-down close is also supported.
 
 ## Common Scenarios
 
-- Artists with only active submissions show only the `Active Submissions` view.
-- Artists with only winner IDs show only the `Winning Artworks` view.
-- Artists with both types open with the clicked badge’s tab preselected.
-- Active and winner views support card-level drop interactions and related metadata
-  that is already available in those sections (media, ranks, ratings context).
-- On mobile and touch surfaces, badge hover tooltips are omitted and the badge
-  remains clickable.
-- Profile headers only show one badge even when both counts are present, and
-  encode both states in that single control.
+- Active-only artists show only `Active Submissions`.
+- Winners-only artists show only `Winning Artworks`.
+- Artists with both always open on `Active Submissions`.
+- Badge hover tooltips show on non-touch desktop only.
+- Profile headers and drop rows always use one combined badge (never two badges).
 
 ## Edge Cases
 
-- Badge counts are derived from main-stage data and each behavior is hidden when the
-  corresponding count is zero.
-- Only one badge is shown at a time; when both counts exist it represents both
-  states instead of rendering two separate badges.
-- Desktop users see content-aware tooltip text on badge hover (`View X art
-  submissions`, `View X winning artworks`, or combined text for both states); mobile
-  and touch users do not show this tooltip.
-- When both badge states exist, tab controls render; otherwise the modal uses a
-  single available view.
-- Tap/click inside modal content does not dismiss the modal. Dismiss requires the
-  close affordance or backdrop interaction.
-- Badge totals are real-time values from the current artist activity data.
+- Badge visibility is driven by main-stage submission and winner counts; zero
+  count means no corresponding state.
+- When both states exist, one badge represents both and shows tab controls.
+- Tooltip copy is state-aware on desktop (`View X art submissions`,
+  `View X winning artworks`, or combined text).
+- Clicking inside modal content does not dismiss; close requires close control,
+  backdrop, or (app wrapper) swipe-down.
 
 ## Failure and Recovery
 
-- If active submission data fails to load, the modal shows loading state and can be
-  retried by reopening it.
-- If winner artwork data fails to load, the modal shows a loading state and can be
-  retried by reopening it.
-- The modal remains open while loading and only navigates away after a drop card is
-  explicitly selected.
+- While section data is loading, the modal stays open and shows loading states.
+- If requests fail or return no items, sections can render without cards
+  (no inline error banner in this modal).
+- Selecting a card updates the current route context and closes the modal.
 
 ## Limitations / Notes
 
-- The modal is a compact, contextual surface for current main-stage competition data only.
-- It is not a full profile settings page; navigation is always tied to drop content.
-- Close behavior is intentional: interaction inside the modal content is handled in-place,
-  and accidental background or card interaction closures are minimized.
+- This is a contextual viewer for current main-stage activity, not a profile
+  management surface.
+- Navigation stays tied to drop context in the current page/stream.
 
 ## Related Pages
 
 - [Profile Header Summary](../../profiles/navigation/feature-header-summary.md)
 - [Waves Index](../README.md)
+- [Wave Drop Actions Index](README.md)
 - [Wave Drop Vote Summary and Modal](feature-vote-summary-and-modal.md)
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)

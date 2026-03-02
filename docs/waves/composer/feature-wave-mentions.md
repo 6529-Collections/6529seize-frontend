@@ -2,84 +2,79 @@
 
 ## Overview
 
-Wave composers support two token types for references in post text:
+Wave composers support two reference token types:
 
-- `#` starts wave mentions and resolves to links to existing waves.
-- `$[name]` references NFTs, while `#[name]` is no longer used for NFTs.
+- `#` opens wave mention suggestions and inserts `#[wave_name_in_content]` when selected.
+- `$[name]` references NFTs. `#[name]` is reserved for wave mentions.
 
-Wave mentions are saved as clickable links after submit, so users can jump to the
-mentioned wave directly from a drop body.
-Mention links show a compact wave icon when one is available and expose a
-hover-triggered summary card on desktop.
+After submit, resolved wave mentions render as clickable links to the mentioned
+wave. When available, the link includes a small wave avatar and shows a summary
+tooltip on non-touch devices.
 
 ## Location in the Site
 
-- Wave detail threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}`
-- Wave creation: `/waves/create`
-- Wave description editor surfaces that reuse the same Lexical composer
+- Wave threads: `/waves/{waveId}` (canonical thread route; legacy
+  `/waves?wave={waveId}` normalizes to this route)
+- Direct-message threads: `/messages?wave={waveId}` (canonical DM route; no
+  `/messages/{waveId}` thread route)
 
 ## Entry Points
 
-- Open a wave or DM composer and start typing in the post body.
-- Type `#` followed by a wave name fragment.
+- Open a wave or DM composer and type in the body.
+- Type `#` plus part of a wave name.
 - Select a suggestion from the wave mention menu.
-- Optionally continue typing `$[` to add an NFT reference token such as
-  `$[token_name]`.
-- Save or submit the drop.
+- Optionally add NFT references with `$[name]`.
+- Submit the drop.
 
 ## User Journey
 
-1. In composer mode, type `#` plus the start of a wave name.
-2. A suggestion list opens with matching wave options.
+1. Type `#` plus a wave name fragment.
+2. The suggestion list shows matching waves.
 3. Pick a wave by pressing `Enter`, clicking the suggestion, or using keyboard
    navigation.
-4. The composer inserts a wave mention token in the format `#[wave_name_in_content]`.
+4. The composer inserts `#[wave_name_in_content]`.
 5. Continue editing and submit the drop.
-6. The rendered drop displays that mention as a link that opens the mentioned
-   wave and, on hover-capable devices, opens a wave summary tooltip.
+6. The rendered mention opens `/waves/{waveId}` and shows a hover tooltip on
+   non-touch devices.
 
 ## Common Scenarios
 
-- Mentioning an existing wave from inside a standard thread composer.
-- Mentioning a wave in wave-storm multi-part input.
-- Opening an existing mention in a drop card to jump to `/waves/{waveId}`.
-- Adding NFT references after mentions using `$[nft_name]`.
+- Mentioning another wave while composing in `/waves/{waveId}`.
+- Mentioning a wave while composing in `/messages?wave={waveId}`.
+- Opening a posted mention link to jump to `/waves/{waveId}`.
+- Mixing wave mentions with NFT references using `$[name]`.
 
 ## Edge Cases
 
-- In code blocks, mention suggestions are disabled so `#` and `$` remain literal
-  text until users leave code context.
-- `#` suggestions are context-aware; ambiguous or non-matching wave names remain
-  plain text as `#wave_name_in_content` and do not open as links.
-- When a wave mention is successfully resolved for rendering, it includes a small
-  wave avatar preview inline before the wave name when available.
-- If a wave name includes `]`, it is sanitized on insert so the token remains parseable.
-- If the mention list is not yet available, you can still submit, but only typed
-  tokens that match tracked mentions are promoted to links.
+- In fenced code blocks, mention suggestions are disabled, so `#` and `$[...]`
+  stay literal.
+- If a token was not tracked as a wave mention, it stays plain `#` text in the
+  rendered drop.
+- If a wave name contains `]`, that character is removed when the mention is
+  inserted.
+- Avatar chips appear only when the mentioned wave has a picture.
 
 ## Failure and Recovery
 
-- If the suggestion list does not load, the user can retry typing or submit with
-  plain text until connectivity/search returns.
-- If a posted wave mention does not resolve to a visible link, users can reopen
-  the composer and re-select the wave from the suggestion menu.
-- If an NFT token is still needed, use the `$[name]` pattern instead of `#[name]`.
+- If suggestions fail to load, continue with plain text and retry mention
+  selection later.
+- If a posted mention renders as plain text, edit the drop and re-select the
+  wave from suggestions.
+- For NFT references, use `$[name]` (not `#[name]`).
 
 ## Limitations / Notes
 
-- Wave mentions require matching mention metadata to render as links.
-- Mention links that do not have resolved metadata render inline as plain
-  `#` text and do not use hover cards.
-- `#[name]` tokens now represent wave mentions; they are not used for NFTs.
-- NFT references use the `[...]` pattern with a leading `$` (for example
-  `$[pixel-pie]`).
-- Query results are loaded as suggestions from matching waves rather than all
-  available public waves.
+- Wave mention links require matching mention metadata.
+- Unresolved mention text renders as plain inline text without wave tooltip
+  behavior.
+- Wave mention links target `/waves/{waveId}` even when authored from DM
+  threads.
+- Suggestion results are search-based matches, not a full list of waves.
 
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Creation Description Step](../create/feature-description-step.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)

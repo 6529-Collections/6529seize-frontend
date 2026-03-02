@@ -2,63 +2,63 @@
 
 ## Overview
 
-Wave voting surfaces include ranked `Top voters` lists for both full waves and
-single drops. These lists load additional ranked entries as users scroll and
-keep voter order continuous as more pages arrive.
+Rank-wave voting surfaces show `Top voters` rankings at wave scope and at
+single-drop scope. Both lists are sorted by descending absolute vote totals and
+load more rows as you scroll.
 
 ## Location in the Site
 
-- Rank-wave right sidebar `Voters` tab in `/waves` and `/messages` layouts.
-- Single-drop detail views under the collapsible `Top voters` section.
+- Right sidebar `Voters` tab for rank waves in shared wave/message layouts
+  (for example `/waves/{waveId}` and `/messages?wave={waveId}`).
+- Non-chat single-drop panels, inside the collapsible `Top voters` section
+  (opened with `drop` query state such as `?drop={dropId}`).
 
 ## Entry Points
 
 - Open a rank wave, open the right sidebar, and select `Voters`.
-- Open a drop detail from wave/leaderboard content and expand `Top voters`.
-- Cast votes on drops to appear in these rankings.
+- Open a non-chat drop panel and expand `Top voters`.
+- Vote on drops to appear in the rankings.
 
 ## User Journey
 
-1. Open either top-voters surface (wave-level or drop-level).
-2. The first ranked voters page loads.
-3. Each row shows rank, voter profile link, vote-direction indicators, and
-   total voting credits used.
-4. Scroll to the bottom of the loaded list to trigger the next page.
-5. Additional voters append below the existing rows until no more pages remain.
+1. Open a voters surface (wave-level or drop-level).
+2. The first page loads (20 rows per request).
+3. Each row shows rank, voter profile, vote-direction markers, and absolute
+   vote total.
+4. Scroll to the bottom to request the next page.
+5. More rows append until no next page is available.
 
 ## Common Scenarios
 
-- Wave-level `Voters` tab shows top voters across the entire wave.
-- Single-drop `Top voters` shows top voters for only that drop.
-- Voter rows are profile links, so users can open voter profiles directly from
-  the ranking.
-- A thin loading bar appears while additional ranking pages are being fetched.
-- If no one has voted yet, the panel shows `Be the First to Make a Vote`.
+- The sidebar `Voters` tab ranks voters across the whole wave.
+- Single-drop `Top voters` ranks voters for that one drop.
+- Voter rows link to voter profiles in both list types.
+- A thin loading bar appears while the next page is loading.
+- Empty states show `Be the First to Make a Vote` with scope-specific guidance.
 
 ## Edge Cases
 
-- Single-drop `Top voters` stays collapsed until users expand it.
-- Voters with only positive votes show the positive indicator only; voters with
-  mixed vote history can show both positive and negative indicators.
-- Long or auto-generated handles may be visually truncated in the single-drop
+- The right-sidebar `Voters` tab appears only for rank waves.
+- Single-drop `Top voters` renders only for non-chat drops and is collapsed by
+  default.
+- Positive-only voters show the positive marker only; mixed voters can show
+  both positive and negative markers.
+- Ethereum-style and auto-generated handles can truncate in the single-drop
   list while still linking to the same profile.
-- If a voter has no handle, the list links using the voter's primary address and
-  can appear as an address-style label.
-- Additional pages continue from the server-reported current page so ranking
-  rows are appended in order.
+- Data requests run only when a signed-in profile handle is available.
 
 ## Failure and Recovery
 
-- If loading a later page fails, already rendered voters stay visible.
-- Retry happens by requesting the next page again (for example by continuing to
-  scroll) or refreshing the current view.
-- If the first page returns no voters, users see the empty-state guidance
-  instead of a persistent loading state.
+- Each request retries up to three times with incremental delay.
+- If loading a later page still fails, already rendered voters stay visible.
+- Reaching list end again re-attempts loading the next page when available.
+- If no voters are returned, the UI resolves to the empty-state guidance instead
+  of a stuck loading state.
 
 ## Limitations / Notes
 
-- Ranking order is fixed to highest total votes first in these surfaces.
-- These panels do not include user-controlled sorting/filtering.
+- Ranking order is fixed to descending absolute vote totals.
+- These panels do not support user sorting or filtering.
 - Wave-level and drop-level voter rankings are separate scopes.
 
 ## Related Pages

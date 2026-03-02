@@ -4,6 +4,12 @@
 
 Composer docs cover editing and submission behavior before drops are posted.
 
+## Route Coverage
+
+- Thread composer routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Create-wave description-step editor behavior (including `/waves/create`) is documented in
+  [Wave Creation Description Step](../create/feature-description-step.md).
+
 ## Features
 
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
