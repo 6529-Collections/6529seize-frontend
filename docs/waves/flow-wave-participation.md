@@ -11,7 +11,7 @@ sharing links that reopen the same context.
 - Wave discovery and list surfaces: `/discover`, `/waves`, and `/{user}/waves`
 - Wave thread routes: `/waves/{waveId}`
 - Direct-message wave routes: `/messages?wave={waveId}`
-- App-mode wave creation route: `/waves/create`
+- App-mode creation routes: `/waves/create` and `/messages/create`
 
 ## Entry Points
 
@@ -23,6 +23,8 @@ sharing links that reopen the same context.
   it to `/waves/{waveId}`.
 - Start a new wave from desktop create controls or from `/waves/create` in
   app mode.
+- Start a new direct message from desktop `create=dm` state or from
+  `/messages/create` in app mode.
 
 ## User Journey
 
@@ -47,6 +49,8 @@ sharing links that reopen the same context.
   staying in the same wave context.
 - Start create-wave from desktop list/header/sidebar controls using
   `create=wave` URL state.
+- Start create-DM from desktop list/sidebar controls using `create=dm` URL
+  state.
 - Submit artwork in Memes waves from the leaderboard `Drop` action.
 
 ## Edge Cases

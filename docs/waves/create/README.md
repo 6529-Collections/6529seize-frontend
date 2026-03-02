@@ -1,14 +1,14 @@
-# Wave Creation
+# Wave and Direct Message Creation
 
 ## Overview
 
-Creation docs cover entry points and step-by-step configuration behavior for
-creating waves.
+Creation docs cover wave-creation setup and direct-message creation flows.
 Current user-facing creation supports `Chat` and `Rank` wave types.
 The `Approve` option is shown in the type selector but is currently disabled.
 
 ## Features
 
+- [Direct Message Creation](feature-direct-message-creation.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)

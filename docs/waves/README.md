@@ -4,36 +4,39 @@
 
 Use this area when users need to:
 
-- find waves from list surfaces
-- open a wave thread or direct-message thread
-- create a wave
+- browse waves and direct-message conversations
+- open a wave thread from lists or shared links
+- create a wave or direct-message thread
 - post, vote, react, and manage drops
-- recover from route, tab, or posting failures
+- recover from route, tab, link-target, or posting failures
 
 In-scope routes:
 
 - List and discovery routes: `/discover`, `/waves`, `/messages`.
-- Thread routes: `/waves/{waveId}`, `/messages?wave={waveId}`.
-- Wave creation route (app mode): `/waves/create`.
-- Desktop create-modal URL state: `?create=wave`.
+- Wave thread route: `/waves/{waveId}`.
+- Direct-message thread route: `/messages?wave={waveId}` (no `/messages/{waveId}` route).
+- App create routes: `/waves/create`, `/messages/create`.
+- Desktop create-modal URL states: `?create=wave`, `?create=dm`.
 
 Thread query behavior:
 
-- `drop={dropId}` opens the drop overlay.
-- `serialNo={n}` targets a drop in chat.
-- `divider={n}` sets the unread divider with serial targeting.
+- `drop={dropId}` opens a single-drop overlay in the current thread context.
+- `serialNo={n}` targets a chat drop, then clears `serialNo` from the URL after jump setup.
+- `divider={n}` sets unread-divider position only when `serialNo` is also present.
 
 Legacy and ownership notes:
 
-- Legacy wave links: `/waves?wave={waveId}` normalize to `/waves/{waveId}`.
+- Legacy wave links: `/waves?wave={waveId}` redirect to `/waves/{waveId}` and keep other query values.
 - Legacy profile alias: `/{user}/waves` redirects to `/{user}`.
-- `/messages/create` is owned by the Navigation docs area.
+- Route-shell behavior (header/back) for `/waves/create` and `/messages/create` is owned by Navigation docs.
+- Wave and direct-message creation form behavior is owned by Waves Create docs.
 
 ## Features
 
 - [Discovery](discovery/README.md): find and open waves from discover and list
   surfaces, including `My Votes`.
-- [Create](create/README.md): wave creation entry points and step behavior.
+- [Create](create/README.md): wave and direct-message creation entry points and
+  form/step behavior.
 - [Chat](chat/README.md): timeline scroll, serial jumps, unread controls, and
   typing state.
 - [Composer](composer/README.md): compose and edit drops with markdown,
