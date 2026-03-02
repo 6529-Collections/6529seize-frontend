@@ -12,7 +12,8 @@ Use this subarea for finding waves from `/discover` before opening a thread.
 
 ## Query Coverage
 
-- `identity={handle}` is the only discovery filter persisted in URL state.
+- `identity={selectedIdentity}` is the only discovery filter persisted in URL state.
+- `selectedIdentity` can be a handle or wallet value from `By Identity`.
 - Wave-name search is local UI state and is not written to the URL.
 
 ## Ownership
@@ -20,10 +21,10 @@ Use this subarea for finding waves from `/discover` before opening a thread.
 - Owns discover section browsing (`Latest`, `Most Followed`, and related
   sections).
 - Owns discover search mode (`Search waves` and `By Identity`).
-- Owns discover-card routing behavior from `/discover` into wave and DM
-  threads.
 - Owns section expand/collapse (`Show all` and `Show less`) and expanded-list
   paging behavior.
+- Owns discover-card routing behavior from `/discover` into wave and DM
+  threads.
 - Does not own thread tabs or in-thread behavior after route entry.
 - Does not own wave/direct-message creation form behavior.
 
