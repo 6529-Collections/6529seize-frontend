@@ -142,8 +142,14 @@ export default function HeaderUserProxyDropdown({
                         onSelectAccount={onSelectConnectedAccount}
                         canAddAccount={canAddConnectedAccount}
                         onAddAccount={() => {
-                          seizeAddConnectedAccount();
-                          onClose();
+                          void runMenuAction({
+                            action: () => seizeAddConnectedAccount(),
+                            pendingKey: "add-account",
+                            errorMessage:
+                              "Failed to add connected account. Please try again.",
+                          }).finally(() => {
+                            onClose();
+                          });
                         }}
                       />
                     </div>

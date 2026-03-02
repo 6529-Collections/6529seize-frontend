@@ -198,7 +198,9 @@ const isCapacitorPlatform = (): boolean => {
 };
 
 const normalizeAddress = (address: string): string => address.toLowerCase();
-const ADD_FLOW_CANCEL_GRACE_MS = 5000;
+// 5000ms allows wallet connectors enough time to settle transient state changes
+// so we do not treat successful account transitions as cancelled add flows.
+export const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
 
 const validateStoredAddress = (
   storedAddress: string
@@ -820,7 +822,22 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       let remainingProfiles = getConnectedWalletAccounts().length;
+      const maxIterations = Math.max(
+        MAX_CONNECTED_PROFILES * 2,
+        remainingProfiles + 2
+      );
+      let iterations = 0;
+
       while (remainingProfiles > 0) {
+        iterations += 1;
+        if (iterations > maxIterations) {
+          const iterationError = new AuthenticationError(
+            `Failed to clear all authenticated profiles: exceeded ${maxIterations} iterations during logout cleanup.`
+          );
+          logError("seizeDisconnectAndLogoutAll", iterationError);
+          throw iterationError;
+        }
+
         removeAuthJwt();
         const nextRemainingProfiles = getConnectedWalletAccounts().length;
         if (nextRemainingProfiles >= remainingProfiles) {
@@ -832,6 +849,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshStoredConnectedAccounts();
       setDisconnected();
     } catch (error: unknown) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       const authError = new AuthenticationError(
         "Failed to clear all authenticated profiles after successful wallet disconnect",
         error
@@ -906,8 +927,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [refreshStoredConnectedAccounts, setConnected]
   );
 
+  const canAddConnectedAccount = useMemo(() => {
+    return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
+  }, [storedConnectedAccounts]);
+
   const seizeAddConnectedAccount = useCallback((): void => {
-    if (!canStoreAnotherWalletAccount()) {
+    if (!canAddConnectedAccount || !canStoreAnotherWalletAccount()) {
       return;
     }
 
@@ -952,9 +977,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     account.address,
     account.isConnected,
+    canAddConnectedAccount,
     disconnect,
     seizeConnect,
-    storedConnectedAccounts.length,
   ]);
 
   const connectedAccounts = useMemo(() => {
@@ -977,9 +1002,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       };
     });
   }, [activeAddress, liveConnectedAddress, storedConnectedAccounts]);
-  const canAddConnectedAccount = useMemo(() => {
-    return storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
-  }, [storedConnectedAccounts.length]);
 
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
@@ -1008,11 +1030,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       activeAddress,
       isActiveWalletConnected,
       connectedAccounts,
-      connectedAddress,
-      impersonatedAddress,
       walletInfo?.name,
       walletInfo?.icon,
-      walletInfo?.type,
       seizeConnect,
       seizeDisconnect,
       seizeDisconnectAndLogout,
