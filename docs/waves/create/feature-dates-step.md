@@ -2,82 +2,91 @@
 
 ## Overview
 
-The `Dates` step schedules when submissions open, when voting starts, when
-winners are announced, and (for recurring schedules) when the wave ends.
+The `Dates` step sets when a `Rank` wave accepts submissions, when voting
+starts, and when winners are announced.
+
+If recurring announcements are enabled, this step also sets `Wave End Date`.
 
 ## Location in the Site
 
-- Full-page wave creation flow: `/waves/create`
+- Full-page create route: `/waves/create`
+- Create-wave modal flows that reuse the same step sequence
 - Step label: `Dates`
-- Available in `Rank` wave creation
+- User-reachable in `Rank` wave creation (`Approve` is shown in `Overview` but
+  disabled)
 
 ## Entry Points
 
-- Start creating a `Rank` wave and continue from `Groups` to `Dates`.
-- Select `Dates` from the create-wave step rail to revisit timing.
-- Return to `Dates` from later steps to adjust schedule before finishing.
+- Start a `Rank` create flow and continue `Overview -> Groups -> Dates`.
+- Use `Back` from `Drops`, `Voting`, `Outcomes`, or `Description`.
+- On large screens, use the step rail to return to `Dates` after you have
+  moved past it.
 
 ## User Journey
 
-1. Open the `Dates` step.
-2. Use the collapsible sections:
-   - `Wave Timeline`
-   - `Winners Announcements`
-   - `Wave End Date` (shown only when recurring announcements are enabled)
-3. Set `Drops Submission Opens`.
-4. Set `Drops Voting Begins` (must be at or after submission start).
-5. Set `First Winners Announcement` date and time.
-6. Add or remove additional winner-announcement intervals.
-7. Optionally enable `Repeating Announcement Cycles` once at least one
+1. Set `Drops Submission Opens`.
+2. Set `Drops Voting Begins` (must be at or after submission start).
+3. Set `First Winners Announcement` date and time (must be at or after voting
+   start).
+4. Add optional `Additional Announcements` as intervals (`Hours`, `Days`, or
+   `Weeks`).
+5. Optional: enable `Repeating Announcement Cycles` after at least one
    additional interval exists.
-8. If recurring is enabled, set `Wave End Date` and review projected final
-   announcement timing.
+6. If recurring is enabled, set `Wave End Date`.
+7. Continue to `Drops`.
 
 ## Common Scenarios
 
-- Single-announcement wave:
-  - Set the first winners announcement and leave additional intervals empty.
-- Fixed multi-announcement schedule:
-  - Add one or more intervals; wave end aligns to the last scheduled
-    announcement.
-- Recurring schedule:
-  - Add intervals, enable recurring cycles, and set an explicit end date.
-- Keyboard-driven scheduling:
-  - Toggle section headers by keyboard and continue editing time controls.
+- One-time winners: set only `First Winners Announcement`.
+- Fixed schedule: add intervals and leave recurring off.
+  - End date follows the last scheduled announcement.
+- Recurring schedule: add intervals, enable recurring, then set an end date and
+  time.
+- Mid-flow adjustment: return from later steps and revise dates before final
+  submit.
 
 ## Edge Cases
 
-- Voting start is constrained to submission start or later.
-- Recurring mode cannot be enabled until at least one additional interval is
-  configured.
-- `Wave End Date` controls appear only when recurring mode is active and
-  additional intervals exist.
-- On first interaction with winner-announcement controls, the timeline section
-  can auto-collapse to keep focus on announcement setup.
-- Section headers expose expanded/collapsed state and linked content regions
-  for assistive technologies.
+- `Drops Submission Opens` cannot be set in the past; past picks are pushed to
+  current time.
+- On first interaction with `Winners Announcements`, `Wave Timeline` can
+  auto-collapse once.
+- If voting start moves forward, first winners announcement can auto-shift so
+  it stays at or after voting start.
+- `Wave End Date` appears only when recurring is on and at least one additional
+  interval exists.
+- When recurring is turned on, end date is prefilled to a future default
+  covering about two full announcement cycles unless a later valid end date
+  already exists.
+- End-date calendar selection blocks days before one full configured cycle is
+  complete.
 
 ## Failure and Recovery
 
-- If recurring mode is toggled without additional intervals, add an interval
-  first and retry.
-- If timeline ordering becomes invalid, adjust submission/voting/announcement
-  times until chronological order is valid.
-- If recurring end timing is too early, move end date forward so expected
-  announcements fit in the schedule.
+- If `Next` does not advance, verify:
+  - submission start <= voting start
+  - first announcement is not before voting start
+  - end date is set and valid
+- If recurring controls are missing, add at least one additional announcement
+  interval first.
+- If first announcement shifts after a voting-date change, set it again in
+  `Winners Announcements`.
+- If end-date selection feels too early in recurring mode, move it later or use
+  longer intervals.
 
 ## Limitations / Notes
 
-- Chat waves skip the `Dates` step entirely.
-- Additional winner announcements are configured as intervals, not arbitrary
-  standalone timestamps.
-- Expanded/collapsed section state is session UI state and resets on reload.
-- The `Approve` type is currently shown as disabled in `Overview`, so users do
-  not reach an approve-specific `Dates` path.
+- `Chat` waves skip `Dates`.
+- Additional announcements are interval-based; there is no standalone timestamp
+  list.
+- Create-step state is local to the active create session; closing the create
+  modal/page resets draft values.
 
 ## Related Pages
 
+- [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
+- [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
