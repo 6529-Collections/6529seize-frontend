@@ -2,77 +2,65 @@
 
 ## Overview
 
-The wave composer supports dragging and pasting image files directly into the body
-editor. Dropped/pasted images are uploaded automatically and rendered inline as
-the image placeholder transitions to a remote image URL.
+Dropping or pasting image files into the drop editor uploads them immediately
+and inserts inline images in the editor content.
+
+This page covers drag/paste image uploads only.
 
 ## Location in the Site
 
-- Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}`
-- Full composer at `/waves/create`
-- Wave description composer surfaces that use the same editor
+- Wave thread composer: `/waves/{waveId}`
+- Direct-message thread composer: `/messages?wave={waveId}`
+- Create-wave `Description` step: `/waves/create`
+- Create-wave modal flows that reuse the same `Description` step
 
 ## Entry Points
 
-- Open a wave, DM, or wave creation composer.
-- Focus the body editor.
-- Drop an image file onto the editor or paste an image from the clipboard.
+- Open a supported composer/editor surface.
+- Keep focus in the body editor.
+- Drop image files into the editor or paste image files from the clipboard.
 
-## User Journey
+## What Happens
 
-1. Trigger drag/drop or paste with one or more files while focus is in the body
-   editor.
-2. For supported image files, the editor inserts a temporary loading image block
-   at the insertion point.
-3. Each image uploads through the wave-drop multipart media pipeline.
-4. On success, the loading placeholder is replaced with the final uploaded image
-   URL.
-5. On upload failure, that specific placeholder is removed.
+1. The handler reads dropped/pasted files and keeps accepted image MIME types.
+2. If none are accepted, the app shows
+   `Unsupported file type for Drag & Drop / Paste.` and stops.
+3. For each accepted image, the editor inserts a temporary loading image node.
+4. Each accepted image uploads independently through `drop-media` multipart
+   upload endpoints.
+5. On success, that loading node is replaced with the uploaded image URL.
+6. On failure, that loading node is removed.
 
-## Common Scenarios
+## Rules and Limits
 
-- Pasting screenshots or copied image files into the composer.
-- Dropping a single image or a small set of images into the editor.
-- Inserting multiple images; each accepted image is processed individually.
+- Accepted types use `image/*` matching, with explicit entries that include
+  `image/heic`, `image/heif`, `image/gif`, and `image/webp`.
+- Upload rejects empty files.
+- Upload rejects files larger than `500 MB`.
+
+## Feedback Model
+
+- No per-image progress bar in the editor for drag/paste uploads.
+- No inline row-level failure message for a single failed image upload.
+- Drag/paste uploads do not add files to the attachment tray.
 
 ## Edge Cases
 
-- The drag/paste handler only accepts image files with types from the image
-  pipeline (`image/*`, `image/heic`, `image/heif`, `image/gif`, `image/webp`).
-- If no accepted images are found in the dropped/pasted set, the composer shows
-  a toast: `Unsupported file type for Drag & Drop / Paste.`
-- If an upload fails during that path, the loading image node is removed and the
-  editor does not keep a broken placeholder.
-- Empty-file and oversized-file failures also remove the temporary placeholder;
-  this path does not show a per-image inline error row.
-- The path does not surface upload progress in the composer; feedback is limited to
-  placeholder replacement/removal behavior.
+- Mixed file sets: accepted images upload; unsupported files are ignored when
+  at least one image is accepted.
+- Multi-image batches: each image can succeed or fail independently.
 
 ## Failure and Recovery
 
-- If a file is rejected as unsupported, use a supported image type and retry the
-  drop or paste.
-- If an upload placeholder disappears, retry with a smaller non-empty file, or
-  use the Upload Media control for a clean retry.
-- For oversized or empty files, re-choose a valid image before re-uploading.
-
-## Limitations / Notes
-
-- `multiPartUpload` enforces a hard `500 MB` max file size and blocks empty files
-  in this upload path.
-- This path is image-only and does not apply non-image media drag/paste flows.
-- Pasted/dragged image acceptance can differ from the media-selector control, which
-  has a broader MIME target.
-- The drag/paste path uses placeholder replacement/removal feedback rather than
-  per-file progress or detailed inline error panels.
+- Unsupported-type toast: retry with image files.
+- Loading image disappears: retry with a smaller, non-empty image.
+- For audio/video or explicit file-queue handling, use `Upload a file`.
 
 ## Related Pages
 
 - [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
+- [Wave Creation Description Step](../create/feature-description-step.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
-- [Wave Curation URL Submissions](feature-curation-url-submissions.md)
-- [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Docs Home](../../README.md)
