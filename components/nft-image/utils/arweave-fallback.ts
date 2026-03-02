@@ -80,10 +80,13 @@ export function withArweaveFallback(
       return;
     }
 
-    // Ensure we always end up with a string (TS-safe)
     let originalSrc = target.dataset[DS_ORIGINAL];
 
-    if (!originalSrc) {
+    if (originalSrc && originalSrc !== currentSrc) {
+      delete target.dataset[DS_INDEX];
+      originalSrc = currentSrc;
+      target.dataset[DS_ORIGINAL] = originalSrc;
+    } else if (!originalSrc) {
       originalSrc = currentSrc;
       target.dataset[DS_ORIGINAL] = originalSrc;
     }
