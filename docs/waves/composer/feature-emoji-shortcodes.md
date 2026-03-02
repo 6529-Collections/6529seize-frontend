@@ -2,74 +2,83 @@
 
 ## Overview
 
-Wave drop composers support inline emoji shortcode conversion. When users enter
-a valid emoji ID in `:emoji_id:` format, the composer replaces it with an
-inline emoji and keeps typing flow continuous.
+Wave and direct-message composers convert valid `:emoji_id:` text to inline
+emoji while you type. The same conversion also runs in inline drop edit mode.
 
 ## Location in the Site
 
-- Wave detail threads: `/waves/{waveId}`
-- Direct-message wave threads: `/messages?wave={waveId}`
-- Drop edit composer for existing wave drops
+- Wave thread composer: `/waves/{waveId}` (legacy `/waves?wave={waveId}`
+  redirects here before the composer loads)
+- Direct-message thread composer: `/messages?wave={waveId}` (no
+  `/messages/{waveId}` route)
+- Inline drop edit composer in wave and direct-message threads
 
 ## Entry Points
 
-- Type an emoji shortcode directly in the drop composer.
-- Pick an emoji from the composer emoji picker.
-- Edit an existing draft or drop that includes shortcode-style emoji text.
+- Type shortcode text in the composer (`:emoji_id:`).
+- Open the composer emoji picker and choose an emoji.
+- Open edit mode on a drop that already has shortcode text.
 
 ## User Journey
 
-1. Focus a wave drop composer (new drop or edit mode).
-2. Enter shortcode text in `:emoji_id:` format.
-3. When the shortcode matches a supported emoji ID, it converts to inline emoji.
-4. The composer inserts a trailing space after the emoji.
-5. Continue typing and submit normally.
+1. Focus a wave, DM, or edit composer.
+2. Type `:emoji_id:` or choose an emoji from the picker.
+3. Native picker selections insert a native emoji character directly.
+4. Custom picker selections insert `:id:` text.
+5. The composer converts valid native/custom IDs to inline emoji.
+6. After each conversion, the editor inserts a trailing space and keeps typing
+   active.
+7. Continue writing and submit (or save edit) normally.
 
 ## Common Scenarios
 
-- Native emoji IDs such as `:smile:` convert inline.
-- Custom 6529 emoji IDs convert inline when available in the emoji catalog.
-- Emoji picker selections can produce the same inline result as typed
-  shortcodes.
-- Multiple valid shortcodes in the same draft can each convert inline.
-- In mobile composer mode, the emoji picker opens in the full-screen picker surface so
-  users can scroll through emoji groups and pick a symbol without losing composer
-  focus or triggering unrelated page movement.
+- `:smile:` and other valid native IDs convert inline.
+- Valid 6529 custom IDs convert after the custom emoji catalog loads.
+- Multiple valid shortcodes in one text run convert inline.
+- Existing shortcode text in edit mode converts after editor content loads.
+- On mobile, the picker opens in a full-screen dialog.
 
 ## Edge Cases
 
-- Unknown shortcode IDs stay as plain text and are not force-converted.
-- Partial shortcode text (for example, missing the closing `:`) stays plain
-  text until completed.
-- If conversion happens while the caret is inside the shortcode, the caret is
-  repositioned after the inserted emoji so typing can continue.
-- On mobile, the emoji picker interaction stays scoped to the modal surface while
-  selecting emojis, so accidental scroll or zoom interactions stay off the composer
-  thread.
+- Unknown shortcode IDs remain plain text.
+- Partial shortcode text (for example `:emoji_id` without the closing `:`)
+  remains plain text.
+- Shortcode IDs are matched with word characters only (letters, numbers,
+  underscore).
+- If conversion runs while the caret is inside the shortcode text, the caret
+  moves to the inserted spacing position so typing can continue.
+- While custom emoji data is loading, custom IDs remain plain text.
+- If custom emoji loading fails, custom IDs remain plain text while native IDs
+  still convert.
+- If one unsupported `:id:` appears before a valid shortcode in the same text
+  run, later shortcodes in that run may not convert until the unsupported token
+  is fixed or removed.
 
 ## Failure and Recovery
 
-- If a shortcode does not convert, verify exact ID spelling and closing-colon
-  format (`:emoji_id:`), then retry.
-- If custom emoji data is unavailable, custom IDs remain plain text; users can
-  continue composing and submit with text fallback.
-- Failed or unsupported emoji conversion does not block drop submission.
+- If a shortcode does not convert, confirm exact `:emoji_id:` format and retry.
+- If a valid shortcode still does not convert, remove unsupported shortcode text
+  in the same run, then retry.
+- If a custom emoji does not convert, reopen the picker and reselect the emoji
+  or retry after network recovery.
+- Unsupported or failed conversion does not block drop submission.
 
 ## Limitations / Notes
 
-- Conversion recognizes shortcode IDs that match supported native or custom
-  emoji entries.
-- Shortcode matching uses word-style IDs (letters, numbers, underscore).
-- This page covers composer behavior, not drop reaction emoji controls.
-- Emoji picker symbols are rendered at a fixed base size for touch-friendly visual
-  legibility in composer surfaces.
+- Composer availability is documented separately in
+  [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md).
+- This page covers composer and edit input behavior, not drop reaction emoji
+  controls.
+- Desktop picker closes on outside click; mobile picker closes after selection
+  or explicit close.
 
 ## Related Pages
 
+- [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
+- [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
-- [Wave Drop Reactions and Rating Actions](../drop-actions/feature-reactions-and-ratings.md)
+- [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
+- [Wave Drop Reactions and Rating Actions](../drop-actions/feature-reactions-and-ratings.md)
 - [Docs Home](../../README.md)
