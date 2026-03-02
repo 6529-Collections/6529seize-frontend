@@ -9,6 +9,7 @@ import {
   removeAuthJwt,
   setActiveWalletAccount,
   setAuthJwt,
+  syncConnectedWalletProfile,
   syncWalletRoleWithServer,
 } from "@/services/auth/auth.utils";
 import Cookies from "js-cookie";
@@ -238,5 +239,42 @@ describe("auth.utils", () => {
     expect(
       getConnectedWalletAccounts().map((account) => account.address)
     ).toEqual(["0x001", "0x002", "0x003"]);
+  });
+
+  it("syncs and updates stored profile metadata for connected wallet accounts", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", "refresh-a", "role-a");
+    syncConnectedWalletProfile("0xAaA", "profile-1", "alice");
+
+    expect(getConnectedWalletAccounts()[0]).toEqual(
+      expect.objectContaining({
+        address: "0xAaA",
+        profileId: "profile-1",
+        profileHandle: "alice",
+      })
+    );
+
+    // Re-auth should not wipe previously synced profile metadata.
+    setAuthJwt("0xAaA", "jwt-a2", "refresh-a2", "role-a");
+    expect(getConnectedWalletAccounts()[0]).toEqual(
+      expect.objectContaining({
+        address: "0xAaA",
+        refreshToken: "refresh-a2",
+        profileId: "profile-1",
+        profileHandle: "alice",
+      })
+    );
+
+    // Metadata updates should overwrite stale values.
+    syncConnectedWalletProfile("0xAaA", "profile-2", "alice-updated");
+    expect(getConnectedWalletAccounts()[0]).toEqual(
+      expect.objectContaining({
+        profileId: "profile-2",
+        profileHandle: "alice-updated",
+      })
+    );
   });
 });

@@ -31,6 +31,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   removeAuthJwt: jest.fn(),
   setActiveWalletAccount: jest.fn(() => true),
   setAuthJwt: jest.fn(),
+  syncConnectedWalletProfile: jest.fn(),
   getAuthJwt: jest.fn(() => null),
 }));
 
@@ -109,8 +110,8 @@ mockTitleContextModule();
 let walletAddress: string | null = "0x1";
 let connectionState: string = "connected";
 
-const mockSeizeDisconnectAndLogout = jest.fn();
-const mockSeizeDisconnect = jest.fn();
+const mockSeizeDisconnectAndLogout = jest.fn(() => Promise.resolve());
+const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({

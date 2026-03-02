@@ -144,6 +144,8 @@ interface SeizeConnectContextType {
   connectedAccounts: readonly {
     readonly address: string;
     readonly role: string | null;
+    readonly profileId: string | null;
+    readonly profileHandle: string | null;
     readonly isActive: boolean;
     readonly isConnected: boolean;
   }[];
@@ -1056,6 +1058,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       return {
         address: storedAccount.address,
         role: storedAccount.role,
+        profileId: storedAccount.profileId,
+        profileHandle: storedAccount.profileHandle,
         isActive,
         isConnected: isConnectedForAccount,
       };

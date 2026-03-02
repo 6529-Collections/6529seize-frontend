@@ -41,6 +41,7 @@ import {
   removeAuthJwt,
   setActiveWalletAccount,
   setAuthJwt,
+  syncConnectedWalletProfile,
 } from "@/services/auth/auth.utils";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
@@ -259,6 +260,18 @@ export default function Auth({
   useEffect(() => {
     latestAddressRef.current = address;
   }, [address]);
+
+  useEffect(() => {
+    if (!address || !connectedProfile?.id) {
+      return;
+    }
+
+    syncConnectedWalletProfile(
+      address,
+      connectedProfile.id,
+      connectedProfile.handle ?? null
+    );
+  }, [address, connectedProfile?.id, connectedProfile?.handle]);
 
   // Immediate authentication effect with race condition prevention
   useEffect(() => {
