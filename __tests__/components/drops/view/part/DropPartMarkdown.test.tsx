@@ -627,7 +627,7 @@ describe("DropPartMarkdown", () => {
     expect(a).toHaveAttribute("href", "https://google.com");
   });
 
-  it("renders separate spaced paragraphs for blank-line content", () => {
+  it("renders separate paragraphs for blank-line content with tight spacing", () => {
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
@@ -642,8 +642,26 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs).toHaveLength(2);
     expect(paragraphs[0]).toHaveTextContent("First");
     expect(paragraphs[1]).toHaveTextContent("Second");
-    expect(paragraphs[0]?.className).toContain("tw-mb-3");
-    expect(paragraphs[0]?.className).toContain("last:tw-mb-0");
+    expect(paragraphs[0]?.className).toContain("tw-mb-0");
+    expect(paragraphs[0]?.className).not.toContain("tw-mb-3");
+  });
+
+  it("preserves one visible blank line when content has triple newlines", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"First\n\n\nSecond"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = document.querySelectorAll("p.word-break");
+    expect(paragraphs).toHaveLength(3);
+    expect(paragraphs[0]).toHaveTextContent("First");
+    expect(paragraphs[1]?.textContent).toBe("\u00a0");
+    expect(paragraphs[2]).toHaveTextContent("Second");
   });
 
   it("renders one inline show-previews action when previews are hidden", async () => {
