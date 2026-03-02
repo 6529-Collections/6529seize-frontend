@@ -105,7 +105,7 @@ const convertCodeNodesToFences = (root: RootNode) => {
     if (!node) continue;
 
     if ($isCodeNode(node)) {
-      const language = node.getLanguage?.() ?? "";
+      const language = node.getLanguage() ?? "";
       const safeLanguage = language.trim().replaceAll(/[`\n\r]/g, "");
       const codeText = node.getTextContent();
       const normalizedCode = codeText.endsWith("\n")
@@ -146,6 +146,7 @@ function reconstructSplitMention(
   if (!mentionMatch) return false;
 
   const handle = mentionMatch[1];
+  if (!handle) return false;
   const mentionNode = $createMentionNode(`@${handle}`);
 
   const currentText = currentNode.getTextContent();
@@ -611,7 +612,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           >
             cancel
           </button>{" "}
-          {!isMobileDevice ? "• enter to " : "• "}
+          {isMobileDevice ? "• " : "• enter to "}
           <button
             onClick={handleSave}
             className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
