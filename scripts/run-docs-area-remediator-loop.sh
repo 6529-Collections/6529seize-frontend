@@ -154,7 +154,23 @@ EOF
   if [[ "${is_root_target}" == "true" ]]; then
     python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --all --strict --enforce-monotonic
   else
-    python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic
+    area_validation_output=""
+    if ! area_validation_output="$(python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic 2>&1)"; then
+      printf '%s\n' "${area_validation_output}"
+      if printf '%s\n' "${area_validation_output}" | grep -q "stale-route signals"; then
+        echo ""
+        echo "Detected stale-route backlog in docs/${target_area}; running auto-remediation."
+        python3 .codex/skills/docs-area-remediator/scripts/run_stale_route_remediation.py --area "${target_area}"
+        git add -A "docs/${target_area}" docs/README.md
+        python3 .codex/skills/docs-area-remediator/scripts/validate_docs_optimizations.py --area "${target_area}" --strict --enforce-monotonic
+      else
+        echo ""
+        echo "Area validation failed for docs/${target_area}."
+        exit 1
+      fi
+    else
+      printf '%s\n' "${area_validation_output}"
+    fi
   fi
   python3 .codex/skills/commit-docs-updater/scripts/validate_docs_links.py
   git commit -m "docs: remediator pass ${iteration} (${target_path})"

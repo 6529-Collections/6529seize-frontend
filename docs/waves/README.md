@@ -6,33 +6,37 @@ Use this area when users need to:
 
 - browse waves and direct-message conversations
 - open a thread from lists or shared links
-- create a wave or direct-message thread
+- create waves or direct-message threads
 - post, vote, react, and manage drops
 - recover from route, tab, link-target, or posting failures
 
-In-scope routes:
+## Route Map
 
-- List and discovery routes: `/discover`, `/waves`, `/messages`.
+- List routes: `/discover`, `/waves`, `/messages`.
 - Wave thread route: `/waves/{waveId}`.
 - Direct-message thread route: `/messages?wave={waveId}` (no `/messages/{waveId}` route).
 - App create routes: `/waves/create`, `/messages/create`.
-- Web create-modal URL states for wave creation: `/discover?create=wave` or `/waves?create=wave`.
-- Web create-modal URL states for direct-message creation: `/discover?create=dm`, `/waves?create=dm`, or `/messages?create=dm`.
+- Web create URL states for wave creation: `/discover?create=wave` or
+  `/waves?create=wave`.
+- Web create URL states for direct-message creation:
+  `/discover?create=dm`, `/waves?create=dm`, or `/messages?create=dm`.
 
-Thread query behavior:
+## Deep-Link Query Behavior
 
 - `drop={dropId}` opens a single-drop overlay in the current thread context.
+- Closing the single-drop overlay removes `drop` from the URL.
 - `serialNo={n}` targets a chat drop during initial thread setup.
 - `divider={n}` sets unread-divider position only when `serialNo` is also present.
-- After jump setup, the app clears both `serialNo` and `divider` from the URL.
+- After jump setup, the app removes both `serialNo` and `divider` from the URL.
 
-Access constraints:
+## Access and Availability
 
-- Wave and direct-message creation requires a connected profile.
-- In web, create actions use `?create=wave` or `?create=dm`.
-- In app, create actions use `/waves/create` or `/messages/create`.
+- Waves and Messages routes require an authenticated wallet.
+- A profile handle is required before route content renders.
+- When Waves access is unavailable (for example proxy-restricted access), the route shows an unavailable state.
+- Wave and direct-message creation requires an eligible connected profile.
 
-Legacy and ownership notes:
+## Legacy Routes and Ownership Boundaries
 
 - Legacy wave links: `/waves?wave={waveId}` redirect to `/waves/{waveId}` and keep other query values.
 - Legacy profile alias: `/{user}/waves` redirects to `/{user}`.
