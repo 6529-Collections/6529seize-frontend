@@ -71,18 +71,45 @@ const setWalletAuthCookie = (jwt: string | null): void => {
   }
 };
 
+const parseAccountsJson = (raw: string): unknown[] | null => {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const hasRequiredAccountFields = (
+  record: Partial<ConnectedWalletAccount>
+): record is Partial<ConnectedWalletAccount> & {
+  address: string;
+  refreshToken: string;
+} =>
+  typeof record.address === "string" &&
+  record.address.trim().length > 0 &&
+  typeof record.refreshToken === "string" &&
+  record.refreshToken.trim().length > 0;
+
+const toStoredAccount = (
+  record: Partial<ConnectedWalletAccount> & {
+    address: string;
+    refreshToken: string;
+  }
+): ConnectedWalletAccount => ({
+  address: record.address,
+  refreshToken: record.refreshToken,
+  role: typeof record.role === "string" ? record.role : null,
+  jwt: typeof record.jwt === "string" ? record.jwt : null,
+  profileId: typeof record.profileId === "string" ? record.profileId : null,
+  profileHandle:
+    typeof record.profileHandle === "string" ? record.profileHandle : null,
+});
+
 const readAccountsFromStorage = (): ConnectedWalletAccount[] => {
   const raw = safeLocalStorage.getItem(WALLET_ACCOUNTS_STORAGE_KEY);
-  if (!raw) return [];
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [];
-  }
-
-  if (!Array.isArray(parsed)) return [];
+  const parsed = raw ? parseAccountsJson(raw) : null;
+  if (!parsed) return [];
 
   const dedupe = new Set<string>();
   const accounts: ConnectedWalletAccount[] = [];
@@ -90,28 +117,12 @@ const readAccountsFromStorage = (): ConnectedWalletAccount[] => {
   for (const item of parsed) {
     if (!item || typeof item !== "object") continue;
     const record = item as Partial<ConnectedWalletAccount>;
-    if (
-      typeof record.address !== "string" ||
-      record.address.trim().length === 0 ||
-      typeof record.refreshToken !== "string" ||
-      record.refreshToken.trim().length === 0
-    ) {
-      continue;
-    }
+    if (!hasRequiredAccountFields(record)) continue;
 
     const normalized = normalizeAddress(record.address);
     if (dedupe.has(normalized)) continue;
     dedupe.add(normalized);
-
-    accounts.push({
-      address: record.address,
-      refreshToken: record.refreshToken,
-      role: typeof record.role === "string" ? record.role : null,
-      jwt: typeof record.jwt === "string" ? record.jwt : null,
-      profileId: typeof record.profileId === "string" ? record.profileId : null,
-      profileHandle:
-        typeof record.profileHandle === "string" ? record.profileHandle : null,
-    });
+    accounts.push(toStoredAccount(record));
   }
 
   return accounts;

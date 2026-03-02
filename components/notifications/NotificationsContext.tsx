@@ -180,37 +180,37 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const resolveAddressForNotificationProfile = useCallback(
     ({
-      targetProfileId,
-      targetProfileHandle,
-    }: {
-      targetProfileId: string;
-      targetProfileHandle: string;
-    }): string | null => {
+      target_profile_id,
+      target_profile_handle,
+    }: Pick<
+      DevicePushData,
+      "target_profile_id" | "target_profile_handle"
+    >): string | null => {
       if (
-        connectedProfileRef.current?.id === targetProfileId &&
+        connectedProfileRef.current?.id === target_profile_id &&
         activeAddressRef.current
       ) {
         return activeAddressRef.current;
       }
 
       const profileMatchedAccount = connectedAccountsRef.current.find(
-        (account) => account.profileId === targetProfileId
+        (account) => account.profileId === target_profile_id
       );
       if (profileMatchedAccount) {
         return profileMatchedAccount.address;
       }
 
       const roleMatchedAccount = connectedAccountsRef.current.find(
-        (account) => account.role === targetProfileId
+        (account) => account.role === target_profile_id
       );
       if (roleMatchedAccount) {
         return roleMatchedAccount.address;
       }
 
-      const normalizedTargetProfileHandle = targetProfileHandle.toLowerCase();
+      const normalizedHandle = target_profile_handle.toLowerCase();
       const handleMatchedAccount = connectedAccountsRef.current.find(
         (account) =>
-          account.profileHandle?.toLowerCase() === normalizedTargetProfileHandle
+          account.profileHandle?.toLowerCase() === normalizedHandle
       );
       if (handleMatchedAccount) {
         return handleMatchedAccount.address;
@@ -312,8 +312,8 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const matchedAddress = resolveAddressForNotificationProfile({
-        targetProfileId,
-        targetProfileHandle,
+        target_profile_id: targetProfileId,
+        target_profile_handle: targetProfileHandle,
       });
 
       if (!matchedAddress) {
