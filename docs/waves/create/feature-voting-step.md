@@ -2,81 +2,88 @@
 
 ## Overview
 
-The `Voting` step configures how drops are scored in `Rank` wave creation.
-Users choose a voting credit mode, optional Rep filters, and optional
-time-weighted voting settings.
+Use `Voting` in `Rank` wave creation to define how votes are counted.
+Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 
 ## Location in the Site
 
-- Full-page flow: `/waves/create`
-- Create-wave modal flow on desktop discover/waves/messages shells
-- `Voting` step in `Rank` wave creation
+- Full-page create route: `/waves/create`
+- Desktop create-wave modal mode (`?create=wave`) on:
+  - `/discover`
+  - `/waves`
+  - `/waves/{waveId}`
+  - `/messages`
+  - `/messages?wave={waveId}`
+- Step label: `Voting`
+- User-reachable only in `Rank` creation (`Approve` is shown in `Overview` but
+  disabled)
 
-## Entry Points
+## Step Path
 
-- Open a `Rank` wave creation flow and continue from `Drops` to `Voting`.
-- Reopen `Voting` from the step rail while creating before submission.
-- Use the same step sequence when create-wave is opened as a desktop modal.
+- `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
 
-## User Journey
+## Navigation Behavior
 
-1. Open `Voting` in a rank-wave create flow.
-2. Choose one voting mode:
+- Enter `Voting` from `Drops`.
+- `Back` from `Outcomes` returns to `Voting`.
+- `Next` stays enabled; validation runs when clicked.
+- On large screens, the step rail can reopen completed steps only.
+- On smaller screens, use `Back` and `Next`.
+
+## What You Can Set
+
+1. Choose one vote mode:
    - `By TDH + XTDH` (default)
    - `By TDH`
    - `By Rep`
-3. If `By Rep` is selected, provide at least one rep scope field:
-   - voting category, or
-   - profile identifier
-4. Switching away from `By Rep` clears rep scope fields automatically.
-5. Review `Allow Negative Votes`:
-   - the toggle is shown but currently disabled in create-wave.
-6. Optionally configure `Time weighted voting` interval (`Rank` only).
-7. Continue to `Outcomes`.
+2. If `By Rep` is selected, set at least one scope field:
+   - `Rep Category`, or
+   - `Profile` (identity search)
+3. Review `Allow Negative Votes` (shown but disabled).
+4. Optional: enable `Time-Weighted Voting`.
+5. If enabled, set `Averaging Interval` in `Minutes` or `Hours`.
+6. Click `Next` to continue to `Outcomes`.
 
-## Common Scenarios
+## Validation and State Rules
 
-- New rank waves default to `By TDH + XTDH`.
-- Use `By Rep` when votes should be tied to reputation context.
-- Use TDH-based modes for score methods that do not require Rep inputs.
-- `XTDH` is not shown as a standalone selectable vote mode.
-
-## Edge Cases
-
-- Existing rep scope values are cleared when switching from `By Rep` to TDH
-  modes.
-- If `By Rep` is selected and both category/profile are empty, progression is
-  blocked.
-- Time-weighted interval is constrained to `5 minutes` through `24 hours` when
-  enabled.
-- Chat waves do not include the `Voting` step.
+- `By Rep` blocks forward navigation when both `Rep Category` and `Profile` are
+  empty.
+- Switching from `By Rep` to `By TDH + XTDH` or `By TDH` clears saved `Rep`
+  fields.
+- `XTDH` is not offered as a standalone selectable mode.
+- Time-weighted interval must stay between `5 minutes` and `24 hours`.
+- If interval is empty, invalid, or below minimum on blur, it resets to the
+  selected-unit minimum (`5` minutes or `1` hour).
+- If interval is above maximum, it is capped (`1440` minutes or `24` hours).
+- Switching between `Minutes` and `Hours` converts and clamps the interval.
+- Wave create payload always sends `forbid_negative_votes: false` (negative
+  votes allowed).
 
 ## Failure and Recovery
 
-- If rep-scope validation appears, keep mode on `By Rep`, fill category or
-  profile, then continue.
-- If time-weighted validation appears, adjust interval into the allowed range
-  and retry.
-- If submit fails later, reopen flow and retry with the same voting settings.
+- If `By Rep` validation blocks progress, fill either `Rep Category` or
+  `Profile`, then click `Next` again.
+- If time-weighted interval validation appears, set a value in range and retry.
+- If submit fails later in `Description`, keep voting settings and retry submit.
 
 ## Limitations / Notes
 
-- `By TDH + XTDH`, `By TDH`, and `By Rep` are the creator-facing options.
-- Time-weighted voting appears on rank-wave creation only.
-- Time-weighted input supports `minutes` and `hours`.
-- `Allow Negative Votes` is currently non-interactive in create-wave and does
-  not change the submitted wave configuration.
-- The `Approve` type is currently shown as disabled in `Overview`, so users do
-  not reach an approve-specific voting path.
+- Creator-facing voting options are only `By TDH + XTDH`, `By TDH`, and
+  `By Rep`.
+- `Allow Negative Votes` is currently non-interactive in create-wave.
+- Time-weighted voting is available only for `Rank` waves.
+- `Approve` paths exist in code, but users cannot reach them from the current
+  type picker.
 
 ## Related Pages
 
 - [Wave Creation Index](README.md)
+- [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Dates and Timeline](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Outcomes Setup](feature-outcomes-step.md)
+- [Wave Creation Outcomes Step](feature-outcomes-step.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
