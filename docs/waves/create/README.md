@@ -2,26 +2,60 @@
 
 ## Overview
 
-Creation docs cover wave-creation setup and direct-message creation flows.
-Current user-facing creation supports `Chat` and `Rank` wave types.
-The `Approve` option is shown in the type selector but is currently disabled.
+Use this area to create:
+
+- new waves (`Chat` and `Rank`)
+- new direct messages
+
+`Approve` appears in the wave-type selector but is disabled.
 
 ## Features
 
-- [Direct Message Creation](feature-direct-message-creation.md)
-- [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
-- [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
-- [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Voting Configuration](feature-voting-step.md)
-- [Wave Creation Outcomes Setup](feature-outcomes-step.md)
-- [Wave Creation Description Step](feature-description-step.md)
+### Route and Mode Coverage
+
+- Desktop create mode uses `create=wave` or `create=dm` on the current route:
+  `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
+  `/messages?wave={waveId}`.
+- App create routes:
+  - wave: `/waves/create`
+  - direct message: `/messages/create`
+- Success routes:
+  - wave: `/waves/{waveId}`
+  - direct message: `/messages?wave={waveId}`
+- On desktop, closing create mode removes only `create` and keeps all other
+  route/query context.
+
+### Wave Creation Journey
+
+- Entry points: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
+- Step pages:
+  1. [Wave Creation Overview Step](feature-overview-step.md)
+  2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
+  3. [Wave Creation Dates and Timeline](feature-dates-step.md) (`Rank` only)
+  4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` only)
+  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank`
+     only)
+  6. [Wave Creation Outcomes Setup](feature-outcomes-step.md) (`Rank` only)
+  7. [Wave Creation Description Step](feature-description-step.md)
+- Step path by wave type:
+  - `Chat`: `Overview -> Groups -> Description`
+  - `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+
+### Direct-Message Journey
+
+- [Direct Message Creation](feature-direct-message-creation.md): identity
+  search, recipient selection, and thread creation.
+
+### Access and Availability
+
+- Create forms render only when a connected profile is available.
+- If profile context is missing, create entry points are hidden and create
+  forms do not render.
 
 ## Flows
 
-- [Wave Participation Flow](../flow-wave-participation.md): canonical end-to-end
-  wave navigation and interaction flow.
+- [Wave Participation Flow](../flow-wave-participation.md): end-to-end wave
+  discovery, thread participation, and sharing flow.
 
 ## Troubleshooting
 
@@ -35,4 +69,5 @@ The `Approve` option is shown in the type selector but is currently disabled.
 ## Related Areas
 
 - [Waves Index](../README.md)
+- [Navigation Index](../../navigation/README.md)
 - [Groups Index](../../groups/README.md)

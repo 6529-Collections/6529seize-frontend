@@ -25,13 +25,13 @@ time-weighted voting settings.
    - `By TDH + XTDH` (default)
    - `By TDH`
    - `By Rep`
-3. If `By Rep` is selected, complete:
-   - voting category
+3. If `By Rep` is selected, provide at least one rep scope field:
+   - voting category, or
    - profile identifier
-4. For `By TDH` and `By TDH + XTDH`, keep voting category/profile empty.
+4. Switching away from `By Rep` clears rep scope fields automatically.
 5. Review `Allow Negative Votes`:
    - the toggle is shown but currently disabled in create-wave.
-6. Optionally configure `Time weighted voting` interval.
+6. Optionally configure `Time weighted voting` interval (`Rank` only).
 7. Continue to `Outcomes`.
 
 ## Common Scenarios
@@ -43,24 +43,27 @@ time-weighted voting settings.
 
 ## Edge Cases
 
-- Existing Rep values are cleared when switching from `By Rep` to TDH modes.
-- If `By Rep` is selected, missing category/profile blocks progression.
-- If a TDH mode is selected while category/profile values remain, validation
-  errors appear until those values are cleared.
+- Existing rep scope values are cleared when switching from `By Rep` to TDH
+  modes.
+- If `By Rep` is selected and both category/profile are empty, progression is
+  blocked.
+- Time-weighted interval is constrained to `5 minutes` through `24 hours` when
+  enabled.
 - Chat waves do not include the `Voting` step.
 
 ## Failure and Recovery
 
-- If required Rep fields are missing, keep mode on `By Rep`, fill required
-  fields, then continue.
-- If validation errors appear after mode changes, reselect the target mode,
-  correct visible fields, and retry.
+- If rep-scope validation appears, keep mode on `By Rep`, fill category or
+  profile, then continue.
+- If time-weighted validation appears, adjust interval into the allowed range
+  and retry.
 - If submit fails later, reopen flow and retry with the same voting settings.
 
 ## Limitations / Notes
 
 - `By TDH + XTDH`, `By TDH`, and `By Rep` are the creator-facing options.
 - Time-weighted voting appears on rank-wave creation only.
+- Time-weighted input supports `minutes` and `hours`.
 - `Allow Negative Votes` is currently non-interactive in create-wave and does
   not change the submitted wave configuration.
 - The `Approve` type is currently shown as disabled in `Overview`, so users do

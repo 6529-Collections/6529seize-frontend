@@ -24,8 +24,9 @@ before moving to the final `Description` step.
 2. Pick outcome type: `Manual`, `Rep`, or `NIC`.
 3. Configure the selected type and click `Save`.
 4. Review saved outcomes in the list.
-5. Add additional outcomes or remove existing outcomes from the list.
-6. Continue to `Description` once at least one outcome exists.
+5. Add additional outcomes as needed.
+6. Remove saved outcomes where supported (`Manual` and `Rep` rows).
+7. Continue to `Description` once at least one outcome exists.
 
 ## Common Scenarios
 
@@ -44,12 +45,16 @@ before moving to the final `Description` step.
 - Distribution totals must be valid before save:
   - absolute-value winners must sum correctly,
   - percentage-based winners must total `100%`.
+- Saved `NIC` rows currently show a remove icon, but that action is
+  non-functional.
 
 ## Failure and Recovery
 
 - If a save attempt fails validation, fix the highlighted fields and retry.
-- If you add the wrong outcome type, remove that outcome row and create the
-  correct one.
+- If you add the wrong `Manual` or `Rep` outcome type, remove that row and
+  create the correct one.
+- If you add the wrong `NIC` outcome type, restart the create-wave flow to
+  clear saved outcomes.
 - If create flow closes before completion, reopening flow requires re-entering
   outcomes that were not submitted.
 
@@ -57,6 +62,7 @@ before moving to the final `Description` step.
 
 - This step is user-reachable in `Rank` creation.
 - Chat waves do not include outcomes setup.
+- `NIC` outcome rows are currently not removable after save.
 - Approve-specific outcomes code paths exist internally, but `Approve` type is
   currently disabled in `Overview`.
 

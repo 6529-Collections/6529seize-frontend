@@ -34,7 +34,8 @@ underlying page context.
 4. A single `Create Wave` modal opens above the current page context while the
    underlying list/content view remains visible.
 5. Complete creation or close the modal from the header close button, backdrop,
-   or create-flow back/success actions.
+   `Escape` (when focus is not in an input/textarea/select), or create-flow
+   back/success actions.
 6. Closing removes the `create` query value while keeping the rest of the URL
    context.
 
@@ -71,7 +72,7 @@ underlying page context.
 ## Limitations / Notes
 
 - This page documents desktop discover/waves/messages shell behavior only.
-- App-mode create behavior uses dedicated create routes instead of this modal.
+- App create actions route to `/waves/create` instead of this desktop modal.
 - Create-wave visibility depends on the URL create mode and connected-profile
   availability.
 - Desktop wave/message layouts are expected to render one create-wave overlay
