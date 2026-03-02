@@ -27,6 +27,12 @@ jest.mock("react-use", () => {
 });
 
 describe("useWaveShareCopyAction", () => {
+  const defaultParams = {
+    waveId: "w1",
+    waveName: "Wave",
+    isDirectMessage: false,
+  } as const;
+
   const setNavigatorShare = (shareImpl?: unknown) => {
     Object.defineProperty(navigator, "share", {
       configurable: true,
@@ -34,14 +40,14 @@ describe("useWaveShareCopyAction", () => {
     });
   };
 
-  const renderUseWaveShareCopyAction = () =>
-    renderHook(() =>
-      useWaveShareCopyAction({
-        waveId: "w1",
-        waveName: "Wave",
-        isDirectMessage: false,
-      })
-    );
+  const renderUseWaveShareCopyAction = (
+    overrides: Partial<typeof defaultParams> = {}
+  ) => {
+    const params = { ...defaultParams, ...overrides };
+    return renderHook(useWaveShareCopyAction, {
+      initialProps: params,
+    });
+  };
 
   beforeEach(() => {
     mockCopyToClipboard.mockReset();
@@ -128,5 +134,63 @@ describe("useWaveShareCopyAction", () => {
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w1"
     );
+  });
+
+  it("resets copied feedback when target wave URL changes", () => {
+    const { result, rerender } = renderUseWaveShareCopyAction();
+
+    act(() => {
+      result.current.onClick();
+    });
+
+    expect(result.current.label).toBe("Link copied");
+    expect(mockCopyToClipboard).toHaveBeenCalledWith(
+      "http://localhost/waves/w1"
+    );
+
+    rerender({
+      waveId: "w2",
+      waveName: "Wave Two",
+      isDirectMessage: false,
+    });
+
+    expect(result.current.label).toBe("Copy wave link");
+
+    act(() => {
+      result.current.onClick();
+    });
+
+    expect(mockCopyToClipboard).toHaveBeenLastCalledWith(
+      "http://localhost/waves/w2"
+    );
+  });
+
+  it("resets shared feedback when target wave URL changes", async () => {
+    const navigatorShare = jest.fn().mockResolvedValue(undefined);
+    setNavigatorShare(navigatorShare);
+
+    const { result, rerender } = renderUseWaveShareCopyAction();
+    expect(result.current.mode).toBe("share");
+
+    act(() => {
+      result.current.onClick();
+    });
+
+    await waitFor(() =>
+      expect(navigatorShare).toHaveBeenCalledWith({
+        title: "Wave",
+        url: "http://localhost/waves/w1",
+      })
+    );
+    await waitFor(() => expect(result.current.label).toBe("Link shared"));
+
+    rerender({
+      waveId: "w2",
+      waveName: "Wave Two",
+      isDirectMessage: false,
+    });
+
+    expect(result.current.mode).toBe("share");
+    expect(result.current.label).toBe("Share wave");
   });
 });

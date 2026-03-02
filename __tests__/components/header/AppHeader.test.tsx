@@ -79,20 +79,19 @@ const { useWaveById } = require("@/hooks/useWaveById");
 const { useWave } = require("@/hooks/useWave");
 
 function setup(opts: any) {
+  const activeWaveId = opts.activeWaveId ?? opts.wave?.id ?? null;
   (useSeizeConnectContext as jest.Mock).mockReturnValue({
     address: opts.address,
   });
   (useAuth as jest.Mock).mockReturnValue({ activeProfileProxy: opts.proxy });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
-  (useMyStreamOptional as jest.Mock).mockReturnValue(
-    opts.wave
-      ? { activeWave: { id: opts.wave.id } }
-      : { activeWave: { id: null } }
-  );
+  (useMyStreamOptional as jest.Mock).mockReturnValue({
+    activeWave: { id: activeWaveId },
+  });
   (useWaveById as jest.Mock).mockReturnValue({
     wave: opts.wave,
-    isLoading: false,
-    isFetching: false,
+    isLoading: opts.isLoading ?? false,
+    isFetching: opts.isFetching ?? false,
   });
   (useWave as jest.Mock).mockReturnValue(
     opts.waveInfo ?? {
@@ -252,23 +251,44 @@ describe("AppHeader", () => {
     ).toHaveAttribute("data-wave-link-action-mode", "copy");
   });
 
-  it("copies wave link in app header when copy mode is active", () => {
-    setNavigatorShare(undefined);
-    const wave = {
+  it("hides wave link action while active wave is still resolving", () => {
+    const staleWave = {
       id: "w1",
       name: "WaveOne",
       chat: { scope: { group: { is_direct_message: false } } },
     };
+
     setup({
+      activeWaveId: "w2",
+      wave: staleWave,
+      asPath: "/waves/w2",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /copy wave link|share wave/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("copies wave link in app header when copy mode is active", () => {
+    setNavigatorShare(undefined);
+    const wave = {
+      id: "w2",
+      name: "WaveTwo",
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+    setup({
+      activeWaveId: "w2",
       wave,
-      asPath: "/waves/w1",
+      asPath: "/waves/w2",
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
-      "http://localhost/waves/w1"
+      "http://localhost/waves/w2"
     );
     expect(
       screen.getByRole("button", { name: "Link copied" })

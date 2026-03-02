@@ -92,20 +92,21 @@ export default function AppHeader() {
 
   const waveId = myStream?.activeWave.id ?? null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
+  const activeWave = waveId && wave?.id === waveId ? wave : null;
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
-  const { isRankWave, isMemesWave, isDm } = useWave(wave);
+  const { isRankWave, isMemesWave, isDm } = useWave(activeWave);
   const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
-  const showWaveLinkAction = Boolean(waveId && wave && !isDm);
+  const showWaveLinkAction = Boolean(activeWave && !isDm);
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
     feedbackState: waveLinkActionFeedbackState,
     onClick: handleWaveLinkActionClick,
   } = useWaveShareCopyAction({
-    waveId: wave?.id ?? waveId ?? "",
-    waveName: wave?.name ?? "",
-    isDirectMessage: isDm,
+    waveId: waveId ?? "",
+    waveName: activeWave?.name ?? "",
+    isDirectMessage: activeWave ? isDm : false,
   });
   const waveLinkActionIconColor =
     waveLinkActionFeedbackState === "idle"

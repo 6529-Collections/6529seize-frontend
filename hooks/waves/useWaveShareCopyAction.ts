@@ -11,6 +11,10 @@ const DEFAULT_FEEDBACK_TIMEOUT_MS = 1500;
 
 type WaveLinkActionMode = "share" | "copy";
 type WaveLinkActionFeedback = "idle" | "shared" | "copied";
+type FeedbackForUrl = {
+  readonly url: string;
+  readonly value: Exclude<WaveLinkActionFeedback, "idle">;
+} | null;
 
 interface UseWaveShareCopyActionParams {
   readonly waveId: string;
@@ -96,8 +100,9 @@ export function useWaveShareCopyAction({
     [isNativeApp, canonicalWaveUrl]
   );
   const [shareFailedUrl, setShareFailedUrl] = useState<string | null>(null);
-  const [feedbackState, setFeedbackState] =
-    useState<WaveLinkActionFeedback>("idle");
+  const [feedbackForUrl, setFeedbackForUrl] = useState<FeedbackForUrl>(null);
+  const feedbackState: WaveLinkActionFeedback =
+    feedbackForUrl?.url === canonicalWaveUrl ? feedbackForUrl.value : "idle";
   const mode: WaveLinkActionMode =
     nativeShareSupported && shareFailedUrl !== canonicalWaveUrl
       ? "share"
@@ -117,13 +122,19 @@ export function useWaveShareCopyAction({
         window.clearTimeout(feedbackTimeoutRef.current);
       }
 
-      setFeedbackState(nextFeedback);
+      const targetUrl = canonicalWaveUrl;
+      setFeedbackForUrl({ url: targetUrl, value: nextFeedback });
       feedbackTimeoutRef.current = window.setTimeout(() => {
-        setFeedbackState("idle");
+        setFeedbackForUrl((currentFeedback) => {
+          if (currentFeedback?.url !== targetUrl) {
+            return currentFeedback;
+          }
+          return null;
+        });
         feedbackTimeoutRef.current = null;
       }, feedbackTimeoutMs);
     },
-    [feedbackTimeoutMs]
+    [feedbackTimeoutMs, canonicalWaveUrl]
   );
 
   const handleCopy = useCallback(() => {
