@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
 import MarketplacePreview from "@/components/waves/MarketplacePreview";
@@ -192,5 +192,19 @@ describe("MarketplacePreview", () => {
       rootMargin: "500px 0px",
       threshold: 0,
     });
+  });
+
+  it("stops click propagation to parent containers", () => {
+    const onParentClick = jest.fn();
+
+    render(
+      <div onClick={onParentClick}>
+        <MarketplacePreview href="https://manifold.xyz/@andrew-hooker/id/4098474224" />
+      </div>
+    );
+
+    fireEvent.click(screen.getByTestId("manifold-listing"));
+
+    expect(onParentClick).not.toHaveBeenCalled();
   });
 });

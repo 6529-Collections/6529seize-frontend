@@ -2,11 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
-import type {
-  WaveGroupsConfig} from "@/types/waves.types";
-import {
-  CreateWaveGroupConfigType
-} from "@/types/waves.types";
+import type { WaveGroupsConfig } from "@/types/waves.types";
+import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 
@@ -23,10 +20,12 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
     enabled,
     onChange,
     label,
+    displayLabel,
   }: {
     enabled: boolean;
     onChange: (value: boolean) => void;
     label: string;
+    displayLabel?: boolean;
   }) {
     return (
       <div data-testid="wave-toggle">
@@ -36,7 +35,7 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
           onChange={(event) => onChange(event.target.checked)}
           aria-label={label}
         />
-        <label>{label}</label>
+        {displayLabel && <label>{label}</label>}
       </div>
     );
   };
@@ -150,6 +149,7 @@ describe("CreateWaveGroup", () => {
       groupType: CreateWaveGroupConfigType.CAN_CHAT,
     });
 
+    expect(screen.getByText("Enable chat")).toBeInTheDocument();
     const chatToggle = screen.getByLabelText("Enable chat");
     await user.click(chatToggle);
     expect(mockSetChatEnabled).toHaveBeenCalledWith(false);
@@ -168,9 +168,31 @@ describe("CreateWaveGroup", () => {
     renderComponent({
       groupType: CreateWaveGroupConfigType.ADMIN,
     });
-    const toggle = screen.getByLabelText("Allow admins to delete drops");
+    const toggle = screen.getByLabelText("Allow admins to delete posts");
     await user.click(toggle);
     expect(mockSetDropsAdminCanDelete).toHaveBeenCalledWith(true);
+  });
+
+  it("renders the admin delete toggle for chat waves", () => {
+    renderComponent({
+      groupType: CreateWaveGroupConfigType.ADMIN,
+      waveType: ApiWaveType.Chat,
+    });
+
+    expect(
+      screen.getByLabelText("Allow admins to delete posts")
+    ).toBeInTheDocument();
+  });
+
+  it("does not render helper text under the admin toggle", () => {
+    renderComponent({
+      groupType: CreateWaveGroupConfigType.ADMIN,
+      adminCanDeleteDrops: true,
+    });
+
+    expect(
+      screen.queryByText("Admins will be able to delete posts.")
+    ).not.toBeInTheDocument();
   });
 
   it("displays the helper text for defaults", () => {
@@ -183,9 +205,7 @@ describe("CreateWaveGroup", () => {
       groupType: CreateWaveGroupConfigType.CAN_CHAT,
       chatEnabled: false,
     });
-    expect(
-      screen.getByLabelText("Search groups…")
-    ).toBeDisabled();
+    expect(screen.getByLabelText("Search groups…")).toBeDisabled();
   });
 
   it("pre-populates the field when a selection exists in cache", () => {
@@ -240,8 +260,6 @@ describe("CreateWaveGroup", () => {
     renderComponent();
     await user.click(screen.getByLabelText("Search groups…"));
 
-    expect(
-      await screen.findByText("No groups found")
-    ).toBeInTheDocument();
+    expect(await screen.findByText("No groups found")).toBeInTheDocument();
   });
 });

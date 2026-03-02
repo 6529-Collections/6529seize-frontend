@@ -104,6 +104,8 @@ export const useMarketplacePreviewState = ({
       href,
       resolvedMedia,
       resolvedPrice: marketplacePreviewQuery.data?.price ?? undefined,
+      resolvedPriceCurrency:
+        marketplacePreviewQuery.data?.priceCurrency ?? undefined,
       resolvedTitle: toNonEmptyString(marketplacePreviewQuery.data?.title),
     };
   }
