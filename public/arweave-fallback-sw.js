@@ -1,30 +1,37 @@
-const FALLBACK_HOST = "ar-io.net";
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
 
-function isArweaveRequest(url) {
+  if (url.hostname !== "arweave.net") return;
+  if (event.request.mode === "navigate") return;
+
+  // Safety: only handle normal asset GETs
+  if (event.request.method !== "GET") return;
+  if (event.request.headers.has("range")) return;
+
+  event.respondWith(handleRequest(event.request));
+});
+
+async function handleRequest(request) {
   try {
-    const h = new URL(url).hostname.toLowerCase();
-    return h === "arweave.net" || h.endsWith(".arweave.net");
-  } catch {
-    return false;
+    const response = await fetch(request);
+
+    if (response && (response.type === "opaque" || response.ok)) {
+      return response;
+    }
+
+    return fetchFallback(request);
+  } catch (err) {
+    return fetchFallback(request);
   }
 }
 
-self.addEventListener("fetch", (event) => {
-  if (!isArweaveRequest(event.request.url) || event.request.mode === "navigate") return;
+function fetchFallback(request) {
+  const originalUrl = new URL(request.url);
+  const fallbackUrl =
+    "https://ar-io.net" +
+    originalUrl.pathname +
+    originalUrl.search +
+    originalUrl.hash;
 
-  event.respondWith(
-    (async () => {
-      const opts = { method: event.request.method, headers: event.request.headers, credentials: "omit" };
-      const method = event.request.method.toUpperCase();
-      if (method !== "GET" && method !== "HEAD") {
-        return fetch(event.request);
-      }
-      try {
-        const res = await fetch(event.request, opts);
-        if (res?.ok) return res;
-      } catch {}
-      const fallback = event.request.url.replace(/^(https?:\/\/)([^/]+)/, `$1${FALLBACK_HOST}`);
-      return Response.redirect(fallback, 302);
-    })()
-  );
-});
+  return fetch(fallbackUrl);
+}
