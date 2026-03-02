@@ -73,6 +73,7 @@ announcements.
 ## Related Pages
 
 - [Waves Index](../README.md)
+- [Wave Winners Tab](feature-winners-tab.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)

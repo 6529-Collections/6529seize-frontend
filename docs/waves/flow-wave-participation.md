@@ -88,5 +88,7 @@ sharing links that reopen the same context.
 - [Wave Chat Index](chat/README.md)
 - [Wave Drop Actions Index](drop-actions/README.md)
 - [Wave Creation Index](create/README.md)
+- [Wave Winners Tab](leaderboard/feature-winners-tab.md)
+- [Wave Outcome Lists](feature-outcome-lists.md)
 - [Memes Submission Workflows](memes/feature-memes-submission.md)
 - [Wave Troubleshooting](troubleshooting-wave-navigation-and-posting.md)

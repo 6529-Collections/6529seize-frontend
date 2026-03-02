@@ -4,6 +4,7 @@
 
 The `My Votes` tab shows drops you have already voted on in a wave. From this
 tab, you can change individual vote values and reset selected votes in one action.
+This tab is available in memes and curation waves.
 
 ## Location in the Site
 
@@ -65,7 +66,7 @@ tab, you can change individual vote values and reset selected votes in one actio
 
 ## Limitations / Notes
 
-- This tab is only present in wave types where the `My Votes` tab is enabled.
+- This tab is currently shown in memes and curation waves.
 - Vote behavior here is inline and does not replace other vote entry points in
   drop modals or single-drop summaries.
 - `Available` and `Max` values come from wave vote context and are formatted for

@@ -2,11 +2,13 @@
 
 ## Overview
 
-Leaderboard docs cover ranking and timeline behavior in voting surfaces.
+Leaderboard docs cover ranking, winners, and decision-timing behavior in voting
+surfaces.
 
 ## Features
 
 - [Wave Top Voters Lists](feature-top-voters-lists.md)
+- [Wave Winners Tab](feature-winners-tab.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)

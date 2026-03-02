@@ -63,7 +63,8 @@ restores it whenever that wave is opened again and the tab is still available.
 - If local tab memory for a wave is unavailable or invalid, the wave opens with its
   default tab.
 - `Winners` is shown only after the first decision has passed.
-- Non-memes waves do not expose `My Votes` and `FAQ` in the tab strip.
+- `My Votes` appears in memes and curation waves; `FAQ` appears in memes waves
+  only.
 - Tabs expose selected-state semantics and link to the active content panel for
   assistive technologies.
 - For memes waves, available tabs are evaluated to prefer `Leaderboard` first; if it
@@ -101,6 +102,7 @@ restores it whenever that wave is opened again and the tab is still available.
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Winners Tab](../leaderboard/feature-winners-tab.md)
 - [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
 - [Docs Home](../../README.md)
 - [Wave My Votes Tab](feature-my-votes-tab.md)

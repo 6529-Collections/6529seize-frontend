@@ -87,6 +87,7 @@ ask for them.
 ## Related Pages
 
 - [Wave Content Tabs](discovery/feature-content-tabs.md)
+- [Wave Winners Tab](leaderboard/feature-winners-tab.md)
 - [Top Voters Lists](leaderboard/feature-top-voters-lists.md)
 - [Wave Chat Scroll Behavior](chat/feature-scroll-behavior.md)
 - [Loading Status Indicators](../shared/feature-loading-status-indicators.md)
