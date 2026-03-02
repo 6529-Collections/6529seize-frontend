@@ -2,75 +2,71 @@
 
 ## Overview
 
-When users edit an existing wave drop, existing user mentions and wave mentions
-stay intact in the editor instead of breaking into plain text fragments. This
-helps users revise wording around mentions without losing mention behavior,
-including drops that contain intentional extra blank lines.
+When you open `Edit Message`, existing user and wave mentions are restored as
+mention tokens instead of plain text. You can rewrite around mentions without
+rebuilding them.
 
 ## Location in the Site
 
 - Wave detail threads: `/waves/{waveId}`
 - Direct-message wave threads: `/messages?wave={waveId}`
-- Existing drop cards where `Edit Message` is available
+- Drop action menus where `Edit Message` is available
 
 ## Entry Points
 
-- Open a drop action menu and choose `Edit Message`.
-- Edit a previously posted drop that already contains user mentions, `#[wave_name]`
-  wave mentions, or both.
+- Open a drop action menu and select `Edit Message`.
+- Edit is shown only for your own non-participatory drops.
+- Start from a drop that already contains `@[handle]`, `#[wave_name]`, or both.
 
 ## User Journey
 
-1. Open edit mode for an existing drop.
-2. The edit composer loads the current drop content and places the caret at the
-   end of the message.
-3. Existing mentions remain mention entities while users keep typing or editing.
-4. Save the edit from keyboard (`Enter` on desktop) or the save button.
-5. The updated drop renders with mentions preserved in the thread.
-
-## Common Scenarios
-
-- Correct a typo in a sentence that includes one or more mentions.
-- Append text after a mention without needing to recreate the mention.
-- Edit drops containing both user mentions and wave mentions (`#[wave_name]`) in the
-  same body.
-- Edit mention-heavy drops that also use extra blank spacing between sections.
+1. Open edit mode for a drop.
+2. The editor loads current content, restores mention tokens, and places the
+   caret at the end.
+3. Continue typing. Mention suggestion menus still work for new user and wave
+   mentions.
+4. Save with `Enter` (or `Save` in app controls). Use `Shift+Enter` for a
+   newline.
+5. If content is unchanged after normalization, edit mode closes without an
+   update request.
+6. If content changed, edit mode closes immediately and sends the update
+   request.
+7. After success, the updated content appears and the drop shows `(edited)`.
 
 ## Edge Cases
 
-- Mention text that was internally split while loading is reconstructed so it
-  still behaves like a mention in edit mode.
-- Multiple split mention segments in the same message are reconstructed
-  iteratively until the editor reaches a stable state.
-- Incomplete mention text (for example, missing closing characters) stays plain
-  text until users complete or rewrite it.
-- Blank-line spacing remains editable and is compared as normalized markdown, so
-  hidden editor placeholders do not trigger false "changed" saves.
-- NFT hashtag references from the original drop are preserved as existing
-  metadata; edit mode does not re-run NFT hashtag autocomplete for newly typed
-  values.
+- Mentions split across editor text nodes are reconstructed into mention tokens.
+- Reconstruction runs in repeated passes until stable (max 20 passes).
+- Incomplete or malformed mention text stays plain text until corrected.
+- `Enter` does not submit while mention menus are open; it confirms the
+  selected suggestion first.
+- Blank-line placeholders are ignored in change detection, so placeholder-only
+  differences do not trigger a save.
+- For storm drops, only the currently active part content is updated.
 
 ## Failure and Recovery
 
-- If a specific mention cannot be reconstructed automatically, the editor still
-  stays usable and the rest of the message remains editable.
-- Users can delete and re-enter a broken mention using mention autocomplete,
-  then save again.
+- If mention reconstruction fails on a segment, the editor stays usable.
+- Save failures show `Failed to update drop. Please try again.`
+- If the backend rejects editing after the time window, users see `This drop can
+  no longer be edited. Drops can only be edited within 5 minutes of creation.`
+- If a mention renders as plain text after save, reopen `Edit Message` and
+  reinsert it using autocomplete.
 
 ## Limitations / Notes
 
 - This behavior applies to editing existing drops, not the new-drop composer.
-- Auto-preservation applies to recognized user mentions and wave mentions
-  (`#[wave_name]`) loaded into edit mode.
-- Edit mode keeps existing NFT reference metadata unchanged instead of remapping
-  newly typed `$[...]` text to new NFT references.
-- Very malformed mention text may require manual correction before it behaves as
-  a mention again.
+- Mention preservation applies to recognized user and wave mentions loaded into
+  edit mode.
+- Edit requests keep existing drop metadata and referenced NFTs unchanged.
+- Edit mode does not provide NFT hashtag autocomplete for newly typed `$[...]`
+  values.
 
 ## Related Pages
 
 - [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
+- [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)
