@@ -19,6 +19,7 @@ export function sharedConfig(
         { protocol: "https", hostname: "6529.io" },
         { protocol: "https", hostname: "staging.6529.io" },
         { protocol: "https", hostname: "arweave.net" },
+        { protocol: "https", hostname: "ar-io.net" },
         { protocol: "http", hostname: "localhost" },
         { protocol: "https", hostname: "media.generator.seize.io" },
         { protocol: "https", hostname: "d3lqz0a4bldqgf.cloudfront.net" },

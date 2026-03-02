@@ -19,6 +19,7 @@ import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext"
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
+import ArweaveFallbackSwRegistration from "./ArweaveFallbackSwRegistration";
 import CapacitorSetup from "./CapacitorSetup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import QueryClientSetup from "./QueryClientSetup";
@@ -34,6 +35,7 @@ export default function Providers({
       <AppWalletsProvider>
         <WagmiSetup>
           <CapacitorSetup />
+          <ArweaveFallbackSwRegistration />
           <IpfsImageSetup />
           <ReactQueryWrapper>
             <RefreshProvider>
