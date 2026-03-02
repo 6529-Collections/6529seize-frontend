@@ -2,77 +2,87 @@
 
 ## Overview
 
-The artist activity badge opens an artist preview modal from profile and drop
-surfaces. The badge appears when the artist has active main-stage submissions,
-winning artworks, or both. The modal shows `Active Submissions` and
-`Winning Artworks`; tabs appear only when both sections are available.
+The artist activity badge opens a modal for one artist's The Memes activity:
+`Active Submissions` and `Winning Artworks`.
+
+The badge state decides which section opens first.
 
 ## Location in the Site
 
-- Profile headers on `/{user}` and profile tab routes such as
-  `/{user}/brain`, `/{user}/collected`, `/{user}/xtdh`, `/{user}/stats`,
-  `/{user}/subscriptions`, and `/{user}/proxy`.
-- Drop rows in wave and direct-message streams (`/waves/[wave]`,
-  `/messages?wave=<waveId>`).
-- Meme leaderboard and meme participation rows where drop artist info is shown.
-- Single-drop detail surfaces opened in the current route with `?drop=<dropId>`.
+- Profile headers on `/{user}` routes that reuse the shared profile header:
+  `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/xtdh`,
+  `/{user}/stats`, `/{user}/subscriptions`, and `/{user}/proxy`.
+- Wave and direct-message drop headers:
+  `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Single-drop overlays opened with `drop={dropId}` in the current route.
+- Meme participation and meme leaderboard drop rows.
 
 ## Entry Points
 
-- Click the artist activity badge in a profile header when submission or winner
-  counts are present.
-- Click the same badge next to artist names in wave/meme drop rows.
+- Select the artist activity badge next to the artist name.
+- The badge is hidden when both activity counts are `0`.
+- Badge state:
+  - Palette: active submissions only, opens `Active Submissions`.
+  - Trophy: winning artworks only, opens `Winning Artworks`.
+  - Trophy with blue dot: both exist, opens `Active Submissions`.
 
 ## User Journey
 
-1. Open a profile header or drop row that shows artist activity.
-2. If the artist has activity, one badge is shown:
-   - palette icon: active submissions only.
-   - trophy icon: winning artworks only.
-   - trophy icon + blue dot: both types; opens `Active Submissions` first.
-3. If both types exist, switch tabs between `Active Submissions` and
-   `Winning Artworks`.
-4. Select a card to close the modal and open that drop in the current route
-   context (`drop` query param update).
-5. Close with the close button or backdrop click. In app wrapper contexts,
-   swipe-down close is also supported.
+1. Select the artist activity badge.
+2. The modal opens to the section mapped from the badge state.
+3. If both datasets exist, tabs are shown for switching between
+   `Active Submissions` and `Winning Artworks`.
+4. Select a card to open that drop in the current route context:
+   - `drop` is set in the URL.
+   - Existing query params stay in place.
+5. The modal closes after opening a card.
+6. Users can also close with close button or backdrop click/tap.
+7. In app-wrapper contexts, swipe-down close is also supported.
 
 ## Common Scenarios
 
-- Active-only artists show only `Active Submissions`.
-- Winners-only artists show only `Winning Artworks`.
-- Artists with both always open on `Active Submissions`.
-- Badge hover tooltips show on non-touch desktop only.
-- Profile headers and drop rows always use one combined badge (never two badges).
+- On non-touch desktop devices, hovering the badge shows tooltip copy with
+  current counts.
+- `Active Submissions` loading state shows `Loading submissions...`.
+- `Active Submissions` cards show artwork preview, optional title, position,
+  current score, submission date, and mini vote control.
+- `Winning Artworks` loading state shows `Loading won artworks...`.
+- `Winning Artworks` cards show artwork preview (or text fallback), optional
+  title, score total, top-voter avatars, voter count, and won date (or created
+  date fallback).
+- In compact + small-screen thread layouts, selecting a card also closes the
+  chat column.
 
 ## Edge Cases
 
-- Badge visibility is driven by main-stage submission and winner counts; zero
-  count means no corresponding state.
-- When both states exist, one badge represents both and shows tab controls.
-- Tooltip copy is state-aware on desktop (`View X art submissions`,
-  `View X winning artworks`, or combined text).
-- Clicking inside modal content does not dismiss; close requires close control,
-  backdrop, or (app wrapper) swipe-down.
+- Tabs are hidden when only one dataset exists.
+- Active-submission cards can be fewer than profile counts when individual drop
+  lookups fail or return unusable data.
+- Winning-artwork cards can also be fewer than winner counts for the same
+  reason.
+- If no cards are renderable, the modal body shows an empty grid (no dedicated
+  empty-state message).
+- On desktop web, `Esc` does not close this modal.
+- Header subtitle is fixed to `The Memes Collection`.
 
 ## Failure and Recovery
 
-- While section data is loading, the modal stays open and shows loading states.
-- If requests fail or return no items, sections can render without cards
-  (no inline error banner in this modal).
-- Selecting a card updates the current route context and closes the modal.
+- The modal has no inline error banner or retry button.
+- If item fetches fail, affected cards are omitted.
+- Close and reopen the modal to retry with normal fetch behavior.
+- If both datasets exist, switching tabs loads the other dataset.
 
 ## Limitations / Notes
 
-- This is a contextual viewer for current main-stage activity, not a profile
-  management surface.
-- Navigation stays tied to drop context in the current page/stream.
+- This is a contextual viewer, not a profile management surface.
+- Badge state and tab availability depend on currently loaded artist activity
+  counts.
 
 ## Related Pages
 
-- [Profile Header Summary](../../profiles/navigation/feature-header-summary.md)
 - [Waves Index](../README.md)
 - [Wave Drop Actions Index](README.md)
+- [Profile Header Summary](../../profiles/navigation/feature-header-summary.md)
 - [Wave Drop Vote Summary and Modal](feature-vote-summary-and-modal.md)
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
