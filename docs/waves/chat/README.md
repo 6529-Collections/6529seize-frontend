@@ -12,8 +12,10 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
 ## Query Coverage
 
 - `serialNo={n}` opens or jumps to a target drop.
-- `divider={n}` sets an unread boundary for initial thread setup.
-- After jump setup completes, chat removes `serialNo` and `divider` from the URL.
+- During valid `serialNo` setup, optional `divider={n}` can set the unread boundary.
+- If `divider` is missing or invalid during valid `serialNo` setup, chat falls back to current unread metadata.
+- After valid `serialNo` setup starts, chat removes `serialNo` and `divider` from the URL.
+- `divider` without a valid `serialNo` does not drive unread setup.
 
 ## Ownership
 

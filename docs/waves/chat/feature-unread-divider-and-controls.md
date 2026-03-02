@@ -2,10 +2,10 @@
 
 ## Overview
 
-When an unread boundary serial is known, the thread inserts a `New Messages`
-divider at that drop and can show a floating unread-jump control.
-
-Unread controls can stack with bottom/pending controls so both actions stay reachable.
+- Wave chat keeps one unread boundary at a time.
+- When a boundary serial is active, chat inserts `New Messages` before that drop.
+- If that divider is off-screen before you have seen it, chat shows a floating unread-jump control.
+- Unread and bottom/pending controls can stack so both actions stay available.
 
 ## Location in the Site
 
@@ -15,47 +15,48 @@ Unread controls can stack with bottom/pending controls so both actions stay reac
 
 ## Entry Points
 
-- Open a wave row with known first unread serial (row links may include `divider`).
-- Open a serial-target link that includes both `serialNo` and `divider`.
-- Open a serial-target link without `divider` (uses current unread metadata when available).
+- Open a wave or DM thread with unread metadata.
+- Open a serial-target link with `serialNo` and optional `divider`.
 - Use `Mark as unread` on a drop.
+
+## URL Rules
+
+- `serialNo={n}` is required for URL-driven unread setup.
+- `divider={n}` is used only when `serialNo` is valid.
+- If `divider` is missing or invalid during valid `serialNo` setup, chat uses current unread metadata.
+- After valid `serialNo` setup starts, chat removes `serialNo` and `divider` from the URL.
+- `divider` without a valid `serialNo` is ignored.
 
 ## User Journey
 
 1. Open a thread with a known unread boundary serial.
-2. The thread inserts `New Messages` at that serial.
-3. If the divider is off-screen, a floating unread control appears.
-4. Use the control to jump to the unread boundary.
-5. The control hides while divider is visible.
-6. Sending a new message clears current unread-divider state.
+2. Chat inserts `New Messages` before the matching drop.
+3. If the divider is outside view, chat shows an unread-jump control with up/down arrow direction based on divider position.
+4. Use the unread control to jump to that boundary.
+5. If unread and bottom/pending controls are both needed, chat stacks them in one floating control group.
+6. After the divider is seen and then leaves view, chat auto-dismisses the current boundary.
 
-## Common Scenarios
+## Control and Dismiss Behavior
 
-- Divider source comes from first-unread metadata, explicit `divider`, or `Mark as unread`.
-- Unread control arrow points up or down based on divider position.
-- When unread and bottom controls are both visible, they render as a combined stacked control.
-- Count labels are compact and cap at `99+`.
-- On desktop, a close button on the unread control dismisses the current boundary.
-- Swipe-right dismissal is supported for unread control interactions.
-
-## Edge Cases
-
-- Invalid `divider`/`serialNo` values do not block thread rendering.
-- If divider target is not loaded yet, unread control can still appear until history loads.
-- After users see the divider once and move away, current unread boundary auto-dismisses.
-- Escape dismiss works unless focus is currently inside a dialog.
-- Manual dismiss and auto-dismiss apply only to the current boundary; a new boundary
-  or reopened thread can show control again.
+- Sending a new message clears the current unread boundary.
+- `Mark as unread` can replace the boundary with the server-reported unread serial.
+- If the divider target is not loaded yet, unread control can still appear while history loads.
+- Manual dismiss is available from desktop close button and swipe-right gesture.
+- Escape dismiss works unless focus is inside an element using `role="dialog"`.
+- Manual dismiss and auto-dismiss clear only the current boundary. A later boundary update can show controls again.
+- Standalone unread and pending labels cap at `99+`.
+- In stacked mode, controls switch to compact icon-first buttons.
 
 ## Failure and Recovery
 
 - If unread jump stalls on long history, wait for load, then retry control.
-- If control was dismissed accidentally, reopen the thread or mark another drop unread.
+- If unread control was dismissed accidentally, use `Mark as unread` to set a new boundary.
 - If unread boundary looks stale, refresh thread to resync unread metadata.
 
 ## Limitations / Notes
 
-- Unread divider needs a valid unread serial boundary.
+- Unread divider requires a valid unread serial boundary.
+- Only one unread boundary is active at a time.
 - Controls are navigation aids, not a full unread-history manager.
 - Unread navigation is separate from `drop` overlay navigation.
 
