@@ -63,15 +63,14 @@ export default function ManifoldMintingWidget(
   });
 
   useEffect(() => {
-    mintWrite.reset();
-    setMintStatus(<></>);
-    setMintError("");
-
     if (props.claim.phase === ManifoldPhase.PUBLIC) {
       return;
     }
 
     if (mintForAddress && props.claim.merkleRoot) {
+      mintWrite.reset();
+      setMintStatus(<></>);
+      setMintError("");
       setIsError(false);
       setFetchingMerkle(true);
       getMemesMintingProofsByAddress(
@@ -88,9 +87,12 @@ export default function ManifoldMintingWidget(
           }));
           setMerkleProofs(mappedProofs);
         })
-        .catch(() => {
-          setIsError(true);
+        .catch((err) => {
           setMerkleProofs([]);
+          const msg = typeof err === "string" ? err : (err as Error)?.message ?? "";
+          const isNotFound =
+            /404|not found|no proof/i.test(msg) || msg.includes("404");
+          setIsError(!isNotFound);
         })
         .finally(() => {
           setFetchingMerkle(false);
@@ -102,7 +104,6 @@ export default function ManifoldMintingWidget(
     props.contract,
     props.claim.instanceId,
     props.claim.phase,
-    mintWrite,
   ]);
 
   function getReadContractsParams() {
