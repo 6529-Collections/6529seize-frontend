@@ -860,11 +860,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       logError("seizeDisconnectAndLogoutAll", authError);
       throw authError;
     }
-  }, [
-    disconnect,
-    refreshStoredConnectedAccounts,
-    setDisconnected,
-  ]);
+  }, [disconnect, refreshStoredConnectedAccounts, setDisconnected]);
 
   const seizeAcceptConnection = useCallback(
     (address: string): void => {

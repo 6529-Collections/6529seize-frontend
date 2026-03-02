@@ -177,7 +177,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             const identity = await commonApiFetch<ApiIdentity>({
               endpoint: `identities/${account.address.toLowerCase()}`,
             });
-            return identity.id === notificationProfileId ? account.address : null;
+            return identity.id === notificationProfileId
+              ? account.address
+              : null;
           } catch {
             return null;
           }
@@ -228,8 +230,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           : null;
 
       if (notificationProfileId) {
-        const matchedAddress =
-          await resolveAddressForNotificationProfile(notificationProfileId);
+        const matchedAddress = await resolveAddressForNotificationProfile(
+          notificationProfileId
+        );
 
         if (!matchedAddress) {
           console.warn(

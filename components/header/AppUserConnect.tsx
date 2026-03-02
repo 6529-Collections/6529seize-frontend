@@ -47,12 +47,12 @@ export default function AppUserConnect({
       await Promise.resolve(action());
     } catch (error) {
       console.error(errorMessage, error);
-      const errorDetails =
-        error instanceof Error
-          ? error.message
-          : typeof error === "string"
-            ? error
-            : "";
+      let errorDetails = "";
+      if (error instanceof Error) {
+        errorDetails = error.message;
+      } else if (typeof error === "string") {
+        errorDetails = error;
+      }
       const toastMessage = errorDetails
         ? `${errorMessage}: ${errorDetails}`
         : errorMessage;
