@@ -44,6 +44,8 @@ the image placeholder transitions to a remote image URL.
   a toast: `Unsupported file type for Drag & Drop / Paste.`
 - If an upload fails during that path, the loading image node is removed and the
   editor does not keep a broken placeholder.
+- Empty-file and oversized-file failures also remove the temporary placeholder;
+  this path does not show a per-image inline error row.
 - The path does not surface upload progress in the composer; feedback is limited to
   placeholder replacement/removal behavior.
 
@@ -51,8 +53,8 @@ the image placeholder transitions to a remote image URL.
 
 - If a file is rejected as unsupported, use a supported image type and retry the
   drop or paste.
-- If upload fails, remove and re-add the image from a new source, or use the
-  Upload Media control for a clean retry.
+- If an upload placeholder disappears, retry with a smaller non-empty file, or
+  use the Upload Media control for a clean retry.
 - For oversized or empty files, re-choose a valid image before re-uploading.
 
 ## Limitations / Notes
@@ -62,12 +64,15 @@ the image placeholder transitions to a remote image URL.
 - This path is image-only and does not apply non-image media drag/paste flows.
 - Pasted/dragged image acceptance can differ from the media-selector control, which
   has a broader MIME target.
+- The drag/paste path uses placeholder replacement/removal feedback rather than
+  per-file progress or detailed inline error panels.
 
 ## Related Pages
 
+- [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
-- [Wave Drop Metadata Submissions](feature-metadata-submissions.md)
+- [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
 - [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Docs Home](../../README.md)

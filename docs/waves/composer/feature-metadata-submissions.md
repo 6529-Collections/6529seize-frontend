@@ -42,6 +42,8 @@ uploads are empty.
 - Metadata rows can be added/removed while composing before submission.
 - If current draft content is empty but metadata exists, submission still
   proceeds.
+- Custom rows with an empty key but non-empty value are still submitted; add a
+  key label when your workflow requires named metadata fields.
 
 ## Failure and Recovery
 
@@ -68,6 +70,7 @@ uploads are empty.
 
 ## Related Pages
 
+- [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)

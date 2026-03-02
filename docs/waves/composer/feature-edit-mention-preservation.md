@@ -17,7 +17,7 @@ including drops that contain intentional extra blank lines.
 
 - Open a drop action menu and choose `Edit Message`.
 - Edit a previously posted drop that already contains user mentions, `#[wave_name]`
-  wave mentions, or other supported mention patterns.
+  wave mentions, or both.
 
 ## User Journey
 
@@ -46,6 +46,9 @@ including drops that contain intentional extra blank lines.
   text until users complete or rewrite it.
 - Blank-line spacing remains editable and is compared as normalized markdown, so
   hidden editor placeholders do not trigger false "changed" saves.
+- NFT hashtag references from the original drop are preserved as existing
+  metadata; edit mode does not re-run NFT hashtag autocomplete for newly typed
+  values.
 
 ## Failure and Recovery
 
@@ -57,13 +60,16 @@ including drops that contain intentional extra blank lines.
 ## Limitations / Notes
 
 - This behavior applies to editing existing drops, not the new-drop composer.
-- Auto-preservation only applies to recognized mention patterns for users, wave
-  mentions (`#[wave_name]`), and tracked NFT hashtag tokens (`$[name]`).
+- Auto-preservation applies to recognized user mentions and wave mentions
+  (`#[wave_name]`) loaded into edit mode.
+- Edit mode keeps existing NFT reference metadata unchanged instead of remapping
+  newly typed `$[...]` text to new NFT references.
 - Very malformed mention text may require manual correction before it behaves as
   a mention again.
 
 ## Related Pages
 
+- [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)

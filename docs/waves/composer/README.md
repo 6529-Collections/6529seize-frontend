@@ -2,27 +2,49 @@
 
 ## Overview
 
-Composer docs cover editing and submission behavior before drops are posted.
+This area documents drop composing and drop editing in wave and direct-message
+threads.
+
+Use this area when you need behavior for:
+
+- text submission and storm posting
+- metadata-only submissions
+- mentions, emoji, and markdown formatting
+- curation URL-only submissions
+- drag/paste image uploads in composer inputs
 
 ## Route Coverage
 
-- Thread composer routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
-- Create-wave description-step editor behavior (including `/waves/create`) is documented in
+- Wave thread composer: `/waves/{waveId}`
+- Direct-message thread composer: `/messages?wave={waveId}` (no
+  `/messages/{waveId}` route)
+- Legacy `/waves?wave={waveId}` links redirect to `/waves/{waveId}` before the
+  composer loads.
+- Composer availability and eligibility states are documented in
+  [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md).
+- Create-wave `Description` step uses a different editor stack and is owned by
   [Wave Creation Description Step](../create/feature-description-step.md).
 
 ## Features
 
+### Submission and Content
+
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
-- [Wave Drop Composer Drag-and-Paste Image Uploads](feature-wave-drop-drag-paste-image-uploads.md)
-- [Wave Curation URL Submissions](feature-curation-url-submissions.md)
-- [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
-- [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
-- [Wave Drop Body Input Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
-- [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
+- [Wave Drop Composer Body Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
-- [Wave Drop Composer Title Max Length](feature-wave-drop-title-max-length.md)
+- [Wave Drop Composer Drag-and-Paste Image Uploads](feature-wave-drop-drag-paste-image-uploads.md)
+
+### Mentions and Markdown
+
+- [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
+- [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)
+
+### Curation and Edit Flows
+
+- [Wave Curation URL Submissions](feature-curation-url-submissions.md)
+- [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 
 ## Flows
 
@@ -41,4 +63,6 @@ Composer docs cover editing and submission behavior before drops are posted.
 ## Related Areas
 
 - [Waves Index](../README.md)
+- [Wave Chat Index](../chat/README.md)
+- [Wave Creation Index](../create/README.md)
 - [Drop Actions Index](../drop-actions/README.md)
