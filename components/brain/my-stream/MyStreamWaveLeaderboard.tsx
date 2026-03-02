@@ -15,6 +15,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveLeaderboardTime } from "@/components/waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
+import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 import { WaveLeaderboardDrops } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrops";
 import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery";
 import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
@@ -36,6 +37,17 @@ interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
+
+const parsePriceParam = (rawValue: string | null): number | undefined => {
+  if (!rawValue) {
+    return undefined;
+  }
+  const parsedValue = Number.parseFloat(rawValue);
+  if (!Number.isFinite(parsedValue) || parsedValue < 0) {
+    return undefined;
+  }
+  return parsedValue;
+};
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
@@ -62,6 +74,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   const [isCreateDropOpen, setIsCreateDropOpen] = useState(false);
   const [isMemesCreateOpen, setIsMemesCreateOpen] = useState(false);
+  const [isCurationDropModalOpen, setIsCurationDropModalOpen] = useState(false);
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = useMemo(
@@ -74,8 +87,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       }),
     [activeProfileProxy, isCurationWave, isLoggedIn, participation]
   );
-  const showPersistentDropInput =
-    !isMemesWave && isCurationWave && canCreateDrop;
   const showToggleableDropInput =
     !isMemesWave && !isCurationWave && isCreateDropOpen;
 
@@ -89,10 +100,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       return;
     }
 
+    if (isCurationWave) {
+      if (!canCreateDrop) {
+        return;
+      }
+      setIsCurationDropModalOpen(true);
+      return;
+    }
+
     if (!isCurationWave) {
       setIsCreateDropOpen(true);
     }
-  }, [isCurationWave, isMemesWave]);
+  }, [canCreateDrop, isCurationWave, isMemesWave]);
 
   // Generate a unique preference key for this wave
   const viewPreferenceKey = `waveViewMode_${wave.id}`;
@@ -117,7 +136,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
       value === WaveDropsLeaderboardSort.TREND ||
       value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
-      value === WaveDropsLeaderboardSort.CREATED_AT
+      value === WaveDropsLeaderboardSort.CREATED_AT ||
+      (isCurationWave && value === WaveDropsLeaderboardSort.PRICE)
   );
 
   const {
@@ -130,6 +150,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   });
 
   const rawCuratedByGroupId = searchParams.get("curated_by_group");
+  const rawMinPrice = searchParams.get("min_price");
+  const rawMaxPrice = searchParams.get("max_price");
 
   const curationGroupIdSet = useMemo(
     () => new Set(curationGroups.map((group) => group.id)),
@@ -158,6 +180,25 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     isLoadingCurationGroups,
     curationGroupIdSet,
   ]);
+  const minPrice = useMemo(
+    () => (isCurationWave ? parsePriceParam(rawMinPrice) : undefined),
+    [isCurationWave, rawMinPrice]
+  );
+  const maxPrice = useMemo(
+    () => (isCurationWave ? parsePriceParam(rawMaxPrice) : undefined),
+    [isCurationWave, rawMaxPrice]
+  );
+  const priceCurrency = useMemo(() => {
+    const hasPriceFilter =
+      typeof minPrice === "number" || typeof maxPrice === "number";
+    if (
+      isCurationWave &&
+      (hasPriceFilter || sort === WaveDropsLeaderboardSort.PRICE)
+    ) {
+      return "ETH";
+    }
+    return undefined;
+  }, [isCurationWave, maxPrice, minPrice, sort]);
 
   const updateCurationGroupInUrl = useCallback(
     (groupId: string | null) => {
@@ -167,6 +208,34 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         nextParams.set("curated_by_group", groupId);
       } else {
         nextParams.delete("curated_by_group");
+      }
+
+      const nextQuery = nextParams.toString();
+      const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+      router.replace(nextUrl, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+  const updatePriceRangeInUrl = useCallback(
+    ({
+      minPrice: nextMinPrice,
+      maxPrice: nextMaxPrice,
+    }: {
+      readonly minPrice: number | undefined;
+      readonly maxPrice: number | undefined;
+    }) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      if (typeof nextMinPrice === "number") {
+        nextParams.set("min_price", `${nextMinPrice}`);
+      } else {
+        nextParams.delete("min_price");
+      }
+
+      if (typeof nextMaxPrice === "number") {
+        nextParams.set("max_price", `${nextMaxPrice}`);
+      } else {
+        nextParams.delete("max_price");
       }
 
       const nextQuery = nextParams.toString();
@@ -194,7 +263,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         wave={wave}
         sort={sort}
         curatedByGroupId={curatedByGroupId}
-        onCreateDrop={isMemesWave || !isCurationWave ? onCreateDrop : undefined}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
+        onCreateDrop={onCreateDrop}
       />
     );
   } else if (!isMemesWave) {
@@ -203,6 +275,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         wave={wave}
         sort={sort}
         curatedByGroupId={curatedByGroupId}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
         mode={effectiveViewMode === "grid" ? "compact" : "content_only"}
         onDropClick={onDropClick}
       />
@@ -213,6 +288,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         wave={wave}
         sort={sort}
         curatedByGroupId={curatedByGroupId}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
         onDropClick={onDropClick}
       />
     );
@@ -229,14 +307,17 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           viewMode={effectiveViewMode}
           sort={sort}
           onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={
-            isMemesWave || !isCurationWave ? onCreateDrop : undefined
-          }
+          onCreateDrop={onCreateDrop}
           onSortChange={(s) => setSort(s)}
           curationGroups={curationGroups}
           curatedByGroupId={curatedByGroupId ?? null}
           onCurationGroupChange={
             curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
+          }
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          onPriceRangeChange={
+            isCurationWave ? updatePriceRangeInUrl : undefined
           }
         />
       </div>
@@ -268,21 +349,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           )}
         </AnimatePresence>
 
-        {showPersistentDropInput && (
-          <div className="tw-mt-2">
-            <WaveDropCreate
-              wave={wave}
-              onSuccess={() => {}}
-              isCurationLeaderboard
-            />
-          </div>
-        )}
-
         {isMemesWave && isMemesCreateOpen && (
           <MemesArtSubmissionModal
             isOpen={isMemesCreateOpen}
             wave={wave}
             onClose={() => setIsMemesCreateOpen(false)}
+          />
+        )}
+        {isCurationWave && isCurationDropModalOpen && (
+          <WaveLeaderboardCurationDropModal
+            isOpen={isCurationDropModalOpen}
+            wave={wave}
+            onClose={() => setIsCurationDropModalOpen(false)}
           />
         )}
 

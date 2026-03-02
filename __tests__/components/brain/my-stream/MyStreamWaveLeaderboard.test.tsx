@@ -14,9 +14,15 @@ const replace = jest.fn();
 let searchParamsString = "";
 let dropsProps: any;
 let createDropProps: any[] = [];
+let curationModalProps: any;
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
+  SubmissionStatus: {
+    NOT_STARTED: "NOT_STARTED",
+    ACTIVE: "ACTIVE",
+    ENDED: "ENDED",
+  },
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: (...args: any[]) => useLayout(...args),
@@ -84,6 +90,17 @@ jest.mock(
   "@/components/waves/memes/MemesArtSubmissionModal",
   () => (props: any) => (props.isOpen ? <div data-testid="memes" /> : null)
 );
+jest.mock(
+  "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal",
+  () => ({
+    WaveLeaderboardCurationDropModal: (props: any) => {
+      curationModalProps = props;
+      return props.isOpen ? (
+        <button data-testid="curation-modal" onClick={props.onClose} />
+      ) : null;
+    },
+  })
+);
 
 const wave = {
   id: "1",
@@ -111,6 +128,7 @@ describe("MyStreamWaveLeaderboard", () => {
     searchParamsString = "";
     dropsProps = null;
     createDropProps = [];
+    curationModalProps = undefined;
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
     useWaveCurationGroups.mockReturnValue({
       data: [],
@@ -145,6 +163,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(stickyHeader).toHaveClass("tw-sticky");
     expect(stickyHeader).toHaveClass("tw-z-30");
     expect(headerProps.viewMode).toBe("list");
+    expect(headerProps.onPriceRangeChange).toBeUndefined();
     expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
     expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
 
@@ -202,8 +221,8 @@ describe("MyStreamWaveLeaderboard", () => {
     );
   });
 
-  it("reads curation filter from URL and passes it to leaderboard data views", () => {
-    searchParamsString = "curated_by_group=group-1";
+  it("reads curation filters from URL and passes them to leaderboard data views", () => {
+    searchParamsString = "curated_by_group=group-1&min_price=1.5&max_price=4.2";
     useWave.mockReturnValue({
       isMemesWave: false,
       isCurationWave: true,
@@ -227,16 +246,40 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     expect(headerProps.curatedByGroupId).toBe("group-1");
-    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(headerProps.minPrice).toBe(1.5);
+    expect(headerProps.maxPrice).toBe(4.2);
+    expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
     expect(dropsProps.curatedByGroupId).toBe("group-1");
-    expect(dropsProps.onCreateDrop).toBeUndefined();
-    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
-    expect(screen.getByTestId("create-drop").parentElement).toHaveClass(
-      "tw-mt-2"
-    );
-    expect(
-      createDropProps[createDropProps.length - 1]?.isCurationLeaderboard
-    ).toBe(true);
+    expect(dropsProps.minPrice).toBe(1.5);
+    expect(dropsProps.maxPrice).toBe(4.2);
+    expect(dropsProps.priceCurrency).toBe("ETH");
+    expect(dropsProps.onCreateDrop).toEqual(expect.any(Function));
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("opens curation drop modal from header create action", async () => {
+    const user = userEvent.setup();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard();
+
+    expect(screen.queryByTestId("curation-modal")).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("header"));
+    expect(screen.getByTestId("curation-modal")).toBeInTheDocument();
+    expect(curationModalProps.wave).toEqual(wave);
   });
 
   it("updates URL when curation filter changes", () => {
@@ -269,5 +312,46 @@ describe("MyStreamWaveLeaderboard", () => {
 
     headerProps.onCurationGroupChange(null);
     expect(replace).toHaveBeenCalledWith("/waves", { scroll: false });
+  });
+
+  it("updates URL when price range changes", () => {
+    searchParamsString = "curated_by_group=group-1";
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveCurationGroups.mockReturnValue({
+      data: [{ id: "group-1", name: "Curators", group_id: "g1" }],
+      isLoading: false,
+      isError: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard();
+
+    headerProps.onPriceRangeChange({ minPrice: 1.25, maxPrice: undefined });
+    expect(replace).toHaveBeenCalledWith(
+      "/waves?curated_by_group=group-1&min_price=1.25",
+      {
+        scroll: false,
+      }
+    );
+
+    headerProps.onPriceRangeChange({
+      minPrice: undefined,
+      maxPrice: undefined,
+    });
+    expect(replace).toHaveBeenCalledWith("/waves?curated_by_group=group-1", {
+      scroll: false,
+    });
   });
 });

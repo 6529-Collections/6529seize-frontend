@@ -6,14 +6,17 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCurationGroup } from "@/generated/models/ApiWaveCurationGroup";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { AnimatePresence, motion } from "framer-motion";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { getWaveDropEligibility } from "../dropEligibility";
 import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
 import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
 import {
+  WAVE_LEADERBOARD_CURATION_SORT_ITEMS,
   WAVE_LEADERBOARD_SORT_ITEMS,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
@@ -31,7 +34,154 @@ interface WaveLeaderboardHeaderProps {
   readonly onCurationGroupChange?:
     | ((groupId: string | null) => void)
     | undefined;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly onPriceRangeChange?:
+    | ((values: {
+        readonly minPrice: number | undefined;
+        readonly maxPrice: number | undefined;
+      }) => void)
+    | undefined;
 }
+
+interface WaveLeaderboardPriceFiltersProps {
+  readonly waveId: string;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly onPriceRangeChange?:
+    | ((values: {
+        readonly minPrice: number | undefined;
+        readonly maxPrice: number | undefined;
+      }) => void)
+    | undefined;
+  readonly onFiltersActivated: () => void;
+  readonly onFiltersCleared: () => void;
+}
+
+const toPriceInputValue = (value?: number): string =>
+  typeof value === "number" ? value.toString() : "";
+
+const parsePriceInput = (rawValue: string): number | undefined => {
+  if (!rawValue.trim()) {
+    return undefined;
+  }
+  const numericValue = Number.parseFloat(rawValue);
+  if (!Number.isFinite(numericValue) || numericValue < 0) {
+    return undefined;
+  }
+  return numericValue;
+};
+
+const WaveLeaderboardPriceFilters: React.FC<
+  WaveLeaderboardPriceFiltersProps
+> = ({
+  waveId,
+  minPrice,
+  maxPrice,
+  onPriceRangeChange,
+  onFiltersActivated,
+  onFiltersCleared,
+}) => {
+  const [minPriceInput, setMinPriceInput] = useState(() =>
+    toPriceInputValue(minPrice)
+  );
+  const [maxPriceInput, setMaxPriceInput] = useState(() =>
+    toPriceInputValue(maxPrice)
+  );
+
+  const commitPriceRange = () => {
+    if (!onPriceRangeChange) {
+      return;
+    }
+
+    const nextMinPrice = parsePriceInput(minPriceInput);
+    const nextMaxPrice = parsePriceInput(maxPriceInput);
+    const hasActivePriceFilters =
+      typeof nextMinPrice === "number" || typeof nextMaxPrice === "number";
+
+    if (hasActivePriceFilters) {
+      onFiltersActivated();
+    }
+
+    onPriceRangeChange({
+      minPrice: nextMinPrice,
+      maxPrice: nextMaxPrice,
+    });
+  };
+
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5">
+      <div className="tw-flex tw-min-w-[10rem] tw-flex-col tw-gap-y-1.5">
+        <label
+          htmlFor={`leaderboard-min-price-${waveId}`}
+          className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
+        >
+          Min (ETH)
+        </label>
+        <input
+          id={`leaderboard-min-price-${waveId}`}
+          data-testid="leaderboard-price-min-input"
+          type="number"
+          min={0}
+          step="any"
+          inputMode="decimal"
+          placeholder="0"
+          value={minPriceInput}
+          onChange={(event) => setMinPriceInput(event.target.value)}
+          onBlur={commitPriceRange}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              commitPriceRange();
+            }
+          }}
+          className="tw-rounded-xl tw-border-0 tw-bg-black tw-px-4 tw-py-3 tw-text-xl tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
+        />
+      </div>
+      <div className="tw-flex tw-min-w-[10rem] tw-flex-col tw-gap-y-1.5">
+        <label
+          htmlFor={`leaderboard-max-price-${waveId}`}
+          className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
+        >
+          Max (ETH)
+        </label>
+        <input
+          id={`leaderboard-max-price-${waveId}`}
+          data-testid="leaderboard-price-max-input"
+          type="number"
+          min={0}
+          step="any"
+          inputMode="decimal"
+          placeholder="No max"
+          value={maxPriceInput}
+          onChange={(event) => setMaxPriceInput(event.target.value)}
+          onBlur={commitPriceRange}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              commitPriceRange();
+            }
+          }}
+          className="tw-rounded-xl tw-border-0 tw-bg-black tw-px-4 tw-py-3 tw-text-xl tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
+        />
+      </div>
+      <button
+        type="button"
+        data-testid="leaderboard-price-clear"
+        onClick={() => {
+          setMinPriceInput("");
+          setMaxPriceInput("");
+          onFiltersCleared();
+          onPriceRangeChange?.({
+            minPrice: undefined,
+            maxPrice: undefined,
+          });
+        }}
+        className="tw-h-[3.25rem] tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-6 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100"
+      >
+        Clear Filters
+      </button>
+    </div>
+  );
+};
 
 export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   wave,
@@ -43,6 +193,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   curationGroups = [],
   curatedByGroupId = null,
   onCurationGroupChange,
+  minPrice,
+  maxPrice,
+  onPriceRangeChange,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isMemesWave, isCurationWave, participation } = useWave(wave);
@@ -56,16 +209,29 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const showCurationGroupSelect = Boolean(
     onCurationGroupChange && curationGroups.length > 0
   );
+  const showPriceControls = Boolean(isCurationWave && onPriceRangeChange);
+  const sortItems = useMemo(
+    () =>
+      isCurationWave
+        ? WAVE_LEADERBOARD_CURATION_SORT_ITEMS
+        : WAVE_LEADERBOARD_SORT_ITEMS,
+    [isCurationWave]
+  );
   const viewModes: LeaderboardViewMode[] = isMemesWave
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];
+  const hasActivePriceFilters =
+    typeof minPrice === "number" || typeof maxPrice === "number";
+  const [isManualFiltersOpen, setIsManualFiltersOpen] = useState(false);
+  const [isActiveFiltersCollapsed, setIsActiveFiltersCollapsed] =
+    useState(false);
+  const isPriceFiltersOpen = hasActivePriceFilters
+    ? !isActiveFiltersCollapsed
+    : isManualFiltersOpen;
 
   const sortLabelByValue = useMemo(
-    () =>
-      new Map(
-        WAVE_LEADERBOARD_SORT_ITEMS.map((item) => [item.value, item.label])
-      ),
-    []
+    () => new Map(sortItems.map((item) => [item.value, item.label])),
+    [sortItems]
   );
   const activeSortLabel = sortLabelByValue.get(sort) ?? "Current Vote";
 
@@ -196,6 +362,16 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     );
   };
 
+  const onTogglePriceFilters = () => {
+    if (hasActivePriceFilters) {
+      setIsActiveFiltersCollapsed((current) => !current);
+      return;
+    }
+    setIsManualFiltersOpen((current) => !current);
+  };
+
+  const showCurationActions = showPriceControls;
+
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
       <div className="tw-flex tw-items-start tw-gap-2">
@@ -256,6 +432,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               sort={sort}
               onSortChange={onSortChange}
               mode={controlModes.sortMode}
+              items={sortItems}
             />
           </div>
           {showCurationGroupSelect && onCurationGroupChange && (
@@ -269,24 +446,84 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             </div>
           )}
         </div>
-        {isLoggedIn && (
-          <div
-            className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
-          >
-            {canCreateDrop && onCreateDrop && (
+        {showCurationActions ? (
+          <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+            <button
+              type="button"
+              data-testid="leaderboard-price-toggle"
+              aria-expanded={isPriceFiltersOpen}
+              aria-controls={`leaderboard-price-panel-${wave.id}`}
+              onClick={onTogglePriceFilters}
+              className={`tw-inline-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-5 tw-text-sm tw-font-semibold tw-transition ${
+                isPriceFiltersOpen || hasActivePriceFilters
+                  ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100"
+                  : "tw-border-white/10 tw-bg-iron-950 tw-text-iron-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/5"
+              }`}
+            >
+              <AdjustmentsHorizontalIcon className="tw-size-5 tw-flex-shrink-0" />
+              <span>Filters</span>
+            </button>
+            {isLoggedIn && canCreateDrop && onCreateDrop && (
               <PrimaryButton
                 loading={false}
                 disabled={false}
                 onClicked={onCreateDrop}
-                padding="tw-px-3 tw-py-2"
+                padding="tw-px-5 tw-py-2.5"
               >
-                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>Drop</span>
+                <PlusIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                <span>Drop Art</span>
               </PrimaryButton>
             )}
           </div>
+        ) : (
+          isLoggedIn && (
+            <div
+              className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
+            >
+              {canCreateDrop && onCreateDrop && (
+                <PrimaryButton
+                  loading={false}
+                  disabled={false}
+                  onClicked={onCreateDrop}
+                  padding="tw-px-3 tw-py-2"
+                >
+                  <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                  <span>Drop</span>
+                </PrimaryButton>
+              )}
+            </div>
+          )
         )}
       </div>
+
+      {showPriceControls && (
+        <AnimatePresence initial={false}>
+          {isPriceFiltersOpen && (
+            <motion.div
+              id={`leaderboard-price-panel-${wave.id}`}
+              data-testid="leaderboard-price-panel"
+              initial={{ opacity: 0, height: 0, y: -8 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="tw-overflow-hidden"
+            >
+              <WaveLeaderboardPriceFilters
+                key={`${minPrice ?? ""}|${maxPrice ?? ""}`}
+                waveId={wave.id}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                onPriceRangeChange={onPriceRangeChange}
+                onFiltersActivated={() => setIsActiveFiltersCollapsed(false)}
+                onFiltersCleared={() => {
+                  setIsManualFiltersOpen(false);
+                  setIsActiveFiltersCollapsed(false);
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
       <div
         aria-hidden="true"
@@ -296,7 +533,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           ref={sortTabsProbeRef}
           className="tw-inline-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-700"
         >
-          {WAVE_LEADERBOARD_SORT_ITEMS.map((item) => (
+          {sortItems.map((item) => (
             <div
               key={item.key}
               className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-xs tw-font-semibold"

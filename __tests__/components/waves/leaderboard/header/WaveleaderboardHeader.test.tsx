@@ -34,6 +34,17 @@ jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => ({
     { key: "TREND", label: "Hot", value: "TREND" },
     { key: "CREATED_AT", label: "Newest", value: "CREATED_AT" },
   ],
+  WAVE_LEADERBOARD_CURATION_SORT_ITEMS: [
+    { key: "RANK", label: "Current Vote", value: "RANK" },
+    {
+      key: "RATING_PREDICTION",
+      label: "Projected Vote",
+      value: "RATING_PREDICTION",
+    },
+    { key: "TREND", label: "Hot", value: "TREND" },
+    { key: "CREATED_AT", label: "Newest", value: "CREATED_AT" },
+    { key: "PRICE", label: "Price", value: "PRICE" },
+  ],
   WaveleaderboardSort: (props: any) => sortComponentMock(props),
 }));
 
@@ -55,6 +66,11 @@ jest.mock(
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
+  SubmissionStatus: {
+    NOT_STARTED: "NOT_STARTED",
+    ACTIVE: "ACTIVE",
+    ENDED: "ENDED",
+  },
 }));
 
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
@@ -218,6 +234,269 @@ it("renders curation selector and handles curation filter changes", async () => 
   );
   await user.click(screen.getByTestId("curation-group-select"));
   expect(onCurationGroupChange).toHaveBeenCalledWith("cg-1");
+});
+
+it("renders curation price controls and commits range updates", async () => {
+  const user = userEvent.setup();
+  const onPriceRangeChange = jest.fn();
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        onPriceRangeChange={onPriceRangeChange}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(
+    screen.queryByTestId("leaderboard-price-panel")
+  ).not.toBeInTheDocument();
+  await user.click(screen.getByTestId("leaderboard-price-toggle"));
+  const minInput = screen.getByTestId("leaderboard-price-min-input");
+  const maxInput = screen.getByTestId("leaderboard-price-max-input");
+  await user.clear(minInput);
+  await user.type(minInput, "1.5");
+  await user.clear(maxInput);
+  await user.type(maxInput, "3.25");
+  await user.tab();
+  expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+    minPrice: 1.5,
+    maxPrice: 3.25,
+  });
+
+  const latestSortProps =
+    sortComponentMock.mock.calls[sortComponentMock.mock.calls.length - 1]?.[0];
+  expect(latestSortProps?.items).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ value: "PRICE", label: "Price" }),
+    ])
+  );
+
+  await user.click(screen.getByTestId("leaderboard-price-clear"));
+  expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+    minPrice: undefined,
+    maxPrice: undefined,
+  });
+});
+
+it("auto-expands price filters when min or max price is active", () => {
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        minPrice={1.25}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument();
+  expect(screen.getByTestId("leaderboard-price-toggle")).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
+});
+
+it("allows collapsing and reopening filters while price filters are active", async () => {
+  const user = userEvent.setup();
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        minPrice={1.25}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  const toggle = screen.getByTestId("leaderboard-price-toggle");
+  expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument();
+  expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+  await user.click(toggle);
+  expect(
+    screen.queryByTestId("leaderboard-price-panel")
+  ).not.toBeInTheDocument();
+  expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+  await user.click(toggle);
+  expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument();
+  expect(toggle).toHaveAttribute("aria-expanded", "true");
+});
+
+it("resets price input drafts when committed price props change", async () => {
+  const user = userEvent.setup();
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  const { rerender } = render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        minPrice={1}
+        maxPrice={2}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument();
+  const minInput = screen.getByTestId(
+    "leaderboard-price-min-input"
+  ) as HTMLInputElement;
+  const maxInput = screen.getByTestId(
+    "leaderboard-price-max-input"
+  ) as HTMLInputElement;
+
+  await user.clear(minInput);
+  await user.type(minInput, "9");
+  await user.clear(maxInput);
+  await user.type(maxInput, "10");
+  expect(minInput.value).toBe("9");
+  expect(maxInput.value).toBe("10");
+
+  rerender(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        minPrice={3}
+        maxPrice={4}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(
+    (screen.getByTestId("leaderboard-price-min-input") as HTMLInputElement)
+      .value
+  ).toBe("3");
+  expect(
+    (screen.getByTestId("leaderboard-price-max-input") as HTMLInputElement)
+      .value
+  ).toBe("4");
+});
+
+it("does not render price controls for non-curation waves", () => {
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: false,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(
+    screen.queryByTestId("leaderboard-price-min-input")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByTestId("leaderboard-price-max-input")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByTestId("leaderboard-price-toggle")
+  ).not.toBeInTheDocument();
 });
 
 it("does not render curation selector when curation controls are unavailable", () => {

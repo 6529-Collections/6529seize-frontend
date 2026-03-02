@@ -22,6 +22,7 @@ import useCapacitor from "./useCapacitor";
 
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
+  PRICE = "PRICE",
   RATING_PREDICTION = "RATING_PREDICTION",
   TREND = "TREND",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
@@ -33,6 +34,9 @@ interface UseWaveDropsLeaderboardProps {
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly pausePolling?: boolean | undefined;
   readonly curatedByGroupId?: string | undefined;
+  readonly minPrice?: number | undefined;
+  readonly maxPrice?: number | undefined;
+  readonly priceCurrency?: string | undefined;
 }
 
 const SORT_DIRECTION_MAP: Record<
@@ -40,6 +44,7 @@ const SORT_DIRECTION_MAP: Record<
   "ASC" | "DESC" | undefined
 > = {
   [WaveDropsLeaderboardSort.RANK]: undefined,
+  [WaveDropsLeaderboardSort.PRICE]: undefined,
   [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
   [WaveDropsLeaderboardSort.TREND]: "DESC",
   [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
@@ -68,6 +73,9 @@ export function useWaveDropsLeaderboard({
   sort = WaveDropsLeaderboardSort.RANK,
   pausePolling = false,
   curatedByGroupId,
+  minPrice,
+  maxPrice,
+  priceCurrency,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -82,6 +90,24 @@ export function useWaveDropsLeaderboard({
     () => curatedByGroupId?.trim() ?? undefined,
     [curatedByGroupId]
   );
+  const normalizedMinPrice = useMemo(
+    () =>
+      typeof minPrice === "number" && Number.isFinite(minPrice) && minPrice >= 0
+        ? minPrice
+        : undefined,
+    [minPrice]
+  );
+  const normalizedMaxPrice = useMemo(
+    () =>
+      typeof maxPrice === "number" && Number.isFinite(maxPrice) && maxPrice >= 0
+        ? maxPrice
+        : undefined,
+    [maxPrice]
+  );
+  const normalizedPriceCurrency = useMemo(
+    () => priceCurrency?.trim() ?? undefined,
+    [priceCurrency]
+  );
 
   const queryKey = useMemo(
     () =>
@@ -93,9 +119,20 @@ export function useWaveDropsLeaderboard({
           sort,
           sort_direction: sortDirection,
           curated_by_group: normalizedCuratedByGroupId ?? null,
+          min_price: normalizedMinPrice ?? null,
+          max_price: normalizedMaxPrice ?? null,
+          price_currency: normalizedPriceCurrency ?? null,
         },
       ] as const,
-    [waveId, sort, sortDirection, normalizedCuratedByGroupId]
+    [
+      waveId,
+      sort,
+      sortDirection,
+      normalizedCuratedByGroupId,
+      normalizedMinPrice,
+      normalizedMaxPrice,
+      normalizedPriceCurrency,
+    ]
   );
 
   const buildLeaderboardParams = useCallback(
@@ -126,10 +163,24 @@ export function useWaveDropsLeaderboard({
       if (normalizedCuratedByGroupId) {
         params["curated_by_group"] = normalizedCuratedByGroupId;
       }
+      if (typeof normalizedMinPrice === "number") {
+        params["min_price"] = normalizedMinPrice.toString();
+      }
+      if (typeof normalizedMaxPrice === "number") {
+        params["max_price"] = normalizedMaxPrice.toString();
+      }
+      if (normalizedPriceCurrency) {
+        params["price_currency"] = normalizedPriceCurrency;
+      }
 
       return params;
     },
-    [normalizedCuratedByGroupId]
+    [
+      normalizedCuratedByGroupId,
+      normalizedMaxPrice,
+      normalizedMinPrice,
+      normalizedPriceCurrency,
+    ]
   );
 
   const fetchLeaderboardPage = useCallback(

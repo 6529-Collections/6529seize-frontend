@@ -30,6 +30,7 @@ import type { DropMutationBody } from "./CreateDrop";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";
+import PrimaryButton from "../utils/button/PrimaryButton";
 import type { CurationComposerVariant } from "./PrivilegedDropCreator";
 import ModalLayout from "./memes/submission/layout/ModalLayout";
 import {
@@ -428,56 +429,53 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         dropId={dropId}
       />
       {isLeaderboardVariant ? (
-        <div className="tw-flex tw-w-full tw-items-start tw-gap-x-2 lg:tw-gap-x-3">
-          <div className="tw-min-w-0 tw-flex-grow">
-            <CreateCurationDropUrlInput
-              ref={inputRef}
-              value={urlValue}
-              disabled={submitting}
-              isInvalid={isInvalid}
-              showHelperText={false}
-              scrollMarginTopClassName="tw-scroll-mt-24"
-              canonicalUrl={null}
-              onChange={setUrlValue}
-              onBlur={() => setShowLiveValidation(true)}
-              onSubmit={onDrop}
-            />
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
-              <button
-                type="button"
-                onClick={() => setIsSupportedUrlsModalOpen(true)}
-                className={`tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-underline tw-transition desktop-hover:hover:tw-text-white ${
-                  showSupportedUrlAttention
-                    ? "tw-text-red-300 tw-animate-pulse"
-                    : "tw-text-iron-300"
-                }`}
+        <div className="tw-flex tw-w-full tw-flex-col tw-gap-4">
+          <CreateCurationDropUrlInput
+            ref={inputRef}
+            value={urlValue}
+            disabled={submitting}
+            isInvalid={isInvalid}
+            showHelperText={false}
+            scrollMarginTopClassName="tw-scroll-mt-24"
+            canonicalUrl={null}
+            placeholder="https://..."
+            onChange={setUrlValue}
+            onBlur={() => setShowLiveValidation(true)}
+            onSubmit={onDrop}
+          />
+          <div className="tw-flex tw-flex-col tw-gap-2">
+            <button
+              type="button"
+              onClick={() => setIsSupportedUrlsModalOpen(true)}
+              className={`desktop-hover:hover:tw-text-primary-200 tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-medium tw-text-primary-300 tw-transition ${
+                showSupportedUrlAttention ? "tw-animate-pulse" : ""
+              }`}
+            >
+              View Supported URLs
+            </button>
+            {showSupportedUrlAttention && (
+              <p
+                role="alert"
+                className="tw-text-red-300 tw-mb-0 tw-text-sm tw-font-semibold"
               >
-                Supported URLs
-              </button>
-              {showSupportedUrlAttention && (
-                <p
-                  role="alert"
-                  className="tw-text-red-300 tw-mb-0 tw-text-xs tw-font-semibold"
-                >
-                  Unsupported URL format. Open Supported URLs.
+                Unsupported URL format. Open Supported URLs.
+              </p>
+            )}
+            {normalizedCurationUrl &&
+              normalizedCurationUrl !== urlValue.trim() && (
+                <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
+                  Will submit as: {normalizedCurationUrl}
                 </p>
               )}
-              {normalizedCurationUrl &&
-                normalizedCurationUrl !== urlValue.trim() && (
-                  <p className="tw-mb-0 tw-text-[11px] tw-text-iron-500">
-                    Will submit as: {normalizedCurationUrl}
-                  </p>
-                )}
-            </div>
           </div>
-          <div className="tw-shrink-0 tw-self-start">
-            <CreateDropSubmit
-              submitting={submitting}
-              canSubmit={canSubmit}
-              onDrop={onDrop}
-              isDropMode={isDropMode}
-            />
-          </div>
+          <PrimaryButton
+            onClicked={onDrop}
+            loading={submitting}
+            disabled={!canSubmit}
+            padding="tw-w-full tw-px-4 tw-py-3"
+          >
+            <span>Submit to Curation</span>
+          </PrimaryButton>
         </div>
       ) : (
         <div className="tw-flex tw-w-full tw-items-end">

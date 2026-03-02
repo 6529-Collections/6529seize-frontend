@@ -20,6 +20,9 @@ export * from '../models/ApiBulkRepTarget';
 export * from '../models/ApiChangeGroupVisibility';
 export * from '../models/ApiChangeProfileCicRating';
 export * from '../models/ApiChangeProfileRepRating';
+export * from '../models/ApiCicContributor';
+export * from '../models/ApiCicContributorsPage';
+export * from '../models/ApiCicOverview';
 export * from '../models/ApiCommunityMemberMinimal';
 export * from '../models/ApiCommunityMemberOverview';
 export * from '../models/ApiCommunityMembersPage';
@@ -150,6 +153,12 @@ export * from '../models/ApiRatingWithProfileInfoAndLevelPage';
 export * from '../models/ApiRedeemRefreshTokenRequest';
 export * from '../models/ApiRedeemRefreshTokenResponse';
 export * from '../models/ApiRegisterPushNotificationTokenRequest';
+export * from '../models/ApiRepCategoriesPage';
+export * from '../models/ApiRepCategory';
+export * from '../models/ApiRepContributor';
+export * from '../models/ApiRepContributorsPage';
+export * from '../models/ApiRepDirection';
+export * from '../models/ApiRepOverview';
 export * from '../models/ApiRepRating';
 export * from '../models/ApiReplyToDrop';
 export * from '../models/ApiReplyToDropResponse';
@@ -284,6 +293,9 @@ import { ApiBulkRepTarget } from '../models/ApiBulkRepTarget';
 import { ApiChangeGroupVisibility } from '../models/ApiChangeGroupVisibility';
 import { ApiChangeProfileCicRating } from '../models/ApiChangeProfileCicRating';
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
+import { ApiCicContributor } from '../models/ApiCicContributor';
+import { ApiCicContributorsPage } from '../models/ApiCicContributorsPage';
+import { ApiCicOverview } from '../models/ApiCicOverview';
 import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
 import { ApiCommunityMemberOverview } from '../models/ApiCommunityMemberOverview';
 import { ApiCommunityMembersPage } from '../models/ApiCommunityMembersPage';
@@ -414,6 +426,12 @@ import { ApiRatingWithProfileInfoAndLevelPage } from '../models/ApiRatingWithPro
 import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
 import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
 import { ApiRegisterPushNotificationTokenRequest } from '../models/ApiRegisterPushNotificationTokenRequest';
+import { ApiRepCategoriesPage } from '../models/ApiRepCategoriesPage';
+import { ApiRepCategory } from '../models/ApiRepCategory';
+import { ApiRepContributor } from '../models/ApiRepContributor';
+import { ApiRepContributorsPage } from '../models/ApiRepContributorsPage';
+import { ApiRepDirection } from '../models/ApiRepDirection';
+import { ApiRepOverview } from '../models/ApiRepOverview';
 import { ApiRepRating } from '../models/ApiRepRating';
 import { ApiReplyToDrop } from '../models/ApiReplyToDrop';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
@@ -558,6 +576,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfileClassification",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
+    "ApiRepDirection",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
@@ -596,6 +615,9 @@ let typeMap: {[index: string]: any} = {
     "ApiChangeGroupVisibility": ApiChangeGroupVisibility,
     "ApiChangeProfileCicRating": ApiChangeProfileCicRating,
     "ApiChangeProfileRepRating": ApiChangeProfileRepRating,
+    "ApiCicContributor": ApiCicContributor,
+    "ApiCicContributorsPage": ApiCicContributorsPage,
+    "ApiCicOverview": ApiCicOverview,
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
     "ApiCommunityMemberOverview": ApiCommunityMemberOverview,
     "ApiCommunityMembersPage": ApiCommunityMembersPage,
@@ -712,6 +734,11 @@ let typeMap: {[index: string]: any} = {
     "ApiRedeemRefreshTokenRequest": ApiRedeemRefreshTokenRequest,
     "ApiRedeemRefreshTokenResponse": ApiRedeemRefreshTokenResponse,
     "ApiRegisterPushNotificationTokenRequest": ApiRegisterPushNotificationTokenRequest,
+    "ApiRepCategoriesPage": ApiRepCategoriesPage,
+    "ApiRepCategory": ApiRepCategory,
+    "ApiRepContributor": ApiRepContributor,
+    "ApiRepContributorsPage": ApiRepContributorsPage,
+    "ApiRepOverview": ApiRepOverview,
     "ApiRepRating": ApiRepRating,
     "ApiReplyToDrop": ApiReplyToDrop,
     "ApiReplyToDropResponse": ApiReplyToDropResponse,
