@@ -223,7 +223,6 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "zod-validation-error": "^4.0.0",
-    "minimatch": "^10.2.4"
+    "zod-validation-error": "^4.0.0"
   }
 }
