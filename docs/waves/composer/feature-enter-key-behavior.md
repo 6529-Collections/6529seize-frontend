@@ -2,21 +2,15 @@
 
 ## Overview
 
-The wave drop composer uses keyboard shortcuts to switch between submit and
-newline behavior.
+The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 
-On desktop web:
-- `Enter` submits when the draft is submittable.
-- `Shift+Enter` inserts a newline.
-- Repeated `Shift+Enter` keeps intentional blank spacing in rendered markdown.
-
-In storm composition:
-- If the storm already has parts and the active draft has content, `Enter`
-  finalizes the current part and keeps the composer open.
-- If the storm already has parts and the active draft is empty, `Enter` submits
-  the full storm.
-
-On compact layouts, action controls are collapsed behind a chevron until expanded.
+- Desktop web: `Enter` submits when submit is allowed.
+- Desktop web: `Shift+Enter` inserts a new paragraph.
+- Storm mode: when prior parts exist, `Enter` with current draft content adds
+  that part; `Enter` on an empty draft submits the storm.
+- Narrow composer rows show metadata/media/GIF/storm actions behind a chevron.
+  After opening, those actions collapse on the next edit or when focus leaves
+  the composer row.
 
 ## Location in the Site
 
@@ -24,87 +18,70 @@ On compact layouts, action controls are collapsed behind a chevron until expande
 - Direct-message threads: `/messages?wave={waveId}` (canonical DM route; no
   `/messages/{waveId}` route)
 - Drop/post composer input in the thread footer
-- Wave creation description-step editor behavior is documented separately in
-  [Wave Creation Description Step](../create/feature-description-step.md)
 
 ## Entry Points
 
-- Focus the composer input in any wave or DM thread.
-- Type draft content and use keyboard submission.
-- On compact layouts, open the action chevron for metadata, media, GIF, and
-  storm controls.
+- Focus the composer in a wave or DM thread.
+- Type content and press `Enter` or `Shift+Enter`.
+- On narrow rows, open the chevron to reveal composer actions.
 
 ## User Journey
 
-1. Focus the composer and type text.
-2. Press `Shift+Enter` to insert new lines.
-3. Continue editing multi-line content as needed.
-4. Press `Enter` to submit when the draft is valid and submittable.
-5. In storm mode, if prior parts exist and the active draft has content, press
-   `Enter` to finalize the current part and keep composing.
-6. In storm mode, if prior parts exist and the active draft is empty, press
-   `Enter` to submit the full storm.
-7. On compact layouts, expand action controls before adding metadata, media, or
-   GIF content.
-8. On compact layouts, expanded actions collapse after the next text edit or
-   when focus leaves the composer row.
+1. Open a wave or DM thread composer.
+2. Type content.
+3. Use `Shift+Enter` for extra lines.
+4. Press `Enter` to submit when the draft is submittable.
+5. In storm mode with existing parts:
+   press `Enter` with content to add a part, or press `Enter` on empty content
+   to submit the storm.
+6. On narrow rows, use the chevron to show actions, then continue typing.
 
 ## Common Scenarios
 
-- Quick single-line drops can be posted with `Enter`.
-- Multi-line drops can be written with repeated `Shift+Enter`.
-- Multi-line drops can keep intentional extra blank spacing after publish.
-- When composing inside a heading, `Shift+Enter` continues in a normal paragraph
-  instead of keeping heading formatting.
-- When autocomplete is open for mentions, hashtags, or wave mentions, `Enter`
-  confirms the highlighted suggestion instead of submitting.
-- In compact layouts, action controls start collapsed and open from a chevron.
-- In wide layouts, action controls stay visible.
+- Send a short draft quickly with `Enter`.
+- Write multi-line content with repeated `Shift+Enter`.
+- Select mention/hashtag/wave suggestions with `Enter` while typeahead is open.
+- Keep adding storm parts with `Enter` until ready to submit.
 
 ## Edge Cases
 
-- Inside list items, `Enter` follows list editing behavior instead of forcing a
-  submit.
-- If required metadata or required media is missing, pressing `Enter` does not
-  submit the drop.
-- If the draft has no submit-ready content, `Enter` does not post.
-- On mobile web or Capacitor clients, composer keyboard submit shortcuts are not
-  used.
-- If storm-part requirements are still missing, `Enter` does not finalize or
-  submit.
-- If action controls are expanded, they collapse after the next edit interaction
-  or when focus leaves the composer row.
-- After switching to a different wave, action controls reset to compact mode.
+- Inside list items, `Enter` keeps list editing behavior.
+- In headings, `Shift+Enter` continues in a paragraph instead of extending the
+  heading.
+- Missing required metadata or media blocks `Enter` submission.
+- If there is no submit-ready content, `Enter` does not submit.
+- Mobile web and Capacitor disable Enter-key submit shortcuts.
+- On narrow rows, expanded actions collapse after the next edit, on blur, and
+  when switching waves.
 
 ## Failure and Recovery
 
-- If submit is blocked by requirements, complete missing metadata or required
-  media, then press `Enter` again or use the submit button.
-- If action controls are no longer visible, tap the action chevron again to reveal
-  them.
-- If authentication/signature is canceled, the draft remains in place so users
-  can retry.
-- If upload or submission fails, the composer surfaces an error and users can
-  retry without rebuilding the draft from scratch.
+- If submit is blocked, complete required metadata/media and retry `Enter` or
+  use the submit button.
+- If actions collapse on a narrow row, open them again with the chevron.
+- If auth/signature is canceled, the draft stays in place.
+- If upload or submit fails, the composer shows an error and keeps the draft for
+  retry.
 
 ## Limitations / Notes
 
-- Keyboard submit behavior is desktop-focused and depends on submittable state.
-- Autocomplete menus take priority over submit shortcuts while open.
-- `Shift+Enter` creates paragraph breaks, not soft line-break formatting inside
-  the same paragraph node.
-- Intentional extra blank spacing follows markdown rendering in wave drop cards.
-- Action-row behavior is layout-driven: compact rows are collapsed by default and
-  expand only after explicit action interaction.
+- Enter-key submission is desktop-focused and still depends on submit-ready
+  state.
+- Open typeahead menus take precedence over submit shortcuts.
+- `Shift+Enter` inserts paragraphs.
+- Wide rows keep composer actions visible without the chevron.
+- Wave creation `Description` uses a different editor flow in
+  [Wave Creation Description Step](../create/feature-description-step.md).
 
 ## Related Pages
 
+- [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Creation Description Step](../create/feature-description-step.md)
+- [Wave Drop Composer Body Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
+- [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
-- [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)
