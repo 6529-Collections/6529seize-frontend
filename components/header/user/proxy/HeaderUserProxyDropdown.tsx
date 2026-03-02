@@ -157,7 +157,9 @@ export default function HeaderUserProxyDropdown({
                             action: seizeAddConnectedAccount,
                             pendingKey: "add-account",
                             errorMessage:
-                              "Failed to start add-account flow. Please try again.",
+                              "Failed to add connected account. Please try again.",
+                          }).finally(() => {
+                            onClose();
                           });
                         }}
                       />

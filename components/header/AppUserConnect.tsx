@@ -9,7 +9,8 @@ import {
   ArrowRightEndOnRectangleIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import PushNotificationSettings from "./PushNotificationSettings";
 import HeaderQRScanner from "./share/HeaderQRScanner";
@@ -29,6 +30,7 @@ export default function AppUserConnect({
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
   } = useSeizeConnectContext();
+  const { setToast } = useContext(AuthContext);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
@@ -45,6 +47,16 @@ export default function AppUserConnect({
       await Promise.resolve(action());
     } catch (error) {
       console.error(errorMessage, error);
+      const errorDetails =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+            ? error
+            : "";
+      const toastMessage = errorDetails
+        ? `${errorMessage}: ${errorDetails}`
+        : errorMessage;
+      setToast({ message: toastMessage, type: "error" });
     } finally {
       onNavigate();
     }

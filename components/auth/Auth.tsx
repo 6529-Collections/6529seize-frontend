@@ -167,6 +167,8 @@ export default function Auth({
 
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
+  const latestAddressRef = useRef<string | undefined>(address);
+  const activeValidationOperationIdRef = useRef<string | null>(null);
   const [authLoadingState, setAuthLoadingState] = useState<
     "idle" | "validating" | "signing"
   >("idle");
@@ -177,6 +179,7 @@ export default function Auth({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+    activeValidationOperationIdRef.current = null;
     setAuthLoadingState("idle");
   }, []);
 
@@ -202,7 +205,15 @@ export default function Auth({
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
-  const authRole = getRole(getAuthJwt());
+  const authRole = (() => {
+    try {
+      const authJwt = getAuthJwt();
+      return getRole(authJwt);
+    } catch (error) {
+      logErrorSecurely("derive_auth_role", error);
+      return null;
+    }
+  })();
 
   useEffect(() => {
     if (!address) {
@@ -245,6 +256,10 @@ export default function Auth({
     };
   }, [address, abortCurrentAuthOperation]);
 
+  useEffect(() => {
+    latestAddressRef.current = address;
+  }, [address]);
+
   // Immediate authentication effect with race condition prevention
   useEffect(() => {
     // Clear previous operations when dependencies change
@@ -285,12 +300,14 @@ export default function Auth({
 
     // Generate unique operation ID for this validation attempt
     const operationId = `auth-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    activeValidationOperationIdRef.current = operationId;
 
     // IMMEDIATE validation - no setTimeout to prevent timing window vulnerability
     const validateImmediately = async () => {
-      // Address consistency check - ensure address hasn't changed since effect start
-      if (currentAddress !== address) {
-        // Address changed during setup - abort this operation
+      if (
+        latestAddressRef.current !== currentAddress ||
+        activeValidationOperationIdRef.current !== operationId
+      ) {
         return;
       }
 
@@ -302,7 +319,7 @@ export default function Auth({
         const result = await validateAuthImmediate({
           params: {
             currentAddress,
-            connectionAddress: address,
+            connectionAddress: currentAddress,
             jwt: getAuthJwt(),
             activeProfileProxy,
             isConnected,
@@ -318,14 +335,20 @@ export default function Auth({
           },
         });
 
-        // If operation was cancelled or address changed, no further action needed
-        if (result.wasCancelled || currentAddress !== address) {
+        if (
+          result.wasCancelled ||
+          latestAddressRef.current !== currentAddress ||
+          activeValidationOperationIdRef.current !== operationId
+        ) {
           return;
         }
       } finally {
-        // Clean up only if this is still the current operation
-        if (!abortController.signal.aborted && currentAddress === address) {
+        if (
+          abortControllerRef.current === abortController &&
+          activeValidationOperationIdRef.current === operationId
+        ) {
           abortControllerRef.current = null;
+          activeValidationOperationIdRef.current = null;
           setAuthLoadingState("idle");
         }
       }

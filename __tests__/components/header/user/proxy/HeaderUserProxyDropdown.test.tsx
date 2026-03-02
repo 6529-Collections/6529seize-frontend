@@ -12,6 +12,18 @@ jest.mock(
   () => (props: any) => (
     <div data-testid="connected-accounts">
       <button onClick={props.onAddAccount}>Add</button>
+      <button
+        onClick={() => {
+          const nextAccount = props.accounts?.find(
+            (account: { isActive: boolean }) => !account.isActive
+          );
+          if (nextAccount) {
+            props.onSelectAccount(nextAccount.address);
+          }
+        }}
+      >
+        Switch
+      </button>
     </div>
   )
 );
@@ -158,6 +170,35 @@ describe("HeaderUserProxyDropdown", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
     await waitFor(() => {
       expect(seizeAddConnectedAccount).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it("shows an error toast when switching account fails", async () => {
+    const seizeSwitchConnectedAccount = jest
+      .fn()
+      .mockImplementation(() => {
+        throw new Error("Switch failed");
+      });
+
+    const { setToast, onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", role: null, isActive: true, isConnected: true },
+        { address: "0xdef", role: null, isActive: false, isConnected: true },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Switch" }));
+
+    await waitFor(() => {
+      expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
       expect(onClose).toHaveBeenCalled();
     });
   });

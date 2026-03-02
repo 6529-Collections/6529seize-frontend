@@ -197,8 +197,14 @@ export default function AppHeader() {
       return false;
     }
 
-    seizeSwitchConnectedAccount(nextAccount.address);
-    return true;
+    try {
+      seizeSwitchConnectedAccount(nextAccount.address);
+      return true;
+    } catch (error) {
+      console.error("Failed to switch connected account from header", error);
+      setMenuOpen(true);
+      return false;
+    }
   };
 
   const onProfileActivate = () => {
