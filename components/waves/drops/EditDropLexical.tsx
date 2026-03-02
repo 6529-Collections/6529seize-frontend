@@ -105,7 +105,7 @@ const convertCodeNodesToFences = (root: RootNode) => {
     if (!node) continue;
 
     if ($isCodeNode(node)) {
-      const language = node.getLanguage?.() ?? "";
+      const language = node.getLanguage() ?? "";
       const safeLanguage = language.trim().replaceAll(/[`\n\r]/g, "");
       const codeText = node.getTextContent();
       const normalizedCode = codeText.endsWith("\n")
@@ -146,6 +146,7 @@ function reconstructSplitMention(
   if (!mentionMatch) return false;
 
   const handle = mentionMatch[1];
+  if (!handle) return false;
   const mentionNode = $createMentionNode(`@${handle}`);
 
   const currentText = currentNode.getTextContent();
@@ -348,6 +349,7 @@ function KeyboardPlugin({
   onSave,
   onCancel,
   isSaving,
+  isMobileOrApp,
   initialContent,
   mentionsRef,
   waveMentionsRef,
@@ -355,6 +357,7 @@ function KeyboardPlugin({
   onSave: () => void;
   onCancel: () => void;
   isSaving: boolean;
+  isMobileOrApp: boolean;
   initialContent: string;
   mentionsRef: React.RefObject<NewMentionsPluginHandles | null>;
   waveMentionsRef: React.RefObject<NewWaveMentionsPluginHandles | null>;
@@ -380,6 +383,10 @@ function KeyboardPlugin({
           waveMentionsRef.current?.isWaveMentionsOpen()
         ) {
           return false;
+        }
+
+        if (isMobileOrApp) {
+          return true;
         }
 
         if (event?.shiftKey) {
@@ -415,6 +422,7 @@ function KeyboardPlugin({
     onSave,
     onCancel,
     isSaving,
+    isMobileOrApp,
     initialContent,
     mentionsRef,
     waveMentionsRef,
@@ -441,7 +449,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const mentionsRef = useRef<NewMentionsPluginHandles>(null);
   const waveMentionsRef = useRef<NewWaveMentionsPluginHandles>(null);
-  const { isApp } = useDeviceInfo();
+  const { isApp, isMobileDevice } = useDeviceInfo();
+  const isMobileOrApp = isMobileDevice || isApp;
   const normalizedInitialContent = useMemo(
     () => normalizeDropMarkdown(initialContent),
     [initialContent]
@@ -586,6 +595,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             onSave={handleSave}
             onCancel={onCancel}
             isSaving={isSaving}
+            isMobileOrApp={isMobileOrApp}
             initialContent={normalizedInitialContent}
             mentionsRef={mentionsRef}
             waveMentionsRef={waveMentionsRef}
@@ -595,14 +605,14 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
       {!isApp && (
         <div className="tw-mt-1 tw-flex tw-items-center tw-text-xs tw-text-iron-400">
-          escape to{" "}
+          {!isMobileDevice && <>escape to </>}
           <button
             onClick={onCancel}
             className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
           >
             cancel
           </button>{" "}
-          • enter to{" "}
+          {isMobileDevice ? "• " : "• enter to "}
           <button
             onClick={handleSave}
             className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
