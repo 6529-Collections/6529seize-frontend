@@ -110,11 +110,11 @@ const WaveLeaderboardPriceFilters: React.FC<
   };
 
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5">
-      <div className="tw-flex tw-min-w-[10rem] tw-flex-col tw-gap-y-1.5">
+    <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
+      <div className="tw-flex tw-min-w-[9rem] tw-flex-col tw-gap-y-1">
         <label
           htmlFor={`leaderboard-min-price-${waveId}`}
-          className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
+          className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
         >
           Min (ETH)
         </label>
@@ -134,13 +134,13 @@ const WaveLeaderboardPriceFilters: React.FC<
               commitPriceRange();
             }
           }}
-          className="tw-rounded-xl tw-border-0 tw-bg-black tw-px-4 tw-py-3 tw-text-xl tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
+          className="tw-h-10 tw-rounded-lg tw-border-0 tw-bg-black tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
         />
       </div>
-      <div className="tw-flex tw-min-w-[10rem] tw-flex-col tw-gap-y-1.5">
+      <div className="tw-flex tw-min-w-[9rem] tw-flex-col tw-gap-y-1">
         <label
           htmlFor={`leaderboard-max-price-${waveId}`}
-          className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
+          className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
         >
           Max (ETH)
         </label>
@@ -160,7 +160,7 @@ const WaveLeaderboardPriceFilters: React.FC<
               commitPriceRange();
             }
           }}
-          className="tw-rounded-xl tw-border-0 tw-bg-black tw-px-4 tw-py-3 tw-text-xl tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
+          className="tw-h-10 tw-rounded-lg tw-border-0 tw-bg-black tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400"
         />
       </div>
       <button
@@ -175,7 +175,7 @@ const WaveLeaderboardPriceFilters: React.FC<
             maxPrice: undefined,
           });
         }}
-        className="tw-h-[3.25rem] tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-6 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100"
+        className="tw-h-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100"
       >
         Clear Filters
       </button>
@@ -454,13 +454,13 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               aria-expanded={isPriceFiltersOpen}
               aria-controls={`leaderboard-price-panel-${wave.id}`}
               onClick={onTogglePriceFilters}
-              className={`tw-inline-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-5 tw-text-sm tw-font-semibold tw-transition ${
+              className={`tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-text-xs tw-font-semibold tw-transition ${
                 isPriceFiltersOpen || hasActivePriceFilters
                   ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100"
                   : "tw-border-white/10 tw-bg-iron-950 tw-text-iron-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/5"
               }`}
             >
-              <AdjustmentsHorizontalIcon className="tw-size-5 tw-flex-shrink-0" />
+              <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
               <span>Filters</span>
             </button>
             {isLoggedIn && canCreateDrop && onCreateDrop && (

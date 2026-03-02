@@ -117,7 +117,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       />
     ),
     [MyStreamWaveTab.LEADERBOARD]: (
-      <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
+      <MyStreamWaveLeaderboard
+        key={wave.id}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
     ),
     [MyStreamWaveTab.WINNERS]: (
       <WaveWinners wave={wave} onDropClick={onDropClick} />

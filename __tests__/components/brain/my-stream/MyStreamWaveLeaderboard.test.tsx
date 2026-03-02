@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -221,7 +221,7 @@ describe("MyStreamWaveLeaderboard", () => {
     );
   });
 
-  it("reads curation filters from URL and passes them to leaderboard data views", () => {
+  it("reads curation group from URL and keeps price filters local", () => {
     searchParamsString = "curated_by_group=group-1&min_price=1.5&max_price=4.2";
     useWave.mockReturnValue({
       isMemesWave: false,
@@ -246,13 +246,13 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     expect(headerProps.curatedByGroupId).toBe("group-1");
-    expect(headerProps.minPrice).toBe(1.5);
-    expect(headerProps.maxPrice).toBe(4.2);
+    expect(headerProps.minPrice).toBeUndefined();
+    expect(headerProps.maxPrice).toBeUndefined();
     expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
     expect(dropsProps.curatedByGroupId).toBe("group-1");
-    expect(dropsProps.minPrice).toBe(1.5);
-    expect(dropsProps.maxPrice).toBe(4.2);
-    expect(dropsProps.priceCurrency).toBe("ETH");
+    expect(dropsProps.minPrice).toBeUndefined();
+    expect(dropsProps.maxPrice).toBeUndefined();
+    expect(dropsProps.priceCurrency).toBeUndefined();
     expect(dropsProps.onCreateDrop).toEqual(expect.any(Function));
     expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
   });
@@ -314,7 +314,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(replace).toHaveBeenCalledWith("/waves", { scroll: false });
   });
 
-  it("updates URL when price range changes", () => {
+  it("updates local price filters without touching URL", () => {
     searchParamsString = "curated_by_group=group-1";
     useWave.mockReturnValue({
       isMemesWave: false,
@@ -338,20 +338,83 @@ describe("MyStreamWaveLeaderboard", () => {
 
     renderLeaderboard();
 
-    headerProps.onPriceRangeChange({ minPrice: 1.25, maxPrice: undefined });
-    expect(replace).toHaveBeenCalledWith(
-      "/waves?curated_by_group=group-1&min_price=1.25",
-      {
-        scroll: false,
-      }
+    act(() => {
+      headerProps.onPriceRangeChange({ minPrice: 1.25, maxPrice: undefined });
+    });
+    expect(replace).not.toHaveBeenCalled();
+    expect(dropsProps.minPrice).toBe(1.25);
+    expect(dropsProps.maxPrice).toBeUndefined();
+    expect(dropsProps.priceCurrency).toBe("ETH");
+
+    act(() => {
+      headerProps.onPriceRangeChange({
+        minPrice: undefined,
+        maxPrice: undefined,
+      });
+    });
+    expect(replace).not.toHaveBeenCalled();
+    expect(dropsProps.minPrice).toBeUndefined();
+    expect(dropsProps.maxPrice).toBeUndefined();
+    expect(dropsProps.priceCurrency).toBeUndefined();
+  });
+
+  it("resets local price filters when wave changes", async () => {
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    const authContextValue = {
+      connectedProfile: { handle: "tester" },
+      activeProfileProxy: null,
+    } as any;
+
+    const waveA = { ...wave, id: "1" } as ApiWave;
+    const waveB = { ...wave, id: "2" } as ApiWave;
+    const onDropClick = jest.fn();
+
+    const { rerender } = render(
+      <AuthContext.Provider value={authContextValue}>
+        <MyStreamWaveLeaderboard
+          key={waveA.id}
+          wave={waveA}
+          onDropClick={onDropClick}
+        />
+      </AuthContext.Provider>
     );
 
-    headerProps.onPriceRangeChange({
-      minPrice: undefined,
-      maxPrice: undefined,
+    act(() => {
+      headerProps.onPriceRangeChange({ minPrice: 2, maxPrice: 5 });
     });
-    expect(replace).toHaveBeenCalledWith("/waves?curated_by_group=group-1", {
-      scroll: false,
+
+    expect(dropsProps.minPrice).toBe(2);
+    expect(dropsProps.maxPrice).toBe(5);
+
+    rerender(
+      <AuthContext.Provider value={authContextValue}>
+        <MyStreamWaveLeaderboard
+          key={waveB.id}
+          wave={waveB}
+          onDropClick={onDropClick}
+        />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(dropsProps.minPrice).toBeUndefined();
+      expect(dropsProps.maxPrice).toBeUndefined();
+      expect(dropsProps.priceCurrency).toBeUndefined();
     });
   });
 });

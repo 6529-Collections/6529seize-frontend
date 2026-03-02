@@ -38,17 +38,6 @@ interface MyStreamWaveLeaderboardProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const parsePriceParam = (rawValue: string | null): number | undefined => {
-  if (!rawValue) {
-    return undefined;
-  }
-  const parsedValue = Number.parseFloat(rawValue);
-  if (!Number.isFinite(parsedValue) || parsedValue < 0) {
-    return undefined;
-  }
-  return parsedValue;
-};
-
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
@@ -75,6 +64,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const [isCreateDropOpen, setIsCreateDropOpen] = useState(false);
   const [isMemesCreateOpen, setIsMemesCreateOpen] = useState(false);
   const [isCurationDropModalOpen, setIsCurationDropModalOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = useMemo(
@@ -150,8 +141,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   });
 
   const rawCuratedByGroupId = searchParams.get("curated_by_group");
-  const rawMinPrice = searchParams.get("min_price");
-  const rawMaxPrice = searchParams.get("max_price");
 
   const curationGroupIdSet = useMemo(
     () => new Set(curationGroups.map((group) => group.id)),
@@ -180,14 +169,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     isLoadingCurationGroups,
     curationGroupIdSet,
   ]);
-  const minPrice = useMemo(
-    () => (isCurationWave ? parsePriceParam(rawMinPrice) : undefined),
-    [isCurationWave, rawMinPrice]
-  );
-  const maxPrice = useMemo(
-    () => (isCurationWave ? parsePriceParam(rawMaxPrice) : undefined),
-    [isCurationWave, rawMaxPrice]
-  );
   const priceCurrency = useMemo(() => {
     const hasPriceFilter =
       typeof minPrice === "number" || typeof maxPrice === "number";
@@ -216,7 +197,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     },
     [pathname, router, searchParams]
   );
-  const updatePriceRangeInUrl = useCallback(
+  const updatePriceRange = useCallback(
     ({
       minPrice: nextMinPrice,
       maxPrice: nextMaxPrice,
@@ -224,25 +205,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       readonly minPrice: number | undefined;
       readonly maxPrice: number | undefined;
     }) => {
-      const nextParams = new URLSearchParams(searchParams.toString());
-
-      if (typeof nextMinPrice === "number") {
-        nextParams.set("min_price", `${nextMinPrice}`);
-      } else {
-        nextParams.delete("min_price");
-      }
-
-      if (typeof nextMaxPrice === "number") {
-        nextParams.set("max_price", `${nextMaxPrice}`);
-      } else {
-        nextParams.delete("max_price");
-      }
-
-      const nextQuery = nextParams.toString();
-      const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-      router.replace(nextUrl, { scroll: false });
+      setMinPrice(nextMinPrice);
+      setMaxPrice(nextMaxPrice);
     },
-    [pathname, router, searchParams]
+    []
   );
 
   const effectiveViewMode = useMemo<LeaderboardViewMode>(() => {
@@ -316,9 +282,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           }
           minPrice={minPrice}
           maxPrice={maxPrice}
-          onPriceRangeChange={
-            isCurationWave ? updatePriceRangeInUrl : undefined
-          }
+          onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
         />
       </div>
 
