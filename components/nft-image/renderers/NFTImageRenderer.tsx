@@ -5,6 +5,7 @@ import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
+import { withArweaveFallback } from "../utils/arweave-fallback";
 
 function getSrc(
   nft: BaseRendererProps["nft"],
@@ -45,7 +46,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         id={props.id ?? `image-${props.nft.id}`}
         src={src}
         alt={props.nft.name}
-        onError={({ currentTarget }) => {
+        onError={withArweaveFallback(({ currentTarget }) => {
           if (currentTarget.src === props.nft.thumbnail) {
             currentTarget.src = props.nft.scaled
               ? props.nft.scaled
@@ -55,7 +56,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
           } else if ("metadata" in props.nft) {
             currentTarget.src = props.nft.metadata.image;
           }
-        }}
+        })}
       />
       {props.showBalance && (
         <NFTImageBalance
