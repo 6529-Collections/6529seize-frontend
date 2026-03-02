@@ -142,11 +142,9 @@ describe("HeaderUserProxyDropdown", () => {
   });
 
   it("shows an error toast when switching account fails", async () => {
-    const seizeSwitchConnectedAccount = jest
-      .fn()
-      .mockImplementation(() => {
-        throw new Error("Switch failed");
-      });
+    const seizeSwitchConnectedAccount = jest.fn().mockImplementation(() => {
+      throw new Error("Switch failed");
+    });
 
     const { setToast, onClose } = renderDropdown({
       profile: profileBase,

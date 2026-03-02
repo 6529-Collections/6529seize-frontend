@@ -61,12 +61,15 @@ jest.mock("@/hooks/useSecureSign", () => ({
 }));
 
 jest.mock("react-bootstrap", () => ({
-  Modal: Object.assign(({ children, show }: any) => (show ? <div>{children}</div> : null), {
-    Header: ({ children }: any) => <div>{children}</div>,
-    Title: ({ children }: any) => <h4>{children}</h4>,
-    Body: ({ children }: any) => <div>{children}</div>,
-    Footer: ({ children }: any) => <div>{children}</div>,
-  }),
+  Modal: Object.assign(
+    ({ children, show }: any) => (show ? <div>{children}</div> : null),
+    {
+      Header: ({ children }: any) => <div>{children}</div>,
+      Title: ({ children }: any) => <h4>{children}</h4>,
+      Body: ({ children }: any) => <div>{children}</div>,
+      Footer: ({ children }: any) => <div>{children}</div>,
+    }
+  ),
   Button: ({ children, onClick }: any) => (
     <button onClick={onClick}>{children}</button>
   ),
