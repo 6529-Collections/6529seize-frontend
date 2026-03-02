@@ -31,6 +31,7 @@ export default function MarketplaceSuperrareArtworkPreview({
         price={state.resolvedPrice}
         priceCurrency={state.resolvedPriceCurrency}
         title={state.resolvedTitle}
+        dataHealth={state.resolvedDataHealth}
         compact={compact}
         hideActions={compact}
       />
