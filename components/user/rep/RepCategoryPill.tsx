@@ -3,7 +3,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { MouseEvent } from "react";
 import { useMemo } from "react";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
-import type { RepDirection } from "./header/UserPageRepHeader";
+import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
 
 const stopPropagation = (e: MouseEvent) => e.stopPropagation();
 
@@ -25,14 +25,14 @@ export default function RepCategoryPill({
   const avatarItems = useMemo(
     () =>
       category.top_contributors.map((c) => ({
-        key: c.profile.handle ?? c.profile.primary_address ?? String(c.profile.id),
+        key: c.profile.handle ?? c.profile.primary_address,
         pfpUrl: c.profile.pfp ?? null,
-        href: c.profile.handle ? `/${c.profile.handle}` : undefined,
-        ariaLabel: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        ...(c.profile.handle ? { href: `/${c.profile.handle}` } : {}),
+        ariaLabel: c.profile.handle ?? c.profile.primary_address,
         fallback: c.profile.handle
           ? c.profile.handle.charAt(0).toUpperCase()
           : "?",
-        title: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        title: c.profile.handle ?? c.profile.primary_address,
         tooltipContent: (
           <span>
             {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
@@ -46,7 +46,7 @@ export default function RepCategoryPill({
   const content = (
     <>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
-        <span className="tw-text-sm tw-font-medium tw-text-white tw-text-left">
+        <span className="tw-text-left tw-text-sm tw-font-medium tw-text-white">
           {category.category}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-300">
@@ -70,16 +70,14 @@ export default function RepCategoryPill({
         )}
         <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
           {formatNumberWithCommas(category.contributor_count)}{" "}
-          {direction === "given"
-            ? category.contributor_count === 1 ? "receiver" : "receivers"
-            : category.contributor_count === 1 ? "rater" : "raters"}
+          {getContributorLabel(direction, category.contributor_count)}
         </span>
       </span>
       {!!category.authenticated_user_contribution && (
         <>
           <span className="tw-text-xs tw-text-white/20">&middot;</span>
           <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-            My Rate:{" "}
+            {direction === "given" ? "To Me:" : "My Rate:"}{" "}
             <span className="tw-font-medium tw-text-primary-400">
               {formatNumberWithCommas(category.authenticated_user_contribution)}
             </span>
@@ -103,9 +101,5 @@ export default function RepCategoryPill({
     );
   }
 
-  return (
-    <div className={`${baseClasses} tw-cursor-default`}>
-      {content}
-    </div>
-  );
+  return <div className={`${baseClasses} tw-cursor-default`}>{content}</div>;
 }

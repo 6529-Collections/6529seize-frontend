@@ -23,7 +23,10 @@ import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
-import type { RepDirection } from "./header/UserPageRepHeader";
+import {
+  getContributorLabel,
+  type RepDirection,
+} from "./header/UserPageRepHeader";
 import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import { getCanEditRep } from "./UserPageRep.helpers";
@@ -38,6 +41,7 @@ export default function UserPageRepMobile({
   repDirection,
   onRepDirectionChange,
   initialActivityLogParams,
+  loading,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -46,6 +50,7 @@ export default function UserPageRepMobile({
   readonly repDirection: RepDirection;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly initialActivityLogParams: ActivityLogParams;
+  readonly loading: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
@@ -55,19 +60,6 @@ export default function UserPageRepMobile({
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(5);
   const [editCategory, setEditCategory] = useState<string | null>(null);
-
-  // Close modals when viewport reaches lg breakpoint
-  useEffect(() => {
-    const mq = globalThis.matchMedia("(min-width: 1024px)");
-    const handler = (e: MediaQueryListEvent) => {
-      if (e.matches) {
-        setIsGrantRepOpen(false);
-        setIsNicRateOpen(false);
-      }
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
 
   useEffect(() => {
     setVisibleCount(5);
@@ -106,13 +98,13 @@ export default function UserPageRepMobile({
   const cicAvatarItems = useMemo(
     () =>
       (cicOverview?.contributors.data ?? []).slice(0, 3).map((c) => ({
-        key: c.profile.handle ?? c.profile.primary_address ?? String(c.profile.id),
+        key: c.profile.handle ?? c.profile.primary_address,
         pfpUrl: c.profile.pfp ?? null,
-        ariaLabel: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        ariaLabel: c.profile.handle ?? c.profile.primary_address,
         fallback: c.profile.handle
           ? c.profile.handle.charAt(0).toUpperCase()
           : "?",
-        title: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        title: c.profile.handle ?? c.profile.primary_address,
         tooltipContent: (
           <span>
             {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
@@ -126,7 +118,7 @@ export default function UserPageRepMobile({
   // --- render ---
 
   return (
-    <div className="lg:tw-hidden">
+    <div>
       {/* Score Cards (tappable navigation) */}
       <div className="tw-grid tw-grid-cols-2 tw-gap-3">
         {/* Rep Score */}
@@ -169,17 +161,16 @@ export default function UserPageRepMobile({
               Total Rep
             </div>
             <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-              {overview
-                ? formatNumberWithCommas(overview.total_rep)
-                : "\u2014"}
+              {overview ? formatNumberWithCommas(overview.total_rep) : "\u2014"}
             </div>
             {overview && (
               <div className="tw-mt-2.5 tw-flex tw-items-center">
                 <span className="tw-text-xs tw-font-normal tw-text-iron-400">
                   {formatNumberWithCommas(overview.contributor_count)}{" "}
-                  {repDirection === "given"
-                    ? overview.contributor_count === 1 ? "receiver" : "receivers"
-                    : overview.contributor_count === 1 ? "rater" : "raters"}
+                  {getContributorLabel(
+                    repDirection,
+                    overview.contributor_count
+                  )}
                 </span>
               </div>
             )}
@@ -248,7 +239,9 @@ export default function UserPageRepMobile({
               )}
               <span className="tw-text-xs tw-font-normal tw-text-iron-400">
                 {formatNumberWithCommas(cicOverview?.contributor_count ?? 0)}{" "}
-                {(cicOverview?.contributor_count ?? 0) === 1 ? "rater" : "raters"}
+                {(cicOverview?.contributor_count ?? 0) === 1
+                  ? "rater"
+                  : "raters"}
               </span>
             </div>
           </div>
@@ -276,7 +269,10 @@ export default function UserPageRepMobile({
                     : "tw-text-iron-500 hover:tw-text-iron-300"
                 }`}
               >
-                <ArrowDownLeftIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" aria-hidden="true" />
+                <ArrowDownLeftIcon
+                  className="tw-h-3 tw-w-3 tw-flex-shrink-0"
+                  aria-hidden="true"
+                />
                 Received
               </button>
               <button
@@ -288,7 +284,10 @@ export default function UserPageRepMobile({
                     : "tw-text-iron-500 hover:tw-text-iron-300"
                 }`}
               >
-                <ArrowUpRightIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" aria-hidden="true" />
+                <ArrowUpRightIcon
+                  className="tw-h-3 tw-w-3 tw-flex-shrink-0"
+                  aria-hidden="true"
+                />
                 Given
               </button>
             </div>
@@ -296,7 +295,7 @@ export default function UserPageRepMobile({
             {/* Rep Categories */}
             {categories.length > 0 && (
               <div className="tw-mt-4">
-                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
+                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-100">
                   Rep Categories
                 </div>
                 <div className="tw-flex tw-flex-wrap tw-gap-2">
@@ -322,6 +321,19 @@ export default function UserPageRepMobile({
                 </div>
               </div>
             )}
+
+            {categories.length === 0 &&
+              (loading ? (
+                <div className="tw-mt-4 tw-flex tw-justify-center tw-py-4">
+                  <div className="tw-h-5 tw-w-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-700 tw-border-t-iron-400" />
+                </div>
+              ) : (
+                <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-500">
+                  {repDirection === "given"
+                    ? "No rep given yet."
+                    : "No rep received yet."}
+                </p>
+              ))}
 
             {canEditRep && repDirection === "received" && (
               <div className="tw-mt-4">

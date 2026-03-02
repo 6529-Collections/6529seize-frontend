@@ -10,9 +10,14 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import RepCategoryPill from "../RepCategoryPill";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
-import { getCanEditRep } from "../UserPageRep.helpers";
+import {
+  getCanEditRep,
+  getContributorLabel,
+  type RepDirection,
+} from "../UserPageRep.helpers";
 
-export type RepDirection = "received" | "given";
+export type { RepDirection };
+export { getContributorLabel };
 
 export default function UserPageRepHeader({
   overview,
@@ -20,12 +25,14 @@ export default function UserPageRepHeader({
   profile,
   repDirection,
   onRepDirectionChange,
+  loading,
 }: {
   readonly overview: ApiRepOverview | null;
   readonly categories: ApiRepCategory[];
   readonly profile: ApiIdentity;
   readonly repDirection: RepDirection;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
+  readonly loading: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -82,9 +89,10 @@ export default function UserPageRepHeader({
                 </div>
                 <span className="tw-mt-1 tw-text-sm tw-font-normal tw-text-iron-400">
                   {formatNumberWithCommas(overview.contributor_count)}{" "}
-                  {repDirection === "given"
-                    ? overview.contributor_count === 1 ? "receiver" : "receivers"
-                    : overview.contributor_count === 1 ? "rater" : "raters"}
+                  {getContributorLabel(
+                    repDirection,
+                    overview.contributor_count
+                  )}
                 </span>
               </div>
             ) : (
@@ -99,7 +107,7 @@ export default function UserPageRepHeader({
             )}
           </div>
 
-          <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4">
+          <div className="tw-flex tw-items-center tw-gap-4">
             <button
               type="button"
               onClick={() => onRepDirectionChange("received")}
@@ -109,7 +117,10 @@ export default function UserPageRepHeader({
                   : "tw-text-iron-500 hover:tw-text-iron-300"
               }`}
             >
-              <ArrowDownLeftIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0" aria-hidden="true" />
+              <ArrowDownLeftIcon
+                className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
               Received
             </button>
             <button
@@ -121,12 +132,16 @@ export default function UserPageRepHeader({
                   : "tw-text-iron-500 hover:tw-text-iron-300"
               }`}
             >
-              <ArrowUpRightIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0" aria-hidden="true" />
+              <ArrowUpRightIcon
+                className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
               Given
             </button>
           </div>
 
-          {(visibleCategories.length > 0 || (canEditRep && repDirection === "received")) && (
+          {(visibleCategories.length > 0 ||
+            (canEditRep && repDirection === "received")) && (
             <div className="tw-mt-6 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-6">
               <div className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                 Rep Categories
@@ -173,6 +188,24 @@ export default function UserPageRepHeader({
               </div>
             </div>
           )}
+
+          {categories.length === 0 &&
+            !loading &&
+            !(canEditRep && repDirection === "received") && (
+              <p className="tw-mb-0 tw-mt-6 tw-text-sm tw-font-normal tw-text-iron-500">
+                {repDirection === "given"
+                  ? "No rep given yet."
+                  : "No rep received yet."}
+              </p>
+            )}
+
+          {categories.length === 0 &&
+            loading &&
+            !(canEditRep && repDirection === "received") && (
+              <div className="tw-mt-6 tw-flex tw-justify-center tw-py-4">
+                <div className="tw-h-6 tw-w-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-700 tw-border-t-iron-400" />
+              </div>
+            )}
         </div>
       </div>
 
@@ -190,7 +223,6 @@ export default function UserPageRepHeader({
         isOpen={isGrantRepOpen}
         onClose={() => setIsGrantRepOpen(false)}
       />
-
     </>
   );
 }
