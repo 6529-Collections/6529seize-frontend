@@ -39,11 +39,37 @@ try {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const deepFreezeRuleConfig = (value, seen = new WeakSet()) => {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) {
+    return value;
+  }
+
+  if (seen.has(value)) {
+    return value;
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const nestedValue of value) {
+      deepFreezeRuleConfig(nestedValue, seen);
+    }
+    return Object.freeze(value);
+  }
+
+  if (Object.getPrototypeOf(value) === Object.prototype) {
+    for (const nestedValue of Object.values(value)) {
+      deepFreezeRuleConfig(nestedValue, seen);
+    }
+  }
+
+  return Object.freeze(value);
+};
+
 // =============================================================================
 // PLUGINS
 // =============================================================================
 // Note: jsx-a11y is already included via eslint-config-next, so we don't register it again
-export const basePlugins = {
+export const basePlugins = Object.freeze({
   "unused-imports": unusedImports,
   "react-hooks": reactHooks,
   "@typescript-eslint": tseslint.plugin,
@@ -52,12 +78,12 @@ export const basePlugins = {
   security: security,
   promise: promise,
   tailwindcss: tailwindcss,
-};
+});
 
 // =============================================================================
 // RULES
 // =============================================================================
-export const baseRules = {
+export const baseRules = deepFreezeRuleConfig({
   // -------------------------------------------------------------------------
   // Next.js Rules - Production Grade
   // -------------------------------------------------------------------------
@@ -433,7 +459,7 @@ export const baseRules = {
   // Arrays
   "array-callback-return": ["off", { allowImplicit: true }],
   "no-array-constructor": "error",
-};
+});
 
 // =============================================================================
 // EXPORT CONFIG
