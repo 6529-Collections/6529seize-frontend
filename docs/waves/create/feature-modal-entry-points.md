@@ -2,54 +2,55 @@
 
 ## Overview
 
-On desktop discover, wave, and message layouts, creating a wave opens one
-shared `Create Wave` modal. Multiple create controls feed the same URL-based
-modal state so the create flow opens consistently without replacing the
-underlying page context.
+Desktop wave creation uses URL mode `?create=wave`.
+When that mode is active, the `Create Wave` modal opens above the current page
+context.
 
-## Location in the Site
+## Route Coverage
 
-- Desktop `/discover`, `/waves`, and `/waves/{waveId}` routes.
-- Desktop `/messages` routes that reuse the same left-sidebar shell.
-- `Waves` section `+` action in the desktop sidebar (expanded and collapsed
-  modes).
-- Discover/waves list header `Create Wave` action.
-- Empty-wave placeholder panel in desktop wave content layouts.
-- App-mode routes use dedicated create pages (`/waves/create`) instead of this
-  desktop modal behavior.
+- Desktop routes where `?create=wave` opens the wave-create modal:
+  - `/discover`
+  - `/waves`
+  - `/waves/{waveId}`
+  - `/messages`
+  - `/messages?wave={waveId}`
+- App create uses `/waves/create`.
 
 ## Entry Points
 
-- Click the `+` create action in the desktop sidebar `Waves` section.
-- Click `Create Wave` from the discover/waves list header.
-- Click `Create Wave` from the desktop empty-wave placeholder panel.
-- Open a desktop discover/wave/message route URL that includes `?create=wave`.
+- `/discover`: click list-header `Create Wave`.
+- `/waves` and `/waves/{waveId}`: click `+` in the left-sidebar `Waves`
+  section.
+- `/waves`: click `Create Wave` in the empty-content placeholder.
+- `/messages`: open by URL only (`?create=wave`).
+- Open a supported desktop route URL with `?create=wave`.
 
-## User Journey
+## URL and Modal Behavior
 
 1. Open a desktop discover, waves, or messages route with an authenticated
    profile.
-2. Start create-wave from a sidebar, header, or placeholder entry point.
-3. The current URL keeps the same path/context and adds `create=wave`.
-4. A single `Create Wave` modal opens above the current page context while the
+2. Start create-wave from an available control, or from a URL that already has
+   `create=wave`.
+3. The current URL keeps the same path/context and sets `create=wave`.
+4. The `Create Wave` modal opens above the current page context while the
    underlying list/content view remains visible.
-5. Complete creation or close the modal from the header close button, backdrop,
-   `Escape` (when focus is not in an input/textarea/select), or create-flow
-   back/success actions.
+5. Close from the header close button, backdrop click, or `Escape` (when focus
+   is not in an input, textarea, or select).
 6. Closing removes the `create` query value while keeping the rest of the URL
    context.
+7. Successful submit navigates to the new wave route.
 
 ## Common Scenarios
 
-- Start a new wave directly from the sidebar while browsing existing waves.
-- Start a new wave from `/discover` and keep the discover list visible behind
-  the modal.
-- Start a new wave from `/messages` without leaving the messages layout.
+- Start a new wave from `/discover` and keep discover list context behind the
+  modal.
+- Start a new wave from desktop waves sidebar while browsing existing waves.
+- Open `/messages?create=wave` or `/messages?wave={waveId}&create=wave` to open
+  create-wave inside messages layout.
 - Reopen the modal by using a URL that already includes `create=wave`.
-- Open create-wave from the desktop empty-state panel before selecting any
-  active wave.
+- Open create-wave from `/waves` placeholder before selecting an active wave.
 
-## Edge Cases
+## Access and Edge Cases
 
 - Existing query parameters (for example `wave` or `drop`) are preserved while
   opening and closing create-wave mode.
@@ -57,10 +58,12 @@ underlying page context.
 - In collapsed sidebar mode, the create control remains icon-first; tooltip
   labels appear only on hover-capable devices.
 - On non-hover devices, tooltip labels are not shown for the create icon.
-- If no connected profile is available, create-wave controls are not shown and
-  modal content is not mounted.
+- If no eligible connected profile is available, create-wave controls are not
+  shown and modal content is not mounted.
+- Desktop `/messages` layout has no dedicated `Create Wave` button; opening
+  wave-create there is URL-driven.
 
-## Failure and Recovery
+## Recovery
 
 - If a stale `create=wave` URL opens the modal unexpectedly, closing the modal
   clears the create state and returns to the underlying page context.
@@ -69,7 +72,7 @@ underlying page context.
 - If the close icon is not convenient on a narrow viewport, clicking the modal
   backdrop also closes the modal.
 
-## Limitations / Notes
+## Scope Notes
 
 - This page documents desktop discover/waves/messages shell behavior only.
 - App create actions route to `/waves/create` instead of this desktop modal.
