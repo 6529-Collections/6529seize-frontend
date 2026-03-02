@@ -33,6 +33,29 @@ import { getCanEditRep } from "./UserPageRep.helpers";
 
 type MobileTab = "rep" | "identity";
 
+function RepEmptyState({
+  loading,
+  repDirection,
+}: {
+  readonly loading: boolean;
+  readonly repDirection: RepDirection;
+}) {
+  if (loading) {
+    return (
+      <div className="tw-mt-4 tw-flex tw-justify-center tw-py-4">
+        <div className="tw-h-5 tw-w-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-700 tw-border-t-iron-400" />
+      </div>
+    );
+  }
+  return (
+    <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-500">
+      {repDirection === "given"
+        ? "No rep given yet."
+        : "No rep received yet."}
+    </p>
+  );
+}
+
 export default function UserPageRepMobile({
   profile,
   overview,
@@ -115,13 +138,10 @@ export default function UserPageRepMobile({
     [cicOverview?.contributors.data]
   );
 
-  // --- render ---
 
   return (
     <div>
-      {/* Score Cards (tappable navigation) */}
       <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-        {/* Rep Score */}
         <button
           type="button"
           onClick={() => setActiveTab("rep")}
@@ -322,18 +342,9 @@ export default function UserPageRepMobile({
               </div>
             )}
 
-            {categories.length === 0 &&
-              (loading ? (
-                <div className="tw-mt-4 tw-flex tw-justify-center tw-py-4">
-                  <div className="tw-h-5 tw-w-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-700 tw-border-t-iron-400" />
-                </div>
-              ) : (
-                <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-500">
-                  {repDirection === "given"
-                    ? "No rep given yet."
-                    : "No rep received yet."}
-                </p>
-              ))}
+            {categories.length === 0 && (
+              <RepEmptyState loading={loading} repDirection={repDirection} />
+            )}
 
             {canEditRep && repDirection === "received" && (
               <div className="tw-mt-4">

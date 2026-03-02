@@ -57,6 +57,7 @@ export default function RepCategoryPill({
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
         {avatarItems.length > 0 && (
           <span
+            role="presentation"
             className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto"
             onClick={stopPropagation}
           >
