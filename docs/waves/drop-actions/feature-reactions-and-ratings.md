@@ -32,7 +32,7 @@ compact drop cards and temporary unsent drops keep those controls disabled.
 
 1. Open a wave or direct-message thread and locate a drop.
 2. Choose a reaction path:
-- quick-react from recent emojis (including frequently used reactions),
+   - quick-react from recent emojis (including frequently used reactions),
    - open emoji picker and choose an emoji, or
    - tap an existing reaction chip.
 3. For existing reaction chips, up to three responders are previewed directly in the tooltip.

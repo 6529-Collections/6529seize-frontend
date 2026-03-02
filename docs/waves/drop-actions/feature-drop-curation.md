@@ -4,18 +4,17 @@
 
 In curated waves, eligible users can mark leaderboard and participation drops as
 curated from the drop action controls. The action toggles between `Curate` and
-`Uncurate` and is tracked per drop for your account.
+`Curated` state and is tracked per drop for your account.
 
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages with an active wave: `/messages?wave={waveId}`
 - Waves and drop rows that include the drop action bar (leaderboard list, gallery
   grid, participation view, and completed participation view)
 
 ## Entry Points
 
-- Open a wave or DM thread that supports curation.
+- Open a wave view that supports curation.
 - Locate a drop card in leaderboard list/grid or participation feed.
 - Tap or click `Curate` on desktop or mobile action controls.
 - The button becomes `Curated` when the action is active.
@@ -26,9 +25,10 @@ curated from the drop action controls. The action toggles between `Curate` and
 2. If you are eligible to curate that drop, a `Curate` button is available.
 3. Tap/click `Curate`.
 4. If successful, the control updates to `Curated`.
-5. Tap/click `Uncurate drop` (desktop) or `Curated`/`Curate drop` (mobile) to
-   remove the curation tag.
-6. Return to leaderboard filtering to review only curation-group-curated drops.
+5. Tap/click `Curated` to remove curation.
+6. In mobile content-only action sheets, this action can appear as
+   `Uncurate drop` / `Curate drop`.
+7. Return to leaderboard filtering to review only curation-group-curated drops.
 
 ## Common Scenarios
 

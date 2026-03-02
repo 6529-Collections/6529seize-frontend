@@ -29,8 +29,16 @@ same menu from the drop header action button because long-press is disabled.
    button (medium+ touch layouts).
 3. When the hold duration is long enough, or the header button opens, the action
    menu opens.
-4. Select a menu action (`Reply`, `Open`, `Copy link`, `Mark as unread`,
-   `Delete`, `Download media`, and other actions available for that context).
+4. Select a menu action available in that context, such as:
+   - quick react
+   - add or update reaction
+   - `Reply`
+   - `Boost` / `Remove Boost`
+   - `Open`
+   - `Copy link`
+   - `Mark as unread`
+   - vote controls
+   - `Edit Message` / `Delete` (author-only contexts)
 5. Confirm the action to continue in the same thread.
 
 ## Common Scenarios
@@ -42,8 +50,6 @@ same menu from the drop header action button because long-press is disabled.
 - Users can access actions without leaving the thread.
 - The menu stays consistent with the device-appropriate action surface used in
   the same area of the app.
-- Non-hover action set content is shared with the desktop `More` menu so users
-  can expect the same actions on each surface.
 - `Hide link previews` and `Show link previews` are no longer available from this
   menu; use the link-level controls in the drop body.
 
@@ -51,8 +57,8 @@ same menu from the drop header action button because long-press is disabled.
 
 - Temporary (unsent) drops do not open the long-press action menu.
 - Quick movement during hold can cancel the gesture, and the menu will not open.
-- On small touch layouts, if long-press is not reliable, the touch action button
-  is the fallback access for the same actions.
+- Some actions are hidden when conditions are not met (for example no connected
+  wallet, drop ownership restrictions, or ineligible voting states).
 
 ## Failure and Recovery
 

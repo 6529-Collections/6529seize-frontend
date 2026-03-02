@@ -9,7 +9,8 @@ Top boosted drops in the current wave also appear as contextual cards in the mes
 list and in the right-sidebar trending section.
 The rank chip uses color for top placement:
 - Gold for #1, silver for #2, amber for #3, and neutral styling for lower ranks.
-Mobile boost/remove actions now include short on-screen confirmation feedback: an icon animation appears on the active drop card, and a success toast confirms the result.
+Mobile boost/remove actions can trigger a short on-screen icon animation on the
+active drop card.
 
 ## Location in the Site
 
@@ -36,13 +37,12 @@ Mobile boost/remove actions now include short on-screen confirmation feedback: a
    - Outline = not boosted by this account
    - Filled = already boosted by this account
 4. The action applies optimistic UI feedback immediately (for most taps/presses).
-5. If the server request succeeds, the resulting state persists and a success toast
-   appears: `Boosted!` or `Boost removed`.
+5. If the server request succeeds, the resulting state persists.
 6. If the server request fails, the action and count revert to the previous
    values and an error toast is shown.
-6. Boosted-drop cards in the message list can be selected to jump directly to the
+7. Boosted-drop cards in the message list can be selected to jump directly to the
    corresponding drop in the same thread.
-7. In the right-sidebar trending view, the top-ranked row is visually emphasized
+8. In the right-sidebar trending view, the top-ranked row is visually emphasized
    compared with lower-ranked rows.
 
 The drop body can still be used for reading and text selection; it does not
@@ -71,8 +71,10 @@ mobile menu entry).
 
 ## Edge Cases
 
-- Unauthenticated users cannot toggle boosts.
-- Temporary/unsent drops do not show boost controls.
+- Unauthenticated users cannot toggle boosts (desktop control is disabled; touch
+  menu boost entry is hidden).
+- Temporary/unsent drops cannot be boosted (controls are disabled or hidden,
+  depending on surface).
 - Repeated taps in the body/tap-and-select gestures do not toggle boost. Use the
   boost control to avoid accidental toggles while selecting text.
 - Mobile actions run a brief boost/unboost animation centered on the drop card.
@@ -91,8 +93,6 @@ mobile menu entry).
 - If boost/unboost fails, the UI rolls back the optimistic update.
 - A network error or request failure shows an explicit toast explaining that the
   action did not apply.
-- On success, a short confirmation toast appears (`Boosted!` or `Boost removed`)
-  to confirm the action was accepted.
 - While a boost action is in-flight, the control is disabled to prevent duplicate
   toggles.
 - If jump-to-drop needs older data, the list continues loading pages and then

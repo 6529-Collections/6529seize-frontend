@@ -7,50 +7,50 @@ their unread boundary sits in a thread.
 
 The action is available in:
 
-- Desktop drop action row (`mark unread` icon).
-- Desktop more-actions menu item.
-- Non-hover long-press action menu item.
+- Desktop `More` menu on the drop action row.
+- Touch action sheet opened from long-press (small touch layouts) or the drop
+  header action button (touch medium+ layouts).
 
 ## Location in the Site
 
 - `/waves/{waveId}`
 - `/messages?wave={waveId}`
-- Wave drop action row and row menus.
+- Drop action menus for full drop cards.
 
 ## Entry Points
 
 - Open a wave or direct-message thread.
 - Locate a drop that is not authored by you.
-- Use the mark-as-unread control.
+- Open the drop action menu and select `Mark as unread`.
 
 ## User Journey
 
-1. Open the thread and hover a non-own drop (or long-press on a non-hover
-   device).
-2. Select `Mark as unread`.
-3. The action shows a loading spinner while the request is in flight.
-4. On success:
+1. Open a thread and find a drop from another author.
+2. Open the drop action menu.
+3. Select `Mark as unread`.
+4. The action shows a loading spinner while the request is in flight.
+5. On success:
    - A toast confirms the action.
    - The thread unread divider updates to the server-reported first unread serial.
    - Existing wave unread counts are updated for both wave and direct-message lists.
-5. The unread jump controls can now be used to return to that divider boundary.
+6. The unread jump controls can now be used to return to that divider boundary.
 
 ## Common Scenarios
 
-- Marking as unread for someone else’s drop is available for signed-in users who are
-  not using an active profile proxy.
-- The action is included in the per-drop overflow menu, so it remains accessible
-  when the compact action row is crowded.
-- The action is not shown on temporary draft drops.
+- Marking as unread is available only for drops not authored by you.
+- The action is exposed through drop action menus, not as a standalone desktop
+  row icon.
+- The action remains available in both desktop and touch menu flows.
 - Existing unread and divider context is replaced with the new boundary returned by
   the API.
 
 ## Edge Cases
 
 - The action is hidden for drop authors to prevent self-mark operations.
-- Temporary draft drops do not support mark-unread.
-- Non-hover controls show a full-width menu item, while desktop uses icon + tooltip
-  entry points.
+- Menu-entry visual style differs by surface (desktop dropdown row vs touch
+  full-width row) but triggers the same API action.
+- If the action is already in progress, the control is disabled until the request
+  resolves.
 
 ## Failure and Recovery
 
