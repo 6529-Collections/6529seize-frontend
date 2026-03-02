@@ -18,7 +18,7 @@ export default function UserPageHeaderName({
   profileEnabledAt,
   variant = "full",
   submissionCount = 0,
-  winnerCount = 0,
+  trophyCount = 0,
   onBadgeClick,
 }: {
   readonly profile: ApiIdentity;
@@ -28,7 +28,7 @@ export default function UserPageHeaderName({
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
   readonly submissionCount?: number;
-  readonly winnerCount?: number;
+  readonly trophyCount?: number;
   readonly onBadgeClick?: (tab: ArtistPreviewTab) => void;
 }) {
   const getDisplayName = (): string => {
@@ -65,15 +65,15 @@ export default function UserPageHeaderName({
             </p>
           </UserPageHeaderNameWrapper>
           {profile?.handle && (
-            <div className="xl:tw-mt-1 tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center">
+            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center xl:tw-mt-1">
               <UserCICTypeIconWrapper profile={profile} />
             </div>
           )}
           <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
-          {onBadgeClick && (submissionCount > 0 || winnerCount > 0) && (
+          {onBadgeClick && (submissionCount > 0 || trophyCount > 0) && (
             <ArtistActivityBadge
               submissionCount={submissionCount}
-              winCount={winnerCount}
+              trophyCount={trophyCount}
               onBadgeClick={onBadgeClick}
               tooltipId="profile-artist-activity-badge"
             />

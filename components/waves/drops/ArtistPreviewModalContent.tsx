@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -11,6 +11,10 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ModalTab } from "./ArtistPreviewModal";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import {
+  getSubmissionCount,
+  getTrophyArtworkCount,
+} from "@/helpers/artist-activity.helpers";
 
 interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;
@@ -19,7 +23,7 @@ interface ArtistPreviewModalContentProps {
   readonly isApp?: boolean | undefined;
   readonly activeTab: ModalTab;
   readonly onTabChange: (tab: ModalTab) => void;
-  readonly hasWinningArtworks: boolean;
+  readonly hasTrophyArtworks: boolean;
 }
 
 export const ArtistPreviewModalContent: React.FC<
@@ -31,7 +35,7 @@ export const ArtistPreviewModalContent: React.FC<
   isApp = false,
   activeTab,
   onTabChange,
-  hasWinningArtworks,
+  hasTrophyArtworks,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -39,17 +43,17 @@ export const ArtistPreviewModalContent: React.FC<
   const compact = useCompactMode();
   const isSmallScreen = useMediaQuery("(max-width: 1023px)");
 
-  const submissionCount = user.active_main_stage_submission_ids?.length || 0;
-  const winnerCount = user.winner_main_stage_drop_ids?.length || 0;
+  const submissionCount = getSubmissionCount(user);
+  const trophyCount = getTrophyArtworkCount(user);
   const hasActiveSubmissions = submissionCount > 0;
 
-  const showTabs = hasActiveSubmissions && hasWinningArtworks;
-  
+  const showTabs = hasActiveSubmissions && hasTrophyArtworks;
+
   // Extract nested ternary for better readability
   let currentContentType: "active" | "winners";
   if (showTabs) {
     currentContentType = activeTab;
-  } else if (hasWinningArtworks) {
+  } else if (hasTrophyArtworks) {
     currentContentType = "winners";
   } else {
     currentContentType = "active";
@@ -70,16 +74,16 @@ export const ArtistPreviewModalContent: React.FC<
   };
 
   return (
-    <div className="tailwind-scope tw-relative tw-rounded-xl tw-overflow-hidden tw-bg-[#0E1012] tw-border tw-border-white/5 tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
+    <div className="tailwind-scope tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/5 tw-bg-[#0E1012] tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
       {currentContentType === "winners" && (
         <>
           {/* Top micro-gradient band for subtle luxe */}
-          <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-12 tw-pointer-events-none tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0)_70%)]" />
+          <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-12 tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0)_70%)]" />
           {/* Faint glass film */}
-          <div className="tw-absolute tw-inset-0 tw-pointer-events-none tw-backdrop-blur-[1px]" />
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-backdrop-blur-[1px]" />
         </>
       )}
-      
+
       {/* Header */}
       <ArtistPreviewModalHeader
         user={user}
@@ -87,11 +91,11 @@ export const ArtistPreviewModalContent: React.FC<
         isApp={isApp}
         currentContentType={currentContentType}
         submissionCount={submissionCount}
-        winnerCount={winnerCount}
+        trophyCount={trophyCount}
       />
 
       {/* Tabs + content */}
-      <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-relative">
+      <div className="tw-relative tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
         {showTabs && (
           <ArtistPreviewModalTabs
             activeTab={activeTab}
@@ -103,17 +107,39 @@ export const ArtistPreviewModalContent: React.FC<
           // Extract nested ternary logic for better readability
           if (showTabs) {
             return activeTab === "active" ? (
-              <ArtistActiveSubmissionContent user={user} isOpen={isOpen} onClose={onClose} isApp={isApp} />
+              <ArtistActiveSubmissionContent
+                user={user}
+                isOpen={isOpen}
+                onClose={onClose}
+                isApp={isApp}
+              />
             ) : (
-              <ArtistWinningArtworksContent user={user} isOpen={isOpen} onDropClick={handleDropClick} />
+              <ArtistWinningArtworksContent
+                user={user}
+                isOpen={isOpen}
+                onDropClick={handleDropClick}
+              />
             );
           }
-          
-          if (hasWinningArtworks) {
-            return <ArtistWinningArtworksContent user={user} isOpen={isOpen} onDropClick={handleDropClick} />;
+
+          if (hasTrophyArtworks) {
+            return (
+              <ArtistWinningArtworksContent
+                user={user}
+                isOpen={isOpen}
+                onDropClick={handleDropClick}
+              />
+            );
           }
-          
-          return <ArtistActiveSubmissionContent user={user} isOpen={isOpen} onClose={onClose} isApp={isApp} />;
+
+          return (
+            <ArtistActiveSubmissionContent
+              user={user}
+              isOpen={isOpen}
+              onClose={onClose}
+              isApp={isApp}
+            />
+          );
         })()}
       </div>
     </div>
