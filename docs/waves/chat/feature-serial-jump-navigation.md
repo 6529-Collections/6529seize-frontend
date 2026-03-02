@@ -2,75 +2,74 @@
 
 ## Overview
 
-Wave and DM threads support serial-target navigation so links and in-thread actions
-can jump directly to a specific drop.
-When a thread opens with `serialNo`, the list resolves the target, scrolls to it,
-and applies a temporary highlight that fades out.
-If the target is outside the currently loaded window, the client loads surrounding
-pages first, then finalizes the jump.
+Serial jump opens or repositions a thread to a specific drop serial.
+It is used by shared links and by in-thread jump actions.
+
+When the target resolves, the app scrolls it into view, applies temporary highlight,
+and clears temporary jump UI.
 
 ## Location in the Site
 
 - `/waves/{waveId}`
 - `/messages?wave={waveId}`
-- Shared links and in-thread actions that target a specific drop serial.
+- Thread URL query values: `serialNo` and `divider`
+- In-thread search and sidebar jump actions that target a drop serial
 
 ## Entry Points
 
-- Open a shared thread link with `serialNo`.
-- Open a shared thread link with both `serialNo` and `divider`.
-- Use in-thread jump actions that target serials (for example search results,
-  unread controls, or boosted/activity jump actions).
+- Open a shared serial-target link:
+  `/waves/{waveId}?serialNo={serialNo}` or
+  `/messages?wave={waveId}&serialNo={serialNo}`
+- Open a serial-target link that also includes `divider`.
+- Select a result from the in-thread `Search messages` modal.
+- Select a drop from header search while already inside a wave thread.
+- Use right-sidebar jump actions (for example boosted/activity serial jumps).
 
 ## User Journey
 
-1. Open a wave/DM thread from a link or action that includes `serialNo`.
-2. The thread hydrates around current data, then resolves the target serial.
-3. If the serial is outside the loaded window, the client requests focused ranges
-   and historical pages until the target can be rendered.
-4. The target drop is scrolled into view and receives temporary visual highlight.
-5. If a `divider` query is present, unread-boundary context is applied during the
-   same initialization flow.
-6. After initialization, consumed jump params are cleared from the URL so normal
-   browsing can continue.
+1. Trigger a serial jump from a link or in-thread action.
+2. If the target serial is already loaded, the app scrolls to it immediately.
+3. If it is not loaded, the app fetches around that serial, then retries the jump.
+4. The target drop receives temporary visual highlight.
+5. URL-triggered jumps consume `serialNo` (and `divider` when present), then remove
+   those query values from the URL.
+6. Normal thread browsing resumes.
 
 ## Common Scenarios
 
-- Links using canonical `/waves/{waveId}?serialNo={serialNo}` jump to the expected
-  drop in wave threads.
-- DM links using `/messages?wave={waveId}&serialNo={serialNo}` jump in the same way.
-- When both `serialNo` and `divider` are present, jump targeting and unread-boundary
-  context can both be initialized.
-- During jump hydration, long tweet previews can appear compact first and expand with
-  `Show full tweet` later.
+- Wave links using `/waves/{waveId}?serialNo={serialNo}` jump to the target drop.
+- DM links using `/messages?wave={waveId}&serialNo={serialNo}` jump the same way.
+- In-thread search can jump in-place through the shared wave-scroll context without
+  changing route.
+- If in-place scroll context is unavailable, search falls back to setting `serialNo`
+  in the URL and re-initializing jump.
+- If `serialNo` is present without `divider`, unread boundary falls back to current
+  unread metadata when available.
 
 ## Edge Cases
 
-- If the target serial is far outside loaded data, multiple fetches may run before
-  the target becomes visible.
-- If a link includes `serialNo` but no `divider`, unread boundary still uses current
-  unread metadata when available.
-- Invalid or unresolved serial values keep users in the current thread context
-  without blocking normal reading.
+- Invalid or non-numeric `serialNo` values are ignored; thread stays usable.
+- Distant targets may require multiple backfill requests before they render.
+- During long jumps, a temporary blocking overlay can appear and then clear.
+- If both `drop` and `serialNo` are in the URL, `drop` overlay behavior is handled first.
 
 ## Failure and Recovery
 
-- If jump targeting stalls, temporary scrolling overlays clear and normal scrolling
-  stays available.
-- If target data is not immediately resolvable, users can continue reading and retry
-  by reopening the same link.
-- If URL cleanup for jump params fails transiently, list interactions remain usable
-  and reloading the thread typically re-syncs state.
+- If jump targeting stalls, wait for data backfill and retry from the same action.
+- If jump overlay clears before finding the target, continue reading and retry jump.
+- If query cleanup fails transiently, reload the thread to resync URL state.
 
 ## Limitations / Notes
 
-- Serial jump is navigation aid, not a persistent filtered view.
-- Highlighting is temporary and shown only for explicit serial-target flows.
-- Jump completion depends on the target serial existing in accessible thread data.
+- Serial jump is a navigation aid, not a persistent filtered mode.
+- Target highlight is temporary.
+- Jump completion depends on the target serial existing in accessible thread history.
 
 ## Related Pages
 
+- [Wave Chat Index](README.md)
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
 - [Wave Chat Unread Divider and Jump Controls](feature-unread-divider-and-controls.md)
 - [Wave Drop Open and Copy Links](../drop-actions/feature-open-and-copy-links.md)
 - [Wave Drop Quote Link Cards](../drop-actions/feature-quote-link-cards.md)
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)

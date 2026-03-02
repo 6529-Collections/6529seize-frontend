@@ -2,64 +2,65 @@
 
 ## Overview
 
-Chat waves can be marked as closed before submission. In that state, the composer area does
-not show the normal message input; instead users see a closed-state banner so the thread stays
-read-only.
+The thread composer is shown only when current wave state and user permissions allow posting.
+When posting is unavailable, the composer area switches to a status panel instead of input fields.
+
+For chat-type waves with chat disabled, that panel text is `Wave is closed`.
 
 ## Location in the Site
 
-- Public or group chat waves: `/waves/{waveId}`
-- Direct-message chat threads: `/messages?wave={waveId}`
-- Composer section at the bottom of thread view
+- Wave threads: `/waves/{waveId}`
+- Direct-message threads: `/messages?wave={waveId}`
+- Sticky composer area at the bottom of thread view
 
 ## Entry Points
 
-- Open a chat wave where posting is disabled.
-- Open a direct-message thread that is currently not accepting chat drops.
-- Open any other wave thread to compare composer behavior between open and closed states.
+- Open a thread where chat posting is enabled.
+- Open a thread where chat posting is disallowed for your profile.
+- Open a chat-type thread where chat has been closed by wave config.
+- In app mode, edit an existing drop in-thread and return to normal compose state.
 
 ## User Journey
 
-1. Open the wave or direct-message thread.
-2. If `wave.type === Chat` and chat is disabled, the composer block is replaced by:
-   - `Wave is closed`
-3. Existing drops remain visible and ordered as usual.
-4. Reply and new-drop actions are not available while this banner is shown.
-5. Returning to an open wave or different thread returns the normal composer controls.
+1. Open a wave or direct-message thread.
+2. The app checks posting eligibility and chat availability for this wave.
+3. If posting is available, normal composer controls render.
+4. If posting is not available, the composer area renders an unavailable-state panel.
+5. If the wave is chat-type and chat is disabled, the panel text is `Wave is closed`.
+6. Existing drops stay readable in the same thread.
 
 ## Common Scenarios
 
-- During temporary closure windows, users can read existing conversation context but cannot
-  add new drops.
-- The closed state does not alter reaction, profile, or link-preview behavior for existing
-  drops already loaded in the thread.
-- When a thread is reopened later, normal composer controls return.
+- Chat is open: users can post from the normal composer.
+- Posting is disallowed for the current profile: composer area shows an unavailable-state message.
+- Chat is closed for a chat-type wave: thread is read-only and composer shows `Wave is closed`.
+- In app mode during inline drop edit, the main thread composer hides until edit mode exits.
 
 ## Edge Cases
 
-- This state is limited to chat-type waves; non-chat drop modes still use their normal
-  composer behavior.
-- The closed-state banner appears only for threads where chat is explicitly disabled.
-- Some thread-level chrome may still show metadata or navigation controls even when posting is
-  unavailable.
+- Composer state is recalculated per wave; switching threads can immediately change availability.
+- Closed-state messaging applies only when chat-type waves have chat explicitly disabled.
+- Route-level auth/profile gates can block thread rendering before composer rules are evaluated.
+- Unread controls, typing indicator, and drop content keep their own behavior while composer is unavailable.
 
 ## Failure and Recovery
 
-- If the closed state appears unexpectedly, users can refresh the thread to re-sync wave metadata.
-- If users switch to another thread, composer state resets according to that thread's own open/closed
-  config.
+- If composer state looks stale after permission/wave changes, refresh the thread.
+- If a thread opened from stale list metadata, leave and reopen the thread.
+- If posting is unexpectedly unavailable, verify auth/profile eligibility first.
 
 ## Limitations / Notes
 
-- The banner does not provide a manual reopen action in the UI.
-- There is no separate prompt for when the wave will reopen unless that information is surfaced
-  elsewhere in the thread or wave details.
+- This page covers composer availability, not input-formatting rules.
+- There is no inline reopen/permission escalation action in this panel.
+- Create-wave and create-DM modal behavior is documented in Waves Create docs.
 
 ## Related Pages
 
 - [Wave Chat Index](./README.md)
-- [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
-- [Wave Chat Typing Indicator](feature-typing-indicator.md)
+- [Wave Composer Index](../composer/README.md)
+- [Wave Participation Flow](../flow-wave-participation.md)
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
 - [Wave Drop Composer Enter-Key Behavior](../composer/feature-enter-key-behavior.md)
-- [Wave Drop Content Display](../drop-actions/feature-content-display.md)
+- [Wave Drop Actions Index](../drop-actions/README.md)
 - [Docs Home](../../README.md)

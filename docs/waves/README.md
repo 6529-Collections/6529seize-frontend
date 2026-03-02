@@ -56,8 +56,8 @@ Use this area for wave and direct-message tasks:
   surfaces, including `My Votes`.
 - [Create](create/README.md): wave and direct-message creation entry points and
   form/step behavior.
-- [Chat](chat/README.md): timeline scroll, serial jumps, unread controls, and
-  typing state.
+- [Chat](chat/README.md): thread scroll/pinning, serial jumps, unread controls,
+  typing state, and composer availability.
 - [Composer](composer/README.md): compose and edit drops with markdown,
   mentions, emoji, uploads, and metadata submissions.
 - [Drop Actions](drop-actions/README.md): vote, react, open/copy links,
