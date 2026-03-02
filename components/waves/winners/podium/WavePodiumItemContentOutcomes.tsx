@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
+import React, { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
@@ -14,17 +15,11 @@ interface WavePodiumItemContentOutcomesProps {
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
 > = ({ winner }) => {
-  const [isTouch, setIsTouch] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    setIsTouch("ontouchstart" in window);
-  }, []);
+  const { enableLongPress: isTouch } = useInteractionMode();
 
   const handleClick = (e: React.MouseEvent) => {
     if (isTouch) {
       e.stopPropagation();
-      setIsOpen(!isOpen);
     }
   };
 

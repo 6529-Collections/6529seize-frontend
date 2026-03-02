@@ -9,7 +9,7 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -178,7 +178,8 @@ const WaveDrop = ({
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
-  const hasTouch = useHasTouchInput() || isMobile;
+  const { enableLongPress } = useInteractionMode();
+  const hasTouch = enableLongPress || isMobile;
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
   const allowLongPress = hasTouch && !isMdUp;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import useCapacitor from "./useCapacitor";
 
 interface DeviceInfo {
@@ -12,10 +13,10 @@ interface DeviceInfo {
 
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
-  const touchDetectedRef = useRef(false);
+  const { enableLongPress } = useInteractionMode();
 
   const getInfo = useCallback(
-    (touchDetected: boolean): DeviceInfo => {
+    (): DeviceInfo => {
       if (
         typeof globalThis === "undefined" ||
         typeof navigator === "undefined"
@@ -32,13 +33,11 @@ export default function useDeviceInfo(): DeviceInfo {
         matchMedia: (query: string) => MediaQueryList;
       };
       const nav = navigator as Navigator & {
-        msMaxTouchPoints?: number | undefined;
         userAgentData?: { mobile?: boolean | undefined } | undefined;
         standalone?: boolean | undefined;
       };
 
-      const maxTouchPoints = nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0;
-      const hasTouchScreen = touchDetected || maxTouchPoints > 0;
+      const hasTouchScreen = enableLongPress;
 
       const ua = nav.userAgent;
       const uaDataMobile = nav.userAgentData?.mobile;
@@ -60,10 +59,10 @@ export default function useDeviceInfo(): DeviceInfo {
         isAppleMobile: appleMobile,
       };
     },
-    [isCapacitor]
+    [enableLongPress, isCapacitor]
   );
 
-  const [info, setInfo] = useState<DeviceInfo>(() => getInfo(false));
+  const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
 
   useEffect(() => {
     const hasEventListenerApi =
@@ -72,7 +71,7 @@ export default function useDeviceInfo(): DeviceInfo {
 
     const update = () =>
       setInfo((prev) => {
-        const next = getInfo(touchDetectedRef.current);
+        const next = getInfo();
         if (
           prev.isMobileDevice === next.isMobileDevice &&
           prev.hasTouchScreen === next.hasTouchScreen &&
@@ -84,23 +83,13 @@ export default function useDeviceInfo(): DeviceInfo {
         return next;
       });
 
-    const onceTouch = () => {
-      touchDetectedRef.current = true;
-      update();
-      if (hasEventListenerApi) {
-        globalThis.removeEventListener("touchstart", onceTouch);
-      }
-    };
-
     if (hasEventListenerApi) {
       globalThis.addEventListener("resize", update);
-      globalThis.addEventListener("touchstart", onceTouch, { passive: true });
     }
 
     return () => {
       if (hasEventListenerApi) {
         globalThis.removeEventListener("resize", update);
-        globalThis.removeEventListener("touchstart", onceTouch);
       }
     };
   }, [getInfo]);

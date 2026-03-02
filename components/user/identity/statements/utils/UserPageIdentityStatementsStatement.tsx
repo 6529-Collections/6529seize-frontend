@@ -7,7 +7,8 @@ import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { STATEMENT_META } from "@/helpers/Types";
-import { useEffect, useState } from "react";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
+import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteStatementButton";
@@ -33,10 +34,8 @@ export default function UserPageIdentityStatementsStatement({
   };
 
   const canOpen = STATEMENT_META[statement.statement_type].canOpenStatement;
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const { enableHoverUI } = useInteractionMode();
+  const isTouchScreen = !enableHoverUI;
 
   return (
     <li className="tw-group hover:tw-bg-white/[0.02] tw-pl-0.5 tw-py-4 tw-transition-colors tw-duration-200 tw-ease-out tw-border-b tw-border-solid tw-border-white/[0.06] tw-border-t-0 tw-border-x-0 last:tw-border-b-0">

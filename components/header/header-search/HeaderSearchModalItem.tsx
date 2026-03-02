@@ -21,6 +21,7 @@ import {
   getWaveRoute,
 } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -91,11 +92,7 @@ export default function HeaderSearchModalItem({
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref as React.RefObject<HTMLDivElement>);
   const { isApp } = useDeviceInfo();
-
-  const supportsHover =
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(hover: hover)").matches;
+  const { enableHoverUI: supportsHover } = useInteractionMode();
 
   const isPage = () => (content as PageSearchResult).type === "PAGE";
   const isProfile = () => Object.hasOwn(content, "handle");

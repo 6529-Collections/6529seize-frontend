@@ -4,7 +4,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
@@ -104,7 +104,8 @@ const DefaultWinnerDrop = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { enableLongPress } = useInteractionMode();
+  const hasTouch = enableLongPress || isMobile;
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 

@@ -1,5 +1,6 @@
 "use client";
 
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import React, { useEffect, useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
@@ -23,7 +24,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { waves } = useMyStream();
   const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
   const { setToast } = useAuth();
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const { enableHoverUI } = useInteractionMode();
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
   // Check if this specific wave operation is in progress
@@ -57,25 +58,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
 
-  // Detect touch device on component mount
-  useEffect(() => {
-    const checkTouch = () => {
-      // Check if device supports touch events
-      setIsTouchDevice(
-        "ontouchstart" in window ||
-          navigator.maxTouchPoints > 0 ||
-          // @ts-ignore: matchMedia may not be available in all environments
-          (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)
-      );
-    };
 
-    checkTouch();
-    window.addEventListener("resize", checkTouch);
-
-    return () => {
-      window.removeEventListener("resize", checkTouch);
-    };
-  }, []);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();

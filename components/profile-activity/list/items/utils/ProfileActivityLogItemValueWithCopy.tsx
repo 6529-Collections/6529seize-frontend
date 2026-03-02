@@ -1,7 +1,8 @@
 "use client";
 
 import { Tooltip } from "react-tooltip";
-import { useEffect, useState } from "react";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
+import { useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -13,10 +14,8 @@ export default function ProfileActivityLogItemValueWithCopy({
   readonly title: string;
   readonly value: string;
 }) {
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const { enableHoverUI } = useInteractionMode();
+  const isTouchScreen = !enableHoverUI;
 
   const [_, copyToClipboard] = useCopyToClipboard();
 

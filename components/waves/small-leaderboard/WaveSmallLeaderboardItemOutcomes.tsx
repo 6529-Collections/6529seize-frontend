@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
+import React from "react";
 import { Tooltip } from "react-tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
@@ -16,15 +17,11 @@ interface WaveSmallLeaderboardItemOutcomesProps {
 export const WaveSmallLeaderboardItemOutcomes: React.FC<
   WaveSmallLeaderboardItemOutcomesProps
 > = ({ drop, isMobile: _isMobile = false }) => {
-  const [isTouch] = useState(
-    () => typeof globalThis !== "undefined" && "ontouchstart" in globalThis
-  );
-  const [isOpen, setIsOpen] = useState(false);
+  const { enableLongPress: isTouch } = useInteractionMode();
 
   const handleClick = (e: React.MouseEvent) => {
     if (isTouch) {
       e.stopPropagation();
-      setIsOpen(!isOpen);
     }
   };
 

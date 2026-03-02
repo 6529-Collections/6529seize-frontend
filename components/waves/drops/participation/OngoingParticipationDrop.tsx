@@ -14,7 +14,7 @@ import ParticipationDropHeader from "./ParticipationDropHeader";
 import ParticipationDropContent from "./ParticipationDropContent";
 import ParticipationDropMetadata from "./ParticipationDropMetadata";
 import ParticipationDropFooter from "./ParticipationDropFooter";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -39,7 +39,8 @@ export default function OngoingParticipationDrop({
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { enableLongPress } = useInteractionMode();
+  const hasTouch = enableLongPress || isMobile;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);

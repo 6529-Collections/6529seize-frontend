@@ -2,7 +2,7 @@
 
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
@@ -79,7 +79,7 @@ export default function OverlappingAvatars({
   onItemClick,
 }: OverlappingAvatarsProps) {
   const baseId = useId();
-  const isTouchDevice = useIsTouchDevice();
+  const { enableLongPress: isTouchDevice } = useInteractionMode();
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
   const avatarRing =

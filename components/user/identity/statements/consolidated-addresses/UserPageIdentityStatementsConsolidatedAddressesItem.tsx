@@ -99,10 +99,8 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     };
   }, []);
 
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    setIsTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const { enableHoverUI } = useInteractionMode();
+  const isTouchScreen = !enableHoverUI;
 
   const [assigningPrimary, setAssigningPrimary] = useState(false);
   const [statusMessage, setStatusMessage] = useState<any>();

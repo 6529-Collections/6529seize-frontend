@@ -1,5 +1,6 @@
 "use client";
 
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -46,43 +47,8 @@ function WebSidebar({
     return null;
   }, [connectedProfile?.handle, address]);
 
-  const [isTouchScreen, setIsTouchScreen] = useState(false);
-  useEffect(() => {
-    const { window: browserWindow } = globalThis as typeof globalThis & {
-      window?: Window | undefined;
-    };
-    if (
-      browserWindow === undefined ||
-      typeof browserWindow.matchMedia !== "function"
-    ) {
-      setIsTouchScreen(false);
-      return;
-    }
-
-    const coarsePointerQuery = browserWindow.matchMedia("(pointer: coarse)");
-    const handlePointerChange = (event: MediaQueryListEvent) => {
-      setIsTouchScreen(event.matches);
-    };
-
-    setIsTouchScreen(coarsePointerQuery.matches);
-
-    if (typeof coarsePointerQuery.addEventListener === "function") {
-      coarsePointerQuery.addEventListener("change", handlePointerChange);
-      return () =>
-        coarsePointerQuery.removeEventListener("change", handlePointerChange);
-    }
-
-    if ("onchange" in coarsePointerQuery) {
-      const originalHandler = coarsePointerQuery.onchange;
-      coarsePointerQuery.onchange = handlePointerChange;
-      return () => {
-        if (coarsePointerQuery.onchange === handlePointerChange) {
-          coarsePointerQuery.onchange = originalHandler ?? null;
-        }
-      };
-    }
-    return;
-  }, []);
+  const { enableHoverUI } = useInteractionMode();
+  const isTouchScreen = !enableHoverUI;
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);

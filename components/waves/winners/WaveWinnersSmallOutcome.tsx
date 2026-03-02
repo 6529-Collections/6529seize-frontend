@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
+import React from "react";
 import { Tooltip } from "react-tooltip";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -13,17 +14,11 @@ interface WaveWinnersSmallOutcomeProps {
 export const WaveWinnersSmallOutcome: React.FC<
   WaveWinnersSmallOutcomeProps
 > = ({ drop }) => {
-  const [isTouch, setIsTouch] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    setIsTouch("ontouchstart" in window);
-  }, []);
+  const { enableLongPress: isTouch } = useInteractionMode();
 
   const handleClick = (e: React.MouseEvent) => {
     if (isTouch) {
       e.stopPropagation();
-      setIsOpen(!isOpen);
     }
   };
 
