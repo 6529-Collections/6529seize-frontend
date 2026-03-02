@@ -18,8 +18,7 @@ area is slightly shorter so metadata and actions appear earlier.
 ## Entry Points
 - Open `Discover` from desktop sidebar navigation.
 - In mobile app mode, open `Discover` from bottom navigation.
-- Use `Search waves` on `/discover`.
-- Use `By Identity` on `/discover` to filter by author handle.
+- Browse cards from discover sections or discover search results on `/discover`.
 
 ## User Journey
 1. Users open a wave grid and see cards with a hero image/gradient, title,
@@ -76,6 +75,8 @@ area is slightly shorter so metadata and actions appear earlier.
 - This page documents grid cards, not the left-sidebar Brain/DM wave list rows.
 
 ## Related Pages
+- [Wave Discovery Index](README.md)
+- [Wave Discover Sections and Search](feature-discover-sections-and-search.md)
 - [Waves Index](../README.md)
 - [Wave Create Modal Entry Points](../create/feature-modal-entry-points.md)
 - [Wave Drop Open and Copy Links](../drop-actions/feature-open-and-copy-links.md)

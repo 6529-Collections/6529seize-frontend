@@ -62,7 +62,9 @@ This tab is available in memes and curation waves.
   editable.
 - If a vote request fails, an error toast is shown and you can try again from the
   same row.
-- If a reset request fails, an error toast is shown and you can retry by running the reset action again from the tab controls.
+- If a reset request fails, an error toast is shown.
+- If reset progress stays active after an error, refresh the wave and retry
+  from `My Votes`.
 
 ## Limitations / Notes
 
@@ -74,8 +76,9 @@ This tab is available in memes and curation waves.
 
 ## Related Pages
 
-- [Waves Discovery Index](README.md)
-- [Wave Content Tabs](feature-content-tabs.md)
+- [Wave Leaderboards Index](README.md)
+- [Wave Content Tabs](../chat/feature-content-tabs.md)
+- [Wave Discovery Index](../discovery/README.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Docs Home](../../README.md)

@@ -68,7 +68,7 @@ to explicit no-drop states instead of staying in a loading state.
 
 - [Waves Index](../README.md)
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
-- [Wave Content Tabs](../discovery/feature-content-tabs.md)
+- [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
 - [Pagination Controls](../../shared/feature-pagination-controls.md)

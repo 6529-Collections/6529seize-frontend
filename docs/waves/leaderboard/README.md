@@ -2,9 +2,9 @@
 
 ## Overview
 
-Leaderboard docs cover ranking, winners, and decision-timing behavior in voting
-surfaces. For create-entry gating and eligibility messaging, start with
-`Wave Leaderboard Drop Entry and Eligibility`.
+Leaderboard docs cover ranking, winners, decision-timing behavior, and `My
+Votes` management in voting surfaces. For create-entry gating and eligibility
+messaging, start with `Wave Leaderboard Drop Entry and Eligibility`.
 
 ## Features
 
@@ -16,6 +16,8 @@ surfaces. For create-entry gating and eligibility messaging, start with
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Wave Leaderboard Sort and Group Filters](feature-sort-and-group-filters.md)
 - [Wave Leaderboard Gallery Cards](feature-gallery-cards.md)
+- [Wave My Votes Tab](feature-my-votes-tab.md): voted-drop list, inline vote
+  edits, select-all controls, and bulk reset behavior.
 
 ## Flows
 

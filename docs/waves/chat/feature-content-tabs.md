@@ -98,11 +98,12 @@ restores it whenever that wave is opened again and the tab is still available.
 
 ## Related Pages
 
+- [Wave Chat Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
 - [Wave Winners Tab](../leaderboard/feature-winners-tab.md)
-- [Wave Chat Scroll Behavior](../chat/feature-scroll-behavior.md)
+- [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
+- [Wave My Votes Tab](../leaderboard/feature-my-votes-tab.md)
 - [Docs Home](../../README.md)
-- [Wave My Votes Tab](feature-my-votes-tab.md)

@@ -55,11 +55,11 @@ Use this area for wave and direct-message tasks:
 ## Features
 
 - [Discovery](discovery/README.md): find and open waves from discover and list
-  surfaces, including `My Votes`.
+  surfaces.
 - [Create](create/README.md): wave and direct-message creation entry points and
   form/step behavior.
-- [Chat](chat/README.md): thread scroll/pinning, serial jumps, unread controls,
-  typing state, and composer availability.
+- [Chat](chat/README.md): in-thread tab behavior, thread scroll/pinning, serial
+  jumps, unread controls, typing state, and composer availability.
 - [Composer](composer/README.md): compose and edit drops with markdown,
   mentions, emoji, uploads, and metadata submissions.
 - [Drop Actions](drop-actions/README.md): vote, react, open/copy links,
@@ -71,7 +71,7 @@ Use this area for wave and direct-message tasks:
 - [Link Previews](link-previews/README.md): external/social/web3 preview-card
   rendering in thread content.
 - [Leaderboard](leaderboard/README.md): leaderboard states, filters, timeline,
-  winners-tab behavior, and top-voter views.
+  winners-tab behavior, `My Votes` tab behavior, and top-voter views.
 - [Memes](memes/README.md): memes submission flow and submission-state behavior.
 - [Outcome Lists](feature-outcome-lists.md): outcome cards, winner rows, and
   distribution loading states.

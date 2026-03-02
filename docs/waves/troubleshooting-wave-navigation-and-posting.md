@@ -84,7 +84,7 @@ target, tabs look wrong, or posting is unavailable.
 - [Wave Participation Flow](flow-wave-participation.md)
 - [Wave Chat Scroll Behavior](chat/feature-scroll-behavior.md)
 - [Wave Chat Composer Availability](chat/feature-chat-composer-availability.md)
-- [Wave Content Tabs](discovery/feature-content-tabs.md)
+- [Wave Content Tabs](chat/feature-content-tabs.md)
 - [Wave Drop Open and Copy Links](drop-actions/feature-open-and-copy-links.md)
 - [Wave Leaderboard Drop States](leaderboard/feature-drop-states.md)
 - [Memes Submission Workflows](memes/feature-memes-submission.md)

@@ -65,7 +65,7 @@ Multi-decision waves show winner groups in a dated timeline.
 ## Related Pages
 
 - [Wave Leaderboards Index](README.md)
-- [Wave Content Tabs](../discovery/feature-content-tabs.md)
+- [Wave Content Tabs](../chat/feature-content-tabs.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Wave Outcome Lists](../feature-outcome-lists.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)

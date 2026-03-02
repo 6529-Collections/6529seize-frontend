@@ -20,6 +20,8 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
 ## Ownership
 
 - Owns thread scroll and bottom-pinning behavior.
+- Owns main thread tab behavior (tab visibility, defaults, and per-wave tab
+  restoration) for rank-wave layouts.
 - Owns serial jump behavior from links, search, and sidebar actions.
 - Owns unread divider rendering and unread jump controls.
 - Owns typing-indicator behavior.
@@ -29,6 +31,8 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
 
 ## Features
 
+- [Wave Content Tabs](feature-content-tabs.md): tab visibility, defaults, and
+  per-wave tab restoration.
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md): latest pinning, history
   loading, and pending-message controls.
 - [Wave Chat Serial Jump Navigation](feature-serial-jump-navigation.md):
