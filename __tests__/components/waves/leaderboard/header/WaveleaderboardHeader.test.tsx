@@ -1,7 +1,13 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const useWave = jest.fn();
@@ -76,6 +82,7 @@ jest.mock("@/hooks/useWave", () => ({
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   <button
     data-testid="create"
+    data-padding={props.padding}
     onClick={props.onClicked}
     disabled={props.disabled}
   >
@@ -83,9 +90,21 @@ jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   </button>
 ));
 
-jest.mock("react-use", () => ({
-  createBreakpoint: jest.fn(() => () => "MD"),
-}));
+jest.mock("react-use", () => {
+  const React = require("react");
+
+  return {
+    createBreakpoint: jest.fn(() => () => "MD"),
+    useDebounce: (fn: () => void, ms: number, deps: readonly unknown[]) => {
+      React.useEffect(() => {
+        const timeoutId = setTimeout(() => {
+          fn();
+        }, ms);
+        return () => clearTimeout(timeoutId);
+      }, deps);
+    },
+  };
+});
 
 const wave = { id: "w" } as any;
 
@@ -239,6 +258,202 @@ it("renders curation selector and handles curation filter changes", async () => 
 it("renders curation price controls and commits range updates", async () => {
   const user = userEvent.setup();
   const onPriceRangeChange = jest.fn();
+  const onCreateDrop = jest.fn();
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={onCreateDrop}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        onPriceRangeChange={onPriceRangeChange}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(
+    screen.queryByTestId("leaderboard-price-panel")
+  ).not.toBeInTheDocument();
+  const createButton = screen.getByTestId("create");
+  expect(createButton).toHaveAttribute("data-padding", "tw-px-3.5 tw-py-2");
+  expect(screen.getByText("Drop Art")).toBeInTheDocument();
+  const createIcon = createButton.querySelector("svg");
+  expect(createIcon).toHaveClass("tw-h-4", "tw-w-4");
+
+  await user.click(createButton);
+  expect(onCreateDrop).toHaveBeenCalledTimes(1);
+
+  await user.click(screen.getByTestId("leaderboard-price-toggle"));
+  const minInput = screen.getByTestId("leaderboard-price-min-input");
+  const maxInput = screen.getByTestId("leaderboard-price-max-input");
+  await user.clear(minInput);
+  await user.type(minInput, "1.5");
+  await user.clear(maxInput);
+  await user.type(maxInput, "3.25");
+  await user.tab();
+  expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+    minPrice: 1.5,
+    maxPrice: 3.25,
+  });
+
+  const latestSortProps =
+    sortComponentMock.mock.calls[sortComponentMock.mock.calls.length - 1]?.[0];
+  expect(latestSortProps?.items).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ value: "PRICE", label: "Price" }),
+    ])
+  );
+
+  await user.click(screen.getByTestId("leaderboard-price-clear"));
+  expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+    minPrice: undefined,
+    maxPrice: undefined,
+  });
+});
+
+it("auto-applies price range updates after debounce while typing", () => {
+  jest.useFakeTimers();
+
+  try {
+    const onPriceRangeChange = jest.fn();
+
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: { isEligible: true },
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveLeaderboardHeader
+          wave={wave}
+          onCreateDrop={jest.fn()}
+          viewMode="list"
+          onViewModeChange={jest.fn()}
+          sort={WaveDropsLeaderboardSort.RANK}
+          onSortChange={jest.fn()}
+          onPriceRangeChange={onPriceRangeChange}
+        />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("leaderboard-price-toggle"));
+    const minInput = screen.getByTestId("leaderboard-price-min-input");
+    const maxInput = screen.getByTestId("leaderboard-price-max-input");
+    fireEvent.change(minInput, { target: { value: "1.5" } });
+    fireEvent.change(maxInput, { target: { value: "3.25" } });
+
+    expect(onPriceRangeChange).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(349);
+    });
+    expect(onPriceRangeChange).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+      minPrice: 1.5,
+      maxPrice: 3.25,
+    });
+
+    fireEvent.click(screen.getByTestId("leaderboard-price-clear"));
+    expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+      minPrice: undefined,
+      maxPrice: undefined,
+    });
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("does not auto-apply zero draft values during debounce", () => {
+  jest.useFakeTimers();
+
+  try {
+    const onPriceRangeChange = jest.fn();
+
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: { isEligible: true },
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveLeaderboardHeader
+          wave={wave}
+          onCreateDrop={jest.fn()}
+          viewMode="list"
+          onViewModeChange={jest.fn()}
+          sort={WaveDropsLeaderboardSort.RANK}
+          onSortChange={jest.fn()}
+          onPriceRangeChange={onPriceRangeChange}
+        />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("leaderboard-price-toggle"));
+    const minInput = screen.getByTestId("leaderboard-price-min-input");
+
+    fireEvent.change(minInput, { target: { value: "0" } });
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+    expect(onPriceRangeChange).not.toHaveBeenCalled();
+
+    fireEvent.change(minInput, { target: { value: "0." } });
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+    expect(onPriceRangeChange).not.toHaveBeenCalled();
+
+    fireEvent.change(minInput, { target: { value: "0.125" } });
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+    expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+      minPrice: 0.125,
+      maxPrice: undefined,
+    });
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("commits zero value on blur", async () => {
+  const onPriceRangeChange = jest.fn();
 
   useWave.mockReturnValue({
     isMemesWave: false,
@@ -267,35 +482,19 @@ it("renders curation price controls and commits range updates", async () => {
     </AuthContext.Provider>
   );
 
-  expect(
-    screen.queryByTestId("leaderboard-price-panel")
-  ).not.toBeInTheDocument();
-  await user.click(screen.getByTestId("leaderboard-price-toggle"));
+  fireEvent.click(screen.getByTestId("leaderboard-price-toggle"));
   const minInput = screen.getByTestId("leaderboard-price-min-input");
-  const maxInput = screen.getByTestId("leaderboard-price-max-input");
-  await user.clear(minInput);
-  await user.type(minInput, "1.5");
-  await user.clear(maxInput);
-  await user.type(maxInput, "3.25");
-  await user.tab();
-  expect(onPriceRangeChange).toHaveBeenLastCalledWith({
-    minPrice: 1.5,
-    maxPrice: 3.25,
-  });
 
-  const latestSortProps =
-    sortComponentMock.mock.calls[sortComponentMock.mock.calls.length - 1]?.[0];
-  expect(latestSortProps?.items).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ value: "PRICE", label: "Price" }),
-    ])
+  fireEvent.focus(minInput);
+  fireEvent.change(minInput, { target: { value: "0" } });
+  fireEvent.blur(minInput);
+
+  await waitFor(() =>
+    expect(onPriceRangeChange).toHaveBeenLastCalledWith({
+      minPrice: 0,
+      maxPrice: undefined,
+    })
   );
-
-  await user.click(screen.getByTestId("leaderboard-price-clear"));
-  expect(onPriceRangeChange).toHaveBeenLastCalledWith({
-    minPrice: undefined,
-    maxPrice: undefined,
-  });
 });
 
 it("auto-expands price filters when min or max price is active", () => {
@@ -370,13 +569,17 @@ it("allows collapsing and reopening filters while price filters are active", asy
   expect(toggle).toHaveAttribute("aria-expanded", "true");
 
   await user.click(toggle);
-  expect(
-    screen.queryByTestId("leaderboard-price-panel")
-  ).not.toBeInTheDocument();
+  await waitFor(() =>
+    expect(
+      screen.queryByTestId("leaderboard-price-panel")
+    ).not.toBeInTheDocument()
+  );
   expect(toggle).toHaveAttribute("aria-expanded", "false");
 
   await user.click(toggle);
-  expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument();
+  await waitFor(() =>
+    expect(screen.getByTestId("leaderboard-price-panel")).toBeInTheDocument()
+  );
   expect(toggle).toHaveAttribute("aria-expanded", "true");
 });
 

@@ -39,7 +39,12 @@ describe("WaveLeaderboardCurationDropModal", () => {
     expect(
       await screen.findByTestId("curation-drop-modal")
     ).toBeInTheDocument();
-    expect(screen.getByText("Drop Artwork")).toBeInTheDocument();
+    const panel = screen.getByTestId("curation-drop-modal-panel");
+    expect(panel.className).toContain("tw-rounded-xl");
+    expect(panel.className).toContain("tw-border-iron-800");
+
+    const heading = screen.getByRole("heading", { name: "Drop Artwork" });
+    expect(heading).toHaveClass("tw-text-2xl");
 
     await user.click(screen.getByLabelText("Close drop artwork modal"));
     expect(onClose).toHaveBeenCalledTimes(1);

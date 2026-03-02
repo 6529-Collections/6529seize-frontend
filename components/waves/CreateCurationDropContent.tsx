@@ -11,7 +11,6 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import dynamic from "next/dynamic";
 import React, {
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -19,7 +18,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -32,7 +30,6 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";
 import PrimaryButton from "../utils/button/PrimaryButton";
 import type { CurationComposerVariant } from "./PrivilegedDropCreator";
-import ModalLayout from "./memes/submission/layout/ModalLayout";
 import {
   normalizeCurationDropInput,
   SUPPORTED_CURATION_URL_EXAMPLES,
@@ -59,90 +56,6 @@ interface CreateCurationDropContentProps {
 const DEFAULT_HELPER_TEXT =
   "Use one supported HTTPS URL only, without extra text.";
 
-interface CurationInfoModalProps {
-  readonly isOpen: boolean;
-  readonly isApp: boolean;
-  readonly title: string;
-  readonly onClose: () => void;
-  readonly children: ReactNode;
-}
-
-const CurationInfoModal: React.FC<CurationInfoModalProps> = ({
-  isOpen,
-  isApp,
-  title,
-  onClose,
-  children,
-}) => {
-  const modalRef = useRef<HTMLDivElement | null>(null);
-  const previousActiveElementRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    previousActiveElementRef.current = document.activeElement as HTMLElement;
-    modalRef.current?.focus();
-
-    const originalOverflow = document.body.style.overflow;
-    if (!isApp) {
-      document.body.style.overflow = "hidden";
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      if (!isApp) {
-        document.body.style.overflow = originalOverflow;
-      }
-      document.removeEventListener("keydown", onKeyDown);
-      previousActiveElementRef.current?.focus();
-    };
-  }, [isApp, isOpen, onClose]);
-
-  if (!isOpen) {
-    return null;
-  }
-
-  const modalContent = (
-    <dialog
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-m-0 tw-h-full tw-w-full tw-max-w-none tw-border-0 tw-bg-iron-600/60 tw-p-0 tw-outline-none"
-      open
-      aria-modal="true"
-      aria-label={title}
-    >
-      <button
-        type="button"
-        className="tw-fixed tw-inset-0 tw-cursor-default tw-border-0 tw-bg-transparent tw-p-0"
-        aria-label={`Close ${title}`}
-        onClick={onClose}
-      />
-      <div
-        ref={modalRef}
-        className="tw-relative tw-z-10 tw-w-full tw-max-w-2xl tw-px-4"
-        tabIndex={-1}
-      >
-        <ModalLayout title={title} onCancel={onClose}>
-          {children}
-        </ModalLayout>
-      </div>
-    </dialog>
-  );
-
-  if (isApp) {
-    return modalContent;
-  }
-
-  return createPortal(modalContent, document.body);
-};
-
 const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   activeDrop,
   onCancelReplyQuote,
@@ -163,14 +76,10 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   const [urlValue, setUrlValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showLiveValidation, setShowLiveValidation] = useState(false);
-  const [isSupportedUrlsModalOpen, setIsSupportedUrlsModalOpen] =
-    useState(false);
+  const [isSupportedUrlsExpanded, setIsSupportedUrlsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isInitialMountRef = useRef(true);
   const isLeaderboardVariant = curationComposerVariant === "leaderboard";
-  const handleSupportedUrlsModalClose = useCallback(() => {
-    setIsSupportedUrlsModalOpen(false);
-  }, []);
 
   const curationValidation = useMemo(() => {
     return validateCurationDropInput(urlValue);
@@ -185,8 +94,6 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   const invalidHelperText =
     curationValidation?.helperText ?? DEFAULT_HELPER_TEXT;
   const helperText = isInvalid ? invalidHelperText : DEFAULT_HELPER_TEXT;
-  const showSupportedUrlAttention =
-    isLeaderboardVariant && isInvalid && urlValue.trim().length > 0;
 
   const getUpdatedDropRequest = useCallback(
     async (
@@ -429,15 +336,15 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         dropId={dropId}
       />
       {isLeaderboardVariant ? (
-        <div className="tw-flex tw-w-full tw-flex-col tw-gap-4">
+        <div className="tw-flex tw-w-full tw-flex-col tw-gap-3.5">
           <CreateCurationDropUrlInput
             ref={inputRef}
             value={urlValue}
             disabled={submitting}
             isInvalid={isInvalid}
-            showHelperText={false}
+            helperText={helperText}
             scrollMarginTopClassName="tw-scroll-mt-24"
-            canonicalUrl={null}
+            canonicalUrl={normalizedCurationUrl}
             placeholder="https://..."
             onChange={setUrlValue}
             onBlur={() => setShowLiveValidation(true)}
@@ -446,33 +353,43 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
           <div className="tw-flex tw-flex-col tw-gap-2">
             <button
               type="button"
-              onClick={() => setIsSupportedUrlsModalOpen(true)}
-              className={`desktop-hover:hover:tw-text-primary-200 tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-medium tw-text-primary-300 tw-transition ${
-                showSupportedUrlAttention ? "tw-animate-pulse" : ""
-              }`}
+              onClick={() => setIsSupportedUrlsExpanded((current) => !current)}
+              aria-expanded={isSupportedUrlsExpanded}
+              aria-controls="leaderboard-supported-urls-panel"
+              className="desktop-hover:hover:tw-text-primary-200 tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition"
             >
-              View Supported URLs
+              {isSupportedUrlsExpanded
+                ? "Hide Supported URLs"
+                : "View Supported URLs"}
             </button>
-            {showSupportedUrlAttention && (
-              <p
-                role="alert"
-                className="tw-text-red-300 tw-mb-0 tw-text-sm tw-font-semibold"
+            {isSupportedUrlsExpanded && (
+              <div
+                id="leaderboard-supported-urls-panel"
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-p-3"
               >
-                Unsupported URL format. Open Supported URLs.
-              </p>
-            )}
-            {normalizedCurationUrl &&
-              normalizedCurationUrl !== urlValue.trim() && (
-                <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
-                  Will submit as: {normalizedCurationUrl}
+                <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
+                  Submit one URL only. It must match one of these formats:
                 </p>
-              )}
+                <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0">
+                  {SUPPORTED_CURATION_URL_EXAMPLES.map(({ label, example }) => (
+                    <li key={`${label}-${example}`} className="tw-space-y-1">
+                      <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-text-iron-100">
+                        {label}
+                      </p>
+                      <code className="tw-block tw-overflow-x-auto tw-rounded-md tw-bg-iron-950 tw-px-2 tw-py-1 tw-text-[11px] tw-text-iron-300">
+                        {example}
+                      </code>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           <PrimaryButton
             onClicked={onDrop}
             loading={submitting}
             disabled={!canSubmit}
-            padding="tw-w-full tw-px-4 tw-py-3"
+            padding="tw-w-full tw-px-4 tw-py-2.5"
           >
             <span>Submit to Curation</span>
           </PrimaryButton>
@@ -505,30 +422,6 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
             </div>
           </div>
         </div>
-      )}
-      {isLeaderboardVariant && (
-        <CurationInfoModal
-          isOpen={isSupportedUrlsModalOpen}
-          onClose={handleSupportedUrlsModalClose}
-          title="Supported URLs"
-          isApp={isApp}
-        >
-          <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
-            Submit one URL only. It must match one of these formats:
-          </p>
-          <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0">
-            {SUPPORTED_CURATION_URL_EXAMPLES.map(({ label, example }) => (
-              <li key={`${label}-${example}`} className="tw-space-y-1">
-                <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-text-iron-100">
-                  {label}
-                </p>
-                <code className="tw-block tw-overflow-x-auto tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-[11px] tw-text-iron-300">
-                  {example}
-                </code>
-              </li>
-            ))}
-          </ul>
-        </CurationInfoModal>
       )}
       <TermsSignatureFlow />
     </div>

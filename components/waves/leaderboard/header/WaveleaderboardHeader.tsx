@@ -9,8 +9,9 @@ import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import { useDebounce } from "react-use";
 import { getWaveDropEligibility } from "../dropEligibility";
 import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
@@ -72,6 +73,11 @@ const parsePriceInput = (rawValue: string): number | undefined => {
   return numericValue;
 };
 
+const isZeroDraftInput = (rawValue: string): boolean => {
+  const trimmedValue = rawValue.trim();
+  return trimmedValue === "0" || trimmedValue === "0.";
+};
+
 const WaveLeaderboardPriceFilters: React.FC<
   WaveLeaderboardPriceFiltersProps
 > = ({
@@ -88,6 +94,7 @@ const WaveLeaderboardPriceFilters: React.FC<
   const [maxPriceInput, setMaxPriceInput] = useState(() =>
     toPriceInputValue(maxPrice)
   );
+  const hasDraftInputEditsRef = useRef(false);
 
   const commitPriceRange = () => {
     if (!onPriceRangeChange) {
@@ -96,6 +103,13 @@ const WaveLeaderboardPriceFilters: React.FC<
 
     const nextMinPrice = parsePriceInput(minPriceInput);
     const nextMaxPrice = parsePriceInput(maxPriceInput);
+    const hasSameCommittedRange =
+      nextMinPrice === minPrice && nextMaxPrice === maxPrice;
+
+    if (hasSameCommittedRange) {
+      return;
+    }
+
     const hasActivePriceFilters =
       typeof nextMinPrice === "number" || typeof nextMaxPrice === "number";
 
@@ -108,6 +122,27 @@ const WaveLeaderboardPriceFilters: React.FC<
       maxPrice: nextMaxPrice,
     });
   };
+
+  useDebounce(
+    () => {
+      if (!hasDraftInputEditsRef.current) {
+        return;
+      }
+      if (isZeroDraftInput(minPriceInput) || isZeroDraftInput(maxPriceInput)) {
+        return;
+      }
+      commitPriceRange();
+    },
+    350,
+    [
+      minPriceInput,
+      maxPriceInput,
+      minPrice,
+      maxPrice,
+      onPriceRangeChange,
+      onFiltersActivated,
+    ]
+  );
 
   return (
     <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-2.5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
@@ -127,7 +162,10 @@ const WaveLeaderboardPriceFilters: React.FC<
           inputMode="decimal"
           placeholder="0"
           value={minPriceInput}
-          onChange={(event) => setMinPriceInput(event.target.value)}
+          onChange={(event) => {
+            hasDraftInputEditsRef.current = true;
+            setMinPriceInput(event.target.value);
+          }}
           onBlur={commitPriceRange}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -153,7 +191,10 @@ const WaveLeaderboardPriceFilters: React.FC<
           inputMode="decimal"
           placeholder="No max"
           value={maxPriceInput}
-          onChange={(event) => setMaxPriceInput(event.target.value)}
+          onChange={(event) => {
+            hasDraftInputEditsRef.current = true;
+            setMaxPriceInput(event.target.value);
+          }}
           onBlur={commitPriceRange}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -468,9 +509,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 loading={false}
                 disabled={false}
                 onClicked={onCreateDrop}
-                padding="tw-px-5 tw-py-2.5"
+                padding="tw-px-3.5 tw-py-2"
               >
-                <PlusIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
                 <span>Drop Art</span>
               </PrimaryButton>
             )}

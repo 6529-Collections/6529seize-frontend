@@ -22,11 +22,6 @@ jest.mock("@tanstack/react-query", () => ({
     }),
   }),
 }));
-jest.mock("@/hooks/useProgressiveDebounce", () => ({
-  useProgressiveDebounce: (cb: any) => {
-    setTimeout(cb, 0);
-  },
-}));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -110,6 +105,7 @@ describe("CreateDrop", () => {
 
   it("shows success toast for leaderboard curation submissions", async () => {
     const setToast = jest.fn();
+    const onAllDropsAdded = jest.fn();
     useWaveMock.mockReturnValue({ isCurationWave: true } as any);
 
     render(
@@ -126,6 +122,7 @@ describe("CreateDrop", () => {
             fixedDropMode={"PARTICIPATION" as any}
             privileges={{} as any}
             curationComposerVariant="leaderboard"
+            onAllDropsAdded={onAllDropsAdded}
           />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
@@ -139,6 +136,8 @@ describe("CreateDrop", () => {
         type: "success",
       });
     });
+
+    await waitFor(() => expect(onAllDropsAdded).toHaveBeenCalledTimes(1));
   });
 
   it("does not show success toast for non-leaderboard curation submissions", async () => {
@@ -171,5 +170,52 @@ describe("CreateDrop", () => {
       message: "Drop submitted successfully",
       type: "success",
     });
+  });
+
+  it("does not call onAllDropsAdded when submission fails", async () => {
+    const setToast = jest.fn();
+    const onAllDropsAdded = jest.fn();
+    const waitAndInvalidateDrops = jest.fn();
+    useWaveMock.mockReturnValue({ isCurationWave: true } as any);
+    commonApiPostMock.mockRejectedValueOnce(new Error("boom"));
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              onAllDropsAdded={onAllDropsAdded}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"PARTICIPATION" as any}
+              privileges={{} as any}
+              curationComposerVariant="leaderboard"
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      await userEvent.click(screen.getByText("submit curation"));
+
+      await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "boom",
+          type: "error",
+        })
+      );
+      expect(waitAndInvalidateDrops).toHaveBeenCalled();
+      expect(onAllDropsAdded).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 });
