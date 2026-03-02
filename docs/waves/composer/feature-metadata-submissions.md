@@ -2,71 +2,68 @@
 
 ## Overview
 
-Standard wave drop composer metadata can be submitted as standalone content. A
-drop can be sent with populated metadata even when the editor body and file
-uploads are empty.
+The standard wave composer supports metadata submissions.
+
+- Metadata can be submitted with no body text and no file uploads.
+- This applies to non-curation composer flows in both `Post` (chat) and `Drop`
+  (participation) modes.
+- Curation `Drop` mode is URL-only and does not use metadata rows.
 
 ## Location in the Site
 
-- Wave detail threads: `/waves/{waveId}`
-- Direct-message wave threads: `/messages?wave={waveId}`
-- Drop/post composer row and metadata panel in the thread footer
+- Wave thread: `/waves/{waveId}`
+- Direct-message thread: `/messages?wave={waveId}`
+- Thread footer composer actions row (`Post` / `Drop`)
 
 ## Entry Points
 
-- Open a wave thread and use the composer metadata action.
-- Open metadata from requirement prompts in drop mode when requirements are
-  shown.
-- Add custom metadata rows directly from the metadata panel.
+1. Open composer actions and select `Add metadata`.
+2. On narrow rows, select the chevron first, then `Add metadata`.
+3. In `Drop` mode with required metadata configured, select the `Metadata`
+   requirement chip to reopen the panel.
 
-## User Journey
+## Metadata Row Behavior
 
-1. Open the metadata panel in the composer.
-2. Fill one or more metadata values.
-3. Leave text and files empty (optional).
-4. Submit from the composer.
-5. The drop is sent with metadata payload and no visible text/media body.
+- In `Drop` mode, required metadata rows are preloaded from wave settings.
+- Required keys are locked and required rows cannot be removed.
+- A required value is treated as missing only when it is `null`, `undefined`,
+  or `""`.
+- Numeric required values accept `0`, negative numbers, and decimals.
+- In `Chat` mode, required metadata and required media checks are not enforced.
+- Switching from `Drop` to `Chat` removes only required rows that still have no
+  value; required rows with values stay.
 
-## Common Scenarios
+## Submit Rules
 
-- Submit structured metadata updates without writing markdown.
-- Combine metadata with text/media in a single submission.
-- Fill required metadata keys, then submit immediately.
-- Use numeric metadata values, including `0`, as valid entered values.
-
-## Edge Cases
-
-- Empty or whitespace-only metadata values do not make the composer submittable
-  by themselves.
-- Required metadata keys cannot be removed from the metadata panel.
-- Metadata rows can be added/removed while composing before submission.
-- If current draft content is empty but metadata exists, submission still
-  proceeds.
-- Custom rows with an empty key but non-empty value are still submitted; add a
-  key label when your workflow requires named metadata fields.
+- Submit stays disabled until at least one content source exists (non-blank
+  body text, attached media, existing storm parts, or at least one populated
+  metadata value).
+- Whitespace-only metadata values do not count as populated metadata content.
+- In `Drop` mode, missing required metadata or required media blocks submit.
+- Requirement chips render only after the draft is already submittable.
+- `Metadata` chip opens the metadata panel. `Media` chip opens a file picker.
 
 ## Failure and Recovery
 
-- Missing required metadata or required media blocks submission until resolved.
-- If authentication or required signature is canceled, submission stops and the
-  draft remains available.
-- If upload/signing/submission errors occur, the composer shows error feedback
-  and users can retry.
-- If an attached file is empty, the upload is blocked with an upload error and
-  users must attach a valid file to continue.
-- Multipart upload progress is capped at `0%`–`100%`, so retries do not show
-  progress overflow in upload indicators.
+- If wallet auth/signature/terms is canceled, submission stops and current
+  draft state stays.
+- If upload or signing preparation fails, the composer shows an error and keeps
+  draft state for retry.
+- Upload progress is clamped to `0%`-`100%`.
+- Composer state resets once a request is queued.
+- If API submission fails after queueing, re-enter metadata/content and submit
+  again.
 
 ## Limitations / Notes
 
-- Submit stays disabled until at least one content source exists (text, media,
-  existing parts, or populated metadata).
-- Metadata values reset with the rest of composer state after successful
-  submission.
-- Curation URL composer flows use URL-only submission and do not expose this
-  metadata panel.
-- This page covers metadata behavior in the wave composer, not creation-time
-  wave requirement setup.
+- `Add new` custom rows currently do not produce submit-ready metadata values
+  and are excluded from the metadata payload.
+- Curation URL composer flows use URL-only submission and do not expose metadata
+  rows.
+- Composer access/eligibility constraints are documented in
+  [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md).
+- This page covers thread-composer metadata behavior, not wave-creation
+  metadata setup.
 
 ## Related Pages
 
@@ -74,7 +71,7 @@ uploads are empty.
 - [Waves Index](../README.md)
 - [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
-- [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
+- [Wave Drop Composer Body Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
 - [Wave Creation Drop Settings](../create/feature-drops-step.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)
