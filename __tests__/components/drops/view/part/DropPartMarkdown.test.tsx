@@ -53,6 +53,14 @@ import userEvent from "@testing-library/user-event";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 
+const setQueryDataMock = jest.fn();
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({
+    setQueryData: setQueryDataMock,
+  }),
+}));
+
 const FALLBACK_BASE_ENDPOINT = "https://6529.io";
 const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
 const originalArtBlocksFlags = {
@@ -617,6 +625,25 @@ describe("DropPartMarkdown", () => {
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
     const a = screen.getByRole("link", { name: "link" });
     expect(a).toHaveAttribute("href", "https://google.com");
+  });
+
+  it("renders separate spaced paragraphs for blank-line content", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"First\n\nSecond"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = document.querySelectorAll("p.word-break");
+    expect(paragraphs).toHaveLength(2);
+    expect(paragraphs[0]).toHaveTextContent("First");
+    expect(paragraphs[1]).toHaveTextContent("Second");
+    expect(paragraphs[0]?.className).toContain("tw-mb-3");
+    expect(paragraphs[0]?.className).toContain("last:tw-mb-0");
   });
 
   it("renders one inline show-previews action when previews are hidden", async () => {
