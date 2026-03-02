@@ -4,15 +4,20 @@ import {
 } from "@/components/notifications/NotificationsContext";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
-import { commonApiFetch } from "@/services/api/common-api";
 
 const push = jest.fn();
 const mockUseRouter = jest.fn(() => ({ push }));
 const mockSeizeSwitchConnectedAccount = jest.fn();
+let mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
 const mockSeizeConnectContext = {
   address: "0xaaa",
   connectedAccounts: [
-    { address: "0xaaa", role: null, refreshToken: "rt-a", jwt: "jwt-a" },
+    {
+      address: "0xaaa",
+      role: null,
+      profileId: "test-profile-id",
+      profileHandle: "owner",
+    },
   ],
   seizeSwitchConnectedAccount: mockSeizeSwitchConnectedAccount,
 };
@@ -30,13 +35,12 @@ jest.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: { id: "test-profile-id" } }),
+  useAuth: () => ({ connectedProfile: mockConnectedProfile }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => mockSeizeConnectContext,
 }));
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn().mockResolvedValue({ id: "test-profile-id" }),
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
@@ -94,8 +98,14 @@ describe("NotificationsContext initialization", () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
     jest.clearAllMocks();
     mockSeizeConnectContext.address = "0xaaa";
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
     mockSeizeConnectContext.connectedAccounts = [
-      { address: "0xaaa", role: null, refreshToken: "rt-a", jwt: "jwt-a" },
+      {
+        address: "0xaaa",
+        role: null,
+        profileId: "test-profile-id",
+        profileHandle: "owner",
+      },
     ];
     PushNotifications.removeAllListeners.mockClear();
     PushNotifications.addListener.mockClear();
@@ -207,9 +217,16 @@ it("skips notification removal when not registered", async () => {
 describe("push notification action handling", () => {
   beforeEach(() => {
     push.mockClear();
+    mockSeizeSwitchConnectedAccount.mockReset();
     mockSeizeConnectContext.address = "0xaaa";
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
     mockSeizeConnectContext.connectedAccounts = [
-      { address: "0xaaa", role: null, refreshToken: "rt-a", jwt: "jwt-a" },
+      {
+        address: "0xaaa",
+        role: null,
+        profileId: "test-profile-id",
+        profileHandle: "owner",
+      },
     ];
     const { PushNotifications } = require("@capacitor/push-notifications");
     PushNotifications.addListener.mockClear();
@@ -267,6 +284,8 @@ describe("push notification action handling", () => {
               redirect: "profile",
               handle: "abc",
               notification_id: "1",
+              target_profile_id: "test-profile-id",
+              target_profile_handle: "owner",
             },
           },
         });
@@ -283,10 +302,6 @@ describe("push notification action handling", () => {
 
   it("discards notification when profile is not connected", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
-    const mockedCommonApiFetch = commonApiFetch as jest.MockedFunction<
-      typeof commonApiFetch
-    >;
-    mockedCommonApiFetch.mockResolvedValue({ id: "another-profile-id" });
 
     let registrationCallback:
       | ((token: { value: string }) => Promise<void>)
@@ -335,7 +350,8 @@ describe("push notification action handling", () => {
             data: {
               redirect: "profile",
               handle: "abc",
-              profile_id: "missing-profile-id",
+              target_profile_id: "missing-profile-id",
+              target_profile_handle: "missing-handle",
             },
           },
         });

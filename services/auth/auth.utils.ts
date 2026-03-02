@@ -18,6 +18,8 @@ export interface ConnectedWalletAccount {
   readonly refreshToken: string;
   readonly role: string | null;
   readonly jwt: string | null;
+  readonly profileId: string | null;
+  readonly profileHandle: string | null;
 }
 
 const COOKIE_OPTIONS = {
@@ -106,6 +108,9 @@ const readAccountsFromStorage = (): ConnectedWalletAccount[] => {
       refreshToken: record.refreshToken,
       role: typeof record.role === "string" ? record.role : null,
       jwt: typeof record.jwt === "string" ? record.jwt : null,
+      profileId: typeof record.profileId === "string" ? record.profileId : null,
+      profileHandle:
+        typeof record.profileHandle === "string" ? record.profileHandle : null,
     });
   }
 
@@ -203,6 +208,8 @@ const migrateLegacyStorageIfNeeded = (): void => {
     refreshToken: legacyRefreshToken,
     role: legacyRole,
     jwt: legacyJwt,
+    profileId: null,
+    profileHandle: null,
   };
 
   writeAccountsToStorage([legacyAccount]);
@@ -273,14 +280,22 @@ export const setAuthJwt = (
   refreshToken: string,
   role?: string
 ): boolean => {
+  const storedAccounts = getStoredAccounts();
+  const existingAccount =
+    storedAccounts.find(
+      (account) =>
+        normalizeAddress(account.address) === normalizeAddress(address)
+    ) ?? null;
+
   const nextAccount: ConnectedWalletAccount = {
     address,
     refreshToken,
     role: role ?? null,
     jwt,
+    profileId: existingAccount?.profileId ?? null,
+    profileHandle: existingAccount?.profileHandle ?? null,
   };
 
-  const storedAccounts = getStoredAccounts();
   const accountIndex = storedAccounts.findIndex(
     (account) => normalizeAddress(account.address) === normalizeAddress(address)
   );
@@ -399,5 +414,50 @@ export const syncWalletRoleWithServer = (
     safeLocalStorage.removeItem(addressRoleStorageKey);
   }
 
+  emitWalletAccountsUpdated();
+};
+
+export const syncConnectedWalletProfile = (
+  address: string,
+  profileId: string,
+  profileHandle: string | null
+): void => {
+  const normalizedProfileId = profileId.trim();
+  if (normalizedProfileId.length === 0) {
+    return;
+  }
+
+  const normalizedAddress = normalizeAddress(address);
+  const normalizedProfileHandle =
+    profileHandle && profileHandle.trim().length > 0 ? profileHandle : null;
+  const accounts = getStoredAccounts();
+  let hasChanges = false;
+
+  const nextAccounts = accounts.map((account) => {
+    if (normalizeAddress(account.address) !== normalizedAddress) {
+      return account;
+    }
+
+    if (
+      account.profileId === normalizedProfileId &&
+      account.profileHandle === normalizedProfileHandle
+    ) {
+      return account;
+    }
+
+    hasChanges = true;
+    return {
+      ...account,
+      profileId: normalizedProfileId,
+      profileHandle: normalizedProfileHandle,
+    };
+  });
+
+  if (!hasChanges) {
+    return;
+  }
+
+  const activeAccount = getActiveAccountFromAccounts(nextAccounts);
+  persistAccountsWithActive(nextAccounts, activeAccount?.address ?? null);
   emitWalletAccountsUpdated();
 };
