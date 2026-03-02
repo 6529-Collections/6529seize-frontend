@@ -74,6 +74,7 @@ import {
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+import { normalizeCurationDropInput } from "./utils/validateCurationDropUrl";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -117,6 +118,7 @@ interface CreateDropContentProps {
   >;
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
+  readonly onSwitchToDropModeWithUrl: (url: string) => void;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly privileges: DropPrivileges;
 }
@@ -346,6 +348,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   setDrop,
   setIsStormMode,
   onDropModeChange,
+  onSwitchToDropModeWithUrl,
   submitDrop,
   privileges,
 }) => {
@@ -361,7 +364,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
-  const { isMemesWave } = useWave(wave);
+  const { isMemesWave, isCurationWave } = useWave(wave);
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
@@ -480,6 +483,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
   const canSubmit = getCanSubmit();
   const canAddPart = getCanAddPart();
+  const normalizedCurationDropUrl = useMemo(() => {
+    if (!isCurationWave || isDropMode) {
+      return null;
+    }
+    return normalizeCurationDropInput(getMarkdown ?? "");
+  }, [getMarkdown, isCurationWave, isDropMode]);
+  const showCurationDropModeWarning =
+    !isDropMode && !!normalizedCurationDropUrl && isCurationWave;
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
 
@@ -883,6 +894,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     createDropInputRef.current?.focus();
   };
 
+  const onSwitchToDropMode = useCallback(() => {
+    if (!normalizedCurationDropUrl) {
+      return;
+    }
+    onSwitchToDropModeWithUrl(normalizedCurationDropUrl);
+  }, [normalizedCurationDropUrl, onSwitchToDropModeWithUrl]);
+
   const focusInputWithDelay = (delay: number) => {
     setTimeout(() => {
       createDropInputRef.current?.focus();
@@ -1157,6 +1175,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               onMentionedWave={onMentionedWave}
               onDrop={onDrop}
             />
+            {showCurationDropModeWarning && (
+              <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
+                This looks like a curation URL.{" "}
+                <button
+                  type="button"
+                  className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
+                  onClick={onSwitchToDropMode}
+                >
+                  Switch to Drop mode
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
