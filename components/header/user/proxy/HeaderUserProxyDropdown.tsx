@@ -158,8 +158,6 @@ export default function HeaderUserProxyDropdown({
                             pendingKey: "add-account",
                             errorMessage:
                               "Failed to add connected account. Please try again.",
-                          }).finally(() => {
-                            onClose();
                           });
                         }}
                       />

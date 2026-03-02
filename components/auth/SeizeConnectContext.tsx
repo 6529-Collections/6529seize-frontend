@@ -408,6 +408,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addFlowOriginAddressRef = useRef<string | null>(null);
   const retryConnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isAddingConnectedAccountRef = useRef(false);
   const isMountedRef = useRef(true);
   const nodeEnv = getNodeEnv();
   const isDevLikeEnv =
@@ -742,7 +743,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [open]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
-    if (!isActiveWalletConnected) {
+    const hasLiveProviderConnection = !!(
+      account.address &&
+      account.isConnected &&
+      isAddress(account.address)
+    );
+
+    if (!hasLiveProviderConnection && !isActiveWalletConnected) {
       return;
     }
 
@@ -757,7 +764,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       logError("seizeDisconnect", walletError);
       throw walletError;
     }
-  }, [disconnect, isActiveWalletConnected]);
+  }, [
+    account.address,
+    account.isConnected,
+    disconnect,
+    isActiveWalletConnected,
+  ]);
 
   const seizeDisconnectAndLogout = useCallback(async (): Promise<void> => {
     // CRITICAL: Wallet disconnect MUST succeed before auth cleanup
@@ -932,6 +944,21 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    if (isAddingConnectedAccountRef.current) {
+      return;
+    }
+
+    const clearAddConnectedAccountGuard = (): void => {
+      isAddingConnectedAccountRef.current = false;
+      addFlowOriginAddressRef.current = null;
+      if (retryConnectTimeoutRef.current) {
+        clearTimeout(retryConnectTimeoutRef.current);
+        retryConnectTimeoutRef.current = null;
+      }
+    };
+
+    isAddingConnectedAccountRef.current = true;
+
     const liveConnectedWallet =
       account.address && account.isConnected && isAddress(account.address)
         ? getAddress(account.address)
@@ -946,30 +973,66 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         retryConnectTimeoutRef.current = null;
       }
 
-      disconnect()
-        .then(() => {
-          retryConnectTimeoutRef.current = setTimeout(() => {
-            retryConnectTimeoutRef.current = null;
-            if (!isMountedRef.current) {
-              return;
-            }
-            seizeConnect();
-          }, 100);
-        })
-        .catch((error: unknown) => {
-          addFlowOriginAddressRef.current = null;
-          setIsAddingConnectedAccount(false);
-          const walletError = createWalletError(
-            WalletDisconnectionError,
-            "disconnect wallet before adding account",
-            error
-          );
-          logError("seizeAddConnectedAccount", walletError);
-        });
+      try {
+        disconnect()
+          .then(() => {
+            retryConnectTimeoutRef.current = setTimeout(() => {
+              retryConnectTimeoutRef.current = null;
+              if (!isMountedRef.current) {
+                clearAddConnectedAccountGuard();
+                return;
+              }
+              try {
+                seizeConnect();
+                clearAddConnectedAccountGuard();
+              } catch (error: unknown) {
+                clearAddConnectedAccountGuard();
+                setIsAddingConnectedAccount(false);
+                const connectionError = createWalletError(
+                  WalletConnectionError,
+                  "start add-account connection flow",
+                  error
+                );
+                logError("seizeAddConnectedAccount", connectionError);
+              }
+            }, 100);
+          })
+          .catch((error: unknown) => {
+            clearAddConnectedAccountGuard();
+            setIsAddingConnectedAccount(false);
+            const walletError = createWalletError(
+              WalletDisconnectionError,
+              "disconnect wallet before adding account",
+              error
+            );
+            logError("seizeAddConnectedAccount", walletError);
+          });
+      } catch (error: unknown) {
+        clearAddConnectedAccountGuard();
+        setIsAddingConnectedAccount(false);
+        const walletError = createWalletError(
+          WalletDisconnectionError,
+          "disconnect wallet before adding account",
+          error
+        );
+        logError("seizeAddConnectedAccount", walletError);
+      }
       return;
     }
 
-    seizeConnect();
+    try {
+      seizeConnect();
+      clearAddConnectedAccountGuard();
+    } catch (error: unknown) {
+      clearAddConnectedAccountGuard();
+      setIsAddingConnectedAccount(false);
+      const connectionError = createWalletError(
+        WalletConnectionError,
+        "start add-account connection flow",
+        error
+      );
+      logError("seizeAddConnectedAccount", connectionError);
+    }
   }, [
     account.address,
     account.isConnected,

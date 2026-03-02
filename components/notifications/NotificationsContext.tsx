@@ -28,6 +28,8 @@ const MAX_REGISTRATION_RETRIES = 3;
 const INITIAL_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 5000;
 const IOS_INITIALIZATION_DELAY_MS = 500;
+const PROFILE_SWITCH_SETTLE_TIMEOUT_MS = 3000;
+const PROFILE_SWITCH_POLL_INTERVAL_MS = 50;
 
 const DELEGATE_ERROR_PATTERNS = [
   "capacitorDidRegisterForRemoteNotifications",
@@ -198,15 +200,64 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       notificationProfileId: string,
       matchedAddress: string
     ): Promise<boolean> => {
+      const isMatchedProfileActive = (): boolean => {
+        const activeAddress = activeAddressRef.current;
+        if (!activeAddress) {
+          return false;
+        }
+
+        const normalizedActiveAddress = activeAddress.toLowerCase();
+        const normalizedMatchedAddress = matchedAddress.toLowerCase();
+        if (normalizedActiveAddress !== normalizedMatchedAddress) {
+          return false;
+        }
+
+        if (connectedProfileRef.current?.id === notificationProfileId) {
+          return true;
+        }
+
+        const activeAccount = connectedAccountsRef.current.find(
+          (account) =>
+            account.address.toLowerCase() === normalizedMatchedAddress
+        );
+        return activeAccount?.role === notificationProfileId;
+      };
+
+      const waitForProfileSwitchSettlement = async (): Promise<boolean> => {
+        const timeoutAt = Date.now() + PROFILE_SWITCH_SETTLE_TIMEOUT_MS;
+
+        while (Date.now() < timeoutAt) {
+          if (isMatchedProfileActive()) {
+            return true;
+          }
+          await new Promise((resolve) =>
+            setTimeout(resolve, PROFILE_SWITCH_POLL_INTERVAL_MS)
+          );
+        }
+
+        return isMatchedProfileActive();
+      };
+
+      if (isMatchedProfileActive()) {
+        return true;
+      }
+
       if (
         activeAddressRef.current?.toLowerCase() === matchedAddress.toLowerCase()
       ) {
-        return true;
+        return await waitForProfileSwitchSettlement();
       }
 
       try {
         await Promise.resolve(seizeSwitchConnectedAccount(matchedAddress));
-        return true;
+        const didSettle = await waitForProfileSwitchSettlement();
+        if (!didSettle) {
+          console.warn(
+            "Ignoring notification: switched wallet account but profile did not settle in time",
+            { notificationProfileId, matchedAddress }
+          );
+        }
+        return didSettle;
       } catch (error) {
         console.warn(
           "Ignoring notification: failed to switch to matched connected profile",
@@ -235,6 +286,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         );
 
         if (!matchedAddress) {
+          await removeDeliveredNotifications([notification]);
           console.warn(
             "Ignoring notification: profile is not one of connected accounts",
             { notificationProfileId }

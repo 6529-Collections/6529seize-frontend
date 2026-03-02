@@ -635,7 +635,14 @@ export default function Auth({
         });
         if (!success) {
           setShowSignModal(false);
-          void seizeDisconnect();
+          try {
+            await seizeDisconnect();
+          } catch (error) {
+            logErrorSecurely(
+              "requestAuth_disconnect_after_failed_signin",
+              error
+            );
+          }
           return { success: false };
         }
 
@@ -734,11 +741,15 @@ export default function Auth({
     setShowSignModal(false);
 
     if (!isAddressAuthorized) {
-      void seizeDisconnect();
+      void seizeDisconnect().catch((error) => {
+        logErrorSecurely("onCancelSignRequest_disconnect", error);
+      });
       return;
     }
 
-    void seizeDisconnectAndLogout();
+    void seizeDisconnectAndLogout().catch((error) => {
+      logErrorSecurely("onCancelSignRequest_disconnectAndLogout", error);
+    });
   }, [isAddressAuthorized, seizeDisconnect, seizeDisconnectAndLogout]);
 
   // Computed modal visibility to prevent flickering during rapid state changes
