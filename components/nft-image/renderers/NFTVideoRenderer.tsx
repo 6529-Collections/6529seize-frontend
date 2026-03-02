@@ -4,6 +4,7 @@ import { Col } from "react-bootstrap";
 import styles from "../NFTImage.module.scss";
 import NFTImageBalance from "../NFTImageBalance";
 import type { BaseRendererProps } from "../types/renderer-props";
+import { withArweaveFallback } from "../utils/arweave-fallback";
 
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   return (
@@ -32,7 +33,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
             : props.nft.animation
         }
         className={props.imageStyle}
-        onError={({ currentTarget }) => {
+        onError={withArweaveFallback(({ currentTarget }) => {
           if (
             "metadata" in props.nft &&
             currentTarget.src === props.nft.compressed_animation
@@ -41,7 +42,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
           } else if ("metadata" in props.nft) {
             currentTarget.src = props.nft.metadata.animation;
           }
-        }}></video>
+        })}></video>
     </Col>
   );
 }

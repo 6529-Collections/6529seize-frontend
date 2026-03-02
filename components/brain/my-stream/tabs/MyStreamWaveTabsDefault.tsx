@@ -9,6 +9,9 @@ import {
   MagnifyingGlassIcon,
   ChatBubbleLeftIcon,
   Squares2X2Icon,
+  ShareIcon,
+  LinkIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -19,6 +22,7 @@ import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -45,6 +49,18 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const isMobile = breakpoint === "S";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
+  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const showShareAction = !isDirectMessage;
+  const {
+    mode: waveLinkActionMode,
+    label: waveLinkActionLabel,
+    feedbackState: waveLinkActionFeedbackState,
+    onClick: handleWaveLinkActionClick,
+  } = useWaveShareCopyAction({
+    waveId: wave.id,
+    waveName: wave.name,
+    isDirectMessage,
+  });
 
   const handleMobileBack = () => {
     const params = new URLSearchParams(searchParams.toString() || "");
@@ -72,6 +88,22 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("serialNo", String(serialNo));
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const waveLinkActionIconColor =
+    waveLinkActionFeedbackState === "idle"
+      ? "tw-text-iron-200"
+      : "tw-text-emerald-300";
+  const renderWaveLinkActionIcon = () => {
+    if (waveLinkActionFeedbackState !== "idle") {
+      return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
+    }
+
+    if (waveLinkActionMode === "share") {
+      return <ShareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
+    }
+
+    return <LinkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
   };
 
   return (
@@ -139,6 +171,18 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
                   )}
                 </button>
               )}
+              {showShareAction && (
+                <button
+                  type="button"
+                  onClick={handleWaveLinkActionClick}
+                  aria-label={waveLinkActionLabel}
+                  title={waveLinkActionLabel}
+                  data-wave-link-action-mode={waveLinkActionMode}
+                  className={`tw-ml-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white ${waveLinkActionIconColor}`}
+                >
+                  {renderWaveLinkActionIcon()}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
@@ -150,11 +194,23 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             </>
           )}
         </div>
-        <div className="tw-relative tw-flex tw-items-center tw-self-stretch">
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-self-stretch">
+          {isMobile && showShareAction && (
+            <button
+              type="button"
+              onClick={handleWaveLinkActionClick}
+              aria-label={waveLinkActionLabel}
+              title={waveLinkActionLabel}
+              data-wave-link-action-mode={waveLinkActionMode}
+              className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white ${waveLinkActionIconColor}`}
+            >
+              {renderWaveLinkActionIcon()}
+            </button>
+          )}
           <button
             type="button"
             onClick={toggleRightSidebar}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-flex tw-h-8 tw-w-8 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
             aria-label="Toggle right sidebar"
           >
             <ChevronDoubleLeftIcon

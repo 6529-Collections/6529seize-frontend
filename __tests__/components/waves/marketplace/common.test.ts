@@ -1,9 +1,12 @@
 import { createTestQueryClient } from "../../../utils/reactQuery";
 import {
+  deriveMarketplaceDataHealth,
+  patchFromMediaLinkUpdate,
   primeMarketplacePreviewCacheFromNftLinks,
   type MarketplacePreviewData,
 } from "@/components/waves/marketplace/common";
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
+import type { WsMediaLinkUpdatedData } from "@/helpers/Types";
 
 const getMarketplacePreviewQueryKey = (href: string, mode: string) =>
   ["MARKETPLACE_PREVIEW", { href, mode }] as const;
@@ -74,6 +77,210 @@ const createNftLinkWithMediaPreview = ({
       media_preview: mediaPreview,
     },
   });
+
+const createMediaLinkUpdatedPayload = (
+  overrides: Partial<WsMediaLinkUpdatedData> = {}
+): WsMediaLinkUpdatedData => ({
+  canonical_id: "MANIFOLD:claim:1",
+  platform: "MANIFOLD",
+  chain: null,
+  contract: null,
+  token: null,
+  name: null,
+  description: null,
+  media_uri: null,
+  last_error_message: null,
+  price: null,
+  price_currency: null,
+  last_successfully_updated: null,
+  failed_since: null,
+  ...overrides,
+});
+
+describe("patchFromMediaLinkUpdate", () => {
+  const createCurrentData = (
+    overrides: Partial<MarketplacePreviewData> = {}
+  ): MarketplacePreviewData => ({
+    href: "https://example.com/1",
+    canonicalId: "manifold:claim:1",
+    platform: "MANIFOLD",
+    title: "Old title",
+    description: "Old description",
+    media: {
+      url: "https://cdn.example.com/current-preview.webp",
+      mimeType: "image/webp",
+    },
+    price: "1.0",
+    priceCurrency: "ETH",
+    lastErrorMessage: null,
+    lastSuccessfullyUpdatedMs: null,
+    failedSinceMs: null,
+    ...overrides,
+  });
+
+  it("prefers preview urls from websocket payload over media_uri", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData(),
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+        media_preview: {
+          card_url: "https://cdn.example.com/card-preview.avif",
+          small_url: "https://cdn.example.com/small-preview.jpg",
+          thumb_url: "https://cdn.example.com/thumb-preview.jpg",
+          mime_type: "image/avif",
+        },
+      }),
+    });
+
+    expect(patched.media).toEqual({
+      url: "https://cdn.example.com/card-preview.avif",
+      mimeType: "image/avif",
+    });
+  });
+
+  it("keeps existing cached preview media when websocket has only media_uri", () => {
+    const current = createCurrentData();
+
+    const patched = patchFromMediaLinkUpdate({
+      current,
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+      }),
+    });
+
+    expect(patched.media).toEqual(current.media);
+  });
+
+  it("falls back to media_uri when cache has no media and websocket has no preview", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData({ media: null }),
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+      }),
+    });
+
+    expect(patched.media).toEqual({
+      url: "https://cdn.example.com/full.jpg",
+      mimeType: "image/jpeg",
+    });
+  });
+
+  it("supports flat preview fields in websocket payload", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData(),
+      update: createMediaLinkUpdatedPayload({
+        media_uri: "https://cdn.example.com/full.jpg",
+        media_preview_small_url: "https://cdn.example.com/small-preview.png",
+      }),
+    });
+
+    expect(patched.media).toEqual({
+      url: "https://cdn.example.com/small-preview.png",
+      mimeType: "image/png",
+    });
+  });
+
+  it("patches metadata timestamps from websocket payload", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData(),
+      update: createMediaLinkUpdatedPayload({
+        last_error_message: "Timed out while fetching metadata",
+        last_successfully_updated: "1735689600",
+        failed_since: 1735689700,
+      }),
+    });
+
+    expect(patched.lastErrorMessage).toBe("Timed out while fetching metadata");
+    expect(patched.lastSuccessfullyUpdatedMs).toBe(1735689600000);
+    expect(patched.failedSinceMs).toBe(1735689700000);
+  });
+
+  it("clears metadata error fields when websocket sends null values", () => {
+    const patched = patchFromMediaLinkUpdate({
+      current: createCurrentData({
+        lastErrorMessage: "temporary provider outage",
+        lastSuccessfullyUpdatedMs: 1735689600000,
+        failedSinceMs: 1735689700000,
+      }),
+      update: createMediaLinkUpdatedPayload(),
+    });
+
+    expect(patched.lastErrorMessage).toBeNull();
+    expect(patched.lastSuccessfullyUpdatedMs).toBeNull();
+    expect(patched.failedSinceMs).toBeNull();
+  });
+});
+
+describe("deriveMarketplaceDataHealth", () => {
+  const createData = (
+    overrides: Partial<MarketplacePreviewData> = {}
+  ): MarketplacePreviewData => ({
+    href: "https://example.com/1",
+    canonicalId: "manifold:claim:1",
+    platform: "MANIFOLD",
+    title: "NFT #1",
+    description: null,
+    media: {
+      url: "https://cdn.example.com/current-preview.webp",
+      mimeType: "image/webp",
+    },
+    price: "1.0",
+    priceCurrency: "ETH",
+    lastErrorMessage: null,
+    lastSuccessfullyUpdatedMs: null,
+    failedSinceMs: null,
+    ...overrides,
+  });
+
+  it("returns fresh for recent successful updates", () => {
+    const data = createData({
+      lastSuccessfullyUpdatedMs: Date.now() - 60 * 60 * 1000,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health.state).toBe("fresh");
+    expect(health.details).toContain("NFT data fresh: last successful update");
+  });
+
+  it("returns stale when update age exceeds threshold", () => {
+    const data = createData({
+      lastSuccessfullyUpdatedMs: Date.now() - 4 * 24 * 60 * 60 * 1000,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health.state).toBe("stale");
+    expect(health.details).toContain("NFT data stale: last successful update");
+  });
+
+  it("returns error when nft-link reports last error message", () => {
+    const data = createData({
+      lastErrorMessage: "Could not fetch metadata",
+      failedSinceMs: Date.now() - 10 * 60 * 1000,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health.state).toBe("error");
+    expect(health.details).toContain("Could not fetch metadata");
+  });
+
+  it("returns unknown when no status metadata exists", () => {
+    const data = createData({
+      lastSuccessfullyUpdatedMs: null,
+      lastErrorMessage: null,
+      failedSinceMs: null,
+    });
+
+    const health = deriveMarketplaceDataHealth(data);
+
+    expect(health).toEqual({
+      state: "unknown",
+      details: "NFT data update status unavailable",
+    });
+  });
+});
 
 describe("primeMarketplacePreviewCacheFromNftLinks", () => {
   it("seeds marketplace preview cache for both preview modes", () => {
@@ -293,6 +500,9 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
         media: null,
         price: null,
         priceCurrency: null,
+        lastErrorMessage: null,
+        lastSuccessfullyUpdatedMs: null,
+        failedSinceMs: null,
       }
     );
 

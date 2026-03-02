@@ -81,6 +81,9 @@ describe("MarketplaceOpenseaAssetPreview", () => {
           href,
           mediaUrl: "https://i.seadn.io/s/raw/files/radar-dome.png",
           mediaMimeType: "image/png",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );
@@ -123,6 +126,9 @@ describe("MarketplaceOpenseaAssetPreview", () => {
           price: "0.5 ETH",
           priceCurrency: "ETH",
           title: "OpenSea Asset #42",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );

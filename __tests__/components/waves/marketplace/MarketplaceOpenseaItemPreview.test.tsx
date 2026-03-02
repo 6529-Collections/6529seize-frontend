@@ -73,6 +73,9 @@ describe("MarketplaceOpenseaItemPreview", () => {
           mediaUrl: "https://opensea.io/item/test/opengraph-image?ts=1",
           mediaMimeType: "image/png",
           title: "Radar Dome",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );
@@ -108,6 +111,9 @@ describe("MarketplaceOpenseaItemPreview", () => {
           href,
           mediaUrl: "https://i.seadn.io/s/raw/files/radar-dome.png",
           mediaMimeType: "image/png",
+          dataHealth: expect.objectContaining({
+            details: expect.any(String),
+          }),
         })
       )
     );

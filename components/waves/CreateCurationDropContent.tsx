@@ -49,6 +49,7 @@ interface CreateCurationDropContentProps {
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly isDropMode: boolean;
+  readonly initialUrl: string | null;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
 }
@@ -62,6 +63,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   wave,
   dropId,
   isDropMode,
+  initialUrl,
   submitDrop,
   curationComposerVariant = "default",
 }) => {
@@ -73,7 +75,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
 
-  const [urlValue, setUrlValue] = useState("");
+  const [urlValue, setUrlValue] = useState(() => initialUrl ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [showLiveValidation, setShowLiveValidation] = useState(false);
   const [isSupportedUrlsExpanded, setIsSupportedUrlsExpanded] = useState(false);
@@ -395,7 +397,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
           </PrimaryButton>
         </div>
       ) : (
-        <div className="tw-flex tw-w-full tw-items-end">
+        <div className="tw-flex tw-w-full tw-items-start">
           <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
             <div className="tw-w-full tw-flex-grow">
               <CreateCurationDropUrlInput
@@ -411,7 +413,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
               />
             </div>
           </div>
-          <div className="tw-ml-2 lg:tw-ml-3">
+          <div className="tw-ml-2 tw-self-start lg:tw-ml-3">
             <div className="tw-flex tw-items-center tw-gap-x-3">
               <CreateDropSubmit
                 submitting={submitting}

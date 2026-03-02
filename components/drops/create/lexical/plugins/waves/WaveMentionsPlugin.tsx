@@ -195,6 +195,7 @@ const NewWaveMentionsPlugin = forwardRef<
                     options={options}
                     setHighlightedIndex={setHighlightedIndex}
                     selectOptionAndCleanUp={selectOptionAndCleanUp}
+                    anchorElement={anchorElementRef.current}
                   />
                 </div>,
                 anchorElementRef.current

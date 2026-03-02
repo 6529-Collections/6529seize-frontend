@@ -3,20 +3,14 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import type {
-  ApiProfileRepRatesState,
-  RatingWithProfileInfoAndLevel,
-} from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
+import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
+import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { amIUser, formatNumberWithCommas } from "@/helpers/Helpers";
-import type { Page } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
-import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
+import { RateMatter } from "@/types/enums";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useMemo, useState } from "react";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
@@ -25,30 +19,59 @@ import UserPageIdentityStatements from "../identity/statements/UserPageIdentityS
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
-import TopRaterAvatars from "./header/TopRaterAvatars";
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
+import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
+import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
 import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
-import {
-  getCanEditRep,
-  sortRepsByRatingAndContributors,
-} from "./UserPageRep.helpers";
+import { getCanEditRep } from "./UserPageRep.helpers";
 
 type MobileTab = "rep" | "identity";
 
+function RepEmptyState({
+  loading,
+  repDirection,
+}: {
+  readonly loading: boolean;
+  readonly repDirection: RepDirection;
+}) {
+  if (loading) {
+    return (
+      <div className="tw-mt-4 tw-flex tw-justify-center tw-py-4">
+        <div className="tw-h-5 tw-w-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-700 tw-border-t-iron-400" />
+      </div>
+    );
+  }
+  return (
+    <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-normal tw-text-iron-500">
+      {repDirection === "given" ? "No rep given yet." : "No rep received yet."}
+    </p>
+  );
+}
+
 export default function UserPageRepMobile({
   profile,
-  repRates,
+  overview,
+  categories,
+  cicOverview,
+  repDirection,
+  onRepDirectionChange,
   initialActivityLogParams,
+  loading,
 }: {
   readonly profile: ApiIdentity;
-  readonly repRates: ApiProfileRepRatesState | null;
+  readonly overview: ApiRepOverview | null;
+  readonly categories: ApiRepCategory[];
+  readonly cicOverview: ApiCicOverview | null;
+  readonly repDirection: RepDirection;
+  readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly initialActivityLogParams: ActivityLogParams;
+  readonly loading: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
-  const profileHandle = profile.handle ?? "";
 
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
@@ -56,55 +79,9 @@ export default function UserPageRepMobile({
   const [visibleCount, setVisibleCount] = useState(5);
   const [editCategory, setEditCategory] = useState<string | null>(null);
 
-  const { data: nicRatings } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
-    queryKey: [
-      QueryKey.PROFILE_RATERS,
-      {
-        handleOrWallet: profileHandle,
-        matter: RateMatter.NIC,
-        page: 1,
-        pageSize: 1,
-        order: SortDirection.DESC,
-        orderBy: ProfileRatersParamsOrderBy.RATING,
-        given: false,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${profileHandle}/cic/ratings/by-rater`,
-        params: {
-          page: `${1}`,
-          page_size: `${1}`,
-          order: SortDirection.DESC.toLowerCase(),
-          order_by: ProfileRatersParamsOrderBy.RATING.toLowerCase(),
-          given: "false",
-        },
-      }),
-    enabled: !!profileHandle,
-  });
-
-  // Close modals when viewport reaches lg breakpoint
-  useEffect(() => {
-    const mq = globalThis.matchMedia("(min-width: 1024px)");
-    const handler = (e: MediaQueryListEvent) => {
-      if (e.matches) {
-        setIsGrantRepOpen(false);
-        setIsNicRateOpen(false);
-      }
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
   useEffect(() => {
     setVisibleCount(5);
-  }, [repRates?.rating_stats]);
-
-  // --- derived: sorted reps, can-edit flags ---
-  const reps = useMemo(
-    () => sortRepsByRatingAndContributors(repRates?.rating_stats ?? []),
-    [repRates?.rating_stats]
-  );
+  }, [categories]);
 
   const canEditRep = useMemo(
     () =>
@@ -135,13 +112,30 @@ export default function UserPageRepMobile({
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()
     );
 
-  // --- render ---
+  // Build CIC avatar items from overview contributors
+  const cicAvatarItems = useMemo(
+    () =>
+      (cicOverview?.contributors.data ?? []).slice(0, 3).map((c) => ({
+        key: c.profile.handle ?? c.profile.primary_address,
+        pfpUrl: c.profile.pfp ?? null,
+        ariaLabel: c.profile.handle ?? c.profile.primary_address,
+        fallback: c.profile.handle
+          ? c.profile.handle.charAt(0).toUpperCase()
+          : "?",
+        title: c.profile.handle ?? c.profile.primary_address,
+        tooltipContent: (
+          <span>
+            {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
+            {formatNumberWithCommas(c.contribution)}
+          </span>
+        ),
+      })),
+    [cicOverview?.contributors.data]
+  );
 
   return (
-    <div className="lg:tw-hidden">
-      {/* Score Cards (tappable navigation) */}
+    <div>
       <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-        {/* Rep Score */}
         <button
           type="button"
           onClick={() => setActiveTab("rep")}
@@ -181,15 +175,16 @@ export default function UserPageRepMobile({
               Total Rep
             </div>
             <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-              {repRates
-                ? formatNumberWithCommas(repRates.total_rep_rating)
-                : "\u2014"}
+              {overview ? formatNumberWithCommas(overview.total_rep) : "\u2014"}
             </div>
-            {repRates && (
+            {overview && (
               <div className="tw-mt-2.5 tw-flex tw-items-center">
                 <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-                  {formatNumberWithCommas(repRates.number_of_raters)}{" "}
-                  {repRates.number_of_raters === 1 ? "rater" : "raters"}
+                  {formatNumberWithCommas(overview.contributor_count)}{" "}
+                  {getContributorLabel(
+                    repDirection,
+                    overview.contributor_count
+                  )}
                 </span>
               </div>
             )}
@@ -236,29 +231,31 @@ export default function UserPageRepMobile({
               NIC
             </div>
             <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white">
-              {formatNumberWithCommas(profile.cic)}
+              {formatNumberWithCommas(cicOverview?.total_cic ?? profile.cic)}
             </div>
             <div className="tw-mt-2.5 tw-flex tw-items-center tw-gap-1.5">
               <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
-                <UserCICTypeIcon cic={profile.cic} />
+                <UserCICTypeIcon cic={cicOverview?.total_cic ?? profile.cic} />
               </span>
               <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-emerald-400">
-                <UserCICStatus cic={profile.cic} />
+                <UserCICStatus cic={cicOverview?.total_cic ?? profile.cic} />
               </span>
             </div>
             <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-              <div className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
-                <TopRaterAvatars
-                  handleOrWallet={profile.handle ?? ""}
-                  matter={RateMatter.NIC}
-                  count={3}
-                  size="sm"
-                  withLinks={false}
-                />
-              </div>
+              {cicAvatarItems.length > 0 && (
+                <div className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
+                  <OverlappingAvatars
+                    items={cicAvatarItems}
+                    size="sm"
+                    maxCount={3}
+                  />
+                </div>
+              )}
               <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-                {formatNumberWithCommas(nicRatings?.count ?? 0)}{" "}
-                {(nicRatings?.count ?? 0) === 1 ? "rater" : "raters"}
+                {formatNumberWithCommas(cicOverview?.contributor_count ?? 0)}{" "}
+                {(cicOverview?.contributor_count ?? 0) === 1
+                  ? "rater"
+                  : "raters"}
               </span>
             </div>
           </div>
@@ -275,37 +272,77 @@ export default function UserPageRepMobile({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: "easeInOut" }}
           >
+            {/* Received / Given toggle */}
+            <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4">
+              <button
+                type="button"
+                aria-pressed={repDirection === "received"}
+                onClick={() => onRepDirectionChange("received")}
+                className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
+                  repDirection === "received"
+                    ? "tw-text-iron-100"
+                    : "tw-text-iron-500 hover:tw-text-iron-300"
+                }`}
+              >
+                <ArrowDownLeftIcon
+                  className="tw-h-3 tw-w-3 tw-flex-shrink-0"
+                  aria-hidden="true"
+                />
+                Received
+              </button>
+              <button
+                type="button"
+                aria-pressed={repDirection === "given"}
+                onClick={() => onRepDirectionChange("given")}
+                className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
+                  repDirection === "given"
+                    ? "tw-text-iron-100"
+                    : "tw-text-iron-500 hover:tw-text-iron-300"
+                }`}
+              >
+                <ArrowUpRightIcon
+                  className="tw-h-3 tw-w-3 tw-flex-shrink-0"
+                  aria-hidden="true"
+                />
+                Given
+              </button>
+            </div>
+
             {/* Rep Categories */}
-            {reps.length > 0 && (
+            {categories.length > 0 && (
               <div className="tw-mt-4">
-                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
+                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-100">
                   Rep Categories
                 </div>
                 <div className="tw-flex tw-flex-wrap tw-gap-2">
-                  {reps.slice(0, visibleCount).map((rep) => (
+                  {categories.slice(0, visibleCount).map((cat) => (
                     <RepCategoryPill
-                      key={rep.category}
-                      rep={rep}
-                      profileHandle={profile.handle ?? ""}
-                      canEdit={canEditRep}
+                      key={cat.category}
+                      category={cat}
+                      canEdit={canEditRep && repDirection === "received"}
                       onEdit={setEditCategory}
+                      direction={repDirection}
                       compact
                     />
                   ))}
-                  {reps.length > visibleCount && (
+                  {categories.length > visibleCount && (
                     <button
                       type="button"
                       onClick={() => setVisibleCount((prev) => prev + 10)}
                       className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
                     >
-                      +{reps.length - visibleCount} more
+                      +{categories.length - visibleCount} more
                     </button>
                   )}
                 </div>
               </div>
             )}
 
-            {canEditRep && (
+            {categories.length === 0 && (
+              <RepEmptyState loading={loading} repDirection={repDirection} />
+            )}
+
+            {canEditRep && repDirection === "received" && (
               <div className="tw-mt-4">
                 <UserPageRateWrapper
                   profile={profile}
@@ -402,20 +439,19 @@ export default function UserPageRepMobile({
         )}
       </AnimatePresence>
 
-      {/* Grant Rep Bottom Sheet */}
       <GrantRepDialog
         profile={profile}
-        repRates={repRates}
+        overview={overview}
         isOpen={isGrantRepOpen}
         onClose={() => setIsGrantRepOpen(false)}
       />
 
-      {/* Rate NIC Bottom Sheet */}
       <MobileWrapperDialog
         title="Rate NIC"
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
         tabletModal
+        maxWidthClass="md:tw-max-w-md"
       >
         <div className="tw-px-4 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
