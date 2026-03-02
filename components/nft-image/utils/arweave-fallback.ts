@@ -89,7 +89,7 @@ export function withArweaveFallback(
     }
 
     const storedIdxRaw = target.dataset[DS_INDEX];
-    const storedIdx = storedIdxRaw !== undefined ? Number(storedIdxRaw) : NaN;
+    const storedIdx = storedIdxRaw === undefined ? Number.NaN : Number(storedIdxRaw);
 
     const currentIdx = Number.isFinite(storedIdx)
       ? storedIdx
