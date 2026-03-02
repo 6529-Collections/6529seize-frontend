@@ -15,20 +15,16 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     (async () => {
       const opts = { method: event.request.method, headers: event.request.headers, credentials: "omit" };
-      let res;
-      try {
-        res = await fetch(event.request, opts);
-      } catch {
-        const method = event.request.method.toUpperCase();
-        if (method !== "GET" && method !== "HEAD") {
-          return new Response(null, { status: 502 });
-        }
-        const fallback = event.request.url.replace(/^(https?:\/\/)([^/]+)/, `$1${FALLBACK_HOST}`);
-        res = await fetch(fallback, opts).catch(() => null);
-        if (res?.ok) return res;
-        return res || new Response(null, { status: 502 });
+      const method = event.request.method.toUpperCase();
+      if (method !== "GET" && method !== "HEAD") {
+        return fetch(event.request);
       }
-      return res;
+      try {
+        const res = await fetch(event.request, opts);
+        if (res?.ok) return res;
+      } catch {}
+      const fallback = event.request.url.replace(/^(https?:\/\/)([^/]+)/, `$1${FALLBACK_HOST}`);
+      return Response.redirect(fallback, 302);
     })()
   );
 });

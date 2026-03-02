@@ -5,7 +5,7 @@ export function isArweaveUrl(url: string): boolean {
   try {
     const u = new URL(url);
     const h = u.hostname.toLowerCase();
-    return h === ARWEAVE_HOST || h === "www." + ARWEAVE_HOST;
+    return h === ARWEAVE_HOST || h.endsWith("." + ARWEAVE_HOST);
   } catch {
     return false;
   }
