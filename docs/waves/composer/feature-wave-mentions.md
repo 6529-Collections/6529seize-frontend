@@ -1,92 +1,86 @@
-# Wave Mentions and NFT Hashtag Syntax
+# Wave Mentions
 
 ## Overview
 
-Wave composers support two reference token types:
+Wave and direct-message composers support tracked wave mentions.
 
-- `#` opens wave mention suggestions and inserts a wave mention token.
-- `$` opens NFT hashtag suggestions and inserts an NFT token.
-- Selected tokens serialize as `#[wave_name_in_content]` and `$[name]` when the
-  drop is submitted.
-
-After submit, resolved wave mentions render as clickable links to the mentioned
-wave. When available, the link includes a small wave avatar and shows a summary
-tooltip on non-touch devices.
+- Type `#` and at least 2 characters to search wave names.
+- Select a result to insert a tracked mention token.
+- Submitted mentions serialize as `#[wave_name_in_content]`.
+- Posted mentions render as wave links to `/waves/{waveId}`.
 
 ## Location in the Site
 
-- Wave threads: `/waves/{waveId}` (canonical thread route; legacy
-  `/waves?wave={waveId}` normalizes to this route)
-- Direct-message threads: `/messages?wave={waveId}` (canonical DM route; no
-  `/messages/{waveId}` thread route)
+- Wave thread composer: `/waves/{waveId}` (legacy `/waves?wave={waveId}`
+  redirects here first)
+- Direct-message thread composer: `/messages?wave={waveId}` (no
+  `/messages/{waveId}` route)
+- Inline `Edit Message` composer in these thread routes
 
 ## Entry Points
 
-- Open a wave or DM composer and type in the body.
-- Type `#` plus part of a wave name.
-- Select a suggestion from the wave mention menu.
-- Optionally type `$` and select an NFT hashtag suggestion.
-- Submit the drop.
+- Open a wave, DM, or edit composer.
+- Type `#` plus a wave-name fragment (2+ characters).
+- Select a wave from the suggestion menu with keyboard or pointer input.
+- Submit the drop or save the edit.
 
 ## User Journey
 
 1. Type `#` plus a wave name fragment.
-2. The suggestion list shows matching waves.
-3. Pick a wave by pressing `Enter`, clicking the suggestion, or using keyboard
-   navigation.
-4. The composer inserts a wave mention token into the draft.
-5. Continue editing and submit the drop.
-6. Submitted mention metadata renders as `#[wave_name_in_content]` in markdown
-   and opens `/waves/{waveId}` with a hover tooltip on
-   non-touch devices.
+2. The app fetches up to 5 matching non-DM waves.
+3. Select a wave suggestion.
+4. The composer inserts a wave mention token and tracks mention metadata.
+5. Submit or save.
+6. The posted mention renders as a wave link that opens `/waves/{waveId}`.
 
 ## Common Scenarios
 
-- Mentioning another wave while composing in `/waves/{waveId}`.
-- Mentioning a wave while composing in `/messages?wave={waveId}`.
-- Opening a posted mention link to jump to `/waves/{waveId}`.
-- Mixing wave mentions with NFT hashtag references in one drop.
+- Mention another wave while posting in `/waves/{waveId}`.
+- Mention a wave while chatting in `/messages?wave={waveId}`.
+- Add a new wave mention while editing an existing drop.
+- Open a rendered mention link to jump into the mentioned wave.
 
 ## Edge Cases
 
-- In fenced code blocks, mention suggestions are disabled, so `#` and `$[...]`
-  stay literal.
-- If a token was not tracked as a wave mention, it stays plain `#` text in the
-  rendered drop.
-- If `$[name]` is typed manually without selecting an NFT suggestion, it can
-  remain plain text and may not resolve as an NFT reference.
-- If a wave name contains `]`, that character is removed when the mention is
-  inserted.
-- Avatar chips appear only when the mentioned wave has a picture.
+- Mention search runs only after at least 2 typed characters and returns
+  non-DM waves only.
+- Mention suggestions are disabled inside inline/fenced code.
+- Mention suggestions are suppressed while slash-command trigger matching is
+  active.
+- If a selected wave name contains `]`, that character is removed from inserted
+  mention text.
+- Manually typed `#[name]` text without tracked metadata stays plain text after
+  submit.
+- Mention links show a small wave avatar only when the mentioned wave has a
+  picture.
 
 ## Failure and Recovery
 
-- If suggestions fail to load, continue with plain text and retry mention
-  selection later.
-- If a posted mention renders as plain text, edit the drop and re-select the
-  wave from suggestions.
-- For NFT references, use the `$` suggestion menu and reselect the token before
-  submitting.
+- If search returns no result, refine the name fragment and retry.
+- If a posted `#[name]` stays plain text, open `Edit Message`, reselect the
+  wave from mention suggestions, and save.
+- If the wrong wave was inserted, reopen `Edit Message`, replace the mention
+  from the `#` menu, and save.
 
 ## Limitations / Notes
 
-- Wave mention links require matching mention metadata.
-- NFT references also require tracked metadata; plain typed text does not
-  guarantee NFT resolution.
-- Unresolved mention text renders as plain inline text without wave tooltip
-  behavior.
-- Wave mention links target `/waves/{waveId}` even when authored from DM
-  threads.
-- Suggestion results are search-based matches, not a full list of waves.
+- The suggestion menu shows at most 5 waves.
+- Mention links require both mention text and matching `mentioned_waves`
+  metadata.
+- Untracked `#[name]` text renders as plain text.
+- On touch devices, mention links do not show hover summary tooltips.
+- Mention links always target `/waves/{waveId}`, including when authored from a
+  DM thread.
+- Composer eligibility and blocked-posting states are documented in
+  [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md).
 
 ## Related Pages
 
 - [Wave Composer Index](README.md)
+- [Wave NFT Hashtag References](feature-nft-hashtag-references.md)
 - [Waves Index](../README.md)
-- [Wave Creation Description Step](../create/feature-description-step.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)
-- [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)

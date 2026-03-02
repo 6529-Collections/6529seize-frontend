@@ -9,7 +9,7 @@ Use this area when you need behavior for:
 
 - text submission and storm posting
 - metadata-only submissions
-- mentions, emoji, and markdown formatting
+- user/wave mentions, NFT hashtag references, emoji, and markdown formatting
 - curation URL-only submissions
 - drag/paste image uploads in composer inputs
 
@@ -36,7 +36,8 @@ Use this area when you need behavior for:
 
 ### Mentions and Markdown
 
-- [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
+- [Wave Mentions](feature-wave-mentions.md)
+- [Wave NFT Hashtag References](feature-nft-hashtag-references.md)
 - [Wave Drop Composer Emoji Shortcodes](feature-emoji-shortcodes.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)

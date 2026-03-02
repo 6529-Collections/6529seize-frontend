@@ -82,7 +82,7 @@ in a portal, and repositions to stay visible in the viewport.
 
 - [Docs Home](../README.md)
 - [Shared Index](README.md)
-- [Wave Mentions and NFT Hashtag Syntax](../waves/composer/feature-wave-mentions.md)
+- [Wave Mentions](../waves/composer/feature-wave-mentions.md)
 - [Wave Drop Content Display](../waves/drop-actions/feature-content-display.md)
 - [Brain Wave List Name Tooltips](../waves/sidebars/feature-brain-list-name-tooltips.md)
 - [Notifications Feed](../notifications/feature-notifications-feed.md)

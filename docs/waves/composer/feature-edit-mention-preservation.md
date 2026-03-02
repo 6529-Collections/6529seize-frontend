@@ -66,7 +66,8 @@ rebuilding them.
 
 - [Wave Composer Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Mentions and NFT Hashtag Syntax](feature-wave-mentions.md)
+- [Wave Mentions](feature-wave-mentions.md)
+- [Wave NFT Hashtag References](feature-nft-hashtag-references.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Drop Markdown Code Blocks](feature-markdown-code-blocks.md)
