@@ -2,85 +2,79 @@
 
 ## Overview
 
-The wave composer enforces two different free-text limits:
+The standard thread composer enforces three text-length rules:
 
-- A hard input cap of `25,000` characters for every composer body input.
-- In storm mode, the combined body length across existing parts plus the active
-  draft must stay below `24,000` characters.
-- In storm mode after at least one part already exists, the active draft must be
-  `240` characters or less before final submit.
+- Body input is capped at `25,000` characters.
+- Storm add is blocked when `existing storm text + current draft text >= 24,000`.
+- When a storm already has at least one part, submit is blocked if current
+  draft text is over `240` characters.
+
+These rules apply to non-curation thread composer flows in both `Post` and
+`Drop` modes.
 
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}`
-- Both desktop and mobile thread composer surfaces.
+- Direct-message threads: `/messages?wave={waveId}` (no `/messages/{waveId}`
+  route)
+- Thread footer composer on desktop and mobile
 
 ## Entry Points
 
-- Open a wave or DM composer and start typing in the body field.
-- Enable storm mode and add additional parts for multipart drops.
+1. Open a wave or DM thread composer and type in the body input.
+2. Use the storm button (`Break into storm` / `Add a part`) to split content.
+3. Use submit (`Post` / `Drop`) or desktop `Enter` submit behavior.
 
-## User Journey
+## Rules in Practice
 
-1. Type markdown content in the body editor.
-2. In regular single-part mode, input is trimmed at `25,000` characters.
-3. Switch to storm mode and split content into parts.
-4. Keep adding storm parts until the aggregate total (previous parts + current
-   draft) reaches the combined threshold limit.
-5. After at least one storm part exists, shorten the active draft to `240`
-   characters or less before final submit.
-6. Submit once content-length and metadata/media requirements are satisfied.
+- A single-part post/drop can submit above `240` chars, up to `25,000`.
+- Storm add uses the `24,000` total-text rule, not the `240` submit rule.
+- With existing storm parts, submit can only finalize when current draft text is
+  `240` chars or less.
+- When submit is enabled and existing storm parts plus current draft content are
+  present, submit adds the current draft as another part (it does not finalize
+  the storm).
+- To finalize and send the storm, submit from an empty current draft.
 
 ## Common Scenarios
 
-- Single-part drops can exceed `240` characters and submit normally when under
-  `25,000`.
-- Users can split long content into storm parts for pacing.
-- The compose UI shows the storm part length only after storm mode has active
-  parts.
-- When the active draft is over `240` with existing storm parts, length text is
-  shown in error state to indicate the submission block.
-
-## Edge Cases
-
-- If there is no prior storm part, the `240`-character rule does not block
-  regular single-part submission.
-- If there is no prior storm part, users can still split a long draft into storm
-  mode; the `240` limit is enforced before final storm submit once parts exist.
-- `25,000` characters is a hard editor cap; extra characters are not retained
-  in the draft.
-- In storm mode with existing parts, an active draft over `240` prevents final
-  submission until fixed.
-- In storm mode, aggregate content at or above `24,000` blocks adding another
-  storm part.
-- Files and metadata requirements are evaluated in addition to text-length
-  limits before submit.
-- Thread/DM composer submissions always send `title` as empty (`null`); title
-  entry is not part of this composer flow.
+- A `24,500`-char draft can submit as one part, but cannot be split into storm.
+- In storm mode, a `500`-char draft can still be added with the storm button
+  (if total text stays under `24,000`), but submit stays blocked until the
+  draft is shortened or cleared.
+- In `Drop` mode, required media/metadata can still block submit even when
+  length checks pass.
 
 ## Failure and Recovery
 
-- If length limits block submission or adding a part, shorten the current draft
-  or submit the current storm and continue in a fresh composer draft.
-- If storm length indicators are over threshold, reduce the active part to
-  `240` characters before splitting/finalizing.
-- For very large posts, stay in single-part mode and submit under `25,000` when that is a better fit.
+- If storm add is disabled, shorten current draft text or keep it as a
+  single-part submission.
+- If submit is blocked in storm mode, shorten current draft text to `240` or
+  less, or add that draft as a part and then submit from an empty draft.
+- If submit is still blocked in `Drop` mode, complete required media/metadata
+  and retry.
+- If auth/signature/upload fails, fix the error and retry from the current
+  draft state.
 
 ## Limitations / Notes
 
-- Storm caps apply to body text behavior, not file upload count or file sizes.
-- Part-length checks apply in storm submission state, not in single-part compose
-  mode.
-- Create-wave `Description` step behavior uses a different editor stack and is
-  documented in
+- Limits here are text-only. Media limits are separate.
+- This page covers standard thread composer behavior, not curation URL-only
+  composer behavior.
+- Thread and DM submissions from this composer send `title: null`.
+- Composer access and eligibility states are documented in
+  [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md).
+- Create-wave `Description` uses a different editor flow in
   [Wave Creation Description Step](../create/feature-description-step.md).
 
 ## Related Pages
 
 - [Wave Composer Index](README.md)
+- [Waves Index](../README.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)
+- [Wave Curation URL Submissions](feature-curation-url-submissions.md)
+- [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md)
 - [Wave Drop Markdown Blank-Line Preservation](feature-markdown-blank-line-preservation.md)
 - [Wave Creation Description Step](../create/feature-description-step.md)
 - [Docs Home](../../README.md)
