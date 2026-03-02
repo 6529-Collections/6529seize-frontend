@@ -11,7 +11,11 @@ export default function ArweaveFallbackSwRegistration() {
     }
     navigator.serviceWorker
       .register(SW_PATH, { scope: "/" })
-      .catch(() => {});
+      .catch((e) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.error(`[ArweaveFallbackSW] Failed to register ${SW_PATH}:`, e);
+        }
+      });
   }, []);
   return null;
 }

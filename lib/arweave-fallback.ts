@@ -1,5 +1,5 @@
-const ARWEAVE_HOST = "arweave.net";
-const FALLBACK_HOST = "ar-io.net";
+export const ARWEAVE_HOST = "arweave.net";
+export const FALLBACK_HOST = "ar-io.net";
 
 export function isArweaveUrl(url: string): boolean {
   try {
@@ -15,7 +15,6 @@ export function getArweaveFallbackUrl(url: string): string | null {
   if (!isArweaveUrl(url)) return null;
   try {
     const u = new URL(url);
-    u.hostname = FALLBACK_HOST;
     u.host = FALLBACK_HOST + (u.port ? ":" + u.port : "");
     return u.toString();
   } catch {
