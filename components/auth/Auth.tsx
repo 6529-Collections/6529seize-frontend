@@ -747,7 +747,9 @@ export default function Auth({
       return;
     }
 
-    void seizeDisconnectAndLogout();
+    void seizeDisconnectAndLogout().catch((error) => {
+      logErrorSecurely("onCancelSignRequest_disconnectAndLogout", error);
+    });
   }, [isAddressAuthorized, seizeDisconnect, seizeDisconnectAndLogout]);
 
   // Computed modal visibility to prevent flickering during rapid state changes
