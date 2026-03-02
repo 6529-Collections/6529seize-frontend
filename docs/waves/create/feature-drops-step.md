@@ -2,74 +2,91 @@
 
 ## Overview
 
-The `Drops` step controls what participants can submit in `Rank` waves.
-Creators can set required submission type, required metadata keys, optional
-submission cap, and optional participation terms.
+Use `Drops` in `Rank` wave creation to define submission requirements:
+
+- one required media type
+- optional required metadata keys
+- optional simultaneous-submission limit
+- optional participation terms
 
 ## Location in the Site
 
-- Full-page wave creation flow: `/waves/create`
-- Create-wave modal flows that reuse the same step sequence
-- `Drops` step in `Rank` wave creation
+- Full-page create route: `/waves/create`
+- Desktop create-wave modal mode (`?create=wave`) on:
+  - `/discover`
+  - `/waves`
+  - `/waves/{waveId}`
+  - `/messages`
+  - `/messages?wave={waveId}`
+- Step label: `Drops`
+- User-reachable in `Rank` creation (`Approve` appears in `Overview` but is
+  disabled)
 
 ## Entry Points
 
-- Start creating a `Rank` wave and move to `Drops`.
-- Navigate back to `Drops` from later steps to revise requirements.
-- Open create-wave from wave navigation surfaces and complete the same step
-  sequence.
+- Follow the `Rank` path: `Overview -> Groups -> Dates -> Drops`.
+- Use `Back` from `Voting` to return in one step.
+- On large screens, use the step rail after you move past `Drops`.
 
 ## User Journey
 
-1. Open the `Drops` step.
-2. Choose one required submission type option:
-   - `None`
+1. Choose one required submission type:
+   - `None` (default)
    - `Image`
    - `Audio`
    - `Video`
-3. Add required metadata rows and set each row's type/name.
-4. Optionally set `Maximum number of simultaneous submissions per participant`.
-5. Optionally enable participation terms and enter terms text.
-6. Continue to the next creation step.
+2. Optionally add required metadata rows:
+   - set row type (`Text` or `Number`)
+   - set metadata name
+   - remove rows you do not need
+3. Optionally set `Maximum number of simultaneous submissions per participant`.
+4. Optionally enable `Participation Terms` and enter terms text.
+5. Click `Next` to continue to `Voting`.
 
 ## Common Scenarios
 
-- Leave required type as `None` to allow unrestricted media type submissions.
-- Set one media requirement (`Image`, `Audio`, or `Video`) for all
-  participant submissions.
-- Add required metadata keys for structured participant input.
-- Leave simultaneous-submissions blank for unlimited submissions per
-  participant.
+- Keep `None` when no media restriction is required.
+- Require one media type for all participant submissions.
+- Leave metadata empty when no extra fields are needed (`No required metadata
+  added`).
+- Add metadata rules for fields every participant must provide.
+- Leave submission-limit blank for unlimited simultaneous submissions.
+- Add participation terms when submissions should require signed terms.
 
 ## Edge Cases
 
-- Simultaneous-submissions keeps positive integer values only.
-- Invalid, zero, or negative submission-cap input is treated as blank.
-- Duplicate metadata names are marked invalid so creators can resolve conflicts.
-- Disabling participation terms clears previously entered terms text.
+- Required-type controls render as checkboxes, but behave as single-select.
+- Duplicate metadata names block `Next`.
+- Duplicate rows show `Metadata name must be unique` on each duplicate row.
+- Blank metadata-name rows can stay in the form and are excluded from the final
+  create request.
+- Multiple blank-name rows count as duplicates and block `Next`.
+- Submission-limit input keeps only positive integers:
+  - `0`, negative, or invalid input clears the value.
+  - decimal input is reduced to its integer part (example: `2.5` becomes `2`).
+- Turning off `Enable Terms` clears saved terms text.
+- Terms-signature requirement is enabled only when terms text is non-empty.
 
 ## Failure and Recovery
 
-- If metadata names are duplicated, rename duplicates until uniqueness errors
-  clear.
-- If submission cap is invalid, re-enter a positive value or clear the field
-  for unlimited behavior.
-- If requirements are too strict, switch required type to `None` or remove
-  metadata rows before continuing.
+- If `Next` does not advance, resolve duplicate metadata names, then retry.
+- If submission-limit input keeps clearing, enter a positive whole number or
+  leave it blank.
+- If terms were enabled by mistake, disable `Enable Terms` to clear them.
 
 ## Limitations / Notes
 
-- Required type selection is single-choice (`None` or one media type).
-- Submission cap is optional.
-- Participation terms apply to non-chat waves and require participant wallet
-  signature when enabled.
-- Chat waves do not include this step.
-- The `Approve` type is currently shown as disabled in `Overview`, so users do
-  not reach an approve-specific `Drops` path.
+- `Chat` waves skip `Drops`.
+- `Approve` has drops-step code paths, but `Approve` is disabled in the
+  user-visible wave-type picker.
+- Required metadata is optional.
+- Participation terms are optional.
 
 ## Related Pages
 
+- [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
+- [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Dates and Timeline](feature-dates-step.md)
