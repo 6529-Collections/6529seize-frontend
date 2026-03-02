@@ -2,63 +2,69 @@
 
 ## Overview
 
-Wave chat shows a live typing row when other participants are actively typing
-in the current thread. The row uses a soft bottom gradient and animated dots
-to stay readable above the composer area.
+Wave chat shows a live typing row above the composer when other participants
+type in the current thread.
 
 ## Location in the Site
 
 - `/waves/{waveId}`
 - `/messages?wave={waveId}`
-- Bottom overlay of the thread message list
+- Same thread routes when `drop={dropId}` is open
+- Bottom overlay of the chat message list in chat view only (not gallery)
 
 ## Entry Points
 
-- Open a wave or direct-message thread with loaded drops.
-- Another participant starts typing in the same wave.
-- Keep thread open while typing activity updates in real time.
+- Open a wave or direct-message thread with existing drops.
+- Keep the wave unmuted.
+- Wait for another participant to send typing updates for the same wave.
 
 ## User Journey
 
 1. Open a thread.
-2. When another participant types, the typing row fades in.
-3. Label text updates as typers join or stop typing.
-4. If a typer submits a drop, their typing label clears.
-5. If no new typing signal arrives for a short window, the row fades out.
+2. When another participant types, a row fades in with three animated dots and
+   a handle label.
+3. The label updates as people start typing, stop typing, or post.
+4. If no new typing signal arrives for about 5 to 6 seconds, the row fades out.
 
-## Common Scenarios
+## Label Rules
 
 - One typer: `handle is typing`.
 - Two typers: `handle1, handle2 are typing`.
 - Three or more typers: `handle1, handle2 and N more people are typing`.
-- Typers are ordered by participant level (highest first).
+- Handles are ordered by highest participant level first.
 - The current viewer's own typing is not echoed back.
 
 ## Edge Cases
 
-- Typing events for other waves are ignored.
+- Loading and empty-thread states show instead of the typing row.
+- Gallery view does not show this row.
+- Typing events for other wave IDs are ignored.
 - Switching waves clears current typing state.
-- Muted waves disable typing subscription; no typing row is shown.
-- If the thread is hydrating or empty, loading/empty states show instead of typing row.
+- Muting a wave clears and disables typing updates.
+- Unmuting starts a fresh typing subscription for the active wave.
+- Drop-post updates remove that author's typing label immediately.
+- Malformed websocket payloads are ignored.
 
 ## Failure and Recovery
 
-- Invalid websocket payloads are ignored without blocking thread usage.
-- If websocket traffic drops, typing labels expire on timeout and clear.
-- Reconnect attempts are finite; after repeated failures, reopen thread later to resume updates.
+- If websocket traffic drops, current typing labels time out and clear.
+- Wave typing subscription retries are limited to 20 attempts with a 2-second
+  delay between attempts.
+- If retries are exhausted, switch threads or reload to start a fresh
+  subscription cycle.
 
 ## Limitations / Notes
 
-- Typing status expires about 5 seconds after the latest typing signal.
-- Label refresh runs on a short interval, so appearance/disappearance can lag briefly.
-- This indicator is a lightweight activity signal, not guaranteed presence or delivery state.
+- This indicator is a lightweight activity signal, not guaranteed presence or
+  delivery state.
+- Label refresh is interval-based, so show/hide timing can lag briefly.
 - There is no dedicated typing-connection error banner.
 
 ## Related Pages
 
 - [Wave Chat Index](README.md)
 - [Wave Chat Scroll Behavior](feature-scroll-behavior.md)
-- [Wave Drop Composer Enter-Key Behavior](../composer/feature-enter-key-behavior.md)
-- [Wave Drop Content Display](../drop-actions/feature-content-display.md)
-- [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
+- [Wave Chat Composer Availability](feature-chat-composer-availability.md)
+- [Wave Notification Controls and Mute Behavior](../sidebars/feature-wave-notification-controls.md)
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
 - [Docs Home](../../README.md)
