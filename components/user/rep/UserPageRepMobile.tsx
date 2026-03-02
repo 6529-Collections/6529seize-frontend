@@ -3,20 +3,14 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import type {
-  ApiProfileRepRatesState,
-  RatingWithProfileInfoAndLevel,
-} from "@/entities/IProfile";
-import { SortDirection } from "@/entities/ISort";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
+import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
+import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { amIUser, formatNumberWithCommas } from "@/helpers/Helpers";
-import type { Page } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
-import { ProfileRatersParamsOrderBy, RateMatter } from "@/types/enums";
-import { useQuery } from "@tanstack/react-query";
+import { RateMatter } from "@/types/enums";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useMemo, useState } from "react";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
@@ -25,67 +19,42 @@ import UserPageIdentityStatements from "../identity/statements/UserPageIdentityS
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
 import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
-import TopRaterAvatars from "./header/TopRaterAvatars";
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import type { RepDirection } from "./header/UserPageRepHeader";
-import RepGivenList from "./RepGivenList";
 import RepCategoryPill from "./RepCategoryPill";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
-import {
-  getCanEditRep,
-  sortRepsByRatingAndContributors,
-} from "./UserPageRep.helpers";
+import { getCanEditRep } from "./UserPageRep.helpers";
 
 type MobileTab = "rep" | "identity";
 
 export default function UserPageRepMobile({
   profile,
-  repRates,
+  overview,
+  categories,
+  cicOverview,
+  repDirection,
+  onRepDirectionChange,
   initialActivityLogParams,
 }: {
   readonly profile: ApiIdentity;
-  readonly repRates: ApiProfileRepRatesState | null;
+  readonly overview: ApiRepOverview | null;
+  readonly categories: ApiRepCategory[];
+  readonly cicOverview: ApiCicOverview | null;
+  readonly repDirection: RepDirection;
+  readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly initialActivityLogParams: ActivityLogParams;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
-  const profileHandle = profile.handle ?? "";
 
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
-  const [repDirection, setRepDirection] = useState<RepDirection>("received");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(5);
   const [editCategory, setEditCategory] = useState<string | null>(null);
-
-  const { data: nicRatings } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
-    queryKey: [
-      QueryKey.PROFILE_RATERS,
-      {
-        handleOrWallet: profileHandle,
-        matter: RateMatter.NIC,
-        page: 1,
-        pageSize: 1,
-        order: SortDirection.DESC,
-        orderBy: ProfileRatersParamsOrderBy.RATING,
-        given: false,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${profileHandle}/cic/ratings/by-rater`,
-        params: {
-          page: `${1}`,
-          page_size: `${1}`,
-          order: SortDirection.DESC.toLowerCase(),
-          order_by: ProfileRatersParamsOrderBy.RATING.toLowerCase(),
-          given: "false",
-        },
-      }),
-    enabled: !!profileHandle,
-  });
 
   // Close modals when viewport reaches lg breakpoint
   useEffect(() => {
@@ -102,13 +71,7 @@ export default function UserPageRepMobile({
 
   useEffect(() => {
     setVisibleCount(5);
-  }, [repRates?.rating_stats]);
-
-  // --- derived: sorted reps, can-edit flags ---
-  const reps = useMemo(
-    () => sortRepsByRatingAndContributors(repRates?.rating_stats ?? []),
-    [repRates?.rating_stats]
-  );
+  }, [categories]);
 
   const canEditRep = useMemo(
     () =>
@@ -138,6 +101,27 @@ export default function UserPageRepMobile({
     (profile.wallets ?? []).some(
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()
     );
+
+  // Build CIC avatar items from overview contributors
+  const cicAvatarItems = useMemo(
+    () =>
+      (cicOverview?.contributors.data ?? []).slice(0, 3).map((c) => ({
+        key: c.profile.handle ?? c.profile.primary_address ?? String(c.profile.id),
+        pfpUrl: c.profile.pfp ?? null,
+        ariaLabel: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        fallback: c.profile.handle
+          ? c.profile.handle.charAt(0).toUpperCase()
+          : "?",
+        title: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        tooltipContent: (
+          <span>
+            {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
+            {formatNumberWithCommas(c.contribution)}
+          </span>
+        ),
+      })),
+    [cicOverview?.contributors.data]
+  );
 
   // --- render ---
 
@@ -185,15 +169,17 @@ export default function UserPageRepMobile({
               Total Rep
             </div>
             <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-              {repRates
-                ? formatNumberWithCommas(repRates.total_rep_rating)
+              {overview
+                ? formatNumberWithCommas(overview.total_rep)
                 : "\u2014"}
             </div>
-            {repRates && (
+            {overview && (
               <div className="tw-mt-2.5 tw-flex tw-items-center">
                 <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-                  {formatNumberWithCommas(repRates.number_of_raters)}{" "}
-                  {repRates.number_of_raters === 1 ? "rater" : "raters"}
+                  {formatNumberWithCommas(overview.contributor_count)}{" "}
+                  {repDirection === "given"
+                    ? overview.contributor_count === 1 ? "receiver" : "receivers"
+                    : overview.contributor_count === 1 ? "rater" : "raters"}
                 </span>
               </div>
             )}
@@ -240,29 +226,29 @@ export default function UserPageRepMobile({
               NIC
             </div>
             <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white">
-              {formatNumberWithCommas(profile.cic)}
+              {formatNumberWithCommas(cicOverview?.total_cic ?? profile.cic)}
             </div>
             <div className="tw-mt-2.5 tw-flex tw-items-center tw-gap-1.5">
               <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
-                <UserCICTypeIcon cic={profile.cic} />
+                <UserCICTypeIcon cic={cicOverview?.total_cic ?? profile.cic} />
               </span>
               <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-emerald-400">
-                <UserCICStatus cic={profile.cic} />
+                <UserCICStatus cic={cicOverview?.total_cic ?? profile.cic} />
               </span>
             </div>
             <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-              <div className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
-                <TopRaterAvatars
-                  handleOrWallet={profile.handle ?? ""}
-                  matter={RateMatter.NIC}
-                  count={3}
-                  size="sm"
-                  withLinks={false}
-                />
-              </div>
+              {cicAvatarItems.length > 0 && (
+                <div className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
+                  <OverlappingAvatars
+                    items={cicAvatarItems}
+                    size="sm"
+                    maxCount={3}
+                  />
+                </div>
+              )}
               <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-                {formatNumberWithCommas(nicRatings?.count ?? 0)}{" "}
-                {(nicRatings?.count ?? 0) === 1 ? "rater" : "raters"}
+                {formatNumberWithCommas(cicOverview?.contributor_count ?? 0)}{" "}
+                {(cicOverview?.contributor_count ?? 0) === 1 ? "rater" : "raters"}
               </span>
             </div>
           </div>
@@ -283,7 +269,7 @@ export default function UserPageRepMobile({
             <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4">
               <button
                 type="button"
-                onClick={() => setRepDirection("received")}
+                onClick={() => onRepDirectionChange("received")}
                 className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
                   repDirection === "received"
                     ? "tw-text-iron-100"
@@ -295,7 +281,7 @@ export default function UserPageRepMobile({
               </button>
               <button
                 type="button"
-                onClick={() => setRepDirection("given")}
+                onClick={() => onRepDirectionChange("given")}
                 className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
                   repDirection === "given"
                     ? "tw-text-iron-100"
@@ -307,75 +293,67 @@ export default function UserPageRepMobile({
               </button>
             </div>
 
-            {repDirection === "received" ? (
-              <>
-                {/* Rep Categories */}
-                {reps.length > 0 && (
-                  <div className="tw-mt-4">
-                    <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
-                      Rep Categories
-                    </div>
-                    <div className="tw-flex tw-flex-wrap tw-gap-2">
-                      {reps.slice(0, visibleCount).map((rep) => (
-                        <RepCategoryPill
-                          key={rep.category}
-                          rep={rep}
-                          profileHandle={profile.handle ?? ""}
-                          canEdit={canEditRep}
-                          onEdit={setEditCategory}
-                          compact
-                        />
-                      ))}
-                      {reps.length > visibleCount && (
-                        <button
-                          type="button"
-                          onClick={() => setVisibleCount((prev) => prev + 10)}
-                          className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
-                        >
-                          +{reps.length - visibleCount} more
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {canEditRep && (
-                  <div className="tw-mt-4">
-                    <UserPageRateWrapper
-                      profile={profile}
-                      type={RateMatter.REP}
-                      hideOwnProfileMessage
-                    >
-                      <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
-                        <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
-                          Add rep to this identity
-                        </span>
-                        <button
-                          onClick={() => setIsGrantRepOpen(true)}
-                          className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-blue-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 md:tw-py-3"
-                        >
-                          <svg
-                            className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <path d="M12 5v14M5 12h14" />
-                          </svg>
-                          Grant Rep
-                        </button>
-                      </div>
-                    </UserPageRateWrapper>
-                  </div>
-                )}
-              </>
-            ) : (
+            {/* Rep Categories */}
+            {categories.length > 0 && (
               <div className="tw-mt-4">
-                <RepGivenList handle={profileHandle} />
+                <div className="tw-mb-3 tw-whitespace-nowrap tw-text-xs tw-uppercase tw-tracking-wider tw-text-iron-100 tw-font-semibold">
+                  Rep Categories
+                </div>
+                <div className="tw-flex tw-flex-wrap tw-gap-2">
+                  {categories.slice(0, visibleCount).map((cat) => (
+                    <RepCategoryPill
+                      key={cat.category}
+                      category={cat}
+                      canEdit={canEditRep && repDirection === "received"}
+                      onEdit={setEditCategory}
+                      direction={repDirection}
+                      compact
+                    />
+                  ))}
+                  {categories.length > visibleCount && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((prev) => prev + 10)}
+                      className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900/60 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-border-iron-600/60 hover:tw-bg-iron-800/60 hover:tw-text-iron-300"
+                    >
+                      +{categories.length - visibleCount} more
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {canEditRep && repDirection === "received" && (
+              <div className="tw-mt-4">
+                <UserPageRateWrapper
+                  profile={profile}
+                  type={RateMatter.REP}
+                  hideOwnProfileMessage
+                >
+                  <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-5 tw-py-3">
+                    <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
+                      Add rep to this identity
+                    </span>
+                    <button
+                      onClick={() => setIsGrantRepOpen(true)}
+                      className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-blue-500/20 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 md:tw-py-3"
+                    >
+                      <svg
+                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Grant Rep
+                    </button>
+                  </div>
+                </UserPageRateWrapper>
               </div>
             )}
 
@@ -445,7 +423,7 @@ export default function UserPageRepMobile({
       {/* Grant Rep Bottom Sheet */}
       <GrantRepDialog
         profile={profile}
-        repRates={repRates}
+        overview={overview}
         isOpen={isGrantRepOpen}
         onClose={() => setIsGrantRepOpen(false)}
       />

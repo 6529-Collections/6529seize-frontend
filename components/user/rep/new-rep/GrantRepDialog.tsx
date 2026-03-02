@@ -1,4 +1,4 @@
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { RateMatter } from "@/types/enums";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -7,12 +7,12 @@ import UserPageRepNewRep from "./UserPageRepNewRep";
 
 export default function GrantRepDialog({
   profile,
-  repRates,
+  overview,
   isOpen,
   onClose,
 }: {
   readonly profile: ApiIdentity;
-  readonly repRates: ApiProfileRepRatesState | null;
+  readonly overview: ApiRepOverview | null;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
@@ -27,7 +27,7 @@ export default function GrantRepDialog({
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
         <UserPageRepNewRep
           profile={profile}
-          repRates={repRates}
+          overview={overview}
           onSuccess={onClose}
           onCancel={onClose}
         />

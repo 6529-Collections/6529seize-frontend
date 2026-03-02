@@ -3,13 +3,15 @@
 import { AuthContext } from "@/components/auth/Auth";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
+import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
+import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
 import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -31,33 +33,101 @@ export default function UserPageRep({
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
 
-  const [rater, setRater] = useState<string | undefined>(undefined);
-  useEffect(
-    () => setRater(connectedProfile?.handle?.toLowerCase()),
-    [connectedProfile]
-  );
-
   const [repDirection, setRepDirection] = useState<RepDirection>("received");
 
-  const { data: repRates } = useQuery<ApiProfileRepRatesState>({
+  // --- Incoming (received) rep ---
+  const { data: repOverview } = useQuery<ApiRepOverview>({
     queryKey: [
-      QueryKey.PROFILE_REP_RATINGS,
-      { rater: rater, handleOrWallet: user },
+      QueryKey.REP_OVERVIEW,
+      { handleOrWallet: user, direction: "incoming" },
     ],
     queryFn: async () =>
-      await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${user}/rep/ratings/received`,
-        params: rater ? { rater } : {},
+      await commonApiFetch<ApiRepOverview>({
+        endpoint: `profiles/${user}/rep/overview`,
       }),
     enabled: !!user,
   });
+
+  const { data: repCategories } = useQuery<ApiRepCategoriesPage>({
+    queryKey: [
+      QueryKey.REP_CATEGORIES,
+      { handleOrWallet: user, direction: "incoming" },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiRepCategoriesPage>({
+        endpoint: `profiles/${user}/rep/categories`,
+        params: {
+          page: "1",
+          page_size: "20",
+          top_contributors_limit: "5",
+        },
+      }),
+    enabled: !!user,
+  });
+
+  // --- Outgoing (given) rep --- only fetch when active
+  const { data: repOverviewGiven } = useQuery<ApiRepOverview>({
+    queryKey: [
+      QueryKey.REP_OVERVIEW,
+      { handleOrWallet: user, direction: "outgoing" },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiRepOverview>({
+        endpoint: `profiles/${user}/rep/overview`,
+        params: { direction: "outgoing" },
+      }),
+    enabled: !!user && repDirection === "given",
+  });
+
+  const { data: repCategoriesGiven } = useQuery<ApiRepCategoriesPage>({
+    queryKey: [
+      QueryKey.REP_CATEGORIES,
+      { handleOrWallet: user, direction: "outgoing" },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiRepCategoriesPage>({
+        endpoint: `profiles/${user}/rep/categories`,
+        params: {
+          direction: "outgoing",
+          page: "1",
+          page_size: "20",
+          top_contributors_limit: "5",
+        },
+      }),
+    enabled: !!user && repDirection === "given",
+  });
+
+  // --- CIC overview ---
+  const { data: cicOverview } = useQuery<ApiCicOverview>({
+    queryKey: [
+      QueryKey.CIC_OVERVIEW,
+      { handleOrWallet: user },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiCicOverview>({
+        endpoint: `profiles/${user}/cic/overview`,
+      }),
+    enabled: !!user,
+  });
+
+  // Pick active direction's data
+  const activeOverview =
+    repDirection === "received" ? (repOverview ?? null) : (repOverviewGiven ?? null);
+  const activeCategories =
+    repDirection === "received"
+      ? (repCategories?.data ?? [])
+      : (repCategoriesGiven?.data ?? []);
 
   return (
     <div className="tailwind-scope">
       {/* Mobile layout (<1024px) */}
       <UserPageRepMobile
         profile={profile}
-        repRates={repRates ?? null}
+        overview={activeOverview}
+        categories={activeCategories}
+        cicOverview={cicOverview ?? null}
+        repDirection={repDirection}
+        onRepDirectionChange={setRepDirection}
         initialActivityLogParams={initialActivityLogParams}
       />
 
@@ -67,7 +137,8 @@ export default function UserPageRep({
           {/* Left Column - Rep Content */}
           <div className="tw-min-w-0">
             <UserPageRepHeader
-              repRates={repRates ?? null}
+              overview={activeOverview}
+              categories={activeCategories}
               profile={profile}
               repDirection={repDirection}
               onRepDirectionChange={setRepDirection}

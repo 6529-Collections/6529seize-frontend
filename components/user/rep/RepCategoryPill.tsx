@@ -1,57 +1,87 @@
-import type { RatingStats } from "@/entities/IProfile";
+import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { MouseEvent } from "react";
-import TopRaterAvatars from "./header/TopRaterAvatars";
+import { useMemo } from "react";
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
+import type { RepDirection } from "./header/UserPageRepHeader";
 
 const stopPropagation = (e: MouseEvent) => e.stopPropagation();
 
 export default function RepCategoryPill({
-  rep,
-  profileHandle,
+  category,
   canEdit,
   onEdit,
   compact = false,
+  direction = "received",
 }: {
-  readonly rep: RatingStats;
-  readonly profileHandle: string;
+  readonly category: ApiRepCategory;
   readonly canEdit: boolean;
   readonly onEdit: (category: string) => void;
   readonly compact?: boolean;
+  readonly direction?: RepDirection;
 }) {
   const paddingClass = compact ? "tw-px-3 tw-py-2" : "tw-px-4 tw-py-2.5";
+
+  const avatarItems = useMemo(
+    () =>
+      category.top_contributors.map((c) => ({
+        key: c.profile.handle ?? c.profile.primary_address ?? String(c.profile.id),
+        pfpUrl: c.profile.pfp ?? null,
+        href: c.profile.handle ? `/${c.profile.handle}` : undefined,
+        ariaLabel: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        fallback: c.profile.handle
+          ? c.profile.handle.charAt(0).toUpperCase()
+          : "?",
+        title: c.profile.handle ?? c.profile.primary_address ?? undefined,
+        tooltipContent: (
+          <span>
+            {c.profile.handle ?? c.profile.primary_address} &middot;{" "}
+            {formatNumberWithCommas(c.contribution)}
+          </span>
+        ),
+      })),
+    [category.top_contributors]
+  );
 
   const content = (
     <>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
         <span className="tw-text-sm tw-font-medium tw-text-white tw-text-left">
-          {rep.category}
+          {category.category}
         </span>
         <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-300">
-          {formatNumberWithCommas(rep.rating)}
+          {formatNumberWithCommas(category.total_rep)}
         </span>
       </span>
       <span className="tw-text-xs tw-text-white/20">&middot;</span>
       <span className="tw-inline-flex tw-items-center tw-gap-1.5">
-        <span className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto">
-          <TopRaterAvatars
-            handleOrWallet={profileHandle}
-            category={rep.category}
-            count={5}
-            onAvatarClick={stopPropagation}
-          />
-        </span>
+        {avatarItems.length > 0 && (
+          <span
+            className="tw-pointer-events-none desktop-hover:tw-pointer-events-auto"
+            onClick={stopPropagation}
+          >
+            <OverlappingAvatars
+              items={avatarItems}
+              size="sm"
+              maxCount={5}
+              onItemClick={(e) => stopPropagation(e)}
+            />
+          </span>
+        )}
         <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
-          {formatNumberWithCommas(rep.contributor_count)}{" "}
-          {rep.contributor_count === 1 ? "rater" : "raters"}
+          {formatNumberWithCommas(category.contributor_count)}{" "}
+          {direction === "given"
+            ? category.contributor_count === 1 ? "receiver" : "receivers"
+            : category.contributor_count === 1 ? "rater" : "raters"}
         </span>
       </span>
-      {!!rep.rater_contribution && (
+      {!!category.authenticated_user_contribution && (
         <>
           <span className="tw-text-xs tw-text-white/20">&middot;</span>
           <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
             My Rate:{" "}
             <span className="tw-font-medium tw-text-primary-400">
-              {formatNumberWithCommas(rep.rater_contribution)}
+              {formatNumberWithCommas(category.authenticated_user_contribution)}
             </span>
           </span>
         </>
@@ -65,7 +95,7 @@ export default function RepCategoryPill({
     return (
       <button
         type="button"
-        onClick={() => onEdit(rep.category)}
+        onClick={() => onEdit(category.category)}
         className={`${baseClasses} tw-cursor-pointer hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-shadow-md`}
       >
         {content}
