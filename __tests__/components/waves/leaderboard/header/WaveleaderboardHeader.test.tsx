@@ -27,7 +27,7 @@ const curationComponentMock = jest.fn((props: any) => (
     Curation
   </button>
 ));
-const resolveControlModesMock = jest.fn();
+const resolveHeaderLayoutMock = jest.fn();
 
 jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => ({
   WAVE_LEADERBOARD_SORT_ITEMS: [
@@ -63,10 +63,10 @@ jest.mock(
 );
 
 jest.mock(
-  "@/components/waves/leaderboard/header/waveLeaderboardHeaderControls",
+  "@/components/waves/leaderboard/header/waveLeaderboardHeaderLayout",
   () => ({
-    resolveWaveLeaderboardHeaderControlModes: (...args: any[]) =>
-      resolveControlModesMock(...args),
+    resolveWaveLeaderboardHeaderLayout: (...args: any[]) =>
+      resolveHeaderLayoutMock(...args),
   })
 );
 
@@ -111,11 +111,13 @@ const wave = { id: "w" } as any;
 beforeEach(() => {
   sortComponentMock.mockClear();
   curationComponentMock.mockClear();
-  resolveControlModesMock.mockReset();
-  resolveControlModesMock.mockReturnValue({
+  resolveHeaderLayoutMock.mockReset();
+  resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
     curationMode: "tabs",
     enableControlsScroll: false,
+    actionMode: "full",
+    wrapActions: false,
   });
 
   useWave.mockReturnValue({
@@ -290,9 +292,17 @@ it("renders curation price controls and commits range updates", async () => {
   expect(
     screen.queryByTestId("leaderboard-price-panel")
   ).not.toBeInTheDocument();
+  expect(screen.getByTestId("leaderboard-header-actions-row")).toHaveAttribute(
+    "data-action-mode",
+    "full"
+  );
+  expect(screen.getByTestId("leaderboard-header-actions-row")).toHaveAttribute(
+    "data-wrap",
+    "no"
+  );
   const createButton = screen.getByTestId("create");
   expect(createButton).toHaveAttribute("data-padding", "tw-px-3.5 tw-py-2");
-  expect(screen.getByText("Drop Art")).toBeInTheDocument();
+  expect(screen.getAllByText("Drop Art").length).toBeGreaterThan(0);
   const createIcon = createButton.querySelector("svg");
   expect(createIcon).toHaveClass("tw-h-4", "tw-w-4");
 
@@ -738,10 +748,12 @@ it("does not render curation selector when curation controls are unavailable", (
 });
 
 it("applies resolved modes and enables scroll fallback styling when requested", async () => {
-  resolveControlModesMock.mockReturnValue({
+  resolveHeaderLayoutMock.mockReturnValue({
     sortMode: "dropdown",
     curationMode: "dropdown",
     enableControlsScroll: true,
+    actionMode: "icon",
+    wrapActions: true,
   });
 
   render(
@@ -778,5 +790,95 @@ it("applies resolved modes and enables scroll fallback styling when requested", 
   expect(
     screen.getByTestId("leaderboard-header-controls-row").className
   ).toContain("tw-overflow-x-auto");
-  expect(resolveControlModesMock).toHaveBeenCalled();
+  expect(resolveHeaderLayoutMock).toHaveBeenCalled();
+});
+
+it("renders icon-only curation actions with drop glyph when layout requests compact mode", () => {
+  resolveHeaderLayoutMock.mockReturnValue({
+    sortMode: "dropdown",
+    curationMode: "tabs",
+    enableControlsScroll: false,
+    actionMode: "icon",
+    wrapActions: false,
+  });
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  const actionsRow = screen.getByTestId("leaderboard-header-actions-row");
+  expect(actionsRow).toHaveAttribute("data-action-mode", "icon");
+  expect(actionsRow).toHaveAttribute("data-wrap", "no");
+
+  const createButton = screen.getByTestId("create");
+  expect(createButton).toHaveAttribute("data-padding", "tw-px-2.5 tw-py-2");
+  expect(createButton.querySelector('path[d^="M8.62826"]')).not.toBeNull();
+});
+
+it("marks the actions row as wrapped when layout requests wrapping", () => {
+  resolveHeaderLayoutMock.mockReturnValue({
+    sortMode: "dropdown",
+    curationMode: "dropdown",
+    enableControlsScroll: false,
+    actionMode: "icon",
+    wrapActions: true,
+  });
+
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: true,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={wave}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+        onPriceRangeChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("leaderboard-header-actions-row")).toHaveAttribute(
+    "data-wrap",
+    "yes"
+  );
+  expect(
+    screen.getByTestId("leaderboard-header-controls-row").className
+  ).toContain("tw-basis-full");
 });

@@ -9,12 +9,14 @@ import {
 } from "react";
 
 interface LeaderboardHeaderControlMeasurements {
-  readonly availableWidth: number;
+  readonly rowWidth: number;
   readonly viewModesWidth: number;
   readonly sortTabsWidth: number;
   readonly sortDropdownWidth: number;
   readonly curationTabsWidth: number;
   readonly curationDropdownWidth: number;
+  readonly actionsFullWidth: number;
+  readonly actionsIconWidth: number;
 }
 
 interface UseLeaderboardHeaderControlMeasurementsInput {
@@ -23,51 +25,61 @@ interface UseLeaderboardHeaderControlMeasurementsInput {
 }
 
 interface UseLeaderboardHeaderControlMeasurementsResult {
+  readonly headerRowRef: RefObject<HTMLDivElement | null>;
   readonly controlsRowRef: RefObject<HTMLDivElement | null>;
   readonly viewModeTabsRef: RefObject<HTMLDivElement | null>;
   readonly sortTabsProbeRef: RefObject<HTMLDivElement | null>;
   readonly sortDropdownProbeRef: RefObject<HTMLDivElement | null>;
   readonly curationTabsProbeRef: RefObject<HTMLDivElement | null>;
   readonly curationDropdownProbeRef: RefObject<HTMLDivElement | null>;
+  readonly actionsFullProbeRef: RefObject<HTMLDivElement | null>;
+  readonly actionsIconProbeRef: RefObject<HTMLDivElement | null>;
   readonly measurements: LeaderboardHeaderControlMeasurements;
 }
 
 const INITIAL_MEASUREMENTS: LeaderboardHeaderControlMeasurements = {
-  availableWidth: 0,
+  rowWidth: 0,
   viewModesWidth: 0,
   sortTabsWidth: 0,
   sortDropdownWidth: 0,
   curationTabsWidth: 0,
   curationDropdownWidth: 0,
+  actionsFullWidth: 0,
+  actionsIconWidth: 0,
 };
 
 const areMeasurementsEqual = (
   current: LeaderboardHeaderControlMeasurements,
   next: LeaderboardHeaderControlMeasurements
 ): boolean =>
-  current.availableWidth === next.availableWidth &&
+  current.rowWidth === next.rowWidth &&
   current.viewModesWidth === next.viewModesWidth &&
   current.sortTabsWidth === next.sortTabsWidth &&
   current.sortDropdownWidth === next.sortDropdownWidth &&
   current.curationTabsWidth === next.curationTabsWidth &&
-  current.curationDropdownWidth === next.curationDropdownWidth;
+  current.curationDropdownWidth === next.curationDropdownWidth &&
+  current.actionsFullWidth === next.actionsFullWidth &&
+  current.actionsIconWidth === next.actionsIconWidth;
 
 export function useLeaderboardHeaderControlMeasurements({
   showCurationGroupSelect,
   remeasureKey,
 }: UseLeaderboardHeaderControlMeasurementsInput): UseLeaderboardHeaderControlMeasurementsResult {
+  const headerRowRef = useRef<HTMLDivElement | null>(null);
   const controlsRowRef = useRef<HTMLDivElement | null>(null);
   const viewModeTabsRef = useRef<HTMLDivElement | null>(null);
   const sortTabsProbeRef = useRef<HTMLDivElement | null>(null);
   const sortDropdownProbeRef = useRef<HTMLDivElement | null>(null);
   const curationTabsProbeRef = useRef<HTMLDivElement | null>(null);
   const curationDropdownProbeRef = useRef<HTMLDivElement | null>(null);
+  const actionsFullProbeRef = useRef<HTMLDivElement | null>(null);
+  const actionsIconProbeRef = useRef<HTMLDivElement | null>(null);
   const [measurements, setMeasurements] =
     useState<LeaderboardHeaderControlMeasurements>(INITIAL_MEASUREMENTS);
 
   const measureNow = useCallback(() => {
     const nextMeasurements: LeaderboardHeaderControlMeasurements = {
-      availableWidth: controlsRowRef.current?.clientWidth ?? 0,
+      rowWidth: headerRowRef.current?.clientWidth ?? 0,
       viewModesWidth: viewModeTabsRef.current?.offsetWidth ?? 0,
       sortTabsWidth: sortTabsProbeRef.current?.offsetWidth ?? 0,
       sortDropdownWidth: sortDropdownProbeRef.current?.offsetWidth ?? 0,
@@ -77,6 +89,8 @@ export function useLeaderboardHeaderControlMeasurements({
       curationDropdownWidth: showCurationGroupSelect
         ? (curationDropdownProbeRef.current?.offsetWidth ?? 0)
         : 0,
+      actionsFullWidth: actionsFullProbeRef.current?.offsetWidth ?? 0,
+      actionsIconWidth: actionsIconProbeRef.current?.offsetWidth ?? 0,
     };
 
     setMeasurements((currentMeasurements) =>
@@ -130,12 +144,15 @@ export function useLeaderboardHeaderControlMeasurements({
     scheduleMeasure();
 
     const observedElements = [
+      headerRowRef.current,
       controlsRowRef.current,
       viewModeTabsRef.current,
       sortTabsProbeRef.current,
       sortDropdownProbeRef.current,
       showCurationGroupSelect ? curationTabsProbeRef.current : null,
       showCurationGroupSelect ? curationDropdownProbeRef.current : null,
+      actionsFullProbeRef.current,
+      actionsIconProbeRef.current,
     ].filter((element): element is HTMLDivElement => Boolean(element));
 
     if (typeof ResizeObserver === "undefined") {
@@ -161,12 +178,15 @@ export function useLeaderboardHeaderControlMeasurements({
   }, [measureNow, remeasureKey, showCurationGroupSelect]);
 
   return {
+    headerRowRef,
     controlsRowRef,
     viewModeTabsRef,
     sortTabsProbeRef,
     sortDropdownProbeRef,
     curationTabsProbeRef,
     curationDropdownProbeRef,
+    actionsFullProbeRef,
+    actionsIconProbeRef,
     measurements,
   };
 }

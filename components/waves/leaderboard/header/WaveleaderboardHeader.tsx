@@ -21,7 +21,7 @@ import {
   WAVE_LEADERBOARD_SORT_ITEMS,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
-import { resolveWaveLeaderboardHeaderControlModes } from "./waveLeaderboardHeaderControls";
+import { resolveWaveLeaderboardHeaderLayout } from "./waveLeaderboardHeaderLayout";
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
@@ -224,6 +224,31 @@ const WaveLeaderboardPriceFilters: React.FC<
   );
 };
 
+const DropModeGlyphIcon: React.FC<{
+  readonly className?: string | undefined;
+}> = ({ className = "tw-size-4 tw-flex-shrink-0" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M8.62826 7.89684C8.62826 7.60735 8.62826 6.72633 7.11906 4.34441C6.41025 3.22565 5.71213 2.3144 5.68274 2.27615L5.12514 1.55005L4.56755 2.27615C4.53816 2.3144 3.84008 3.2257 3.13123 4.34441C1.62207 6.72633 1.62207 7.60735 1.62207 7.89684C1.62207 9.82846 3.19352 11.3999 5.12514 11.3999C7.05676 11.3999 8.62826 9.82846 8.62826 7.89684Z"
+      fill="currentColor"
+    />
+    <path
+      d="M21.2502 2.24459C20.7301 1.42366 20.2173 0.754227 20.1956 0.726104L19.638 0L19.0805 0.726104C19.0589 0.754227 18.546 1.42366 18.0259 2.24459C17.5419 3.00847 16.8984 4.11804 16.8984 4.931C16.8984 6.44166 18.1274 7.67061 19.638 7.67061C21.1487 7.67061 22.3777 6.44161 22.3777 4.931C22.3777 4.11799 21.7342 3.00847 21.2502 2.24459Z"
+      fill="currentColor"
+    />
+    <path
+      d="M13.6806 7.0994L13.1231 6.37329L12.5655 7.0994C12.5083 7.17388 11.1491 8.94805 9.76692 11.1295C7.8616 14.1367 6.89551 16.3717 6.89551 17.7724C6.89551 21.2063 9.68921 24 13.1231 24C16.557 24 19.3506 21.2063 19.3506 17.7724C19.3506 16.3717 18.3845 14.1367 16.4792 11.1295C15.097 8.94805 13.7379 7.17388 13.6806 7.0994Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   wave,
   onCreateDrop,
@@ -291,32 +316,49 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     () => curationGroups.map((group) => `${group.id}:${group.name}`).join("|"),
     [curationGroups]
   );
+  const showCurationActions = showPriceControls;
+  const showCreateAction = Boolean(isLoggedIn && canCreateDrop && onCreateDrop);
+  let actionsRemeasureVariant = "none";
+
+  if (showCurationActions && showCreateAction) {
+    actionsRemeasureVariant = "with-drop";
+  } else if (showCurationActions) {
+    actionsRemeasureVariant = "filter-only";
+  }
+
+  const remeasureKey = `${activeSortLabel}|${activeCurationLabel}|${curationProbeKey}|actions:${actionsRemeasureVariant}`;
 
   const {
+    headerRowRef,
     controlsRowRef,
     viewModeTabsRef,
     sortTabsProbeRef,
     sortDropdownProbeRef,
     curationTabsProbeRef,
     curationDropdownProbeRef,
+    actionsFullProbeRef,
+    actionsIconProbeRef,
     measurements,
   } = useLeaderboardHeaderControlMeasurements({
     showCurationGroupSelect,
-    remeasureKey: `${activeSortLabel}|${activeCurationLabel}|${curationProbeKey}`,
+    remeasureKey,
   });
 
-  const controlModes = useMemo(
+  const layout = useMemo(
     () =>
-      resolveWaveLeaderboardHeaderControlModes({
-        availableWidth: measurements.availableWidth,
+      resolveWaveLeaderboardHeaderLayout({
+        rowWidth: measurements.rowWidth,
         viewModesWidth: measurements.viewModesWidth,
         sortTabsWidth: measurements.sortTabsWidth,
         sortDropdownWidth: measurements.sortDropdownWidth,
         hasCurationControl: showCurationGroupSelect,
         curationTabsWidth: measurements.curationTabsWidth,
         curationDropdownWidth: measurements.curationDropdownWidth,
+        hasActions: showCurationActions,
+        actionsFullWidth: measurements.actionsFullWidth,
+        actionsIconWidth: measurements.actionsIconWidth,
       }),
-    [measurements, showCurationGroupSelect]
+    [measurements, showCurationActions, showCurationGroupSelect]
   );
 
   const getViewModeLabel = (mode: LeaderboardViewMode) => {
@@ -411,16 +453,21 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     setIsManualFiltersOpen((current) => !current);
   };
 
-  const showCurationActions = showPriceControls;
+  const isCompactActions = layout.actionMode === "icon";
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-gap-y-4 tw-bg-black tw-@container">
-      <div className="tw-flex tw-items-start tw-gap-2">
+      <div
+        ref={headerRowRef}
+        className="tw-flex tw-flex-wrap tw-items-start tw-gap-2"
+      >
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
           className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2 ${
-            controlModes.enableControlsScroll
+            layout.wrapActions ? "tw-basis-full" : ""
+          } ${
+            layout.enableControlsScroll
               ? "horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
               : "tw-overflow-x-hidden"
           }`}
@@ -472,7 +519,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
-              mode={controlModes.sortMode}
+              mode={layout.sortMode}
               items={sortItems}
             />
           </div>
@@ -482,37 +529,64 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 groups={curationGroups}
                 selectedGroupId={curatedByGroupId}
                 onChange={onCurationGroupChange}
-                mode={controlModes.curationMode}
+                mode={layout.curationMode}
               />
             </div>
           )}
         </div>
         {showCurationActions ? (
-          <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+          <div
+            data-testid="leaderboard-header-actions-row"
+            data-action-mode={layout.actionMode}
+            data-wrap={layout.wrapActions ? "yes" : "no"}
+            className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
+              layout.wrapActions ? "tw-basis-auto" : ""
+            }`}
+          >
             <button
               type="button"
               data-testid="leaderboard-price-toggle"
+              aria-label="Toggle filters"
               aria-expanded={isPriceFiltersOpen}
               aria-controls={`leaderboard-price-panel-${wave.id}`}
               onClick={onTogglePriceFilters}
-              className={`tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-text-xs tw-font-semibold tw-transition ${
+              className={`tw-inline-flex tw-h-9 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-semibold tw-transition ${
+                isCompactActions
+                  ? "tw-w-9 tw-justify-center tw-px-0"
+                  : "tw-gap-2 tw-px-3.5"
+              } ${
                 isPriceFiltersOpen || hasActivePriceFilters
                   ? "tw-border-white/15 tw-bg-white/10 tw-text-iron-100"
                   : "tw-border-white/10 tw-bg-iron-950 tw-text-iron-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/5"
               }`}
             >
               <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
-              <span>Filters</span>
+              {isCompactActions ? (
+                <span className="tw-sr-only">Filters</span>
+              ) : (
+                <span>Filters</span>
+              )}
             </button>
-            {isLoggedIn && canCreateDrop && onCreateDrop && (
+            {showCreateAction && (
               <PrimaryButton
                 loading={false}
                 disabled={false}
-                onClicked={onCreateDrop}
-                padding="tw-px-3.5 tw-py-2"
+                onClicked={() => onCreateDrop?.()}
+                padding={
+                  isCompactActions ? "tw-px-2.5 tw-py-2" : "tw-px-3.5 tw-py-2"
+                }
               >
-                <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>Drop Art</span>
+                {isCompactActions ? (
+                  <>
+                    <DropModeGlyphIcon />
+                    <span className="tw-sr-only">Drop Art</span>
+                  </>
+                ) : (
+                  <>
+                    <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                    <span>Drop Art</span>
+                  </>
+                )}
               </PrimaryButton>
             )}
           </div>
@@ -617,6 +691,40 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             >
               <span className="tw-font-semibold tw-text-iron-500">Group: </span>
               {activeCurationLabel}
+            </div>
+          </>
+        )}
+
+        {showCurationActions && (
+          <>
+            <div
+              ref={actionsFullProbeRef}
+              className="tw-inline-flex tw-items-center tw-gap-2"
+            >
+              <div className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3.5 tw-text-xs tw-font-semibold tw-text-iron-200">
+                <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
+                <span>Filters</span>
+              </div>
+              {showCreateAction && (
+                <div className="tw-inline-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-ring-1 tw-ring-inset tw-ring-white">
+                  <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                  <span>Drop Art</span>
+                </div>
+              )}
+            </div>
+
+            <div
+              ref={actionsIconProbeRef}
+              className="tw-inline-flex tw-items-center tw-gap-2"
+            >
+              <div className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-xs tw-font-semibold tw-text-iron-200">
+                <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
+              </div>
+              {showCreateAction && (
+                <div className="tw-inline-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-ring-1 tw-ring-inset tw-ring-white">
+                  <DropModeGlyphIcon />
+                </div>
+              )}
             </div>
           </>
         )}
