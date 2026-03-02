@@ -43,7 +43,7 @@ Use this area to create:
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` only)
   5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank`
      only)
-  6. [Wave Creation Outcomes Setup](feature-outcomes-step.md) (`Rank` only)
+  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` only)
   7. [Wave Creation Description Step](feature-description-step.md)
 - Step path by wave type:
   - `Chat`: `Overview -> Groups -> Description`

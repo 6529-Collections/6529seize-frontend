@@ -1,75 +1,88 @@
-# Wave Creation Outcomes Setup
+# Wave Creation Outcomes Step
 
 ## Overview
 
-The `Outcomes` step defines how winners are rewarded in rank-wave creation.
-Creators add one or more outcome definitions and must save at least one outcome
-before moving to the final `Description` step.
+Use `Outcomes` to define winner rewards in `Rank` wave creation.
+You must save at least one outcome before `Next` can move to `Description`.
 
 ## Location in the Site
 
-- Full-page wave creation flow: `/waves/create`
-- Create-wave modal flows that reuse the same step sequence
+- Full-page create route: `/waves/create`
+- Desktop modal create mode: `?create=wave` on discover/waves/messages shells
 - Step label: `Outcomes`
-- Available in `Rank` wave creation
+- User-reachable only in `Rank` creation (`Approve` is disabled in `Overview`)
 
-## Entry Points
+## Step Path
 
-- Create a rank wave and continue from `Voting` to `Outcomes`.
-- Return to `Outcomes` from later steps to revise reward setup.
+- `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+
+## Outcome Types
+
+### `Manual`
+
+- Required: `Manual action`
+- Required: `Winning Positions` (examples: `1-3,5,7-9`)
+- `Save` adds one manual row to the outcomes list
+
+### `Rep`
+
+- Required: `Rep Category`
+- Starts with one winner row
+- `Add winner` appends rows
+- `Save` adds one rep row (category, total, winner count)
+
+### `NIC`
+
+- Starts with one winner row
+- `Add winner` appends rows
+- `Save` adds one NIC row (total, winner count)
 
 ## User Journey
 
-1. Open `Outcomes`.
-2. Pick outcome type: `Manual`, `Rep`, or `NIC`.
-3. Configure the selected type and click `Save`.
-4. Review saved outcomes in the list.
-5. Add additional outcomes as needed.
-6. Remove saved outcomes where supported (`Manual` and `Rep` rows).
-7. Continue to `Description` once at least one outcome exists.
+1. Open `Outcomes` from `Voting`.
+2. Click one type: `Manual`, `Rep`, or `NIC`.
+3. Fill the selected form.
+4. Click `Save` to add a row, or `Cancel` to discard draft edits.
+5. Repeat to add more outcomes.
+6. Click `Next` to continue to `Description`.
 
 ## Common Scenarios
 
-- Add a `Manual` outcome for explicit winning positions (`1-3`, `5`, `7-9`).
-- Add a `Rep` outcome by selecting category and winner distribution values.
-- Add a `NIC` outcome with winner distribution values.
-- Combine multiple outcomes (for example one `Manual` plus one `Rep`) in the
-  same wave.
+- Mix outcome types in one wave (for example manual + rep).
+- Add multiple winner rows for `Rep` or `NIC`.
+- Return from `Description` to `Outcomes` and adjust rewards before submit.
 
 ## Edge Cases
 
-- If no outcomes are saved, step validation shows `No outcomes added` as an
-  error and blocks forward navigation.
-- Invalid manual positions format blocks save until corrected.
-- `Rep` outcomes require a selected category.
-- Distribution totals must be valid before save:
-  - absolute-value winners must sum correctly,
-  - percentage-based winners must total `100%`.
-- Saved `NIC` rows currently show a remove icon, but that action is
-  non-functional.
+- If no rows are saved, `Next` is blocked and `No outcomes added` is highlighted.
+- While a type form is open, step-level `Previous` and `Next` actions are hidden.
+- Manual validation can show:
+  - `Please enter your manual action`
+  - `Please enter positions`
+  - `Invalid position format`
+- Rep/NIC saves require totals greater than `0`.
+- Changing selected type while editing drops unsaved form values.
+- Saved `Manual` and `Rep` rows can be removed.
+- Saved `NIC` rows show a remove icon, but it currently does not remove the row.
 
 ## Failure and Recovery
 
-- If a save attempt fails validation, fix the highlighted fields and retry.
-- If you add the wrong `Manual` or `Rep` outcome type, remove that row and
-  create the correct one.
-- If you add the wrong `NIC` outcome type, restart the create-wave flow to
-  clear saved outcomes.
-- If create flow closes before completion, reopening flow requires re-entering
-  outcomes that were not submitted.
+- If save validation appears, fix highlighted fields and click `Save` again.
+- If a saved `Manual` or `Rep` row is wrong, remove it and create a new row.
+- If a saved `NIC` row is wrong, restart create-wave to clear it.
+- If create mode closes before submit, reopen create-wave and re-enter outcomes.
 
 ## Limitations / Notes
 
-- This step is user-reachable in `Rank` creation.
-- Chat waves do not include outcomes setup.
-- `NIC` outcome rows are currently not removable after save.
-- Approve-specific outcomes code paths exist internally, but `Approve` type is
-  currently disabled in `Overview`.
+- Percentage distribution mode is not exposed in the current outcomes UI.
+- `Approve` outcomes paths exist in code but are not user-reachable from the type picker.
 
 ## Related Pages
 
 - [Wave Creation Index](README.md)
+- [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Outcome Lists](../feature-outcome-lists.md)
+- [Waves Index](../README.md)
 - [Docs Home](../../README.md)
