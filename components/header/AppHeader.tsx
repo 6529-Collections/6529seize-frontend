@@ -12,6 +12,9 @@ import {
   Bars3Icon,
   ChatBubbleLeftIcon,
   Squares2X2Icon,
+  ShareIcon,
+  LinkIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
@@ -24,6 +27,7 @@ import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
+import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -92,6 +96,32 @@ export default function AppHeader() {
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
   const { isRankWave, isMemesWave, isDm } = useWave(wave);
   const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
+  const showWaveLinkAction = Boolean(waveId && wave && !isDm);
+  const {
+    mode: waveLinkActionMode,
+    label: waveLinkActionLabel,
+    feedbackState: waveLinkActionFeedbackState,
+    onClick: handleWaveLinkActionClick,
+  } = useWaveShareCopyAction({
+    waveId: wave?.id ?? waveId ?? "",
+    waveName: wave?.name ?? "",
+    isDirectMessage: isDm,
+  });
+  const waveLinkActionIconColor =
+    waveLinkActionFeedbackState === "idle"
+      ? "tw-text-iron-300"
+      : "tw-text-emerald-300";
+  const renderWaveLinkActionIcon = () => {
+    if (waveLinkActionFeedbackState !== "idle") {
+      return <CheckIcon className="tw-h-5 tw-w-5" />;
+    }
+
+    if (waveLinkActionMode === "share") {
+      return <ShareIcon className="tw-h-5 tw-w-5" />;
+    }
+
+    return <LinkIcon className="tw-h-5 tw-w-5" />;
+  };
 
   const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
   const isMessagesRoute =
@@ -185,8 +215,18 @@ export default function AppHeader() {
         </div>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <HeaderActionButtons />
-          {isHomeRoute && (
-            <NetworkHealthCTA className="md:tw-hidden" />
+          {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
+          {showWaveLinkAction && (
+            <button
+              type="button"
+              onClick={handleWaveLinkActionClick}
+              aria-label={waveLinkActionLabel}
+              title={waveLinkActionLabel}
+              data-wave-link-action-mode={waveLinkActionMode}
+              className={`tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 ${waveLinkActionIconColor}`}
+            >
+              {renderWaveLinkActionIcon()}
+            </button>
           )}
           <HeaderSearchButton
             wave={
