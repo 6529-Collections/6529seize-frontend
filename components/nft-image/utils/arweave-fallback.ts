@@ -34,8 +34,8 @@ export function withArweaveFallback(
     if (src && isArweaveUrl(src)) {
       const fallback = getArweaveFallbackUrl(src);
       if (fallback) {
-        if (target.dataset.arweaveOriginalSrc === undefined) {
-          target.dataset.arweaveOriginalSrc = src;
+        if (target.dataset['arweaveOriginalSrc'] === undefined) {
+          target.dataset['arweaveOriginalSrc'] = src;
         }
         target.src = fallback;
         return;
