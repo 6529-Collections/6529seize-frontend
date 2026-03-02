@@ -10,30 +10,36 @@ Use this area for wave and direct-message tasks:
 - post, vote, react, and manage drops
 - recover from route, tab, deep-link, or posting failures
 
-## Route and Query Coverage
+## Route Coverage
 
-- Primary routes: `/discover`, `/waves`, `/waves/{waveId}`, and `/messages`.
-- Direct-message threads use `/messages?wave={waveId}` (no
-  `/messages/{waveId}` route).
-- App create routes: `/waves/create` and `/messages/create`.
-- Web create URL states use `?create=` on the current route:
-  `/discover`, `/waves`, `/waves/{waveId}`, or `/messages`.
+- Discover list: `/discover`
+- Waves list: `/waves`
+- Wave thread: `/waves/{waveId}`
+- Messages list: `/messages`
+- Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
+  route)
+- App create routes: `/waves/create` and `/messages/create`
+
+## Query Coverage
+
+- Web create states use `create=wave` or `create=dm` on the current stream
+  route (for example `/discover`, `/waves`, `/waves/{waveId}`, `/messages`, or
+  `/messages?wave={waveId}`).
 - `drop={dropId}` opens a single-drop overlay in the current thread context.
-- If a URL contains both `drop` and `serialNo`, drop-open behavior applies
+- If a URL contains both `drop` and `serialNo`, drop-open behavior is handled
   first.
 - Closing the drop overlay removes `drop` from the URL.
-- `serialNo={n}` targets a chat drop during initial thread setup.
-- `divider={n}` sets unread-divider position only when `serialNo` is present.
-- After jump setup, the app removes both `serialNo` and `divider` from the
-  URL.
+- `serialNo={n}` targets a drop during initial thread setup.
+- `divider={n}` is applied only when `serialNo` is also present.
+- After initial jump setup, the app removes both `serialNo` and `divider` from
+  the URL.
 
 ## Access and Availability
 
-- `/discover`, `/waves`, and `/messages` require an authenticated wallet.
+- `/discover`, `/waves`, and `/messages` require authenticated wallet access.
 - A profile handle is required before route content renders.
-- When waves access is unavailable (for example proxy-restricted access), these
-  routes show an unavailable state.
-- Wave and direct-message creation requires an eligible connected profile.
+- Proxy sessions cannot access wave/message content and show unavailable states.
+- Wave and direct-message creation requires a connected non-proxy profile.
 
 ## Legacy Routes and Ownership
 
