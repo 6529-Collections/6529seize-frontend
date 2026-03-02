@@ -40,7 +40,9 @@ interface WaveDropReactionsProps {
 
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
-  const { enableLongPress: isTouchDevice } = useInteractionMode();
+  const { enableLongPress, enableHoverUI } = useInteractionMode();
+  const isTouchDevice = enableLongPress;
+  const showHoverTooltip = enableHoverUI;
 
   const handleOpenDialog = useCallback((reactionKey: string) => {
     setDialogReaction(reactionKey);
@@ -59,6 +61,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
           isTouchDevice={isTouchDevice}
+          showHoverTooltip={showHoverTooltip}
         />
       ))}
       <WaveDropReactionsDetailDialog
@@ -76,11 +79,13 @@ function WaveDropReaction({
   reaction,
   onOpenDetailDialog,
   isTouchDevice,
+  showHoverTooltip,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
   readonly isTouchDevice: boolean;
+  readonly showHoverTooltip: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
@@ -401,7 +406,7 @@ function WaveDropReaction({
     <>
       <button
         onClick={handleClick}
-        {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
+        {...(showHoverTooltip && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
           "tw-mt-1 tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-1 tw-shadow-sm hover:tw-text-iron-100",
@@ -425,7 +430,7 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice && (
+      {showHoverTooltip && (
         <Tooltip
           id={tooltipId}
           delayShow={250}

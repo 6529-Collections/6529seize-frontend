@@ -33,7 +33,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { connectedProfile } = useContext(AuthContext);
   const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
     useCreateModalState();
-  const { enableLongPress: isTouchDevice } = useInteractionMode();
+  const { enableHoverUI } = useInteractionMode();
+  const isHoverSupported = enableHoverUI;
 
   const shouldRenderCreateDirectMessage = !isApp;
 
@@ -184,7 +185,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         </div>
       </div>
 
-      {!isTouchDevice && shouldRenderCreateDirectMessage && (
+      {isHoverSupported && shouldRenderCreateDirectMessage && (
         <ReactTooltip
           id="create-dm-tooltip"
           place="bottom"

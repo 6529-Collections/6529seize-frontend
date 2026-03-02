@@ -25,6 +25,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
   const { setToast } = useAuth();
   const { enableHoverUI } = useInteractionMode();
+  const isTouchDevice = !enableHoverUI;
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
   // Check if this specific wave operation is in progress

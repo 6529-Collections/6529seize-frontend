@@ -2,7 +2,7 @@
 
 import useInteractionMode from "@/src/interaction/useInteractionMode";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";

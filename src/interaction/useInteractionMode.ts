@@ -21,6 +21,9 @@ const DEFAULT_STATE: InteractionModeState = {
 let cachedState: InteractionModeState = DEFAULT_STATE;
 let initialized = false;
 const subscribers = new Set<(state: InteractionModeState) => void>();
+let mediaQueriesRef: MediaQueryList[] | null = null;
+let handlePointerDownRef: ((event: PointerEvent) => void) | null = null;
+let handlePointerMoveRef: ((event: PointerEvent) => void) | null = null;
 
 const getMediaMatch = (query: string): boolean => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -37,7 +40,9 @@ const getCapabilityState = (): Pick<InteractionModeState, "canHover" | "hasFineP
 
 const emit = (nextState: InteractionModeState) => {
   cachedState = nextState;
-  subscribers.forEach((subscriber) => subscriber(cachedState));
+  subscribers.forEach((subscriber) => {
+    subscriber(cachedState);
+  });
 };
 
 const updateCapabilities = () => {
@@ -54,6 +59,21 @@ const updatePointerType = (pointerType: string) => {
   emit({ ...cachedState, lastPointerType: pointerType });
 };
 
+function teardown() {
+  if (typeof window === "undefined" || !mediaQueriesRef || !handlePointerDownRef || !handlePointerMoveRef) {
+    return;
+  }
+  mediaQueriesRef.forEach((query) => {
+    query.removeEventListener("change", updateCapabilities);
+  });
+  window.removeEventListener("pointerdown", handlePointerDownRef, { passive: true } as EventListenerOptions);
+  window.removeEventListener("pointermove", handlePointerMoveRef, { passive: true } as EventListenerOptions);
+  mediaQueriesRef = null;
+  handlePointerDownRef = null;
+  handlePointerMoveRef = null;
+  initialized = false;
+}
+
 const init = () => {
   if (initialized || typeof window === "undefined") {
     return;
@@ -67,9 +87,12 @@ const init = () => {
     window.matchMedia("(any-pointer: fine)"),
     window.matchMedia("(hover: none)"),
   ];
+  mediaQueriesRef = mediaQueries;
 
   const handlePointerDown = (event: PointerEvent) => updatePointerType(event.pointerType);
   const handlePointerMove = (event: PointerEvent) => updatePointerType(event.pointerType);
+  handlePointerDownRef = handlePointerDown;
+  handlePointerMoveRef = handlePointerMove;
 
   mediaQueries.forEach((query) => {
     query.addEventListener("change", updateCapabilities);
@@ -90,6 +113,9 @@ export default function useInteractionMode() {
 
     return () => {
       subscribers.delete(onChange);
+      if (subscribers.size === 0) {
+        teardown();
+      }
     };
   }, []);
 

@@ -21,6 +21,9 @@ export const WaveWinnersSmallOutcome: React.FC<
       e.stopPropagation();
     }
   };
+  const tooltipOpenEvents = isTouch ? { click: true } : { mouseenter: true };
+  const tooltipCloseEvents = isTouch ? { click: true } : { mouseleave: true };
+  const tooltipGlobalCloseEvents = isTouch ? { clickOutsideAnchor: true } : {};
 
   const { nicTotal, repTotal, manualOutcomes } = useWaveRankReward({
     waveId: drop.wave.id,
@@ -185,6 +188,9 @@ export const WaveWinnersSmallOutcome: React.FC<
         id={`outcome-small-${drop.id}`}
         place="top"
         delayShow={200}
+        openEvents={tooltipOpenEvents}
+        closeEvents={tooltipCloseEvents}
+        globalCloseEvents={tooltipGlobalCloseEvents}
         style={{
           backgroundColor: "#1F2937",
           color: "white",

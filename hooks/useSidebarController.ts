@@ -52,7 +52,8 @@ export function useSidebarController() {
 
   const [isNarrow, setIsNarrow] = useState(() => narrowMql?.matches ?? false);
   const [isMobileWidth, setIsMobileWidth] = useState(() => mobileWidthMql?.matches ?? false);
-  const { enableLongPress: isTouchScreen } = useInteractionMode();
+  const { enableHoverUI } = useInteractionMode();
+  const isTouchScreen = !enableHoverUI;
 
   const lastIsNarrowRef = useRef(isNarrow);
 

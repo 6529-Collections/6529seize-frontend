@@ -79,7 +79,8 @@ export default function OverlappingAvatars({
   onItemClick,
 }: OverlappingAvatarsProps) {
   const baseId = useId();
-  const { enableLongPress: isTouchDevice } = useInteractionMode();
+  const { enableHoverUI } = useInteractionMode();
+  const showTooltip = enableHoverUI;
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
   const avatarRing =
@@ -106,9 +107,9 @@ export default function OverlappingAvatars({
           />
         );
 
-        const showTooltip =
-          !isTouchDevice && item.title !== undefined && item.title !== "";
-        const tooltipId = showTooltip ? `${baseId}-${index}` : undefined;
+        const showTooltipForItem =
+          showTooltip && item.title !== undefined && item.title !== "";
+        const tooltipId = showTooltipForItem ? `${baseId}-${index}` : undefined;
         const wrapper = (
           <div
             key={item.key}
@@ -137,7 +138,7 @@ export default function OverlappingAvatars({
           wrapper
         );
 
-        if (showTooltip && tooltipId !== undefined) {
+        if (showTooltipForItem && tooltipId !== undefined) {
           return (
             <span key={item.key} className="tw-inline-flex">
               {anchor}

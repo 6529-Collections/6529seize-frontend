@@ -15,7 +15,11 @@ export default function ProfileActivityLogItemValueWithCopy({
   readonly value: string;
 }) {
   const { enableHoverUI } = useInteractionMode();
-  const isTouchScreen = !enableHoverUI;
+  const hasTouchCapability =
+    typeof navigator !== "undefined" &&
+    (navigator.maxTouchPoints > 0 ||
+      "ontouchstart" in (typeof window !== "undefined" ? window : ({} as Window)));
+  const isTouchScreen = !enableHoverUI || hasTouchCapability;
 
   const [_, copyToClipboard] = useCopyToClipboard();
 

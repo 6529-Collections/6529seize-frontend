@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import useInteractionMode from "@/src/interaction/useInteractionMode";
 import useCapacitor from "./useCapacitor";
 
 interface DeviceInfo {
@@ -13,7 +12,6 @@ interface DeviceInfo {
 
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
-  const { enableLongPress } = useInteractionMode();
 
   const getInfo = useCallback(
     (): DeviceInfo => {
@@ -37,13 +35,15 @@ export default function useDeviceInfo(): DeviceInfo {
         standalone?: boolean | undefined;
       };
 
-      const hasTouchScreen = enableLongPress;
+      const hasTouchCapability =
+        nav.maxTouchPoints > 0 ||
+        "ontouchstart" in (typeof window !== "undefined" ? window : ({} as Window));
 
       const ua = nav.userAgent;
       const uaDataMobile = nav.userAgentData?.mobile;
       const classicMobile =
         /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      const iPadDesktopUA = ua.includes("Macintosh") && hasTouchScreen;
+      const iPadDesktopUA = ua.includes("Macintosh") && hasTouchCapability;
       const appleMobile = /(iPhone|iPad|iPod)/i.test(ua) || iPadDesktopUA;
       const widthMobile =
         win.matchMedia?.("(max-width: 768px)")?.matches ?? false;
@@ -54,12 +54,12 @@ export default function useDeviceInfo(): DeviceInfo {
 
       return {
         isMobileDevice,
-        hasTouchScreen,
+        hasTouchScreen: hasTouchCapability,
         isApp: isCapacitor,
         isAppleMobile: appleMobile,
       };
     },
-    [enableLongPress, isCapacitor]
+    [isCapacitor]
   );
 
   const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
@@ -83,6 +83,7 @@ export default function useDeviceInfo(): DeviceInfo {
         return next;
       });
 
+    update();
     if (hasEventListenerApi) {
       globalThis.addEventListener("resize", update);
     }

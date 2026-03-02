@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({

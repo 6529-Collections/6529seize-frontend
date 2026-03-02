@@ -15,10 +15,10 @@ interface WavePodiumItemContentOutcomesProps {
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
 > = ({ winner }) => {
-  const { enableLongPress: isTouch } = useInteractionMode();
+  const { enableLongPress: isTouchInteraction } = useInteractionMode();
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isTouch) {
+    if (isTouchInteraction) {
       e.stopPropagation();
     }
   };
