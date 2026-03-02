@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 
 // React Compiler plugin is optional; keep linting resilient if dependency is missing.
 let reactCompilerPlugin;
+let reactCompilerPluginLoadError = null;
 try {
   ({ default: reactCompilerPlugin } =
     await import("eslint-plugin-react-compiler"));
@@ -27,6 +28,13 @@ try {
   if (!moduleNotFound) {
     throw error;
   }
+
+  reactCompilerPluginLoadError = error;
+  const loadErrorMessage =
+    error instanceof Error ? error.message : "Unknown module load failure";
+  console.warn(
+    `[eslint.config] Optional plugin "eslint-plugin-react-compiler" could not be loaded: ${loadErrorMessage}`
+  );
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -471,6 +479,16 @@ export const createEslintConfig = ({
   includeTestResultsIgnore = true,
   reactCompilerRule = "off",
 } = {}) => {
+  if (reactCompilerRule !== "off" && !reactCompilerPlugin) {
+    const loadErrorMessage =
+      reactCompilerPluginLoadError instanceof Error
+        ? reactCompilerPluginLoadError.message
+        : "Module was not found";
+    throw new Error(
+      `Cannot apply reactCompilerRule="${reactCompilerRule}" because "eslint-plugin-react-compiler" is unavailable. Install the plugin or set reactCompilerRule to "off". Load error: ${loadErrorMessage}`
+    );
+  }
+
   const plugins = { ...basePlugins, ...extraPlugins };
   if (reactCompilerPlugin) {
     plugins["react-compiler"] = reactCompilerPlugin;
