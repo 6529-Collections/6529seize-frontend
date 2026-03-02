@@ -106,6 +106,7 @@ export default function UserPageRepHeader({
           <div className="tw-flex tw-items-center tw-gap-4">
             <button
               type="button"
+              aria-pressed={repDirection === "received"}
               onClick={() => onRepDirectionChange("received")}
               className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 ${
                 repDirection === "received"
@@ -121,6 +122,7 @@ export default function UserPageRepHeader({
             </button>
             <button
               type="button"
+              aria-pressed={repDirection === "given"}
               onClick={() => onRepDirectionChange("given")}
               className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 ${
                 repDirection === "given"
@@ -190,8 +192,8 @@ export default function UserPageRepHeader({
             !(canEditRep && repDirection === "received") && (
               <p className="tw-mb-0 tw-mt-6 tw-text-sm tw-font-normal tw-text-iron-500">
                 {repDirection === "given"
-                  ? "No rep given yet."
-                  : "No rep received yet."}
+                  ? "This identity hasn't given any rep yet."
+                  : "This identity hasn't received any rep yet."}
               </p>
             )}
 

@@ -282,6 +282,7 @@ export default function UserPageRepMobile({
             <div className="tw-mt-4 tw-flex tw-items-center tw-gap-4">
               <button
                 type="button"
+                aria-pressed={repDirection === "received"}
                 onClick={() => onRepDirectionChange("received")}
                 className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
                   repDirection === "received"
@@ -297,6 +298,7 @@ export default function UserPageRepMobile({
               </button>
               <button
                 type="button"
+                aria-pressed={repDirection === "given"}
                 onClick={() => onRepDirectionChange("given")}
                 className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${
                   repDirection === "given"
@@ -443,7 +445,6 @@ export default function UserPageRepMobile({
         )}
       </AnimatePresence>
 
-      {/* Grant Rep Bottom Sheet */}
       <GrantRepDialog
         profile={profile}
         overview={overview}
@@ -451,7 +452,6 @@ export default function UserPageRepMobile({
         onClose={() => setIsGrantRepOpen(false)}
       />
 
-      {/* Rate NIC Bottom Sheet */}
       <MobileWrapperDialog
         title="Rate NIC"
         isOpen={isNicRateOpen}

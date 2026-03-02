@@ -27,7 +27,7 @@ export default function RepCategoryPill({
       category.top_contributors.map((c) => ({
         key: c.profile.handle ?? c.profile.primary_address,
         pfpUrl: c.profile.pfp ?? null,
-        ...(c.profile.handle ? { href: `/${c.profile.handle}` } : {}),
+        href: `/${c.profile.handle ?? c.profile.primary_address}`,
         ariaLabel: c.profile.handle ?? c.profile.primary_address,
         fallback: c.profile.handle
           ? c.profile.handle.charAt(0).toUpperCase()
